@@ -1,8 +1,7 @@
-using YummyZoom.Domain.Common.ValueObjects; 
-using YummyZoom.Domain.UserAggregate.Entities; 
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.UserAggregate.Entities;
 using YummyZoom.Domain.UserAggregate.Errors;
-using YummyZoom.Domain.UserAggregate.Events;
-using YummyZoom.Domain.UserAggregate.ValueObjects; 
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 

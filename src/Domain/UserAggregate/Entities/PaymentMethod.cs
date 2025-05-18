@@ -1,4 +1,3 @@
-using YummyZoom.Domain.Common.Models; // Assuming Entity is here
 using YummyZoom.Domain.UserAggregate.ValueObjects; // For PaymentMethodId
 
 namespace YummyZoom.Domain.UserAggregate.Entities;

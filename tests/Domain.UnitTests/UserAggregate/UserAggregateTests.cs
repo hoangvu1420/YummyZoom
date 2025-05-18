@@ -5,10 +5,6 @@ using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Entities;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Errors;
-using YummyZoom.SharedKernel;
-using System.Collections.Generic;
-using System;
-using System.Linq;
 
 namespace YummyZoom.Domain.UnitTests.UserAggregate;
 

@@ -1,8 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
-using System;
 
 namespace YummyZoom.Domain.UnitTests.UserAggregate.ValueObjects;
 

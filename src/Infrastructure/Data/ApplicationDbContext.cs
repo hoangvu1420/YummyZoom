@@ -4,7 +4,6 @@ using YummyZoom.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.SharedKernel;

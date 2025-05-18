@@ -1,6 +1,5 @@
 using YummyZoom.Domain.UserAggregate.Errors; // Assuming UserErrors will be in this namespace
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.Common.Models; // Correct namespace for AggregateRootId
 
 namespace YummyZoom.Domain.UserAggregate.ValueObjects;
 
