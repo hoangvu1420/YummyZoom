@@ -64,6 +64,11 @@ public class RoleAssignmentTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
 
+        // Verify the role assignment is added to the Domain UserAggregate
+        var domainUser = await FindAsync<User>(UserId.Create(_testUserId));
+        domainUser.Should().NotBeNull();
+        domainUser!.UserRoles.Should().ContainSingle(ra => ra.RoleName == Roles.RestaurantOwner);
+        
         // Verify the role is assigned in Identity
         using var scope = CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -71,11 +76,6 @@ public class RoleAssignmentTests : BaseTestFixture
         appUser.Should().NotBeNull();
         var isInRole = await userManager.IsInRoleAsync(appUser!, Roles.RestaurantOwner);
         isInRole.Should().BeTrue("User should be assigned to the RestaurantOwner role in Identity.");
-
-        // Verify the role assignment is added to the Domain UserAggregate
-        var domainUser = await FindAsync<User>(UserId.Create(_testUserId));
-        domainUser.Should().NotBeNull();
-        domainUser!.UserRoles.Should().ContainSingle(ra => ra.RoleName == Roles.RestaurantOwner);
     }
 
     [Test]

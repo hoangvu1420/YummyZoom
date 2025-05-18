@@ -1,6 +1,7 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Entities;
 using YummyZoom.Domain.UserAggregate.Errors;
+using YummyZoom.Domain.UserAggregate.Events;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
@@ -175,7 +176,7 @@ public sealed class User : AggregateRoot<UserId, Guid>
         }
 
         _userRoles.Add(roleAssignment);
-        // AddDomainEvent(new RoleAssignmentAddedToUserEvent((UserId)Id, roleAssignment)); 
+        AddDomainEvent(new RoleAssignmentAddedToUserEvent((UserId)Id, roleAssignment)); 
         return Result.Success();
     }
 
@@ -210,7 +211,7 @@ public sealed class User : AggregateRoot<UserId, Guid>
             return Result.Failure(UserErrors.RoleNotFound(roleName)); 
         }
 
-        // AddDomainEvent(new RoleAssignmentRemovedFromUserEvent((UserId)Id, roleAssignmentToRemove)); 
+        AddDomainEvent(new RoleAssignmentRemovedFromUserEvent((UserId)Id, roleAssignmentToRemove)); 
         return Result.Success();
     }
 

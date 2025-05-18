@@ -8,16 +8,13 @@ namespace YummyZoom.Application.Users.Commands.AssignRoleToUser;
 public class AssignRoleToUserCommandHandler : IRequestHandler<AssignRoleToUserCommand, Result>
 {
     private readonly IUserAggregateRepository _userAggregateRepository;
-    private readonly IIdentityService _identityService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignRoleToUserCommandHandler(
         IUserAggregateRepository userAggregateRepository,
-        IIdentityService identityService,
         IUnitOfWork unitOfWork)
     {
         _userAggregateRepository = userAggregateRepository;
-        _identityService = identityService;
         _unitOfWork = unitOfWork;
     }
 
@@ -57,13 +54,6 @@ public class AssignRoleToUserCommandHandler : IRequestHandler<AssignRoleToUserCo
             }
 
             await _userAggregateRepository.UpdateAsync(userAggregate, cancellationToken);
-
-            // Synchronize role assignment with ASP.NET Core Identity
-            var identityResult = await _identityService.AddUserToRoleAsync(request.UserId, request.RoleName);
-            if (identityResult.IsFailure)
-            {
-                return Result.Failure(identityResult.Error);
-            }
 
             return Result.Success();
         }, cancellationToken);
