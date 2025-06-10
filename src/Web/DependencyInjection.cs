@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 
 namespace YummyZoom.Web;
 
@@ -27,7 +29,23 @@ public static class DependencyInjection
 
         builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddOpenApiDocument((configure, sp) =>
+        // Add API Versioning
+        builder.Services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+        }).AddApiExplorer(options =>
+        {
+            // Format the version as "v{major}.{minor}"
+            options.GroupNameFormat = "'v'VVV";
+
+            // Substitute the version in the route template
+            options.SubstituteApiVersionInUrl = true;
+        });
+
+        builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "YummyZoom API";
 

@@ -9,7 +9,7 @@ namespace YummyZoom.Web.Endpoints;
 
 public class TodoItems : EndpointGroupBase
 {
-    public override void Map(WebApplication app)
+    public override void Map(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup(this)
             .RequireAuthorization();

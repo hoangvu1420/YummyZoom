@@ -1,3 +1,4 @@
+// src\Web\Program.cs
 using YummyZoom.Application;
 using YummyZoom.Infrastructure;
 using YummyZoom.Infrastructure.Data;
@@ -29,13 +30,20 @@ app.UseHttpsRedirection();
 
 app.UseOpenApi(settings =>
 {
-    settings.Path = "/api/specification.json";
+    // The path needs to be versioned for NSwag to find the correct document
+    settings.Path = "/api/{documentName}/specification.json";
 });
 
 app.UseSwaggerUi(settings =>
 {
     settings.Path = "/api";
-    settings.DocumentPath = "/api/specification.json";
+    // Configure multiple document URLs, one for each version
+    var provider = app.Services.GetRequiredService<Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider>();
+    foreach (var description in provider.ApiVersionDescriptions.Reverse())
+    {
+        settings.DocumentPath = $"/api/{description.GroupName}/specification.json";
+        settings.DocumentTitle = $"YummyZoom API {description.ApiVersion}";
+    }
 });
 app.UseStaticFiles();
 
@@ -44,7 +52,9 @@ app.UseExceptionHandler(options => { });
 app.Map("/", () => Results.Redirect("/api"));
 
 app.MapDefaultEndpoints();
-app.MapEndpoints();
+
+// Map versioned endpoints.
+app.MapVersionedEndpoints();
 
 app.Run();
 
