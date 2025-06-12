@@ -7,6 +7,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Azure.Security.KeyVault.Secrets;
 
 namespace YummyZoom.Web;
 
@@ -67,9 +68,24 @@ public static class DependencyInjection
         var keyVaultUri = builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"];
         if (!string.IsNullOrWhiteSpace(keyVaultUri))
         {
-            builder.Configuration.AddAzureKeyVault(
-                new Uri(keyVaultUri),
-                new DefaultAzureCredential());
+            try
+            {
+                // Try to connect to the Key Vault to ensure it's accessible
+                var credential = new DefaultAzureCredential();
+                var client = new SecretClient(new Uri(keyVaultUri), credential);
+                // Attempt to list secrets as a connectivity check (minimal call)
+                using IEnumerator<SecretProperties> enumerator = client.GetPropertiesOfSecrets().GetEnumerator();
+                enumerator.MoveNext();
+                
+                builder.Configuration.AddAzureKeyVault(
+                    new Uri(keyVaultUri),
+                    credential);
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception as needed
+                throw new InvalidOperationException($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.", ex);
+            }
         }
     }
 }

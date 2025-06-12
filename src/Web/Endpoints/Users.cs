@@ -3,6 +3,8 @@ using YummyZoom.Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Users.Commands.AssignRoleToUser;
 using YummyZoom.Application.Users.Commands.RemoveRoleFromUser;
+using YummyZoom.Application.Users.Commands.RegisterDevice;
+using YummyZoom.Application.Users.Commands.UnregisterDevice;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -48,5 +50,29 @@ public class Users : EndpointGroupBase
                 : result.ToIResult();
         })
         .WithName("RemoveRoleFromUser");
+
+        // Add endpoint for registering devices
+        group.MapPost("/devices/register", async ([FromBody] RegisterDeviceCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+
+            return result.IsSuccess
+                ? Results.Ok()
+                : result.ToIResult();
+        })
+        .WithName("RegisterDevice")
+        .RequireAuthorization();
+
+        // Add endpoint for unregistering devices
+        group.MapPost("/devices/unregister", async ([FromBody] UnregisterDeviceCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+
+            return result.IsSuccess
+                ? Results.Ok()
+                : result.ToIResult();
+        })
+        .WithName("UnregisterDevice")
+        .RequireAuthorization();
     }
 }
