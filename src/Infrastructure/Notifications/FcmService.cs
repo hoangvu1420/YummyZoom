@@ -9,7 +9,7 @@ namespace YummyZoom.Infrastructure.Notifications;
 public class FcmService : IFcmService
 {
     private readonly ILogger<FcmService> _logger;
-    private readonly FirebaseMessaging _firebaseMessaging; 
+    private readonly FirebaseMessaging _firebaseMessaging;
     private readonly IServiceProvider _serviceProvider;
 
     public FcmService(
@@ -41,7 +41,26 @@ public class FcmService : IFcmService
                     Title = title,
                     Body = body
                 },
-                Data = data
+                Data = data,
+                Android = new AndroidConfig
+                {
+                    Priority = Priority.High,
+                    Notification = new AndroidNotification
+                    {
+                        ChannelId = "yummyzoom_channel"
+                    }
+                },
+                Apns = new ApnsConfig
+                {
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "apns-priority", "10" }
+                    },
+                    Aps = new Aps
+                    {
+                        Sound = "default"
+                    }
+                }
             };
 
             string response = await _firebaseMessaging.SendAsync(message);
@@ -138,7 +157,26 @@ public class FcmService : IFcmService
                     Title = title,
                     Body = body
                 },
-                Data = data
+                Data = data,
+                Android = new AndroidConfig
+                {
+                    Priority = Priority.High,
+                    Notification = new AndroidNotification
+                    {
+                        ChannelId = "yummyzoom_channel"
+                    }
+                },
+                Apns = new ApnsConfig
+                {
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "apns-priority", "10" }
+                    },
+                    Aps = new Aps
+                    {
+                        Sound = "default"
+                    }
+                }
             };
 
             var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(multicastMessage);
