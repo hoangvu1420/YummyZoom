@@ -1,0 +1,69 @@
+using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.SharedKernel;
+
+namespace YummyZoom.Application.Notifications.Commands.SendBroadcastNotification;
+
+public class SendBroadcastNotificationCommandHandler : IRequestHandler<SendBroadcastNotificationCommand, Result>
+{
+    private readonly IFcmService _fcmService;
+    private readonly IUserDeviceRepository _userDeviceRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<SendBroadcastNotificationCommandHandler> _logger;
+
+    public SendBroadcastNotificationCommandHandler(
+        IFcmService fcmService,
+        IUserDeviceRepository userDeviceRepository,
+        IUnitOfWork unitOfWork,
+        ILogger<SendBroadcastNotificationCommandHandler> logger)
+    {
+        _fcmService = fcmService ?? throw new ArgumentNullException(nameof(fcmService));
+        _userDeviceRepository = userDeviceRepository ?? throw new ArgumentNullException(nameof(userDeviceRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<Result> Handle(SendBroadcastNotificationCommand request, CancellationToken cancellationToken)
+    {
+        // Validate input
+        if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Body))
+        {
+            return Result.Failure(NotificationErrors.InvalidNotificationData());
+        }
+
+        try
+        {
+            // Get all active FCM tokens from all users
+            var fcmTokens = await _userDeviceRepository.GetAllActiveFcmTokensAsync(cancellationToken);
+
+            if (fcmTokens.Count == 0)
+            {
+                _logger.LogWarning("No active devices found for broadcast notification");
+                return Result.Failure(NotificationErrors.NoActiveDevicesForBroadcast());
+            }
+
+            _logger.LogInformation("Sending broadcast notification to {TokenCount} devices", fcmTokens.Count);
+
+            // Send multicast notification to all devices
+            var result = await _fcmService.SendMulticastNotificationAsync(
+                fcmTokens, 
+                request.Title, 
+                request.Body, 
+                request.DataPayload);
+
+            if (result.IsFailure)
+            {
+                _logger.LogError("Failed to send broadcast notification: {Error}", result.Error.Description);
+                return Result.Failure(NotificationErrors.BroadcastFailed(result.Error.Description));
+            }
+
+            _logger.LogInformation("Successfully sent broadcast notification to all active devices");
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while sending broadcast notification");
+            return Result.Failure(NotificationErrors.BroadcastFailed($"Unexpected error: {ex.Message}"));
+        }
+    }
+} 

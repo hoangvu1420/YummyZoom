@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -38,6 +39,38 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                     {
                         mock.Setup(s => s.DomainId).Returns(UserId.Create(userIdGuid.Value));
                     }
+                    return mock.Object;
+                });
+
+            // Mock IFcmService for testing
+            services
+                .RemoveAll<IFcmService>()
+                .AddTransient(provider =>
+                {
+                    var mock = new Mock<IFcmService>();
+                    
+                    // Mock successful multicast notification sending
+                    mock.Setup(s => s.SendMulticastNotificationAsync(
+                            It.IsAny<IEnumerable<string>>(), 
+                            It.IsAny<string>(), 
+                            It.IsAny<string>(), 
+                            It.IsAny<Dictionary<string, string>>()))
+                        .ReturnsAsync(Result.Success<List<string>>(new List<string>()));
+                    
+                    // Mock successful single notification sending
+                    mock.Setup(s => s.SendNotificationAsync(
+                            It.IsAny<string>(), 
+                            It.IsAny<string>(), 
+                            It.IsAny<string>(), 
+                            It.IsAny<Dictionary<string, string>>()))
+                        .ReturnsAsync(Result.Success());
+                        
+                    // Mock successful data message sending
+                    mock.Setup(s => s.SendDataMessageAsync(
+                            It.IsAny<string>(), 
+                            It.IsAny<Dictionary<string, string>>()))
+                        .ReturnsAsync(Result.Success());
+                            
                     return mock.Object;
                 });
         });

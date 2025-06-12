@@ -61,6 +61,14 @@ public class UserDeviceRepository : IUserDeviceRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<string>> GetAllActiveFcmTokensAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.UserDevices
+            .Where(ud => ud.IsActive)
+            .Select(ud => ud.FcmToken)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task MarkTokenAsInvalidAsync(string fcmToken, CancellationToken cancellationToken = default)
     {
         var device = await _dbContext.UserDevices

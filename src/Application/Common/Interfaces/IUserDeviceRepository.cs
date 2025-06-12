@@ -16,6 +16,11 @@ public interface IUserDeviceRepository
     Task<List<string>> GetActiveFcmTokensByUserIdAsync(UserId userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieves all active FCM tokens from all users (for broadcast notifications).
+    /// </summary>
+    Task<List<string>> GetAllActiveFcmTokensAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Marks a specific token as invalid/inactive (e.g., if FCM reports it's expired).
     /// </summary>
     Task MarkTokenAsInvalidAsync(string fcmToken, CancellationToken cancellationToken = default);

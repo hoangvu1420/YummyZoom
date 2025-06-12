@@ -72,28 +72,32 @@ public partial class Testing
         await EnsureRolesExistAsync(roles);
         
         using var scope = _scopeFactory.CreateScope();
-
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        var user = new ApplicationUser { UserName = userName, Email = userName };
-
-        var result = await userManager.CreateAsync(user, password);
+        var user = await userManager.FindByEmailAsync(userName);
+        if (user == null)
+        {
+            user = new ApplicationUser { UserName = userName, Email = userName };
+            var result = await userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(Environment.NewLine, result.ToApplicationResult().Errors);
+                throw new Exception($"Unable to create {userName}.{Environment.NewLine}{errors}");
+            }
+        }
 
         if (roles.Any())
         {
-            await userManager.AddToRolesAsync(user, roles);
+            var userRoles = await userManager.GetRolesAsync(user);
+            var missingRoles = roles.Except(userRoles).ToArray();
+            if (missingRoles.Any())
+            {
+                await userManager.AddToRolesAsync(user, missingRoles);
+            }
         }
 
-        if (result.Succeeded)
-        {
-            _userId = user.Id; 
-
-            return _userId.Value; 
-        }
-
-        var errors = string.Join(Environment.NewLine, result.ToApplicationResult().Errors);
-
-        throw new Exception($"Unable to create {userName}.{Environment.NewLine}{errors}");
+        _userId = user.Id;
+        return _userId.Value;
     }
 
     public static async Task ResetState()

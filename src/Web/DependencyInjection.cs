@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Asp.Versioning;
-using Asp.Versioning.ApiExplorer;
 using Azure.Security.KeyVault.Secrets;
 
 namespace YummyZoom.Web;
@@ -22,7 +21,6 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>

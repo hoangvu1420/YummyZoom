@@ -35,10 +35,11 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(command);
 
             return result.IsSuccess
-                ? Results.Ok()
+                ? Results.NoContent()
                 : result.ToIResult();
         })
-        .WithName("AssignRoleToUser");
+        .WithName("AssignRoleToUser")
+        .WithStandardResults();
 
         // Add endpoint for removing roles
         group.MapPost("/remove-role", async ([FromBody] RemoveRoleFromUserCommand command, ISender sender) =>
@@ -46,10 +47,11 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(command);
 
             return result.IsSuccess
-                ? Results.Ok()
+                ? Results.NoContent()
                 : result.ToIResult();
         })
-        .WithName("RemoveRoleFromUser");
+        .WithName("RemoveRoleFromUser")
+        .WithStandardResults();
 
         // Add endpoint for registering devices
         group.MapPost("/devices/register", async ([FromBody] RegisterDeviceCommand command, ISender sender) =>
@@ -57,10 +59,11 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(command);
 
             return result.IsSuccess
-                ? Results.Ok()
+                ? Results.NoContent()
                 : result.ToIResult();
         })
         .WithName("RegisterDevice")
+        .WithStandardResults()
         .RequireAuthorization();
 
         // Add endpoint for unregistering devices
@@ -69,10 +72,11 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(command);
 
             return result.IsSuccess
-                ? Results.Ok()
+                ? Results.NoContent()
                 : result.ToIResult();
         })
         .WithName("UnregisterDevice")
+        .WithStandardResults()
         .RequireAuthorization();
     }
 }

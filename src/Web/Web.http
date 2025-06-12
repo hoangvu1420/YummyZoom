@@ -137,3 +137,64 @@ DELETE {{Web_HostAddress}}/api/TodoItems/1
 Authorization: Bearer {{BearerToken}}
 
 ###
+
+# POST Users Device Register
+POST {{Web_HostAddress}}/api/Users/devices/register
+Authorization: Bearer {{BearerToken}}
+Content-Type: application/json
+
+// RegisterDeviceCommand
+{
+  "FcmToken": "d1234567890abcdef",
+  "Platform": "iOS",
+  "DeviceId": "DEVICE123"
+}
+
+###
+
+# POST Users Device Unregister
+POST {{Web_HostAddress}}/api/Users/devices/unregister
+Authorization: Bearer {{BearerToken}}
+Content-Type: application/json
+
+// UnregisterDeviceCommand
+{
+  "FcmToken": "d1234567890abcdef"
+}
+
+###
+
+# POST Notifications Send to User (Admin Only)
+POST {{Web_HostAddress}}/api/Notifications/send-to-user
+Authorization: Bearer {{BearerToken}}
+Content-Type: application/json
+
+// SendNotificationToUserCommand - Requires Administrator role
+{
+  "UserId": "01234567-89ab-cdef-0123-456789abcdef",
+  "Title": "Important Update",
+  "Body": "Your order has been confirmed and is being prepared!",
+  "DataPayload": {
+    "orderId": "ORDER123",
+    "type": "order_update"
+  }
+}
+
+###
+
+# POST Notifications Broadcast (Admin Only)
+POST {{Web_HostAddress}}/api/Notifications/send-broadcast
+Authorization: Bearer {{BearerToken}}
+Content-Type: application/json
+
+// SendBroadcastNotificationCommand - Requires Administrator role
+{
+  "Title": "System Maintenance",
+  "Body": "YummyZoom will be under maintenance from 2-4 AM tonight. Thank you for your patience!",
+  "DataPayload": {
+    "maintenanceType": "scheduled",
+    "duration": "2hours"
+  }
+}
+
+###
