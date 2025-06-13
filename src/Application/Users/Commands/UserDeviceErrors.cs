@@ -23,4 +23,8 @@ public static class UserDeviceErrors
     public static Error TokenAlreadyRegistered(string fcmToken) => Error.Validation(
         "UserDevice.TokenAlreadyRegistered",
         $"FCM token '{fcmToken}' is already registered to another user.");
-} 
+
+    public static Error InvalidDeviceData() => Error.Validation(
+        "UserDevice.InvalidDeviceData",
+        "Device ID, Platform, and FCM Token cannot be empty.");
+}

@@ -6,6 +6,7 @@ using YummyZoom.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
+using YummyZoom.SharedKernel.Models;
 
 namespace YummyZoom.Application.FunctionalTests.Notifications;
 
@@ -76,14 +77,20 @@ public abstract class NotificationTestsBase : BaseTestFixture
     protected static async Task<Guid> SetupUserWithInactiveDeviceAsync(string email, string fcmToken, string platform = "iOS")
     {
         var userId = await SetupUserWithDeviceAsync(email, fcmToken, platform);
-        
-        // Mark the device as inactive
+
+        // Mark the session as inactive
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var device = await context.UserDevices.FirstAsync(d => d.FcmToken == fcmToken);
-        device.IsActive = false;
-        await context.SaveChangesAsync();
-        
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
+
+        var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
+        if (session != null)
+        {
+            session.IsActive = false;
+            session.LoggedOutAt = DateTime.UtcNow;
+            // Assuming SaveChangesAsync is handled by the repository or UoW
+            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+        }
+
         return userId;
     }
 
@@ -172,33 +179,35 @@ public abstract class NotificationTestsBase : BaseTestFixture
     #region Query Helper Methods
 
     /// <summary>
-    /// Counts all active devices in the system.
+    /// Counts all active sessions in the system.
     /// </summary>
-    protected static async Task<int> CountAllActiveDevicesAsync()
+    protected static async Task<int> CountAllActiveSessionsAsync()
     {
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.UserDevices.CountAsync(d => d.IsActive);
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
+        var activeTokens = await userDeviceSessionRepository.GetAllActiveFcmTokensAsync();
+        return activeTokens.Count;
     }
 
     /// <summary>
-    /// Counts active devices for a specific user.
+    /// Counts active sessions for a specific user.
     /// </summary>
-    protected static async Task<int> CountActiveDevicesForUserAsync(Guid userId)
+    protected static async Task<int> CountActiveSessionsForUserAsync(Guid userId)
     {
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.UserDevices.CountAsync(d => d.UserId == userId && d.IsActive);
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
+        var activeTokens = await userDeviceSessionRepository.GetActiveFcmTokensByUserIdAsync(userId);
+        return activeTokens.Count;
     }
 
     /// <summary>
-    /// Finds a device by its FCM token.
+    /// Finds an active session by its FCM token.
     /// </summary>
-    protected static async Task<UserDevice?> FindDeviceByTokenAsync(string fcmToken)
+    protected static async Task<UserDeviceSession?> FindActiveSessionByTokenAsync(string fcmToken)
     {
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.UserDevices.FirstOrDefaultAsync(d => d.FcmToken == fcmToken);
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
+        return await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
     }
 
     #endregion

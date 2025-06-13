@@ -1,22 +1,26 @@
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.SharedKernel;
+using Microsoft.Extensions.Logging; 
 
 namespace YummyZoom.Application.Users.Commands.UnregisterDevice;
 
 public class UnregisterDeviceCommandHandler : IRequestHandler<UnregisterDeviceCommand, Result>
 {
-    private readonly IUserDeviceRepository _userDeviceRepository;
+    private readonly IUserDeviceSessionRepository _userDeviceSessionRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUser _currentUser;
+    private readonly ILogger<UnregisterDeviceCommandHandler> _logger; 
 
     public UnregisterDeviceCommandHandler(
-        IUserDeviceRepository userDeviceRepository,
+        IUserDeviceSessionRepository userDeviceSessionRepository,
         IUnitOfWork unitOfWork,
-        IUser currentUser)
+        IUser currentUser,
+        ILogger<UnregisterDeviceCommandHandler> logger) 
     {
-        _userDeviceRepository = userDeviceRepository ?? throw new ArgumentNullException(nameof(userDeviceRepository));
+        _userDeviceSessionRepository = userDeviceSessionRepository ?? throw new ArgumentNullException(nameof(userDeviceSessionRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger)); 
     }
 
     public Task<Result> Handle(UnregisterDeviceCommand request, CancellationToken cancellationToken)
@@ -26,25 +30,30 @@ public class UnregisterDeviceCommandHandler : IRequestHandler<UnregisterDeviceCo
             // Ensure user is authenticated
             if (_currentUser.DomainId is null)
             {
+                _logger.LogWarning("UnregisterDeviceCommand failed: User not authenticated.");
                 return Result.Failure(UserDeviceErrors.UserNotAuthenticated());
             }
 
-            // Check if token exists before trying to remove it
-            var tokenExists = await _userDeviceRepository.TokenExistsAsync(
-                request.FcmToken.Trim(), 
+            // Find the active session for the current user and FCM token
+            var session = await _userDeviceSessionRepository.GetActiveSessionByTokenAsync(
+                request.FcmToken.Trim(),
                 cancellationToken);
 
-            if (!tokenExists)
+            if (session == null || session.UserId != _currentUser.DomainId.Value)
             {
+                // Token not found, or found but belongs to a different user on a shared device
+                _logger.LogWarning("UnregisterDeviceCommand failed: FCM token {FcmToken} not found or does not belong to user {UserId}", request.FcmToken, _currentUser.DomainId.Value);
                 return Result.Failure(UserDeviceErrors.TokenNotFound(request.FcmToken));
             }
 
-            // Remove the device token
-            await _userDeviceRepository.RemoveTokenAsync(
-                request.FcmToken.Trim(),
-                cancellationToken);
+            // Deactivate the session
+            session.IsActive = false;
+            session.LoggedOutAt = DateTime.UtcNow;
+            // EF Core will track the changes, no explicit update call needed for this scenario
+
+            _logger.LogInformation("Deactivated session for UserId {UserId} with FCM token {FcmToken}", _currentUser.DomainId.Value, request.FcmToken);
 
             return Result.Success();
         }, cancellationToken);
     }
-} 
+}

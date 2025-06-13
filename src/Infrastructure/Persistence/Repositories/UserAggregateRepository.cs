@@ -18,11 +18,6 @@ public class UserAggregateRepository : IUserAggregateRepository
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)
     {
         await _dbContext.DomainUsers.AddAsync(user, cancellationToken);
-        // Note: SaveChangesAsync is typically called by a Unit of Work pattern
-        // or explicitly after the command handler completes its operations.
-        // Adding it here would make the repository less flexible if multiple
-        // operations need to be part of the same transaction.
-        // For now, we assume SaveChangesAsync is handled elsewhere (e.g., by IdentityService's transaction).
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -40,11 +35,7 @@ public class UserAggregateRepository : IUserAggregateRepository
 
     public Task UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
-        // EF Core tracks changes, so just marking the entity as Modified
-        // or relying on change tracking is usually sufficient.
-        // The actual update SQL is generated during SaveChangesAsync.
         _dbContext.DomainUsers.Update(user); 
-        // Again, SaveChangesAsync is assumed to be handled elsewhere.
-        return Task.CompletedTask; // Update itself is synchronous in terms of EF tracking
+        return Task.CompletedTask; 
     }
 }

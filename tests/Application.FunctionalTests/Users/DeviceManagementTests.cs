@@ -6,10 +6,29 @@ using YummyZoom.Infrastructure.Data;
 using YummyZoom.SharedKernel.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using YummyZoom.SharedKernel.Models;
+using YummyZoom.Application.Common.Interfaces;
 
 namespace YummyZoom.Application.FunctionalTests.Users;
 
 using static Testing;
+
+/// <summary>
+/// DTO class representing device information for testing purposes.
+/// Combines data from Device and UserDeviceSession entities to maintain compatibility with existing tests.
+/// </summary>
+public class DeviceTestInfo
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public string FcmToken { get; set; } = string.Empty;
+    public string Platform { get; set; } = string.Empty;
+    public DateTime RegisteredAt { get; set; }
+    public DateTime? LastUsedAt { get; set; }
+    public bool IsActive { get; set; }
+    public string? DeviceId { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
 
 public class DeviceManagementTests : BaseTestFixture
 {
@@ -83,7 +102,7 @@ public class DeviceManagementTests : BaseTestFixture
         var firstCommand = new RegisterDeviceCommand(
             FcmToken: "update-test-token",
             Platform: "Android",
-            DeviceId: "old-device"
+            DeviceId: "consistent-device"
         );
         var firstResult = await SendAsync(firstCommand);
         firstResult.ShouldBeSuccessful();
@@ -95,11 +114,12 @@ public class DeviceManagementTests : BaseTestFixture
         // Wait a brief moment to ensure timestamp difference
         await Task.Delay(100);
 
-        // Register same token with different platform
+        // Register same token with same DeviceId but different platform (device info update scenario)
         var updateCommand = new RegisterDeviceCommand(
             FcmToken: "update-test-token",
-            Platform: "iOS",
-            DeviceId: "new-device"
+            Platform: "iOS", // Updated platform
+            DeviceId: "consistent-device", // Same DeviceId
+            ModelName: "iPhone 15" // Added model info
         );
 
         // Act
@@ -114,7 +134,7 @@ public class DeviceManagementTests : BaseTestFixture
 
         var updatedDevice = await FindDeviceByTokenAsync("update-test-token");
         updatedDevice!.Platform.Should().Be("iOS", "Platform should be updated");
-        updatedDevice.DeviceId.Should().Be("new-device", "DeviceId should be updated");
+        updatedDevice.DeviceId.Should().Be("consistent-device", "DeviceId should remain the same");
         updatedDevice.RegisteredAt.Should().Be(originalRegisteredAt, "RegisteredAt should remain unchanged");
         updatedDevice.LastUsedAt.Should().BeAfter(originalRegisteredAt, "LastUsedAt should be updated");
         updatedDevice.UpdatedAt.Should().BeAfter(originalRegisteredAt, "UpdatedAt should be updated");
@@ -189,6 +209,132 @@ public class DeviceManagementTests : BaseTestFixture
 
         // Assert
         await act.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Test]
+    public async Task RegisterDevice_WithDifferentDeviceId_ShouldCreateNewDevice()
+    {
+        // Arrange
+        var userId = await RunAsDefaultUserAsync();
+        
+        // Register device first time
+        var firstCommand = new RegisterDeviceCommand(
+            FcmToken: "multi-device-token",
+            Platform: "Android",
+            DeviceId: "phone-123"
+        );
+        var firstResult = await SendAsync(firstCommand);
+        firstResult.ShouldBeSuccessful();
+
+        // Wait a brief moment
+        await Task.Delay(100);
+
+        // Register different device with same FCM token (device change scenario)
+        var secondCommand = new RegisterDeviceCommand(
+            FcmToken: "multi-device-token",
+            Platform: "Android",
+            DeviceId: "tablet-456"
+        );
+
+        // Act
+        var secondResult = await SendAsync(secondCommand);
+
+        // Assert
+        secondResult.ShouldBeSuccessful();
+
+        // Verify that a new device was created (different DeviceIds = different physical devices)
+        var activeDevice = await FindDeviceByTokenAsync("multi-device-token");
+        activeDevice.Should().NotBeNull();
+        activeDevice!.DeviceId.Should().Be("tablet-456", "Should be using the new device");
+        activeDevice.Platform.Should().Be("Android");
+        activeDevice.IsActive.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task RegisterDevice_AppReinstallScenario_ShouldReuseCompatibleDevice()
+    {
+        // Arrange
+        var userId = await RunAsDefaultUserAsync();
+        
+        // Register device without DeviceId (app installed on device without stable ID)
+        var firstCommand = new RegisterDeviceCommand(
+            FcmToken: "reinstall-token",
+            Platform: "iOS"
+        );
+        var firstResult = await SendAsync(firstCommand);
+        firstResult.ShouldBeSuccessful();
+
+        var originalDevice = await FindDeviceByTokenAsync("reinstall-token");
+        var originalRegisteredAt = originalDevice!.RegisteredAt;
+
+        // Wait a brief moment
+        await Task.Delay(100);
+
+        // App reinstall: now has DeviceId but same FCM token
+        var reinstallCommand = new RegisterDeviceCommand(
+            FcmToken: "reinstall-token",
+            Platform: "iOS",
+            DeviceId: "iphone-789"
+        );
+
+        // Act
+        var reinstallResult = await SendAsync(reinstallCommand);
+
+        // Assert
+        reinstallResult.ShouldBeSuccessful();
+
+        // Should reuse the same device and add the DeviceId
+        var devicesWithToken = await CountDevicesWithTokenAsync("reinstall-token");
+        devicesWithToken.Should().Be(1, "Should reuse existing device, not create new one");
+
+        var updatedDevice = await FindDeviceByTokenAsync("reinstall-token");
+        updatedDevice!.DeviceId.Should().Be("iphone-789", "DeviceId should be added to existing device");
+        updatedDevice.Platform.Should().Be("iOS");
+        updatedDevice.RegisteredAt.Should().Be(originalRegisteredAt, "RegisteredAt should remain unchanged");
+        updatedDevice.IsActive.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task RegisterDevice_TokenRefreshScenario_ShouldCreateNewSession()
+    {
+        // Arrange
+        var userId = await RunAsDefaultUserAsync();
+        
+        // Register device first time
+        var firstCommand = new RegisterDeviceCommand(
+            FcmToken: "old-token",
+            Platform: "Android",
+            DeviceId: "stable-device-123"
+        );
+        var firstResult = await SendAsync(firstCommand);
+        firstResult.ShouldBeSuccessful();
+
+        // Wait a brief moment
+        await Task.Delay(100);
+
+        // Token refresh: same device, new FCM token
+        var refreshCommand = new RegisterDeviceCommand(
+            FcmToken: "new-token",
+            Platform: "Android",
+            DeviceId: "stable-device-123"
+        );
+
+        // Act
+        var refreshResult = await SendAsync(refreshCommand);
+
+        // Assert
+        refreshResult.ShouldBeSuccessful();
+
+        // Old token should be inactive
+        var oldTokenDevice = await FindDeviceByTokenAsync("old-token");
+        oldTokenDevice.Should().BeNull("Old token should be inactive");
+
+        // New token should be active on the same device
+        var newTokenDevice = await FindDeviceByTokenAsync("new-token");
+        newTokenDevice.Should().NotBeNull();
+        newTokenDevice!.DeviceId.Should().Be("stable-device-123");
+        newTokenDevice.Platform.Should().Be("Android");
+        newTokenDevice.IsActive.Should().BeTrue();
     }
 
     #endregion
@@ -276,18 +422,34 @@ public class DeviceManagementTests : BaseTestFixture
         // Arrange
         var userId = await RunAsDefaultUserAsync();
         
-        // Create an inactive device directly in the database
-        var inactiveDevice = new UserDevice
+        // Create a device and inactive session directly in the database using the new model
+        using var scope = CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        var device = new Device
+        {
+            Id = Guid.NewGuid(),
+            DeviceId = "inactive-device-id",
+            Platform = "Android",
+            ModelName = "Test Device",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        context.Devices.Add(device);
+        await context.SaveChangesAsync();
+
+        var inactiveSession = new UserDeviceSession
         {
             Id = Guid.NewGuid(),
             UserId = userId,
+            DeviceId = device.Id,
             FcmToken = "inactive-token",
-            Platform = "Android",
-            RegisteredAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsActive = false // Inactive device
+            IsActive = false, // Inactive session
+            LastLoginAt = DateTime.UtcNow.AddHours(-1),
+            LoggedOutAt = DateTime.UtcNow
         };
-        await AddAsync(inactiveDevice);
+        context.UserDeviceSessions.Add(inactiveSession);
+        await context.SaveChangesAsync();
 
         var command = new UnregisterDeviceCommand("inactive-token");
 
@@ -379,23 +541,45 @@ public class DeviceManagementTests : BaseTestFixture
 
     #region Helper Methods
 
-    private static async Task<UserDevice?> FindDeviceByTokenAsync(string fcmToken)
+    private static async Task<DeviceTestInfo?> FindDeviceByTokenAsync(string fcmToken)
     {
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
         
-        return await context.UserDevices
-            .FirstOrDefaultAsync(d => d.FcmToken == fcmToken);
+        var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
+        if (session == null)
+            return null;
+
+        // Get the device information
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var device = await context.Devices.FirstOrDefaultAsync(d => d.Id == session.DeviceId);
+        
+        if (device == null)
+            return null;
+
+        // Combine session and device data into the test DTO
+        return new DeviceTestInfo
+        {
+            Id = session.Id,
+            UserId = session.UserId,
+            FcmToken = session.FcmToken,
+            Platform = device.Platform,
+            RegisteredAt = device.CreatedAt, // Map device.CreatedAt to RegisteredAt (device registration time)
+            LastUsedAt = session.LastLoginAt,   // Use LastLoginAt as LastUsedAt for compatibility
+            IsActive = session.IsActive,
+            DeviceId = device.DeviceId,
+            UpdatedAt = device.UpdatedAt
+        };
     }
 
     private static async Task<int> CountDevicesWithTokenAsync(string fcmToken)
     {
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
         
-        return await context.UserDevices
-            .CountAsync(d => d.FcmToken == fcmToken);
+        var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
+        return session != null ? 1 : 0;
     }
 
     #endregion
-} 
+}

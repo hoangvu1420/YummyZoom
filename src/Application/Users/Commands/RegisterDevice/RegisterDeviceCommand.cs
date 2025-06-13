@@ -5,4 +5,5 @@ namespace YummyZoom.Application.Users.Commands.RegisterDevice;
 public record RegisterDeviceCommand(
     string FcmToken,
     string Platform,
-    string? DeviceId = null) : IRequest<Result>; 
+    string? DeviceId = null,
+    string? ModelName = null) : IRequest<Result>;

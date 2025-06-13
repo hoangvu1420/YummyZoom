@@ -64,26 +64,28 @@ public static class DependencyInjection
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)
     {
         var keyVaultUri = builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"];
-        if (!string.IsNullOrWhiteSpace(keyVaultUri))
+        if (string.IsNullOrWhiteSpace(keyVaultUri))
         {
-            try
-            {
-                // Try to connect to the Key Vault to ensure it's accessible
-                var credential = new DefaultAzureCredential();
-                var client = new SecretClient(new Uri(keyVaultUri), credential);
-                // Attempt to list secrets as a connectivity check (minimal call)
-                using IEnumerator<SecretProperties> enumerator = client.GetPropertiesOfSecrets().GetEnumerator();
-                enumerator.MoveNext();
+            return;
+        }
+
+        try
+        {
+            // Try to connect to the Key Vault to ensure it's accessible
+            var credential = new DefaultAzureCredential();
+            var client = new SecretClient(new Uri(keyVaultUri), credential);
+            // Attempt to list secrets as a connectivity check (minimal call)
+            using IEnumerator<SecretProperties> enumerator = client.GetPropertiesOfSecrets().GetEnumerator();
+            enumerator.MoveNext();
                 
-                builder.Configuration.AddAzureKeyVault(
-                    new Uri(keyVaultUri),
-                    credential);
-            }
-            catch (Exception ex)
-            {
-                // Log or handle the exception as needed
-                throw new InvalidOperationException($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.", ex);
-            }
+            builder.Configuration.AddAzureKeyVault(
+                new Uri(keyVaultUri),
+                credential);
+        }
+        catch (Exception ex)
+        {
+            // Log or handle the exception as needed
+            throw new InvalidOperationException($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.", ex);
         }
     }
 }

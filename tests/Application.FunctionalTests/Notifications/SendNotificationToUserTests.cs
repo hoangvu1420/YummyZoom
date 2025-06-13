@@ -88,9 +88,9 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Assert
         result.ShouldBeSuccessful();
         
-        // Verify user has multiple active devices
-        var deviceCount = await CountActiveDevicesForUserAsync(targetUserId);
-        deviceCount.Should().Be(3);
+        // Verify user has multiple active sessions
+        var sessionCount = await CountActiveSessionsForUserAsync(targetUserId);
+        sessionCount.Should().Be(3);
     }
 
     [Test]
@@ -341,11 +341,11 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Assert
         result.ShouldBeSuccessful();
         
-        // Verify device still exists and is active
-        var deviceExists = await FindDeviceByTokenAsync("workflow-token");
-        deviceExists.Should().NotBeNull();
-        deviceExists!.IsActive.Should().BeTrue();
+        // Verify session still exists and is active
+        var sessionExists = await FindActiveSessionByTokenAsync("workflow-token");
+        sessionExists.Should().NotBeNull();
+        sessionExists!.IsActive.Should().BeTrue();
     }
 
     #endregion
-} 
+}

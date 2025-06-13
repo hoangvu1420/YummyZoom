@@ -22,11 +22,18 @@ public class FcmService : IFcmService
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
-    private async Task ExecuteInScope(Func<IUserDeviceRepository, Task> action)
+    // Helper method to mark a token as invalid using the new repository
+    private async Task MarkTokenAsInvalidAsync(string fcmToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var userDeviceRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceRepository>();
-        await action(userDeviceRepository);
+        var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
+
+        var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
+        if (session != null)
+        {
+            session.IsActive = false;
+            session.LoggedOutAt = DateTime.UtcNow;
+        }
     }
 
     public async Task<Result> SendNotificationAsync(string fcmToken, string title, string body, Dictionary<string, string>? data = null)
@@ -76,7 +83,7 @@ public class FcmService : IFcmService
             // Handle invalid tokens
             if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered || ex.MessagingErrorCode == MessagingErrorCode.InvalidArgument)
             {
-                await ExecuteInScope(repo => repo.MarkTokenAsInvalidAsync(fcmToken));
+                await MarkTokenAsInvalidAsync(fcmToken);
 
                 _logger.LogWarning("Marked FCM token {FcmTokenPrefix} as invalid due to error code {ErrorCode}.",
                     fcmToken[..Math.Min(8, fcmToken.Length)], ex.MessagingErrorCode);
@@ -118,7 +125,7 @@ public class FcmService : IFcmService
 
             if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered || ex.MessagingErrorCode == MessagingErrorCode.InvalidArgument)
             {
-                await ExecuteInScope(repo => repo.MarkTokenAsInvalidAsync(fcmToken));
+                await MarkTokenAsInvalidAsync(fcmToken);
 
                 _logger.LogWarning("Marked FCM token {FcmTokenPrefix} as invalid due to error code {ErrorCode}.",
                     fcmToken[..Math.Min(8, fcmToken.Length)], ex.MessagingErrorCode);
@@ -197,7 +204,7 @@ public class FcmService : IFcmService
                         if (sendResponse.Exception is FirebaseMessagingException fmEx &&
                             (fmEx.MessagingErrorCode == MessagingErrorCode.Unregistered || fmEx.MessagingErrorCode == MessagingErrorCode.InvalidArgument))
                         {
-                            await ExecuteInScope(repo => repo.MarkTokenAsInvalidAsync(tokensList[i]));
+                            await MarkTokenAsInvalidAsync(tokensList[i]);
 
                             _logger.LogWarning("Marked FCM token {FcmTokenPrefix} as invalid due to error code {ErrorCode}.",
                                 tokensList[i][..Math.Min(8, tokensList[i].Length)], fmEx.MessagingErrorCode);

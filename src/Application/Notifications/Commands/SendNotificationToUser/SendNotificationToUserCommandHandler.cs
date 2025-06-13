@@ -8,18 +8,18 @@ namespace YummyZoom.Application.Notifications.Commands.SendNotificationToUser;
 public class SendNotificationToUserCommandHandler : IRequestHandler<SendNotificationToUserCommand, Result>
 {
     private readonly IFcmService _fcmService;
-    private readonly IUserDeviceRepository _userDeviceRepository;
+    private readonly IUserDeviceSessionRepository _userDeviceSessionRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SendNotificationToUserCommandHandler> _logger;
 
     public SendNotificationToUserCommandHandler(
         IFcmService fcmService,
-        IUserDeviceRepository userDeviceRepository,
+        IUserDeviceSessionRepository userDeviceSessionRepository,
         IUnitOfWork unitOfWork,
         ILogger<SendNotificationToUserCommandHandler> logger)
     {
         _fcmService = fcmService ?? throw new ArgumentNullException(nameof(fcmService));
-        _userDeviceRepository = userDeviceRepository ?? throw new ArgumentNullException(nameof(userDeviceRepository));
+        _userDeviceSessionRepository = userDeviceSessionRepository ?? throw new ArgumentNullException(nameof(userDeviceSessionRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -37,8 +37,8 @@ public class SendNotificationToUserCommandHandler : IRequestHandler<SendNotifica
             // Convert primitive Guid to UserId value object
             var userId = UserId.Create(request.UserId);
 
-            // Get active FCM tokens for the user
-            var fcmTokens = await _userDeviceRepository.GetActiveFcmTokensByUserIdAsync(userId, cancellationToken);
+            // Get active FCM tokens for the user from sessions
+            var fcmTokens = await _userDeviceSessionRepository.GetActiveFcmTokensByUserIdAsync(request.UserId, cancellationToken);
 
             if (fcmTokens.Count == 0)
             {
@@ -46,19 +46,19 @@ public class SendNotificationToUserCommandHandler : IRequestHandler<SendNotifica
                 return Result.Failure(NotificationErrors.NoActiveDevices(userId));
             }
 
-            _logger.LogInformation("Sending notification to {TokenCount} devices for user {UserId}", 
+            _logger.LogInformation("Sending notification to {TokenCount} devices for user {UserId}",
                 fcmTokens.Count, request.UserId);
 
             // Send multicast notification
             var result = await _fcmService.SendMulticastNotificationAsync(
-                fcmTokens, 
-                request.Title, 
-                request.Body, 
+                fcmTokens,
+                request.Title,
+                request.Body,
                 request.DataPayload);
 
             if (result.IsFailure)
             {
-                _logger.LogError("Failed to send notification to user {UserId}: {Error}", 
+                _logger.LogError("Failed to send notification to user {UserId}: {Error}",
                     request.UserId, result.Error.Description);
                 return Result.Failure(NotificationErrors.FcmSendFailed(result.Error.Description));
             }
@@ -72,4 +72,4 @@ public class SendNotificationToUserCommandHandler : IRequestHandler<SendNotifica
             return Result.Failure(NotificationErrors.FcmSendFailed($"Unexpected error: {ex.Message}"));
         }
     }
-} 
+}

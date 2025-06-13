@@ -114,9 +114,9 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Assert
         result.ShouldBeSuccessful();
         
-        // Verify that only active devices exist in system
-        var activeDeviceCount = await CountAllActiveDevicesAsync();
-        activeDeviceCount.Should().BeGreaterThan(0);
+        // Verify that only active sessions exist in system
+        var activeSessionCount = await CountAllActiveSessionsAsync();
+        activeSessionCount.Should().BeGreaterThan(0);
     }
 
     [Test]
@@ -310,9 +310,9 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Assert
         result.ShouldBeSuccessful();
         
-        // Verify multiple devices exist and are active
-        var activeDeviceCount = await CountAllActiveDevicesAsync();
-        activeDeviceCount.Should().BeGreaterThan(2);
+        // Verify multiple sessions exist and are active
+        var activeSessionCount = await CountAllActiveSessionsAsync();
+        activeSessionCount.Should().BeGreaterThan(2);
     }
 
     [Test]
@@ -332,9 +332,9 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Assert
         result.ShouldBeSuccessful();
         
-        // Verify large number of devices
-        var activeDeviceCount = await CountAllActiveDevicesAsync();
-        activeDeviceCount.Should().BeGreaterThan(5);
+        // Verify large number of sessions
+        var activeSessionCount = await CountAllActiveSessionsAsync();
+        activeSessionCount.Should().BeGreaterThan(5);
     }
 
     #endregion

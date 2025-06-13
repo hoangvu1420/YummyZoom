@@ -7,18 +7,18 @@ namespace YummyZoom.Application.Notifications.Commands.SendBroadcastNotification
 public class SendBroadcastNotificationCommandHandler : IRequestHandler<SendBroadcastNotificationCommand, Result>
 {
     private readonly IFcmService _fcmService;
-    private readonly IUserDeviceRepository _userDeviceRepository;
+    private readonly IUserDeviceSessionRepository _userDeviceSessionRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SendBroadcastNotificationCommandHandler> _logger;
 
     public SendBroadcastNotificationCommandHandler(
         IFcmService fcmService,
-        IUserDeviceRepository userDeviceRepository,
+        IUserDeviceSessionRepository userDeviceSessionRepository,
         IUnitOfWork unitOfWork,
         ILogger<SendBroadcastNotificationCommandHandler> logger)
     {
         _fcmService = fcmService ?? throw new ArgumentNullException(nameof(fcmService));
-        _userDeviceRepository = userDeviceRepository ?? throw new ArgumentNullException(nameof(userDeviceRepository));
+        _userDeviceSessionRepository = userDeviceSessionRepository ?? throw new ArgumentNullException(nameof(userDeviceSessionRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -33,8 +33,8 @@ public class SendBroadcastNotificationCommandHandler : IRequestHandler<SendBroad
 
         try
         {
-            // Get all active FCM tokens from all users
-            var fcmTokens = await _userDeviceRepository.GetAllActiveFcmTokensAsync(cancellationToken);
+            // Get all active FCM tokens from all users from sessions
+            var fcmTokens = await _userDeviceSessionRepository.GetAllActiveFcmTokensAsync(cancellationToken);
 
             if (fcmTokens.Count == 0)
             {
@@ -46,9 +46,9 @@ public class SendBroadcastNotificationCommandHandler : IRequestHandler<SendBroad
 
             // Send multicast notification to all devices
             var result = await _fcmService.SendMulticastNotificationAsync(
-                fcmTokens, 
-                request.Title, 
-                request.Body, 
+                fcmTokens,
+                request.Title,
+                request.Body,
                 request.DataPayload);
 
             if (result.IsFailure)
@@ -66,4 +66,4 @@ public class SendBroadcastNotificationCommandHandler : IRequestHandler<SendBroad
             return Result.Failure(NotificationErrors.BroadcastFailed($"Unexpected error: {ex.Message}"));
         }
     }
-} 
+}

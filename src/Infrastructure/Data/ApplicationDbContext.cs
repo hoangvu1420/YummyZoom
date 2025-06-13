@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.SharedKernel;
+using YummyZoom.SharedKernel.Models;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -16,7 +17,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<TodoList> TodoLists => Set<TodoList>();
     public DbSet<User> DomainUsers => Set<User>();
-    public DbSet<UserDevice> UserDevices => Set<UserDevice>();
+    public DbSet<Device> Devices => Set<Device>();
+    public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
