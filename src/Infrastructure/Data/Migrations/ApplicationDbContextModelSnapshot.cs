@@ -152,6 +152,57 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.RoleAssignmentAggregate.RoleAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId")
+                        .HasDatabaseName("IX_RoleAssignments_RestaurantId");
+
+                    b.HasIndex("Role")
+                        .HasDatabaseName("IX_RoleAssignments_Role");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_RoleAssignments_UserId");
+
+                    b.HasIndex("UserId", "RestaurantId", "Role")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RoleAssignments_User_Restaurant_Role");
+
+                    b.ToTable("RoleAssignments", (string)null);
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.TodoListAggregate.TodoList", b =>
                 {
                     b.Property<Guid>("Id")
@@ -194,6 +245,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
@@ -472,13 +526,11 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("YummyZoom.Domain.UserAggregate.User", b =>
                 {
-                    b.OwnsMany("YummyZoom.Domain.Common.ValueObjects.Address", "Addresses", b1 =>
+                    b.OwnsMany("YummyZoom.Domain.UserAggregate.Entities.Address", "Addresses", b1 =>
                         {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("AddressId");
 
                             b1.Property<string>("City")
                                 .IsRequired()
@@ -490,6 +542,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                 .HasMaxLength(100)
                                 .HasColumnType("character varying(100)");
 
+                            b1.Property<DateTimeOffset>("Created")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("CreatedBy")
+                                .HasColumnType("text");
+
                             b1.Property<string>("DeliveryInstructions")
                                 .HasMaxLength(500)
                                 .HasColumnType("character varying(500)");
@@ -497,6 +555,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                             b1.Property<string>("Label")
                                 .HasMaxLength(100)
                                 .HasColumnType("character varying(100)");
+
+                            b1.Property<DateTimeOffset>("LastModified")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("LastModifiedBy")
+                                .HasColumnType("text");
 
                             b1.Property<string>("State")
                                 .HasMaxLength(100)
@@ -569,38 +633,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                 .HasForeignKey("UserId");
                         });
 
-                    b.OwnsMany("YummyZoom.Domain.UserAggregate.ValueObjects.RoleAssignment", "UserRoles", b1 =>
-                        {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("RoleName")
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("TargetEntityId")
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("TargetEntityType")
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.HasKey("UserId", "RoleName");
-
-                            b1.HasIndex("TargetEntityId", "TargetEntityType", "RoleName");
-
-                            b1.ToTable("UserRoles", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
                     b.Navigation("Addresses");
 
                     b.Navigation("PaymentMethods");
-
-                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

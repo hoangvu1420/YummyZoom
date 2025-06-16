@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.SharedKernel.Constants;
+using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
+using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -55,6 +57,11 @@ public partial class Testing
     public static Guid? GetUserId() 
     {
         return _userId;
+    }
+
+    public static void SetUserId(Guid? userId)
+    {
+        _userId = userId;
     }
 
     public static async Task<Guid> RunAsDefaultUserAsync() 
@@ -185,7 +192,106 @@ public partial class Testing
     
     public static async Task SetupForUserRegistrationTestsAsync()
     {
-        await EnsureRolesExistAsync(Roles.Customer, Roles.Administrator, Roles.RestaurantOwner); 
+        await EnsureRolesExistAsync(Roles.User, Roles.Administrator, Roles.RestaurantOwner); 
+    }
+
+    /// <summary>
+    /// Creates a role assignment for a user in a restaurant with the specified role.
+    /// Requires an administrator to be logged in.
+    /// </summary>
+    public static async Task<Guid> CreateRoleAssignmentAsync(Guid userId, Guid restaurantId, RestaurantRole role)
+    {
+        var command = new CreateRoleAssignmentCommand(userId, restaurantId, role);
+        var result = await SendAsync(command);
+        
+        if (result.IsFailure)
+        {
+            throw new Exception($"Failed to create role assignment: {result.Error.Description}");
+        }
+        
+        return result.Value.RoleAssignmentId;
+    }
+
+    /// <summary>
+    /// Sets up a user as a restaurant owner for the specified restaurant.
+    /// Creates the user, assigns administrator role temporarily to create role assignment, then switches to the user.
+    /// </summary>
+    public static async Task<Guid> RunAsRestaurantOwnerAsync(string email, Guid restaurantId)
+    {
+        // First ensure we have admin access to create role assignments
+        await EnsureRolesExistAsync(Roles.Administrator);
+        var adminUserId = await RunAsAdministratorAsync();
+        
+        // Create the target user
+        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
+        
+        // Switch back to admin to create role assignment
+        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
+        
+        // Create the restaurant owner role assignment
+        await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Owner);
+        
+        // Switch back to the target user
+        SetUserId(userId);
+        return userId;
+    }
+
+    /// <summary>
+    /// Sets up a user as restaurant staff for the specified restaurant.
+    /// Creates the user, assigns administrator role temporarily to create role assignment, then switches to the user.
+    /// </summary>
+    public static async Task<Guid> RunAsRestaurantStaffAsync(string email, Guid restaurantId)
+    {
+        // First ensure we have admin access to create role assignments
+        await EnsureRolesExistAsync(Roles.Administrator);
+        var adminUserId = await RunAsAdministratorAsync();
+        
+        // Create the target user
+        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
+        
+        // Switch back to admin to create role assignment
+        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
+        
+        // Create the restaurant staff role assignment
+        await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Staff);
+        
+        // Switch back to the target user
+        SetUserId(userId);
+        return userId;
+    }
+
+    /// <summary>
+    /// Sets up a user with multiple restaurant roles for testing complex authorization scenarios.
+    /// </summary>
+    public static async Task<Guid> RunAsUserWithMultipleRestaurantRolesAsync(string email, (Guid restaurantId, RestaurantRole role)[] roleAssignments)
+    {
+        // First ensure we have admin access to create role assignments
+        await EnsureRolesExistAsync(Roles.Administrator);
+        var adminUserId = await RunAsAdministratorAsync();
+        
+        // Create the target user
+        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
+        
+        // Switch back to admin to create role assignments
+        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
+        
+        // Create all role assignments
+        foreach (var (restaurantId, role) in roleAssignments)
+        {
+            await CreateRoleAssignmentAsync(userId, restaurantId, role);
+        }
+        
+        // Switch back to the target user
+        SetUserId(userId);
+        return userId;
+    }
+
+    /// <summary>
+    /// Sets up authorization test environment with required roles.
+    /// </summary>
+    public static async Task SetupForAuthorizationTestsAsync()
+    {
+        await EnsureRolesExistAsync(Roles.Administrator, Roles.RestaurantOwner, Roles.RestaurantStaff, Roles.User);
     }
 
     [OneTimeTearDown]

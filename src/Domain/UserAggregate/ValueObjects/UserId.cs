@@ -1,4 +1,4 @@
-using YummyZoom.Domain.UserAggregate.Errors; // Assuming UserErrors will be in this namespace
+using YummyZoom.Domain.UserAggregate.Errors; 
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.UserAggregate.ValueObjects;

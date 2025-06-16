@@ -1,6 +1,7 @@
 ﻿using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
+using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Notifications;
 using YummyZoom.Infrastructure.Persistence.Repositories;
@@ -15,6 +16,8 @@ using YummyZoom.SharedKernel.Constants;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authorization;
+using YummyZoom.Application.Common.Authorization;
 
 namespace YummyZoom.Infrastructure;
 
@@ -68,13 +71,24 @@ public static class DependencyInjection
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, IdentityService>();
         builder.Services.AddScoped<IUserAggregateRepository, UserAggregateRepository>();
+        builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
         builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
         builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
 
         builder.Services.AddSingleton<IFcmService, FcmService>();
 
-        builder.Services.AddAuthorization(options =>
-            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator))
+            .AddPolicy(Policies.MustBeRestaurantOwner, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.RestaurantOwner)))
+            .AddPolicy(Policies.MustBeRestaurantStaff, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.RestaurantStaff)))
+            .AddPolicy(Policies.MustBeUserOwner, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.UserOwner)));
+
+        builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, YummyZoomClaimsPrincipalFactory>();
+
+        builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)

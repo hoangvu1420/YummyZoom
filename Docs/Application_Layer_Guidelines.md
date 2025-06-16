@@ -215,13 +215,13 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             var idResult = await _identityService.CreateIdentityUserAsync(
                 request.Email!, 
                 request.Password!, 
-                Roles.Customer);
+                Roles.User);
             
             if (idResult.IsFailure) 
                 return Result.Failure<Guid>(idResult.Error);
 
             // 2) Build domain User aggregate
-            var roleResult = RoleAssignment.Create(Roles.Customer);
+            var roleResult = RoleAssignment.Create(Roles.User);
             if (roleResult.IsFailure) 
                 return Result.Failure<Guid>(roleResult.Error);
 

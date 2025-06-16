@@ -1,8 +1,8 @@
 ﻿using YummyZoom.Application.Users.Commands.RegisterUser;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc;
-using YummyZoom.Application.Users.Commands.AssignRoleToUser;
-using YummyZoom.Application.Users.Commands.RemoveRoleFromUser;
+using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
+using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.Application.Users.Commands.UnregisterDevice;
 
@@ -29,28 +29,29 @@ public class Users : EndpointGroupBase
         .WithName("RegisterUserCustom")
         .WithStandardResults<RegisterUserResponse>();
 
-        // Add endpoint for assigning roles
-        group.MapPost("/assign-role", async ([FromBody] AssignRoleToUserCommand command, ISender sender) =>
+        // Add endpoint for creating role assignments
+        group.MapPost("/role-assignments", async ([FromBody] CreateRoleAssignmentCommand command, ISender sender) =>
         {
+            var result = await sender.Send(command);
+
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToIResult();
+        })
+        .WithName("CreateRoleAssignment")
+        .WithStandardResults<CreateRoleAssignmentResponse>();
+
+        // Add endpoint for removing role assignments
+        group.MapDelete("/role-assignments/{roleAssignmentId:guid}", async (Guid roleAssignmentId, ISender sender) =>
+        {
+            var command = new DeleteRoleAssignmentCommand(roleAssignmentId);
             var result = await sender.Send(command);
 
             return result.IsSuccess
                 ? Results.NoContent()
                 : result.ToIResult();
         })
-        .WithName("AssignRoleToUser")
-        .WithStandardResults();
-
-        // Add endpoint for removing roles
-        group.MapPost("/remove-role", async ([FromBody] RemoveRoleFromUserCommand command, ISender sender) =>
-        {
-            var result = await sender.Send(command);
-
-            return result.IsSuccess
-                ? Results.NoContent()
-                : result.ToIResult();
-        })
-        .WithName("RemoveRoleFromUser")
+        .WithName("DeleteRoleAssignment")
         .WithStandardResults();
 
         // Add endpoint for registering devices

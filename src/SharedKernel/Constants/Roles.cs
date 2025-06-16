@@ -2,9 +2,15 @@
 
 public abstract class Roles
 {
+    public const string User = nameof(User);
+
     public const string Administrator = nameof(Administrator);
 
-    public const string Customer = nameof(Customer);
-
     public const string RestaurantOwner = nameof(RestaurantOwner);
+
+    public const string RestaurantStaff = nameof(RestaurantStaff);
+
+    public const string UserOwner = nameof(UserOwner);
+
+    public const string UserAdmin = nameof(UserAdmin);
 }

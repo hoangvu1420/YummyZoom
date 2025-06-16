@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using YummyZoom.SharedKernel.Models; // Reference the entity from SharedKernel
 
 namespace YummyZoom.Application.Common.Interfaces;

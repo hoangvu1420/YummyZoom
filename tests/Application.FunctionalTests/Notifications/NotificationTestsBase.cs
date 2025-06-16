@@ -1,9 +1,7 @@
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using YummyZoom.SharedKernel.Models;
@@ -29,7 +27,7 @@ public abstract class NotificationTestsBase : BaseTestFixture
         var currentUser = GetCurrentUserId();
         
         // Create user and register device
-        var userId = await RunAsUserAsync(email, "Password123!", new[] { Roles.Customer });
+        var userId = await RunAsUserAsync(email, "Password123!", new[] { Roles.User });
         
         var registerCommand = new RegisterDeviceCommand(fcmToken, platform);
         var result = await SendAsync(registerCommand);
@@ -53,7 +51,7 @@ public abstract class NotificationTestsBase : BaseTestFixture
         var currentUser = GetCurrentUserId();
         
         // Create user and register multiple devices
-        var userId = await RunAsUserAsync(email, "Password123!", new[] { Roles.Customer });
+        var userId = await RunAsUserAsync(email, "Password123!", new[] { Roles.User });
         
         foreach (var token in fcmTokens)
         {
@@ -155,16 +153,16 @@ public abstract class NotificationTestsBase : BaseTestFixture
         var currentUser = GetCurrentUserId();
         
         // User 1 with multiple devices
-        var user1Id = await RunAsUserAsync("workflow1@test.com", "Password123!", new[] { Roles.Customer });
+        var user1Id = await RunAsUserAsync("workflow1@test.com", "Password123!", new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-1a", "iOS", "iPhone-1"));
         await SendAsync(new RegisterDeviceCommand("workflow-token-1b", "Android", "Samsung-1"));
         
         // User 2 with single device
-        var user2Id = await RunAsUserAsync("workflow2@test.com", "Password123!", new[] { Roles.Customer });
+        var user2Id = await RunAsUserAsync("workflow2@test.com", "Password123!", new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-2", "iOS", "iPhone-2"));
         
         // User 3 with single device
-        var user3Id = await RunAsUserAsync("workflow3@test.com", "Password123!", new[] { Roles.Customer });
+        var user3Id = await RunAsUserAsync("workflow3@test.com", "Password123!", new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-3", "Android", "Pixel-3"));
         
         // Restore the previous user context if one existed

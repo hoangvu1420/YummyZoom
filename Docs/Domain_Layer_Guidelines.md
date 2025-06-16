@@ -102,112 +102,229 @@ Familiarize yourself with these fundamental DDD patterns used in the codebase:
 
 ---
 
-## Example of a Domain Aggregate
+### Example of a Domain Aggregate (YummyZoom `Menu`)
 
-src\Domain\MenuAggregate\Menu.cs:
+`src\Domain\MenuAggregate\Menu.cs`:
 
 ```csharp
+
+namespace YummyZoom.Domain.MenuAggregate;
+
 public sealed class Menu : AggregateRoot<MenuId, Guid>
 {
-    private readonly List<MenuSection> _sections = []; // Owned collection of MenuSection Entities
-    private readonly List<DinnerId> _dinnerIds = []; // References to Dinner Aggregate
-    private readonly List<MenuReviewId> _menuReviewIds = []; // References to MenuReview Aggregate
+    private readonly List<MenuCategory> _categories = [];
 
     public string Name { get; private set; }
     public string Description { get; private set; }
-    public AverageRating AverageRating { get; private set; }
-    public IReadOnlyList<MenuSection> Sections => _sections.AsReadOnly();
-    public HostId HostId { get; private set; }
-
-    public IReadOnlyList<DinnerId> DinnerIds => _dinnerIds.AsReadOnly();
-    public IReadOnlyList<MenuReviewId> MenuReviewIds => _menuReviewIds.AsReadOnly(); 
+    public bool IsEnabled { get; private set; }
+    public RestaurantId RestaurantId { get; private set; }
+    
+    public IReadOnlyList<MenuCategory> Categories => _categories.AsReadOnly();
 
     private Menu(
         MenuId menuId,
-        HostId hostId,
+        RestaurantId restaurantId,
         string name,
         string description,
-        AverageRating averageRating,
-        List<MenuSection> sections)
+        bool isEnabled,
+        List<MenuCategory> categories)
         : base(menuId)
     {
-        HostId = hostId;
+        RestaurantId = restaurantId;
         Name = name;
         Description = description;
-        AverageRating = averageRating;
-        _sections = sections;
+        IsEnabled = isEnabled;
+        _categories = categories;
     }
 
     public static Menu Create(
-        HostId hostId,
+        RestaurantId restaurantId,
         string name,
         string description,
-        List<MenuSection>? sections = null)
+        bool isEnabled = true,
+        List<MenuCategory>? categories = null)
     {
-        // TODO: enforce invariants
+        // Invariants:
+        // - Name and description should not be empty (can be handled by a Result object).
+        // - RestaurantId must be valid.
+        
         var menu = new Menu(
             MenuId.CreateUnique(),
-            hostId,
+            restaurantId,
             name,
             description,
-            AverageRating.CreateNew(),
-            sections ?? []);
+            isEnabled,
+            categories ?? []);
         
-        menu.AddDomainEvent(new MenuCreated(menu));
+        menu.AddDomainEvent(new MenuCreated(menu.Id, menu.RestaurantId));
         
         return menu;
     }
     
-    public void AddDinnerId(DinnerId dinnerId)
+    public void UpdateDetails(string name, string description)
     {
-        _dinnerIds.Add(dinnerId);
+        // Add validation logic here if needed
+        Name = name;
+        Description = description;
+    }
+
+    public void Enable()
+    {
+        if (IsEnabled) return; 
+        IsEnabled = true;
+        AddDomainEvent(new MenuEnabled(Id));
+    }
+
+    public void Disable()
+    {
+        if (!IsEnabled) return; 
+        IsEnabled = false;
+        AddDomainEvent(new MenuDisabled(Id));
     }
 
 #pragma warning disable CS8618
-    private Menu()
-    {
-    }
+    private Menu() { }
 #pragma warning restore CS8618
 }
 ```
 
-src\Domain\MenuAggregate\Entities\MenuSection.cs:
+`src\Domain\MenuAggregate\Entities\MenuCategory.cs`:
 
 ```csharp
-public sealed class MenuSection : Entity<MenuSectionId>
-{
-    private readonly List<MenuItem> _items;
-    public string Name { get; private set; }
-    public string Description { get; private set; }
 
+namespace YummyZoom.Domain.MenuAggregate.Entities;
+
+public sealed class MenuCategory : Entity<MenuCategoryId>
+{
+    private readonly List<MenuItem> _items = [];
+    
+    public string Name { get; private set; }
+    public int DisplayOrder { get; private set; }
     public IReadOnlyList<MenuItem> Items => _items.AsReadOnly();
 
-    private MenuSection(
+    private MenuCategory(
+        MenuCategoryId categoryId,
         string name, 
-        string description, 
-        List<MenuItem> items, 
-        MenuSectionId? id = null)
-        : base(id ?? MenuSectionId.CreateUnique())
+        int displayOrder, 
+        List<MenuItem> items)
+        : base(categoryId)
     {
         Name = name;
-        Description = description;
+        DisplayOrder = displayOrder;
         _items = items;
     }
 
-    public static MenuSection Create(
+    public static MenuCategory Create(
         string name,
-        string description,
+        int displayOrder,
         List<MenuItem>? items = null)
     {
-        // TODO: enforce invariants
-        return new MenuSection(name, description, items ?? new());
+        // Invariants:
+        // - Name should not be empty.
+        // - DisplayOrder should be non-negative.
+        
+        return new MenuCategory(
+            MenuCategoryId.CreateUnique(), 
+            name, 
+            displayOrder, 
+            items ?? []);
     }
+    
+#pragma warning disable CS8618
+    private MenuCategory() { }
+#pragma warning restore CS8618
 }
 ```
 
-src\Domain\MenuAggregate\ValueObjects\MenuId.cs:
+`src\Domain\MenuAggregate\Entities\MenuItem.cs`:
 
 ```csharp
+
+namespace YummyZoom.Domain.MenuAggregate.Entities;
+
+public sealed class MenuItem : Entity<MenuItemId>
+{
+    private readonly List<TagId> _dietaryTagIds = [];
+    private readonly List<AppliedCustomization> _appliedCustomizations = [];
+
+    public string Name { get; private set; }
+    public string Description { get; private set; }
+    public Money BasePrice { get; private set; }
+    public string? ImageUrl { get; private set; }
+    public bool IsAvailable { get; private set; }
+
+    public IReadOnlyList<TagId> DietaryTagIds => _dietaryTagIds.AsReadOnly();
+    public IReadOnlyList<AppliedCustomization> AppliedCustomizations => _appliedCustomizations.AsReadOnly();
+
+    private MenuItem(
+        MenuItemId menuItemId,
+        string name,
+        string description,
+        Money basePrice,
+        bool isAvailable,
+        string? imageUrl,
+        List<TagId> dietaryTagIds,
+        List<AppliedCustomization> appliedCustomizations) 
+        : base(menuItemId)
+    {
+        Name = name;
+        Description = description;
+        BasePrice = basePrice;
+        IsAvailable = isAvailable;
+        ImageUrl = imageUrl;
+        _dietaryTagIds = dietaryTagIds;
+        _appliedCustomizations = appliedCustomizations;
+    }
+    
+    public static MenuItem Create(
+        string name,
+        string description,
+        Money basePrice,
+        string? imageUrl = null,
+        bool isAvailable = true,
+        List<TagId>? dietaryTagIds = null,
+        List<AppliedCustomization>? appliedCustomizations = null)
+    {
+        // Invariants:
+        // - Name should not be empty.
+        // - BasePrice must be non-negative.
+        
+        return new MenuItem(
+            MenuItemId.CreateUnique(),
+            name,
+            description,
+            basePrice,
+            isAvailable,
+            imageUrl,
+            dietaryTagIds ?? [],
+            appliedCustomizations ?? []);
+    }
+
+    public void MarkAsUnavailable()
+    {
+        if (!IsAvailable) return;
+        IsAvailable = false;
+        // Consider raising a domain event if other parts of the system need to react to this.
+    }
+
+    public void MarkAsAvailable()
+    {
+        if (IsAvailable) return;
+        IsAvailable = true;
+    }
+
+#pragma warning disable CS8618
+    private MenuItem() { }
+#pragma warning restore CS8618
+}
+```
+
+`src/Domain/MenuAggregate/ValueObjects/MenuId.cs`:
+
+```csharp
+
+namespace YummyZoom.Domain.MenuAggregate.ValueObjects;
+
 public sealed class MenuId : AggregateRootId<Guid>
 {
     public override Guid Value { get; protected set; }
@@ -219,61 +336,82 @@ public sealed class MenuId : AggregateRootId<Guid>
 
     public static MenuId CreateUnique()
     {
-        // TODO: enforce invariants
         return new MenuId(Guid.NewGuid());
     }
 
     public static MenuId Create(Guid value)
     {
-        // TODO: enforce invariants
+        // Could add validation, e.g., value != Guid.Empty
         return new MenuId(value);
     }
-
+    
     public static Result<MenuId> Create(string value)
     {
-        return !Guid.TryParse(value, out var guid) ? (Result<MenuId>)Errors.Menu.InvalidMenuId : (Result<MenuId>)new MenuId(guid);
+        return !Guid.TryParse(value, out var guid) 
+            ? Result.Failure<MenuId>(Errors.Menu.InvalidMenuId) 
+            : Result.Success(new MenuId(guid));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;
     }
+    
+#pragma warning disable CS8618
+    private MenuId() { }
+#pragma warning restore CS8618
 }
 ```
 
-src\Domain\MenuAggregate\ValueObjects\MenuSectionId.cs:
+`src/Domain/MenuAggregate/ValueObjects/AppliedCustomization.cs`:
 
 ```csharp
-public sealed class MenuSectionId : ValueObject
+
+namespace YummyZoom.Domain.MenuAggregate.ValueObjects;
+
+// This is a Value Object because its identity is defined by its properties.
+// Two AppliedCustomizations are the same if they have the same GroupId, Title, and Order.
+public sealed class AppliedCustomization : ValueObject
 {
-    public MenuSectionId(Guid value)
+    public CustomizationGroupId CustomizationGroupId { get; private set; }
+    public string DisplayTitle { get; private set; }
+    public int DisplayOrder { get; private set; }
+
+    private AppliedCustomization(CustomizationGroupId customizationGroupId, string displayTitle, int displayOrder)
     {
-        Value = value;
+        CustomizationGroupId = customizationGroupId;
+        DisplayTitle = displayTitle;
+        DisplayOrder = displayOrder;
     }
 
-    public Guid Value { get; private set; }
-
-    public static MenuSectionId CreateUnique()
+    public static AppliedCustomization Create(CustomizationGroupId customizationGroupId, string displayTitle, int displayOrder)
     {
-        // TODO: enforce invariants
-        return new MenuSectionId(Guid.NewGuid());
+        // Invariants:
+        // - DisplayTitle should not be empty.
+        // - DisplayOrder should be non-negative.
+        
+        return new AppliedCustomization(customizationGroupId, displayTitle, displayOrder);
     }
-
-    public static MenuSectionId Create(Guid value)
-    {
-        // TODO: enforce invariants
-        return new MenuSectionId(value);
-    }
-
+    
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        yield return Value;
+        yield return CustomizationGroupId;
+        yield return DisplayTitle;
+        yield return DisplayOrder;
     }
+    
+#pragma warning disable CS8618
+    private AppliedCustomization() { }
+#pragma warning restore CS8618
 }
 ```
 
-src\Domain\MenuAggregate\Events\MenuCreated.cs:
+`src/Domain/MenuAggregate/Events/MenuCreated.cs`:
 
 ```csharp
-public record MenuCreated(Menu Menu) : IDomainEvent;
+
+namespace YummyZoom.Domain.MenuAggregate.Events;
+
+// Note: Passing IDs instead of the full aggregate to promote decoupling.
+public record MenuCreated(MenuId MenuId, RestaurantId RestaurantId) : IDomainEvent;
 ```

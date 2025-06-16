@@ -33,47 +33,23 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50) 
             .IsRequired(false);
 
-        // --- Configure owned collection of RoleAssignment Value Objects ---
-        // This maps UserRoles to a separate UserRoles table
-        builder.OwnsMany(u => u.UserRoles, roleBuilder =>
-        {
-            roleBuilder.ToTable("UserRoles");
-
-            // Foreign key back to the Users table
-            roleBuilder.WithOwner().HasForeignKey("UserId");
-
-            // Properties of the RoleAssignment VO
-            roleBuilder.Property(ur => ur.RoleName)
-                .HasMaxLength(100)
-                .IsRequired();
-
-            roleBuilder.Property(ur => ur.TargetEntityId) 
-                .HasMaxLength(100)
-                .IsRequired(false); 
-
-            roleBuilder.Property(ur => ur.TargetEntityType)
-                .HasMaxLength(100)
-                .IsRequired(false); 
-
-            // Composite Primary Key for the UserRoles table
-            // This ensures a user doesn't have the exact same role assignment twice.
-            roleBuilder.HasKey("UserId", "RoleName");
-
-            // Index for querying roles by TargetEntityId (e.g., find all owners of a restaurant)
-            roleBuilder.HasIndex("TargetEntityId", "TargetEntityType", "RoleName");
-        });
-
-        // --- Configure owned collection of Address Value Objects ---
+        // --- Configure owned collection of Address Entities ---
         // This maps Addresses to a separate UserAddresses table
         builder.OwnsMany(u => u.Addresses, addressBuilder =>
         {
             addressBuilder.ToTable("UserAddresses");
             addressBuilder.WithOwner().HasForeignKey("UserId");
 
-            // Since Address is a value object without an ID property, we need a key for EF Core's owned entities
-            // Using an index for the collection - EF Core will create a shadow property Id by default
-            addressBuilder.UsePropertyAccessMode(PropertyAccessMode.Field);
-            addressBuilder.HasKey("Id");
+            // Address is an Entity with AddressId, so we need to configure the key properly
+            addressBuilder.HasKey(a => a.Id);
+
+            // Configure AddressId value conversion
+            addressBuilder.Property(a => a.Id)
+                .HasColumnName("AddressId")
+                .ValueGeneratedNever()
+                .HasConversion(
+                    id => id.Value,
+                    value => AddressId.Create(value));
 
             // Configure Address properties
             addressBuilder.Property(a => a.Label).HasMaxLength(100).IsRequired(false);

@@ -83,7 +83,7 @@ public class RegisterUserTests : BaseTestFixture
         // Verify the user is assigned to the Customer role
         using var scope = CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var isInRole = await userManager.IsInRoleAsync(appUser!, Roles.Customer);
+        var isInRole = await userManager.IsInRoleAsync(appUser!, Roles.User);
         isInRole.Should().BeTrue("User should be assigned to the Customer role");
     }
 

@@ -35,7 +35,7 @@ public class DeviceManagementTests : BaseTestFixture
     [SetUp]
     public async Task TestSetup()
     {
-        await EnsureRolesExistAsync(Roles.Customer);
+        await EnsureRolesExistAsync(Roles.User);
     }
 
     #region RegisterDevice Tests

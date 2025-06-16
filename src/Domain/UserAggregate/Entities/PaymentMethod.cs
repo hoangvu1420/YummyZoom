@@ -53,9 +53,9 @@ public sealed class PaymentMethod : Entity<PaymentMethodId>
 
     // Methods to update payment method details or set as default can be added here
     // These methods should return Result and contain relevant business logic/invariants
-    public void SetAsDefault()
+    public void SetAsDefault(bool isDefault = true)
     {
-        IsDefault = true;
+        IsDefault = isDefault;
     }
 
 #pragma warning disable CS8618

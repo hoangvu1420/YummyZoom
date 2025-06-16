@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
+using YummyZoom.Application.FunctionalTests.Authorization;
+using MediatR;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -73,6 +75,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                             
                     return mock.Object;
                 });
+
+            // Register test command handlers for authorization testing
+            services.AddTransient<IRequestHandler<TestRestaurantOwnerCommand, Result<Unit>>, TestRestaurantOwnerCommandHandler>();
+            services.AddTransient<IRequestHandler<TestRestaurantStaffCommand, Result<Unit>>, TestRestaurantStaffCommandHandler>();
+            services.AddTransient<IRequestHandler<TestUnprotectedCommand, Result<Unit>>, TestUnprotectedCommandHandler>();
+            services.AddTransient<IRequestHandler<TestUserOwnerCommand, Result<Unit>>, TestUserOwnerCommandHandler>();
+            services.AddTransient<IRequestHandler<TestUnprotectedUserCommand, Result<Unit>>, TestUnprotectedUserCommandHandler>();
         });
     }
 }

@@ -23,33 +23,6 @@ public class UserErrorsTests
     }
 
     [Test]
-    public void RoleNotFound_ShouldReturnErrorWithCorrectCodeAndMessage()
-    {
-        // Arrange
-        var roleName = "NonExistentRole";
-
-        // Act
-        var error = UserErrors.RoleNotFound(roleName);
-
-        // Assert
-        error.Should().NotBeNull();
-        error.Code.Should().Be("User.RoleNotFound");
-        error.Description.Should().Contain(roleName);
-    }
-
-    [Test]
-    public void CannotRemoveLastRole_ShouldReturnErrorWithCorrectCodeAndMessage()
-    {
-        // Act
-        var error = UserErrors.CannotRemoveLastRole;
-
-        // Assert
-        error.Should().NotBeNull();
-        error.Code.Should().Be("User.CannotRemoveLastRole");
-        error.Description.Should().Be("Cannot remove the last role from the user.");
-    }
-
-    [Test]
     public void AddressNotFound_ShouldReturnErrorWithCorrectCodeAndMessage()
     {
         // Arrange
@@ -89,17 +62,5 @@ public class UserErrorsTests
         error.Should().NotBeNull();
         error.Code.Should().Be("User.InvalidPaymentMethod");
         error.Description.Should().Be("Payment method is invalid.");
-    }
-
-     [Test]
-    public void MustHaveAtLeastOneRole_ShouldReturnErrorWithCorrectCodeAndMessage()
-    {
-        // Act
-        var error = UserErrors.MustHaveAtLeastOneRole;
-
-        // Assert
-        error.Should().NotBeNull();
-        error.Code.Should().Be("User.MustHaveAtLeastOneRole");
-        error.Description.Should().Be("User must have at least one role.");
     }
 }

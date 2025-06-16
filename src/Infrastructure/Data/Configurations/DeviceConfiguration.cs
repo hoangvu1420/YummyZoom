@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.SharedKernel.Models;
 
 namespace YummyZoom.Infrastructure.Data.Configurations;

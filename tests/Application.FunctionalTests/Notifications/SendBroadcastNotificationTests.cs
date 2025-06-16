@@ -1,11 +1,7 @@
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Notifications.Commands.SendBroadcastNotification;
 using YummyZoom.Application.Notifications;
-using YummyZoom.Application.Users.Commands.RegisterDevice;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.SharedKernel.Constants;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 namespace YummyZoom.Application.FunctionalTests.Notifications;
 
@@ -16,7 +12,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
     [SetUp]
     public async Task TestSetup()
     {
-        await EnsureRolesExistAsync(Roles.Administrator, Roles.Customer);
+        await EnsureRolesExistAsync(Roles.Administrator, Roles.User);
     }
 
     #region Success Scenarios
@@ -145,7 +141,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
     public async Task SendBroadcastNotification_AsNonAdministrator_ShouldReturnForbidden()
     {
         // Arrange
-        var customerId = await RunAsUserAsync("customer@test.com", "Password123!", new[] { Roles.Customer });
+        var customerId = await RunAsUserAsync("customer@test.com", "Password123!", new[] { Roles.User });
         
         var command = new SendBroadcastNotificationCommand(
             "Unauthorized Broadcast",

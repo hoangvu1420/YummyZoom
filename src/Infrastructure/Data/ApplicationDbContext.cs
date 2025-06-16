@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.UserAggregate;
+using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Models;
 
@@ -17,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<TodoList> TodoLists => Set<TodoList>();
     public DbSet<User> DomainUsers => Set<User>();
+    public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
 

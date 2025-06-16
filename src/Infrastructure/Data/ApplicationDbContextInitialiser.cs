@@ -90,7 +90,7 @@ public class ApplicationDbContextInitialiser
     public async Task TrySeedAsync()
     {
         // Default roles
-        string[] roles = [Roles.Administrator, Roles.Customer, Roles.RestaurantOwner];
+        string[] roles = [Roles.Administrator, Roles.User, Roles.RestaurantOwner];
 
         foreach (var roleName in roles)
         {
@@ -109,14 +109,13 @@ public class ApplicationDbContextInitialiser
             await _userManager.AddToRolesAsync(administrator, [Roles.Administrator]);
         }
 
-        // Customer users - using improved approach following RegisterUserCommandHandler pattern
         // Seed users with devices and sessions
-        await SeedCustomerUserWithDeviceAsync("User 1", "hoangnguyenvu1420@gmail.com", "123456",
-            "cgFolBPZTJKuo3zcffqMoz:APA91bGbETXlfLmbXOVTkI8H4NLO7c_FiWjH7mAUzS881EQhIoF0EAE-1wp8FI0aT2a-jY89ji4nvfD3kcWvQiJ1IwUDPxAc_y0NWK4Q0TxEqzWQsUeRNc8",
+        await SeedDefaultUserWithDeviceAsync("User 1", "hoangnguyenvu1420@gmail.com", "123456",
+            "eaVgeLKNTgqOSMFsNmUYo5:APA91bEmTbtxCFo_888pNUNEUi6euk66GP6iYbtWV_Sq2uWeb81IPO1LMfKpsabH77N_xjdVwmNgd3ms3xTLf92iK8DVvr-Zh_bOKB-wZIm3Ns3E5T0O5Xs",
             "Android", "seed-device-1", "Seed Device 1");
 
-        await SeedCustomerUserWithDeviceAsync("User 2", "hoangnguyenvu1220@gmail.com", "123456",
-            "cWJlZpHzTmOXbfn2yQrt3a:APA91bF5cWnD1sOgRszQvK2tt422ApMGrbCoZv1y7krz7VisPFuR4Uaym-w7eX5uk_3TyWcEE61apPECErlwnNhKHpuGlmL5Wwu0NrCRt1LNxefcZxVz7zc",
+        await SeedDefaultUserWithDeviceAsync("User 2", "hoangnguyenvu1220@gmail.com", "123456",
+            "cQ9KY8l7TxSVFN0p-Z36rx:APA91bESwLQivfzOkzxnOviBsDNIl4wuDcBRI8j39x5zyi87R3fVS7g4lkLhdU6iXSVg6vQSk_ShL_E5f84mf4oSZaD92AAoEcim0VFYsTUoebhCF82P4Xk",
             "Android", "seed-device-2", "Seed Device 2");
 
         // Default data
@@ -136,7 +135,7 @@ public class ApplicationDbContextInitialiser
         _logger.LogInformation("Database seeding completed successfully.");
     }
 
-    private async Task SeedCustomerUserWithDeviceAsync(string name, string email, string password, string fcmToken, string platform, string deviceId, string? modelName)
+    private async Task SeedDefaultUserWithDeviceAsync(string name, string email, string password, string fcmToken, string platform, string deviceId, string? modelName)
     {
         // Check if user already exists in identity system
         if (_userManager.Users.Any(u => u.Email == email))
@@ -156,8 +155,8 @@ public class ApplicationDbContextInitialiser
 
                 try
                 {
-                    // 1) Create identity user + assign Customer role
-                    var idResult = await _identityService.CreateIdentityUserAsync(email, password, Roles.Customer);
+                    // 1) Create identity user + assign User role
+                    var idResult = await _identityService.CreateIdentityUserAsync(email, password, Roles.User);
 
                     if (idResult.IsFailure)
                     {
@@ -166,21 +165,13 @@ public class ApplicationDbContextInitialiser
                         return;
                     }
 
-                    // 2) Build domain User aggregate
-                    var roleResult = RoleAssignment.Create(Roles.Customer);
-                    if (roleResult.IsFailure)
-                    {
-                        _logger.LogWarning("Failed to create role assignment for {Email}: {Error}", email, roleResult.Error);
-                        await transaction.RollbackAsync();
-                        return;
-                    }
-
+                    // 2) Create domain User aggregate (no role assignments)
                     var userResult = User.Create(
                         UserId.Create(idResult.Value),
                         name,
                         email,
                         null,
-                        new List<RoleAssignment> { roleResult.Value });
+                        isActive: true);
 
                     if (userResult.IsFailure)
                     {
@@ -225,18 +216,18 @@ public class ApplicationDbContextInitialiser
 
                     await transaction.CommitAsync();
 
-                    _logger.LogInformation("Successfully seeded customer user {Email} with device {DeviceId}", email, deviceId);
+                    _logger.LogInformation("Successfully seeded default user {Email} with device {DeviceId}", email, deviceId);
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Error occurred while seeding customer user {Email}", email);
+                    _logger.LogError(ex, "Error occurred while seeding default user {Email}", email);
                 }
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to seed customer user {Email}", email);
+            _logger.LogError(ex, "Failed to seed default user {Email}", email);
         }
     }
 }

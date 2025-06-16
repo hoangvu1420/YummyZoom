@@ -3,10 +3,7 @@ using YummyZoom.Application.Notifications.Commands.SendNotificationToUser;
 using YummyZoom.Application.Notifications;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.SharedKernel.Constants;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 namespace YummyZoom.Application.FunctionalTests.Notifications;
 
@@ -17,7 +14,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
     [SetUp]
     public async Task TestSetup()
     {
-        await EnsureRolesExistAsync(Roles.Administrator, Roles.Customer);
+        await EnsureRolesExistAsync(Roles.Administrator, Roles.User);
     }
 
     #region Success Scenarios
@@ -120,7 +117,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
     public async Task SendNotificationToUser_AsNonAdministrator_ShouldReturnForbidden()
     {
         // Arrange
-        var customerId = await RunAsUserAsync("customer@test.com", "Password123!", new[] { Roles.Customer });
+        var customerId = await RunAsUserAsync("customer@test.com", "Password123!", new[] { Roles.User });
         var targetUserId = await SetupUserWithDeviceAsync("target@test.com", "target-token");
         
         var command = new SendNotificationToUserCommand(
@@ -252,7 +249,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
     {
         // Arrange
         await RunAsAdministratorAsync();
-        var userWithoutDevices = await RunAsUserAsync("nodevices@test.com", "Password123!", new[] { Roles.Customer });
+        var userWithoutDevices = await RunAsUserAsync("nodevices@test.com", "Password123!", new[] { Roles.User });
         
         // Restore administrator context
         await RunAsAdministratorAsync();
@@ -321,7 +318,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         await RunAsAdministratorAsync();
         
         // Create target user and register device
-        var targetUserId = await RunAsUserAsync("workflow@test.com", "Password123!", new[] { Roles.Customer });
+        var targetUserId = await RunAsUserAsync("workflow@test.com", "Password123!", new[] { Roles.User });
         var registerCommand = new RegisterDeviceCommand("workflow-token", "iOS", "iPhone-123");
         var registerResult = await SendAsync(registerCommand);
         registerResult.ShouldBeSuccessful();

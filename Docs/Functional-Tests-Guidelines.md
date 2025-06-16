@@ -126,7 +126,7 @@ public async Task CreateRestaurant_AsRestaurantOwner_ShouldSucceedAndCreateResta
   * If no user is simulated (`_userId` is null), the mocked `IUser.Id` will be null, and the `AuthorizationBehaviour` will throw an `UnauthorizedAccessException` for protected endpoints.
   * If the user does not have the required role, a `ForbiddenAccessException` will be thrown.
 * **Prerequisite Data (Roles, etc.):**
-  * The `IdentityService.CreateUserAsync` (when called by your application's registration endpoint) assigns a default `Roles.Customer` to new users.
+  * The `IdentityService.CreateUserAsync` (when called by your application's registration endpoint) assigns a default `Roles.User` to new users.
   * For other roles, ensure they exist using `EnsureRolesExistAsync()` in your test's `[SetUp]` method or in a specific setup helper like `SetupForUserRegistrationTestsAsync()`. This method is idempotent (won't try to create a role if it already exists).
 * **Database Interactions:**
   * Use `FindAsync<TEntity>(id)` to retrieve entities for verification.

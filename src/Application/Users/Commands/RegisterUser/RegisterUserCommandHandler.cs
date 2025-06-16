@@ -27,26 +27,22 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         // New implementation using the functional UoW pattern
         return _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // 1) Create identity user + assign Customer role
+            // 1) Create identity user + assign Customer role (baseline role)
             var idResult = await _identityService.CreateIdentityUserAsync(
                 request.Email!, 
                 request.Password!, 
-                Roles.Customer);
+                Roles.User);
             
             if (idResult.IsFailure) 
                 return Result.Failure<Guid>(idResult.Error);
 
-            // 2) Build domain User aggregate
-            var roleResult = RoleAssignment.Create(Roles.Customer);
-            if (roleResult.IsFailure) 
-                return Result.Failure<Guid>(roleResult.Error);
-
+            // 2) Create domain User aggregate (no roles - just customer identity)
             var userResult = User.Create(
                 UserId.Create(idResult.Value),
                 request.Name!, 
                 request.Email!, 
                 null,
-                new List<RoleAssignment> { roleResult.Value });
+                isActive: true);
                 
             if (userResult.IsFailure) 
                 return Result.Failure<Guid>(userResult.Error);

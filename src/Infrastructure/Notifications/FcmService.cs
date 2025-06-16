@@ -151,7 +151,7 @@ public class FcmService : IFcmService
         if (!tokensList.Any())
         {
             _logger.LogWarning("Attempted to send multicast notification with no tokens provided.");
-            return Result.Success<List<string>>(new List<string>()); // No tokens to send to, consider it success
+            return Result.Success<List<string>>([]); // No tokens to send to, consider it success
         }
 
         try
@@ -186,7 +186,7 @@ public class FcmService : IFcmService
                 }
             };
 
-            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(multicastMessage);
+            var response = await _firebaseMessaging.SendEachForMulticastAsync(multicastMessage);
 
             if (response.FailureCount > 0)
             {
@@ -217,7 +217,7 @@ public class FcmService : IFcmService
             }
 
             _logger.LogInformation("Successfully sent multicast message to {SuccessCount} tokens.", response.SuccessCount);
-            return Result.Success<List<string>>(new List<string>()); // All succeeded, no failed tokens
+            return Result.Success<List<string>>([]); // All succeeded, no failed tokens
         }
         catch (Exception ex)
         {

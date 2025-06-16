@@ -2,6 +2,7 @@
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Security;
+using YummyZoom.Application.Common.Authorization;
 
 namespace YummyZoom.Application.Common.Behaviours;
 
@@ -64,7 +65,9 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
             {
                 foreach (var policy in authorizeAttributesWithPolicies.Select(a => a.Policy))
                 {
-                    var authorized = await _identityService.AuthorizeAsync(_user.Id, policy);
+                    // Pass the request as a resource for policy-based authorization if it implements IContextualCommand
+                    object? resource = request is IContextualCommand ? request : null;
+                    var authorized = await _identityService.AuthorizeAsync(_user.Id, policy, resource);
 
                     if (!authorized)
                     {
