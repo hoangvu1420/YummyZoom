@@ -169,8 +169,6 @@ graph TD
     style C fill:#c8e6c9,stroke:#4caf50
     style D fill:#c8e6c9,stroke:#4caf50
     style F fill:#c8e6c9,stroke:#4caf50
-    style H fill:#ffcdd2,stroke:#f44336
-    style I fill:#c8e6c9,stroke:#4caf50
 ```
 
 ### 3. Enhanced Command Authorization Flow
@@ -194,8 +192,6 @@ sequenceDiagram
     PH->>AS: Success/Failure
     AS->>AB: AuthorizationResult
     AB->>C: Continue or Throw Exception
-    
-    Note over C,CC: Total Time: ~1ms vs ~50ms+ (with DB queries)
 ```
 
 ## Enhanced Error Handling Flow

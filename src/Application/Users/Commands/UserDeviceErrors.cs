@@ -4,10 +4,6 @@ namespace YummyZoom.Application.Users.Commands;
 
 public static class UserDeviceErrors
 {
-    public static Error UserNotAuthenticated() => Error.Failure(
-        "UserDevice.UserNotAuthenticated",
-        "User must be authenticated to register a device.");
-
     public static Error TokenNotFound(string fcmToken) => Error.NotFound(
         "UserDevice.TokenNotFound",
         $"FCM token '{fcmToken}' not found or is inactive.");

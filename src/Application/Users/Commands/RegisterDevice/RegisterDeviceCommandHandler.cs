@@ -31,13 +31,6 @@ public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceComman
     {
         return _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // Ensure user is authenticated
-            if (_currentUser.DomainId is null)
-            {
-                _logger.LogWarning("RegisterDeviceCommand failed: User not authenticated.");
-                return Result.Failure(UserDeviceErrors.UserNotAuthenticated());
-            }
-
             if (string.IsNullOrWhiteSpace(request.Platform) || string.IsNullOrWhiteSpace(request.FcmToken))
             {
                  _logger.LogWarning("RegisterDeviceCommand failed: Missing required device information.");
@@ -133,7 +126,7 @@ public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceComman
             var newSession = new UserDeviceSession
             {
                 Id = Guid.NewGuid(),
-                UserId = _currentUser.DomainId.Value,
+                UserId = _currentUser.DomainUserId!.Value, // Safe to use ! since authorization pipeline guarantees authentication
                 DeviceId = device.Id,
                 FcmToken = request.FcmToken.Trim(),
                 IsActive = true,
@@ -141,7 +134,7 @@ public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceComman
                 LoggedOutAt = null
             };
             await _userDeviceSessionRepository.AddSessionAsync(newSession, cancellationToken);
-            _logger.LogInformation("Created new UserDeviceSession for UserId {UserId} on DeviceId {DeviceId}", _currentUser.DomainId.Value, device.DeviceId);
+            _logger.LogInformation("Created new UserDeviceSession for UserId {UserId} on DeviceId {DeviceId}", _currentUser.DomainUserId.Value, device.DeviceId);
 
             return Result.Success();
         }, cancellationToken);

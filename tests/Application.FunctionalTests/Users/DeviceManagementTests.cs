@@ -152,11 +152,10 @@ public class DeviceManagementTests : BaseTestFixture
         );
 
         // Act
-        var result = await SendAsync(command);
+        Func<Task> act = () => SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(UserDeviceErrors.UserNotAuthenticated().Code);
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
 
     [Test]
@@ -395,11 +394,10 @@ public class DeviceManagementTests : BaseTestFixture
         var command = new UnregisterDeviceCommand("some-token");
 
         // Act
-        var result = await SendAsync(command);
+        Func<Task> act = () => SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(UserDeviceErrors.UserNotAuthenticated().Code);
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
 
     [Test]

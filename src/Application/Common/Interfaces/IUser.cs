@@ -6,6 +6,6 @@ namespace YummyZoom.Application.Common.Interfaces;
 public interface IUser
 {
     string? Id { get; } 
-    UserId? DomainId { get; } 
+    UserId? DomainUserId { get; } 
     ClaimsPrincipal? Principal { get; }
 }

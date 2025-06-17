@@ -27,22 +27,15 @@ public class UnregisterDeviceCommandHandler : IRequestHandler<UnregisterDeviceCo
     {
         return _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // Ensure user is authenticated
-            if (_currentUser.DomainId is null)
-            {
-                _logger.LogWarning("UnregisterDeviceCommand failed: User not authenticated.");
-                return Result.Failure(UserDeviceErrors.UserNotAuthenticated());
-            }
-
             // Find the active session for the current user and FCM token
             var session = await _userDeviceSessionRepository.GetActiveSessionByTokenAsync(
                 request.FcmToken.Trim(),
                 cancellationToken);
 
-            if (session == null || session.UserId != _currentUser.DomainId.Value)
+            if (session == null || session.UserId != _currentUser.DomainUserId!.Value) // Safe to use ! since authorization pipeline guarantees authentication
             {
                 // Token not found, or found but belongs to a different user on a shared device
-                _logger.LogWarning("UnregisterDeviceCommand failed: FCM token {FcmToken} not found or does not belong to user {UserId}", request.FcmToken, _currentUser.DomainId.Value);
+                _logger.LogWarning("UnregisterDeviceCommand failed: FCM token {FcmToken} not found or does not belong to user {UserId}", request.FcmToken, _currentUser.DomainUserId!.Value);
                 return Result.Failure(UserDeviceErrors.TokenNotFound(request.FcmToken));
             }
 
@@ -51,7 +44,7 @@ public class UnregisterDeviceCommandHandler : IRequestHandler<UnregisterDeviceCo
             session.LoggedOutAt = DateTime.UtcNow;
             // EF Core will track the changes, no explicit update call needed for this scenario
 
-            _logger.LogInformation("Deactivated session for UserId {UserId} with FCM token {FcmToken}", _currentUser.DomainId.Value, request.FcmToken);
+            _logger.LogInformation("Deactivated session for UserId {UserId} with FCM token {FcmToken}", _currentUser.DomainUserId!.Value, request.FcmToken);
 
             return Result.Success();
         }, cancellationToken);

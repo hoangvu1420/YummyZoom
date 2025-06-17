@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using YummyZoom.SharedKernel.Constants;
 
@@ -58,7 +59,7 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
         // Business rule: Users can access their own data
         if (requirement.Role == Roles.UserOwner)
         {
-            var currentUserId = context.User.FindFirst("sub")?.Value;
+            var currentUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (currentUserId == resource.ResourceId)
             {
                 context.Succeed(requirement);

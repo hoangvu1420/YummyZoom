@@ -95,7 +95,7 @@ public class TestUserService : IUser
 
     public string? Id => _userId?.ToString();
 
-    public UserId? DomainId => _userId.HasValue ? UserId.Create(_userId.Value) : null;
+    public UserId? DomainUserId => _userId.HasValue ? UserId.Create(_userId.Value) : null;
 
     public ClaimsPrincipal? Principal
     {

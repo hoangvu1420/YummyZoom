@@ -17,7 +17,7 @@ public class CurrentUser : IUser
 
     public ClaimsPrincipal? Principal => _httpContextAccessor.HttpContext?.User;
 
-    public UserId? DomainId
+    public UserId? DomainUserId
     {
         get
         {
