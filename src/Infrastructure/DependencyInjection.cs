@@ -4,7 +4,6 @@ using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Notifications;
-using YummyZoom.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

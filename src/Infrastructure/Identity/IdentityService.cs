@@ -163,29 +163,6 @@ public class IdentityService : IIdentityService
         return user != null && await _userManager.IsInRoleAsync(user, role);
     }
 
-    public async Task<bool> AuthorizeAsync(string userId, string policyName)
-    {
-        return await AuthorizeAsync(userId, policyName, null);
-    }
-
-    public async Task<bool> AuthorizeAsync(string userId, string policyName, object? resource)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            return false;
-        }
-
-        var principal = await _userClaimsPrincipalFactory.CreateAsync(user);
-
-        var result = resource != null 
-            ? await _authorizationService.AuthorizeAsync(principal, resource, policyName)
-            : await _authorizationService.AuthorizeAsync(principal, policyName);
-
-        return result.Succeeded;
-    }
-
     public async Task<Result> DeleteUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

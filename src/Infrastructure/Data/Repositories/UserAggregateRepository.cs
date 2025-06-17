@@ -1,10 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore; // Required for EF Core async methods
 
-namespace YummyZoom.Infrastructure.Persistence.Repositories;
+// Required for EF Core async methods
+
+namespace YummyZoom.Infrastructure.Data.Repositories;
 
 public class UserAggregateRepository : IUserAggregateRepository
 {

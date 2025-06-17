@@ -108,8 +108,9 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         await RunAsAdministratorAsync();
         var roleAssignmentId = await CreateRoleAssignmentAsync(userId, _restaurantId1, RestaurantRole.Owner);
 
-        // Switch back to user and verify permission granted
+        // Switch back to user and refresh claims from database
         SetUserId(userId);
+        await RefreshUserClaimsAsync();
         var result1 = await SendAsync(command);
         result1.ShouldBeSuccessful();
 
@@ -119,58 +120,11 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         var deleteResult = await SendAsync(deleteCommand);
         deleteResult.ShouldBeSuccessful();
 
-        // Switch back to user and verify permission revoked
+        // Switch back to user and refresh claims from database
         SetUserId(userId);
+        await RefreshUserClaimsAsync();
         Func<Task> actAfter = () => SendAsync(command);
         await actAfter.Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
-    }
-
-    #endregion
-
-    #region Authorization Service Integration Tests
-
-    [Test]
-    public async Task IdentityService_AuthorizeAsync_ShouldWorkWithClaims()
-    {
-        // Arrange
-        var userId = await RunAsRestaurantOwnerAsync("owner@test.com", _restaurantId1);
-        
-        using var scope = CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
-
-        // Create test commands as resources to provide restaurant context
-        var ownerCommand = new TestRestaurantOwnerCommand(_restaurantId1);
-        var staffCommand = new TestRestaurantStaffCommand(_restaurantId1);
-
-        // Act - Test direct authorization service calls with proper resource context
-        var ownerResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantOwner", ownerCommand);
-        var staffResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantStaff", staffCommand);
-
-        // Assert
-        ownerResult.Should().BeTrue("User should have restaurant owner permissions");
-        staffResult.Should().BeTrue("Restaurant owners should also have staff permissions");
-    }
-
-    [Test]
-    public async Task IdentityService_AuthorizeAsync_WithoutPermissions_ShouldReturnFalse()
-    {
-        // Arrange
-        var userId = await RunAsDefaultUserAsync();
-        
-        using var scope = CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
-
-        // Create test commands as resources to provide restaurant context
-        var ownerCommand = new TestRestaurantOwnerCommand(_restaurantId1);
-        var staffCommand = new TestRestaurantStaffCommand(_restaurantId1);
-
-        // Act - Test authorization without restaurant roles
-        var ownerResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantOwner", ownerCommand);
-        var staffResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantStaff", staffCommand);
-
-        // Assert
-        ownerResult.Should().BeFalse("User should not have restaurant owner permissions");
-        staffResult.Should().BeFalse("User should not have restaurant staff permissions");
     }
 
     #endregion
@@ -199,10 +153,11 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
 
         // Assert - Verify permission claims are present
         var permissionClaims = principal.Claims.Where(c => c.Type == "permission").ToList();
-        permissionClaims.Should().HaveCount(2, "User should have 2 restaurant role assignments");
+        permissionClaims.Should().HaveCount(3, "User should have 2 restaurant role assignments + 1 user ownership claim");
 
         permissionClaims.Should().Contain(c => c.Value == $"RestaurantOwner:{_restaurantId1}");
         permissionClaims.Should().Contain(c => c.Value == $"RestaurantStaff:{_restaurantId2}");
+        permissionClaims.Should().Contain(c => c.Value == $"UserOwner:{userId}");
     }
 
     #endregion

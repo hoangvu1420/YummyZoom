@@ -62,6 +62,20 @@ public partial class Testing
     public static void SetUserId(Guid? userId)
     {
         _userId = userId;
+        
+        // Update the TestUserService with the new user context
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        testUserService.SetUserId(userId);
+    }
+
+    public static async Task RefreshUserClaimsAsync()
+    {
+        // Refresh claims from the current database state
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        if (_factory?.Services != null)
+        {
+            await testUserService.RefreshClaimsFromDatabase(_factory.Services);
+        }
     }
 
     public static async Task<Guid> RunAsDefaultUserAsync() 
@@ -104,6 +118,17 @@ public partial class Testing
         }
 
         _userId = user.Id;
+        
+        // Update the TestUserService with the new user context
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        testUserService.SetUserId(user.Id);
+        
+        // Add administrator claims if user has Administrator role
+        if (roles.Contains(Roles.Administrator))
+        {
+            testUserService.AddAdminClaim();
+        }
+        
         return _userId.Value;
     }
 
@@ -118,6 +143,10 @@ public partial class Testing
         }
 
         _userId = null;
+        
+        // Clear the test user service as well
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        testUserService.SetUserId(null);
     }
 
     public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
@@ -231,8 +260,13 @@ public partial class Testing
         // Create the restaurant owner role assignment
         await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Owner);
         
-        // Switch back to the target user
+        // Switch back to the target user and add the restaurant owner claim
         SetUserId(userId);
+        
+        // Add the restaurant owner permission claim to the test user service
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        testUserService.AddPermissionClaim(Roles.RestaurantOwner, restaurantId.ToString());
+        
         return userId;
     }
 
@@ -255,8 +289,13 @@ public partial class Testing
         // Create the restaurant staff role assignment
         await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Staff);
         
-        // Switch back to the target user
+        // Switch back to the target user and add the restaurant staff claim
         SetUserId(userId);
+        
+        // Add the restaurant staff permission claim to the test user service
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        testUserService.AddPermissionClaim(Roles.RestaurantStaff, restaurantId.ToString());
+        
         return userId;
     }
 
@@ -281,8 +320,22 @@ public partial class Testing
             await CreateRoleAssignmentAsync(userId, restaurantId, role);
         }
         
-        // Switch back to the target user
+        // Switch back to the target user and add all permission claims
         SetUserId(userId);
+        
+        // Add all permission claims to the test user service
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+        foreach (var (restaurantId, role) in roleAssignments)
+        {
+            var roleConstant = role switch
+            {
+                RestaurantRole.Owner => Roles.RestaurantOwner,
+                RestaurantRole.Staff => Roles.RestaurantStaff,
+                _ => role.ToString()
+            };
+            testUserService.AddPermissionClaim(roleConstant, restaurantId.ToString());
+        }
+        
         return userId;
     }
 

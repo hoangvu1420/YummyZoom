@@ -26,7 +26,7 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
     {
         var identity = await base.GenerateClaimsAsync(user);
 
-        // Add restaurant permissions (existing logic)
+        // Add restaurant permissions
         var domainUserId = UserId.Create(user.Id);
         var roleAssignments = await _roleAssignmentRepository.GetByUserIdAsync(domainUserId);
         foreach (var assignment in roleAssignments)
@@ -43,7 +43,7 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
             identity.AddClaim(new Claim("permission", claimValue));
         }
 
-        // Add user self-ownership permission (new logic)
+        // Add user self-ownership permission
         identity.AddClaim(new Claim("permission", $"{Roles.UserOwner}:{user.Id}"));
         
         // Add admin permissions if user is administrator

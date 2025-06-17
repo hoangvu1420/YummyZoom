@@ -54,17 +54,6 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
         RestaurantId restaurantId,
         RestaurantRole role)
     {
-        // Validate inputs
-        if (userId is null)
-        {
-            return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidUserId("null"));
-        }
-
-        if (restaurantId is null)
-        {
-            return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRestaurantId("null"));
-        }
-
         if (!Enum.IsDefined(role))
         {
             return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRole(role.ToString()));
@@ -98,23 +87,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
         DateTime createdAt,
         DateTime? updatedAt = null)
     {
-        // Validate inputs
-        if (id is null)
-        {
-            return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRoleAssignmentId("null"));
-        }
-
-        if (userId is null)
-        {
-            return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidUserId("null"));
-        }
-
-        if (restaurantId is null)
-        {
-            return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRestaurantId("null"));
-        }
-
-        if (!Enum.IsDefined(typeof(RestaurantRole), role))
+        if (!Enum.IsDefined(role))
         {
             return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRole(role.ToString()));
         }

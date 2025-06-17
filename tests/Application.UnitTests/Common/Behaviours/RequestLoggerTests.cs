@@ -4,6 +4,7 @@ using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using System.Security.Claims;
 
 namespace YummyZoom.Application.UnitTests.Common.Behaviours;
 
@@ -11,7 +12,6 @@ public class RequestLoggerTests
 {
     private Mock<ILogger<CreateTodoItemCommand>> _logger = null!;
     private Mock<IUser> _user = null!;
-    private Mock<IIdentityService> _identityService = null!;
     private Mock<MediatR.RequestHandlerDelegate<MediatR.Unit>> _next = null!;
 
     [SetUp]
@@ -19,32 +19,66 @@ public class RequestLoggerTests
     {
         _logger = new Mock<ILogger<CreateTodoItemCommand>>();
         _user = new Mock<IUser>();
-        _identityService = new Mock<IIdentityService>();
     }
 
     [Test]
-    public async Task ShouldCallGetUserNameAsyncOnceIfAuthenticated()
+    public async Task ShouldExtractUsernameFromClaimsIfAuthenticated()
     {
-        _user.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        // Arrange
+        var userId = Guid.NewGuid().ToString();
+        var username = "test@example.com";
+        
+        var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.NameIdentifier, userId)
+        }));
+        
+        _user.Setup(x => x.Id).Returns(userId);
+        _user.Setup(x => x.Principal).Returns(claimsPrincipal);
         _next = new Mock<MediatR.RequestHandlerDelegate<MediatR.Unit>>();
 
-        var requestLogger = new LoggingBehaviour<CreateTodoItemCommand, MediatR.Unit>(_logger.Object, _user.Object, _identityService.Object);
+        var requestLogger = new LoggingBehaviour<CreateTodoItemCommand, MediatR.Unit>(_logger.Object, _user.Object);
 
+        // Act
         await requestLogger.Handle(new CreateTodoItemCommand { ListId = Guid.NewGuid(), Title = "title" }, _next.Object, new CancellationToken());
 
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<string>()), Times.Once); 
+        // Assert
         _next.Verify(n => n(), Times.Once);
+        // Verify that logging was called (we can't easily verify the exact content without more complex setup)
+        _logger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("YummyZoom Request")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 
     [Test]
-    public async Task ShouldNotCallGetUserNameAsyncOnceIfUnauthenticated()
+    public async Task ShouldHandleUnauthenticatedUser()
     {
+        // Arrange
+        _user.Setup(x => x.Id).Returns((string?)null);
+        _user.Setup(x => x.Principal).Returns((ClaimsPrincipal?)null);
         _next = new Mock<MediatR.RequestHandlerDelegate<MediatR.Unit>>();
-        var requestLogger = new LoggingBehaviour<CreateTodoItemCommand, MediatR.Unit>(_logger.Object, _user.Object, _identityService.Object);
+        
+        var requestLogger = new LoggingBehaviour<CreateTodoItemCommand, MediatR.Unit>(_logger.Object, _user.Object);
 
+        // Act
         await requestLogger.Handle(new CreateTodoItemCommand { ListId = Guid.NewGuid(), Title = "title" }, _next.Object, new CancellationToken());
 
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<string>()), Times.Never); 
+        // Assert
         _next.Verify(n => n(), Times.Once);
+        // Verify that logging was called even for unauthenticated users
+        _logger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("YummyZoom Request")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 }

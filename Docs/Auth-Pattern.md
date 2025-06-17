@@ -2,13 +2,14 @@
 
 ## Overview
 
-YummyZoom implements a **generic, contextual authorization system** that provides fine-grained, resource-aware security controls. The system seamlessly handles multiple resource types (restaurants, users, etc.) while maintaining type safety and extensibility.
+YummyZoom implements a **high-performance, claims-based authorization system** that provides fine-grained, resource-aware security controls. The system seamlessly handles multiple resource types (restaurants, users, etc.) while maintaining type safety, extensibility, and optimal performance through cached claims.
 
 ### Key Features
 
+- **High-Performance Claims-Based**: Uses cached claims instead of database queries for authorization
 - **Generic Resource Authorization**: Single authorization infrastructure supporting any resource type
 - **Contextual Permissions**: Role-based access scoped to specific resources
-- **Claims-Based Security**: Automatic claims generation and validation
+- **Optimized Pipeline**: Eliminates unnecessary database queries during authorization checks
 - **Type-Safe Commands**: Strongly-typed command interfaces for each resource type
 - **Extensible Design**: Easy to add new resource types and authorization rules
 - **Full Backward Compatibility**: Existing restaurant authorization unchanged
@@ -18,30 +19,33 @@ YummyZoom implements a **generic, contextual authorization system** that provide
 ## System Architecture
 
 ### 1. **Authentication Foundation**
+
 - **ASP.NET Core Identity**: Manages user authentication, passwords, and global roles
 - **ApplicationUser**: Identity entity for authentication
 - **User Aggregate**: Domain entity for business logic
+- **Cached Claims**: Claims generated once during login and reused for all requests
 
-### 2. **Authorization Components**
+### 2. **Enhanced Authorization Pipeline**
 
 ```mermaid
 graph TD
-    A[IContextualCommand] --> B[IRestaurantCommand]
-    A --> C[IUserCommand]
-    A --> D[IOrderCommand - Future]
+    A[User Login] --> B[YummyZoomClaimsPrincipalFactory]
+    B --> C[Generate Claims from DB Once]
+    C --> D[Cache Claims in JWT/Cookie]
     
-    E[PermissionAuthorizationHandler] --> F[Restaurant Logic]
-    E --> G[User Logic]
-    E --> H[Future Resource Logic]
+    E[Request Authorization] --> F[AuthorizationBehaviour]
+    F --> G[Use Cached HttpContext.User]
+    G --> H[ASP.NET Core IAuthorizationService]
+    H --> I[PermissionAuthorizationHandler]
+    I --> J[Fast Claims Lookup]
     
-    I[Claims Factory] --> J[Restaurant Claims]
-    I --> K[User Claims]
-    I --> L[Admin Claims]
+    K[No Database Queries During Authorization]
 ```
 
-### 3. **Core Interfaces**
+### 4. **Core Interfaces**
 
 #### Base Interface
+
 ```csharp
 public interface IContextualCommand
 {
@@ -50,7 +54,18 @@ public interface IContextualCommand
 }
 ```
 
+#### Enhanced IUser Interface
+
+```csharp
+public interface IUser
+{
+    string? Id { get; }
+    ClaimsPrincipal? Principal { get; } // NEW: Direct access to cached claims
+}
+```
+
 #### Resource-Specific Interfaces
+
 ```csharp
 // Restaurant commands
 public interface IRestaurantCommand : IContextualCommand
@@ -73,33 +88,94 @@ public interface IUserCommand : IContextualCommand
 
 ---
 
-## How Claims-Based Authorization Works
+## Enhanced Claims-Based Authorization Flow
 
-### 1. **Claims Generation**
+### 1. **One-Time Claims Generation (During Login)**
 
-Claims are automatically generated during user authentication:
+Claims are generated once during authentication and cached:
 
 ```csharp
-// Restaurant permissions (from RoleAssignment entities)
-"permission:RestaurantOwner:restaurant-123"
-"permission:RestaurantStaff:restaurant-456"
-
-// User permissions (automatic self-ownership)
-"permission:UserOwner:user-789"
-
-// Admin permissions (wildcard access)
-"permission:UserAdmin:*
+// YummyZoomClaimsPrincipalFactory generates claims from database ONCE
+protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
+{
+    var identity = await base.GenerateClaimsAsync(user);
+    
+    // Query database ONCE during login
+    var roleAssignments = await _roleAssignmentRepository.GetByUserIdAsync(domainUserId);
+    
+    // Generate permission claims
+    foreach (var assignment in roleAssignments)
+    {
+        var claimValue = $"{assignment.Role}:{assignment.RestaurantId.Value}";
+        identity.AddClaim(new Claim("permission", claimValue));
+    }
+    
+    // Add user self-ownership claim
+    identity.AddClaim(new Claim("permission", $"UserOwner:{user.Id}"));
+    
+    return identity; // Claims cached in JWT/Cookie
+}
 ```
 
-### 2. **Authorization Flow**
+### 2. **Fast Authorization Pipeline**
 
-1. **Command Dispatch**: User sends a command implementing `IContextualCommand`
-2. **Policy Check**: Authorization pipeline checks required policy
-3. **Claims Validation**: Handler verifies user has required permission claim
-4. **Resource Context**: Permission checked against specific resource ID
-5. **Business Rules**: Additional rules applied (e.g., owners can do staff actions)
+Authorization now uses cached claims with zero database queries:
 
-### 3. **Permission Format**
+```csharp
+// AuthorizationBehaviour - ENHANCED
+public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+{
+    var authorizationAttributes = request.GetType().GetCustomAttributes<AuthorizeAttribute>();
+    
+    if (authorizationAttributes.Any())
+    {
+        if (_user.Principal == null) // Use cached principal
+            throw new UnauthorizedAccessException();
+            
+        foreach (var attribute in authorizationAttributes)
+        {
+            if (!string.IsNullOrEmpty(attribute.Policy))
+            {
+                // Use ASP.NET Core IAuthorizationService directly with cached claims
+                var authorizationResult = await _authorizationService.AuthorizeAsync(
+                    _user.Principal, // Cached claims - NO DB QUERY
+                    request as IContextualCommand,
+                    attribute.Policy);
+                    
+                if (!authorizationResult.Succeeded)
+                    throw new ForbiddenAccessException();
+            }
+        }
+    }
+    
+    return await next();
+}
+```
+
+### 3. **Optimized Logging Behaviors**
+
+Logging now extracts usernames from cached claims:
+
+```csharp
+// LoggingBehaviour - ENHANCED
+public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+{
+    var requestName = typeof(TRequest).Name;
+    var userIdString = _user.Id ?? string.Empty;
+    
+    // Extract username from cached claims - NO DB QUERY
+    string? userName = _user.Principal?.FindFirst(ClaimTypes.Name)?.Value ?? 
+                      _user.Principal?.FindFirst(ClaimTypes.Email)?.Value ?? 
+                      "Unknown";
+    
+    _logger.LogInformation("YummyZoom Request: {Name} {@UserId} {@UserName} {@Request}",
+        requestName, userIdString, userName, request);
+    
+    return await next();
+}
+```
+
+### 4. **Permission Format**
 
 All permissions follow the pattern: `"Role:ResourceId"`
 
@@ -160,6 +236,7 @@ public record PurgeSystemDataCommand : IRequest<Result<Unit>>;
 ## Available Policies and Roles
 
 ### Current Policies
+
 ```csharp
 // Restaurant policies
 public const string MustBeRestaurantOwner = nameof(MustBeRestaurantOwner);
@@ -173,6 +250,7 @@ public const string CanPurge = nameof(CanPurge);
 ```
 
 ### Current Roles
+
 ```csharp
 // Global roles
 public const string User = nameof(User);
@@ -272,7 +350,7 @@ private void HandleOrderAuthorization(
 }
 ```
 
-### Step 6: Add Claims Generation
+### Step 6: Add Claims Generation (One-Time Setup)
 
 ```csharp
 // In YummyZoomClaimsPrincipalFactory.cs
@@ -283,7 +361,7 @@ protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUse
     // Add restaurant permissions (existing)
     // Add user permissions (existing)
     
-    // Add order permissions (new)
+    // Add order permissions (new) - QUERIED ONCE DURING LOGIN
     var orderAssignments = await _orderAssignmentRepository.GetByUserIdAsync(domainUserId);
     foreach (var assignment in orderAssignments)
     {
@@ -298,7 +376,7 @@ protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUse
         identity.AddClaim(new Claim("permission", claimValue));
     }
 
-    return identity;
+    return identity; // Claims cached for all subsequent requests
 }
 ```
 
@@ -312,48 +390,6 @@ public record UpdateOrderCommand(
 ) : IRequest<Result<Unit>>, IOrderCommand
 {
     OrderId IOrderCommand.OrderId => Domain.OrderAggregate.ValueObjects.OrderId.Create(OrderId);
-}
-```
-
----
-
-## Testing Your Authorization
-
-### Unit Tests
-```csharp
-[Test]
-public async Task OrderCommand_WithOrderOwner_ShouldSucceed()
-{
-    // Arrange
-    var userId = await RunAsOrderOwnerAsync("owner@test.com", _orderId);
-    var command = new UpdateOrderCommand(_orderId, OrderStatus.Completed);
-
-    // Act  
-    var result = await SendAsync(command);
-
-    // Assert
-    result.ShouldBeSuccessful();
-}
-```
-
-### Integration Tests
-```csharp
-[Test] 
-public async Task IdentityService_OrderAuthorization_ShouldWorkCorrectly()
-{
-    // Arrange
-    var userId = await RunAsOrderOwnerAsync("owner@test.com", _orderId);
-    var identityService = GetRequiredService<IIdentityService>();
-    var command = new UpdateOrderCommand(_orderId, OrderStatus.Completed);
-
-    // Act
-    var authorized = await identityService.AuthorizeAsync(
-        userId.ToString(), 
-        "MustBeOrderOwner", 
-        command);
-
-    // Assert
-    authorized.Should().BeTrue();
 }
 ```
 
@@ -392,112 +428,12 @@ public class ComplexOrderAuthorizationHandler :
         ComplexOrderRequirement requirement,
         ComplexOrderCommand resource)
     {
-        // Custom business logic
-        // Multiple resource checks
+        // Custom business logic using cached claims
+        // Multiple resource checks (no DB queries)
         // Temporal constraints
         // etc.
     }
 }
 ```
 
-### Performance Considerations
-
-- **Claims Caching**: Claims are generated once per login session
-- **Efficient Lookups**: Authorization handler uses simple string comparisons
-- **Batch Operations**: Multiple commands of same type are efficiently processed
-- **Resource Isolation**: No performance impact between different resource types
-
----
-
-## Migration and Backward Compatibility
-
-### Existing Code
-All existing restaurant authorization code works unchanged:
-- Same command interfaces
-- Same authorization attributes  
-- Same test patterns
-- Same claims format
-
-### New Code
-Simply implement `IContextualCommand` via the appropriate resource interface:
-- `IRestaurantCommand` for restaurant operations
-- `IUserCommand` for user operations
-- Custom interfaces for new resource types
-
----
-
-## Best Practices
-
-### Security
-- ✅ Always use resource-specific interfaces (`IRestaurantCommand`, `IUserCommand`)
-- ✅ Apply authorization attributes to all sensitive commands
-- ✅ Use constants from `Policies.cs` and `Roles.cs` - never magic strings
-- ✅ Test both positive and negative authorization scenarios
-
-### Performance  
-- ✅ Leverage claims caching (automatic)
-- ✅ Use specific policies rather than complex custom logic
-- ✅ Batch similar operations when possible
-
-### Maintainability
-- ✅ Document new policies and business rules
-- ✅ Follow naming conventions (`MustBe{Resource}{Role}`)
-- ✅ Keep authorization logic in the handler, not in commands
-- ✅ Write comprehensive tests for new authorization scenarios
-
-### Extensibility
-- ✅ Use the generic `IContextualCommand` pattern for new resources
-- ✅ Add resource-type-specific business rules in the authorization handler
-- ✅ Consider future resource types when designing new commands
-- ✅ Maintain separation between authentication and authorization concerns
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**403 Forbidden Errors**
-- Check if user has required claims: `"permission:Role:ResourceId"`
-- Verify policy is registered in DI
-- Ensure command implements correct interface
-- Check authorization attribute is applied
-
-**Claims Not Generated**
-- Verify role assignments exist in database
-- Check claims factory includes your resource type
-- Ensure user has logged in since role assignment
-
-**Tests Failing**  
-- Use `using static Testing;` in test files
-- Inherit from `BaseTestFixture`
-- Include proper using statements for `ApplicationUser`
-- Set up test data with `SetupForAuthorizationTestsAsync()`
-
-### Debug Commands
-
-```bash
-# Test authorization in isolation
-dotnet test --filter "UserCommandAuthorizationTests"
-
-# Test mixed scenarios  
-dotnet test --filter "MixedResourceAuthorizationTests"
-
-# Test specific policy
-dotnet test --filter "RestaurantOwner"
-```
-
----
-
-## Future Enhancements
-
-The system is designed to easily support:
-
-- **Hierarchical Permissions**: Parent-child resource relationships
-- **Temporal Authorization**: Time-based access controls  
-- **External Authorization**: Integration with external permission systems
-- **Audit Trail**: Comprehensive authorization logging
-- **Dynamic Policies**: Runtime policy configuration
-- **Resource Sharing**: Cross-tenant resource access
-
-The generic contextual authorization system provides a solid foundation for any authorization requirements while maintaining simplicity and type safety.
+The high-performance, claims-based authorization system provides optimal performance while maintaining simplicity, type safety, and full backward compatibility.

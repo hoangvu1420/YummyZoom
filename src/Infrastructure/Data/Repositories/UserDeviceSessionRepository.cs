@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.SharedKernel.Models;
 
-namespace YummyZoom.Infrastructure.Persistence.Repositories;
+namespace YummyZoom.Infrastructure.Data.Repositories;
 
 public class UserDeviceSessionRepository : IUserDeviceSessionRepository
 {

@@ -65,30 +65,9 @@ public class DebugAuthorizationTests : BaseTestFixture
         
         // Assert - Check permission claims
         var permissionClaims = principal.Claims.Where(c => c.Type == "permission").ToList();
-        permissionClaims.Should().HaveCount(1);
-        permissionClaims[0].Value.Should().Be($"RestaurantOwner:{restaurantId}");
-    }
-
-    [Test]
-    public async Task Debug_IdentityServiceAuthorization_ShouldWork()
-    {
-        // Arrange
-        await SetupForAuthorizationTestsAsync();
-        var restaurantId = Guid.NewGuid();
-        
-        var userId = await RunAsRestaurantOwnerAsync("owner@test.com", restaurantId);
-        
-        // Act - Test authorization service directly
-        using var scope = CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
-        
-        // Create a test restaurant command
-        var testCommand = new TestRestaurantOwnerCommand(restaurantId);
-        
-        var result = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantOwner", testCommand);
-        
-        // Assert
-        result.Should().BeTrue("User should be authorized as restaurant owner");
+        permissionClaims.Should().HaveCount(2, "User should have 1 restaurant role claim + 1 user ownership claim");
+        permissionClaims.Should().Contain(c => c.Value == $"RestaurantOwner:{restaurantId}");
+        permissionClaims.Should().Contain(c => c.Value == $"UserOwner:{userId}");
     }
 
     [Test]

@@ -260,8 +260,9 @@ public class PolicyBasedAuthorizationTests : BaseTestFixture
         await RunAsAdministratorAsync();
         await CreateRoleAssignmentAsync(userId, _restaurantId1, RestaurantRole.Owner);
 
-        // Switch back to the user
+        // Switch back to the user and refresh claims from database
         SetUserId(userId);
+        await RefreshUserClaimsAsync();
 
         // Assert - Should now succeed
         var result = await SendAsync(command);

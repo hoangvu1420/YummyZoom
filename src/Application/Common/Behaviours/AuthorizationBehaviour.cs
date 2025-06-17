@@ -3,31 +3,35 @@ using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace YummyZoom.Application.Common.Behaviours;
 
 public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     private readonly IUser _user;
-    private readonly IIdentityService _identityService;
+    private readonly IAuthorizationService _authorizationService;
 
     public AuthorizationBehaviour(
         IUser user,
-        IIdentityService identityService)
+        IAuthorizationService authorizationService)
     {
         _user = user;
-        _identityService = identityService;
+        _authorizationService = authorizationService;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var authorizeAttributes = request.GetType().GetCustomAttributes<AuthorizeAttribute>();
+        var authorizeAttributes = request.GetType().GetCustomAttributes<YummyZoom.Application.Common.Security.AuthorizeAttribute>();
 
-        IEnumerable<AuthorizeAttribute> attributes = authorizeAttributes as AuthorizeAttribute[] ?? authorizeAttributes.ToArray();
+        IEnumerable<YummyZoom.Application.Common.Security.AuthorizeAttribute> attributes = authorizeAttributes as YummyZoom.Application.Common.Security.AuthorizeAttribute[] ?? authorizeAttributes.ToArray();
         if (attributes.Any())
         {
+            // Get the current user's claims principal
+            var principal = _user.Principal;
+            
             // Must be authenticated user
-            if (_user.Id == null)
+            if (principal == null || !principal.Identity?.IsAuthenticated == true)
             {
                 throw new UnauthorizedAccessException();
             }
@@ -43,7 +47,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                 {
                     foreach (var role in roles)
                     {
-                        var isInRole = await _identityService.IsInRoleAsync(_user.Id, role.Trim());
+                        var isInRole = principal.IsInRole(role.Trim());
                         if (isInRole)
                         {
                             authorized = true;
@@ -67,9 +71,12 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                 {
                     // Pass the request as a resource for policy-based authorization if it implements IContextualCommand
                     object? resource = request is IContextualCommand ? request : null;
-                    var authorized = await _identityService.AuthorizeAsync(_user.Id, policy, resource);
+                    
+                    var result = resource != null 
+                        ? await _authorizationService.AuthorizeAsync(principal, resource, policy)
+                        : await _authorizationService.AuthorizeAsync(principal, policy);
 
-                    if (!authorized)
+                    if (!result.Succeeded)
                     {
                         throw new ForbiddenAccessException();
                     }

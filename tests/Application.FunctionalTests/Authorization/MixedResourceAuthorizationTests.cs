@@ -156,59 +156,6 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
 
     #endregion
 
-    #region Authorization Handler Context Tests
-
-    [Test]
-    public async Task AuthorizationHandler_ShouldRouteToCorrectLogicBasedOnResourceType()
-    {
-        // This test verifies that the authorization handler correctly routes to
-        // restaurant vs user authorization logic based on ResourceType
-
-        // Arrange
-        var userId = await RunAsRestaurantOwnerAsync("handler@test.com", _restaurantId1);
-        
-        using var scope = CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
-
-        // Create commands with different resource types
-        var restaurantCommand = new TestRestaurantOwnerCommand(_restaurantId1);  // ResourceType = "Restaurant"
-        var userCommand = new TestUserOwnerCommand(userId);                     // ResourceType = "User"
-
-        // Act - Test authorization through IdentityService (which uses the handler)
-        var restaurantResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantOwner", restaurantCommand);
-        var userResult = await identityService.AuthorizeAsync(userId.ToString(), "MustBeUserOwner", userCommand);
-
-        // Assert
-        restaurantResult.Should().BeTrue("User should have restaurant owner permissions");
-        userResult.Should().BeTrue("User should have access to their own data");
-    }
-
-    [Test]
-    public async Task AuthorizationHandler_DifferentResourceTypes_ShouldNotInterfere()
-    {
-        // This test ensures that restaurant permissions don't interfere with user permissions and vice versa
-
-        // Arrange
-        var userId = await RunAsRestaurantOwnerAsync("separate@test.com", _restaurantId1);
-        
-        using var scope = CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
-
-        // Test cross-resource type interference
-        var userCommandWithRestaurantPolicy = new TestUserOwnerCommand(userId);
-        var restaurantCommandWithUserPolicy = new TestRestaurantOwnerCommand(_restaurantId1);
-
-        // Act - Try to use wrong policy for resource type
-        var userWithRestaurantPolicy = await identityService.AuthorizeAsync(userId.ToString(), "MustBeRestaurantOwner", userCommandWithRestaurantPolicy);
-        var restaurantWithUserPolicy = await identityService.AuthorizeAsync(userId.ToString(), "MustBeUserOwner", restaurantCommandWithUserPolicy);
-
-        // Assert - Should fail because policies don't match resource types
-        userWithRestaurantPolicy.Should().BeFalse("Restaurant policy should not work on user resources");
-        restaurantWithUserPolicy.Should().BeFalse("User policy should not work on restaurant resources");
-    }
-
-    #endregion
-
     #region Performance and Edge Cases
 
     [Test]
