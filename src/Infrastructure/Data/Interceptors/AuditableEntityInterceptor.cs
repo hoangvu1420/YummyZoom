@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.Common.Models;
 
 namespace YummyZoom.Infrastructure.Data.Interceptors;

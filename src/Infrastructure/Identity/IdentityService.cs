@@ -4,6 +4,8 @@ using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 

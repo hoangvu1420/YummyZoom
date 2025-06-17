@@ -1,6 +1,6 @@
 ﻿using YummyZoom.Domain.TodoListAggregate;
 
-namespace YummyZoom.Application.Common.Interfaces;
+namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface IApplicationDbContext
 {

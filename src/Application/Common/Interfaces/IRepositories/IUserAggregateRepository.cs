@@ -1,7 +1,7 @@
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 
-namespace YummyZoom.Application.Common.Interfaces;
+namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface IUserAggregateRepository
 {

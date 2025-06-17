@@ -4,6 +4,7 @@ using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Application.Common.Behaviours;
 

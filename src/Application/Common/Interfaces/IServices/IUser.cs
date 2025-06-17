@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
-using YummyZoom.Domain.UserAggregate.ValueObjects; 
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 
-namespace YummyZoom.Application.Common.Interfaces;
+namespace YummyZoom.Application.Common.Interfaces.IServices;
 
 public interface IUser
 {

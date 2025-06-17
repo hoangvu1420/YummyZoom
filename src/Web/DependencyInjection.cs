@@ -7,6 +7,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Asp.Versioning;
 using Azure.Security.KeyVault.Secrets;
+using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Web;
 

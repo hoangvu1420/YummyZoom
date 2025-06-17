@@ -1,6 +1,8 @@
-using YummyZoom.SharedKernel.Models; // Reference the entity from SharedKernel
+using YummyZoom.SharedKernel.Models;
 
-namespace YummyZoom.Application.Common.Interfaces;
+// Reference the entity from SharedKernel
+
+namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface IUserDeviceSessionRepository
 {

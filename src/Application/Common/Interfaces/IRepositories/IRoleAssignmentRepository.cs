@@ -1,9 +1,9 @@
 using YummyZoom.Domain.RoleAssignmentAggregate;
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
+using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 
-namespace YummyZoom.Application.Common.Interfaces;
+namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface IRoleAssignmentRepository
 {

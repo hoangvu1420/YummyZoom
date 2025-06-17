@@ -5,6 +5,7 @@ using YummyZoom.Domain.RoleAssignmentAggregate.Errors;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 using Microsoft.AspNetCore.Authorization;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 
 namespace YummyZoom.Application.RoleAssignments.Commands.UpdateRoleAssignment;
 

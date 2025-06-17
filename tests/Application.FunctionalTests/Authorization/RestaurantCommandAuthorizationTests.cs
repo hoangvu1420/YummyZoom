@@ -4,6 +4,7 @@ using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 

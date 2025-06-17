@@ -17,6 +17,8 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authorization;
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Infrastructure;
 

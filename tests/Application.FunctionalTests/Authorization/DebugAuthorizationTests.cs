@@ -2,6 +2,7 @@ using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Infrastructure.Identity;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;

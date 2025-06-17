@@ -10,6 +10,8 @@ using YummyZoom.SharedKernel;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using MediatR;
 using System.Security.Claims;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 

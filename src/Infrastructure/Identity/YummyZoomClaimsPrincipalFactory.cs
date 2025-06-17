@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.SharedKernel.Constants;
 

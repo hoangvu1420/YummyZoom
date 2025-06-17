@@ -1,6 +1,6 @@
 ﻿using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Application.Common.Interfaces;
+namespace YummyZoom.Application.Common.Interfaces.IServices;
 
 public interface IIdentityService
 {

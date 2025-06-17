@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System.Security.Claims;
+using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Application.UnitTests.Common.Behaviours;
 

@@ -1,6 +1,8 @@
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.SharedKernel;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Application.Users.Commands.UnregisterDevice;
 

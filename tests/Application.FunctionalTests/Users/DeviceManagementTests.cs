@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.SharedKernel.Models;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 
 namespace YummyZoom.Application.FunctionalTests.Users;
 
