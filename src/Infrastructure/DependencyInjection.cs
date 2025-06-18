@@ -1,5 +1,4 @@
-﻿using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Infrastructure.Data;
+﻿using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;

@@ -1,5 +1,4 @@
 ﻿using Azure.Identity;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 

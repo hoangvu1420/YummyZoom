@@ -1,5 +1,4 @@
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,5 +1,4 @@
-﻿using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
+﻿using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.TodoListAggregate.Enums;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.Domain.TodoListAggregate.Errors;

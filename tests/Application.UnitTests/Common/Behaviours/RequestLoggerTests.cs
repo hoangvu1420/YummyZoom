@@ -1,5 +1,4 @@
 ﻿using YummyZoom.Application.Common.Behaviours;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;
 using Microsoft.Extensions.Logging;
 using Moq;

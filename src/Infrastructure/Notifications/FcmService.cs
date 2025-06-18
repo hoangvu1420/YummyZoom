@@ -1,7 +1,6 @@
 using FirebaseAdmin.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.SharedKernel;

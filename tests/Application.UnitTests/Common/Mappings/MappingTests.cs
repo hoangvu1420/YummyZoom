@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using AutoMapper;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 using YummyZoom.Application.TodoLists.Queries.GetTodos;

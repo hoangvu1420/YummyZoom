@@ -1,4 +1,3 @@
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;

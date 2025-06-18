@@ -1,5 +1,4 @@
 ﻿using System.Data.Common;
-using YummyZoom.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -16,8 +15,6 @@ using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 
 namespace YummyZoom.Application.FunctionalTests;
-
-using static Testing;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {

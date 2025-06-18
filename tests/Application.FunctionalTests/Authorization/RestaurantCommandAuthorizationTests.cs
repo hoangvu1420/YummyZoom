@@ -1,4 +1,3 @@
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;

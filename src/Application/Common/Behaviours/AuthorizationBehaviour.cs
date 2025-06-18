@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using YummyZoom.Application.Common.Interfaces.IServices;
@@ -23,9 +21,9 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var authorizeAttributes = request.GetType().GetCustomAttributes<YummyZoom.Application.Common.Security.AuthorizeAttribute>();
+        var authorizeAttributes = request.GetType().GetCustomAttributes<Security.AuthorizeAttribute>();
 
-        IEnumerable<YummyZoom.Application.Common.Security.AuthorizeAttribute> attributes = authorizeAttributes as YummyZoom.Application.Common.Security.AuthorizeAttribute[] ?? authorizeAttributes.ToArray();
+        IEnumerable<Security.AuthorizeAttribute> attributes = authorizeAttributes as Security.AuthorizeAttribute[] ?? authorizeAttributes.ToArray();
         if (attributes.Any())
         {
             // Get the current user's claims principal

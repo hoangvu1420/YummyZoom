@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

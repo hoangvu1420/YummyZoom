@@ -1,4 +1,3 @@
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Infrastructure.Identity;

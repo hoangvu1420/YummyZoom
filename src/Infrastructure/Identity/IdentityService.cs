@@ -1,4 +1,3 @@
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Errors;

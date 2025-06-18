@@ -1,4 +1,3 @@
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Models;
 using Microsoft.Extensions.Logging;

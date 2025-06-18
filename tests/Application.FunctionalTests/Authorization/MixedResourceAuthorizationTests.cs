@@ -1,7 +1,5 @@
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
