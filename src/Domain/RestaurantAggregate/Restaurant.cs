@@ -1,7 +1,6 @@
 
 using YummyZoom.Domain.RestaurantAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAggregate;
 

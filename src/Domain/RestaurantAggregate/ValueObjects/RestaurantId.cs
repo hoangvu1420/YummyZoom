@@ -1,6 +1,3 @@
-
-using YummyZoom.SharedKernel;
-
 namespace YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 public sealed class RestaurantId : AggregateRootId<Guid>

@@ -1,0 +1,45 @@
+using YummyZoom.SharedKernel;
+
+namespace YummyZoom.Domain.Common.ValueObjects;
+
+public sealed class Money : ValueObject
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    private Money(decimal amount, string currency)
+    {
+        Amount = amount;
+        Currency = currency;
+    }
+
+    public static Result<Money> Create(decimal amount, string currency = "USD")
+    {
+        if (amount < 0)
+        {
+            return Result.Failure<Money>(Errors.Money.NegativeAmount);
+        }
+
+        if (string.IsNullOrWhiteSpace(currency))
+        {
+            return Result.Failure<Money>(Errors.Money.InvalidCurrency);
+        }
+
+        return Result.Success(new Money(amount, currency));
+    }
+
+    public override string ToString()
+    {
+        return $"{Amount:0.00} {Currency}";
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Amount;
+        yield return Currency;
+    }
+    
+#pragma warning disable CS8618
+    private Money() { }
+#pragma warning restore CS8618
+}
