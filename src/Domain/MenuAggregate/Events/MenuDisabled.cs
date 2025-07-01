@@ -1,6 +1,5 @@
 
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuAggregate.Events;
 

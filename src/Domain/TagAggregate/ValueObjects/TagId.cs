@@ -1,3 +1,6 @@
+using YummyZoom.Domain.TagAggregate.Errors;
+using YummyZoom.SharedKernel;
+
 namespace YummyZoom.Domain.TagAggregate.ValueObjects;
 
 public sealed class TagId : AggregateRootId<Guid>
@@ -17,6 +20,13 @@ public sealed class TagId : AggregateRootId<Guid>
     public static TagId Create(Guid value)
     {
         return new TagId(value);
+    }
+    
+    public static Result<TagId> Create(string value)
+    {
+        return !Guid.TryParse(value, out var guid) 
+            ? Result.Failure<TagId>(TagErrors.InvalidTagId) 
+            : Result.Success(new TagId(guid));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
