@@ -4,10 +4,12 @@ namespace YummyZoom.Domain.Common.ValueObjects;
 
 public sealed class Money : ValueObject
 {
+    public static readonly Money Zero = new Money(0, "USD");
+    
     public decimal Amount { get; }
     public string Currency { get; }
 
-    private Money(decimal amount, string currency)
+    public Money(decimal amount, string currency = "USD")
     {
         Amount = amount;
         Currency = currency;

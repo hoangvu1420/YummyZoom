@@ -216,6 +216,8 @@
     * `LineItemTotal` (Money VO - `(BasePrice + sum of Adjustments) * Quantity`)
   * `PaymentTransaction` (List of Child Entities):
     * `TransactionID` (Identifier)
+    * `PaymentMethodType` (Enum: CreditCard, PayPal, ApplePay, GooglePay, CashOnDelivery)
+    * `PaymentMethodDisplay` (String, optional, e.g., "Visa **** 4242")
     * `Type` (Enum: Payment, Refund)
     * `Amount` (Money VO)
     * `Status` (Enum: Pending, Succeeded, Failed)
