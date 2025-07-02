@@ -25,7 +25,7 @@ public sealed class MenuId : AggregateRootId<Guid>
     public static Result<MenuId> Create(string value)
     {
         return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<MenuId>(Errors.Menu.InvalidMenuId) 
+            ? Result.Failure<MenuId>(Errors.MenuErrors.InvalidMenuId) 
             : Result.Success(new MenuId(guid));
     }
 

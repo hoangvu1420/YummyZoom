@@ -15,14 +15,9 @@ public sealed class Money : ValueObject
 
     public static Result<Money> Create(decimal amount, string currency = "USD")
     {
-        if (amount < 0)
-        {
-            return Result.Failure<Money>(Errors.Money.NegativeAmount);
-        }
-
         if (string.IsNullOrWhiteSpace(currency))
         {
-            return Result.Failure<Money>(Errors.Money.InvalidCurrency);
+            return Result.Failure<Money>(Errors.MoneyErrors.InvalidCurrency);
         }
 
         return Result.Success(new Money(amount, currency));

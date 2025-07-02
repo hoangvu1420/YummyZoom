@@ -5,7 +5,7 @@ using YummyZoom.Domain.MenuAggregate.Events;
 
 namespace YummyZoom.Domain.MenuAggregate;
 
-public sealed class Menu : AggregateRoot<MenuId, Guid>
+public sealed class MenuErrors : AggregateRoot<MenuId, Guid>
 {
     private readonly List<MenuCategory> _categories = [];
 
@@ -16,7 +16,7 @@ public sealed class Menu : AggregateRoot<MenuId, Guid>
     
     public IReadOnlyList<MenuCategory> Categories => _categories.AsReadOnly();
 
-    private Menu(
+    private MenuErrors(
         MenuId menuId,
         RestaurantId restaurantId,
         string name,
@@ -32,14 +32,14 @@ public sealed class Menu : AggregateRoot<MenuId, Guid>
         _categories = categories;
     }
 
-    public static Menu Create(
+    public static MenuErrors Create(
         RestaurantId restaurantId,
         string name,
         string description,
         bool isEnabled = true,
         List<MenuCategory>? categories = null)
     {
-        var menu = new Menu(
+        var menu = new MenuErrors(
             MenuId.CreateUnique(),
             restaurantId,
             name,
@@ -73,6 +73,6 @@ public sealed class Menu : AggregateRoot<MenuId, Guid>
     }
 
 #pragma warning disable CS8618
-    private Menu() { }
+    private MenuErrors() { }
 #pragma warning restore CS8618
 }

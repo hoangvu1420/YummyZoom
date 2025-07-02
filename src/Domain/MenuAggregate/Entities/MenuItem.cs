@@ -1,7 +1,8 @@
-
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuAggregate.Errors;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.TagAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuAggregate.Entities;
 
@@ -39,7 +40,7 @@ public sealed class MenuItem : Entity<MenuItemId>
         _appliedCustomizations = appliedCustomizations;
     }
     
-    public static MenuItem Create(
+    public static Result<MenuItem> Create(
         string name,
         string description,
         Money basePrice,
@@ -48,7 +49,13 @@ public sealed class MenuItem : Entity<MenuItemId>
         List<TagId>? dietaryTagIds = null,
         List<AppliedCustomization>? appliedCustomizations = null)
     {
-        return new MenuItem(
+        // Business rule: Menu item prices must be positive
+        if (basePrice.Amount <= 0)
+        {
+            return Result.Failure<MenuItem>(Errors.MenuErrors.NegativeMenuItemPrice);
+        }
+
+        var menuItem = new MenuItem(
             MenuItemId.CreateUnique(),
             name,
             description,
@@ -57,6 +64,8 @@ public sealed class MenuItem : Entity<MenuItemId>
             imageUrl,
             dietaryTagIds ?? [],
             appliedCustomizations ?? []);
+
+        return Result.Success(menuItem);
     }
 
     public void MarkAsUnavailable()
