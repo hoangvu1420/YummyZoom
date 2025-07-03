@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate;
 using YummyZoom.Domain.RestaurantAccountAggregate.Entities;
@@ -15,10 +16,10 @@ namespace YummyZoom.Domain.UnitTests.RestaurantAccountAggregate;
 public class RestaurantAccountTests
 {
     private static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
-    private static readonly Money TenDollars = Money.Create(10.00m).Value;
-    private static readonly Money FiveDollars = Money.Create(5.00m).Value;
-    private static readonly Money NegativeFiveDollars = Money.Create(-5.00m).Value;
-    private static readonly Money ZeroDollars = Money.Create(0.00m).Value;
+    private static readonly Money TenDollars = new Money(10.00m, Currencies.Default);
+    private static readonly Money FiveDollars = new Money(5.00m, Currencies.Default);
+    private static readonly Money NegativeFiveDollars = new Money(-5.00m, Currencies.Default);
+    private static readonly Money ZeroDollars = new Money(0.00m, Currencies.Default);
     private static readonly OrderId DefaultOrderId = OrderId.Create(Guid.NewGuid());
 
     private static PayoutMethodDetails CreateTestPayoutMethod()
@@ -418,10 +419,10 @@ public class RestaurantAccountTests
     {
         // Arrange
         var account = RestaurantAccount.Create(DefaultRestaurantId);
-        var twentyDollars = Money.Create(20.00m).Value;
-        var threeDollars = Money.Create(3.00m).Value;
-        var negativeThreeDollars = Money.Create(-3.00m).Value;
-        var negativeTwoDollars = Money.Create(-2.00m).Value;
+        var twentyDollars = new Money(20.00m, Currencies.Default);
+        var threeDollars = new Money(3.00m, Currencies.Default);
+        var negativeThreeDollars = new Money(-3.00m, Currencies.Default);
+        var negativeTwoDollars = new Money(-2.00m, Currencies.Default);
 
         // Act - Simulate a complete order lifecycle
         account.AddOrderRevenue(twentyDollars, DefaultOrderId); // +$20, Balance = $20
@@ -447,10 +448,10 @@ public class RestaurantAccountTests
         var account = RestaurantAccount.Create(DefaultRestaurantId);
         var randomAmounts = new[]
         {
-            Money.Create(15.75m).Value,
-            Money.Create(-2.25m).Value,
-            Money.Create(8.50m).Value,
-            Money.Create(-1.00m).Value
+            new Money(15.75m, Currencies.Default),
+            new Money(-2.25m, Currencies.Default),
+            new Money(8.50m, Currencies.Default),
+            new Money(-1.00m, Currencies.Default)
         };
 
         // Act & Assert - Check consistency after each transaction
@@ -480,9 +481,9 @@ public class RestaurantAccountTests
     {
         // Arrange
         var account = RestaurantAccount.Create(DefaultRestaurantId);
-        var hundredDollars = Money.Create(100.00m).Value;
-        var threePercentFee = Money.Create(-3.00m).Value;
-        var fiftyDollars = Money.Create(50.00m).Value;
+        var hundredDollars = new Money(100.00m, Currencies.Default);
+        var threePercentFee = new Money(-3.00m, Currencies.Default);
+        var fiftyDollars = new Money(50.00m, Currencies.Default);
         
         // Act - Simulate a month of restaurant operations
         
@@ -492,13 +493,13 @@ public class RestaurantAccountTests
         
         // Week 2: More orders and a refund
         account.AddOrderRevenue(fiftyDollars, DefaultOrderId);
-        account.AddRefundDeduction(Money.Create(-10.00m).Value, DefaultOrderId);
+        account.AddRefundDeduction(new Money(-10.00m, Currencies.Default), DefaultOrderId);
         
         // Week 3: Manual adjustment for promotion reimbursement
-        account.AddManualAdjustment(Money.Create(5.00m).Value);
+        account.AddManualAdjustment(new Money(5.00m, Currencies.Default));
         
         // Week 4: Process payout
-        var payoutAmount = Money.Create(100.00m).Value;
+        var payoutAmount = new Money(100.00m, Currencies.Default);
         var payoutResult = account.ProcessPayout(payoutAmount);
         
         // Assert
@@ -524,7 +525,7 @@ public class RestaurantAccountTests
         var account = RestaurantAccount.Create(DefaultRestaurantId);
         if (balance > 0)
         {
-            var amount = Money.Create(balance).Value;
+            var amount = new Money(balance, Currencies.Default);
             account.AddOrderRevenue(amount, DefaultOrderId);
         }
         account.ClearDomainEvents();

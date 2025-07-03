@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Entities;
 using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
@@ -35,7 +36,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
 
     public static RestaurantAccount Create(RestaurantId restaurantId)
     {
-        var zeroBalance = Money.Create(0).Value; // Should always succeed for 0
+        var zeroBalance = new Money(0, Currencies.Default);
         
         var account = new RestaurantAccount(
             RestaurantAccountId.CreateUnique(),
@@ -105,7 +106,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         }
 
         // Create negative amount for payout (debit transaction)
-        var negativePayoutAmount = Money.Create(-payoutAmount.Amount, payoutAmount.Currency).Value;
+        var negativePayoutAmount = new Money(-payoutAmount.Amount, payoutAmount.Currency);
         
         var transactionResult = AccountTransaction.Create(
             TransactionType.PayoutSettlement, 
@@ -160,9 +161,9 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         _transactions.Add(transaction);
         
         // Recalculate balance and verify invariant
-        var newBalance = Money.Create(
+        var newBalance = new Money(
             _transactions.Sum(t => t.Amount.Amount), 
-            CurrentBalance.Currency).Value;
+            CurrentBalance.Currency);
         
         CurrentBalance = newBalance;
         

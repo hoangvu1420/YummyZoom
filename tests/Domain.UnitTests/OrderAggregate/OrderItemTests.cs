@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
@@ -14,7 +15,7 @@ public class OrderItemTests
     private static readonly MenuCategoryId DefaultMenuCategoryId = MenuCategoryId.CreateUnique();
     private static readonly MenuItemId DefaultMenuItemId = MenuItemId.CreateUnique();
     private const string DefaultItemName = "Test Pizza";
-    private static readonly Money DefaultBasePrice = new Money(15.99m);
+    private static readonly Money DefaultBasePrice = new Money(15.99m, Currencies.Default);
     private const int DefaultQuantity = 2;
     private static readonly OrderItemCustomization DefaultCustomization = CreateDefaultCustomization();
 
@@ -43,7 +44,7 @@ public class OrderItemTests
         orderItem.SelectedCustomizations.Should().BeEmpty();
         
         // Verify calculated line item total
-        var expectedLineTotal = new Money(DefaultBasePrice.Amount * DefaultQuantity);
+        var expectedLineTotal = new Money(DefaultBasePrice.Amount * DefaultQuantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedLineTotal);
     }
 
@@ -71,7 +72,7 @@ public class OrderItemTests
         
         // Verify calculated line item total includes customization price
         var customizationTotal = DefaultCustomization.Snapshot_ChoicePriceAdjustmentAtOrder.Amount;
-        var expectedLineTotal = new Money((DefaultBasePrice.Amount + customizationTotal) * DefaultQuantity);
+        var expectedLineTotal = new Money((DefaultBasePrice.Amount + customizationTotal) * DefaultQuantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedLineTotal);
     }
 
@@ -100,7 +101,7 @@ public class OrderItemTests
         
         // Verify calculated line item total includes all customizations
         var totalCustomizationCost = 2.00m + 3.50m; // Sum of customization prices
-        var expectedLineTotal = new Money((DefaultBasePrice.Amount + totalCustomizationCost) * DefaultQuantity);
+        var expectedLineTotal = new Money((DefaultBasePrice.Amount + totalCustomizationCost) * DefaultQuantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedLineTotal);
     }
 
@@ -165,7 +166,7 @@ public class OrderItemTests
     public void LineItemTotal_WithNoCustomizations_ShouldEqualBasePriceTimesQuantity()
     {
         // Arrange
-        var basePrice = new Money(12.50m);
+        var basePrice = new Money(12.50m, Currencies.Default);
         var quantity = 3;
 
         // Act
@@ -177,7 +178,7 @@ public class OrderItemTests
             quantity).Value;
 
         // Assert
-        var expectedTotal = new Money(basePrice.Amount * quantity);
+        var expectedTotal = new Money(basePrice.Amount * quantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedTotal);
     }
 
@@ -185,7 +186,7 @@ public class OrderItemTests
     public void LineItemTotal_WithCustomizations_ShouldIncludeCustomizationCosts()
     {
         // Arrange
-        var basePrice = new Money(10.00m);
+        var basePrice = new Money(10.00m, Currencies.Default);
         var quantity = 2;
         var customization = CreateCustomization("Large Size", 3.00m);
         var customizations = new List<OrderItemCustomization> { customization };
@@ -201,7 +202,7 @@ public class OrderItemTests
 
         // Assert
         // (10.00 + 3.00) * 2 = 26.00
-        var expectedTotal = new Money((basePrice.Amount + 3.00m) * quantity);
+        var expectedTotal = new Money((basePrice.Amount + 3.00m) * quantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedTotal);
     }
 
@@ -209,7 +210,7 @@ public class OrderItemTests
     public void LineItemTotal_WithNegativeCustomizationAdjustment_ShouldCalculateCorrectly()
     {
         // Arrange
-        var basePrice = new Money(15.00m);
+        var basePrice = new Money(15.00m, Currencies.Default);
         var quantity = 1;
         var discount = CreateCustomization("Student Discount", -2.00m);
         var customizations = new List<OrderItemCustomization> { discount };
@@ -225,7 +226,7 @@ public class OrderItemTests
 
         // Assert
         // (15.00 - 2.00) * 1 = 13.00
-        var expectedTotal = new Money((basePrice.Amount - 2.00m) * quantity);
+        var expectedTotal = new Money((basePrice.Amount - 2.00m) * quantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedTotal);
     }
 
@@ -243,7 +244,7 @@ public class OrderItemTests
         return OrderItemCustomization.Create(
             "Toppings",
             choiceName,
-            new Money(priceAdjustment)).Value;
+            new Money(priceAdjustment, Currencies.Default)).Value;
     }
 
     #endregion

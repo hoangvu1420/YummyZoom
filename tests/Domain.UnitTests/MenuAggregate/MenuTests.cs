@@ -1,5 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate;
 using YummyZoom.Domain.MenuAggregate.Entities;
 using YummyZoom.Domain.MenuAggregate.Events;
@@ -8,7 +10,7 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 namespace YummyZoom.Domain.UnitTests.MenuAggregate;
 
 [TestFixture]
-public class MenuErrorsTests
+public class MenuTests
 {
     private const string DefaultName = "Test Menu";
     private const string DefaultDescription = "Test Description";
@@ -93,7 +95,7 @@ public class MenuErrorsTests
     public void CreateMenuItem_WithValidInputs_ShouldSucceedAndInitializeMenuItemCorrectly()
     {
         // Arrange & Act
-        var result = MenuItem.Create("Test Item", "Test Description", YummyZoom.Domain.Common.ValueObjects.Money.Create(10.00m).Value);
+        var result = MenuItem.Create("Test Item", "Test Description", new Money(10.00m, Currencies.Default));
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -110,7 +112,7 @@ public class MenuErrorsTests
     public void CreateMenuItem_WithNegativePrice_ShouldFail()
     {
         // Arrange & Act
-        var result = MenuItem.Create("Test Item", "Test Description", YummyZoom.Domain.Common.ValueObjects.Money.Create(-5.00m).Value);
+        var result = MenuItem.Create("Test Item", "Test Description", new Money(-5.00m, Currencies.Default));
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -121,7 +123,7 @@ public class MenuErrorsTests
     public void CreateMenuItem_WithZeroPrice_ShouldFail()
     {
         // Arrange & Act
-        var result = MenuItem.Create("Test Item", "Test Description", YummyZoom.Domain.Common.ValueObjects.Money.Create(0m).Value);
+        var result = MenuItem.Create("Test Item", "Test Description", new Money(0m, Currencies.Default));
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -132,7 +134,7 @@ public class MenuErrorsTests
     public void MarkAsUnavailable_Should_SetIsAvailableToFalse()
     {
         // Arrange
-        var result = MenuItem.Create("Test Item", "Test Description", YummyZoom.Domain.Common.ValueObjects.Money.Create(10.00m).Value);
+        var result = MenuItem.Create("Test Item", "Test Description", new Money(10.00m, Currencies.Default));
         result.IsSuccess.Should().BeTrue();
         var menuItem = result.Value;
 
@@ -147,7 +149,7 @@ public class MenuErrorsTests
     public void MarkAsAvailable_Should_SetIsAvailableToTrue()
     {
         // Arrange
-        var result = MenuItem.Create("Test Item", "Test Description", YummyZoom.Domain.Common.ValueObjects.Money.Create(10.00m).Value, isAvailable: false);
+        var result = MenuItem.Create("Test Item", "Test Description", new Money(10.00m, Currencies.Default), isAvailable: false);
         result.IsSuccess.Should().BeTrue();
         var menuItem = result.Value;
 

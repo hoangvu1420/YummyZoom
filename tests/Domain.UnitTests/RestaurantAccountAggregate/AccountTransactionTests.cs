@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Entities;
 using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
@@ -11,9 +12,9 @@ namespace YummyZoom.Domain.UnitTests.RestaurantAccountAggregate;
 [TestFixture]
 public class AccountTransactionTests
 {
-    private static readonly Money TenDollars = Money.Create(10.00m).Value;
-    private static readonly Money NegativeFiveDollars = Money.Create(-5.00m).Value;
-    private static readonly Money ZeroDollars = Money.Create(0.00m).Value;
+    private static readonly Money TenDollars = new Money(10.00m, Currencies.Default);
+    private static readonly Money NegativeFiveDollars = new Money(-5.00m, Currencies.Default);
+    private static readonly Money ZeroDollars = new Money(0.00m, Currencies.Default);
     private static readonly OrderId DefaultOrderId = OrderId.Create(Guid.NewGuid());
 
     #region Create() Method Tests - OrderRevenue

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
@@ -15,7 +16,7 @@ public class RestaurantAccountEventsTests
     private static readonly RestaurantAccountId DefaultAccountId = RestaurantAccountId.CreateUnique();
     private static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
     private static readonly AccountTransactionId DefaultTransactionId = AccountTransactionId.CreateUnique();
-    private static readonly Money DefaultAmount = Money.Create(10.00m).Value;
+    private static readonly Money DefaultAmount = new Money(10.00m, Currencies.Default);
     private static readonly OrderId DefaultOrderId = OrderId.Create(Guid.NewGuid());
     private static readonly PayoutMethodDetails DefaultPayoutMethod = PayoutMethodDetails.Create("Bank Account: ****1234").Value;
 
@@ -126,8 +127,8 @@ public class RestaurantAccountEventsTests
     public void PayoutSettled_WithValidParameters_ShouldInitializeCorrectly()
     {
         // Arrange
-        var payoutAmount = Money.Create(50.00m).Value;
-        var newBalance = Money.Create(25.00m).Value;
+        var payoutAmount = new Money(50.00m, Currencies.Default);
+        var newBalance = new Money(25.00m, Currencies.Default);
 
         // Act
         var payoutSettledEvent = new PayoutSettled(DefaultAccountId, payoutAmount, newBalance);
@@ -142,8 +143,8 @@ public class RestaurantAccountEventsTests
     public void PayoutSettled_ShouldImplementIDomainEvent()
     {
         // Arrange
-        var payoutAmount = Money.Create(50.00m).Value;
-        var newBalance = Money.Create(25.00m).Value;
+        var payoutAmount = new Money(50.00m, Currencies.Default);
+        var newBalance = new Money(25.00m, Currencies.Default);
 
         // Act
         var payoutSettledEvent = new PayoutSettled(DefaultAccountId, payoutAmount, newBalance);
@@ -156,8 +157,8 @@ public class RestaurantAccountEventsTests
     public void PayoutSettled_WithZeroNewBalance_ShouldInitializeCorrectly()
     {
         // Arrange
-        var payoutAmount = Money.Create(100.00m).Value;
-        var zeroBalance = Money.Create(0.00m).Value;
+        var payoutAmount = new Money(100.00m, Currencies.Default);
+        var zeroBalance = new Money(0.00m, Currencies.Default);
 
         // Act
         var payoutSettledEvent = new PayoutSettled(DefaultAccountId, payoutAmount, zeroBalance);
@@ -242,8 +243,8 @@ public class RestaurantAccountEventsTests
     public void PayoutSettled_WithSameParameters_ShouldBeEqual()
     {
         // Arrange
-        var payoutAmount = Money.Create(50.00m).Value;
-        var newBalance = Money.Create(25.00m).Value;
+        var payoutAmount = new Money(50.00m, Currencies.Default);
+        var newBalance = new Money(25.00m, Currencies.Default);
         var event1 = new PayoutSettled(DefaultAccountId, payoutAmount, newBalance);
         var event2 = new PayoutSettled(DefaultAccountId, payoutAmount, newBalance);
 

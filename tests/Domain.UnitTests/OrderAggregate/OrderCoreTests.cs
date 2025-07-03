@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
@@ -25,10 +26,10 @@ public class OrderCoreTests
     private static readonly DeliveryAddress DefaultDeliveryAddress = CreateDefaultDeliveryAddress();
     private static readonly List<OrderItem> DefaultOrderItems = CreateDefaultOrderItems();
     private const string DefaultSpecialInstructions = "No special instructions";
-    private static readonly Money DefaultDiscountAmount = Money.Zero;
-    private static readonly Money DefaultDeliveryFee = new Money(5.00m);
-    private static readonly Money DefaultTipAmount = new Money(2.00m);
-    private static readonly Money DefaultTaxAmount = new Money(1.50m);
+    private static readonly Money DefaultDiscountAmount = Money.Zero(Currencies.Default);
+    private static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
+    private static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
+    private static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
 
     #region Create() Method Tests
 
@@ -68,11 +69,11 @@ public class OrderCoreTests
         order.EstimatedDeliveryTime.Should().BeNull();
         
         // Verify calculated amounts
-        var expectedSubtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount));
+        var expectedSubtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         order.Subtotal.Should().Be(expectedSubtotal);
         
         var expectedTotal = new Money(expectedSubtotal.Amount - DefaultDiscountAmount.Amount + 
-                                    DefaultTaxAmount.Amount + DefaultDeliveryFee.Amount + DefaultTipAmount.Amount);
+                                    DefaultTaxAmount.Amount + DefaultDeliveryFee.Amount + DefaultTipAmount.Amount, Currencies.Default);
         order.TotalAmount.Should().Be(expectedTotal);
         
         // Verify domain event
@@ -99,10 +100,10 @@ public class OrderCoreTests
         result.IsSuccess.Should().BeTrue();
         var order = result.Value;
         
-        order.DiscountAmount.Should().Be(Money.Zero);
-        order.DeliveryFee.Should().Be(Money.Zero);
-        order.TipAmount.Should().Be(Money.Zero);
-        order.TaxAmount.Should().Be(Money.Zero);
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
+        order.DeliveryFee.Should().Be(Money.Zero(Currencies.Default));
+        order.TipAmount.Should().Be(Money.Zero(Currencies.Default));
+        order.TaxAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
 
@@ -151,7 +152,7 @@ public class OrderCoreTests
     public void Create_WithNegativeTotalAmount_ShouldFailWithNegativeTotalAmountError()
     {
         // Arrange
-        var largeDiscount = new Money(1000m); // Much larger than the order total
+        var largeDiscount = new Money(1000m, Currencies.Default); // Much larger than the order total
 
         // Act
         var result = Order.Create(
@@ -347,7 +348,7 @@ public class OrderCoreTests
             MenuCategoryId.CreateUnique(),
             MenuItemId.CreateUnique(),
             "Test Item",
-            new Money(10.00m),
+            new Money(10.00m, Currencies.Default),
             2).Value;
 
         return new List<OrderItem> { orderItem };

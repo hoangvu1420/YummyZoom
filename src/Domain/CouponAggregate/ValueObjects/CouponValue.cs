@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
@@ -88,7 +89,7 @@ public sealed class CouponValue : ValueObject
     {
         yield return Type;
         yield return PercentageValue ?? 0m;
-        yield return FixedAmountValue ?? Money.Zero;
+        yield return FixedAmountValue ?? Money.Zero(Currencies.Default);
         yield return FreeItemValue?.Value ?? Guid.Empty;
     }
 

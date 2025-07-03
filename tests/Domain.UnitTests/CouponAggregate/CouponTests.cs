@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.Errors;
@@ -20,7 +21,7 @@ public class CouponTests
     private static readonly AppliesTo DefaultAppliesTo = AppliesTo.CreateForWholeOrder().Value;
     private static readonly DateTime DefaultStartDate = new(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private static readonly DateTime DefaultEndDate = new(2025, 12, 31, 23, 59, 59, DateTimeKind.Utc);
-    private static readonly Money DefaultMinOrderAmount = Money.Create(25.00m).Value;
+    private static readonly Money DefaultMinOrderAmount = new Money(25.00m, Currencies.Default);
 
     #region Create() Method Tests - New Coupon
 
@@ -301,7 +302,7 @@ public class CouponTests
     public void Create_WithInvalidMinOrderAmount_ShouldFailWithInvalidMinOrderAmountError()
     {
         // Arrange
-        var invalidAmount = Money.Create(-10.00m).Value;
+        var invalidAmount = new Money(-10.00m, Currencies.Default);
 
         // Act
         var result = Coupon.Create(

@@ -68,8 +68,10 @@ public sealed class OrderItem : Entity<OrderItemId>
 
     private Money CalculateLineItemTotal()
     {
-        var customizationTotal = _selectedCustomizations.Sum(c => c.Snapshot_ChoicePriceAdjustmentAtOrder.Amount);
-        return new Money((Snapshot_BasePriceAtOrder.Amount + customizationTotal) * Quantity);
+        var currency = Snapshot_BasePriceAtOrder.Currency;
+        var customizationTotal = new Money(_selectedCustomizations.Sum(c => c.Snapshot_ChoicePriceAdjustmentAtOrder.Amount), currency);
+        
+        return (Snapshot_BasePriceAtOrder + customizationTotal) * Quantity;
     }
 
 #pragma warning disable CS8618

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -24,10 +25,10 @@ public class OrderCouponTests
     private static readonly DeliveryAddress DefaultDeliveryAddress = CreateDefaultDeliveryAddress();
     private static readonly List<OrderItem> DefaultOrderItems = CreateDefaultOrderItems();
     private const string DefaultSpecialInstructions = "No special instructions";
-    private static readonly Money DefaultDiscountAmount = Money.Zero;
-    private static readonly Money DefaultDeliveryFee = new Money(5.00m);
-    private static readonly Money DefaultTipAmount = new Money(2.00m);
-    private static readonly Money DefaultTaxAmount = new Money(1.50m);
+    private static readonly Money DefaultDiscountAmount = Money.Zero(Currencies.Default);
+    private static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
+    private static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
+    private static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
 
     #region ApplyCoupon() Method Tests
 
@@ -37,7 +38,7 @@ public class OrderCouponTests
         // Arrange
         var order = CreateValidOrder();
         var coupon = CreatePercentageCoupon(0.10m); // 10% discount
-        var expectedDiscount = new Money(order.Subtotal.Amount * 0.10m);
+        var expectedDiscount = new Money(order.Subtotal.Amount * 0.10m, Currencies.Default);
 
         // Act
         var result = order.ApplyCoupon(coupon);
@@ -51,7 +52,7 @@ public class OrderCouponTests
         
         // Verify total amount is recalculated
         var expectedTotal = new Money(order.Subtotal.Amount - expectedDiscount.Amount + 
-                                    order.TaxAmount.Amount + order.DeliveryFee.Amount + order.TipAmount.Amount);
+                                    order.TaxAmount.Amount + order.DeliveryFee.Amount + order.TipAmount.Amount, Currencies.Default);
         order.TotalAmount.Should().Be(expectedTotal);
     }
 
@@ -60,7 +61,7 @@ public class OrderCouponTests
     {
         // Arrange
         var order = CreateValidOrder();
-        var discountAmount = new Money(5.00m);
+        var discountAmount = new Money(5.00m, Currencies.Default);
         var coupon = CreateFixedAmountCoupon(discountAmount);
 
         // Act
@@ -78,7 +79,7 @@ public class OrderCouponTests
     {
         // Arrange
         var order = CreateValidOrder();
-        var largeDiscountAmount = new Money(1000.00m); // Much larger than subtotal
+        var largeDiscountAmount = new Money(1000.00m, Currencies.Default); // Much larger than subtotal
         var coupon = CreateFixedAmountCoupon(largeDiscountAmount);
 
         // Act
@@ -116,7 +117,7 @@ public class OrderCouponTests
         var coupon = CreateCategorySpecificCoupon(categoryId, 0.15m); // 15% discount
         var expectedDiscount = new Money(order.OrderItems
             .Where(oi => oi.Snapshot_MenuCategoryId == categoryId)
-            .Sum(oi => oi.LineItemTotal.Amount) * 0.15m);
+            .Sum(oi => oi.LineItemTotal.Amount) * 0.15m, Currencies.Default);
 
         // Act
         var result = order.ApplyCoupon(coupon);
@@ -131,7 +132,7 @@ public class OrderCouponTests
     {
         // Arrange
         var order = CreateValidOrder();
-        var minOrderAmount = new Money(1000.00m); // Much higher than order subtotal
+        var minOrderAmount = new Money(1000.00m, Currencies.Default); // Much higher than order subtotal
         var coupon = CreatePercentageCouponWithMinOrder(0.10m, minOrderAmount);
 
         // Act
@@ -140,7 +141,7 @@ public class OrderCouponTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(OrderErrors.CouponNotApplicable);
-        order.DiscountAmount.Should().Be(Money.Zero);
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
 
@@ -176,7 +177,7 @@ public class OrderCouponTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(OrderErrors.CouponCannotBeAppliedToOrderStatus);
-        order.DiscountAmount.Should().Be(Money.Zero);
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
 
@@ -194,7 +195,7 @@ public class OrderCouponTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(OrderErrors.CouponNotApplicable);
-        order.DiscountAmount.Should().Be(Money.Zero);
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
     }
 
     [Test]
@@ -232,7 +233,7 @@ public class OrderCouponTests
         var discountBaseAmount = order.OrderItems
             .Where(oi => oi.Snapshot_MenuCategoryId == order.OrderItems.First().Snapshot_MenuCategoryId)
             .Sum(oi => oi.LineItemTotal.Amount);
-        var expectedDiscount = new Money(discountBaseAmount * 0.01m);
+        var expectedDiscount = new Money(discountBaseAmount * 0.01m, Currencies.Default);
 
         // Act
         var result = order.ApplyCoupon(coupon);
@@ -261,13 +262,13 @@ public class OrderCouponTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        order.DiscountAmount.Should().Be(Money.Zero);
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
         order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         
         // Verify total amount is recalculated without discount
         var expectedTotal = new Money(order.Subtotal.Amount + 
-                                    order.TaxAmount.Amount + order.DeliveryFee.Amount + order.TipAmount.Amount);
+                                    order.TaxAmount.Amount + order.DeliveryFee.Amount + order.TipAmount.Amount, Currencies.Default);
         order.TotalAmount.Should().Be(expectedTotal);
     }
 
@@ -324,7 +325,7 @@ public class OrderCouponTests
             MenuCategoryId.CreateUnique(),
             MenuItemId.CreateUnique(),
             "Test Item",
-            new Money(10.00m),
+            new Money(10.00m, Currencies.Default),
             2).Value;
 
         return new List<OrderItem> { orderItem };

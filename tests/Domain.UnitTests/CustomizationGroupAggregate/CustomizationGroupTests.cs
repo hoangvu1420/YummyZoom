@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
@@ -17,8 +18,8 @@ public class CustomizationGroupTests
     private const string DefaultGroupName = "Size Options";
     private const int DefaultMinSelections = 1;
     private const int DefaultMaxSelections = 1;
-    private static readonly Money DefaultPrice = Money.Create(0m).Value;
-    private static readonly Money PriceAdjustment = Money.Create(2.50m).Value;
+    private static readonly Money DefaultPrice = new Money(1.00m, Currencies.Default);
+    private static readonly Money PriceAdjustment = new Money(2.50m, Currencies.Default);
 
     #region Create() Method Tests
 
@@ -212,7 +213,7 @@ public class CustomizationGroupTests
         var group = CreateValidGroup();
         var choice1 = CustomizationChoice.Create("Small", DefaultPrice).Value;
         var choice2 = CustomizationChoice.Create("Medium", PriceAdjustment).Value;
-        var choice3 = CustomizationChoice.Create("Large", Money.Create(5.00m).Value).Value;
+        var choice3 = CustomizationChoice.Create("Large", new Money(5.00m, Currencies.Default)).Value;
 
         // Act
         var result1 = group.AddChoice(choice1);
@@ -297,7 +298,7 @@ public class CustomizationGroupTests
         group.AddChoice(originalChoice);
         var originalChoiceId = originalChoice.Id;
         var newName = "Extra Large";
-        var newPriceAdjustment = Money.Create(3.00m).Value;
+        var newPriceAdjustment = new Money(3.00m, Currencies.Default);
         var newIsDefault = true;
 
         // Act
@@ -356,7 +357,7 @@ public class CustomizationGroupTests
         var group = CreateValidGroup();
         var originalChoice = CustomizationChoice.Create("Large", DefaultPrice, false).Value;
         group.AddChoice(originalChoice);
-        var newPriceAdjustment = Money.Create(4.00m).Value;
+        var newPriceAdjustment = new Money(4.00m, Currencies.Default);
 
         // Act - Update with same name but different price and default flag
         var result = group.UpdateChoice(originalChoice.Id, "Large", newPriceAdjustment, true);

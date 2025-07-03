@@ -71,11 +71,12 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         Status = OrderStatus.Placed;
         PlacementTimestamp = DateTime.UtcNow;
         LastUpdateTimestamp = DateTime.UtcNow;
-
-        // Initialize with default values before recalculation
-        Subtotal = Money.Zero;
-        TotalAmount = Money.Zero;
         
+        var orderCurrency = deliveryFee.Currency;
+
+        Subtotal = Money.Zero(orderCurrency);
+        TotalAmount = Money.Zero(orderCurrency);
+
         RecalculateTotals();
     }
 
@@ -96,17 +97,20 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
             return Result.Failure<Order>(OrderErrors.OrderItemRequired);
         }
 
+        // Establish a single currency for the new order from the items provided.
+        var currency = orderItems.First().Snapshot_BasePriceAtOrder.Currency;
+
         var order = new Order(
             OrderId.CreateUnique(),
             GenerateOrderNumber(),
             customerId,
             restaurantId,
             deliveryAddress,
-            specialInstructions,
-            discountAmount ?? Money.Zero,
-            deliveryFee ?? Money.Zero,
-            tipAmount ?? Money.Zero,
-            taxAmount ?? Money.Zero,
+            specialInstructions,            
+            discountAmount ?? Money.Zero(currency),
+            deliveryFee ?? Money.Zero(currency),
+            tipAmount ?? Money.Zero(currency),
+            taxAmount ?? Money.Zero(currency),
             orderItems,
             appliedCouponIds);
 
@@ -205,27 +209,28 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
             return Result.Failure(OrderErrors.CouponNotApplicable);
         }
 
+        var discountBaseMoney = new Money(GetDiscountBaseAmount(coupon), Subtotal.Currency);
         Money newDiscount;
         switch (coupon.Value.Type)
         {
             case CouponType.Percentage:
-                newDiscount = new Money(discountBaseAmount * coupon.Value.PercentageValue!.Value);
+                newDiscount = discountBaseMoney * coupon.Value.PercentageValue!.Value;
                 break;
             case CouponType.FixedAmount:
                 // Discount cannot be more than the value of the items it applies to
-                var fixedAmount = coupon.Value.FixedAmountValue!.Amount;
-                newDiscount = new Money(Math.Min(discountBaseAmount, fixedAmount));
+                var fixedAmount = coupon.Value.FixedAmountValue!; // Assumes this is a Money object
+                newDiscount = new Money(Math.Min(discountBaseMoney.Amount, fixedAmount.Amount), Subtotal.Currency);
                 break;
             case CouponType.FreeItem:
                 // The base amount is already calculated as the price of the free item
-                newDiscount = new Money(discountBaseAmount);
+                newDiscount = discountBaseMoney;
                 break;
             default:
                 return Result.Failure(OrderErrors.CouponNotApplicable);
         }
 
         // Ensure discount doesn't exceed subtotal
-        if (newDiscount.Amount > Subtotal.Amount)
+        if (newDiscount.Amount > Subtotal.Amount) // Comparison operators could be added to Money VO
         {
             newDiscount = Subtotal;
         }
@@ -245,7 +250,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
             return Result.Success(); // No coupon to remove
         }
 
-        DiscountAmount = Money.Zero;
+        DiscountAmount = Money.Zero(Subtotal.Currency);
         _appliedCouponIds.Clear();
         RecalculateTotals();
         LastUpdateTimestamp = DateTime.UtcNow;
@@ -277,16 +282,23 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
 
     private void RecalculateTotals()
     {
+        // If there are no items, totals are based on fees/tips alone.
+        if (!_orderItems.Any())
+        {
+            var currency = DeliveryFee.Currency; // Get currency from another source
+            Subtotal = Money.Zero(currency);
+            TotalAmount = Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount;
+            return;
+        }
+        
+        // Establish the currency for the calculation from the items.
+        var orderCurrency = _orderItems.First().LineItemTotal.Currency;
+
         // 1. Calculate Subtotal from all items
-        Subtotal = new Money(_orderItems.Sum(item => item.LineItemTotal.Amount));
+        Subtotal = _orderItems.Sum(item => item.LineItemTotal, orderCurrency);
 
         // 2. Calculate final total
-        TotalAmount = new Money(Subtotal.Amount - DiscountAmount.Amount + TaxAmount.Amount + DeliveryFee.Amount + TipAmount.Amount);
-    }
-
-    private Money CalculateSubtotal()
-    {
-        return new Money(_orderItems.Sum(item => item.LineItemTotal.Amount));
+        TotalAmount = Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount;
     }
 
     private static string GenerateOrderNumber()

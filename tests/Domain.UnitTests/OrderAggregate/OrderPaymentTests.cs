@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
@@ -24,10 +25,10 @@ public class OrderPaymentTests
     private static readonly DeliveryAddress DefaultDeliveryAddress = CreateDefaultDeliveryAddress();
     private static readonly List<OrderItem> DefaultOrderItems = CreateDefaultOrderItems();
     private const string DefaultSpecialInstructions = "No special instructions";
-    private static readonly Money DefaultDiscountAmount = Money.Zero;
-    private static readonly Money DefaultDeliveryFee = new Money(5.00m);
-    private static readonly Money DefaultTipAmount = new Money(2.00m);
-    private static readonly Money DefaultTaxAmount = new Money(1.50m);
+    private static readonly Money DefaultDiscountAmount = Money.Zero(Currencies.Default);
+    private static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
+    private static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
+    private static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
 
     #region Payment Methods Tests
 
@@ -120,7 +121,7 @@ public class OrderPaymentTests
             MenuCategoryId.CreateUnique(),
             MenuItemId.CreateUnique(),
             "Test Item",
-            new Money(10.00m),
+            new Money(10.00m, Currencies.Default),
             2).Value;
 
         return new List<OrderItem> { orderItem };
@@ -131,7 +132,7 @@ public class OrderPaymentTests
         return PaymentTransaction.Create(
             PaymentMethodType.CreditCard,
             PaymentTransactionType.Payment,
-            new Money(25.50m),
+            new Money(25.50m, Currencies.Default),
             DateTime.UtcNow).Value;
     }
 

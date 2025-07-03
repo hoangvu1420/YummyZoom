@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.Errors;
@@ -96,7 +97,7 @@ public class CouponUpdateMethodsTests
     {
         // Arrange
         var coupon = CreateValidCoupon();
-        var minAmount = Money.Create(50.00m).Value;
+        var minAmount = new Money(25.00m, Currencies.Default);
 
         // Act
         var result = coupon.SetMinimumOrderAmount(minAmount);
@@ -125,7 +126,7 @@ public class CouponUpdateMethodsTests
     {
         // Arrange
         var coupon = CreateValidCoupon();
-        var negativeAmount = Money.Create(-10.00m).Value;
+        var negativeAmount = new Money(-10.00m, Currencies.Default);
         var originalAmount = coupon.MinOrderAmount;
 
         // Act
@@ -142,7 +143,7 @@ public class CouponUpdateMethodsTests
     {
         // Arrange
         var coupon = CreateValidCoupon();
-        var zeroAmount = Money.Create(0m).Value;
+        var zeroAmount = new Money(0m, Currencies.Default);
 
         // Act
         var result = coupon.SetMinimumOrderAmount(zeroAmount);
@@ -161,7 +162,7 @@ public class CouponUpdateMethodsTests
     {
         // Arrange
         var coupon = CreateValidCoupon();
-        coupon.SetMinimumOrderAmount(Money.Create(25.00m).Value); // Set first
+        coupon.SetMinimumOrderAmount(new Money(25.00m, Currencies.Default)); // Set first
 
         // Act
         var result = coupon.RemoveMinimumOrderAmount();

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
@@ -82,7 +83,7 @@ public class CouponValueTests
     public void CreateFixedAmount_WithValidAmount_ShouldSucceedAndSetCorrectProperties()
     {
         // Arrange
-        var amount = Money.Create(25.50m).Value;
+        var amount = new Money(25.00m, Currencies.Default);
 
         // Act
         var result = CouponValue.CreateFixedAmount(amount);
@@ -105,7 +106,7 @@ public class CouponValueTests
     public void CreateFixedAmount_WithValidAmountValues_ShouldSucceed(decimal amountValue)
     {
         // Arrange
-        var amount = Money.Create(amountValue).Value;
+        var amount = new Money(amountValue, Currencies.Default);
 
         // Act
         var result = CouponValue.CreateFixedAmount(amount);
@@ -119,7 +120,7 @@ public class CouponValueTests
     public void CreateFixedAmount_WithZeroAmount_ShouldFailWithValidationError()
     {
         // Arrange
-        var zeroAmount = Money.Create(0m).Value;
+        var zeroAmount = new Money(0m, Currencies.Default);
 
         // Act
         var result = CouponValue.CreateFixedAmount(zeroAmount);
@@ -134,7 +135,7 @@ public class CouponValueTests
     public void CreateFixedAmount_WithNegativeAmount_ShouldFailWithValidationError()
     {
         // Arrange
-        var negativeAmount = Money.Create(-10.50m).Value;
+        var negativeAmount = new Money(-10.50m, Currencies.Default);
 
         // Act
         var result = CouponValue.CreateFixedAmount(negativeAmount);
@@ -212,7 +213,7 @@ public class CouponValueTests
     public void GetDisplayValue_ForFixedAmountCoupon_ShouldReturnCorrectFormat()
     {
         // Arrange
-        var amount = Money.Create(25.00m).Value;
+        var amount = new Money(25.00m, Currencies.Default);
         var couponValue = CouponValue.CreateFixedAmount(amount).Value;
 
         // Act
@@ -258,7 +259,7 @@ public class CouponValueTests
     public void Equality_WithSameFixedAmountValues_ShouldBeEqual()
     {
         // Arrange
-        var amount = Money.Create(25.00m).Value;
+        var amount = new Money(25.00m, Currencies.Default);
         var couponValue1 = CouponValue.CreateFixedAmount(amount).Value;
         var couponValue2 = CouponValue.CreateFixedAmount(amount).Value;
 
@@ -299,7 +300,7 @@ public class CouponValueTests
     {
         // Arrange
         var percentageCoupon = CouponValue.CreatePercentage(10m).Value;
-        var fixedAmountCoupon = CouponValue.CreateFixedAmount(Money.Create(10m).Value).Value;
+        var fixedAmountCoupon = CouponValue.CreateFixedAmount(new Money(10m, Currencies.Default)).Value;
         var freeItemCoupon = CouponValue.CreateFreeItem(MenuItemId.CreateUnique()).Value;
 
         // Act & Assert

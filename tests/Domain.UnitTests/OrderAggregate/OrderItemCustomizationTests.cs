@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
@@ -11,7 +12,7 @@ public class OrderItemCustomizationTests
 {
     private const string DefaultGroupName = "Size Options";
     private const string DefaultChoiceName = "Large";
-    private static readonly Money DefaultPriceAdjustment = new Money(2.50m);
+    private static readonly Money DefaultPriceAdjustment = new Money(2.50m, Currencies.Default);
 
     #region Create() Method Tests
 
@@ -37,7 +38,7 @@ public class OrderItemCustomizationTests
     public void Create_WithZeroPriceAdjustment_ShouldSucceed()
     {
         // Arrange
-        var zeroPriceAdjustment = Money.Zero;
+        var zeroPriceAdjustment = Money.Zero(Currencies.Default);
 
         // Act
         var result = OrderItemCustomization.Create(
@@ -54,7 +55,7 @@ public class OrderItemCustomizationTests
     public void Create_WithNegativePriceAdjustment_ShouldSucceed()
     {
         // Arrange
-        var negativePriceAdjustment = new Money(-1.50m);
+        var negativePriceAdjustment = new Money(-1.50m, Currencies.Default);
 
         // Act
         var result = OrderItemCustomization.Create(
@@ -214,12 +215,12 @@ public class OrderItemCustomizationTests
         var customization1 = OrderItemCustomization.Create(
             DefaultGroupName,
             DefaultChoiceName,
-            new Money(1.00m)).Value;
+            new Money(1.00m, Currencies.Default)).Value;
 
         var customization2 = OrderItemCustomization.Create(
             DefaultGroupName,
             DefaultChoiceName,
-            new Money(2.00m)).Value;
+            new Money(2.00m, Currencies.Default)).Value;
 
         // Act & Assert
         customization1.Should().NotBe(customization2);

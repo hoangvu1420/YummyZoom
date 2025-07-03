@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
 using YummyZoom.SharedKernel;
@@ -10,8 +11,8 @@ namespace YummyZoom.Domain.UnitTests.CustomizationGroupAggregate;
 public class CustomizationChoiceTests
 {
     private const string DefaultChoiceName = "Large";
-    private static readonly Money DefaultPriceAdjustment = Money.Create(2.50m).Value;
-    private static readonly Money ZeroPriceAdjustment = Money.Create(0m).Value;
+    private static readonly Money DefaultPriceAdjustment = new Money(2.50m, Currencies.Default);
+    private static readonly Money ZeroPriceAdjustment = new Money(0m, Currencies.Default);
     private const bool DefaultIsDefault = false;
 
     #region Create() Method Tests
@@ -73,7 +74,7 @@ public class CustomizationChoiceTests
     public void Create_WithPositivePriceAdjustment_ShouldSucceed()
     {
         // Arrange
-        var positivePriceAdjustment = Money.Create(5.99m).Value;
+        var positivePriceAdjustment = new Money(1.00m, Currencies.Default);
 
         // Act
         var result = CustomizationChoice.Create(DefaultChoiceName, positivePriceAdjustment);
@@ -212,7 +213,7 @@ public class CustomizationChoiceTests
     public void Create_WithVariousCombinations_ShouldSucceed(string name, decimal priceAmount, bool isDefault)
     {
         // Arrange
-        var priceAdjustment = Money.Create(priceAmount).Value;
+        var priceAdjustment = new Money(priceAmount, Currencies.Default);
 
         // Act
         var result = CustomizationChoice.Create(name, priceAdjustment, isDefault);

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -12,7 +13,7 @@ public class PaymentTransactionTests
 {
     private static readonly PaymentMethodType DefaultPaymentMethodType = PaymentMethodType.CreditCard;
     private static readonly PaymentTransactionType DefaultTransactionType = PaymentTransactionType.Payment;
-    private static readonly Money DefaultAmount = new Money(25.99m);
+    private static readonly Money DefaultAmount = new Money(25.99m, Currencies.Default);
     private static readonly DateTime DefaultTimestamp = DateTime.UtcNow;
     private const string DefaultPaymentMethodDisplay = "Visa **** 4242";
     private const string DefaultGatewayReferenceId = "stripe_pi_12345";
@@ -85,7 +86,7 @@ public class PaymentTransactionTests
     public void Create_WithInvalidAmount_ShouldFailWithInvalidAmountError(decimal invalidAmount)
     {
         // Arrange
-        var invalidAmountMoney = new Money(invalidAmount);
+        var invalidAmountMoney = new Money(invalidAmount, Currencies.Default);
 
         // Act
         var result = PaymentTransaction.Create(
