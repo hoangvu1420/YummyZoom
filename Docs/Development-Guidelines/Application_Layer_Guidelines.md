@@ -47,7 +47,7 @@ public class GetSomethingQueryHandler : IRequestHandler<GetSomethingQuery, Resul
     {
         using var connection = _dbConnectionFactory.CreateConnection();
         
-        const string sql = @"SELECT * FROM ""TableName"" WHERE ""Id"" = @Id";
+        const string sql = """SELECT * FROM "TableName" WHERE "Id" = @Id""";
         var data = await connection.QueryAsync<SomethingDto>(
             new CommandDefinition(sql, new { request.Id }, cancellationToken: cancellationToken));
             
@@ -167,7 +167,7 @@ src/Application/<FeatureName>/
 - Always use repositories and work with full aggregates
 - Wrap in transactions using `IUnitOfWork.ExecuteInTransactionAsync`
 - Validate business rules in domain entities, not handlers
-- Use `[Authorize]` attributes for access control
+- Use `[Authorize]` attributes for access control with roles or policies
 
 ### Queries
 

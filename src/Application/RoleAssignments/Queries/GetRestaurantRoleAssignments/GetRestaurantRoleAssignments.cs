@@ -30,16 +30,17 @@ public class GetRestaurantRoleAssignmentsQueryHandler : IRequestHandler<GetResta
     {
         using var connection = _dbConnectionFactory.CreateConnection();
 
-        const string sql = @"
-            SELECT
-                ra.""Id"",
-                ra.""UserId"",
-                ra.""RestaurantId"",
-                ra.""Role"",
-                ra.""CreatedAt"",
-                ra.""UpdatedAt""
-            FROM ""RoleAssignments"" AS ra
-            WHERE ra.""RestaurantId"" = @RestaurantId";
+        const string sql = """
+                           SELECT
+                               ra."Id",
+                               ra."UserId",
+                               ra."RestaurantId",
+                               ra."Role",
+                               ra."CreatedAt",
+                               ra."UpdatedAt"
+                           FROM "RoleAssignments" AS ra
+                           WHERE ra."RestaurantId" = @RestaurantId
+                           """;
 
         var roleAssignments = await connection.QueryAsync<RoleAssignmentDto>(
             new CommandDefinition(sql, new { request.RestaurantId }, cancellationToken: cancellationToken));
