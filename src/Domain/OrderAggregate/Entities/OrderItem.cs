@@ -9,7 +9,8 @@ namespace YummyZoom.Domain.OrderAggregate.Entities;
 public sealed class OrderItem : Entity<OrderItemId>
 {
     private readonly List<OrderItemCustomization> _selectedCustomizations = [];
-
+    
+    public MenuCategoryId Snapshot_MenuCategoryId { get; private set; }
     public MenuItemId Snapshot_MenuItemId { get; private set; }
     public string Snapshot_ItemName { get; private set; }
     public Money Snapshot_BasePriceAtOrder { get; private set; }
@@ -20,6 +21,7 @@ public sealed class OrderItem : Entity<OrderItemId>
 
     private OrderItem(
         OrderItemId orderItemId,
+        MenuCategoryId snapshotMenuCategoryId,
         MenuItemId snapshotMenuItemId,
         string snapshotItemName,
         Money snapshotBasePriceAtOrder,
@@ -27,6 +29,7 @@ public sealed class OrderItem : Entity<OrderItemId>
         List<OrderItemCustomization> selectedCustomizations)
         : base(orderItemId)
     {
+        Snapshot_MenuCategoryId = snapshotMenuCategoryId;
         Snapshot_MenuItemId = snapshotMenuItemId;
         Snapshot_ItemName = snapshotItemName;
         Snapshot_BasePriceAtOrder = snapshotBasePriceAtOrder;
@@ -36,6 +39,7 @@ public sealed class OrderItem : Entity<OrderItemId>
     }
 
     public static Result<OrderItem> Create(
+        MenuCategoryId snapshotMenuCategoryId,
         MenuItemId snapshotMenuItemId,
         string snapshotItemName,
         Money snapshotBasePriceAtOrder,
@@ -54,6 +58,7 @@ public sealed class OrderItem : Entity<OrderItemId>
 
         return new OrderItem(
             OrderItemId.CreateUnique(),
+            snapshotMenuCategoryId,
             snapshotMenuItemId,
             snapshotItemName,
             snapshotBasePriceAtOrder,

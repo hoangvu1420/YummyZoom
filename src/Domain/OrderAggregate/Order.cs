@@ -1,4 +1,5 @@
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -70,9 +71,12 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         Status = OrderStatus.Placed;
         PlacementTimestamp = DateTime.UtcNow;
         LastUpdateTimestamp = DateTime.UtcNow;
+
+        // Initialize with default values before recalculation
+        Subtotal = Money.Zero;
+        TotalAmount = Money.Zero;
         
-        Subtotal = CalculateSubtotal();
-        TotalAmount = CalculateTotalAmount();
+        RecalculateTotals();
     }
 
     public static Result<Order> Create(
@@ -88,7 +92,8 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         List<CouponId>? appliedCouponIds = null)
     {
         if (!orderItems.Any())
-        {            return Result.Failure<Order>(OrderErrors.OrderItemRequired);
+        {
+            return Result.Failure<Order>(OrderErrors.OrderItemRequired);
         }
 
         var order = new Order(
@@ -109,7 +114,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         {
             return Result.Failure<Order>(OrderErrors.NegativeTotalAmount);
         }
-        
+
         order.AddDomainEvent(new OrderCreated(order.Id, order.CustomerId, order.RestaurantId, order.TotalAmount));
 
         return order;
@@ -125,7 +130,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         Status = OrderStatus.Accepted;
         EstimatedDeliveryTime = estimatedDeliveryTime;
         LastUpdateTimestamp = DateTime.UtcNow;
-        
+
         AddDomainEvent(new OrderAccepted(Id));
         return Result.Success();
     }
@@ -157,7 +162,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         AddDomainEvent(new OrderCancelled(Id));
         return Result.Success();
     }
-    
+
     public Result AddPaymentAttempt(PaymentTransaction payment)
     {
         _paymentTransactions.Add(payment);
@@ -171,20 +176,117 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         {
             return Result.Failure(OrderErrors.PaymentNotFound);
         }
-        
+
         payment.MarkAsSucceeded();
         AddDomainEvent(new OrderPaid(Id, paymentTransactionId));
         return Result.Success();
     }
 
+    public Result ApplyCoupon(Coupon coupon)
+    {
+        if (Status != OrderStatus.Placed)
+        {
+            return Result.Failure(OrderErrors.CouponCannotBeAppliedToOrderStatus);
+        }
+
+        if (_appliedCouponIds.Any())
+        {
+            return Result.Failure(OrderErrors.CouponAlreadyApplied);
+        }
+
+        if (coupon.MinOrderAmount is not null && Subtotal.Amount < coupon.MinOrderAmount.Amount)
+        {
+            return Result.Failure(OrderErrors.CouponNotApplicable);
+        }
+
+        var discountBaseAmount = GetDiscountBaseAmount(coupon);
+        if (discountBaseAmount <= 0)
+        {
+            return Result.Failure(OrderErrors.CouponNotApplicable);
+        }
+
+        Money newDiscount;
+        switch (coupon.Value.Type)
+        {
+            case CouponType.Percentage:
+                newDiscount = new Money(discountBaseAmount * coupon.Value.PercentageValue!.Value);
+                break;
+            case CouponType.FixedAmount:
+                // Discount cannot be more than the value of the items it applies to
+                var fixedAmount = coupon.Value.FixedAmountValue!.Amount;
+                newDiscount = new Money(Math.Min(discountBaseAmount, fixedAmount));
+                break;
+            case CouponType.FreeItem:
+                // The base amount is already calculated as the price of the free item
+                newDiscount = new Money(discountBaseAmount);
+                break;
+            default:
+                return Result.Failure(OrderErrors.CouponNotApplicable);
+        }
+
+        // Ensure discount doesn't exceed subtotal
+        if (newDiscount.Amount > Subtotal.Amount)
+        {
+            newDiscount = Subtotal;
+        }
+
+        DiscountAmount = newDiscount;
+        _appliedCouponIds.Add((CouponId)coupon.Id);
+        RecalculateTotals();
+        LastUpdateTimestamp = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    public Result RemoveCoupon()
+    {
+        if (!_appliedCouponIds.Any())
+        {
+            return Result.Success(); // No coupon to remove
+        }
+
+        DiscountAmount = Money.Zero;
+        _appliedCouponIds.Clear();
+        RecalculateTotals();
+        LastUpdateTimestamp = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    private decimal GetDiscountBaseAmount(Coupon coupon)
+    {
+        switch (coupon.AppliesTo.Scope)
+        {
+            case CouponScope.WholeOrder:
+                return Subtotal.Amount;
+
+            case CouponScope.SpecificItems:
+                return _orderItems
+                    .Where(oi => coupon.AppliesTo.ItemIds!.Contains(oi.Snapshot_MenuItemId))
+                    .Sum(oi => oi.LineItemTotal.Amount);
+
+            case CouponScope.SpecificCategories:
+                return _orderItems
+                    .Where(oi => coupon.AppliesTo.CategoryIds!.Contains(oi.Snapshot_MenuCategoryId))
+                    .Sum(oi => oi.LineItemTotal.Amount);
+
+            default:
+                return 0;
+        }
+    }
+
+    private void RecalculateTotals()
+    {
+        // 1. Calculate Subtotal from all items
+        Subtotal = new Money(_orderItems.Sum(item => item.LineItemTotal.Amount));
+
+        // 2. Calculate final total
+        TotalAmount = new Money(Subtotal.Amount - DiscountAmount.Amount + TaxAmount.Amount + DeliveryFee.Amount + TipAmount.Amount);
+    }
+
     private Money CalculateSubtotal()
     {
         return new Money(_orderItems.Sum(item => item.LineItemTotal.Amount));
-    }
-
-    private Money CalculateTotalAmount()
-    {
-        return new Money(Subtotal.Amount - DiscountAmount.Amount + TaxAmount.Amount + DeliveryFee.Amount + TipAmount.Amount);
     }
 
     private static string GenerateOrderNumber()

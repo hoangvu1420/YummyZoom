@@ -11,6 +11,7 @@ namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 [TestFixture]
 public class OrderItemTests
 {
+    private static readonly MenuCategoryId DefaultMenuCategoryId = MenuCategoryId.CreateUnique();
     private static readonly MenuItemId DefaultMenuItemId = MenuItemId.CreateUnique();
     private const string DefaultItemName = "Test Pizza";
     private static readonly Money DefaultBasePrice = new Money(15.99m);
@@ -24,6 +25,7 @@ public class OrderItemTests
     {
         // Arrange & Act
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             DefaultBasePrice,
@@ -53,6 +55,7 @@ public class OrderItemTests
 
         // Act
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             DefaultBasePrice,
@@ -82,6 +85,7 @@ public class OrderItemTests
 
         // Act
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             DefaultBasePrice,
@@ -107,6 +111,7 @@ public class OrderItemTests
     {
         // Arrange & Act
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             DefaultBasePrice,
@@ -123,6 +128,7 @@ public class OrderItemTests
     {
         // Arrange & Act
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             invalidName,
             DefaultBasePrice,
@@ -139,6 +145,7 @@ public class OrderItemTests
         // Arrange & Act
 #pragma warning disable CS8625
         var result = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             null,
             DefaultBasePrice,
@@ -163,6 +170,7 @@ public class OrderItemTests
 
         // Act
         var orderItem = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             basePrice,
@@ -184,6 +192,7 @@ public class OrderItemTests
 
         // Act
         var orderItem = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             basePrice,
@@ -207,6 +216,7 @@ public class OrderItemTests
 
         // Act
         var orderItem = OrderItem.Create(
+            DefaultMenuCategoryId,
             DefaultMenuItemId,
             DefaultItemName,
             basePrice,

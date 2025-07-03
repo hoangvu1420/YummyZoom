@@ -16,6 +16,15 @@ public static class OrderErrors
     public static readonly Error InvalidOrderStatusForCancel =
         Error.Validation("Order.InvalidOrderStatusForCancel", "Order cannot be cancelled at its current stage.");
 
+    public static readonly Error CouponCannotBeAppliedToOrderStatus =
+        Error.Validation("Order.CouponCannotBeApplied", "A coupon cannot be applied to an order in its current status.");
+
+    public static readonly Error CouponAlreadyApplied =
+        Error.Validation("Order.CouponAlreadyApplied", "A coupon has already been applied to this order. Please remove it first.");
+
+    public static readonly Error CouponNotApplicable =
+        Error.Validation("Order.CouponNotApplicable", "This coupon is not applicable to the items in your order.");
+
     public static readonly Error NegativeTotalAmount =
         Error.Validation("Order.NegativeTotalAmount", "The total amount for an order cannot be negative.");
 
