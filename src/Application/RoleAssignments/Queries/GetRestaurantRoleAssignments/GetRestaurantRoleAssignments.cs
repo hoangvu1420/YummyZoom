@@ -1,5 +1,5 @@
-using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
+using Dapper;
+using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.SharedKernel;
 
@@ -19,26 +19,31 @@ public record RoleAssignmentDto(
 
 public class GetRestaurantRoleAssignmentsQueryHandler : IRequestHandler<GetRestaurantRoleAssignmentsQuery, Result<GetRestaurantRoleAssignmentsResponse>>
 {
-    private readonly IRoleAssignmentRepository _roleAssignmentRepository;
+    private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public GetRestaurantRoleAssignmentsQueryHandler(IRoleAssignmentRepository roleAssignmentRepository)
+    public GetRestaurantRoleAssignmentsQueryHandler(IDbConnectionFactory dbConnectionFactory)
     {
-        _roleAssignmentRepository = roleAssignmentRepository;
+        _dbConnectionFactory = dbConnectionFactory;
     }
 
     public async Task<Result<GetRestaurantRoleAssignmentsResponse>> Handle(GetRestaurantRoleAssignmentsQuery request, CancellationToken cancellationToken)
     {
-        var restaurantId = RestaurantId.Create(request.RestaurantId);
-        var roleAssignments = await _roleAssignmentRepository.GetByRestaurantIdAsync(restaurantId, cancellationToken);
+        using var connection = _dbConnectionFactory.CreateConnection();
 
-        var roleAssignmentDtos = roleAssignments.Select(ra => new RoleAssignmentDto(
-            ra.Id.Value,
-            ra.UserId.Value,
-            ra.RestaurantId.Value,
-            ra.Role,
-            ra.CreatedAt,
-            ra.UpdatedAt)).ToList();
+        const string sql = @"
+            SELECT
+                ra.""Id"",
+                ra.""UserId"",
+                ra.""RestaurantId"",
+                ra.""Role"",
+                ra.""CreatedAt"",
+                ra.""UpdatedAt""
+            FROM ""RoleAssignments"" AS ra
+            WHERE ra.""RestaurantId"" = @RestaurantId";
 
-        return Result.Success(new GetRestaurantRoleAssignmentsResponse(roleAssignmentDtos));
+        var roleAssignments = await connection.QueryAsync<RoleAssignmentDto>(
+            new CommandDefinition(sql, new { request.RestaurantId }, cancellationToken: cancellationToken));
+
+        return Result.Success(new GetRestaurantRoleAssignmentsResponse(roleAssignments.AsList()));
     }
 }

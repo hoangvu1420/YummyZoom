@@ -1,5 +1,5 @@
-using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
+using Dapper;
+using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.SharedKernel;
 
@@ -17,28 +17,38 @@ public record RoleAssignmentDto(
     DateTime CreatedAt,
     DateTime? UpdatedAt);
 
+/// <summary>
+/// Query handler that uses the new CQRS pattern with IDbConnectionFactory + Dapper.
+/// This demonstrates the consistent application of the pattern across different query types.
+/// </summary>
 public class GetUserRoleAssignmentsQueryHandler : IRequestHandler<GetUserRoleAssignmentsQuery, Result<GetUserRoleAssignmentsResponse>>
 {
-    private readonly IRoleAssignmentRepository _roleAssignmentRepository;
+    private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public GetUserRoleAssignmentsQueryHandler(IRoleAssignmentRepository roleAssignmentRepository)
+    public GetUserRoleAssignmentsQueryHandler(IDbConnectionFactory dbConnectionFactory)
     {
-        _roleAssignmentRepository = roleAssignmentRepository;
+        _dbConnectionFactory = dbConnectionFactory;
     }
 
     public async Task<Result<GetUserRoleAssignmentsResponse>> Handle(GetUserRoleAssignmentsQuery request, CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(request.UserId);
-        var roleAssignments = await _roleAssignmentRepository.GetByUserIdAsync(userId, cancellationToken);
+        using var connection = _dbConnectionFactory.CreateConnection();
 
-        var roleAssignmentDtos = roleAssignments.Select(ra => new RoleAssignmentDto(
-            ra.Id.Value,
-            ra.UserId.Value,
-            ra.RestaurantId.Value,
-            ra.Role,
-            ra.CreatedAt,
-            ra.UpdatedAt)).ToList();
+        // Direct SQL query for user-specific role assignments
+        const string sql = @"
+            SELECT
+                ra.""Id"",
+                ra.""UserId"",
+                ra.""RestaurantId"",
+                ra.""Role"",
+                ra.""CreatedAt"",
+                ra.""UpdatedAt""
+            FROM ""RoleAssignments"" AS ra
+            WHERE ra.""UserId"" = @UserId";
 
-        return Result.Success(new GetUserRoleAssignmentsResponse(roleAssignmentDtos));
+        var roleAssignments = await connection.QueryAsync<RoleAssignmentDto>(
+            new CommandDefinition(sql, new { request.UserId }, cancellationToken: cancellationToken));
+
+        return Result.Success(new GetUserRoleAssignmentsResponse(roleAssignments.AsList()));
     }
 }

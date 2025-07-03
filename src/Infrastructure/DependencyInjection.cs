@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Interfaces;
 
 namespace YummyZoom.Infrastructure;
 
@@ -74,6 +75,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
         builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
         builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
+
+        // Register the connection factory for Dapper queries
+        builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 
         builder.Services.AddSingleton<IFcmService, FcmService>();
 
