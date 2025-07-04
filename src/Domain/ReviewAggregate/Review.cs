@@ -108,13 +108,33 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>
 
     public Result Hide()
     {
+        if (IsHidden)
+        {
+            return Result.Success(); // Already hidden, no need to raise event
+        }
+
         IsHidden = true;
+        
+        AddDomainEvent(new ReviewHidden(
+            (ReviewId)Id,
+            DateTime.UtcNow));
+
         return Result.Success();
     }
 
     public Result Show()
     {
+        if (!IsHidden)
+        {
+            return Result.Success(); // Already shown, no need to raise event
+        }
+
         IsHidden = false;
+        
+        AddDomainEvent(new ReviewShown(
+            (ReviewId)Id,
+            DateTime.UtcNow));
+
         return Result.Success();
     }
 

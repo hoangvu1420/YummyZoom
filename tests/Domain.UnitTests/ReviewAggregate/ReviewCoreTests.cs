@@ -196,6 +196,14 @@ public class ReviewCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         review.IsHidden.Should().BeTrue();
+
+        // Verify domain event
+        var hiddenEvents = review.DomainEvents.OfType<ReviewHidden>();
+        IEnumerable<ReviewHidden> reviewHiddens = hiddenEvents as ReviewHidden[] ?? hiddenEvents.ToArray();
+        reviewHiddens.Should().ContainSingle();
+        var hiddenEvent = reviewHiddens.Single();
+        hiddenEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        hiddenEvent.HiddenAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Test]
@@ -205,6 +213,7 @@ public class ReviewCoreTests
         var review = CreateValidReview();
         review.Hide(); // First hide it
         review.IsHidden.Should().BeTrue();
+        review.ClearDomainEvents(); // Clear events to test Show() event in isolation
 
         // Act
         var result = review.Show();
@@ -212,6 +221,14 @@ public class ReviewCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         review.IsHidden.Should().BeFalse();
+
+        // Verify domain event
+        var shownEvents = review.DomainEvents.OfType<ReviewShown>();
+        IEnumerable<ReviewShown> reviewShowns = shownEvents as ReviewShown[] ?? shownEvents.ToArray();
+        reviewShowns.Should().ContainSingle();
+        var shownEvent = reviewShowns.Single();
+        shownEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        shownEvent.ShownAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Test]
@@ -220,6 +237,7 @@ public class ReviewCoreTests
         // Arrange
         var review = CreateValidReview();
         review.Hide();
+        review.ClearDomainEvents(); // Clear events to test second Hide() call
 
         // Act
         var result = review.Hide();
@@ -227,6 +245,7 @@ public class ReviewCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         review.IsHidden.Should().BeTrue();
+        review.DomainEvents.Should().BeEmpty("because no new event should be added for already hidden review");
     }
 
     [Test]
@@ -235,6 +254,7 @@ public class ReviewCoreTests
         // Arrange
         var review = CreateValidReview();
         review.IsHidden.Should().BeFalse();
+        review.ClearDomainEvents(); // Clear creation events to test Show() behavior in isolation
 
         // Act
         var result = review.Show();
@@ -242,6 +262,7 @@ public class ReviewCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         review.IsHidden.Should().BeFalse();
+        review.DomainEvents.Should().BeEmpty("because no new event should be added for already visible review");
     }
 
     #endregion
