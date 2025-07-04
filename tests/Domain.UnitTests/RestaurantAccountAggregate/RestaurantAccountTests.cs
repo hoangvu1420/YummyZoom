@@ -8,7 +8,6 @@ using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.UnitTests;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAccountAggregate;
 

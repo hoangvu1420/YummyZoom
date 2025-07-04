@@ -1,4 +1,3 @@
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 

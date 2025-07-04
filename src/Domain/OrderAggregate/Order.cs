@@ -1,5 +1,4 @@
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;

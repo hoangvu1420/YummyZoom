@@ -1,6 +1,5 @@
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.Errors;
-using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuAggregate.Entities;

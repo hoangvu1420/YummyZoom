@@ -1,4 +1,3 @@
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.CouponAggregate.Events;

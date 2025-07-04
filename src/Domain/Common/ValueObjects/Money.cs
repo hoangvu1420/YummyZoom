@@ -1,5 +1,3 @@
-using YummyZoom.SharedKernel;
-
 namespace YummyZoom.Domain.Common.ValueObjects;
 
 public sealed class Money : ValueObject
