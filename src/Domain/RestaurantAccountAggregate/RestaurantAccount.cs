@@ -34,7 +34,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         _transactions = transactions;
     }
 
-    public static RestaurantAccount Create(RestaurantId restaurantId)
+    public static Result<RestaurantAccount> Create(RestaurantId restaurantId)
     {
         var zeroBalance = new Money(0, Currencies.Default);
         
@@ -49,7 +49,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             (RestaurantAccountId)account.Id, 
             restaurantId));
 
-        return account;
+        return Result.Success(account);
     }
 
     public Result AddOrderRevenue(Money amount, OrderId orderId)

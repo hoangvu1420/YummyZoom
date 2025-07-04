@@ -8,6 +8,7 @@ using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.UnitTests;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAccountAggregate;
 
@@ -29,10 +30,22 @@ public class RestaurantAccountTests
     #region Create() Method Tests
 
     [Test]
+    public void Create_WithValidRestaurantId_ShouldReturnSuccessfulResult()
+    {
+        // Arrange & Act
+        var result = RestaurantAccount.Create(DefaultRestaurantId);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        result.Value.Should().NotBeNull();
+        result.Value.RestaurantId.Should().Be(DefaultRestaurantId);
+    }
+
+    [Test]
     public void Create_WithValidRestaurantId_ShouldSucceedAndInitializeAccountCorrectly()
     {
         // Arrange & Act
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
 
         // Assert
         account.Should().NotBeNull();
@@ -56,7 +69,7 @@ public class RestaurantAccountTests
     public void AddOrderRevenue_WithValidPositiveAmount_ShouldSucceedAndUpdateBalanceAndAddTransaction()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents(); // Clear creation event
 
         // Act
@@ -85,7 +98,7 @@ public class RestaurantAccountTests
     public void AddOrderRevenue_WithNegativeAmount_ShouldFailWithOrderRevenueMustBePositiveError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var initialBalance = account.CurrentBalance;
         var initialTransactionCount = account.Transactions.Count;
         account.ClearDomainEvents();
@@ -105,7 +118,7 @@ public class RestaurantAccountTests
     public void AddOrderRevenue_WithZeroAmount_ShouldFailWithOrderRevenueMustBePositiveError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -120,7 +133,7 @@ public class RestaurantAccountTests
     public void AddOrderRevenue_MultipleTransactions_ShouldAccumulateBalanceCorrectly()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -143,7 +156,7 @@ public class RestaurantAccountTests
     public void AddPlatformFee_WithValidNegativeAmount_ShouldSucceedAndUpdateBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(TenDollars, DefaultOrderId); // Add some revenue first
         account.ClearDomainEvents();
 
@@ -165,7 +178,7 @@ public class RestaurantAccountTests
     public void AddPlatformFee_WithPositiveAmount_ShouldFailWithPlatformFeeMustBeNegativeError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -185,7 +198,7 @@ public class RestaurantAccountTests
     public void AddRefundDeduction_WithValidNegativeAmount_ShouldSucceedAndUpdateBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(TenDollars, DefaultOrderId); // Add some revenue first
         account.ClearDomainEvents();
 
@@ -206,7 +219,7 @@ public class RestaurantAccountTests
     public void AddRefundDeduction_WithPositiveAmount_ShouldFailWithRefundDeductionMustBeNegativeError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -225,7 +238,7 @@ public class RestaurantAccountTests
     public void ProcessPayout_WithValidAmountNotExceedingBalance_ShouldSucceedAndCreatePayoutTransaction()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(TenDollars, DefaultOrderId); // Balance = $10
         account.ClearDomainEvents();
 
@@ -256,7 +269,7 @@ public class RestaurantAccountTests
     public void ProcessPayout_WithAmountExceedingBalance_ShouldFailWithInsufficientBalanceError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(FiveDollars, DefaultOrderId); // Balance = $5
         var initialBalance = account.CurrentBalance;
         var initialTransactionCount = account.Transactions.Count;
@@ -277,7 +290,7 @@ public class RestaurantAccountTests
     public void ProcessPayout_WithExactBalanceAmount_ShouldSucceedAndLeaveZeroBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(TenDollars, DefaultOrderId); // Balance = $10
         account.ClearDomainEvents();
 
@@ -293,7 +306,7 @@ public class RestaurantAccountTests
     public void ProcessPayout_WithZeroBalance_ShouldFailWithInsufficientBalanceError()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId); // Balance = $0
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail(); // Balance = $0
         account.ClearDomainEvents();
 
         // Act
@@ -312,7 +325,7 @@ public class RestaurantAccountTests
     public void AddManualAdjustment_WithPositiveAmount_ShouldSucceedAndIncreaseBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -332,7 +345,7 @@ public class RestaurantAccountTests
     public void AddManualAdjustment_WithNegativeAmount_ShouldSucceedAndDecreaseBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.AddOrderRevenue(TenDollars, DefaultOrderId); // Start with $10
         account.ClearDomainEvents();
 
@@ -352,7 +365,7 @@ public class RestaurantAccountTests
     public void AddManualAdjustment_WithZeroAmount_ShouldSucceedAndNotChangeBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var initialBalance = account.CurrentBalance;
         account.ClearDomainEvents();
 
@@ -373,7 +386,7 @@ public class RestaurantAccountTests
     public void UpdatePayoutMethod_WithValidPayoutMethodDetails_ShouldSucceedAndUpdatePayoutMethod()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         account.ClearDomainEvents();
 
         // Act
@@ -394,7 +407,7 @@ public class RestaurantAccountTests
     public void UpdatePayoutMethod_MultipleUpdates_ShouldOverwritePreviousPayoutMethod()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var firstPayoutMethod = PayoutMethodDetails.Create("First Method").Value;
         var secondPayoutMethod = PayoutMethodDetails.Create("Second Method").Value;
         account.UpdatePayoutMethod(firstPayoutMethod);
@@ -417,7 +430,7 @@ public class RestaurantAccountTests
     public void BalanceConsistency_AfterMultipleTransactionTypes_ShouldMaintainCorrectBalance()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var twentyDollars = new Money(20.00m, Currencies.Default);
         var threeDollars = new Money(3.00m, Currencies.Default);
         var negativeThreeDollars = new Money(-3.00m, Currencies.Default);
@@ -444,7 +457,7 @@ public class RestaurantAccountTests
     public void BalanceConsistency_CurrentBalanceShouldAlwaysEqualSumOfTransactions()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var randomAmounts = new[]
         {
             new Money(15.75m, Currencies.Default),
@@ -479,7 +492,7 @@ public class RestaurantAccountTests
     public void RestaurantAccount_CompleteLifecycle_ShouldHandleAllOperationsCorrectly()
     {
         // Arrange
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         var hundredDollars = new Money(100.00m, Currencies.Default);
         var threePercentFee = new Money(-3.00m, Currencies.Default);
         var fiftyDollars = new Money(50.00m, Currencies.Default);
@@ -521,7 +534,7 @@ public class RestaurantAccountTests
 
     private static RestaurantAccount CreateAccountWithBalance(decimal balance)
     {
-        var account = RestaurantAccount.Create(DefaultRestaurantId);
+        var account = RestaurantAccount.Create(DefaultRestaurantId).ValueOrFail();
         if (balance > 0)
         {
             var amount = new Money(balance, Currencies.Default);
