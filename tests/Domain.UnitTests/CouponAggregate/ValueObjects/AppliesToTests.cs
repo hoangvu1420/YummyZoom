@@ -1,9 +1,10 @@
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 
-namespace YummyZoom.Domain.UnitTests.CouponAggregate;
+namespace YummyZoom.Domain.UnitTests.CouponAggregate.ValueObjects;
 
 [TestFixture]
 public class AppliesToTests
@@ -92,8 +93,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.EmptyItemIds");
-        result.Error.Description.Should().Be("At least one menu item ID must be specified for specific items scope");
+        result.Error.Should().Be(CouponErrors.EmptyItemIds);
     }
 
     [Test]
@@ -106,8 +106,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.EmptyItemIds");
-        result.Error.Description.Should().Be("At least one menu item ID must be specified for specific items scope");
+        result.Error.Should().Be(CouponErrors.EmptyItemIds);
     }
 
     [Test]
@@ -122,8 +121,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.DuplicateItemIds");
-        result.Error.Description.Should().Be("Menu item IDs must be unique");
+        result.Error.Should().Be(CouponErrors.DuplicateItemIds);
     }
 
     [Test]
@@ -198,8 +196,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.EmptyCategoryIds");
-        result.Error.Description.Should().Be("At least one menu category ID must be specified for specific categories scope");
+        result.Error.Should().Be(CouponErrors.EmptyCategoryIds);
     }
 
     [Test]
@@ -212,8 +209,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.EmptyCategoryIds");
-        result.Error.Description.Should().Be("At least one menu category ID must be specified for specific categories scope");
+        result.Error.Should().Be(CouponErrors.EmptyCategoryIds);
     }
 
     [Test]
@@ -228,8 +224,7 @@ public class AppliesToTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("AppliesTo.DuplicateCategoryIds");
-        result.Error.Description.Should().Be("Menu category IDs must be unique");
+        result.Error.Should().Be(CouponErrors.DuplicateCategoryIds);
     }
 
     [Test]

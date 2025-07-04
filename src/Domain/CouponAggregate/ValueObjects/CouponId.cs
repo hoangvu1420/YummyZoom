@@ -1,4 +1,5 @@
 using YummyZoom.SharedKernel;
+using YummyZoom.Domain.CouponAggregate.Errors;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;
 
@@ -23,9 +24,8 @@ public sealed class CouponId : AggregateRootId<Guid>
     
     public static Result<CouponId> Create(string value)
     {
-        // TODO: Add specific error for InvalidCouponId when Coupon aggregate is fully implemented
         return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<CouponId>(Error.Validation("Coupon.InvalidId", "Invalid Coupon Id")) 
+            ? Result.Failure<CouponId>(CouponErrors.InvalidCouponId(value)) 
             : Result.Success(new CouponId(guid));
     }
 

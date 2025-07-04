@@ -3,9 +3,10 @@ using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 
-namespace YummyZoom.Domain.UnitTests.CouponAggregate;
+namespace YummyZoom.Domain.UnitTests.CouponAggregate.ValueObjects;
 
 [TestFixture]
 public class CouponValueTests
@@ -57,8 +58,7 @@ public class CouponValueTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("CouponValue.InvalidPercentage");
-        result.Error.Description.Should().Be("Percentage must be greater than 0");
+        result.Error.Should().Be(CouponErrors.InvalidPercentageZeroOrNegative);
     }
 
     [TestCase(100.01)]
@@ -71,8 +71,7 @@ public class CouponValueTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("CouponValue.InvalidPercentage");
-        result.Error.Description.Should().Be("Percentage cannot exceed 100");
+        result.Error.Should().Be(CouponErrors.InvalidPercentageExceedsMaximum);
     }
 
     #endregion
@@ -127,8 +126,7 @@ public class CouponValueTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("CouponValue.InvalidAmount");
-        result.Error.Description.Should().Be("Fixed amount must be greater than 0");
+        result.Error.Should().Be(CouponErrors.InvalidAmount);
     }
 
     [Test]
@@ -142,8 +140,7 @@ public class CouponValueTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("CouponValue.InvalidAmount");
-        result.Error.Description.Should().Be("Fixed amount must be greater than 0");
+        result.Error.Should().Be(CouponErrors.InvalidAmount);
     }
 
     #endregion

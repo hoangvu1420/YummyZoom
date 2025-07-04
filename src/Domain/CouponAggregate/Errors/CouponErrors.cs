@@ -75,4 +75,34 @@ public static class CouponErrors
     public static Error CannotIncrementUsageWhenExpired => Error.Validation(
         "Coupon.CannotIncrementUsageWhenExpired",
         "Cannot increment usage count when coupon is expired.");
+
+    // AppliesTo errors
+    public static Error EmptyItemIds => Error.Validation(
+        "AppliesTo.EmptyItemIds",
+        "At least one menu item ID must be specified for specific items scope");
+
+    public static Error DuplicateItemIds => Error.Validation(
+        "AppliesTo.DuplicateItemIds",
+        "Menu item IDs must be unique");
+
+    public static Error EmptyCategoryIds => Error.Validation(
+        "AppliesTo.EmptyCategoryIds",
+        "At least one menu category ID must be specified for specific categories scope");
+
+    public static Error DuplicateCategoryIds => Error.Validation(
+        "AppliesTo.DuplicateCategoryIds",
+        "Menu category IDs must be unique");
+
+    // CouponValue errors
+    public static Error InvalidPercentageZeroOrNegative => Error.Validation(
+        "CouponValue.InvalidPercentage",
+        "Percentage must be greater than 0");
+
+    public static Error InvalidPercentageExceedsMaximum => Error.Validation(
+        "CouponValue.InvalidPercentage",
+        "Percentage cannot exceed 100");
+
+    public static Error InvalidAmount => Error.Validation(
+        "CouponValue.InvalidAmount",
+        "Fixed amount must be greater than 0");
 }

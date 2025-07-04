@@ -1,5 +1,6 @@
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
+using YummyZoom.Domain.CouponAggregate.Errors;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;
 
@@ -35,16 +36,12 @@ public sealed class AppliesTo : ValueObject
     {
         if (itemIds == null || itemIds.Count == 0)
         {
-            return Result.Failure<AppliesTo>(Error.Validation(
-                "AppliesTo.EmptyItemIds", 
-                "At least one menu item ID must be specified for specific items scope"));
+            return Result.Failure<AppliesTo>(CouponErrors.EmptyItemIds);
         }
 
         if (itemIds.Distinct().Count() != itemIds.Count)
         {
-            return Result.Failure<AppliesTo>(Error.Validation(
-                "AppliesTo.DuplicateItemIds", 
-                "Menu item IDs must be unique"));
+            return Result.Failure<AppliesTo>(CouponErrors.DuplicateItemIds);
         }
 
         return Result.Success(new AppliesTo(CouponScope.SpecificItems, itemIds, []));
@@ -58,16 +55,12 @@ public sealed class AppliesTo : ValueObject
     {
         if (categoryIds == null || categoryIds.Count == 0)
         {
-            return Result.Failure<AppliesTo>(Error.Validation(
-                "AppliesTo.EmptyCategoryIds", 
-                "At least one menu category ID must be specified for specific categories scope"));
+            return Result.Failure<AppliesTo>(CouponErrors.EmptyCategoryIds);
         }
 
         if (categoryIds.Distinct().Count() != categoryIds.Count)
         {
-            return Result.Failure<AppliesTo>(Error.Validation(
-                "AppliesTo.DuplicateCategoryIds", 
-                "Menu category IDs must be unique"));
+            return Result.Failure<AppliesTo>(CouponErrors.DuplicateCategoryIds);
         }
 
         return Result.Success(new AppliesTo(CouponScope.SpecificCategories, [], categoryIds));

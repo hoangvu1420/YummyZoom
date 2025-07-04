@@ -1,6 +1,7 @@
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
+using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -31,16 +32,12 @@ public sealed class CouponValue : ValueObject
     {
         if (percentage <= 0)
         {
-            return Result.Failure<CouponValue>(Error.Validation(
-                "CouponValue.InvalidPercentage", 
-                "Percentage must be greater than 0"));
+            return Result.Failure<CouponValue>(CouponErrors.InvalidPercentageZeroOrNegative);
         }
 
         if (percentage > 100)
         {
-            return Result.Failure<CouponValue>(Error.Validation(
-                "CouponValue.InvalidPercentage", 
-                "Percentage cannot exceed 100"));
+            return Result.Failure<CouponValue>(CouponErrors.InvalidPercentageExceedsMaximum);
         }
 
         return Result.Success(new CouponValue(CouponType.Percentage, percentage, null, null));
@@ -54,9 +51,7 @@ public sealed class CouponValue : ValueObject
     {
         if (amount.Amount <= 0)
         {
-            return Result.Failure<CouponValue>(Error.Validation(
-                "CouponValue.InvalidAmount", 
-                "Fixed amount must be greater than 0"));
+            return Result.Failure<CouponValue>(CouponErrors.InvalidAmount);
         }
 
         return Result.Success(new CouponValue(CouponType.FixedAmount, null, amount, null));
