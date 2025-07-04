@@ -1,3 +1,6 @@
+using YummyZoom.Domain.RestaurantAggregate.Errors;
+using YummyZoom.SharedKernel;
+
 namespace YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 public sealed class BusinessHours : ValueObject
@@ -11,9 +14,18 @@ public sealed class BusinessHours : ValueObject
         Hours = hours;
     }
 
-    public static BusinessHours Create(string hours)
+    public static Result<BusinessHours> Create(string hours)
     {
-        return new BusinessHours(hours);
+        const int maxLength = 200;
+
+        // Validate hours format
+        if (string.IsNullOrWhiteSpace(hours))
+            return Result.Failure<BusinessHours>(RestaurantErrors.BusinessHoursFormatIsRequired());
+
+        if (hours.Length > maxLength)
+            return Result.Failure<BusinessHours>(RestaurantErrors.BusinessHoursFormatTooLong(maxLength));
+
+        return Result.Success(new BusinessHours(hours.Trim()));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
