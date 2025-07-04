@@ -1,9 +1,7 @@
-using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.SupportTicketAggregate.ValueObjects;
-using YummyZoom.Domain.UnitTests;
 
 namespace YummyZoom.Domain.UnitTests.SupportTicketAggregate.ValueObjects;
 

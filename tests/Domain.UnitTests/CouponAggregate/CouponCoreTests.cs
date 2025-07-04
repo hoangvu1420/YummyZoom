@@ -6,7 +6,6 @@ using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.Events;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.CouponAggregate;

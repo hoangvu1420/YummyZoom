@@ -1,7 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.SupportTicketAggregate;
-using YummyZoom.Domain.SupportTicketAggregate.Entities;
 using YummyZoom.Domain.SupportTicketAggregate.Enums;
 using YummyZoom.Domain.SupportTicketAggregate.Errors;
 using YummyZoom.Domain.SupportTicketAggregate.Events;

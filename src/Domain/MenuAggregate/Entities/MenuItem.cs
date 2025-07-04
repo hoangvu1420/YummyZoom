@@ -1,6 +1,7 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.TagAggregate.ValueObjects;
+using YummyZoom.Domain.MenuAggregate.Errors;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuAggregate.Entities;
@@ -48,10 +49,17 @@ public sealed class MenuItem : Entity<MenuItemId>
         List<TagId>? dietaryTagIds = null,
         List<AppliedCustomization>? appliedCustomizations = null)
     {
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<MenuItem>(MenuErrors.InvalidItemName(name));
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure<MenuItem>(MenuErrors.InvalidItemDescription(description));
+
         // Business rule: Menu item prices must be positive
         if (basePrice.Amount <= 0)
         {
-            return Result.Failure<MenuItem>(Errors.MenuErrors.NegativeMenuItemPrice);
+            return Result.Failure<MenuItem>(MenuErrors.NegativeMenuItemPrice);
         }
 
         var menuItem = new MenuItem(
@@ -77,6 +85,51 @@ public sealed class MenuItem : Entity<MenuItemId>
     {
         if (IsAvailable) return;
         IsAvailable = true;
+    }
+
+    public Result UpdateDetails(string name, string description)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(MenuErrors.InvalidItemName(name));
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(MenuErrors.InvalidItemDescription(description));
+
+        Name = name;
+        Description = description;
+        return Result.Success();
+    }
+
+    public Result UpdatePrice(Money newPrice)
+    {
+        if (newPrice.Amount <= 0)
+            return Result.Failure(MenuErrors.NegativeMenuItemPrice);
+
+        BasePrice = newPrice;
+        return Result.Success();
+    }
+
+    public void UpdateImageUrl(string? imageUrl)
+    {
+        ImageUrl = imageUrl;
+    }
+
+    public Result UpdateFullDetails(string name, string description, Money basePrice, string? imageUrl = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(MenuErrors.InvalidItemName(name));
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(MenuErrors.InvalidItemDescription(description));
+
+        if (basePrice.Amount <= 0)
+            return Result.Failure(MenuErrors.NegativeMenuItemPrice);
+
+        Name = name;
+        Description = description;
+        BasePrice = basePrice;
+        ImageUrl = imageUrl;
+        return Result.Success();
     }
 
 #pragma warning disable CS8618
