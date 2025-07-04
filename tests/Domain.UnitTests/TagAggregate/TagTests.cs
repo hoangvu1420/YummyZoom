@@ -247,12 +247,15 @@ public class TagTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         tag.TagCategory.Should().Be(newCategory);
-        tag.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TagUpdated));
         
-        var tagUpdatedEvent = tag.DomainEvents.OfType<TagUpdated>().Single();
-        tagUpdatedEvent.TagId.Should().Be(tag.Id);
-        tagUpdatedEvent.TagName.Should().Be(tag.TagName);
-        tagUpdatedEvent.TagCategory.Should().Be(newCategory.ToStringValue());
+        // Should raise only TagCategoryChanged event (plus the initial TagCreated)
+        tag.DomainEvents.Should().HaveCount(2);
+        tag.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TagCategoryChanged));
+        
+        var tagCategoryChangedEvent = tag.DomainEvents.OfType<TagCategoryChanged>().Single();
+        tagCategoryChangedEvent.TagId.Should().Be(tag.Id);
+        tagCategoryChangedEvent.OldCategory.Should().Be(DefaultTagCategory.ToStringValue());
+        tagCategoryChangedEvent.NewCategory.Should().Be(newCategory.ToStringValue());
     }
 
     [Test]

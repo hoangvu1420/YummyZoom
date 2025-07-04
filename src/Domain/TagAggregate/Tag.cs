@@ -87,13 +87,11 @@ public sealed class Tag : AggregateRoot<TagId, Guid>
         // Only raise event if the category actually changed
         if (oldCategory != TagCategory)
         {
-            AddDomainEvent(new TagUpdated((TagId)Id, TagName, TagCategory.ToStringValue()));
+            AddDomainEvent(new TagCategoryChanged((TagId)Id, oldCategory.ToStringValue(), TagCategory.ToStringValue()));
         }
 
         return Result.Success();
     }
-
-
 
 #pragma warning disable CS8618
     private Tag() { } // Required by EF Core
