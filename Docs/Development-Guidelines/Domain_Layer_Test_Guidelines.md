@@ -1,6 +1,4 @@
 
----
-
 ### Unit Testing Guidelines for the Domain Layer
 
 **Core Philosophy:** A unit test for a domain object verifies that a **single business operation** results in the **correct state change** and/or produces the **correct outcome** (success, failure, or domain event), while correctly enforcing all business rules (invariants).
