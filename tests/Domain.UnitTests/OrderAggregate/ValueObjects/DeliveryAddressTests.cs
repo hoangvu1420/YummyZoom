@@ -3,7 +3,7 @@ using NUnit.Framework;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 
-namespace YummyZoom.Domain.UnitTests.OrderAggregate;
+namespace YummyZoom.Domain.UnitTests.OrderAggregate.ValueObjects;
 
 [TestFixture]
 public class DeliveryAddressTests

@@ -1,6 +1,7 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
@@ -186,7 +187,19 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
-    public Result ApplyCoupon(Coupon coupon)
+    /// <summary>
+    /// Applies a coupon to the order using decoupled parameters (preferred approach)
+    /// </summary>
+    /// <param name="couponId">The ID of the coupon being applied</param>
+    /// <param name="couponValue">The value and type of the coupon</param>
+    /// <param name="appliesTo">The scope and criteria for coupon application</param>
+    /// <param name="minOrderAmount">Minimum order amount required for coupon eligibility</param>
+    /// <returns>Result indicating success or failure</returns>
+    public Result ApplyCoupon(
+        CouponId couponId,
+        CouponValue couponValue,
+        AppliesTo appliesTo,
+        Money? minOrderAmount)
     {
         if (Status != OrderStatus.Placed)
         {
@@ -198,31 +211,31 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
             return Result.Failure(OrderErrors.CouponAlreadyApplied);
         }
 
-        if (coupon.MinOrderAmount is not null && Subtotal.Amount < coupon.MinOrderAmount.Amount)
+        if (minOrderAmount is not null && Subtotal.Amount < minOrderAmount.Amount)
         {
             return Result.Failure(OrderErrors.CouponNotApplicable);
         }
 
-        var discountBaseAmount = GetDiscountBaseAmount(coupon);
+        var discountBaseAmount = GetDiscountBaseAmount(couponValue, appliesTo);
         if (discountBaseAmount <= 0)
         {
             return Result.Failure(OrderErrors.CouponNotApplicable);
         }
 
-        var discountBaseMoney = new Money(GetDiscountBaseAmount(coupon), Subtotal.Currency);
+        var discountBaseMoney = new Money(discountBaseAmount, Subtotal.Currency);
         Money newDiscount;
-        switch (coupon.Value.Type)
+        switch (couponValue.Type)
         {
             case CouponType.Percentage:
-                newDiscount = discountBaseMoney * coupon.Value.PercentageValue!.Value;
+                newDiscount = discountBaseMoney * (couponValue.PercentageValue!.Value / 100m);
                 break;
             case CouponType.FixedAmount:
                 // Discount cannot be more than the value of the items it applies to
-                var fixedAmount = coupon.Value.FixedAmountValue!; // Assumes this is a Money object
+                var fixedAmount = couponValue.FixedAmountValue!; // Assumes this is a Money object
                 newDiscount = new Money(Math.Min(discountBaseMoney.Amount, fixedAmount.Amount), Subtotal.Currency);
                 break;
             case CouponType.FreeItem:
-                // The base amount is already calculated as the price of the free item
+                // For free item coupons, the discount is the price of one unit of the cheapest matching item
                 newDiscount = discountBaseMoney;
                 break;
             default:
@@ -236,7 +249,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         }
 
         DiscountAmount = newDiscount;
-        _appliedCouponIds.Add((CouponId)coupon.Id);
+        _appliedCouponIds.Add(couponId);
         RecalculateTotals();
         LastUpdateTimestamp = DateTime.UtcNow;
 
@@ -258,26 +271,54 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
-    private decimal GetDiscountBaseAmount(Coupon coupon)
+    private decimal GetDiscountBaseAmount(CouponValue couponValue, AppliesTo appliesTo)
     {
-        switch (coupon.AppliesTo.Scope)
+        // For FreeItem coupons, calculate based on the specific free item
+        if (couponValue.Type == CouponType.FreeItem && couponValue.FreeItemValue is not null)
+        {
+            return GetFreeItemDiscountAmount(couponValue.FreeItemValue);
+        }
+
+        switch (appliesTo.Scope)
         {
             case CouponScope.WholeOrder:
                 return Subtotal.Amount;
 
             case CouponScope.SpecificItems:
                 return _orderItems
-                    .Where(oi => coupon.AppliesTo.ItemIds!.Contains(oi.Snapshot_MenuItemId))
+                    .Where(oi => appliesTo.ItemIds!.Contains(oi.Snapshot_MenuItemId))
                     .Sum(oi => oi.LineItemTotal.Amount);
 
             case CouponScope.SpecificCategories:
                 return _orderItems
-                    .Where(oi => coupon.AppliesTo.CategoryIds!.Contains(oi.Snapshot_MenuCategoryId))
+                    .Where(oi => appliesTo.CategoryIds!.Contains(oi.Snapshot_MenuCategoryId))
                     .Sum(oi => oi.LineItemTotal.Amount);
 
             default:
                 return 0;
         }
+    }
+
+    private decimal GetFreeItemDiscountAmount(MenuItemId freeItemId)
+    {
+        // Find all order items that match the free item
+        var matchingItems = _orderItems
+            .Where(oi => oi.Snapshot_MenuItemId == freeItemId)
+            .ToList();
+
+        if (!matchingItems.Any())
+        {
+            return 0; // No matching items found
+        }
+
+        // For free item coupons, typically apply to the cheapest occurrence
+        // Calculate per-unit price including customizations
+        var cheapestItem = matchingItems
+            .OrderBy(oi => oi.LineItemTotal.Amount / oi.Quantity)
+            .First();
+
+        // Return the price for one unit of the cheapest matching item
+        return cheapestItem.LineItemTotal.Amount / cheapestItem.Quantity;
     }
 
     private void RecalculateTotals()
@@ -303,8 +344,13 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
 
     private static string GenerateOrderNumber()
     {
-        // This is a simplistic approach. In a real system, this would be more robust.
-        return Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        // Format: ORD-YYYYMMDD-HHMMSS-XXXX (where XXXX is random)
+        var now = DateTime.UtcNow;
+        var datePart = now.ToString("yyyyMMdd");
+        var timePart = now.ToString("HHmmss");
+        var randomPart = Random.Shared.Next(1000, 9999);
+        
+        return $"ORD-{datePart}-{timePart}-{randomPart}";
     }
 
 #pragma warning disable CS8618

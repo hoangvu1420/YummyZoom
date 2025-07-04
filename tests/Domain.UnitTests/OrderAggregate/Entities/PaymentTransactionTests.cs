@@ -6,7 +6,7 @@ using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
 
-namespace YummyZoom.Domain.UnitTests.OrderAggregate;
+namespace YummyZoom.Domain.UnitTests.OrderAggregate.Entities;
 
 [TestFixture]
 public class PaymentTransactionTests
