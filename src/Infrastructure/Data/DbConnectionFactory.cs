@@ -8,7 +8,7 @@ namespace YummyZoom.Infrastructure.Data;
 public class DbConnectionFactory : IDbConnectionFactory
 {
     private readonly IConfiguration _configuration;
-    private IDbConnection? _connection;
+    private NpgsqlConnection? _connection;
 
     public DbConnectionFactory(IConfiguration configuration)
     {
@@ -32,5 +32,6 @@ public class DbConnectionFactory : IDbConnectionFactory
         {
             _connection.Dispose();
         }
+        GC.SuppressFinalize(this);
     }
 }

@@ -36,16 +36,16 @@ public class GetUserRoleAssignmentsQueryHandler : IRequestHandler<GetUserRoleAss
 
         // Direct SQL query for user-specific role assignments
         const string sql = """
-                           SELECT
-                               ra."Id",
-                               ra."UserId",
-                               ra."RestaurantId",
-                               ra."Role",
-                               ra."CreatedAt",
-                               ra."UpdatedAt"
-                           FROM "RoleAssignments" AS ra
-                           WHERE ra."UserId" = @UserId
-                           """;
+            SELECT
+                ra."Id",
+                ra."UserId",
+                ra."RestaurantId",
+                ra."Role",
+                ra."CreatedAt",
+                ra."UpdatedAt"
+            FROM "RoleAssignments" AS ra
+            WHERE ra."UserId" = @UserId
+            """;
 
         var roleAssignments = await connection.QueryAsync<RoleAssignmentDto>(
             new CommandDefinition(sql, new { request.UserId }, cancellationToken: cancellationToken));

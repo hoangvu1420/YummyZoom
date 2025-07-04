@@ -48,21 +48,21 @@ public class GetRestaurantRoleAssignmentsWithUserInfoQueryHandler : IRequestHand
         // Complex query that joins RoleAssignments with AspNetUsers table
         // This demonstrates the flexibility of direct SQL for read operations
         const string sql = """
-                           SELECT
-                               ra."Id",
-                               ra."UserId",
-                               u."Email" as UserEmail,
-                               u."FirstName" as UserFirstName,
-                               u."LastName" as UserLastName,
-                               ra."RestaurantId",
-                               ra."Role",
-                               ra."CreatedAt",
-                               ra."UpdatedAt"
-                           FROM "RoleAssignments" AS ra
-                           INNER JOIN "AspNetUsers" AS u ON ra."UserId"::text = u."Id"
-                           WHERE ra."RestaurantId" = @RestaurantId
-                           ORDER BY ra."CreatedAt" DESC
-                           """;
+            SELECT
+                ra."Id",
+                ra."UserId",
+                u."Email" as UserEmail,
+                u."FirstName" as UserFirstName,
+                u."LastName" as UserLastName,
+                ra."RestaurantId",
+                ra."Role",
+                ra."CreatedAt",
+                ra."UpdatedAt"
+            FROM "RoleAssignments" AS ra
+            INNER JOIN "AspNetUsers" AS u ON ra."UserId"::text = u."Id"
+            WHERE ra."RestaurantId" = @RestaurantId
+            ORDER BY ra."CreatedAt" DESC
+            """;
 
         var roleAssignments = await connection.QueryAsync<RoleAssignmentWithUserInfoDto>(
             new CommandDefinition(sql, new { request.RestaurantId }, cancellationToken: cancellationToken));
