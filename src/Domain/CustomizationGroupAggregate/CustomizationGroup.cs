@@ -84,6 +84,10 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             return Result.Failure(CustomizationGroupErrors.InvalidChoiceId);
         }
         _choices.Remove(choice);
+        
+        var groupId = (CustomizationGroupId)Id;
+        AddDomainEvent(new Events.CustomizationChoiceRemoved(groupId, choice.Id, choice.Name));
+        
         return Result.Success();
     }
 
@@ -105,6 +109,10 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             return Result.Failure(updated.Error);
         }
         _choices[_choices.IndexOf(choice)] = updated.Value;
+        
+        var groupId = (CustomizationGroupId)Id;
+        AddDomainEvent(new Events.CustomizationChoiceUpdated(groupId, choiceId, newName, newPriceAdjustment, isDefault));
+        
         return Result.Success();
     }
 

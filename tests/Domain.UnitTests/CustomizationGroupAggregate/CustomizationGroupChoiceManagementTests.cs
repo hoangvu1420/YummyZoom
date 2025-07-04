@@ -110,6 +110,12 @@ public class CustomizationGroupChoiceManagementTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         group.Choices.Should().BeEmpty();
+        group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceRemoved));
+
+        var choiceRemovedEvent = group.DomainEvents.OfType<CustomizationChoiceRemoved>().Single();
+        choiceRemovedEvent.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
+        choiceRemovedEvent.ChoiceId.Should().Be(choice.Id);
+        choiceRemovedEvent.Name.Should().Be(choice.Name);
     }
 
     [Test]
@@ -174,6 +180,14 @@ public class CustomizationGroupChoiceManagementTests
         updatedChoice.PriceAdjustment.Should().Be(newPriceAdjustment);
         updatedChoice.IsDefault.Should().Be(newIsDefault);
         // Note: The choice will have a new ID due to re-creation for immutability
+        
+        group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceUpdated));
+        var choiceUpdatedEvent = group.DomainEvents.OfType<CustomizationChoiceUpdated>().Single();
+        choiceUpdatedEvent.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
+        choiceUpdatedEvent.ChoiceId.Should().Be(originalChoiceId);
+        choiceUpdatedEvent.NewName.Should().Be(newName);
+        choiceUpdatedEvent.NewPriceAdjustment.Should().Be(newPriceAdjustment);
+        choiceUpdatedEvent.IsDefault.Should().Be(newIsDefault);
     }
 
     [Test]

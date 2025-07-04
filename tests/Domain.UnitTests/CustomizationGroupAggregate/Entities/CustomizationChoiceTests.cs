@@ -5,7 +5,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.UnitTests.CustomizationGroupAggregate;
+namespace YummyZoom.Domain.UnitTests.CustomizationGroupAggregate.Entities;
 
 [TestFixture]
 public class CustomizationChoiceTests
