@@ -84,6 +84,10 @@ public sealed class User : AggregateRoot<UserId, Guid>
     public Result AddAddress(Address address)
     {
         _addresses.Add(address);
+        
+        // Raise domain event
+        AddDomainEvent(new UserAddressAdded((UserId)Id, address));
+        
         return Result.Success();
     }
 
@@ -97,6 +101,10 @@ public sealed class User : AggregateRoot<UserId, Guid>
         }
 
         _addresses.Remove(addressToRemove);
+        
+        // Raise domain event
+        AddDomainEvent(new UserAddressRemoved((UserId)Id, addressId));
+        
         return Result.Success();
     }
 
@@ -112,6 +120,10 @@ public sealed class User : AggregateRoot<UserId, Guid>
         }
 
         _paymentMethods.Add(paymentMethod);
+        
+        // Raise domain event
+        AddDomainEvent(new UserPaymentMethodAdded((UserId)Id, paymentMethod));
+        
         return Result.Success();
     }
 
@@ -125,6 +137,10 @@ public sealed class User : AggregateRoot<UserId, Guid>
         }
 
         _paymentMethods.Remove(paymentMethodToRemove);
+        
+        // Raise domain event
+        AddDomainEvent(new UserPaymentMethodRemoved((UserId)Id, paymentMethodId));
+        
         return Result.Success();
     }
 
@@ -145,6 +161,10 @@ public sealed class User : AggregateRoot<UserId, Guid>
 
         // Set the specified one as default
         paymentMethod.SetAsDefault(true);
+        
+        // Raise domain event
+        AddDomainEvent(new UserDefaultPaymentMethodChanged((UserId)Id, paymentMethodId));
+        
         return Result.Success();
     }
 
@@ -152,25 +172,44 @@ public sealed class User : AggregateRoot<UserId, Guid>
     {
         Name = name;
         PhoneNumber = phoneNumber;
+        
+        // Raise domain event
+        AddDomainEvent(new UserProfileUpdated((UserId)Id, name, phoneNumber));
+        
         return Result.Success();
     }
 
     public Result UpdateEmail(string email)
     {
+        // Store the old email for the event
+        var oldEmail = Email;
+        
         // Email is an identifier, so it's handled separately from regular profile updates
         Email = email;
+        
+        // Raise domain event
+        AddDomainEvent(new UserEmailChanged((UserId)Id, oldEmail, email));
+        
         return Result.Success();
     }
 
     public Result Activate()
     {
         IsActive = true;
+        
+        // Raise domain event
+        AddDomainEvent(new UserActivated((UserId)Id));
+        
         return Result.Success();
     }
 
     public Result Deactivate()
     {
         IsActive = false;
+        
+        // Raise domain event
+        AddDomainEvent(new UserDeactivated((UserId)Id));
+        
         return Result.Success();
     }
 

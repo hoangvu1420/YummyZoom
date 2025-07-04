@@ -1,6 +1,8 @@
-## Determine aggregates and refine relationships
+## YummyZoom Domain Design
 
-### Proposed Aggregates and Their Detailed Structures
+This document outlines the domain design for the YummyZoom platform, focusing on the aggregates that encapsulate the core business logic and data structures. The design follows Domain-Driven Design (DDD) principles, ensuring that each aggregate is cohesive, encapsulated, and adheres to its own invariants.
+
+### Aggregates and Their Detailed Structures
 
 #### 1. `User` Aggregate
 
