@@ -1,5 +1,6 @@
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;

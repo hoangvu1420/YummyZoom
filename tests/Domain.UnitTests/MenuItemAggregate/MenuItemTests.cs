@@ -3,7 +3,7 @@ using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.Events;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;

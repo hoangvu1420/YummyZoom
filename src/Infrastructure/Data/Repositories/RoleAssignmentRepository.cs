@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;

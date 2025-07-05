@@ -1,4 +1,5 @@
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 

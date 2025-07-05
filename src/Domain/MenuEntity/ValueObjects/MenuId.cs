@@ -1,7 +1,7 @@
-using YummyZoom.Domain.Menu.Errors;
+using YummyZoom.Domain.MenuEntity.Errors;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.Menu.ValueObjects;
+namespace YummyZoom.Domain.MenuEntity.ValueObjects;
 
 public sealed class MenuId : AggregateRootId<Guid>
 {

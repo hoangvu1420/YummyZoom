@@ -1,9 +1,11 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.Menu.ValueObjects;
-using MenuCategoryEntity = YummyZoom.Domain.Menu.MenuCategory;
+using System.Linq;
+using YummyZoom.Domain.MenuEntity.Events;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using MenuCategoryEntity = YummyZoom.Domain.MenuEntity.MenuCategory;
 
-namespace YummyZoom.Domain.UnitTests.MenuTests;
+namespace YummyZoom.Domain.UnitTests.MenuEntity;
 
 /// <summary>
 /// Tests for MenuCategory entity functionality including creation and updates.
@@ -34,6 +36,12 @@ public class MenuCategoryTests
         category.MenuId.Should().Be(DefaultMenuId);
         category.Name.Should().Be(DefaultCategoryName);
         category.DisplayOrder.Should().Be(DefaultDisplayOrder);
+        
+        // Assert domain event
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryAdded));
+        var categoryAddedEvent = category.DomainEvents.OfType<MenuCategoryAdded>().Single();
+        categoryAddedEvent.MenuId.Should().Be(DefaultMenuId);
+        categoryAddedEvent.CategoryId.Should().Be(category.Id);
     }
 
     [Test]
@@ -103,6 +111,14 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.Name.Should().Be(newName);
+        
+        // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryNameUpdated)
+        category.DomainEvents.Should().HaveCount(2);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
+        var nameUpdatedEvent = category.DomainEvents.OfType<MenuCategoryNameUpdated>().Single();
+        nameUpdatedEvent.MenuId.Should().Be(category.MenuId);
+        nameUpdatedEvent.CategoryId.Should().Be(category.Id);
+        nameUpdatedEvent.NewName.Should().Be(newName);
     }
 
     [Test]
@@ -111,21 +127,25 @@ public class MenuCategoryTests
         // Arrange
         var category = CreateValidCategory();
         var originalName = category.Name;
+        var originalEventCount = category.DomainEvents.Count;
 
         // Act & Assert - Null name
         var nullResult = category.UpdateName(null!);
         nullResult.ShouldBeFailure("Menu.InvalidCategoryName");
         category.Name.Should().Be(originalName);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
 
         // Act & Assert - Empty name
         var emptyResult = category.UpdateName("");
         emptyResult.ShouldBeFailure("Menu.InvalidCategoryName");
         category.Name.Should().Be(originalName);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
 
         // Act & Assert - Whitespace name
         var whitespaceResult = category.UpdateName("   ");
         whitespaceResult.ShouldBeFailure("Menu.InvalidCategoryName");
         category.Name.Should().Be(originalName);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
     }
 
     [Test]
@@ -134,6 +154,7 @@ public class MenuCategoryTests
         // Arrange
         var category = CreateValidCategory();
         var originalName = category.Name;
+        var originalEventCount = category.DomainEvents.Count;
 
         // Act
         var result = category.UpdateName(originalName);
@@ -141,6 +162,10 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.Name.Should().Be(originalName);
+        
+        // Assert that a new event is still raised even with the same name
+        category.DomainEvents.Should().HaveCount(originalEventCount + 1);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
     }
 
     [Test]
@@ -157,6 +182,14 @@ public class MenuCategoryTests
         result.ShouldBeSuccessful();
         category.Name.Should().Be(newName);
         category.Name.Should().NotBe(DefaultCategoryName);
+        
+        // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryNameUpdated)
+        category.DomainEvents.Should().HaveCount(2);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
+        var nameUpdatedEvent = category.DomainEvents.OfType<MenuCategoryNameUpdated>().Single();
+        nameUpdatedEvent.MenuId.Should().Be(category.MenuId);
+        nameUpdatedEvent.CategoryId.Should().Be(category.Id);
+        nameUpdatedEvent.NewName.Should().Be(newName);
     }
 
     #endregion
@@ -176,6 +209,14 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(newDisplayOrder);
+        
+        // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryDisplayOrderUpdated)
+        category.DomainEvents.Should().HaveCount(2);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
+        var displayOrderUpdatedEvent = category.DomainEvents.OfType<MenuCategoryDisplayOrderUpdated>().Single();
+        displayOrderUpdatedEvent.MenuId.Should().Be(category.MenuId);
+        displayOrderUpdatedEvent.CategoryId.Should().Be(category.Id);
+        displayOrderUpdatedEvent.NewDisplayOrder.Should().Be(newDisplayOrder);
     }
 
     [Test]
@@ -184,21 +225,25 @@ public class MenuCategoryTests
         // Arrange
         var category = CreateValidCategory();
         var originalOrder = category.DisplayOrder;
+        var originalEventCount = category.DomainEvents.Count;
 
         // Act & Assert - Zero display order
         var zeroResult = category.UpdateDisplayOrder(0);
         zeroResult.ShouldBeFailure("Menu.InvalidDisplayOrder");
         category.DisplayOrder.Should().Be(originalOrder);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
 
         // Act & Assert - Negative display order
         var negativeResult = category.UpdateDisplayOrder(-1);
         negativeResult.ShouldBeFailure("Menu.InvalidDisplayOrder");
         category.DisplayOrder.Should().Be(originalOrder);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
 
         // Act & Assert - Very negative display order
         var veryNegativeResult = category.UpdateDisplayOrder(-100);
         veryNegativeResult.ShouldBeFailure("Menu.InvalidDisplayOrder");
         category.DisplayOrder.Should().Be(originalOrder);
+        category.DomainEvents.Should().HaveCount(originalEventCount); // No new event raised
     }
 
     [Test]
@@ -207,6 +252,7 @@ public class MenuCategoryTests
         // Arrange
         var category = CreateValidCategory();
         var originalOrder = category.DisplayOrder;
+        var originalEventCount = category.DomainEvents.Count;
 
         // Act
         var result = category.UpdateDisplayOrder(originalOrder);
@@ -214,6 +260,10 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(originalOrder);
+        
+        // Assert that a new event is still raised even with the same order
+        category.DomainEvents.Should().HaveCount(originalEventCount + 1);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
     }
 
     [Test]
@@ -229,6 +279,14 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(largeOrder);
+        
+        // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryDisplayOrderUpdated)
+        category.DomainEvents.Should().HaveCount(2);
+        category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
+        var displayOrderUpdatedEvent = category.DomainEvents.OfType<MenuCategoryDisplayOrderUpdated>().Single();
+        displayOrderUpdatedEvent.MenuId.Should().Be(category.MenuId);
+        displayOrderUpdatedEvent.CategoryId.Should().Be(category.Id);
+        displayOrderUpdatedEvent.NewDisplayOrder.Should().Be(largeOrder);
     }
 
     #endregion

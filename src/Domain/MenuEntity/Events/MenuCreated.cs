@@ -1,8 +1,6 @@
-
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.Menu.Events;
+namespace YummyZoom.Domain.MenuEntity.Events;
 
 public record MenuCreated(MenuId MenuId, RestaurantId RestaurantId) : IDomainEvent;

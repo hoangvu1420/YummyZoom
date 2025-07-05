@@ -1,4 +1,4 @@
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Application.Common.Authorization;
 

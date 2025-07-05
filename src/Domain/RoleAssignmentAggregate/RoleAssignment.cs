@@ -1,3 +1,4 @@
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Domain.RoleAssignmentAggregate.Errors;

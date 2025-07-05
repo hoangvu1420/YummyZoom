@@ -1,4 +1,4 @@
-namespace YummyZoom.Domain.AccountTransaction.Enums; // <-- New Namespace
+namespace YummyZoom.Domain.AccountTransactionEntity.Enums; 
 
 public enum TransactionType
 {

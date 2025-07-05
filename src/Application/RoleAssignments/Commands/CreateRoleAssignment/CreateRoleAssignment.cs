@@ -1,6 +1,7 @@
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Security;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;

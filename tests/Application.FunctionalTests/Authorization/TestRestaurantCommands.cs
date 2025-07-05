@@ -4,6 +4,7 @@ using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 using MediatR;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -13,7 +14,7 @@ namespace YummyZoom.Application.FunctionalTests.Authorization;
 [Authorize(Policy = Policies.MustBeRestaurantOwner)]
 public record TestRestaurantOwnerCommand(Guid RestaurantId) : IRequest<Result<Unit>>, IRestaurantCommand
 {
-    RestaurantId IRestaurantCommand.RestaurantId => Domain.RoleAssignmentAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
+    RestaurantId IRestaurantCommand.RestaurantId => Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
 }
 
 /// <summary>
@@ -22,7 +23,7 @@ public record TestRestaurantOwnerCommand(Guid RestaurantId) : IRequest<Result<Un
 [Authorize(Policy = Policies.MustBeRestaurantStaff)]
 public record TestRestaurantStaffCommand(Guid RestaurantId) : IRequest<Result<Unit>>, IRestaurantCommand
 {
-    RestaurantId IRestaurantCommand.RestaurantId => Domain.RoleAssignmentAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
+    RestaurantId IRestaurantCommand.RestaurantId => Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
 }
 
 /// <summary>
@@ -30,7 +31,7 @@ public record TestRestaurantStaffCommand(Guid RestaurantId) : IRequest<Result<Un
 /// </summary>
 public record TestUnprotectedCommand(Guid RestaurantId) : IRequest<Result<Unit>>, IRestaurantCommand
 {
-    RestaurantId IRestaurantCommand.RestaurantId => Domain.RoleAssignmentAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
+    RestaurantId IRestaurantCommand.RestaurantId => Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(RestaurantId);
 }
 
 /// <summary>

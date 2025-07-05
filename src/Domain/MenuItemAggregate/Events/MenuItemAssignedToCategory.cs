@@ -1,4 +1,4 @@
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 

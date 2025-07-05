@@ -1,10 +1,10 @@
-using YummyZoom.Domain.Menu.Errors;
-using YummyZoom.Domain.Menu.Events;
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.Errors;
+using YummyZoom.Domain.MenuEntity.Events;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.Menu;
+namespace YummyZoom.Domain.MenuEntity;
 
 public sealed class Menu : Entity<MenuId>
 {
@@ -46,7 +46,7 @@ public sealed class Menu : Entity<MenuId>
             description,
             isEnabled);
         
-        menu.AddDomainEvent(new MenuCreated((MenuId)menu.Id, menu.RestaurantId));
+        menu.AddDomainEvent(new MenuCreated(menu.Id, menu.RestaurantId));
         
         return Result.Success(menu);
     }
@@ -68,14 +68,14 @@ public sealed class Menu : Entity<MenuId>
     {
         if (IsEnabled) return; 
         IsEnabled = true;
-        AddDomainEvent(new MenuEnabled((MenuId)Id));
+        AddDomainEvent(new MenuEnabled(Id));
     }
 
     public void Disable()
     {
         if (!IsEnabled) return; 
         IsEnabled = false;
-        AddDomainEvent(new MenuDisabled((MenuId)Id));
+        AddDomainEvent(new MenuDisabled(Id));
     }
 
 #pragma warning disable CS8618

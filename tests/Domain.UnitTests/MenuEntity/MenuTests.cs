@@ -1,10 +1,10 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.Menu.Events;
+using YummyZoom.Domain.MenuEntity;
+using YummyZoom.Domain.MenuEntity.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using MenuEntity = YummyZoom.Domain.Menu.Menu;
 
-namespace YummyZoom.Domain.UnitTests.MenuTests;
+namespace YummyZoom.Domain.UnitTests.MenuEntity;
 
 /// <summary>
 /// Tests for core Menu entity functionality including creation, updates, and lifecycle management.
@@ -22,7 +22,7 @@ public class MenuTests
     public void Create_WithValidInputs_ShouldSucceedAndInitializeMenuCorrectly()
     {
         // Arrange & Act
-        var result = MenuEntity.Create(
+        var result = Menu.Create(
             DefaultRestaurantId,
             DefaultName,
             DefaultDescription);
@@ -47,7 +47,7 @@ public class MenuTests
     public void Create_WithValidInputsAndDisabled_ShouldCreateDisabledMenu()
     {
         // Arrange & Act
-        var result = MenuEntity.Create(
+        var result = Menu.Create(
             DefaultRestaurantId,
             DefaultName,
             DefaultDescription,
@@ -66,15 +66,15 @@ public class MenuTests
     public void Create_WithNullOrEmptyName_ShouldFail()
     {
         // Act & Assert - Null name
-        var nullResult = MenuEntity.Create(DefaultRestaurantId, null!, DefaultDescription);
+        var nullResult = Menu.Create(DefaultRestaurantId, null!, DefaultDescription);
         nullResult.ShouldBeFailure("Menu.InvalidMenuName");
 
         // Act & Assert - Empty name
-        var emptyResult = MenuEntity.Create(DefaultRestaurantId, "", DefaultDescription);
+        var emptyResult = Menu.Create(DefaultRestaurantId, "", DefaultDescription);
         emptyResult.ShouldBeFailure("Menu.InvalidMenuName");
 
         // Act & Assert - Whitespace name
-        var whitespaceResult = MenuEntity.Create(DefaultRestaurantId, "   ", DefaultDescription);
+        var whitespaceResult = Menu.Create(DefaultRestaurantId, "   ", DefaultDescription);
         whitespaceResult.ShouldBeFailure("Menu.InvalidMenuName");
     }
 
@@ -82,15 +82,15 @@ public class MenuTests
     public void Create_WithNullOrEmptyDescription_ShouldFail()
     {
         // Act & Assert - Null description
-        var nullResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, null!);
+        var nullResult = Menu.Create(DefaultRestaurantId, DefaultName, null!);
         nullResult.ShouldBeFailure("Menu.InvalidMenuDescription");
 
         // Act & Assert - Empty description
-        var emptyResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, "");
+        var emptyResult = Menu.Create(DefaultRestaurantId, DefaultName, "");
         emptyResult.ShouldBeFailure("Menu.InvalidMenuDescription");
 
         // Act & Assert - Whitespace description
-        var whitespaceResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, "   ");
+        var whitespaceResult = Menu.Create(DefaultRestaurantId, DefaultName, "   ");
         whitespaceResult.ShouldBeFailure("Menu.InvalidMenuDescription");
     }
 
@@ -246,9 +246,9 @@ public class MenuTests
 
     #region Helper Methods
 
-    private static MenuEntity CreateValidMenu(bool isEnabled = true)
+    private static Menu CreateValidMenu(bool isEnabled = true)
     {
-        return MenuEntity.Create(DefaultRestaurantId, DefaultName, DefaultDescription, isEnabled).Value;
+        return Menu.Create(DefaultRestaurantId, DefaultName, DefaultDescription, isEnabled).Value;
     }
 
     #endregion

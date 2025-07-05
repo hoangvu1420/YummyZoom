@@ -1,13 +1,14 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.AccountTransaction;
-using YummyZoom.Domain.AccountTransaction.Enums;
+using YummyZoom.Domain.AccountTransactionEntity;
+using YummyZoom.Domain.AccountTransactionEntity.Enums;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 
-namespace YummyZoom.Domain.UnitTests.AccountTransaction;
+namespace YummyZoom.Domain.UnitTests.AccountTransactionEntity;
 
 [TestFixture]
 public class AccountTransactionTests
@@ -23,7 +24,7 @@ public class AccountTransactionTests
     public void Create_WithOrderRevenue_ShouldSucceed()
     {
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.OrderRevenue,
             TenDollars,
@@ -44,7 +45,7 @@ public class AccountTransactionTests
     public void Create_WithPlatformFee_ShouldSucceed()
     {
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.PlatformFee,
             NegativeTenDollars,
@@ -63,7 +64,7 @@ public class AccountTransactionTests
         var notes = "Manual adjustment for testing";
 
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.ManualAdjustment,
             TenDollars,
@@ -81,7 +82,7 @@ public class AccountTransactionTests
     public void Create_WithInvalidOrderRevenue_ShouldFail()
     {
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.OrderRevenue,
             NegativeTenDollars, // Invalid amount
@@ -96,7 +97,7 @@ public class AccountTransactionTests
     public void Create_WithInvalidPlatformFee_ShouldFail()
     {
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.PlatformFee,
             TenDollars, // Invalid amount
@@ -111,7 +112,7 @@ public class AccountTransactionTests
     public void Create_WithInvalidRefundDeduction_ShouldFail()
     {
         // Act
-        var result = YummyZoom.Domain.AccountTransaction.AccountTransaction.Create(
+        var result = AccountTransaction.Create(
             DefaultRestaurantAccountId,
             TransactionType.RefundDeduction,
             TenDollars, // Invalid amount

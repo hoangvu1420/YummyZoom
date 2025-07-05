@@ -2,7 +2,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.CouponAggregate.ValueObjects;

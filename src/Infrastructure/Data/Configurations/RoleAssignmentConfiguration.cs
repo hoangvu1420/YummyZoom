@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;

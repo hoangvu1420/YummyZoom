@@ -1,11 +1,12 @@
+using YummyZoom.Domain.AccountTransactionEntity.Enums;
+using YummyZoom.Domain.AccountTransactionEntity.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.AccountTransaction.Enums;
-using YummyZoom.Domain.AccountTransaction.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 
-namespace YummyZoom.Domain.AccountTransaction;
+namespace YummyZoom.Domain.AccountTransactionEntity;
 
 public sealed class AccountTransaction : Entity<AccountTransactionId>
 {

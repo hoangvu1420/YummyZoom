@@ -1,8 +1,9 @@
-using YummyZoom.Domain.Menu.ValueObjects;
-using YummyZoom.Domain.Menu.Errors;
+using YummyZoom.Domain.MenuEntity.Errors;
+using YummyZoom.Domain.MenuEntity.Events;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.Menu;
+namespace YummyZoom.Domain.MenuEntity;
 
 public sealed class MenuCategory : Entity<MenuCategoryId>
 {
@@ -33,11 +34,17 @@ public sealed class MenuCategory : Entity<MenuCategoryId>
         if (displayOrder <= 0)
             return Result.Failure<MenuCategory>(MenuErrors.InvalidDisplayOrder(displayOrder));
 
-        return Result.Success(new MenuCategory(
+        var menuCategory = new MenuCategory(
             MenuCategoryId.CreateUnique(),
             menuId,
             name,
-            displayOrder));
+            displayOrder);
+
+        menuCategory.AddDomainEvent(new MenuCategoryAdded(
+            menuCategory.MenuId,
+            menuCategory.Id));
+
+        return Result.Success(menuCategory);
     }
 
     public Result UpdateName(string name)
@@ -46,6 +53,9 @@ public sealed class MenuCategory : Entity<MenuCategoryId>
             return Result.Failure(MenuErrors.InvalidCategoryName(name));
 
         Name = name;
+
+        AddDomainEvent(new MenuCategoryNameUpdated(MenuId, Id, name));
+
         return Result.Success();
     }
 
@@ -55,6 +65,9 @@ public sealed class MenuCategory : Entity<MenuCategoryId>
             return Result.Failure(MenuErrors.InvalidDisplayOrder(displayOrder));
 
         DisplayOrder = displayOrder;
+
+        AddDomainEvent(new MenuCategoryDisplayOrderUpdated(MenuId, Id, displayOrder));
+
         return Result.Success();
     }
 

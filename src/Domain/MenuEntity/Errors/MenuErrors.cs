@@ -1,7 +1,7 @@
 
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.Menu.Errors;
+namespace YummyZoom.Domain.MenuEntity.Errors;
 
 public static class MenuErrors
 {

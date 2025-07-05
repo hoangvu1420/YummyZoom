@@ -2,7 +2,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.Events;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
