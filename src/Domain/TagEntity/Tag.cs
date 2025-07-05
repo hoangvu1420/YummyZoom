@@ -1,10 +1,10 @@
-using YummyZoom.Domain.TagAggregate.ValueObjects;
-using YummyZoom.Domain.TagAggregate.Enums;
-using YummyZoom.Domain.TagAggregate.Events;
-using YummyZoom.Domain.TagAggregate.Errors;
+using YummyZoom.Domain.TagEntity.Enums;
+using YummyZoom.Domain.TagEntity.Errors;
+using YummyZoom.Domain.TagEntity.Events;
+using YummyZoom.Domain.TagEntity.ValueObjects;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.TagAggregate;
+namespace YummyZoom.Domain.TagEntity;
 
 public sealed class Tag : AggregateRoot<TagId, Guid>
 {

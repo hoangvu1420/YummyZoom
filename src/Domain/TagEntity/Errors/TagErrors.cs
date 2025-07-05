@@ -1,7 +1,7 @@
+using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.TagAggregate.Enums;
 
-namespace YummyZoom.Domain.TagAggregate.Errors;
+namespace YummyZoom.Domain.TagEntity.Errors;
 
 public static class TagErrors
 {

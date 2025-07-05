@@ -7,8 +7,8 @@ using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.Events;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.TagAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.TagEntity.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.MenuItemAggregate;
 

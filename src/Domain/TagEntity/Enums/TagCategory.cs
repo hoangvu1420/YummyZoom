@@ -1,4 +1,4 @@
-namespace YummyZoom.Domain.TagAggregate.Enums;
+namespace YummyZoom.Domain.TagEntity.Enums;
 
 /// <summary>
 /// Defines the valid tag categories for the system using strongly-typed enum.

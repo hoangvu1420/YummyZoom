@@ -1,9 +1,9 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.TagAggregate;
-using YummyZoom.Domain.TagAggregate.Events;
-using YummyZoom.Domain.TagAggregate.Errors;
-using YummyZoom.Domain.TagAggregate.Enums;
+using YummyZoom.Domain.TagEntity;
+using YummyZoom.Domain.TagEntity.Enums;
+using YummyZoom.Domain.TagEntity.Errors;
+using YummyZoom.Domain.TagEntity.Events;
 
 namespace YummyZoom.Domain.UnitTests.TagAggregate;
 

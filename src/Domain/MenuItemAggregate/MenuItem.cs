@@ -4,7 +4,7 @@ using YummyZoom.Domain.MenuItemAggregate.Errors;
 using YummyZoom.Domain.MenuItemAggregate.Events;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.TagAggregate.ValueObjects;
+using YummyZoom.Domain.TagEntity.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuItemAggregate;

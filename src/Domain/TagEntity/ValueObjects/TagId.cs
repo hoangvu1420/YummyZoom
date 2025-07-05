@@ -1,7 +1,7 @@
-using YummyZoom.Domain.TagAggregate.Errors;
+using YummyZoom.Domain.TagEntity.Errors;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.TagAggregate.ValueObjects;
+namespace YummyZoom.Domain.TagEntity.ValueObjects;
 
 public sealed class TagId : AggregateRootId<Guid>
 {
