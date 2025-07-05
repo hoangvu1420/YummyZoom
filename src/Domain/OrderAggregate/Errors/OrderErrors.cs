@@ -48,4 +48,13 @@ public static class OrderErrors
 
     public static readonly Error PaymentNotFound =
         Error.Validation("Order.PaymentNotFound", "The specified payment transaction was not found.");
+
+    public static readonly Error InvalidOrderStatusForPreparing =
+        Error.Validation("Order.InvalidOrderStatusForPreparing", "Order cannot be marked as preparing from its current status.");
+
+    public static readonly Error InvalidOrderStatusForReadyForDelivery =
+        Error.Validation("Order.InvalidOrderStatusForReadyForDelivery", "Order cannot be marked as ready for delivery from its current status.");
+
+    public static readonly Error InvalidOrderStatusForDelivered =
+        Error.Validation("Order.InvalidOrderStatusForDelivered", "Order cannot be marked as delivered from its current status.");
 }

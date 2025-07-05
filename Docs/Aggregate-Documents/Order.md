@@ -78,7 +78,10 @@ These methods modify the state of the aggregate. All state changes must go throu
 | :--- | :--- | :--- | :--- |
 | `Result Accept(DateTime estimatedDeliveryTime)` | Restaurant accepts the order | Order must be in `Placed` status | `OrderErrors.InvalidOrderStatusForAccept` |
 | `Result Reject()` | Restaurant rejects the order | Order must be in `Placed` status | `OrderErrors.InvalidStatusForReject` |
-| `Result Cancel()` | Cancels the order | Order must be in `Placed` or `Accepted` status | `OrderErrors.InvalidOrderStatusForCancel` |
+| `Result Cancel()` | Cancels the order | Order must be in `Placed`, `Accepted`, `Preparing`, or `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForCancel` |
+| `Result MarkAsPreparing()` | Marks the order as preparing | Order must be in `Accepted` status | `OrderErrors.InvalidOrderStatusForPreparing` |
+| `Result MarkAsReadyForDelivery()` | Marks the order as ready for delivery | Order must be in `Preparing` status | `OrderErrors.InvalidOrderStatusForReadyForDelivery` |
+| `Result MarkAsDelivered()` | Marks the order as delivered | Order must be in `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForDelivered` |
 | `Result AddPaymentAttempt(PaymentTransaction payment)` | Adds a payment transaction | None - always succeeds with valid input | None |
 | `Result MarkAsPaid(PaymentTransactionId paymentTransactionId)` | Marks payment as successful | Payment transaction must exist | `OrderErrors.PaymentNotFound` |
 | `Result ApplyCoupon(CouponId, CouponValue, AppliesTo, Money?)` | Applies a coupon discount | Order must be `Placed`, no existing coupon, meets minimum amount | `OrderErrors.CouponCannotBeAppliedToOrderStatus`, `OrderErrors.CouponAlreadyApplied`, `OrderErrors.CouponNotApplicable` |
@@ -125,7 +128,9 @@ The aggregate raises the following domain events to communicate significant stat
 | `OrderRejected` | After a successful call to `Reject` | Signals that the restaurant has rejected the order |
 | `OrderCancelled` | After a successful call to `Cancel` | Signals that the order has been cancelled |
 | `OrderPaid` | After a successful call to `MarkAsPaid` | Signals that payment has been successfully processed |
-| `OrderPreparing` | When order status changes to preparing | Signals that order preparation has begun |
+| `OrderPreparing` | After a successful call to `MarkAsPreparing` | Signals that order preparation has begun |
+| `OrderReadyForDelivery` | After a successful call to `MarkAsReadyForDelivery` | Signals that the order is ready for delivery/pickup |
+| `OrderDelivered` | After a successful call to `MarkAsDelivered` | Signals that the order has been delivered |
 
 ### 6. Order Status Lifecycle
 
@@ -134,9 +139,9 @@ The `OrderStatus` enum defines the following valid statuses and their transition
 | Status | Description | Valid Transitions |
 | :--- | :--- | :--- |
 | `Placed` | Initial status when order is created | → Accepted, Rejected, Cancelled |
-| `Accepted` | Restaurant has accepted the order | → Preparing, Cancelled |
-| `Preparing` | Order is being prepared | → ReadyForDelivery |
-| `ReadyForDelivery` | Order is ready for pickup/delivery | → Delivered |
+| `Accepted` | Restaurant has accepted the order | → Preparing, Cancelled, Rejected |
+| `Preparing` | Order is being prepared | → ReadyForDelivery, Cancelled |
+| `ReadyForDelivery` | Order is ready for pickup/delivery | → Delivered, Cancelled |
 | `Delivered` | Order has been completed | (Terminal state) |
 | `Cancelled` | Order was cancelled | (Terminal state) |
 | `Rejected` | Order was rejected by restaurant | (Terminal state) |

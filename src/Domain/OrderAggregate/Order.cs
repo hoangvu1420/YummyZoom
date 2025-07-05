@@ -12,34 +12,130 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.OrderAggregate;
 
+/// <summary>
+/// Represents an order placed by a customer within the YummyZoom system.
+/// This is an Aggregate Root, ensuring consistency within the Order context.
+/// </summary>
 public sealed class Order : AggregateRoot<OrderId, Guid>
 {
+    #region Fields
+
     private readonly List<OrderItem> _orderItems = [];
     private readonly List<PaymentTransaction> _paymentTransactions = [];
     private readonly List<CouponId> _appliedCouponIds = [];
 
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets the unique identifier of the order.
+    /// </summary>
     public new OrderId Id { get; private set; }
 
+    /// <summary>
+    /// Gets the human-readable order number.
+    /// </summary>
     public string OrderNumber { get; private set; }
+
+    /// <summary>
+    /// Gets the current status of the order.
+    /// </summary>
     public OrderStatus Status { get; private set; }
+
+    /// <summary>
+    /// Gets the timestamp when the order was placed.
+    /// </summary>
     public DateTime PlacementTimestamp { get; private set; }
+
+    /// <summary>
+    /// Gets the timestamp of the last update to the order.
+    /// </summary>
     public DateTime LastUpdateTimestamp { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the estimated delivery time for the order.
+    /// </summary>
     public DateTime? EstimatedDeliveryTime { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the actual delivery time for the order.
+    /// </summary>
+    public DateTime? ActualDeliveryTime { get; private set; }
+
+    /// <summary>
+    /// Gets special instructions provided by the customer for the order.
+    /// </summary>
     public string SpecialInstructions { get; private set; }
+
+    /// <summary>
+    /// Gets the delivery address for the order.
+    /// </summary>
     public DeliveryAddress DeliveryAddress { get; private set; }
+
+    /// <summary>
+    /// Gets the subtotal of the order before discounts, taxes, and fees.
+    /// </summary>
     public Money Subtotal { get; private set; }
+
+    /// <summary>
+    /// Gets the total discount amount applied to the order.
+    /// </summary>
     public Money DiscountAmount { get; private set; }
+
+    /// <summary>
+    /// Gets the delivery fee for the order.
+    /// </summary>
     public Money DeliveryFee { get; private set; }
+
+    /// <summary>
+    /// Gets the tip amount for the order.
+    /// </summary>
     public Money TipAmount { get; private set; }
+
+    /// <summary>
+    /// Gets the tax amount for the order.
+    /// </summary>
     public Money TaxAmount { get; private set; }
+
+    /// <summary>
+    /// Gets the total amount of the order, including all items, discounts, taxes, and fees.
+    /// </summary>
     public Money TotalAmount { get; private set; }
+
+    /// <summary>
+    /// Gets the ID of the customer who placed the order.
+    /// </summary>
     public UserId CustomerId { get; private set; }
+
+    /// <summary>
+    /// Gets the ID of the restaurant from which the order was placed.
+    /// </summary>
     public RestaurantId RestaurantId { get; private set; }
 
+    /// <summary>
+    /// Gets a read-only list of items included in the order.
+    /// </summary>
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
+
+    /// <summary>
+    /// Gets a read-only list of payment transactions associated with the order.
+    /// </summary>
     public IReadOnlyList<PaymentTransaction> PaymentTransactions => _paymentTransactions.AsReadOnly();
+
+    /// <summary>
+    /// Gets a read-only list of coupon IDs applied to the order.
+    /// </summary>
     public IReadOnlyList<CouponId> AppliedCouponIds => _appliedCouponIds.AsReadOnly();
 
+    #endregion
+
+    #region Constructors
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Order"/> class.
+    /// Private constructor enforced by DDD for controlled creation via static factory method.
+    /// </summary>
     private Order(
         OrderId orderId,
         string orderNumber,
@@ -80,6 +176,31 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         RecalculateTotals();
     }
 
+    /// <summary>
+    /// Required for ORM (e.g., Entity Framework Core) and deserialization.
+    /// </summary>
+#pragma warning disable CS8618
+    private Order() { }
+#pragma warning restore CS8618
+
+    #endregion
+
+    #region Static Factory Methods
+
+    /// <summary>
+    /// Creates a new order instance.
+    /// </summary>
+    /// <param name="customerId">The ID of the customer placing the order.</param>
+    /// <param name="restaurantId">The ID of the restaurant for the order.</param>
+    /// <param name="deliveryAddress">The delivery address for the order.</param>
+    /// <param name="orderItems">A list of items included in the order.</param>
+    /// <param name="specialInstructions">Any special instructions for the order.</param>
+    /// <param name="discountAmount">Optional discount amount applied.</param>
+    /// <param name="deliveryFee">Optional delivery fee.</param>
+    /// <param name="tipAmount">Optional tip amount.</param>
+    /// <param name="taxAmount">Optional tax amount.</param>
+    /// <param name="appliedCouponIds">Optional list of applied coupon IDs.</param>
+    /// <returns>A <see cref="Result{Order}"/> indicating success or failure.</returns>
     public static Result<Order> Create(
         UserId customerId,
         RestaurantId restaurantId,
@@ -124,6 +245,16 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return order;
     }
 
+    #endregion
+
+    #region Public Methods - Order Lifecycle
+
+    /// <summary>
+    /// Accepts the order, setting its status to <see cref="OrderStatus.Accepted"/> and
+    /// providing an estimated delivery time.
+    /// </summary>
+    /// <param name="estimatedDeliveryTime">The estimated time for delivery.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result Accept(DateTime estimatedDeliveryTime)
     {
         if (Status != OrderStatus.Placed)
@@ -139,6 +270,10 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Rejects the order, setting its status to <see cref="OrderStatus.Rejected"/>.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result Reject()
     {
         if (Status != OrderStatus.Placed)
@@ -153,9 +288,17 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Cancels the order, setting its status to <see cref="OrderStatus.Cancelled"/>.
+    /// Cancellation is allowed only for specific statuses.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result Cancel()
     {
-        if (Status != OrderStatus.Placed && Status != OrderStatus.Accepted)
+        if (Status != OrderStatus.Placed && 
+            Status != OrderStatus.Accepted && 
+            Status != OrderStatus.Preparing && 
+            Status != OrderStatus.ReadyForDelivery)
         {
             return Result.Failure(OrderErrors.InvalidOrderStatusForCancel);
         }
@@ -167,12 +310,82 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks the order as preparing, setting its status to <see cref="OrderStatus.Preparing"/>.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result MarkAsPreparing()
+    {
+        if (Status != OrderStatus.Accepted)
+        {
+            return Result.Failure(OrderErrors.InvalidOrderStatusForPreparing);
+        }
+
+        Status = OrderStatus.Preparing;
+        LastUpdateTimestamp = DateTime.UtcNow;
+
+        AddDomainEvent(new OrderPreparing(Id));
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Marks the order as ready for delivery, setting its status to <see cref="OrderStatus.ReadyForDelivery"/>.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result MarkAsReadyForDelivery()
+    {
+        if (Status != OrderStatus.Preparing)
+        {
+            return Result.Failure(OrderErrors.InvalidOrderStatusForReadyForDelivery);
+        }
+
+        Status = OrderStatus.ReadyForDelivery;
+        LastUpdateTimestamp = DateTime.UtcNow;
+
+        AddDomainEvent(new OrderReadyForDelivery(Id));
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Marks the order as delivered, setting its status to <see cref="OrderStatus.Delivered"/>
+    /// and recording the actual delivery time.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result MarkAsDelivered()
+    {
+        if (Status != OrderStatus.ReadyForDelivery)
+        {
+            return Result.Failure(OrderErrors.InvalidOrderStatusForDelivered);
+        }
+
+        Status = OrderStatus.Delivered;
+        ActualDeliveryTime = DateTime.UtcNow;
+        LastUpdateTimestamp = DateTime.UtcNow;
+
+        AddDomainEvent(new OrderDelivered(Id, ActualDeliveryTime.Value));
+        return Result.Success();
+    }
+
+    #endregion
+
+    #region Public Methods - Payments
+
+    /// <summary>
+    /// Adds a payment attempt to the order.
+    /// </summary>
+    /// <param name="payment">The payment transaction to add.</param>
+    /// <returns>A <see cref="Result"/> indicating success.</returns>
     public Result AddPaymentAttempt(PaymentTransaction payment)
     {
         _paymentTransactions.Add(payment);
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks a specific payment transaction as succeeded.
+    /// </summary>
+    /// <param name="paymentTransactionId">The ID of the payment transaction to mark as paid.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result MarkAsPaid(PaymentTransactionId paymentTransactionId)
     {
         var payment = _paymentTransactions.FirstOrDefault(p => p.Id == paymentTransactionId);
@@ -186,14 +399,18 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    #endregion
+
+    #region Public Methods - Coupons
+
     /// <summary>
-    /// Applies a coupon to the order using decoupled parameters (preferred approach)
+    /// Applies a coupon to the order using decoupled parameters (preferred approach).
     /// </summary>
-    /// <param name="couponId">The ID of the coupon being applied</param>
-    /// <param name="couponValue">The value and type of the coupon</param>
-    /// <param name="appliesTo">The scope and criteria for coupon application</param>
-    /// <param name="minOrderAmount">Minimum order amount required for coupon eligibility</param>
-    /// <returns>Result indicating success or failure</returns>
+    /// <param name="couponId">The ID of the coupon being applied.</param>
+    /// <param name="couponValue">The value and type of the coupon.</param>
+    /// <param name="appliesTo">The scope and criteria for coupon application.</param>
+    /// <param name="minOrderAmount">Minimum order amount required for coupon eligibility.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result ApplyCoupon(
         CouponId couponId,
         CouponValue couponValue,
@@ -255,6 +472,10 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Removes any applied coupon from the order.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> indicating success.</returns>
     public Result RemoveCoupon()
     {
         if (!_appliedCouponIds.Any())
@@ -270,6 +491,16 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return Result.Success();
     }
 
+    #endregion
+
+    #region Private Helper Methods
+
+    /// <summary>
+    /// Calculates the base amount on which the coupon discount will be applied.
+    /// </summary>
+    /// <param name="couponValue">The value and type of the coupon.</param>
+    /// <param name="appliesTo">The scope and criteria for coupon application.</param>
+    /// <returns>The decimal amount to base the discount calculation on.</returns>
     private decimal GetDiscountBaseAmount(CouponValue couponValue, AppliesTo appliesTo)
     {
         // For FreeItem coupons, calculate based on the specific free item
@@ -298,6 +529,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         }
     }
 
+    /// <summary>
+    /// Calculates the discount amount for a free item coupon.
+    /// </summary>
+    /// <param name="freeItemId">The ID of the menu item that is free.</param>
+    /// <returns>The decimal value representing the discount for the free item.</returns>
     private decimal GetFreeItemDiscountAmount(MenuItemId freeItemId)
     {
         // Find all order items that match the free item
@@ -320,6 +556,9 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return cheapestItem.LineItemTotal.Amount / cheapestItem.Quantity;
     }
 
+    /// <summary>
+    /// Recalculates the subtotal and total amount of the order based on current items, discounts, taxes, and fees.
+    /// </summary>
     private void RecalculateTotals()
     {
         // If there are no items, totals are based on fees/tips alone.
@@ -341,6 +580,10 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         TotalAmount = Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount;
     }
 
+    /// <summary>
+    /// Generates a unique order number.
+    /// </summary>
+    /// <returns>A unique string representing the order number.</returns>
     private static string GenerateOrderNumber()
     {
         // Format: ORD-YYYYMMDD-HHMMSS-XXXX (where XXXX is random)
@@ -352,7 +595,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         return $"ORD-{datePart}-{timePart}-{randomPart}";
     }
 
-#pragma warning disable CS8618
-    private Order() { }
-#pragma warning restore CS8618
+    #endregion
+    
 }

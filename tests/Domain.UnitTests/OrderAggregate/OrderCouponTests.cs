@@ -8,9 +8,6 @@ using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Errors;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
@@ -18,18 +15,8 @@ namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 /// Tests for Order aggregate coupon-related functionality including applying and removing coupons.
 /// </summary>
 [TestFixture]
-public class OrderCouponTests
+public class OrderCouponTests : OrderTestHelpers
 {
-    private static readonly UserId DefaultCustomerId = UserId.CreateUnique();
-    private static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
-    private static readonly DeliveryAddress DefaultDeliveryAddress = CreateDefaultDeliveryAddress();
-    private static readonly List<OrderItem> DefaultOrderItems = CreateDefaultOrderItems();
-    private const string DefaultSpecialInstructions = "No special instructions";
-    private static readonly Money DefaultDiscountAmount = Money.Zero(Currencies.Default);
-    private static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
-    private static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
-    private static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
-
     #region ApplyCoupon() Method Tests - New Decoupled Approach
 
     [Test]
@@ -46,7 +33,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
         order.AppliedCouponIds.Should().ContainSingle();
         order.AppliedCouponIds.Should().Contain(couponId);
@@ -72,7 +59,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(discountAmount);
         order.AppliedCouponIds.Should().ContainSingle();
         order.AppliedCouponIds.Should().Contain(couponId);
@@ -92,7 +79,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(order.Subtotal); // Capped to subtotal
     }
 
@@ -115,7 +102,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
         order.AppliedCouponIds.Should().ContainSingle();
         order.AppliedCouponIds.Should().Contain(couponId);
@@ -135,8 +122,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(OrderErrors.CouponNotApplicable);
+        result.ShouldBeFailure(OrderErrors.CouponNotApplicable.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
@@ -159,7 +145,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
         order.AppliedCouponIds.Should().Contain(couponId);
     }
@@ -182,7 +168,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
         order.AppliedCouponIds.Should().Contain(couponId);
     }
@@ -201,8 +187,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, minOrderAmount);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(OrderErrors.CouponNotApplicable);
+        result.ShouldBeFailure(OrderErrors.CouponNotApplicable.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
@@ -221,7 +206,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, minOrderAmount);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.AppliedCouponIds.Should().Contain(couponId);
     }
 
@@ -242,8 +227,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(secondCouponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(OrderErrors.CouponAlreadyApplied);
+        result.ShouldBeFailure(OrderErrors.CouponAlreadyApplied.Code);
         order.AppliedCouponIds.Should().ContainSingle();
         order.AppliedCouponIds.Should().Contain(firstCouponId);
     }
@@ -263,8 +247,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(OrderErrors.CouponCannotBeAppliedToOrderStatus);
+        result.ShouldBeFailure(OrderErrors.CouponCannotBeAppliedToOrderStatus.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
     }
@@ -301,7 +284,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
     }
 
@@ -341,7 +324,7 @@ public class OrderCouponTests
         var result = order.ApplyCoupon(couponId, couponValue, appliesTo, null);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
         order.AppliedCouponIds.Should().Contain(couponId);
     }
@@ -365,7 +348,7 @@ public class OrderCouponTests
         var result = order.RemoveCoupon();
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
         order.AppliedCouponIds.Should().BeEmpty();
         order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -389,50 +372,10 @@ public class OrderCouponTests
         var result = order.RemoveCoupon();
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(originalDiscountAmount);
         order.TotalAmount.Should().Be(originalTotalAmount);
         order.AppliedCouponIds.Should().HaveCount(originalAppliedCoupons);
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private static Order CreateValidOrder()
-    {
-        return Order.Create(
-            DefaultCustomerId,
-            DefaultRestaurantId,
-            DefaultDeliveryAddress,
-            DefaultOrderItems,
-            DefaultSpecialInstructions,
-            DefaultDiscountAmount,
-            DefaultDeliveryFee,
-            DefaultTipAmount,
-            DefaultTaxAmount).Value;
-    }
-
-    private static DeliveryAddress CreateDefaultDeliveryAddress()
-    {
-        return DeliveryAddress.Create(
-            "123 Main St",
-            "Springfield",
-            "IL",
-            "62701",
-            "USA").Value;
-    }
-
-    private static List<OrderItem> CreateDefaultOrderItems()
-    {
-        var orderItem = OrderItem.Create(
-            MenuCategoryId.CreateUnique(),
-            MenuItemId.CreateUnique(),
-            "Test Item",
-            new Money(10.00m, Currencies.Default),
-            2).Value;
-
-        return new List<OrderItem> { orderItem };
     }
 
     #endregion

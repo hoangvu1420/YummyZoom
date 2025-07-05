@@ -1,17 +1,9 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.Common.Constants;
-using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.Events;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
@@ -19,18 +11,8 @@ namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 /// Tests for Order aggregate payment-related functionality.
 /// </summary>
 [TestFixture]
-public class OrderPaymentTests
+public class OrderPaymentTests : OrderTestHelpers
 {
-    private static readonly UserId DefaultCustomerId = UserId.CreateUnique();
-    private static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
-    private static readonly DeliveryAddress DefaultDeliveryAddress = CreateDefaultDeliveryAddress();
-    private static readonly List<OrderItem> DefaultOrderItems = CreateDefaultOrderItems();
-    private const string DefaultSpecialInstructions = "No special instructions";
-    private static readonly Money DefaultDiscountAmount = Money.Zero(Currencies.Default);
-    private static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
-    private static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
-    private static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
-
     #region Payment Methods Tests
 
     [Test]
@@ -44,7 +26,7 @@ public class OrderPaymentTests
         var result = order.AddPaymentAttempt(payment);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         order.PaymentTransactions.Should().ContainSingle();
         order.PaymentTransactions.Should().Contain(payment);
     }
@@ -61,11 +43,11 @@ public class OrderPaymentTests
         var result = order.MarkAsPaid(payment.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         payment.Status.Should().Be(PaymentStatus.Succeeded);
         
         // Verify domain event
-        order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderPaid));
+        order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderPaid));
         var orderPaidEvent = order.DomainEvents.OfType<OrderPaid>().Single();
         orderPaidEvent.OrderId.Should().Be(order.Id);
         orderPaidEvent.PaymentTransactionId.Should().Be(payment.Id);
@@ -83,58 +65,8 @@ public class OrderPaymentTests
         var result = order.MarkAsPaid(invalidPaymentId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(OrderErrors.PaymentNotFound);
+        result.ShouldBeFailure(OrderErrors.PaymentNotFound.Code);
         order.DomainEvents.Should().HaveCount(initialEventCount); // No new events
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private static Order CreateValidOrder()
-    {
-        return Order.Create(
-            DefaultCustomerId,
-            DefaultRestaurantId,
-            DefaultDeliveryAddress,
-            DefaultOrderItems,
-            DefaultSpecialInstructions,
-            DefaultDiscountAmount,
-            DefaultDeliveryFee,
-            DefaultTipAmount,
-            DefaultTaxAmount).Value;
-    }
-
-    private static DeliveryAddress CreateDefaultDeliveryAddress()
-    {
-        return DeliveryAddress.Create(
-            "123 Main St",
-            "Springfield",
-            "IL",
-            "62701",
-            "USA").Value;
-    }
-
-    private static List<OrderItem> CreateDefaultOrderItems()
-    {
-        var orderItem = OrderItem.Create(
-            MenuCategoryId.CreateUnique(),
-            MenuItemId.CreateUnique(),
-            "Test Item",
-            new Money(10.00m, Currencies.Default),
-            2).Value;
-
-        return new List<OrderItem> { orderItem };
-    }
-
-    private static PaymentTransaction CreateValidPaymentTransaction()
-    {
-        return PaymentTransaction.Create(
-            PaymentMethodType.CreditCard,
-            PaymentTransactionType.Payment,
-            new Money(25.50m, Currencies.Default),
-            DateTime.UtcNow).Value;
     }
 
     #endregion
