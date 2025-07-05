@@ -1,4 +1,4 @@
-namespace YummyZoom.Domain.RestaurantAccountAggregate.Enums;
+namespace YummyZoom.Domain.AccountTransaction.Enums; // <-- New Namespace
 
 public enum TransactionType
 {

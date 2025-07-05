@@ -1,4 +1,4 @@
-namespace YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
+namespace YummyZoom.Domain.AccountTransaction.ValueObjects; // <-- New Namespace
 
 public sealed class AccountTransactionId : ValueObject
 {

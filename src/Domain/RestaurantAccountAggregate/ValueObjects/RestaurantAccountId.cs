@@ -25,7 +25,7 @@ public sealed class RestaurantAccountId : AggregateRootId<Guid>
     public static Result<RestaurantAccountId> Create(string value)
     {
         return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<RestaurantAccountId>(RestaurantAccountErrors.InvalidId)
+            ? Result.Failure<RestaurantAccountId>(RestaurantAccountErrors.InvalidId(value))
             : Result.Success(new RestaurantAccountId(guid));
     }
 

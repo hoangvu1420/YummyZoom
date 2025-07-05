@@ -1,38 +1,46 @@
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
-using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
+using YummyZoom.Domain.AccountTransaction.Enums;
+using YummyZoom.Domain.AccountTransaction.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
+using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 
-namespace YummyZoom.Domain.RestaurantAccountAggregate.Entities;
+namespace YummyZoom.Domain.AccountTransaction;
 
 public sealed class AccountTransaction : Entity<AccountTransactionId>
 {
+    public RestaurantAccountId RestaurantAccountId { get; private set; }
     public TransactionType Type { get; private set; }
     public Money Amount { get; private set; }
     public DateTime Timestamp { get; private set; }
     public OrderId? RelatedOrderId { get; private set; }
+    public string? Notes { get; private set; }
 
     private AccountTransaction(
         AccountTransactionId id,
+        RestaurantAccountId restaurantAccountId,
         TransactionType type,
         Money amount,
         DateTime timestamp,
-        OrderId? relatedOrderId)
+        OrderId? relatedOrderId,
+        string? notes)
         : base(id)
     {
+        RestaurantAccountId = restaurantAccountId;
         Type = type;
         Amount = amount;
         Timestamp = timestamp;
         RelatedOrderId = relatedOrderId;
+        Notes = notes;
     }
 
     public static Result<AccountTransaction> Create(
+        RestaurantAccountId restaurantAccountId,
         TransactionType type,
         Money amount,
-        OrderId? relatedOrderId = null)
+        OrderId? relatedOrderId = null,
+        string? notes = null)
     {
-        // Validation based on business rules
         var validationResult = ValidateTransaction(type, amount);
         if (validationResult.IsFailure)
         {
@@ -41,24 +49,25 @@ public sealed class AccountTransaction : Entity<AccountTransactionId>
 
         return Result.Success(new AccountTransaction(
             AccountTransactionId.CreateUnique(),
+            restaurantAccountId,
             type,
             amount,
             DateTime.UtcNow,
-            relatedOrderId));
+            relatedOrderId,
+            notes));
     }
-
+    
     private static Result ValidateTransaction(TransactionType type, Money amount)
-    {
+    { 
+        // Using the same errors from RestaurantAccountErrors for consistency.
         return type switch
         {
             TransactionType.OrderRevenue when amount.Amount <= 0 => 
-                Result.Failure(RestaurantAccountErrors.OrderRevenueMustBePositive),
+                Result.Failure(RestaurantAccountErrors.OrderRevenueMustBePositive(amount)),
             TransactionType.PlatformFee when amount.Amount >= 0 => 
-                Result.Failure(RestaurantAccountErrors.PlatformFeeMustBeNegative),
-            TransactionType.RefundDeduction when amount.Amount >= 0 => 
-                Result.Failure(RestaurantAccountErrors.RefundDeductionMustBeNegative),
-            TransactionType.PayoutSettlement when amount.Amount >= 0 => 
-                Result.Failure(RestaurantAccountErrors.PayoutSettlementMustBeNegative),
+                Result.Failure(RestaurantAccountErrors.PlatformFeeMustBeNegative(amount)),
+            TransactionType.RefundDeduction when amount.Amount >= 0 =>
+                Result.Failure(RestaurantAccountErrors.RefundDeductionMustBeNegative(amount)),
             _ => Result.Success()
         };
     }

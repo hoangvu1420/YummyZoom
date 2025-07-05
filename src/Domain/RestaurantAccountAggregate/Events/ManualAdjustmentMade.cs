@@ -1,12 +1,11 @@
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAccountAggregate.Events;
 
-public record TransactionAdded(
+public record ManualAdjustmentMade(
     RestaurantAccountId RestaurantAccountId,
-    AccountTransactionId TransactionId,
-    TransactionType Type,
     Money Amount,
-    OrderId? RelatedOrderId) : IDomainEvent;
+    string Reason,
+    Guid AdminId) : IDomainEvent;

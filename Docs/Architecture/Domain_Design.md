@@ -1,8 +1,8 @@
 ## YummyZoom Domain Design
 
-This document outlines the domain design for the YummyZoom platform, focusing on the aggregates that encapsulate the core business logic and data structures. The design follows Domain-Driven Design (DDD) principles, ensuring that each aggregate is cohesive, encapsulated, and adheres to its own invariants.
+This document outlines the domain design for the YummyZoom platform, focusing on the aggregates and entities that encapsulate the core business logic and data structures. The design follows Domain-Driven Design (DDD) principles, ensuring that each object is cohesive, encapsulated, and adheres to its own invariants.
 
-### Aggregates and Their Detailed Structures
+### Domain Objects and Their Detailed Structures
 
 #### 1. `User` Aggregate
 
@@ -26,10 +26,11 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `TokenizedDetails` (e.g., Stripe token, last 4 digits)
     * `IsDefault` (Boolean)
 * **Invariants:**
-  * `Email` must be unique across all users.
+  * `Email` must be unique across all users (enforced by application service/database).
+  * When a new `PaymentMethod` is added as default, all others must be marked as not default.
   * A `User` is considered a customer by their very existence; no special flag is needed.
 * **References to other aggregates (by ID):**
-  * None. This aggregate is now fully independent and does not hold references to `Restaurant` or other business domains.
+  * None.
 
 ---
 
@@ -44,7 +45,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `RestaurantID` (Identifier, reference to the `Restaurant` aggregate)
     * `Role` (Enum: `Owner`, `Staff`)
 * **Invariants:**
-  * The combination of `UserID`, `RestaurantID`, and `Role` must be unique. (A user cannot be assigned the same role twice for the same restaurant).
+  * The combination of `UserID`, `RestaurantID`, and `Role` must be unique. A user can only have one role per restaurant.
   * A `RoleAssignment` must contain a valid, non-null `UserID` and `RestaurantID`.
   * The `Role` must be a valid value from the defined enum (e.g., `Owner`, `Staff`).
 * **References to other aggregates (by ID):**
@@ -56,7 +57,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 #### 3. `Restaurant` Aggregate
 
 * **Aggregate Root:** `Restaurant`
-* **Description:** This aggregate is now lean and focused. It represents the restaurant as a legal and operational entity. Its data changes infrequently.
+* **Description:** A lean aggregate representing the restaurant as a legal and operational entity. Its data changes infrequently.
 * **Entities/Value Objects (VOs) within:**
   * `Restaurant` (Entity - Root):
     * `RestaurantID` (Identifier)
@@ -68,123 +69,128 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `ContactInfo` (VO: `PhoneNumber`, `Email`)
     * `BusinessHours` (VO or structured data)
     * `IsVerified` (Boolean - Admin controlled)
-    * `IsAcceptingOrders` (Boolean - Owner/Staff controlled toggle for "closing" the restaurant temporarily)
+    * `IsAcceptingOrders` (Boolean - Owner/Staff controlled master switch)
 * **Invariants:**
   * `Name` and `Location` are mandatory.
-  * `IsAcceptingOrders` is the master switch; if false, no orders can be created for this restaurant, regardless of menu status.
+  * If `IsAcceptingOrders` is false, no orders can be created for this restaurant.
 * **References to other aggregates (by ID):**
-  * None. It is referenced *by* other aggregates.
+  * None.
 
 ---
 
-#### 4. `Menu` Aggregate
+#### 4. `Menu` & `MenuCategory` (Independent Entities)
 
-* **Aggregate Root:** `Menu`
-* **Description:** Represents a single, complete menu (e.g., "Lunch Menu," "Dinner Menu"). It is the primary transactional boundary for a restaurant's staff when managing what is for sale and its availability.
+* **Design Rationale:** Following performance analysis, the original monolithic `Menu` aggregate has been split. `Menu` and `MenuCategory` are now modeled as independent domain entities, serving as organizational tools rather than consistency boundaries. They do not contain collections of their children; relationships are maintained via ID references.
+
+* **`Menu` (Independent Entity):**
+  * **Description:** An organizational entity that groups `MenuCategory`s. Represents a named collection like "Lunch Menu" or "All Day Menu".
+  * **Structure:** `MenuID`, `RestaurantID`, `Name`, `Description`, `IsEnabled`.
+
+* **`MenuCategory` (Independent Entity):**
+  * **Description:** An organizational entity that groups `MenuItem`s. Represents a section like "Appetizers" or "Desserts".
+  * **Structure:** `MenuCategoryID`, `MenuID`, `Name`, `DisplayOrder`.
+
+---
+
+#### 5. `MenuItem` Aggregate
+
+* **Aggregate Root:** `MenuItem`
+* **Description:** The primary transactional boundary for a single saleable item. This allows for frequent, high-performance updates (e.g., changing availability) without loading an entire menu.
 * **Entities/Value Objects (VOs) within:**
-  * `Menu` (Entity - Root):
-    * `MenuID` (Identifier)
-    * `RestaurantID` (Identifier, links back to the `Restaurant`)
-    * `Name` (e.g., "All Day Menu")
-    * `Description` (Optional, e.g., "Served from 11 AM to 9 PM")
-    * `IsEnabled` (Boolean - To activate/deactivate entire menus, e.g., a "Holiday Menu")
-  * `MenuCategory` (List of Child Entities):
-    * `CategoryID` (Identifier)
-    * `Name` (e.g., "Appetizers", "Main Courses", "Desserts")
-    * `DisplayOrder` (Integer for sorting)
-  * `MenuItem` (List of Child Entities, nested under a `MenuCategory`):
+  * `MenuItem` (Entity - Root):
     * `MenuItemID` (Identifier)
-    * `Name`
-    * `Description`
+    * `RestaurantID` (Reference)
+    * `MenuCategoryID` (Reference)
+    * `Name`, `Description`, `ImageURL`
     * `BasePrice` (Money VO)
-    * `ImageURL`
-    * `IsAvailable` (Boolean - The "out of stock" toggle. This is the most frequently updated field.)
+    * `IsAvailable` (Boolean - The frequently updated "out of stock" flag)
+    * `AppliedCustomizations` (List of VOs referencing `CustomizationGroupID`)
     * `DietaryTagIDs` (List of `TagID`s)
-    * `AppliedCustomizations` (List of `AppliedCustomization` VOs):
-      * `CustomizationGroupID` (Identifier, reference to the `CustomizationGroup` aggregate)
-      * `DisplayTitle` (String, e.g., "Choose Your Spice Level", "Add Toppings")
-      * `DisplayOrder` (Integer)
-* **Invariants:**
-  * A `MenuItem` must belong to a `MenuCategory`.
-  * `MenuItem.BasePrice` cannot be negative.
-  * `MenuItem.Name` must be unique within its `MenuCategory`.
-* **References to other aggregates (by ID):**
-  * `RestaurantID`
-  * `MenuItem.DietaryTagIDs` (List of `TagID`s)
-  * `AppliedCustomizations.CustomizationGroupID` (List of `CustomizationGroupID`s)
+* **Invariants:** `BasePrice` cannot be negative; `Name` must be unique within its `MenuCategory` (enforced by Application Service).
+* **References to other aggregates/entities (by ID):** `RestaurantID`, `MenuCategoryID`, `CustomizationGroupID` (list), `TagID` (list).
 
 ---
 
-#### 5. `CustomizationGroup` Aggregate
+#### 6. `CustomizationGroup` Aggregate
 
 * **Aggregate Root:** `CustomizationGroup`
-* **Description:** Manages a self-contained, reusable set of choices (e.g., sizes, toppings, add-ons). This allows an owner to define an option once and apply it to many menu items.
+* **Description:** Manages a self-contained, reusable set of choices (e.g., sizes, toppings). This allows an owner to define an option once and apply it to many menu items.
 * **Entities/Value Objects (VOs) within:**
   * `CustomizationGroup` (Entity - Root):
     * `GroupID` (Identifier)
-    * `RestaurantID` (Identifier, ensures options are scoped to the correct restaurant)
-    * `GroupName` (Internal name, e.g., "Standard Toppings", "Pizza Sizes")
-    * `MinSelections` (Integer)
-    * `MaxSelections` (Integer)
+    * `RestaurantID` (Identifier)
+    * `GroupName` (Internal name, e.g., "Standard Toppings")
+    * `MinSelections`, `MaxSelections` (Integers)
   * `CustomizationChoice` (List of Child Entities):
     * `ChoiceID` (Identifier)
-    * `Name` (e.g., "Medium", "Extra Cheese", "Spicy")
+    * `Name` (e.g., "Medium", "Extra Cheese")
     * `PriceAdjustment` (Money VO, can be zero)
     * `IsDefault` (Boolean)
-* **Invariants:**
-  * `GroupName` must be unique within the `Restaurant`.
-  * `MaxSelections` must be greater than or equal to `MinSelections`.
-  * `Choice.Name` must be unique within the group.
-* **References to other aggregates (by ID):**
-  * `RestaurantID`
+* **Invariants:** `MaxSelections` >= `MinSelections`; `Choice.Name` must be unique within the group.
+* **References to other aggregates (by ID):** `RestaurantID`.
 
 ---
 
-#### 6. `Tag` Aggregate
+#### 7. `Tag` (Independent Entity)
 
-* **Aggregate Root:** `Tag`
-* **Description:** Manages centrally defined tags (e.g., for dietary preferences, cuisine styles) that can be applied across the system for classification, discovery, and filtering.
-* **Entities/Value Objects (VOs) within:**
-  * `Tag` (Entity - Root):
-    * `TagID` (Identifier)
-    * `TagName` (String, e.g., "Vegetarian", "Gluten-Free", "Spicy")
-    * `TagDescription` (Optional)
-    * `TagCategory` (String, e.g., "Dietary", "Cuisine", "SpiceLevel")
-* **Invariants:**
-  * `TagName` must be unique across the entire system to ensure consistency.
-* **References to other aggregates (by ID):**
-  * None. It is a self-contained, lookup-style aggregate.
+* **Description:** A simple, centrally defined entity for classification (e.g., "Vegetarian", "Spicy"). It does not require the overhead of an aggregate as its invariants are simple.
+* **Structure:**
+  * `TagID` (Identifier)
+  * `TagName` (String, e.g., "Gluten-Free")
+  * `TagDescription` (Optional)
+  * `TagCategory` (String, e.g., "Dietary", "Cuisine")
+* **Invariants:** `TagName` must be unique across the entire system.
 
 ---
 
-#### 7. `RestaurantAccount` Aggregate
+Of course. Here is the rewritten section for `RestaurantAccount` and `AccountTransaction`, split into two distinct parts as requested and following the established document format.
+
+---
+
+#### 8. `RestaurantAccount` Aggregate
 
 * **Aggregate Root:** `RestaurantAccount`
-* **Description:** Represents the financial ledger for a single restaurant on the YummyZoom platform. It is the authoritative source for a restaurant's earnings, fees, and balance. It operates within its own "Payouts" bounded context.
+* **Description:** A lean aggregate that manages a restaurant's *current financial balance* and payout settings. It is designed to be small and highly performant for frequent financial operations, decoupling it from the full transaction history.
 * **Entities/Value Objects (VOs) within:**
   * `RestaurantAccount` (Entity - Root):
     * `RestaurantAccountID` (Identifier)
     * `RestaurantID` (Identifier, links to the `Restaurant` aggregate)
-    * `CurrentBalance` (Money VO) - The amount the platform currently owes the restaurant.
-    * `PayoutMethodDetails` (VO) - Stores details for payouts (e.g., tokenized bank account info, PayPal email). For MVP, this can be a simple text field.
-  * `AccountTransaction` (List of Child Entities):
-    * `TransactionID` (Identifier)
-    * `Type` (Enum: `OrderRevenue`, `PlatformFee`, `RefundDeduction`, `PayoutSettlement`, `ManualAdjustment`)
-    * `Amount` (Money VO) - Positive for credits (revenue), negative for debits (fees, payouts).
-    * `Timestamp`
-    * `RelatedOrderID` (Identifier, optional) - Links the transaction to a specific order for auditing.
+    * `CurrentBalance` (Money VO - A stateful property, not calculated on the fly)
+    * `PayoutMethodDetails` (VO - Stores tokenized bank info, etc.)
 * **Invariants:**
-  * The `CurrentBalance` must always equal the sum of all `AccountTransaction` amounts. This is the aggregate's primary consistency rule.
   * A `PayoutSettlement` transaction cannot be for an amount greater than the `CurrentBalance` at the time of the transaction.
-  * The `Amount` for a `PlatformFee` or `RefundDeduction` must be negative.
-  * The `Amount` for an `OrderRevenue` must be positive.
+  * The `CurrentBalance` is modified directly by behavior-driven methods.
+* **Behavior and Events:**
+  * Methods like `RecordRevenue(amount, orderId)` and `SettlePayout(amount)` directly modify the `CurrentBalance`.
+  * Upon successful state change, it raises specific domain events like `RevenueRecorded` or `PayoutSettled`, which are used to create the audit trail.
 * **References to other aggregates (by ID):**
   * `RestaurantID`
-  * `AccountTransaction.RelatedOrderID` (references `Order`)
 
 ---
 
-#### 8. `Order` Aggregate
+#### 9. `AccountTransaction` (Independent Entity)
+
+* **Type:** Independent Entity
+* **Description:** An immutable, historical record of a single financial event that has occurred on a `RestaurantAccount`. It serves as the official audit log and is created in response to domain events.
+* **Structure:**
+  * `AccountTransactionID` (Identifier)
+  * `RestaurantAccountID` (Identifier, links to the `RestaurantAccount` aggregate)
+  * `Type` (Enum: `OrderRevenue`, `PlatformFee`, `RefundDeduction`, `PayoutSettlement`, `ManualAdjustment`)
+  * `Amount` (Money VO) - Positive for credits, negative for debits.
+  * `Timestamp`
+  * `RelatedOrderID` (Identifier, optional) - Links the transaction to a specific order for auditing.
+  * `Notes` (String, optional) - For manual adjustment reasons, etc.
+* **Creation Note:** This entity is not part of the `RestaurantAccount` aggregate's boundary. It is created and persisted by an event handler in the Application Layer that subscribes to events like `RevenueRecorded` or `PayoutSettled`.
+* **Invariants:**
+  * The `Amount` for a `PlatformFee` or `RefundDeduction` must be negative.
+  * The `Amount` for an `OrderRevenue` must be positive.
+* **References to other aggregates (by ID):**
+  * `RestaurantAccountID`
+  * `RelatedOrderID` (references `Order`)
+
+---
+
+#### 10. `Order` Aggregate
 
 * **Aggregate Root:** `Order`
 * **Description:** Represents a customer's confirmed request for items from a restaurant. It is a transactional, immutable record of a purchase, ensuring historical accuracy.
@@ -237,7 +243,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
-#### 9. `Coupon` Aggregate
+#### 11. `Coupon` Aggregate
 
 * **Aggregate Root:** `Coupon`
 * **Description:** Manages a promotional coupon, its rules, validity, and global usage. Per-user usage is managed externally.
@@ -273,7 +279,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
-#### 10. `Review` Aggregate
+#### 12. `Review` Aggregate
 
 * **Aggregate Root:** `Review`
 * **Description:** Captures authentic customer feedback and ratings for a restaurant, anchored to a completed order.
@@ -299,7 +305,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
-#### 11. `SupportTicket` Aggregate
+#### 13. `SupportTicket` Aggregate
 
 * **Aggregate Root:** `SupportTicket`
 * **Description:** Represents a single, trackable case or issue raised by a user, a restaurant, or the system itself. It manages the entire lifecycle of the issue from submission to resolution.
@@ -336,76 +342,108 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
-### 1. System-Wide Aggregate Relationship Diagram (Final)
+### System-Wide Domain Object Relationship Diagram
 
-This diagram illustrates all **11 aggregates**, grouped into their logical Bounded Contexts. It shows how they are decoupled and relate to one another primarily through ID references and domain events.
+This diagram illustrates all major domain objects, grouped into their logical Bounded Contexts. It shows how they are decoupled and relate to one another primarily through ID references. (AG = Aggregate, EN = Entity).
 
 ```mermaid
 graph TD
     subgraph Identity & Access Context
-        U[1 - User]
-        RA[2 - RoleAssignment]
+        U[1. User AG]
+        RA[2. RoleAssignment AG]
     end
 
     subgraph Restaurant Catalog Context
-        R[3 - Restaurant]
-        M[4 - Menu]
-        CG[5 - CustomizationGroup]
-        T[6 - Tag]
+        R[3. Restaurant AG]
+        Menu[4a. Menu EN]
+        MenuCat[4b. MenuCategory EN]
+        MenuItem[5. MenuItem AG]
+        CG[6. CustomizationGroup AG]
+        Tag[7. Tag EN]
     end
 
     subgraph Order & Fulfillment Context
-        O[8 - Order]
-        C[9 - Coupon]
-        RV[10 - Review]
+        O[9. Order AG]
+        C[10. Coupon AG]
+        RV[11. Review AG]
     end
     
     subgraph Payouts & Monetization Context
-        RAcc[7 - RestaurantAccount]
+        RAcc[8a. RestaurantAccount AG]
+        AccTrans[8b. AccountTransaction EN]
     end
     
     subgraph Support & Governance Context
-        ST[11 - SupportTicket]
+        ST[12. SupportTicket AG]
     end
+
+    %% Legend
+    subgraph Legend
+        direction LR
+        Agg(Aggregate)
+        Ent(Entity)
+    end
+    style Agg fill:#cde4ff,stroke:#0052cc
+    style Ent fill:#d4edda,stroke:#155724
+
 
     %% Relationships
     RA -- References --> U
     RA -- Assigns Role for --> R
 
-    M -- Belongs to --> R
-    M -- Applies --> CG
-    M -- Uses --> T
+    Menu -- Belongs to --> R
+    MenuCat -- Belongs to --> Menu
+    MenuItem -- Belongs to --> MenuCat
+    MenuItem -- References --> CG
+    MenuItem -- References --> Tag
     CG -- Belongs to --> R
 
     O -- Placed by --> U
     O -- For --> R
     O -- Uses --> C
-    O -- Triggers update via Event --> RAcc
+    O -- Triggers Event for --> RAcc
 
     C -- Created by --> R
-    C -- Applies to --> M
+    C -- Applies to --> MenuItem
+    C -- Applies to --> MenuCat
 
     RV -- Based on --> O
     RV -- Written by --> U
     RV -- Is for --> R
 
     RAcc -- Holds balance for --> R
+    AccTrans -- Audit trail for --> RAcc
     
     ST -- Links to --> U
     ST -- Links to --> O
     ST -- Links to --> R
     
+    %% Styling
     style U fill:#cde4ff,stroke:#0052cc
-    style RA fill:#e6f3ff,stroke:#0066cc
-    style R fill:#d4edda,stroke:#155724
-    style M fill:#d4edda,stroke:#155724
-    style CG fill:#d4edda,stroke:#155724
-    style T fill:#f5f5f5,stroke:#6c757d
-    style O fill:#fff3cd,stroke:#856404
-    style C fill:#f8d7da,stroke:#721c24
-    style RV fill:#e2e3e5,stroke:#383d41
-    style RAcc fill:#d1ecf1,stroke:#0c5460
-    style ST fill:#fefefe,stroke:#343a40
+    style RA fill:#cde4ff,stroke:#0052cc
+    style R fill:#cde4ff,stroke:#0052cc
+    style Menu fill:#d4edda,stroke:#155724
+    style MenuCat fill:#d4edda,stroke:#155724
+    style MenuItem fill:#cde4ff,stroke:#0052cc
+    style CG fill:#cde4ff,stroke:#0052cc
+    style Tag fill:#d4edda,stroke:#155724
+    style O fill:#cde4ff,stroke:#0052cc
+    style C fill:#cde4ff,stroke:#0052cc
+    style RV fill:#cde4ff,stroke:#0052cc
+    style RAcc fill:#cde4ff,stroke:#0052cc
+    style AccTrans fill:#d4edda,stroke:#155724
+    style ST fill:#cde4ff,stroke:#0052cc
 ```
 
 ---
+
+### Read Models & Lookup Tables (CQRS Approach)
+
+To optimize for frequent read operations and to handle cross-aggregate checks efficiently, the system will employ several read models. These are denormalized data structures, typically simple database tables, that are updated by event handlers listening to domain events from the write-side aggregates. They do not belong to the Domain Layer but are critical for system performance.
+
+| Read Model / Lookup Table | Description | Triggering Domain Events | Purpose & Use Case |
+| :--- | :--- | :--- | :--- |
+| **`RestaurantReviewSummary`** | A table with `RestaurantID`, `AverageRating`, and `TotalRatingCount`. | `ReviewSubmitted` | To display a restaurant's rating on its page instantly, without querying and calculating from all `Review` aggregates. |
+| **`CouponUsage`** | A simple table with `(UserID, CouponID, OrderID)`. | `OrderPlacedWithCoupon` | To quickly check if a user has already used a coupon with a per-user limit. The Application Service queries this *before* attempting to apply the coupon. |
+| **`FullMenuView`** | A denormalized JSON document or set of tables containing a restaurant's complete menu structure. | `MenuItemCreated`, `MenuItemUpdated`, `MenuCategoryCreated`, `MenuEnabled`, etc. | To provide a lightning-fast, pre-compiled view of a restaurant's menu for the customer-facing app, avoiding complex joins across multiple tables on every page load. |
+| **`RestaurantSearchIndex`** | A search engine document (e.g., in Elasticsearch) containing restaurant name, cuisine types, location, and key menu items. | `RestaurantCreated`, `RestaurantUpdated`, `MenuItemCreated` | To power the main search and discovery feature, allowing users to find restaurants by name, cuisine, or even specific dishes. |
