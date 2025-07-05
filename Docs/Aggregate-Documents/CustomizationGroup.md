@@ -1,0 +1,99 @@
+# CustomizationGroup Aggregate
+
+## Aggregate Documentation: `CustomizationGroup`
+
+* **Version:** 1.0
+* **Last Updated:** 2025-07-05
+* **Source File:** `src/Domain/CustomizationGroupAggregate/CustomizationGroup.cs`
+
+### 1. Overview
+
+**Description:**
+Manages a self-contained, reusable set of choices (e.g., sizes, toppings) that can be applied to menu items. This allows restaurant owners to define an option once and apply it to many menu items, with specific selection rules and pricing adjustments.
+
+**Core Responsibilities:**
+
+* Manages the lifecycle of customization groups and their choices
+* Acts as the transactional boundary for all customization group operations
+* Enforces business rules for choice name uniqueness within the group
+* Enforces business rules for valid selection range constraints (MaxSelections >= MinSelections)
+
+### 2. Structure
+
+* **Aggregate Root:** `CustomizationGroup`
+* **Key Child Entities:**
+  * `CustomizationChoice`: Represents an individual choice within the group with name, price adjustment, and default flag
+* **Key Value Objects:**
+  * `CustomizationGroupId`: Strongly-typed identifier for the aggregate
+  * `ChoiceId`: Strongly-typed identifier for choices
+  * `Money`: Represents price adjustments for choices
+
+### 3. Lifecycle & State Management
+
+#### 3.1. Creation (Factory Method)
+
+The only valid way to create a `CustomizationGroup` is through its static factory method.
+
+```csharp
+public static Result<CustomizationGroup> Create(
+    RestaurantId restaurantId,
+    string groupName,
+    int minSelections,
+    int maxSelections,
+    List<CustomizationChoice>? choices = null)
+```
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `restaurantId` | `RestaurantId` | The restaurant that owns this customization group |
+| `groupName` | `string` | The name of the group (e.g., "Size", "Toppings") |
+| `minSelections` | `int` | Minimum number of choices that must be selected |
+| `maxSelections` | `int` | Maximum number of choices that can be selected |
+| `choices` | `List<CustomizationChoice>?` | Optional initial choices for the group |
+
+**Validation Rules & Potential Errors:**
+
+* `groupName` cannot be null or empty. (Returns `CustomizationGroupErrors.GroupNameRequired`)
+* `maxSelections` must be >= `minSelections`. (Returns `CustomizationGroupErrors.InvalidSelectionRange`)
+* Group name uniqueness is enforced at the application/repository level
+
+#### 3.2. State Transitions & Commands (Public Methods)
+
+These methods modify the state of the aggregate. All state changes must go through these methods.
+
+| Method Signature | Description | Key Invariants Checked | Potential Errors |
+| :--- | :--- | :--- | :--- |
+| `Result AddChoice(CustomizationChoice choice)` | Adds a new choice to the group | Ensures choice names are unique within the group | `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result RemoveChoice(ChoiceId choiceId)` | Removes a choice from the group by ID | Validates that the choice exists | `CustomizationGroupErrors.InvalidChoiceId` |
+| `Result UpdateChoice(ChoiceId choiceId, string newName, Money newPriceAdjustment, bool isDefault)` | Updates an existing choice's properties | Ensures new name is unique and choice exists | `CustomizationGroupErrors.InvalidChoiceId`, `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result UpdateGroupDetails(string groupName, int minSelections, int maxSelections)` | Updates group name and selection constraints | Validates name and selection range | `CustomizationGroupErrors.GroupNameRequired`, `CustomizationGroupErrors.InvalidSelectionRange` |
+| `Result MarkAsDeleted()` | Marks the group as deleted | None - always succeeds | None |
+
+### 4. Exposed State & Queries
+
+#### 4.1. Public Properties
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `Id` | `CustomizationGroupId` | The unique identifier of the aggregate |
+| `RestaurantId` | `RestaurantId` | The restaurant that owns this group |
+| `GroupName` | `string` | The name of the customization group |
+| `MinSelections` | `int` | Minimum number of choices that must be selected |
+| `MaxSelections` | `int` | Maximum number of choices that can be selected |
+| `Choices` | `IReadOnlyList<CustomizationChoice>` | Read-only collection of available choices |
+
+#### 4.2. Public Query Methods
+
+This aggregate does not expose any additional query methods beyond property access.
+
+### 5. Communication (Domain Events)
+
+The aggregate raises the following domain events to communicate significant state changes to the rest of the system.
+
+| Event Name | When It's Raised | Description |
+| :--- | :--- | :--- |
+| `CustomizationGroupCreated` | During the `Create` factory method | Signals that a new customization group has been successfully created |
+| `CustomizationChoiceAdded` | After a successful call to `AddChoice` | Signals that a new choice was added to the group |
+| `CustomizationChoiceRemoved` | After a successful call to `RemoveChoice` | Signals that a choice was removed from the group |
+| `CustomizationChoiceUpdated` | After a successful call to `UpdateChoice` | Signals that an existing choice was modified |
+| `CustomizationGroupDeleted` | After a successful call to `MarkAsDeleted` | Signals that the group has been marked for deletion |

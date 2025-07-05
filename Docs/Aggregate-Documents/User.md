@@ -1,7 +1,7 @@
 # Aggregate Documentation: `User`
 
 * **Version:** 1.0
-* **Last Updated:** 2025-07-04
+* **Last Updated:** 2025-07-05
 * **Source File:** `e:\source\repos\CA\YummyZoom\src\Domain\UserAggregate\User.cs`
 
 ### 1. Overview
@@ -34,7 +34,11 @@
 The only valid way to create a `User` is through its static factory method.
 
 ```csharp
-public static Result<User> Create(string name, string email, string? phoneNumber = null)
+public static Result<User> Create(
+  string name,
+  string email,
+  string? phoneNumber = null
+)
 ```
 
 | Parameter | Type | Description |
@@ -62,6 +66,7 @@ These methods modify the state of the aggregate.
 | `Result UpdateEmail(string email)` | Updates the user's email address. | None. | None. |
 | `Result Activate()` | Activates the user's account. | None. | None. |
 | `Result Deactivate()` | Deactivates the user's account. | None. | None. |
+| `Result MarkAsDeleted(bool forceDelete = false)` | Marks the user as deleted for soft deletion. | None. | None. |
 
 ### 4. Exposed State & Queries
 
@@ -93,3 +98,4 @@ The aggregate raises the following domain events to communicate significant stat
 | `UserEmailChanged` | After a successful call to `UpdateEmail`. | Signals that the user's email has changed. |
 | `UserActivated` | After a successful call to `Activate`. | Signals that the user's account has been activated. |
 | `UserDeactivated` | After a successful call to `Deactivate`. | Signals that the user's account has been deactivated. |
+| `UserDeleted` | After a successful call to `MarkAsDeleted`. | Signals that the user has been marked for deletion. |

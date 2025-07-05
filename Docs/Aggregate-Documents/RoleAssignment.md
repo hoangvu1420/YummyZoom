@@ -1,7 +1,7 @@
 # Aggregate Documentation: `RoleAssignment`
 
 * **Version:** 1.0
-* **Last Updated:** 2025-07-04
+* **Last Updated:** 2025-07-05
 * **Source File:** `e:\source\repos\CA\YummyZoom\src\Domain\RoleAssignmentAggregate\RoleAssignment.cs`
 
 ## 1. Overview
@@ -31,7 +31,11 @@
 The only valid way to create a `RoleAssignment` is through its static factory method.
 
 ```csharp
-public static Result<RoleAssignment> Create(UserId userId, RestaurantId restaurantId, RestaurantRole role)
+public static Result<RoleAssignment> Create(
+  UserId userId,
+  RestaurantId restaurantId,
+  RestaurantRole role
+)
 ```
 
 | Parameter | Type | Description |
@@ -53,7 +57,7 @@ These methods modify the state of the aggregate.
 | Method Signature | Description | Key Invariants Checked | Potential Errors |
 | :--- | :--- | :--- | :--- |
 | `Result UpdateRole(RestaurantRole newRole)` | Updates the role for this assignment. | Checks if `newRole` is a valid `RestaurantRole`. | `RoleAssignmentErrors.InvalidRole` |
-| `void MarkForRemoval()` | Marks this role assignment for removal. | None. | None. |
+| `Result MarkAsDeleted()` | Marks this role assignment for deletion. | None. | None. |
 
 ## 4. Exposed State & Queries
 
@@ -82,4 +86,4 @@ The aggregate raises the following domain events to communicate significant stat
 | Event Name | When It's Raised | Description |
 | :--- | :--- | :--- |
 | `RoleAssignmentCreated` | During the `Create` factory method and `UpdateRole`. | Signals that a new role assignment has been created. |
-| `RoleAssignmentRemoved` | During `UpdateRole` and `MarkForRemoval`. | Signals that a role assignment has been removed. |
+| `RoleAssignmentDeleted` | During `MarkAsDeleted`. | Signals that a role assignment has been marked for deletion. |

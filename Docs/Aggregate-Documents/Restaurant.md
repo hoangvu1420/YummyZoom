@@ -1,7 +1,7 @@
 # Aggregate Documentation: `Restaurant`
 
 * **Version:** 1.0
-* **Last Updated:** 2025-07-04
+* **Last Updated:** 2025-07-05
 * **Source File:** `e:\source\repos\CA\YummyZoom\src\Domain\RestaurantAggregate\Restaurant.cs`
 
 ## 1. Overview
@@ -34,7 +34,20 @@
 The primary way to create a `Restaurant` is through its static factory method.
 
 ```csharp
-public static Result<Restaurant> Create(string name, string? logoUrl, string description, string cuisineType, string street, string city, string state, string zipCode, string country, string phoneNumber, string email, string businessHours)
+public static Result<Restaurant> Create(
+  string name,
+  string? logoUrl,
+  string description,
+  string cuisineType,
+  string street,
+  string city,
+  string state,
+  string zipCode,
+  string country,
+  string phoneNumber,
+  string email,
+  string businessHours
+)
 ```
 
 | Parameter | Type | Description |
@@ -76,6 +89,7 @@ public static Result<Restaurant> Create(string name, string? logoUrl, string des
 | `void Verify()` | Marks the restaurant as verified. | None. | None. |
 | `void AcceptOrders()` | Sets the restaurant to accept orders. | None. | None. |
 | `void DeclineOrders()` | Sets the restaurant to not accept orders. | None. | None. |
+| `Result MarkAsDeleted(bool forceDelete = false)` | Marks the restaurant as deleted. | Cannot delete if accepting orders or verified unless force delete is true. | `RestaurantErrors.CannotDeleteWithActiveOrders`, `RestaurantErrors.CannotDeleteVerifiedRestaurantWithoutConfirmation` |
 
 ## 4. Exposed State & Queries
 
@@ -112,3 +126,4 @@ public static Result<Restaurant> Create(string name, string? logoUrl, string des
 | `RestaurantBrandingUpdated` | After a successful call to `UpdateBranding`. | Signals that the restaurant's branding information has been updated. |
 | `RestaurantProfileUpdated` | After a successful call to `UpdateCompleteProfile`. | Signals that the restaurant's entire profile has been updated. |
 | `RestaurantUpdated` | After a successful call to `UpdateBasicInfo`. | Signals that the restaurant's basic information has been updated. |
+| `RestaurantDeleted` | After a successful call to `MarkAsDeleted`. | Signals that the restaurant has been marked for deletion. |

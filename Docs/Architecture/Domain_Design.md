@@ -143,10 +143,6 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
-Of course. Here is the rewritten section for `RestaurantAccount` and `AccountTransaction`, split into two distinct parts as requested and following the established document format.
-
----
-
 #### 8. `RestaurantAccount` Aggregate
 
 * **Aggregate Root:** `RestaurantAccount`
