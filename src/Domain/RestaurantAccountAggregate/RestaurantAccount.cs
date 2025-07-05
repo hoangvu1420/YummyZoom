@@ -113,6 +113,17 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks this restaurant account as deleted. This is the single, authoritative way to delete this aggregate.
+    /// </summary>
+    /// <returns>A Result indicating success</returns>
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new RestaurantAccountDeleted((RestaurantAccountId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private RestaurantAccount() { }
 #pragma warning restore CS8618

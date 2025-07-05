@@ -132,7 +132,18 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks this customization group as deleted. This is the single, authoritative way to delete this aggregate.
+    /// </summary>
+    /// <returns>A Result indicating success</returns>
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new Events.CustomizationGroupDeleted((CustomizationGroupId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private CustomizationGroup() { }
 #pragma warning restore CS8618
-} 
+}

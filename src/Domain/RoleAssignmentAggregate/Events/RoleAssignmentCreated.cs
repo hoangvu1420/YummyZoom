@@ -10,9 +10,3 @@ public record RoleAssignmentCreated(
     UserId UserId,
     RestaurantId RestaurantId,
     RestaurantRole Role) : IDomainEvent;
-
-public record RoleAssignmentRemoved(
-    RoleAssignmentId RoleAssignmentId,
-    UserId UserId,
-    RestaurantId RestaurantId,
-    RestaurantRole Role) : IDomainEvent;

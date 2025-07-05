@@ -71,6 +71,13 @@ public sealed class MenuCategory : Entity<MenuCategoryId>
         return Result.Success();
     }
 
+    public Result MarkAsDeleted(bool forceDelete = false)
+    {
+        AddDomainEvent(new MenuCategoryRemoved(MenuId, Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private MenuCategory() { }
 #pragma warning restore CS8618

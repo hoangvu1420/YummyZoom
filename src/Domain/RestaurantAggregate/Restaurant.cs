@@ -156,6 +156,25 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         AddDomainEvent(new RestaurantNotAcceptingOrders((RestaurantId)Id));
     }
 
+    public Result MarkAsDeleted(bool forceDelete = false)
+    {
+        // Business rule: Cannot delete restaurant with active orders (unless force delete)
+        if (!forceDelete && IsAcceptingOrders)
+        {
+            return Result.Failure(RestaurantErrors.CannotDeleteWithActiveOrders());
+        }
+
+        // Business rule: Verified restaurants require explicit confirmation (unless force delete)
+        if (!forceDelete && IsVerified)
+        {
+            return Result.Failure(RestaurantErrors.CannotDeleteVerifiedRestaurantWithoutConfirmation());
+        }
+
+        AddDomainEvent(new RestaurantDeleted((RestaurantId)Id));
+
+        return Result.Success();
+    }
+
     private static Result ValidateRestaurantFields(string name, string? logoUrl, string description, string cuisineType)
     {
         const int maxNameLength = 100;

@@ -371,6 +371,17 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
         return AppliesTo.AppliesToItem(menuItemId, categoryId);
     }
 
+    /// <summary>
+    /// Marks this coupon as deleted. This is the single, authoritative way to delete this aggregate.
+    /// </summary>
+    /// <returns>A Result indicating success</returns>
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new CouponDeleted((CouponId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     // For EF Core
     private Coupon()

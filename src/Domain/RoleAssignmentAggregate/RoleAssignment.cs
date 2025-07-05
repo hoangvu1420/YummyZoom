@@ -147,18 +147,16 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
         var oldRole = Role;
         Role = newRole;
         UpdatedAt = DateTime.UtcNow;        // Raise domain event for the update
-        AddDomainEvent(new RoleAssignmentRemoved((RoleAssignmentId)Id, UserId, RestaurantId, oldRole));
         AddDomainEvent(new RoleAssignmentCreated((RoleAssignmentId)Id, UserId, RestaurantId, newRole));
 
         return Result.Success();
     }
 
-    /// <summary>
-    /// Marks this role assignment for removal (used when removing the role assignment)
-    /// </summary>
-    public void MarkForRemoval()
+    public Result MarkAsDeleted()
     {
-        AddDomainEvent(new RoleAssignmentRemoved((RoleAssignmentId)Id, UserId, RestaurantId, Role));
+        AddDomainEvent(new RoleAssignmentDeleted((RoleAssignmentId)Id));
+
+        return Result.Success();
     }
 
     /// <summary>

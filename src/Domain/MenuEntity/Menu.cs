@@ -78,6 +78,13 @@ public sealed class Menu : Entity<MenuId>
         AddDomainEvent(new MenuDisabled(Id));
     }
 
+    public Result MarkAsDeleted(bool forceDelete = false)
+    {
+        AddDomainEvent(new MenuRemoved(Id, RestaurantId));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private Menu() { }
 #pragma warning restore CS8618

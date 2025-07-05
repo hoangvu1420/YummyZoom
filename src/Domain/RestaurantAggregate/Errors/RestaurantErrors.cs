@@ -100,4 +100,13 @@ public static class RestaurantErrors
     public static Error BusinessHoursFormatTooLong(int maxLength) => Error.Validation(
         "Restaurant.BusinessHours.FormatTooLong",
         $"Business hours format cannot exceed {maxLength} characters.");
+
+    // Deletion validation errors
+    public static Error CannotDeleteWithActiveOrders() => Error.Validation(
+        "Restaurant.CannotDeleteWithActiveOrders",
+        "Cannot delete restaurant that has active orders. Please complete or cancel all active orders first.");
+
+    public static Error CannotDeleteVerifiedRestaurantWithoutConfirmation() => Error.Validation(
+        "Restaurant.CannotDeleteVerifiedRestaurantWithoutConfirmation",
+        "Cannot delete verified restaurant without explicit confirmation due to potential impact on existing customers.");
 }

@@ -340,23 +340,20 @@ public class RoleAssignmentTests
     }
 
     [Test]
-    public void MarkForRemoval_ShouldRaiseDomainEvent()
+    public void MarkAsDeleted_ShouldRaiseDomainEvent()
     {
         // Arrange
         var roleAssignment = CreateValidRoleAssignment();
         var initialEventCount = roleAssignment.DomainEvents.Count;
 
         // Act
-        roleAssignment.MarkForRemoval();
+        roleAssignment.MarkAsDeleted();
 
         // Assert
         roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 1);
-        var removedEvent = roleAssignment.DomainEvents.Last() as RoleAssignmentRemoved;
+        var removedEvent = roleAssignment.DomainEvents.Last() as RoleAssignmentDeleted;
         removedEvent.Should().NotBeNull();
         removedEvent!.RoleAssignmentId.Should().Be((RoleAssignmentId)roleAssignment.Id);
-        removedEvent.UserId.Should().Be(roleAssignment.UserId);
-        removedEvent.RestaurantId.Should().Be(roleAssignment.RestaurantId);
-        removedEvent.Role.Should().Be(roleAssignment.Role);
     }
 
     [Test]
@@ -399,11 +396,7 @@ public class RoleAssignmentTests
         roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 2);
         
         var events = roleAssignment.DomainEvents.Skip(initialEventCount).ToList();
-        var removedEvent = events[0] as RoleAssignmentRemoved;
         var createdEvent = events[1] as RoleAssignmentCreated;
-        
-        removedEvent.Should().NotBeNull();
-        removedEvent!.Role.Should().Be(RestaurantRole.Owner, "because that was the old role");
         
         createdEvent.Should().NotBeNull();
         createdEvent!.Role.Should().Be(newRole, "because that's the new role");

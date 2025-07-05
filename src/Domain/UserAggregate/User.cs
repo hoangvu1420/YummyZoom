@@ -213,6 +213,13 @@ public sealed class User : AggregateRoot<UserId, Guid>
         return Result.Success();
     }
 
+    public Result MarkAsDeleted(bool forceDelete = false)
+    {
+        AddDomainEvent(new UserDeleted((UserId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     // For EF Core
     private User()

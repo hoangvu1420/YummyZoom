@@ -131,6 +131,17 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks this menu item as deleted. This is the single, authoritative way to delete this aggregate.
+    /// </summary>
+    /// <returns>A Result indicating success</returns>
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new MenuItemDeleted((MenuItemId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private MenuItem() { }
 #pragma warning restore CS8618

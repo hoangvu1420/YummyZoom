@@ -31,5 +31,4 @@ public static class MenuErrors
     public static Error InvalidDisplayOrder(int displayOrder) => Error.Validation(
         "Menu.InvalidDisplayOrder", 
         $"Display order '{displayOrder}' is invalid. Display order must be a positive number.");
-
 }

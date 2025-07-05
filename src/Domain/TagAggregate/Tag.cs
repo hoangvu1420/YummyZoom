@@ -93,7 +93,14 @@ public sealed class Tag : AggregateRoot<TagId, Guid>
         return Result.Success();
     }
 
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new TagDeleted((TagId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private Tag() { } // Required by EF Core
 #pragma warning restore CS8618
-} 
+}

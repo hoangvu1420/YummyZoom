@@ -160,6 +160,17 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>
         return Result.Success();
     }
 
+    /// <summary>
+    /// Marks this review as deleted. This is the single, authoritative way to delete this aggregate.
+    /// </summary>
+    /// <returns>A Result indicating success</returns>
+    public Result MarkAsDeleted()
+    {
+        AddDomainEvent(new ReviewDeleted((ReviewId)Id));
+
+        return Result.Success();
+    }
+
 #pragma warning disable CS8618
     private Review()
     {
