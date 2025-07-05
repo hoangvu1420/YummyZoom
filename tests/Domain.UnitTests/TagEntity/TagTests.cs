@@ -5,7 +5,7 @@ using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Domain.TagEntity.Errors;
 using YummyZoom.Domain.TagEntity.Events;
 
-namespace YummyZoom.Domain.UnitTests.TagAggregate;
+namespace YummyZoom.Domain.UnitTests.TagEntity;
 
 [TestFixture]
 public class TagTests

@@ -6,7 +6,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.TagEntity;
 
-public sealed class Tag : AggregateRoot<TagId, Guid>
+public sealed class Tag : Entity<TagId>
 {
     public string TagName { get; private set; }
     public string? TagDescription { get; private set; }
