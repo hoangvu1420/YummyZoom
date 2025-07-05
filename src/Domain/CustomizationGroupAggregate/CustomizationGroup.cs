@@ -31,7 +31,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         MinSelections = minSelections;
         MaxSelections = maxSelections;
         if (choices is not null)
-            _choices = choices;
+            _choices = new List<CustomizationChoice>(choices);
     }
 
     public static Result<CustomizationGroup> Create(

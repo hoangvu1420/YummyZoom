@@ -1,7 +1,7 @@
 
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 
-namespace YummyZoom.Domain.MenuAggregate.ValueObjects;
+namespace YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 
 public sealed class AppliedCustomization : ValueObject
 {

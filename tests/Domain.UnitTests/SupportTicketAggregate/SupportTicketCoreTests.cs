@@ -470,4 +470,80 @@ public class SupportTicketCoreTests
     }
 
     #endregion
+
+    #region Property Immutability Tests
+
+    [Test]
+    public void ContextLinks_ShouldBeReadOnly()
+    {
+        // Arrange
+        var contextLinks = new List<ContextLink> { CreateDefaultContextLink() };
+
+        // Act
+        var ticket = SupportTicket.Create(
+            SupportTicketId.CreateUnique(),
+            TicketNumber.CreateFromSequence(123),
+            DefaultSubject,
+            DefaultType,
+            DefaultPriority,
+            SupportTicketStatus.Open,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow,
+            contextLinks,
+            new List<TicketMessage>()).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(SupportTicket).GetProperty(nameof(SupportTicket.ContextLinks));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<ContextLink>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<ContextLink>)ticket.ContextLinks).Add(CreateDefaultContextLink());
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the ticket
+        contextLinks.Add(CreateDefaultContextLink());
+        ticket.ContextLinks.Should().HaveCount(1);
+    }
+
+    [Test]
+    public void Messages_ShouldBeReadOnly()
+    {
+        // Arrange
+        var messages = new List<TicketMessage> 
+        { 
+            TicketMessage.Create(DefaultAuthorId, DefaultAuthorType, DefaultInitialMessage).Value 
+        };
+
+        // Act
+        var ticket = SupportTicket.Create(
+            SupportTicketId.CreateUnique(),
+            TicketNumber.CreateFromSequence(123),
+            DefaultSubject,
+            DefaultType,
+            DefaultPriority,
+            SupportTicketStatus.Open,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow,
+            CreateDefaultContextLinks(),
+            messages).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(SupportTicket).GetProperty(nameof(SupportTicket.Messages));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<TicketMessage>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<TicketMessage>)ticket.Messages).Add(
+            TicketMessage.Create(Guid.NewGuid(), AuthorType.Admin, "Another message").Value);
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the ticket
+        messages.Add(TicketMessage.Create(Guid.NewGuid(), AuthorType.Admin, "Another message").Value);
+        ticket.Messages.Should().HaveCount(1);
+    }
+
+    #endregion
 }

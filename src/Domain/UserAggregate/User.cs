@@ -33,8 +33,8 @@ public sealed class User : AggregateRoot<UserId, Guid>
         Email = email;
         PhoneNumber = phoneNumber;
         IsActive = isActive;
-        _addresses = addresses;
-        _paymentMethods = paymentMethods;
+        _addresses = new List<Address>(addresses);
+        _paymentMethods = new List<PaymentMethod>(paymentMethods);
     }
 
     public static Result<User> Create(

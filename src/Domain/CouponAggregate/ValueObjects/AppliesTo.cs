@@ -1,6 +1,7 @@
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;
 

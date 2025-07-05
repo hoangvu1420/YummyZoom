@@ -287,4 +287,39 @@ public class CustomizationGroupCoreTests
     }
 
     #endregion
+
+    #region Property Immutability Tests
+
+    [Test]
+    public void Choices_ShouldBeReadOnly()
+    {
+        // Arrange
+        var choice1 = CustomizationChoice.Create("Small", DefaultPrice).Value;
+        var choices = new List<CustomizationChoice> { choice1 };
+
+        // Act
+        var group = CustomizationGroup.Create(
+            DefaultRestaurantId,
+            DefaultGroupName,
+            DefaultMinSelections,
+            DefaultMaxSelections,
+            choices).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(CustomizationGroup).GetProperty(nameof(CustomizationGroup.Choices));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<CustomizationChoice>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<CustomizationChoice>)group.Choices).Add(
+            CustomizationChoice.Create("Large", PriceAdjustment).Value);
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the group
+        choices.Add(CustomizationChoice.Create("Large", PriceAdjustment).Value);
+        group.Choices.Should().HaveCount(1);
+    }
+
+    #endregion
 }

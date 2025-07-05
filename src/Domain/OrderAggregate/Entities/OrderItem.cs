@@ -1,5 +1,6 @@
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
+using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
@@ -34,7 +35,7 @@ public sealed class OrderItem : Entity<OrderItemId>
         Snapshot_ItemName = snapshotItemName;
         Snapshot_BasePriceAtOrder = snapshotBasePriceAtOrder;
         Quantity = quantity;
-        _selectedCustomizations = selectedCustomizations;
+        _selectedCustomizations = new List<OrderItemCustomization>(selectedCustomizations);
         LineItemTotal = CalculateLineItemTotal();
     }
 

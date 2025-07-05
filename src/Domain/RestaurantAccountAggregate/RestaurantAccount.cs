@@ -31,7 +31,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         RestaurantId = restaurantId;
         CurrentBalance = currentBalance;
         PayoutMethodDetails = payoutMethodDetails;
-        _transactions = transactions;
+        _transactions = new List<AccountTransaction>(transactions);
     }
 
     public static Result<RestaurantAccount> Create(RestaurantId restaurantId)

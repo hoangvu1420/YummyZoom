@@ -1,6 +1,6 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
@@ -65,8 +65,8 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
         DeliveryFee = deliveryFee;
         TipAmount = tipAmount;
         TaxAmount = taxAmount;
-        _orderItems = orderItems;
-        _appliedCouponIds = appliedCouponIds ?? new List<CouponId>();
+        _orderItems = new List<OrderItem>(orderItems);
+        _appliedCouponIds = appliedCouponIds != null ? new List<CouponId>(appliedCouponIds) : new List<CouponId>();
 
         Status = OrderStatus.Placed;
         PlacementTimestamp = DateTime.UtcNow;
@@ -273,7 +273,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
     private decimal GetDiscountBaseAmount(CouponValue couponValue, AppliesTo appliesTo)
     {
         // For FreeItem coupons, calculate based on the specific free item
-        if (couponValue.Type == CouponType.FreeItem && couponValue.FreeItemValue is not null)
+        if (couponValue is { Type: CouponType.FreeItem, FreeItemValue: not null })
         {
             return GetFreeItemDiscountAmount(couponValue.FreeItemValue);
         }

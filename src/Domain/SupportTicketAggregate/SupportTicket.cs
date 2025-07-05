@@ -45,8 +45,8 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
         SubmissionTimestamp = submissionTimestamp;
         LastUpdateTimestamp = submissionTimestamp;
         AssignedToAdminId = assignedToAdminId;
-        _contextLinks = contextLinks;
-        _messages = messages;
+        _contextLinks = new List<ContextLink>(contextLinks);
+        _messages = new List<TicketMessage>(messages);
     }
 
     public static Result<SupportTicket> Create(

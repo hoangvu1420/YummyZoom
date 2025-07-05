@@ -1,7 +1,7 @@
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;

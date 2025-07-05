@@ -1,17 +1,16 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.MenuAggregate;
-using YummyZoom.Domain.MenuAggregate.Entities;
-using YummyZoom.Domain.MenuAggregate.Events;
+using YummyZoom.Domain.Menu.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using MenuEntity = YummyZoom.Domain.Menu.Menu;
 
-namespace YummyZoom.Domain.UnitTests.MenuAggregate;
+namespace YummyZoom.Domain.UnitTests.MenuTests;
 
 /// <summary>
-/// Tests for core Menu aggregate functionality including creation, updates, and lifecycle management.
+/// Tests for core Menu entity functionality including creation, updates, and lifecycle management.
 /// </summary>
 [TestFixture]
-public class MenuCoreTests
+public class MenuTests
 {
     private static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
     private const string DefaultName = "Test Menu";
@@ -23,7 +22,7 @@ public class MenuCoreTests
     public void Create_WithValidInputs_ShouldSucceedAndInitializeMenuCorrectly()
     {
         // Arrange & Act
-        var result = Menu.Create(
+        var result = MenuEntity.Create(
             DefaultRestaurantId,
             DefaultName,
             DefaultDescription);
@@ -37,11 +36,6 @@ public class MenuCoreTests
         menu.Name.Should().Be(DefaultName);
         menu.Description.Should().Be(DefaultDescription);
         menu.IsEnabled.Should().BeTrue();
-        menu.Categories.Should().BeEmpty();
-        menu.HasCategories.Should().BeFalse();
-        menu.CategoryCount.Should().Be(0);
-        menu.TotalItemCount.Should().Be(0);
-        menu.IsMenuEmpty.Should().BeTrue();
         
         menu.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuCreated>()
@@ -53,7 +47,7 @@ public class MenuCoreTests
     public void Create_WithValidInputsAndDisabled_ShouldCreateDisabledMenu()
     {
         // Arrange & Act
-        var result = Menu.Create(
+        var result = MenuEntity.Create(
             DefaultRestaurantId,
             DefaultName,
             DefaultDescription,
@@ -69,45 +63,18 @@ public class MenuCoreTests
     }
 
     [Test]
-    public void Create_WithCategories_ShouldSucceedAndInitializeWithCategories()
-    {
-        // Arrange
-        var categories = new List<MenuCategory>
-        {
-            CreateValidCategory("Appetizers", 1),
-            CreateValidCategory("Main Courses", 2)
-        };
-
-        // Act
-        var result = Menu.Create(
-            DefaultRestaurantId,
-            DefaultName,
-            DefaultDescription,
-            categories: categories);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        var menu = result.Value;
-        
-        menu.Categories.Should().HaveCount(2);
-        menu.HasCategories.Should().BeTrue();
-        menu.CategoryCount.Should().Be(2);
-        menu.IsMenuEmpty.Should().BeTrue(); // Has categories but no items, still considered empty
-    }
-
-    [Test]
     public void Create_WithNullOrEmptyName_ShouldFail()
     {
         // Act & Assert - Null name
-        var nullResult = Menu.Create(DefaultRestaurantId, null!, DefaultDescription);
+        var nullResult = MenuEntity.Create(DefaultRestaurantId, null!, DefaultDescription);
         nullResult.ShouldBeFailure("Menu.InvalidMenuName");
 
         // Act & Assert - Empty name
-        var emptyResult = Menu.Create(DefaultRestaurantId, "", DefaultDescription);
+        var emptyResult = MenuEntity.Create(DefaultRestaurantId, "", DefaultDescription);
         emptyResult.ShouldBeFailure("Menu.InvalidMenuName");
 
         // Act & Assert - Whitespace name
-        var whitespaceResult = Menu.Create(DefaultRestaurantId, "   ", DefaultDescription);
+        var whitespaceResult = MenuEntity.Create(DefaultRestaurantId, "   ", DefaultDescription);
         whitespaceResult.ShouldBeFailure("Menu.InvalidMenuName");
     }
 
@@ -115,37 +82,16 @@ public class MenuCoreTests
     public void Create_WithNullOrEmptyDescription_ShouldFail()
     {
         // Act & Assert - Null description
-        var nullResult = Menu.Create(DefaultRestaurantId, DefaultName, null!);
+        var nullResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, null!);
         nullResult.ShouldBeFailure("Menu.InvalidMenuDescription");
 
         // Act & Assert - Empty description
-        var emptyResult = Menu.Create(DefaultRestaurantId, DefaultName, "");
+        var emptyResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, "");
         emptyResult.ShouldBeFailure("Menu.InvalidMenuDescription");
 
         // Act & Assert - Whitespace description
-        var whitespaceResult = Menu.Create(DefaultRestaurantId, DefaultName, "   ");
+        var whitespaceResult = MenuEntity.Create(DefaultRestaurantId, DefaultName, "   ");
         whitespaceResult.ShouldBeFailure("Menu.InvalidMenuDescription");
-    }
-
-    [Test]
-    public void Create_WithDuplicateCategoryNames_ShouldFail()
-    {
-        // Arrange
-        var categories = new List<MenuCategory>
-        {
-            CreateValidCategory("Appetizers", 1),
-            CreateValidCategory("APPETIZERS", 2) // Duplicate name (case-insensitive)
-        };
-
-        // Act
-        var result = Menu.Create(
-            DefaultRestaurantId,
-            DefaultName,
-            DefaultDescription,
-            categories: categories);
-
-        // Assert
-        result.ShouldBeFailure("Menu.DuplicateCategoryName");
     }
 
     #endregion
@@ -207,16 +153,33 @@ public class MenuCoreTests
         whitespaceResult.ShouldBeFailure("Menu.InvalidMenuDescription");
     }
 
+    [Test]
+    public void UpdateDetails_ShouldNotChangeName_WhenDescriptionIsInvalid()
+    {
+        // Arrange
+        var menu = CreateValidMenu();
+        var originalName = menu.Name;
+        var originalDescription = menu.Description;
+
+        // Act
+        var result = menu.UpdateDetails("New Name", "");
+
+        // Assert
+        result.ShouldBeFailure("Menu.InvalidMenuDescription");
+        menu.Name.Should().Be(originalName);
+        menu.Description.Should().Be(originalDescription);
+    }
+
     #endregion
 
-    #region Enable()/Disable() Method Tests
+    #region Enable() Method Tests
 
     [Test]
     public void Enable_WhenDisabled_ShouldEnableAndRaiseDomainEvent()
     {
         // Arrange
         var menu = CreateValidMenu(isEnabled: false);
-        menu.ClearDomainEvents(); // Clear creation event
+        menu.ClearDomainEvents();
 
         // Act
         menu.Enable();
@@ -225,7 +188,7 @@ public class MenuCoreTests
         menu.IsEnabled.Should().BeTrue();
         menu.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuEnabled>()
-            .Which.MenuId.Should().Be(menu.Id);
+            .Which.Should().Match<MenuEnabled>(e => e.MenuId == menu.Id);
     }
 
     [Test]
@@ -233,7 +196,7 @@ public class MenuCoreTests
     {
         // Arrange
         var menu = CreateValidMenu(isEnabled: true);
-        menu.ClearDomainEvents(); // Clear creation event
+        menu.ClearDomainEvents();
 
         // Act
         menu.Enable();
@@ -243,12 +206,16 @@ public class MenuCoreTests
         menu.DomainEvents.Should().BeEmpty();
     }
 
+    #endregion
+
+    #region Disable() Method Tests
+
     [Test]
     public void Disable_WhenEnabled_ShouldDisableAndRaiseDomainEvent()
     {
         // Arrange
         var menu = CreateValidMenu(isEnabled: true);
-        menu.ClearDomainEvents(); // Clear creation event
+        menu.ClearDomainEvents();
 
         // Act
         menu.Disable();
@@ -257,7 +224,7 @@ public class MenuCoreTests
         menu.IsEnabled.Should().BeFalse();
         menu.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuDisabled>()
-            .Which.MenuId.Should().Be(menu.Id);
+            .Which.Should().Match<MenuDisabled>(e => e.MenuId == menu.Id);
     }
 
     [Test]
@@ -265,7 +232,7 @@ public class MenuCoreTests
     {
         // Arrange
         var menu = CreateValidMenu(isEnabled: false);
-        menu.ClearDomainEvents(); // Clear creation event
+        menu.ClearDomainEvents();
 
         // Act
         menu.Disable();
@@ -279,14 +246,9 @@ public class MenuCoreTests
 
     #region Helper Methods
 
-    private static Menu CreateValidMenu(bool isEnabled = true)
+    private static MenuEntity CreateValidMenu(bool isEnabled = true)
     {
-        return Menu.Create(DefaultRestaurantId, DefaultName, DefaultDescription, isEnabled).Value;
-    }
-
-    private static MenuCategory CreateValidCategory(string name, int displayOrder)
-    {
-        return MenuCategory.Create(name, displayOrder).Value;
+        return MenuEntity.Create(DefaultRestaurantId, DefaultName, DefaultDescription, isEnabled).Value;
     }
 
     #endregion

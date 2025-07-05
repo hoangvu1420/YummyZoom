@@ -2,7 +2,8 @@ using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
+using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
@@ -245,6 +246,41 @@ public class OrderItemTests
             "Toppings",
             choiceName,
             new Money(priceAdjustment, Currencies.Default)).Value;
+    }
+
+    #endregion
+
+    #region Property Immutability Tests
+
+    [Test]
+    public void SelectedCustomizations_ShouldBeReadOnly()
+    {
+        // Arrange
+        var customizations = new List<OrderItemCustomization> { DefaultCustomization };
+
+        // Act
+        var orderItem = OrderItem.Create(
+            DefaultMenuCategoryId,
+            DefaultMenuItemId,
+            DefaultItemName,
+            DefaultBasePrice,
+            DefaultQuantity,
+            customizations).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(OrderItem).GetProperty(nameof(OrderItem.SelectedCustomizations));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<OrderItemCustomization>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<OrderItemCustomization>)orderItem.SelectedCustomizations).Add(
+            CreateCustomization("Extra Sauce", 1.50m));
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the order item
+        customizations.Add(CreateCustomization("Extra Sauce", 1.50m));
+        orderItem.SelectedCustomizations.Should().HaveCount(1);
     }
 
     #endregion

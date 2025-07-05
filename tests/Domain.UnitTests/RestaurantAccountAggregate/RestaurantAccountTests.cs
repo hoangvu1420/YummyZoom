@@ -3,6 +3,7 @@ using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate;
+using YummyZoom.Domain.RestaurantAccountAggregate.Entities;
 using YummyZoom.Domain.RestaurantAccountAggregate.Enums;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
@@ -541,6 +542,30 @@ public class RestaurantAccountTests
         }
         account.ClearDomainEvents();
         return account;
+    }
+
+    #endregion
+
+    #region Property Immutability Tests
+
+    [Test]
+    public void Transactions_ShouldBeReadOnly()
+    {
+        // Arrange
+        var account = CreateAccountWithBalance(10.00m);
+        
+        // Assert
+        // Type check
+        var property = typeof(RestaurantAccount).GetProperty(nameof(RestaurantAccount.Transactions));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<AccountTransaction>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<AccountTransaction>)account.Transactions).Add(
+            AccountTransaction.Create(
+                TransactionType.ManualAdjustment,
+                FiveDollars).Value);
+        mutate.Should().Throw<NotSupportedException>();
     }
 
     #endregion

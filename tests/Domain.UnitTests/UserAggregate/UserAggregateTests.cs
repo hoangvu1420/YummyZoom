@@ -338,4 +338,70 @@ public class UserAggregateTests
         result.IsSuccess.Should().BeTrue();
         user.IsActive.Should().BeFalse();
     }
+
+    #region Property Immutability Tests
+
+    [Test]
+    public void Addresses_ShouldBeReadOnly()
+    {
+        // Arrange
+        var addresses = new List<Address> { CreateValidAddress() };
+
+        // Act
+        var user = User.Create(
+            UserId.CreateUnique(),
+            DefaultUserName,
+            DefaultUserEmail,
+            DefaultUserPhoneNumber,
+            isActive: true,
+            addresses: addresses,
+            paymentMethods: null).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(User).GetProperty(nameof(User.Addresses));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<Address>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<Address>)user.Addresses).Add(CreateValidAddress("Work"));
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the user
+        addresses.Add(CreateValidAddress("Work"));
+        user.Addresses.Should().HaveCount(1);
+    }
+
+    [Test]
+    public void PaymentMethods_ShouldBeReadOnly()
+    {
+        // Arrange
+        var paymentMethods = new List<PaymentMethod> { CreateValidPaymentMethod() };
+
+        // Act
+        var user = User.Create(
+            UserId.CreateUnique(),
+            DefaultUserName,
+            DefaultUserEmail,
+            DefaultUserPhoneNumber,
+            isActive: true,
+            addresses: null,
+            paymentMethods: paymentMethods).Value;
+
+        // Assert
+        // Type check
+        var property = typeof(User).GetProperty(nameof(User.PaymentMethods));
+        property.Should().NotBeNull();
+        typeof(IReadOnlyList<PaymentMethod>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
+
+        // Immutability check: mutation should throw
+        Action mutate = () => ((ICollection<PaymentMethod>)user.PaymentMethods).Add(CreateValidPaymentMethod("PayPal"));
+        mutate.Should().Throw<NotSupportedException>();
+
+        // Verify that modifying the original list doesn't affect the user
+        paymentMethods.Add(CreateValidPaymentMethod("PayPal"));
+        user.PaymentMethods.Should().HaveCount(1);
+    }
+
+    #endregion
 }

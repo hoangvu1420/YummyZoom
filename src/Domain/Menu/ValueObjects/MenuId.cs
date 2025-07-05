@@ -1,7 +1,7 @@
-
+using YummyZoom.Domain.Menu.Errors;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.MenuAggregate.ValueObjects;
+namespace YummyZoom.Domain.Menu.ValueObjects;
 
 public sealed class MenuId : AggregateRootId<Guid>
 {
@@ -25,7 +25,7 @@ public sealed class MenuId : AggregateRootId<Guid>
     public static Result<MenuId> Create(string value)
     {
         return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<MenuId>(Errors.MenuErrors.InvalidMenuId) 
+            ? Result.Failure<MenuId>(MenuErrors.InvalidMenuId) 
             : Result.Success(new MenuId(guid));
     }
 

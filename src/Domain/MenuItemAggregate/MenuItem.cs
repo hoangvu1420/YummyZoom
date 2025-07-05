@@ -1,16 +1,21 @@
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.ValueObjects;
+using YummyZoom.Domain.Menu.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.Errors;
+using YummyZoom.Domain.MenuItemAggregate.Events;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TagAggregate.ValueObjects;
-using YummyZoom.Domain.MenuAggregate.Errors;
 using YummyZoom.SharedKernel;
 
-namespace YummyZoom.Domain.MenuAggregate.Entities;
+namespace YummyZoom.Domain.MenuItemAggregate;
 
-public sealed class MenuItem : Entity<MenuItemId>
+public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
 {
     private readonly List<TagId> _dietaryTagIds = [];
     private readonly List<AppliedCustomization> _appliedCustomizations = [];
 
+    public RestaurantId RestaurantId { get; private set; }
+    public MenuCategoryId MenuCategoryId { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
     public Money BasePrice { get; private set; }
@@ -22,25 +27,31 @@ public sealed class MenuItem : Entity<MenuItemId>
 
     private MenuItem(
         MenuItemId menuItemId,
+        RestaurantId restaurantId,
+        MenuCategoryId menuCategoryId,
         string name,
         string description,
         Money basePrice,
         bool isAvailable,
         string? imageUrl,
         List<TagId> dietaryTagIds,
-        List<AppliedCustomization> appliedCustomizations) 
+        List<AppliedCustomization> appliedCustomizations)
         : base(menuItemId)
     {
+        RestaurantId = restaurantId;
+        MenuCategoryId = menuCategoryId;
         Name = name;
         Description = description;
         BasePrice = basePrice;
         IsAvailable = isAvailable;
         ImageUrl = imageUrl;
-        _dietaryTagIds = dietaryTagIds;
-        _appliedCustomizations = appliedCustomizations;
+        _dietaryTagIds = new List<TagId>(dietaryTagIds);
+        _appliedCustomizations = new List<AppliedCustomization>(appliedCustomizations);
     }
-    
+
     public static Result<MenuItem> Create(
+        RestaurantId restaurantId,
+        MenuCategoryId menuCategoryId,
         string name,
         string description,
         Money basePrice,
@@ -49,21 +60,19 @@ public sealed class MenuItem : Entity<MenuItemId>
         List<TagId>? dietaryTagIds = null,
         List<AppliedCustomization>? appliedCustomizations = null)
     {
-        // Validate required fields
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<MenuItem>(MenuErrors.InvalidItemName(name));
+            return Result.Failure<MenuItem>(MenuItemErrors.InvalidName(name));
 
         if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure<MenuItem>(MenuErrors.InvalidItemDescription(description));
+            return Result.Failure<MenuItem>(MenuItemErrors.InvalidDescription(description));
 
-        // Business rule: Menu item prices must be positive
         if (basePrice.Amount <= 0)
-        {
-            return Result.Failure<MenuItem>(MenuErrors.NegativeMenuItemPrice);
-        }
+            return Result.Failure<MenuItem>(MenuItemErrors.NegativePrice);
 
         var menuItem = new MenuItem(
             MenuItemId.CreateUnique(),
+            restaurantId,
+            menuCategoryId,
             name,
             description,
             basePrice,
@@ -72,6 +81,8 @@ public sealed class MenuItem : Entity<MenuItemId>
             dietaryTagIds ?? [],
             appliedCustomizations ?? []);
 
+        menuItem.AddDomainEvent(new MenuItemCreated((MenuItemId)menuItem.Id, menuItem.RestaurantId, menuItem.MenuCategoryId));
+        
         return Result.Success(menuItem);
     }
 
@@ -79,21 +90,23 @@ public sealed class MenuItem : Entity<MenuItemId>
     {
         if (!IsAvailable) return;
         IsAvailable = false;
+        AddDomainEvent(new MenuItemAvailabilityChanged((MenuItemId)Id, IsAvailable));
     }
 
     public void MarkAsAvailable()
     {
         if (IsAvailable) return;
         IsAvailable = true;
+        AddDomainEvent(new MenuItemAvailabilityChanged((MenuItemId)Id, IsAvailable));
     }
 
     public Result UpdateDetails(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure(MenuErrors.InvalidItemName(name));
+            return Result.Failure(MenuItemErrors.InvalidName(name));
 
         if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure(MenuErrors.InvalidItemDescription(description));
+            return Result.Failure(MenuItemErrors.InvalidDescription(description));
 
         Name = name;
         Description = description;
@@ -103,32 +116,18 @@ public sealed class MenuItem : Entity<MenuItemId>
     public Result UpdatePrice(Money newPrice)
     {
         if (newPrice.Amount <= 0)
-            return Result.Failure(MenuErrors.NegativeMenuItemPrice);
+            return Result.Failure(MenuItemErrors.NegativePrice);
 
         BasePrice = newPrice;
+        AddDomainEvent(new MenuItemPriceChanged((MenuItemId)Id, newPrice));
         return Result.Success();
     }
 
-    public void UpdateImageUrl(string? imageUrl)
+    public Result AssignToCategory(MenuCategoryId newCategoryId)
     {
-        ImageUrl = imageUrl;
-    }
-
-    public Result UpdateFullDetails(string name, string description, Money basePrice, string? imageUrl = null)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure(MenuErrors.InvalidItemName(name));
-
-        if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure(MenuErrors.InvalidItemDescription(description));
-
-        if (basePrice.Amount <= 0)
-            return Result.Failure(MenuErrors.NegativeMenuItemPrice);
-
-        Name = name;
-        Description = description;
-        BasePrice = basePrice;
-        ImageUrl = imageUrl;
+        var oldCategoryId = MenuCategoryId;
+        MenuCategoryId = newCategoryId;
+        AddDomainEvent(new MenuItemAssignedToCategory((MenuItemId)Id, oldCategoryId, newCategoryId));
         return Result.Success();
     }
 

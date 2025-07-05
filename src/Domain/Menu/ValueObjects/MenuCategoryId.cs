@@ -1,4 +1,5 @@
-namespace YummyZoom.Domain.MenuAggregate.ValueObjects;
+
+namespace YummyZoom.Domain.Menu.ValueObjects;
 
 public sealed class MenuCategoryId : AggregateRootId<Guid>
 {
