@@ -1,4 +1,6 @@
-# Aggregate Documentation: `User`
+# User Aggregate
+
+## Aggregate Documentation: `User`
 
 * **Version:** 1.0
 * **Last Updated:** 2025-07-05

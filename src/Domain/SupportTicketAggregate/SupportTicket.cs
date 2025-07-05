@@ -7,10 +7,20 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.SupportTicketAggregate;
 
+/// <summary>
+/// Represents a support ticket within the YummyZoom system.
+/// This is an Aggregate Root, ensuring consistency within the Support Ticket context.
+/// </summary>
 public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
 {
+    #region Fields
+
     private readonly List<ContextLink> _contextLinks = [];
     private readonly List<TicketMessage> _messages = [];
+
+    #endregion
+
+    #region Properties
 
     public TicketNumber TicketNumber { get; private set; }
     public string Subject { get; private set; }
@@ -23,6 +33,10 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
 
     public IReadOnlyList<ContextLink> ContextLinks => _contextLinks.AsReadOnly();
     public IReadOnlyList<TicketMessage> Messages => _messages.AsReadOnly();
+
+    #endregion
+
+    #region Constructors
 
     private SupportTicket(
         SupportTicketId id,
@@ -48,6 +62,19 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
         _contextLinks = new List<ContextLink>(contextLinks);
         _messages = new List<TicketMessage>(messages);
     }
+
+    /// <summary>
+    /// Required for ORM (e.g., Entity Framework Core) and deserialization.
+    /// </summary>
+#pragma warning disable CS8618
+    private SupportTicket()
+    {
+    }
+#pragma warning restore CS8618
+
+    #endregion
+
+    #region Static Factory Methods
 
     public static Result<SupportTicket> Create(
         string subject,
@@ -159,6 +186,10 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
 
         return Result.Success(ticket);
     }
+
+    #endregion
+
+    #region Public Methods
 
     public Result AddMessage(Guid authorId, AuthorType authorType, string messageText, bool isInternalNote = false)
     {
@@ -381,7 +412,10 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
         return Result.Success();
     }
 
-    // Query methods for business logic
+    #endregion
+
+    #region Public Methods - Queries
+
     public bool IsAssignedToAdmin(Guid adminId)
     {
         return AssignedToAdminId == adminId;
@@ -447,7 +481,10 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
         return DateTimeOffset.UtcNow - LastUpdateTimestamp;
     }
 
-    // Enhanced validation methods
+    #endregion
+
+    #region Private Helper Methods
+
     public static bool IsValidPriorityEscalation(SupportTicketPriority currentPriority, SupportTicketPriority newPriority)
     {
         // Define priority hierarchy (higher number = higher priority)
@@ -572,10 +609,5 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
         };
     }
 
-#pragma warning disable CS8618
-    // For EF Core
-    private SupportTicket()
-    {
-    }
-#pragma warning restore CS8618
+    #endregion
 }
