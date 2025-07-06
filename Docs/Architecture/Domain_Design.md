@@ -45,7 +45,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `RestaurantID` (Identifier, reference to the `Restaurant` aggregate)
     * `Role` (Enum: `Owner`, `Staff`)
 * **Invariants:**
-  * The combination of `UserID`, `RestaurantID`, and `Role` must be unique. A user can only have one role per restaurant.
+  * The combination of `UserID`, `RestaurantID` must be unique. A user can only have one role per restaurant.
   * A `RoleAssignment` must contain a valid, non-null `UserID` and `RestaurantID`.
   * The `Role` must be a valid value from the defined enum (e.g., `Owner`, `Staff`).
 * **References to other aggregates (by ID):**

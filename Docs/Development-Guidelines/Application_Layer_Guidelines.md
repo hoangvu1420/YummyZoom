@@ -66,7 +66,7 @@ public class GetSomethingQueryHandler : IRequestHandler<GetSomethingQuery, Resul
 - **Common Directory:**
   - **Interfaces:** Abstractions for infrastructure dependencies
   - **Behaviours:** Cross-cutting concerns (validation, logging, authorization)
-  - **Models:** Shared data structures (`PaginatedList`, `Result`)
+  - **Models:** Shared data structures (`PaginatedList`)
 
 ## How to Implement a New Feature
 
@@ -147,6 +147,7 @@ src/Application/<FeatureName>/
 
 ### Naming Conventions
 
+- **Feature Directory:** `<FeatureName>` (e.g., `Users`, `RoleAssignments`)
 - **Commands:** `<Action><Entity>Command.cs` (e.g., `CreateRoleAssignmentCommand.cs`)
 - **Queries:** `<Action><Entity>Query.cs` (e.g., `GetUserRoleAssignmentsQuery.cs`)
 - **Handlers:** `<Action><Entity>CommandHandler.cs` or `<Action><Entity>QueryHandler.cs`
@@ -190,18 +191,6 @@ src/Application/<FeatureName>/
 - **Skipping Validation:** Not using validators for input validation
 - **Ignoring Authorization:** Forgetting `[Authorize]` attributes on sensitive operations
 
-## Migration Guide
-
-For detailed steps to migrate existing query handlers to the new Dapper pattern, see:
-📖 **[Query Handler Dapper Migration Guide](Query_Handler_Dapper_Migration_Guide.md)**
-
-This guide includes:
-
-- Step-by-step refactoring process
-- SQL guidelines for PostgreSQL
-- Performance benefits and examples
-- Migration checklist
-
 ## Layer Interactions
 
 - **Domain Layer:** Application invokes domain logic via entities and aggregates
@@ -241,12 +230,6 @@ public class GetRestaurantRoleAssignmentsQueryHandler : IRequestHandler<GetResta
 ```
 
 This approach ensures optimal performance, maintainability, and true CQRS separation while preserving domain integrity.
-
-## References
-
-- **[Query Handler Dapper Migration Guide](Query_Handler_Dapper_Migration_Guide.md)** - Detailed migration steps for existing query handlers
-- **[YummyZoom Project Documentation](../YummyZoom_Project_Documentation.md)** - Overall architecture overview
-- **Existing Features** - Reference `TodoLists`, `Users`, `RoleAssignments` for implementation patterns
 
 ---
 

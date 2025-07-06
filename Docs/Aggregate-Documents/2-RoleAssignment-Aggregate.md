@@ -13,7 +13,7 @@
 
 * Manages the lifecycle of a role assignment.
 * Acts as the transactional boundary for all role assignment operations.
-* Enforces the business rule that the combination of `UserID`, `RestaurantID`, and `Role` must be unique.
+* Enforces the business rule that the combination of `UserID`, `RestaurantID` must be unique.
 
 ## 2. Structure
 
