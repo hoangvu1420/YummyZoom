@@ -8,6 +8,8 @@ namespace YummyZoom.Domain.RestaurantAggregate;
 
 public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
 {
+    #region Properties
+
     public string Name { get; private set; }
     public string LogoUrl { get; private set; }
     public string Description { get; private set; }
@@ -17,6 +19,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
     public BusinessHours BusinessHours { get; private set; }
     public bool IsVerified { get; private set; }
     public bool IsAcceptingOrders { get; private set; }
+
+    #endregion
+
+    #region Constructors
 
     private Restaurant(
         RestaurantId id,
@@ -41,6 +47,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         IsVerified = isVerified;
         IsAcceptingOrders = isAcceptingOrders;
     }
+
+    #endregion
+
+    #region Static Factory Methods
 
     public static Result<Restaurant> Create(
         string name,
@@ -92,7 +102,6 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success(restaurant);
     }
 
-    // Alternative Create method that accepts pre-created value objects
     public static Result<Restaurant> Create(
         string name,
         string? logoUrl,
@@ -135,6 +144,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success(restaurant);
     }
 
+    #endregion
+
+    #region Public Methods - Lifecycle
+
     public void Verify()
     {
         if (IsVerified) return;
@@ -175,45 +188,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success();
     }
 
-    private static Result ValidateRestaurantFields(string name, string? logoUrl, string description, string cuisineType)
-    {
-        const int maxNameLength = 100;
-        const int maxDescriptionLength = 500;
-        const int maxCuisineTypeLength = 50;
+    #endregion
 
-        // Validate name
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure(RestaurantErrors.NameIsRequired());
-        
-        if (name.Length > maxNameLength)
-            return Result.Failure(RestaurantErrors.NameTooLong(maxNameLength));
+    #region Public Methods - Granular Updates
 
-        // Validate description
-        if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure(RestaurantErrors.DescriptionIsRequired());
-        
-        if (description.Length > maxDescriptionLength)
-            return Result.Failure(RestaurantErrors.DescriptionTooLong(maxDescriptionLength));
-
-        // Validate cuisine type
-        if (string.IsNullOrWhiteSpace(cuisineType))
-            return Result.Failure(RestaurantErrors.CuisineTypeIsRequired());
-        
-        if (cuisineType.Length > maxCuisineTypeLength)
-            return Result.Failure(RestaurantErrors.CuisineTypeTooLong(maxCuisineTypeLength));
-
-        // Validate logo URL (optional, but if provided must be valid)
-        if (!string.IsNullOrWhiteSpace(logoUrl))
-        {
-            var urlPattern = @"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$";
-            if (!Regex.IsMatch(logoUrl, urlPattern))
-                return Result.Failure(RestaurantErrors.InvalidLogoUrl(logoUrl));
-        }
-
-        return Result.Success();
-    }
-
-    // Granular update methods for better domain expressiveness
     public Result ChangeName(string name)
     {
         const int maxNameLength = 100;
@@ -367,7 +345,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success();
     }
 
-    // Composite update method for branding-related information
+    #endregion
+
+    #region Public Methods - Composite Updates
+
     public Result UpdateBranding(string name, string? logoUrl, string description)
     {
         // Validate all branding fields first
@@ -409,7 +390,6 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success();
     }
 
-    // Convenience methods for common business operations
     public Result UpdateBasicInfo(string name, string description, string cuisineType)
     {
         // Validate all fields first
@@ -505,7 +485,48 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         return Result.Success();
     }
 
-    // Helper method for field validation
+    #endregion
+
+    #region Private Helper Methods
+
+    private static Result ValidateRestaurantFields(string name, string? logoUrl, string description, string cuisineType)
+    {
+        const int maxNameLength = 100;
+        const int maxDescriptionLength = 500;
+        const int maxCuisineTypeLength = 50;
+
+        // Validate name
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(RestaurantErrors.NameIsRequired());
+        
+        if (name.Length > maxNameLength)
+            return Result.Failure(RestaurantErrors.NameTooLong(maxNameLength));
+
+        // Validate description
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(RestaurantErrors.DescriptionIsRequired());
+        
+        if (description.Length > maxDescriptionLength)
+            return Result.Failure(RestaurantErrors.DescriptionTooLong(maxDescriptionLength));
+
+        // Validate cuisine type
+        if (string.IsNullOrWhiteSpace(cuisineType))
+            return Result.Failure(RestaurantErrors.CuisineTypeIsRequired());
+        
+        if (cuisineType.Length > maxCuisineTypeLength)
+            return Result.Failure(RestaurantErrors.CuisineTypeTooLong(maxCuisineTypeLength));
+
+        // Validate logo URL (optional, but if provided must be valid)
+        if (!string.IsNullOrWhiteSpace(logoUrl))
+        {
+            var urlPattern = @"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$";
+            if (!Regex.IsMatch(logoUrl, urlPattern))
+                return Result.Failure(RestaurantErrors.InvalidLogoUrl(logoUrl));
+        }
+
+        return Result.Success();
+    }
+
     private static Result ValidateField(string value, int maxLength, Func<Error> requiredError, Func<int, Error> tooLongError)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -516,6 +537,8 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
 
         return Result.Success();
     }
+
+    #endregion
 
 #pragma warning disable CS8618
     private Restaurant() { }
