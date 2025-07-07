@@ -1,4 +1,5 @@
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.Errors;
 using YummyZoom.Domain.MenuItemAggregate.Events;
@@ -138,6 +139,65 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
     public Result MarkAsDeleted()
     {
         AddDomainEvent(new MenuItemDeleted((MenuItemId)Id));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Assigns a customization group to this menu item if not already present.
+    /// </summary>
+    /// <param name="customization">The customization to assign</param>
+    /// <returns>A Result indicating success or failure</returns>
+    public Result AssignCustomizationGroup(AppliedCustomization customization)
+    {
+        if (customization is null)
+            return Result.Failure(Error.Validation("MenuItem.InvalidCustomization", "Customization cannot be null."));
+
+        // Check if customization group is already assigned
+        if (_appliedCustomizations.Any(c => c.CustomizationGroupId == customization.CustomizationGroupId))
+            return Result.Failure(MenuItemErrors.CustomizationAlreadyAssigned(customization.CustomizationGroupId.Value.ToString()));
+
+        _appliedCustomizations.Add(customization);
+        AddDomainEvent(new MenuItemCustomizationAssigned(
+            (MenuItemId)Id, 
+            customization.CustomizationGroupId, 
+            customization.DisplayTitle));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Removes a customization group from this menu item.
+    /// </summary>
+    /// <param name="groupId">The ID of the customization group to remove</param>
+    /// <returns>A Result indicating success or failure</returns>
+    public Result RemoveCustomizationGroup(CustomizationGroupId groupId)
+    {
+        var existingCustomization = _appliedCustomizations.FirstOrDefault(c => c.CustomizationGroupId == groupId);
+        if (existingCustomization is null)
+            return Result.Failure(MenuItemErrors.CustomizationNotFound(groupId.Value.ToString()));
+
+        _appliedCustomizations.Remove(existingCustomization);
+        AddDomainEvent(new MenuItemCustomizationRemoved((MenuItemId)Id, groupId));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Sets the dietary tags for this menu item, replacing the entire list.
+    /// </summary>
+    /// <param name="tagIds">The list of tag IDs to set (can be null or empty)</param>
+    /// <returns>A Result indicating success</returns>
+    public Result SetDietaryTags(List<TagId>? tagIds)
+    {
+        _dietaryTagIds.Clear();
+        
+        if (tagIds != null && tagIds.Count > 0)
+        {
+            _dietaryTagIds.AddRange(tagIds);
+        }
+
+        AddDomainEvent(new MenuItemDietaryTagsUpdated((MenuItemId)Id, new List<TagId>(_dietaryTagIds)));
 
         return Result.Success();
     }

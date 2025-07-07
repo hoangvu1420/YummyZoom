@@ -1,4 +1,3 @@
-
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuItemAggregate.Errors;
@@ -23,4 +22,12 @@ public static class MenuItemErrors
     public static Error NotFound(string itemId, string categoryName) => Error.NotFound(
         "MenuItem.NotFound", 
         $"The item with ID '{itemId}' was not found in category '{categoryName}'.");
+
+    public static Error CustomizationAlreadyAssigned(string groupId) => Error.Conflict(
+        "MenuItem.CustomizationAlreadyAssigned",
+        $"Customization group '{groupId}' is already assigned to this menu item.");
+
+    public static Error CustomizationNotFound(string groupId) => Error.NotFound(
+        "MenuItem.CustomizationNotFound", 
+        $"Customization group '{groupId}' is not assigned to this menu item.");
 }
