@@ -41,13 +41,6 @@ public class RoleAssignmentConfiguration : IEntityTypeConfiguration<RoleAssignme
             .IsRequired()
             .HasConversion<string>(); // Store as string in database
 
-        // Configure timestamps
-        builder.Property(ra => ra.CreatedAt)
-            .IsRequired();
-
-        builder.Property(ra => ra.UpdatedAt)
-            .IsRequired(false);
-
         // Unique constraint: User cannot have the same role twice for the same restaurant
         builder.HasIndex(ra => new { ra.UserId, ra.RestaurantId, ra.Role })
             .IsUnique()

@@ -52,8 +52,6 @@ public class RoleAssignmentTests
         roleAssignment.UserId.Should().Be(userId);
         roleAssignment.RestaurantId.Should().Be(restaurantId);
         roleAssignment.Role.Should().Be(role);
-        roleAssignment.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        roleAssignment.UpdatedAt.Should().BeNull("because it's a new role assignment");
     }
 
     [Test]
@@ -126,33 +124,6 @@ public class RoleAssignmentTests
     }
 
     [Test]
-    public void Create_WithSpecificId_ShouldSucceedAndUseProvidedId()
-    {
-        // Arrange
-        var roleAssignmentId = RoleAssignmentId.CreateUnique();
-        var userId = UserId.CreateUnique();
-        var restaurantId = RestaurantId.CreateUnique();
-        var role = RestaurantRole.Owner;
-        var createdAt = DateTime.UtcNow.AddDays(-1);
-        var updatedAt = DateTime.UtcNow;
-
-        // Act
-        var result = RoleAssignment.Create(roleAssignmentId, userId, restaurantId, role, createdAt, updatedAt);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        var roleAssignment = result.Value;
-
-        roleAssignment.Id.Should().Be(roleAssignmentId);
-        roleAssignment.UserId.Should().Be(userId);
-        roleAssignment.RestaurantId.Should().Be(restaurantId);
-        roleAssignment.Role.Should().Be(role);
-        roleAssignment.CreatedAt.Should().Be(createdAt);
-        roleAssignment.UpdatedAt.Should().Be(updatedAt);
-    }
-
-    [Test]
     public void Create_WithSpecificIdButNullId_ShouldFailAndReturnInvalidRoleAssignmentIdError()
     {
         // Arrange
@@ -160,10 +131,9 @@ public class RoleAssignmentTests
         var userId = UserId.CreateUnique();
         var restaurantId = RestaurantId.CreateUnique();
         var role = RestaurantRole.Owner;
-        var createdAt = DateTime.UtcNow;
 
         // Act
-        var result = RoleAssignment.Create(roleAssignmentId!, userId, restaurantId, role, createdAt);
+        var result = RoleAssignment.Create(roleAssignmentId!, userId, restaurantId, role);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -171,11 +141,10 @@ public class RoleAssignmentTests
     }
 
     [Test]
-    public void UpdateRole_WithValidNewRole_ShouldUpdateRoleAndSetUpdatedAt()
+    public void UpdateRole_WithValidNewRole_ShouldUpdateRole()
     {
         // Arrange
         var roleAssignment = CreateValidRoleAssignment(role: RestaurantRole.Owner);
-        var originalCreatedAt = roleAssignment.CreatedAt;
         var newRole = RestaurantRole.Staff;
 
         // Act
@@ -184,9 +153,6 @@ public class RoleAssignmentTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         roleAssignment.Role.Should().Be(newRole);
-        roleAssignment.UpdatedAt.Should().NotBeNull();
-        roleAssignment.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        roleAssignment.CreatedAt.Should().Be(originalCreatedAt, "CreatedAt should not change");
     }
 
     [Test]
@@ -194,7 +160,6 @@ public class RoleAssignmentTests
     {
         // Arrange
         var roleAssignment = CreateValidRoleAssignment(role: RestaurantRole.Owner);
-        var originalUpdatedAt = roleAssignment.UpdatedAt;
         var sameRole = RestaurantRole.Owner;
 
         // Act
@@ -203,7 +168,6 @@ public class RoleAssignmentTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         roleAssignment.Role.Should().Be(sameRole);
-        roleAssignment.UpdatedAt.Should().Be(originalUpdatedAt, "UpdatedAt should not change when role is the same");
     }
 
     [Test]
@@ -212,7 +176,6 @@ public class RoleAssignmentTests
         // Arrange
         var roleAssignment = CreateValidRoleAssignment();
         var originalRole = roleAssignment.Role;
-        var originalUpdatedAt = roleAssignment.UpdatedAt;
         var invalidRole = (RestaurantRole)999;
 
         // Act
@@ -222,7 +185,6 @@ public class RoleAssignmentTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidRole(invalidRole.ToString()));
         roleAssignment.Role.Should().Be(originalRole, "Role should not change on failure");
-        roleAssignment.UpdatedAt.Should().Be(originalUpdatedAt, "UpdatedAt should not change on failure");
     }
 
     [Test]
@@ -381,7 +343,7 @@ public class RoleAssignmentTests
     }
 
     [Test]
-    public void UpdateRole_ShouldRaiseBothRemovedAndCreatedEvents()
+    public void UpdateRole_ShouldRaiseRoleAssignmentUpdatedEvent()
     {
         // Arrange
         var roleAssignment = CreateValidRoleAssignment(role: RestaurantRole.Owner);
@@ -393,12 +355,15 @@ public class RoleAssignmentTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 2);
+        roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 1);
         
-        var events = roleAssignment.DomainEvents.Skip(initialEventCount).ToList();
-        var createdEvent = events[1] as RoleAssignmentCreated;
+        var updatedEvent = roleAssignment.DomainEvents.Last() as RoleAssignmentUpdated;
         
-        createdEvent.Should().NotBeNull();
-        createdEvent!.Role.Should().Be(newRole, "because that's the new role");
+        updatedEvent.Should().NotBeNull();
+        updatedEvent!.RoleAssignmentId.Should().Be((RoleAssignmentId)roleAssignment.Id);
+        updatedEvent.UserId.Should().Be(roleAssignment.UserId);
+        updatedEvent.RestaurantId.Should().Be(roleAssignment.RestaurantId);
+        updatedEvent.PreviousRole.Should().Be(RestaurantRole.Owner, "because that was the original role");
+        updatedEvent.NewRole.Should().Be(newRole, "because that's the new role");
     }
 }

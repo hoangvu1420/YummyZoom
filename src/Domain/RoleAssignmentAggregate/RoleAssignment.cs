@@ -26,21 +26,17 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
     public UserId UserId { get; private set; }
     public RestaurantId RestaurantId { get; private set; }
     public RestaurantRole Role { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     private RoleAssignment(
         RoleAssignmentId id,
         UserId userId,
         RestaurantId restaurantId,
-        RestaurantRole role,
-        DateTime createdAt)
+        RestaurantRole role)
         : base(id)
     {
         UserId = userId;
         RestaurantId = restaurantId;
         Role = role;
-        CreatedAt = createdAt;
     }
 
     /// <summary>
@@ -74,8 +70,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
             RoleAssignmentId.CreateUnique(),
             userId,
             restaurantId,
-            role,
-            DateTime.UtcNow);
+            role);
 
         // Raise domain event
         roleAssignment.AddDomainEvent(new RoleAssignmentCreated(
@@ -94,9 +89,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
         RoleAssignmentId id,
         UserId userId,
         RestaurantId restaurantId,
-        RestaurantRole role,
-        DateTime createdAt,
-        DateTime? updatedAt = null)
+        RestaurantRole role)
     {
         if (id is null)
         {
@@ -118,10 +111,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
             return Result.Failure<RoleAssignment>(RoleAssignmentErrors.InvalidRole(role.ToString()));
         }
 
-        var roleAssignment = new RoleAssignment(id, userId, restaurantId, role, createdAt)
-        {
-            UpdatedAt = updatedAt
-        };
+        var roleAssignment = new RoleAssignment(id, userId, restaurantId, role);
 
         return Result.Success(roleAssignment);
     }
@@ -144,10 +134,16 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
             return Result.Success();
         }
 
-        var oldRole = Role;
+        var previousRole = Role;
         Role = newRole;
-        UpdatedAt = DateTime.UtcNow;        // Raise domain event for the update
-        AddDomainEvent(new RoleAssignmentCreated((RoleAssignmentId)Id, UserId, RestaurantId, newRole));
+        
+        // Raise domain event for the update
+        AddDomainEvent(new RoleAssignmentUpdated(
+            (RoleAssignmentId)Id, 
+            UserId, 
+            RestaurantId, 
+            previousRole, 
+            newRole));
 
         return Result.Success();
     }

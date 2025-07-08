@@ -69,8 +69,6 @@ These methods modify the state of the aggregate.
 | `UserId` | `UserId` | The ID of the assigned user. |
 | `RestaurantId` | `RestaurantId` | The ID of the restaurant. |
 | `Role` | `RestaurantRole` | The assigned role. |
-| `CreatedAt` | `DateTime` | The timestamp of when the assignment was created. |
-| `UpdatedAt` | `DateTime?` | The timestamp of the last update. |
 
 ### 4.2. Public Query Methods
 
@@ -85,5 +83,6 @@ The aggregate raises the following domain events to communicate significant stat
 
 | Event Name | When It's Raised | Description |
 | :--- | :--- | :--- |
-| `RoleAssignmentCreated` | During the `Create` factory method and `UpdateRole`. | Signals that a new role assignment has been created. |
+| `RoleAssignmentCreated` | During the `Create` factory method. | Signals that a new role assignment has been created. |
+| `RoleAssignmentUpdated` | During `UpdateRole` when the role actually changes. | Signals that an existing role assignment has been updated with a new role. Contains both the previous and new roles. |
 | `RoleAssignmentDeleted` | During `MarkAsDeleted`. | Signals that a role assignment has been marked for deletion. |
