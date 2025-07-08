@@ -15,6 +15,7 @@ Manages a self-contained, reusable set of choices (e.g., sizes, toppings) that c
 
 * Manages the lifecycle of customization groups and their choices
 * Acts as the transactional boundary for all customization group operations
+* Controls creation of CustomizationChoice entities to ensure proper encapsulation
 * Enforces business rules for choice name uniqueness within the group
 * Enforces business rules for valid selection range constraints (MaxSelections >= MinSelections)
 * Manages display ordering of choices within the group
@@ -64,8 +65,8 @@ These methods modify the state of the aggregate. All state changes must go throu
 
 | Method Signature | Description | Key Invariants Checked | Potential Errors |
 | :--- | :--- | :--- | :--- |
-| `Result AddChoice(CustomizationChoice choice)` | Adds a new choice to the group | Ensures choice names are unique within the group | `CustomizationGroupErrors.ChoiceNameNotUnique` |
-| `Result AddChoiceWithAutoOrder(string name, Money priceAdjustment, bool isDefault = false)` | Adds a new choice with auto-assigned display order | Ensures choice names are unique and assigns next available order | `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result AddChoice(string name, Money priceAdjustment, bool isDefault, int displayOrder)` | Adds a new choice to the group with primitive parameters. The aggregate creates the CustomizationChoice entity internally. | Ensures choice names are unique within the group and validates all primitive parameters | `CustomizationGroupErrors.ChoiceNameNotUnique`, `CustomizationGroupErrors.ChoiceNameRequired`, `CustomizationGroupErrors.InvalidDisplayOrder` |
+| `Result AddChoiceWithAutoOrder(string name, Money priceAdjustment, bool isDefault = false)` | Adds a new choice with auto-assigned display order | Ensures choice names are unique and assigns next available order | `CustomizationGroupErrors.ChoiceNameNotUnique`, `CustomizationGroupErrors.ChoiceNameRequired` |
 | `Result RemoveChoice(ChoiceId choiceId)` | Removes a choice from the group by ID | Validates that the choice exists | `CustomizationGroupErrors.InvalidChoiceId` |
 | `Result UpdateChoice(ChoiceId choiceId, string newName, Money newPriceAdjustment, bool isDefault, int? displayOrder = null)` | Updates an existing choice's properties | Ensures new name is unique and choice exists | `CustomizationGroupErrors.InvalidChoiceId`, `CustomizationGroupErrors.ChoiceNameNotUnique` |
 | `Result ReorderChoices(List<(ChoiceId choiceId, int newDisplayOrder)> orderChanges)` | Bulk reorders multiple choices with new display orders | Validates choice IDs exist and display orders are non-negative | `CustomizationGroupErrors.ChoiceNotFoundForReordering`, `CustomizationGroupErrors.InvalidDisplayOrder`, `CustomizationGroupErrors.DuplicateDisplayOrder` |

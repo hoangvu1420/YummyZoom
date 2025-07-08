@@ -31,21 +31,25 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice = CustomizationChoice.Create("Large", PriceAdjustment, false, 1).Value;
 
         // Act
-        var result = group.AddChoice(choice);
+        var result = group.AddChoice("Large", PriceAdjustment, false, 1);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         group.Choices.Should().ContainSingle();
-        group.Choices.Should().Contain(choice);
+        var addedChoice = group.Choices.Single();
+        addedChoice.Name.Should().Be("Large");
+        addedChoice.PriceAdjustment.Should().Be(PriceAdjustment);
+        addedChoice.IsDefault.Should().BeFalse();
+        addedChoice.DisplayOrder.Should().Be(1);
+        
         group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceAdded));
 
         var choiceAddedEvent = group.DomainEvents.OfType<CustomizationChoiceAdded>().Single();
         choiceAddedEvent.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
-        choiceAddedEvent.ChoiceId.Should().Be(choice.Id);
-        choiceAddedEvent.Name.Should().Be(choice.Name);
+        choiceAddedEvent.ChoiceId.Should().Be(addedChoice.Id);
+        choiceAddedEvent.Name.Should().Be("Large");
     }
 
     [Test]
@@ -53,19 +57,17 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Large", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", PriceAdjustment, false, 2).Value; // Same name
-        group.AddChoice(choice1);
+        group.AddChoice("Large", DefaultPrice, false, 1);
 
         // Act
-        var result = group.AddChoice(choice2);
+        var result = group.AddChoice("Large", PriceAdjustment, false, 2); // Same name
 
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNameNotUnique);
         group.Choices.Should().ContainSingle(); // Only the first choice should remain
-        group.Choices.Should().Contain(choice1);
-        group.Choices.Should().NotContain(choice2);
+        group.Choices.Single().Name.Should().Be("Large");
+        group.Choices.Single().PriceAdjustment.Should().Be(DefaultPrice);
     }
 
     [Test]
@@ -73,23 +75,20 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Medium", PriceAdjustment, false, 2).Value;
-        var choice3 = CustomizationChoice.Create("Large", new Money(5.00m, Currencies.Default), false, 3).Value;
 
         // Act
-        var result1 = group.AddChoice(choice1);
-        var result2 = group.AddChoice(choice2);
-        var result3 = group.AddChoice(choice3);
+        var result1 = group.AddChoice("Small", DefaultPrice, false, 1);
+        var result2 = group.AddChoice("Medium", PriceAdjustment, false, 2);
+        var result3 = group.AddChoice("Large", new Money(5.00m, Currencies.Default), false, 3);
 
         // Assert
         result1.IsSuccess.Should().BeTrue();
         result2.IsSuccess.Should().BeTrue();
         result3.IsSuccess.Should().BeTrue();
         group.Choices.Should().HaveCount(3);
-        group.Choices.Should().Contain(choice1);
-        group.Choices.Should().Contain(choice2);
-        group.Choices.Should().Contain(choice3);
+        group.Choices.Should().Contain(c => c.Name == "Small");
+        group.Choices.Should().Contain(c => c.Name == "Medium");
+        group.Choices.Should().Contain(c => c.Name == "Large");
     }
 
     [Test]
@@ -97,19 +96,17 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", PriceAdjustment, false, 1).Value; // Same display order
 
         // Act
-        var result1 = group.AddChoice(choice1);
-        var result2 = group.AddChoice(choice2);
+        var result1 = group.AddChoice("Small", DefaultPrice, false, 1);
+        var result2 = group.AddChoice("Large", PriceAdjustment, false, 1); // Same display order
 
         // Assert
         result1.IsSuccess.Should().BeTrue();
         result2.IsSuccess.Should().BeTrue(); // Ties are allowed
         group.Choices.Should().HaveCount(2);
-        group.Choices.Should().Contain(choice1);
-        group.Choices.Should().Contain(choice2);
+        group.Choices.Should().Contain(c => c.Name == "Small");
+        group.Choices.Should().Contain(c => c.Name == "Large");
         
         // Verify ordering: both have same display order, so sorted by name
         var orderedChoices = group.Choices.ToList();
@@ -126,11 +123,11 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice = CustomizationChoice.Create("Large", PriceAdjustment, false, 1).Value;
-        group.AddChoice(choice);
+        group.AddChoice("Large", PriceAdjustment, false, 1);
+        var addedChoice = group.Choices.Single();
 
         // Act
-        var result = group.RemoveChoice(choice.Id);
+        var result = group.RemoveChoice(addedChoice.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -139,8 +136,8 @@ public class CustomizationGroupChoiceManagementTests
 
         var choiceRemovedEvent = group.DomainEvents.OfType<CustomizationChoiceRemoved>().Single();
         choiceRemovedEvent.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
-        choiceRemovedEvent.ChoiceId.Should().Be(choice.Id);
-        choiceRemovedEvent.Name.Should().Be(choice.Name);
+        choiceRemovedEvent.ChoiceId.Should().Be(addedChoice.Id);
+        choiceRemovedEvent.Name.Should().Be(addedChoice.Name);
     }
 
     [Test]
@@ -163,19 +160,19 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", PriceAdjustment, false, 2).Value;
-        group.AddChoice(choice1);
-        group.AddChoice(choice2);
+        group.AddChoice("Small", DefaultPrice, false, 1);
+        group.AddChoice("Large", PriceAdjustment, false, 2);
+        var smallChoice = group.Choices.First(c => c.Name == "Small");
+        var largeChoice = group.Choices.First(c => c.Name == "Large");
 
         // Act
-        var result = group.RemoveChoice(choice1.Id);
+        var result = group.RemoveChoice(smallChoice.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         group.Choices.Should().ContainSingle();
-        group.Choices.Should().Contain(choice2);
-        group.Choices.Should().NotContain(choice1);
+        group.Choices.Should().Contain(largeChoice);
+        group.Choices.Should().NotContain(smallChoice);
     }
 
     #endregion
@@ -187,8 +184,8 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var originalChoice = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        group.AddChoice(originalChoice);
+        group.AddChoice("Small", DefaultPrice, false, 1);
+        var originalChoice = group.Choices.First(c => c.Name == "Small");
         var originalChoiceId = originalChoice.Id;
         var newName = "Extra Large";
         var newPriceAdjustment = new Money(3.00m, Currencies.Default);
@@ -236,10 +233,11 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", PriceAdjustment, false, 2).Value;
-        group.AddChoice(choice1);
-        group.AddChoice(choice2);
+        group.AddChoice("Small", DefaultPrice, false, 1);
+        group.AddChoice("Large", PriceAdjustment, false, 2);
+
+        var choice1 = group.Choices.First(c => c.Name == "Small");
+        var choice2 = group.Choices.First(c => c.Name == "Large");
 
         // Act - Try to update choice2 to have the same name as choice1
         var result = group.UpdateChoice(choice2.Id, "Small", DefaultPrice, false);
@@ -248,7 +246,7 @@ public class CustomizationGroupChoiceManagementTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNameNotUnique);
         // Verify the original choice remains unchanged
-        var unchangedChoice = group.Choices.First(c => c.Id == choice2.Id);
+        var unchangedChoice = group.Choices.First(c => c.Name == "Large");
         unchangedChoice.Name.Should().Be("Large");
     }
 
@@ -257,9 +255,9 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var originalChoice = CustomizationChoice.Create("Large", DefaultPrice, false, 1).Value;
-        group.AddChoice(originalChoice);
+        group.AddChoice("Large", DefaultPrice, false, 1);
         var newPriceAdjustment = new Money(4.00m, Currencies.Default);
+        var originalChoice = group.Choices.First(c => c.Name == "Large");
 
         // Act - Update with same name but different price and default flag
         var result = group.UpdateChoice(originalChoice.Id, "Large", newPriceAdjustment, true);
@@ -277,9 +275,9 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var originalChoice = CustomizationChoice.Create("Large", DefaultPrice, false, 1).Value;
-        group.AddChoice(originalChoice);
+        group.AddChoice("Large", DefaultPrice, false, 1);
         const int newDisplayOrder = 5;
+        var originalChoice = group.Choices.First(c => c.Name == "Large");
 
         // Act
         var result = group.UpdateChoice(originalChoice.Id, "Large", DefaultPrice, false, newDisplayOrder);
@@ -298,8 +296,8 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var originalChoice = CustomizationChoice.Create("Large", DefaultPrice, false, 3).Value;
-        group.AddChoice(originalChoice);
+        group.AddChoice("Large", DefaultPrice, false, 3);
+        var originalChoice = group.Choices.First(c => c.Name == "Large");
 
         // Act - Pass null for display order
         var result = group.UpdateChoice(originalChoice.Id, "Extra Large", DefaultPrice, true, null);
@@ -317,10 +315,11 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", PriceAdjustment, false, 2).Value;
-        group.AddChoice(choice1);
-        group.AddChoice(choice2);
+        group.AddChoice("Small", DefaultPrice, false, 1);
+        group.AddChoice("Large", PriceAdjustment, false, 2);
+
+        var choice1 = group.Choices.First(c => c.Name == "Small");
+        var choice2 = group.Choices.First(c => c.Name == "Large");
 
         // Act - Update choice2 to have the same display order as choice1
         var result = group.UpdateChoice(choice2.Id, "Large", PriceAdjustment, false, 1);
@@ -329,8 +328,8 @@ public class CustomizationGroupChoiceManagementTests
         result.IsSuccess.Should().BeTrue(); // Ties are allowed
         
         // Verify both choices have the same display order
-        var updatedChoice1 = group.Choices.First(c => c.Id == choice1.Id);
-        var updatedChoice2 = group.Choices.First(c => c.Id == choice2.Id);
+        var updatedChoice1 = group.Choices.First(c => c.Name == "Small");
+        var updatedChoice2 = group.Choices.First(c => c.Name == "Large");
         
         updatedChoice1.DisplayOrder.Should().Be(1);
         updatedChoice2.DisplayOrder.Should().Be(1);
@@ -397,10 +396,8 @@ public class CustomizationGroupChoiceManagementTests
     {
         // Arrange
         var group = CreateValidGroup();
-        var choice1 = CustomizationChoice.Create("Small", DefaultPrice, false, 1).Value;
-        var choice2 = CustomizationChoice.Create("Large", new Money(5.00m, Currencies.Default), false, 10).Value; // Gap in ordering
-        group.AddChoice(choice1);
-        group.AddChoice(choice2);
+        group.AddChoice("Small", DefaultPrice, false, 1);
+        group.AddChoice("Large", new Money(5.00m, Currencies.Default), false, 10); // Gap in ordering
 
         // Act
         var result = group.AddChoiceWithAutoOrder("Medium", PriceAdjustment);
