@@ -24,8 +24,28 @@ public static class CustomizationGroupErrors
         "Choice name must be unique within the group.",
         ErrorType.Conflict);
 
+    public static readonly Error ChoiceNameRequired = new(
+        "CustomizationGroup.ChoiceNameRequired",
+        "Choice name is required.",
+        ErrorType.Validation);
+
     public static readonly Error InvalidChoiceId = new(
         "CustomizationGroup.InvalidChoiceId",
         "Invalid choice ID.",
         ErrorType.Validation);
-} 
+
+    public static readonly Error InvalidDisplayOrder = new(
+        "CustomizationGroup.InvalidDisplayOrder",
+        "Display order must be non-negative.",
+        ErrorType.Validation);
+
+    public static readonly Error DuplicateDisplayOrder = new(
+        "CustomizationGroup.DuplicateDisplayOrder",
+        "Display order must be unique within the group.",
+        ErrorType.Conflict);
+
+    public static readonly Error ChoiceNotFoundForReordering = new(
+        "CustomizationGroup.ChoiceNotFoundForReordering",
+        "One or more choice IDs are invalid for reordering.",
+        ErrorType.Validation);
+}

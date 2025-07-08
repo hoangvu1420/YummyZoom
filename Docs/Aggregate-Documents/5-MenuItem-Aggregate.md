@@ -1,7 +1,7 @@
 # Aggregate Documentation: `MenuItem`
 
-* **Version:** 1.0
-* **Last Updated:** 2025-07-05
+* **Version:** 1.1
+* **Last Updated:** 2025-07-07
 * **Source File:** `e:\source\repos\CA\YummyZoom\src\Domain\MenuItemAggregate\MenuItem.cs`
 
 ## 1. Overview
@@ -78,6 +78,9 @@ These methods modify the state of the aggregate.
 | `Result UpdateDetails(string name, string description)` | Updates the item's name and description. | Name and description must not be null or whitespace. | `MenuItemErrors.InvalidName`, `MenuItemErrors.InvalidDescription` |
 | `Result UpdatePrice(Money newPrice)` | Updates the item's base price. | Price must be positive. | `MenuItemErrors.NegativePrice` |
 | `Result AssignToCategory(MenuCategoryId newCategoryId)` | Moves the item to a different category. | None. | None. |
+| `Result AssignCustomizationGroup(AppliedCustomization customization)` | Assigns a customization group to the item if not already present. | Customization cannot be null, group must not already be assigned. | `MenuItemErrors.CustomizationAlreadyAssigned` |
+| `Result RemoveCustomizationGroup(CustomizationGroupId groupId)` | Removes a customization group from the item. | Customization group must be currently assigned. | `MenuItemErrors.CustomizationNotFound` |
+| `Result SetDietaryTags(List<TagId>? tagIds)` | Replaces the entire dietary tags collection. | None (null or empty list is valid). | None. |
 | `Result MarkAsDeleted()` | Marks the item as deleted. | None. | None. |
 
 ## 4. Exposed State & Queries
@@ -111,4 +114,7 @@ The aggregate raises the following domain events to communicate significant stat
 | `MenuItemAvailabilityChanged` | After a successful call to `MarkAsAvailable` or `MarkAsUnavailable`. | Signals that the item's availability status has changed. |
 | `MenuItemPriceChanged` | After a successful call to `UpdatePrice`. | Signals that the item's price has been updated. |
 | `MenuItemAssignedToCategory` | After a successful call to `AssignToCategory`. | Signals that the item has been moved to a different category. |
+| `MenuItemCustomizationAssigned` | After a successful call to `AssignCustomizationGroup`. | Signals that a customization group has been assigned to the item. |
+| `MenuItemCustomizationRemoved` | After a successful call to `RemoveCustomizationGroup`. | Signals that a customization group has been removed from the item. |
+| `MenuItemDietaryTagsUpdated` | After a successful call to `SetDietaryTags`. | Signals that the item's dietary tags have been updated. |
 | `MenuItemDeleted` | After a successful call to `MarkAsDeleted`. | Signals that the item has been marked for deletion. |

@@ -3,6 +3,7 @@ using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
+using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.UnitTests.CustomizationGroupAggregate.Entities;
@@ -224,6 +225,121 @@ public class CustomizationChoiceTests
         choice.Name.Should().Be(name);
         choice.PriceAdjustment.Should().Be(priceAdjustment);
         choice.IsDefault.Should().Be(isDefault);
+    }
+
+    [Test]
+    public void Create_WithValidDisplayOrder_ShouldSucceedAndSetDisplayOrderCorrectly()
+    {
+        // Arrange
+        const int displayOrder = 5;
+        
+        // Act
+        var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, displayOrder);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var choice = result.Value;
+        choice.DisplayOrder.Should().Be(displayOrder);
+        choice.Name.Should().Be(DefaultChoiceName);
+        choice.PriceAdjustment.Should().Be(DefaultPriceAdjustment);
+        choice.IsDefault.Should().Be(DefaultIsDefault);
+    }
+
+    [Test]
+    public void Create_WithDefaultDisplayOrder_ShouldSucceedAndSetDisplayOrderToZero()
+    {
+        // Arrange & Act
+        var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var choice = result.Value;
+        choice.DisplayOrder.Should().Be(0); // Default value
+    }
+
+    [Test]
+    public void Create_WithNegativeDisplayOrder_ShouldFailWithInvalidDisplayOrderError()
+    {
+        // Arrange
+        const int invalidDisplayOrder = -1;
+        
+        // Act
+        var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, invalidDisplayOrder);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("CustomizationGroup.InvalidDisplayOrder");
+    }
+
+    [Test]
+    public void Create_WithSpecificIdAndDisplayOrder_ShouldSucceedAndInitializeCorrectly()
+    {
+        // Arrange
+        var choiceId = ChoiceId.CreateUnique();
+        const int displayOrder = 10;
+        
+        // Act
+        var result = CustomizationChoice.Create(choiceId, DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, displayOrder);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var choice = result.Value;
+        choice.Id.Should().Be(choiceId);
+        choice.DisplayOrder.Should().Be(displayOrder);
+        choice.Name.Should().Be(DefaultChoiceName);
+        choice.PriceAdjustment.Should().Be(DefaultPriceAdjustment);
+        choice.IsDefault.Should().Be(DefaultIsDefault);
+    }
+
+    #endregion
+
+    #region UpdateDisplayOrder() Method Tests
+
+    [Test]
+    public void UpdateDisplayOrder_WithValidDisplayOrder_ShouldSucceedAndUpdateOrder()
+    {
+        // Arrange
+        var choice = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, 1).Value;
+        const int newDisplayOrder = 5;
+
+        // Act
+        var result = choice.UpdateDisplayOrder(newDisplayOrder);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        choice.DisplayOrder.Should().Be(newDisplayOrder);
+    }
+
+    [Test]
+    public void UpdateDisplayOrder_WithNegativeDisplayOrder_ShouldFailWithInvalidDisplayOrderError()
+    {
+        // Arrange
+        var choice = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, 1).Value;
+        const int invalidDisplayOrder = -1;
+        const int originalDisplayOrder = 1;
+
+        // Act
+        var result = choice.UpdateDisplayOrder(invalidDisplayOrder);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("CustomizationGroup.InvalidDisplayOrder");
+        choice.DisplayOrder.Should().Be(originalDisplayOrder); // Should remain unchanged
+    }
+
+    [Test]
+    public void UpdateDisplayOrder_WithZeroDisplayOrder_ShouldSucceedAndUpdateOrder()
+    {
+        // Arrange
+        var choice = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, 5).Value;
+        const int newDisplayOrder = 0;
+
+        // Act
+        var result = choice.UpdateDisplayOrder(newDisplayOrder);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        choice.DisplayOrder.Should().Be(newDisplayOrder);
     }
 
     #endregion

@@ -126,7 +126,8 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `Name` (e.g., "Medium", "Extra Cheese")
     * `PriceAdjustment` (Money VO, can be zero)
     * `IsDefault` (Boolean)
-* **Invariants:** `MaxSelections` >= `MinSelections`; `Choice.Name` must be unique within the group.
+    * `DisplayOrder` (Integer)
+* **Invariants:** `MaxSelections` >= `MinSelections`; `Choice.Name` must be unique within the group; `DisplayOrder` must be non-negative.
 * **References to other aggregates (by ID):** `RestaurantID`.
 
 ---

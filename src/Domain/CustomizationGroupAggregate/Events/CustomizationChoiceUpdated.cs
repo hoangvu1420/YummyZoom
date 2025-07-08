@@ -8,5 +8,6 @@ public record CustomizationChoiceUpdated(
     ChoiceId ChoiceId,
     string NewName,
     Money NewPriceAdjustment,
-    bool IsDefault
+    bool IsDefault,
+    int DisplayOrder
 ) : IDomainEvent;

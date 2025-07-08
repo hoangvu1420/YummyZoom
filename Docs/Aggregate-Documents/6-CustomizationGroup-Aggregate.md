@@ -2,8 +2,8 @@
 
 ## Aggregate Documentation: `CustomizationGroup`
 
-* **Version:** 1.0
-* **Last Updated:** 2025-07-05
+* **Version:** 1.1
+* **Last Updated:** 2025-07-08
 * **Source File:** `src/Domain/CustomizationGroupAggregate/CustomizationGroup.cs`
 
 ### 1. Overview
@@ -17,12 +17,13 @@ Manages a self-contained, reusable set of choices (e.g., sizes, toppings) that c
 * Acts as the transactional boundary for all customization group operations
 * Enforces business rules for choice name uniqueness within the group
 * Enforces business rules for valid selection range constraints (MaxSelections >= MinSelections)
+* Manages display ordering of choices within the group
 
 ### 2. Structure
 
 * **Aggregate Root:** `CustomizationGroup`
 * **Key Child Entities:**
-  * `CustomizationChoice`: Represents an individual choice within the group with name, price adjustment, and default flag
+  * `CustomizationChoice`: Represents an individual choice within the group with name, price adjustment, default flag, and display order
 * **Key Value Objects:**
   * `CustomizationGroupId`: Strongly-typed identifier for the aggregate
   * `ChoiceId`: Strongly-typed identifier for choices
@@ -64,8 +65,10 @@ These methods modify the state of the aggregate. All state changes must go throu
 | Method Signature | Description | Key Invariants Checked | Potential Errors |
 | :--- | :--- | :--- | :--- |
 | `Result AddChoice(CustomizationChoice choice)` | Adds a new choice to the group | Ensures choice names are unique within the group | `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result AddChoiceWithAutoOrder(string name, Money priceAdjustment, bool isDefault = false)` | Adds a new choice with auto-assigned display order | Ensures choice names are unique and assigns next available order | `CustomizationGroupErrors.ChoiceNameNotUnique` |
 | `Result RemoveChoice(ChoiceId choiceId)` | Removes a choice from the group by ID | Validates that the choice exists | `CustomizationGroupErrors.InvalidChoiceId` |
-| `Result UpdateChoice(ChoiceId choiceId, string newName, Money newPriceAdjustment, bool isDefault)` | Updates an existing choice's properties | Ensures new name is unique and choice exists | `CustomizationGroupErrors.InvalidChoiceId`, `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result UpdateChoice(ChoiceId choiceId, string newName, Money newPriceAdjustment, bool isDefault, int? displayOrder = null)` | Updates an existing choice's properties | Ensures new name is unique and choice exists | `CustomizationGroupErrors.InvalidChoiceId`, `CustomizationGroupErrors.ChoiceNameNotUnique` |
+| `Result ReorderChoices(List<(ChoiceId choiceId, int newDisplayOrder)> orderChanges)` | Bulk reorders multiple choices with new display orders | Validates choice IDs exist and display orders are non-negative | `CustomizationGroupErrors.ChoiceNotFoundForReordering`, `CustomizationGroupErrors.InvalidDisplayOrder`, `CustomizationGroupErrors.DuplicateDisplayOrder` |
 | `Result UpdateGroupDetails(string groupName, int minSelections, int maxSelections)` | Updates group name and selection constraints | Validates name and selection range | `CustomizationGroupErrors.GroupNameRequired`, `CustomizationGroupErrors.InvalidSelectionRange` |
 | `Result MarkAsDeleted()` | Marks the group as deleted | None - always succeeds | None |
 
@@ -80,7 +83,7 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `GroupName` | `string` | The name of the customization group |
 | `MinSelections` | `int` | Minimum number of choices that must be selected |
 | `MaxSelections` | `int` | Maximum number of choices that can be selected |
-| `Choices` | `IReadOnlyList<CustomizationChoice>` | Read-only collection of available choices |
+| `Choices` | `IReadOnlyList<CustomizationChoice>` | Read-only collection of available choices, ordered by DisplayOrder ascending, then Name ascending |
 
 #### 4.2. Public Query Methods
 
@@ -93,7 +96,8 @@ The aggregate raises the following domain events to communicate significant stat
 | Event Name | When It's Raised | Description |
 | :--- | :--- | :--- |
 | `CustomizationGroupCreated` | During the `Create` factory method | Signals that a new customization group has been successfully created |
-| `CustomizationChoiceAdded` | After a successful call to `AddChoice` | Signals that a new choice was added to the group |
+| `CustomizationChoiceAdded` | After a successful call to `AddChoice` or `AddChoiceWithAutoOrder` | Signals that a new choice was added to the group |
 | `CustomizationChoiceRemoved` | After a successful call to `RemoveChoice` | Signals that a choice was removed from the group |
 | `CustomizationChoiceUpdated` | After a successful call to `UpdateChoice` | Signals that an existing choice was modified |
+| `CustomizationChoicesReordered` | After a successful call to `ReorderChoices` | Signals that multiple choices had their display order changed |
 | `CustomizationGroupDeleted` | After a successful call to `MarkAsDeleted` | Signals that the group has been marked for deletion |
