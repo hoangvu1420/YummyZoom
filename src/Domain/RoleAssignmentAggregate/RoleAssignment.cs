@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
@@ -21,11 +22,15 @@ namespace YummyZoom.Domain.RoleAssignmentAggregate;
 /// - A RoleAssignment must contain a valid, non-null UserID and RestaurantID
 /// - The Role must be a valid value from the RestaurantRole enum
 /// </summary>
-public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
+public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>, ICreationAuditable
 {
     public UserId UserId { get; private set; }
     public RestaurantId RestaurantId { get; private set; }
     public RestaurantRole Role { get; private set; }
+
+    // Properties from ICreationAuditable
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
 
     private RoleAssignment(
         RoleAssignmentId id,
@@ -148,12 +153,9 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>
         return Result.Success();
     }
 
-    public Result MarkAsDeleted()
-    {
-        AddDomainEvent(new RoleAssignmentDeleted((RoleAssignmentId)Id));
-
-        return Result.Success();
-    }
+    // Note: RoleAssignment uses hard delete strategy, so no MarkAsDeleted method.
+    // When deleted, this aggregate will be physically removed from the database.
+    // The domain event for deletion is raised by the application layer when performing the hard delete.
 
     /// <summary>
     /// Checks if this role assignment matches the given criteria

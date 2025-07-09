@@ -4,6 +4,7 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Configurations.Common;
 
 namespace YummyZoom.Infrastructure.Data.Configurations;
 
@@ -57,5 +58,8 @@ public class RoleAssignmentConfiguration : IEntityTypeConfiguration<RoleAssignme
         // Index for querying by Role (for admin queries)
         builder.HasIndex(ra => ra.Role)
             .HasDatabaseName("IX_RoleAssignments_Role");
+
+        // Configure creation audit properties (RoleAssignment implements ICreationAuditable)
+        builder.ConfigureCreationAuditProperties();
     }
 }

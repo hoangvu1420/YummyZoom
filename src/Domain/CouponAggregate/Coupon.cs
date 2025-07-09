@@ -5,11 +5,12 @@ using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.CouponAggregate;
 
-public sealed class Coupon : AggregateRoot<CouponId, Guid>
+public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     private const int MaxCodeLength = 50;
 
@@ -25,6 +26,17 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
     public int CurrentTotalUsageCount { get; private set; }
     public bool IsEnabled { get; private set; }
     public int? UsageLimitPerUser { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private Coupon(
         CouponId id,
@@ -96,12 +108,12 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
         }
 
         // Validate usage limits
-        if (totalUsageLimit.HasValue && totalUsageLimit.Value <= 0)
+        if (totalUsageLimit <= 0)
         {
             return Result.Failure<Coupon>(CouponErrors.InvalidUsageLimit);
         }
 
-        if (usageLimitPerUser.HasValue && usageLimitPerUser.Value <= 0)
+        if (usageLimitPerUser <= 0)
         {
             return Result.Failure<Coupon>(CouponErrors.InvalidPerUserLimit);
         }
@@ -302,13 +314,13 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
     /// </summary>
     public Result SetTotalUsageLimit(int? totalUsageLimit)
     {
-        if (totalUsageLimit.HasValue && totalUsageLimit.Value <= 0)
+        if (totalUsageLimit is <= 0)
         {
             return Result.Failure(CouponErrors.InvalidUsageLimit);
         }
 
         // Check that new total usage limit doesn't violate current usage
-        if (totalUsageLimit.HasValue && CurrentTotalUsageCount > totalUsageLimit.Value)
+        if (CurrentTotalUsageCount > totalUsageLimit)
         {
             return Result.Failure(CouponErrors.UsageCountCannotExceedLimit(
                 CurrentTotalUsageCount, totalUsageLimit));
@@ -332,7 +344,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
     /// </summary>
     public Result SetPerUserUsageLimit(int? usageLimitPerUser)
     {
-        if (usageLimitPerUser.HasValue && usageLimitPerUser.Value <= 0)
+        if (usageLimitPerUser <= 0)
         {
             return Result.Failure(CouponErrors.InvalidPerUserLimit);
         }
@@ -374,9 +386,20 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>
     /// <summary>
     /// Marks this coupon as deleted. This is the single, authoritative way to delete this aggregate.
     /// </summary>
+    /// <param name="deletedOn">The timestamp when the entity was deleted</param>
+    /// <param name="deletedBy">Who deleted the entity</param>
     /// <returns>A Result indicating success</returns>
-    public Result MarkAsDeleted()
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new CouponDeleted((CouponId)Id));
 
         return Result.Success();

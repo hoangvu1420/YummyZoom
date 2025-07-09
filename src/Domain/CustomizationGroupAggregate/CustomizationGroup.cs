@@ -2,12 +2,13 @@ using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
 using YummyZoom.Domain.CustomizationGroupAggregate.Errors;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 using YummyZoom.Domain.Common.ValueObjects;
 
 namespace YummyZoom.Domain.CustomizationGroupAggregate;
 
-public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Guid>
+public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     private readonly List<CustomizationChoice> _choices = new();
 
@@ -20,6 +21,17 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         .ThenBy(c => c.Name)
         .ToList()
         .AsReadOnly();
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private CustomizationGroup(
         CustomizationGroupId id,
@@ -213,9 +225,20 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
     /// <summary>
     /// Marks this customization group as deleted. This is the single, authoritative way to delete this aggregate.
     /// </summary>
+    /// <param name="deletedOn">The timestamp when the entity was deleted</param>
+    /// <param name="deletedBy">Who deleted the entity</param>
     /// <returns>A Result indicating success</returns>
-    public Result MarkAsDeleted()
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new Events.CustomizationGroupDeleted((CustomizationGroupId)Id));
 
         return Result.Success();

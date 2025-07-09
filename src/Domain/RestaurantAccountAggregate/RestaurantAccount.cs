@@ -5,15 +5,20 @@ using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAccountAggregate;
 
-public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
+public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>, ICreationAuditable
 {
     public RestaurantId RestaurantId { get; private set; }
     public Money CurrentBalance { get; private set; } 
     public PayoutMethodDetails? PayoutMethodDetails { get; private set; }
+
+    // Creation audit properties (immutable aggregate)
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
 
     private RestaurantAccount(
         RestaurantAccountId id,

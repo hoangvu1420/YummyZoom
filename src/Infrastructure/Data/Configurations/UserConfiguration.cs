@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Configurations.Common;
 
 namespace YummyZoom.Infrastructure.Data.Configurations;
 
@@ -32,6 +33,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PhoneNumber)
             .HasMaxLength(50) 
             .IsRequired(false);
+
+        // Configure audit and soft delete properties
+        builder.ConfigureAuditProperties();
+        builder.ConfigureSoftDeleteProperties();
 
         // --- Configure owned collection of Address Entities ---
         // This maps Addresses to a separate UserAddresses table

@@ -1,15 +1,22 @@
-﻿using YummyZoom.Domain.TodoListAggregate.Enums;
+﻿using YummyZoom.Domain.Common.Models;
+using YummyZoom.Domain.TodoListAggregate.Enums;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.TodoListAggregate.Entities;
 
-public class TodoItem : Entity<TodoItemId>
+public class TodoItem : Entity<TodoItemId>, IAuditableEntity
 {
     public string? Title { get; private set; }
     public string? Note { get; private set; }
     public PriorityLevel Priority { get; private set; }
     public DateTime? Reminder { get; private set; }
-    public bool IsDone { get; private set; } 
+    public bool IsDone { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; } 
 
     // Private constructor for creating new instances
     private TodoItem(

@@ -2,15 +2,27 @@ using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Domain.TagEntity.Errors;
 using YummyZoom.Domain.TagEntity.Events;
 using YummyZoom.Domain.TagEntity.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.TagEntity;
 
-public sealed class Tag : Entity<TagId>
+public sealed class Tag : Entity<TagId>, IAuditableEntity, ISoftDeletableEntity
 {
     public string TagName { get; private set; }
     public string? TagDescription { get; private set; }
     public TagCategory TagCategory { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private Tag(
         TagId tagId,
@@ -93,8 +105,17 @@ public sealed class Tag : Entity<TagId>
         return Result.Success();
     }
 
-    public Result MarkAsDeleted()
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new TagDeleted((TagId)Id));
 
         return Result.Success();

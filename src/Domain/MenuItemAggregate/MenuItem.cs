@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
@@ -10,7 +11,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuItemAggregate;
 
-public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
+public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     private readonly List<TagId> _dietaryTagIds = [];
     private readonly List<AppliedCustomization> _appliedCustomizations = [];
@@ -22,6 +23,17 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
     public Money BasePrice { get; private set; }
     public string? ImageUrl { get; private set; }
     public bool IsAvailable { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     public IReadOnlyList<TagId> DietaryTagIds => _dietaryTagIds.AsReadOnly();
     public IReadOnlyList<AppliedCustomization> AppliedCustomizations => _appliedCustomizations.AsReadOnly();
@@ -199,6 +211,29 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>
 
         AddDomainEvent(new MenuItemDietaryTagsUpdated((MenuItemId)Id, new List<TagId>(_dietaryTagIds)));
 
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Marks this menu item as deleted (soft delete).
+    /// </summary>
+    /// <param name="deletedOn">The timestamp when the item was deleted</param>
+    /// <param name="deletedBy">The user who deleted the item</param>
+    /// <returns>A Result indicating success or failure</returns>
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
+    {
+        if (IsDeleted)
+        {
+            // Already deleted, consider this a success
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
+        AddDomainEvent(new MenuItemDeleted((MenuItemId)Id));
+        
         return Result.Success();
     }
 

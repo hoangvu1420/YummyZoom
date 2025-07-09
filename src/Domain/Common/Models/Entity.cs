@@ -1,6 +1,6 @@
 ﻿namespace YummyZoom.Domain.Common.Models;
 
-public abstract class Entity<TId> : IEquatable<Entity<TId>>, IHasDomainEvent, IAuditableEntity
+public abstract class Entity<TId> : IEquatable<Entity<TId>>, IHasDomainEvent
     where TId : ValueObject
 {
     private readonly List<IDomainEvent> _domainEvents = [];
@@ -8,11 +8,6 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>, IHasDomainEvent, IA
     public TId Id { get; protected set; }
     
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-
-    public DateTimeOffset Created { get; set; }
-    public string? CreatedBy { get; set; }
-    public DateTimeOffset LastModified { get; set; }
-    public string? LastModifiedBy { get; set; }
 
     protected Entity(TId id)
     {

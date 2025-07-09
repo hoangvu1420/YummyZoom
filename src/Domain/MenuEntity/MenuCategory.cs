@@ -1,15 +1,27 @@
 using YummyZoom.Domain.MenuEntity.Errors;
 using YummyZoom.Domain.MenuEntity.Events;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuEntity;
 
-public sealed class MenuCategory : Entity<MenuCategoryId>
+public sealed class MenuCategory : Entity<MenuCategoryId>, IAuditableEntity, ISoftDeletableEntity
 {
     public MenuId MenuId { get; private set; }
     public string Name { get; private set; }
     public int DisplayOrder { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private MenuCategory(
         MenuCategoryId categoryId,
@@ -71,8 +83,17 @@ public sealed class MenuCategory : Entity<MenuCategoryId>
         return Result.Success();
     }
 
-    public Result MarkAsDeleted(bool forceDelete = false)
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new MenuCategoryRemoved(MenuId, Id));
 
         return Result.Success();

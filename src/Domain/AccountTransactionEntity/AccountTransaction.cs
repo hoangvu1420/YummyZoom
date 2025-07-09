@@ -4,11 +4,12 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.AccountTransactionEntity;
 
-public sealed class AccountTransaction : Entity<AccountTransactionId>
+public sealed class AccountTransaction : Entity<AccountTransactionId>, ICreationAuditable
 {
     public RestaurantAccountId RestaurantAccountId { get; private set; }
     public TransactionType Type { get; private set; }
@@ -16,6 +17,10 @@ public sealed class AccountTransaction : Entity<AccountTransactionId>
     public DateTime Timestamp { get; private set; }
     public OrderId? RelatedOrderId { get; private set; }
     public string? Notes { get; private set; }
+
+    // Creation audit properties (immutable entity)
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
 
     private AccountTransaction(
         AccountTransactionId id,

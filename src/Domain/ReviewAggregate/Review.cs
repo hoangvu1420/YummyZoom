@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.ReviewAggregate.Errors;
@@ -8,7 +9,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.ReviewAggregate;
 
-public sealed class Review : AggregateRoot<ReviewId, Guid>
+public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     public OrderId OrderId { get; private set; }
     public UserId CustomerId { get; private set; }
@@ -19,6 +20,17 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>
     public bool IsModerated { get; private set; }
     public bool IsHidden { get; private set; }
     public string? Reply { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private Review(
         ReviewId id,
@@ -161,11 +173,23 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>
     }
 
     /// <summary>
-    /// Marks this review as deleted. This is the single, authoritative way to delete this aggregate.
+    /// Marks this review as deleted (soft delete).
     /// </summary>
+    /// <param name="deletedOn">The timestamp when the review was deleted</param>
+    /// <param name="deletedBy">The user who deleted the review</param>
     /// <returns>A Result indicating success</returns>
-    public Result MarkAsDeleted()
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            // Already deleted, consider this a success
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new ReviewDeleted((ReviewId)Id));
 
         return Result.Success();

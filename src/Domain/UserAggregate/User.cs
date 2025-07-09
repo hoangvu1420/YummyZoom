@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.UserAggregate.Entities;
 using YummyZoom.Domain.UserAggregate.Errors;
 using YummyZoom.Domain.UserAggregate.Events;
@@ -6,18 +7,28 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.UserAggregate;
 
-public sealed class User : AggregateRoot<UserId, Guid>
+public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     private readonly List<Address> _addresses = [];
     private readonly List<PaymentMethod> _paymentMethods = [];
 
     public string Name { get; private set; }
-    public string Email { get; private set; } // Unique identifier for login
-    public string? PhoneNumber { get; private set; } // Optional
+    public string Email { get; private set; } 
+    public string? PhoneNumber { get; private set; } 
     public bool IsActive { get; private set; }
-
     public IReadOnlyList<Address> Addresses => _addresses.AsReadOnly();
     public IReadOnlyList<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private User(
         UserId id,
@@ -213,10 +224,35 @@ public sealed class User : AggregateRoot<UserId, Guid>
         return Result.Success();
     }
 
-    public Result MarkAsDeleted(bool forceDelete = false)
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
-        AddDomainEvent(new UserDeleted((UserId)Id));
+        if (IsDeleted)
+        {
+            // Optionally, handle re-deleting an already deleted entity.
+            return Result.Success(); 
+        }
 
+        IsDeleted = true;
+        DeletedOn = deletedOn; // Explicitly set the timestamp here.
+        DeletedBy = deletedBy;
+        
+        AddDomainEvent(new UserDeleted((UserId)Id));
+        return Result.Success();
+    }
+
+    public Result Restore()
+    {
+        if (!IsDeleted)
+        {
+            // Already restored
+            return Result.Success();
+        }
+
+        IsDeleted = false;
+        DeletedOn = null;
+        DeletedBy = null;
+        
+        AddDomainEvent(new UserRestored((UserId)Id));
         return Result.Success();
     }
 

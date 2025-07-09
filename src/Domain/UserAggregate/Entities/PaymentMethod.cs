@@ -1,12 +1,19 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.UserAggregate.ValueObjects; // For PaymentMethodId
 
 namespace YummyZoom.Domain.UserAggregate.Entities;
 
-public sealed class PaymentMethod : Entity<PaymentMethodId>
+public sealed class PaymentMethod : Entity<PaymentMethodId>, IAuditableEntity
 {
     public string Type { get; private set; }
     public string TokenizedDetails { get; private set; }
     public bool IsDefault { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
 
     private PaymentMethod(
         PaymentMethodId id,

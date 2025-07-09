@@ -37,32 +37,37 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
     {
         if (context == null) return;
 
-        foreach (var entry in context.ChangeTracker.Entries<IAuditableEntity>())
+        var utcNow = _dateTime.GetUtcNow();
+
+        // Handle creation auditing for entities that implement ICreationAuditable
+        foreach (var entry in context.ChangeTracker.Entries<ICreationAuditable>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = _user.Id;
+                entry.Entity.Created = utcNow;
+
+                // Handle self-registration scenario for User entity
+                if (entry.Entity is YummyZoom.Domain.UserAggregate.User userEntity && string.IsNullOrEmpty(entry.Entity.CreatedBy))
+                {
+                    entry.Entity.CreatedBy = userEntity.Id.Value.ToString();
+                }
+            }
+        }
+
+        // Handle modification auditing for entities that implement IModificationAuditable
+        foreach (var entry in context.ChangeTracker.Entries<IModificationAuditable>())
         {
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
-                var utcNow = _dateTime.GetUtcNow();
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Entity.CreatedBy = _user.Id;
-                    entry.Entity.Created = utcNow;
-
-                    // Handle self-registration scenario for User entity
-                    if (entry.Entity is YummyZoom.Domain.UserAggregate.User userEntity && string.IsNullOrEmpty(entry.Entity.CreatedBy))
-                    {
-                        entry.Entity.CreatedBy = userEntity.Id.Value.ToString();
-                        entry.Entity.LastModifiedBy = userEntity.Id.Value.ToString(); // Also set LastModifiedBy to self
-                    }
-                    else
-                    {
-                        entry.Entity.LastModifiedBy = _user.Id;
-                    }
-                }
-                else // For EntityState.Modified
-                {
-                    entry.Entity.LastModifiedBy = _user.Id;
-                }
+                entry.Entity.LastModifiedBy = _user.Id;
                 entry.Entity.LastModified = utcNow;
+
+                // Handle self-registration scenario for User entity
+                if (entry.State == EntityState.Added && entry.Entity is YummyZoom.Domain.UserAggregate.User userEntity && string.IsNullOrEmpty(entry.Entity.LastModifiedBy))
+                {
+                    entry.Entity.LastModifiedBy = userEntity.Id.Value.ToString();
+                }
             }
         }
     }

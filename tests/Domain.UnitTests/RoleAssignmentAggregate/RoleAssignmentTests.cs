@@ -302,23 +302,6 @@ public class RoleAssignmentTests
     }
 
     [Test]
-    public void MarkAsDeleted_ShouldRaiseDomainEvent()
-    {
-        // Arrange
-        var roleAssignment = CreateValidRoleAssignment();
-        var initialEventCount = roleAssignment.DomainEvents.Count;
-
-        // Act
-        roleAssignment.MarkAsDeleted();
-
-        // Assert
-        roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 1);
-        var removedEvent = roleAssignment.DomainEvents.Last() as RoleAssignmentDeleted;
-        removedEvent.Should().NotBeNull();
-        removedEvent!.RoleAssignmentId.Should().Be((RoleAssignmentId)roleAssignment.Id);
-    }
-
-    [Test]
     public void Create_ShouldRaiseRoleAssignmentCreatedEvent()
     {
         // Arrange

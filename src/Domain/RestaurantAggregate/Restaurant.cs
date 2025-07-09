@@ -1,12 +1,13 @@
 using YummyZoom.Domain.RestaurantAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.Errors;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 using System.Text.RegularExpressions;
 
 namespace YummyZoom.Domain.RestaurantAggregate;
 
-public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
+public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEntity, ISoftDeletableEntity
 {
     #region Properties
 
@@ -19,6 +20,17 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
     public BusinessHours BusinessHours { get; private set; }
     public bool IsVerified { get; private set; }
     public bool IsAcceptingOrders { get; private set; }
+
+    // Audit properties
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Soft delete properties
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     #endregion
 
@@ -169,19 +181,28 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>
         AddDomainEvent(new RestaurantNotAcceptingOrders((RestaurantId)Id));
     }
 
-    public Result MarkAsDeleted(bool forceDelete = false)
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
-        // Business rule: Cannot delete restaurant with active orders (unless force delete)
-        if (!forceDelete && IsAcceptingOrders)
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        // Business rule: Cannot delete restaurant with active orders
+        if (IsAcceptingOrders)
         {
             return Result.Failure(RestaurantErrors.CannotDeleteWithActiveOrders());
         }
 
-        // Business rule: Verified restaurants require explicit confirmation (unless force delete)
-        if (!forceDelete && IsVerified)
+        // Business rule: Verified restaurants require explicit confirmation
+        if (IsVerified)
         {
             return Result.Failure(RestaurantErrors.CannotDeleteVerifiedRestaurantWithoutConfirmation());
         }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
 
         AddDomainEvent(new RestaurantDeleted((RestaurantId)Id));
 

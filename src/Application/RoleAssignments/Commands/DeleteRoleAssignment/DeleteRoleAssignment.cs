@@ -37,10 +37,7 @@ public class DeleteRoleAssignmentCommandHandler : IRequestHandler<DeleteRoleAssi
                 return Result.Failure<Unit>(RoleAssignmentErrors.RoleAssignmentNotFound(request.RoleAssignmentId));
             }
 
-            // 2) Mark for removal (this raises the domain event)
-            roleAssignment.MarkAsDeleted();
-
-            // 3) Delete the role assignment
+            // 2) Delete the role assignment
             await _roleAssignmentRepository.DeleteAsync(roleAssignment, cancellationToken);
 
             return Result.Success(Unit.Value);

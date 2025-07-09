@@ -1,15 +1,22 @@
-﻿﻿using YummyZoom.Domain.TodoListAggregate.Entities;
+﻿﻿using YummyZoom.Domain.Common.Models;
+using YummyZoom.Domain.TodoListAggregate.Entities;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.TodoListAggregate;
 
-public class TodoList : AggregateRoot<TodoListId, Guid>
+public class TodoList : AggregateRoot<TodoListId, Guid>, IAuditableEntity
 {
     private readonly List<TodoItem> _items = [];
 
     public string? Title { get; private set; }
     public Color Color { get; private set; } 
     public IReadOnlyList<TodoItem> Items => _items.AsReadOnly();
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
 
     // Private constructor for creating new instances
     private TodoList(

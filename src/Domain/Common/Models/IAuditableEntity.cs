@@ -1,9 +1,9 @@
 namespace YummyZoom.Domain.Common.Models;
 
-public interface IAuditableEntity
+/// <summary>
+/// A composite interface for entities that need both creation and modification auditing.
+/// This provides convenience for entities that are fully auditable.
+/// </summary>
+public interface IAuditableEntity : ICreationAuditable, IModificationAuditable
 {
-    DateTimeOffset Created { get; set; }
-    string? CreatedBy { get; set; }
-    DateTimeOffset LastModified { get; set; }
-    string? LastModifiedBy { get; set; }
 }

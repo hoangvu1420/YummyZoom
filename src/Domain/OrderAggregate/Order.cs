@@ -1,3 +1,4 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -15,8 +16,9 @@ namespace YummyZoom.Domain.OrderAggregate;
 /// <summary>
 /// Represents an order placed by a customer within the YummyZoom system.
 /// This is an Aggregate Root, ensuring consistency within the Order context.
+/// Orders are immutable after creation - they can only be created and their status tracked.
 /// </summary>
-public sealed class Order : AggregateRoot<OrderId, Guid>
+public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 {
     #region Fields
 
@@ -27,6 +29,10 @@ public sealed class Order : AggregateRoot<OrderId, Guid>
     #endregion
 
     #region Properties
+
+    // Properties from ICreationAuditable
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
 
     /// <summary>
     /// Gets the unique identifier of the order.

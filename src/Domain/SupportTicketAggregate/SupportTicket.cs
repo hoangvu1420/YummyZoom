@@ -10,8 +10,9 @@ namespace YummyZoom.Domain.SupportTicketAggregate;
 /// <summary>
 /// Represents a support ticket within the YummyZoom system.
 /// This is an Aggregate Root, ensuring consistency within the Support Ticket context.
+/// This is an immutable aggregate - once created, it can only be modified through specific business operations.
 /// </summary>
-public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
+public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreationAuditable
 {
     #region Fields
 
@@ -33,6 +34,10 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>
 
     public IReadOnlyList<ContextLink> ContextLinks => _contextLinks.AsReadOnly();
     public IReadOnlyList<TicketMessage> Messages => _messages.AsReadOnly();
+
+    // Creation audit properties (immutable aggregate)
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
 
     #endregion
 

@@ -1,5 +1,6 @@
 ﻿using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Configurations.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -36,6 +37,9 @@ public class TodoListConfiguration : IEntityTypeConfiguration<TodoList>
                 .HasMaxLength(10)
                 .IsRequired();
         });
+
+        // Configure audit properties
+        builder.ConfigureAuditProperties();
     }
 
     private static void ConfigureTodoItemsTable(EntityTypeBuilder<TodoList> builder)

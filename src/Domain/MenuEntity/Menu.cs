@@ -2,16 +2,28 @@ using YummyZoom.Domain.MenuEntity.Errors;
 using YummyZoom.Domain.MenuEntity.Events;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuEntity;
 
-public sealed class Menu : Entity<MenuId>
+public sealed class Menu : Entity<MenuId>, IAuditableEntity, ISoftDeletableEntity
 {
     public string Name { get; private set; }
     public string Description { get; private set; }
     public bool IsEnabled { get; private set; }
     public RestaurantId RestaurantId { get; private set; }
+
+    // Properties from IAuditableEntity
+    public DateTimeOffset Created { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset LastModified { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // Properties from ISoftDeletableEntity
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public string? DeletedBy { get; set; }
 
     private Menu(
         MenuId menuId,
@@ -78,8 +90,17 @@ public sealed class Menu : Entity<MenuId>
         AddDomainEvent(new MenuDisabled(Id));
     }
 
-    public Result MarkAsDeleted(bool forceDelete = false)
+    public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
     {
+        if (IsDeleted)
+        {
+            return Result.Success();
+        }
+
+        IsDeleted = true;
+        DeletedOn = deletedOn;
+        DeletedBy = deletedBy;
+
         AddDomainEvent(new MenuRemoved(Id, RestaurantId));
 
         return Result.Success();
