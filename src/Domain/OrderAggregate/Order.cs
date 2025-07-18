@@ -24,7 +24,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
     private readonly List<OrderItem> _orderItems = [];
     private readonly List<PaymentTransaction> _paymentTransactions = [];
-    private readonly List<CouponId> _appliedCouponIds = [];
 
     #endregion
 
@@ -126,6 +125,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     public TeamCartId? SourceTeamCartId { get; private set; }
 
     /// <summary>
+    /// Gets the applied coupon IDs for this order.
+    /// </summary>
+    public CouponId? AppliedCouponId { get; private set; }
+
+    /// <summary>
     /// Gets a read-only list of items included in the order.
     /// </summary>
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
@@ -135,10 +139,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// </summary>
     public IReadOnlyList<PaymentTransaction> PaymentTransactions => _paymentTransactions.AsReadOnly();
 
-    /// <summary>
-    /// Gets a read-only list of coupon IDs applied to the order.
-    /// </summary>
-    public IReadOnlyList<CouponId> AppliedCouponIds => _appliedCouponIds.AsReadOnly();
 
     #endregion
 
@@ -160,7 +160,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money tipAmount,
         Money taxAmount,
         List<OrderItem> orderItems,
-        List<CouponId>? appliedCouponIds)
+        CouponId? appliedCouponId)
         : base(orderId)
     {
         Id = orderId;
@@ -174,7 +174,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         TipAmount = tipAmount;
         TaxAmount = taxAmount;
         _orderItems = new List<OrderItem>(orderItems);
-        _appliedCouponIds = appliedCouponIds != null ? new List<CouponId>(appliedCouponIds) : new List<CouponId>();
+        AppliedCouponId = appliedCouponId;
 
         Status = OrderStatus.Placed;
         PlacementTimestamp = DateTime.UtcNow;
@@ -225,7 +225,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money? deliveryFee = null,
         Money? tipAmount = null,
         Money? taxAmount = null,
-        List<CouponId>? appliedCouponIds = null,
+        CouponId? appliedCouponId = null,
         TeamCartId? sourceTeamCartId = null,
         List<PaymentTransaction>? paymentTransactions = null)
     {
@@ -249,7 +249,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             tipAmount ?? Money.Zero(currency),
             taxAmount ?? Money.Zero(currency),
             orderItems,
-            appliedCouponIds);
+            appliedCouponId);
 
         // Set the source TeamCart ID if provided
         order.SourceTeamCartId = sourceTeamCartId;
@@ -460,7 +460,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             return Result.Failure(OrderErrors.CouponCannotBeAppliedToOrderStatus);
         }
 
-        if (_appliedCouponIds.Any())
+        if (AppliedCouponId is not null)
         {
             return Result.Failure(OrderErrors.CouponAlreadyApplied);
         }
@@ -503,7 +503,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         }
 
         DiscountAmount = newDiscount;
-        _appliedCouponIds.Add(couponId);
+        AppliedCouponId = couponId;
         RecalculateTotals();
         LastUpdateTimestamp = DateTime.UtcNow;
 
@@ -516,13 +516,13 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <returns>A <see cref="Result"/> indicating success.</returns>
     public Result RemoveCoupon()
     {
-        if (!_appliedCouponIds.Any())
+        if (AppliedCouponId is null)
         {
             return Result.Success(); // No coupon to remove
         }
 
         DiscountAmount = Money.Zero(Subtotal.Currency);
-        _appliedCouponIds.Clear();
+        AppliedCouponId = null;
         RecalculateTotals();
         LastUpdateTimestamp = DateTime.UtcNow;
 

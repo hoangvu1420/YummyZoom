@@ -358,8 +358,7 @@ public class TeamCartConversionServiceTests
         result.ShouldBeSuccessful();
         var (order, _) = result.Value;
         
-        order.AppliedCouponIds.Should().ContainSingle();
-        order.AppliedCouponIds.First().Should().Be(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
 #endregion

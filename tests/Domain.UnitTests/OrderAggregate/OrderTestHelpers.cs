@@ -111,7 +111,7 @@ public abstract class OrderTestHelpers
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null, // appliedCouponIds
+            null, 
             teamCartId,
             paymentTransactions).Value;
     }
@@ -137,7 +137,7 @@ public abstract class OrderTestHelpers
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null, // appliedCouponIds
+            null, 
             teamCartId,
             paymentTransactions).Value;
     }

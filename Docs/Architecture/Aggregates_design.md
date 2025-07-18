@@ -133,7 +133,7 @@
 - **References to other aggregates (by ID):**
   - `CustomerID` (`UserID` of the customer who placed the order).
   - `RestaurantID` (The restaurant fulfilling the order).
-  - `AppliedCouponIDs` (List of `CouponID`s used on this order).
+  - `AppliedCouponID` (`CouponID` used on this order).
 
 **4. `Coupon` Aggregate**
 

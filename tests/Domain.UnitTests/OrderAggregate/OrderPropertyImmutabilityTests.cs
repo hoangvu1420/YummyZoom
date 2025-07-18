@@ -42,36 +42,6 @@ public class OrderPropertyImmutabilityTests : OrderTestHelpers
     }
 
     [Test]
-    public void AppliedCouponIds_ShouldBeReadOnly()
-    {
-        // Arrange
-        var couponIds = new List<CouponId> { CouponId.CreateUnique() };
-
-        // Act
-        var order = Order.Create(
-            DefaultCustomerId,
-            DefaultRestaurantId,
-            DefaultDeliveryAddress,
-            DefaultOrderItems,
-            DefaultSpecialInstructions,
-            appliedCouponIds: couponIds).Value;
-
-        // Assert
-        // Type check
-        var property = typeof(Order).GetProperty(nameof(Order.AppliedCouponIds));
-        property.Should().NotBeNull();
-        typeof(IReadOnlyList<CouponId>).IsAssignableFrom(property!.PropertyType).Should().BeTrue();
-
-        // Immutability check: mutation should throw
-        Action mutate = () => ((ICollection<CouponId>)order.AppliedCouponIds).Add(CouponId.CreateUnique());
-        mutate.Should().Throw<NotSupportedException>();
-
-        // Verify that modifying the original list doesn't affect the order
-        couponIds.Add(CouponId.CreateUnique());
-        order.AppliedCouponIds.Should().HaveCount(1);
-    }
-
-    [Test]
     public void PaymentTransactions_ShouldBeReadOnly()
     {
         // Arrange

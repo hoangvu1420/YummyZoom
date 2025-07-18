@@ -99,7 +99,7 @@ public sealed class TeamCartConversionService
             deliveryFee: null, // Delivery fee might be calculated at the last minute
             tipAmount: teamCart.TipAmount,
             taxAmount: null, // Tax is typically calculated later
-            appliedCouponIds: teamCart.AppliedCouponId is not null ? new List<CouponId> { teamCart.AppliedCouponId } : null,
+            appliedCouponId: teamCart.AppliedCouponId,
             sourceTeamCartId: teamCart.Id,
             paymentTransactions: paymentTransactions);
 

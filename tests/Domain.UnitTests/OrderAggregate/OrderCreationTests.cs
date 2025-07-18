@@ -85,14 +85,14 @@ public class OrderCreationTests : OrderTestHelpers
         order.DeliveryFee.Should().Be(Money.Zero(Currencies.Default));
         order.TipAmount.Should().Be(Money.Zero(Currencies.Default));
         order.TaxAmount.Should().Be(Money.Zero(Currencies.Default));
-        order.AppliedCouponIds.Should().BeEmpty();
+        order.AppliedCouponId.Should().BeNull();
     }
 
     [Test]
-    public void Create_WithCoupons_ShouldSucceedAndStoreCoupons()
+    public void Create_WithCoupon_ShouldSucceedAndStoreCoupon()
     {
         // Arrange
-        var couponIds = new List<CouponId> { CouponId.CreateUnique(), CouponId.CreateUnique() };
+        var couponId = CouponId.CreateUnique();
 
         // Act
         var result = Order.Create(
@@ -101,13 +101,12 @@ public class OrderCreationTests : OrderTestHelpers
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            appliedCouponIds: couponIds);
+            appliedCouponId: couponId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         var order = result.Value;
-        order.AppliedCouponIds.Should().HaveCount(2);
-        order.AppliedCouponIds.Should().BeEquivalentTo(couponIds);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]

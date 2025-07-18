@@ -236,7 +236,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 * **References to other aggregates (by ID):**
   * `CustomerID` (`UserID` of the customer).
   * `RestaurantID` (The restaurant fulfilling the order).
-  * `AppliedCouponIDs` (List of `CouponID`s used).
+  * `AppliedCouponID` (`CouponID` used).
 
 ---
 

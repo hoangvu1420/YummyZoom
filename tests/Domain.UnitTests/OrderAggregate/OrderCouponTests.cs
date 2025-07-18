@@ -35,8 +35,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
-        order.AppliedCouponIds.Should().ContainSingle();
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
         order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         
         // Verify total amount is recalculated
@@ -61,8 +60,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(discountAmount);
-        order.AppliedCouponIds.Should().ContainSingle();
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]
@@ -104,8 +102,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
-        order.AppliedCouponIds.Should().ContainSingle();
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]
@@ -124,7 +121,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeFailure(OrderErrors.CouponNotApplicable.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
-        order.AppliedCouponIds.Should().BeEmpty();
+        order.AppliedCouponId.Should().BeNull();
     }
 
     [Test]
@@ -147,7 +144,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]
@@ -170,7 +167,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]
@@ -189,7 +186,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeFailure(OrderErrors.CouponNotApplicable.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
-        order.AppliedCouponIds.Should().BeEmpty();
+        order.AppliedCouponId.Should().BeNull();
     }
 
     [Test]
@@ -207,7 +204,7 @@ public class OrderCouponTests : OrderTestHelpers
 
         // Assert
         result.ShouldBeSuccessful();
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     [Test]
@@ -228,8 +225,7 @@ public class OrderCouponTests : OrderTestHelpers
 
         // Assert
         result.ShouldBeFailure(OrderErrors.CouponAlreadyApplied.Code);
-        order.AppliedCouponIds.Should().ContainSingle();
-        order.AppliedCouponIds.Should().Contain(firstCouponId);
+        order.AppliedCouponId.Should().Be(firstCouponId);
     }
 
     [Test]
@@ -249,7 +245,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeFailure(OrderErrors.CouponCannotBeAppliedToOrderStatus.Code);
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
-        order.AppliedCouponIds.Should().BeEmpty();
+        order.AppliedCouponId.Should().BeNull();
     }
 
     [Test]
@@ -326,7 +322,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(expectedDiscount);
-        order.AppliedCouponIds.Should().Contain(couponId);
+        order.AppliedCouponId.Should().Be(couponId);
     }
 
     #endregion
@@ -350,7 +346,7 @@ public class OrderCouponTests : OrderTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
-        order.AppliedCouponIds.Should().BeEmpty();
+        order.AppliedCouponId.Should().BeNull();
         order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         
         // Verify total amount is recalculated without discount
@@ -366,7 +362,7 @@ public class OrderCouponTests : OrderTestHelpers
         var order = CreateValidOrder();
         var originalDiscountAmount = order.DiscountAmount;
         var originalTotalAmount = order.TotalAmount;
-        var originalAppliedCoupons = order.AppliedCouponIds.Count;
+        var originalAppliedCoupon = order.AppliedCouponId;
 
         // Act
         var result = order.RemoveCoupon();
@@ -375,7 +371,7 @@ public class OrderCouponTests : OrderTestHelpers
         result.ShouldBeSuccessful();
         order.DiscountAmount.Should().Be(originalDiscountAmount);
         order.TotalAmount.Should().Be(originalTotalAmount);
-        order.AppliedCouponIds.Should().HaveCount(originalAppliedCoupons);
+        order.AppliedCouponId.Should().Be(originalAppliedCoupon);
     }
 
     #endregion

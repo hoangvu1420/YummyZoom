@@ -61,7 +61,7 @@ public static Result<Order> Create(
 | `deliveryFee` | `Money?` | Optional delivery fee |
 | `tipAmount` | `Money?` | Optional tip amount |
 | `taxAmount` | `Money?` | Optional tax amount |
-| `appliedCouponIds` | `List<CouponId>?` | Optional list of applied coupon IDs |
+| `appliedCouponId` | `CouponId?` | Optional applied coupon ID |
 
 **Validation Rules & Potential Errors:**
 
@@ -111,7 +111,7 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `RestaurantId` | `RestaurantId` | The restaurant fulfilling the order |
 | `OrderItems` | `IReadOnlyList<OrderItem>` | Read-only collection of ordered items |
 | `PaymentTransactions` | `IReadOnlyList<PaymentTransaction>` | Read-only collection of payment attempts |
-| `AppliedCouponIds` | `IReadOnlyList<CouponId>` | Read-only collection of applied coupon IDs |
+| `AppliedCouponId` | `CouponId?` | The applied coupon ID |
 
 #### 4.2. Public Query Methods
 
