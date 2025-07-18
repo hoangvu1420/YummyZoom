@@ -339,6 +339,67 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
+#### 14. `TeamCart` Aggregate
+
+* **Aggregate Root:** `TeamCart`
+* **Description:** Represents a collaborative shopping cart where multiple users can add items before converting to a final Order. It manages the entire lifecycle of team-based ordering, from creation and member invitation through item selection, payment collection, and final conversion to an Order.
+* **Entities/Value Objects (VOs) within:**
+  * `TeamCart` (Entity - Root):
+    * `TeamCartID` (Identifier)
+    * `RestaurantID` (Identifier, links to the `Restaurant` aggregate)
+    * `HostUserID` (Identifier, links to the `User` who created the cart)
+    * `Status` (Enum: `Open`, `AwaitingPayments`, `ReadyToConfirm`, `Converted`, `Expired`)
+    * `ShareToken` (`ShareableLinkToken` VO - Used for inviting others)
+    * `Deadline` (DateTime, optional - When the cart will close)
+    * `CreatedAt` (DateTime)
+    * `ExpiresAt` (DateTime)
+    * `TipAmount` (Money VO)
+    * `AppliedCouponID` (Identifier, optional - links to the `Coupon` aggregate)
+    * `DiscountAmount` (Money VO)
+  * `TeamCartMember` (List of Child Entities):
+    * `MemberID` (Identifier)
+    * `UserID` (Identifier, links to the `User` aggregate)
+    * `Name` (String - Display name)
+    * `Role` (Enum: `Host`, `Guest`)
+  * `TeamCartItem` (List of Child Entities):
+    * `ItemID` (Identifier)
+    * `AddedByUserID` (Identifier, links to the `User` who added the item)
+    * `Snapshot_MenuItemID` (ID of the original `MenuItem`)
+    * `Snapshot_MenuCategoryID` (ID of the original `MenuCategory`)
+    * `Snapshot_ItemName` (String)
+    * `Snapshot_BasePriceAtOrder` (Money VO)
+    * `Quantity` (Integer)
+    * `LineItemTotal` (Money VO)
+    * `SelectedCustomizations` (List of `TeamCartItemCustomization` VOs):
+      * `Snapshot_CustomizationGroupName` (String)
+      * `Snapshot_ChoiceName` (String)
+      * `Snapshot_ChoicePriceAdjustmentAtOrder` (Money VO)
+  * `MemberPayment` (List of Child Entities):
+    * `PaymentID` (Identifier)
+    * `UserID` (Identifier, links to the `User` making the payment)
+    * `Amount` (Money VO)
+    * `Method` (Enum: `Online`, `CashOnDelivery`)
+    * `Status` (Enum: `Pending`, `CommittedToCOD`, `PaidOnline`, `Failed`)
+    * `OnlineTransactionID` (String, optional - for online payments)
+    * `CreatedAt` (DateTime)
+    * `UpdatedAt` (DateTime)
+* **Invariants:**
+  * Every team cart must have exactly one Host who cannot be removed.
+  * Members can only be added when the cart is in Open status.
+  * Payment amount must match the total of items added by that member.
+  * All online payments must be completed before the cart can transition to ReadyToConfirm.
+  * Only the host can modify financial details (tip, coupons).
+  * Cart must be in ReadyToConfirm status to be converted to an Order.
+* **References to other aggregates (by ID):**
+  * `RestaurantID` (references `Restaurant`)
+  * `HostUserID` (references `User`)
+  * `TeamCartMember.UserID` (references `User`)
+  * `TeamCartItem.Snapshot_MenuItemID` (references `MenuItem`)
+  * `TeamCartItem.Snapshot_MenuCategoryID` (references `MenuCategory`)
+  * `AppliedCouponID` (references `Coupon`)
+
+---
+
 ### System-Wide Domain Object Relationship Diagram
 
 This diagram illustrates all major domain objects, grouped into their logical Bounded Contexts. It shows how they are decoupled and relate to one another primarily through ID references. (AG = Aggregate, EN = Entity).
@@ -363,6 +424,7 @@ graph TD
         O[9. Order AG]
         C[10. Coupon AG]
         RV[11. Review AG]
+        TC[14. TeamCart AG]
     end
     
     subgraph Payouts & Monetization Context
@@ -399,10 +461,12 @@ graph TD
     O -- For --> R
     O -- Uses --> C
     O -- Triggers Event for --> RAcc
+    O -- Created from --> TC
 
     C -- Created by --> R
     C -- Applies to --> MenuItem
     C -- Applies to --> MenuCat
+    C -- Used by --> TC
 
     RV -- Based on --> O
     RV -- Written by --> U
@@ -414,6 +478,11 @@ graph TD
     ST -- Links to --> U
     ST -- Links to --> O
     ST -- Links to --> R
+    
+    TC -- Hosted by --> U
+    TC -- Has members --> U
+    TC -- For --> R
+    TC -- Contains --> MenuItem
     
     %% Styling
     style U fill:#cde4ff,stroke:#0052cc
@@ -430,6 +499,7 @@ graph TD
     style RAcc fill:#cde4ff,stroke:#0052cc
     style AccTrans fill:#d4edda,stroke:#155724
     style ST fill:#cde4ff,stroke:#0052cc
+    style TC fill:#cde4ff,stroke:#0052cc
 ```
 
 ---

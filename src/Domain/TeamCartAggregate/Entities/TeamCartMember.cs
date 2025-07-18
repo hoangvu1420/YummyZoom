@@ -83,6 +83,4 @@ public sealed class TeamCartMember : Entity<TeamCartMemberId>
 
         return Result.Success(member);
     }
-
-
 }
