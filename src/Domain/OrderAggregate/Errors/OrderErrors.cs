@@ -28,6 +28,9 @@ public static class OrderErrors
     public static readonly Error NegativeTotalAmount =
         Error.Validation("Order.NegativeTotalAmount", "The total amount for an order cannot be negative.");
 
+    public static readonly Error PaymentMismatch =
+        Error.Validation("Order.PaymentMismatch", "Payment transaction total does not match order total amount.");
+
     public static readonly Error OrderItemInvalidQuantity =
         Error.Validation("OrderItem.InvalidQuantity", "Order item quantity must be positive.");
 

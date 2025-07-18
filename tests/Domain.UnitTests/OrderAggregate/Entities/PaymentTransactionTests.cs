@@ -5,6 +5,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate.Entities;
 
@@ -197,6 +198,138 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.PaymentMethodType.Should().Be(paymentMethodType);
+    }
+
+    #endregion
+
+    #region PaidByUserId Property Tests
+
+    [Test]
+    public void Create_WithPaidByUserId_ShouldSetPaidByUserIdCorrectly()
+    {
+        // Arrange
+        var paidByUserId = UserId.CreateUnique();
+
+        // Act
+        var result = PaymentTransaction.Create(
+            DefaultPaymentMethodType,
+            DefaultTransactionType,
+            DefaultAmount,
+            DefaultTimestamp,
+            paidByUserId: paidByUserId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = result.Value;
+        
+        payment.PaidByUserId.Should().Be(paidByUserId);
+    }
+
+    [Test]
+    public void Create_WithNullPaidByUserId_ShouldAllowNullPaidByUserId()
+    {
+        // Arrange & Act
+        var result = PaymentTransaction.Create(
+            DefaultPaymentMethodType,
+            DefaultTransactionType,
+            DefaultAmount,
+            DefaultTimestamp,
+            paidByUserId: null);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = result.Value;
+        
+        payment.PaidByUserId.Should().BeNull();
+    }
+
+    [Test]
+    public void Create_WithAllParameters_ShouldSetAllPropertiesCorrectly()
+    {
+        // Arrange
+        var paidByUserId = UserId.CreateUnique();
+
+        // Act
+        var result = PaymentTransaction.Create(
+            DefaultPaymentMethodType,
+            DefaultTransactionType,
+            DefaultAmount,
+            DefaultTimestamp,
+            DefaultPaymentMethodDisplay,
+            DefaultGatewayReferenceId,
+            paidByUserId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = result.Value;
+        
+        payment.PaymentMethodType.Should().Be(DefaultPaymentMethodType);
+        payment.Type.Should().Be(DefaultTransactionType);
+        payment.Amount.Should().Be(DefaultAmount);
+        payment.Timestamp.Should().Be(DefaultTimestamp);
+        payment.PaymentMethodDisplay.Should().Be(DefaultPaymentMethodDisplay);
+        payment.PaymentGatewayReferenceId.Should().Be(DefaultGatewayReferenceId);
+        payment.PaidByUserId.Should().Be(paidByUserId);
+    }
+
+    #endregion
+
+    #region TeamCart Integration Tests
+
+    [Test]
+    public void Create_WithTeamCartMemberPayment_ShouldSetCorrectPaidByUserId()
+    {
+        // Arrange
+        var memberId = UserId.CreateUnique();
+        var memberPaymentAmount = new Money(25.00m, Currencies.Default);
+
+        // Act
+        var result = PaymentTransaction.Create(
+            PaymentMethodType.CreditCard,
+            PaymentTransactionType.Payment,
+            memberPaymentAmount,
+            DateTime.UtcNow,
+            "Online Payment",
+            "stripe_pi_123",
+            memberId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = result.Value;
+        
+        payment.PaidByUserId.Should().Be(memberId);
+        payment.PaymentMethodType.Should().Be(PaymentMethodType.CreditCard);
+        payment.Amount.Should().Be(memberPaymentAmount);
+        payment.PaymentMethodDisplay.Should().Be("Online Payment");
+        payment.PaymentGatewayReferenceId.Should().Be("stripe_pi_123");
+    }
+
+    [Test]
+    public void Create_WithHostAsCODGuarantor_ShouldSetHostAsPayerId()
+    {
+        // Arrange
+        var hostId = UserId.CreateUnique();
+        var codAmount = new Money(50.00m, Currencies.Default);
+
+        // Act
+        var result = PaymentTransaction.Create(
+            PaymentMethodType.CashOnDelivery,
+            PaymentTransactionType.Payment,
+            codAmount,
+            DateTime.UtcNow,
+            "Cash on Delivery",
+            null,
+            hostId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = result.Value;
+        
+        payment.PaidByUserId.Should().Be(hostId);
+        payment.PaymentMethodType.Should().Be(PaymentMethodType.CashOnDelivery);
+        payment.Amount.Should().Be(codAmount);
+        payment.PaymentMethodDisplay.Should().Be("Cash on Delivery");
+        payment.PaymentGatewayReferenceId.Should().BeNull();
     }
 
     #endregion

@@ -2,6 +2,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.OrderAggregate.Entities;
@@ -15,6 +16,7 @@ public sealed class PaymentTransaction : Entity<PaymentTransactionId>
     public PaymentStatus Status { get; private set; }
     public DateTime Timestamp { get; private set; }
     public string? PaymentGatewayReferenceId { get; private set; }
+    public UserId? PaidByUserId { get; private set; }
 
     private PaymentTransaction(
         PaymentTransactionId paymentTransactionId,
@@ -23,7 +25,8 @@ public sealed class PaymentTransaction : Entity<PaymentTransactionId>
         PaymentTransactionType type,
         Money amount,
         DateTime timestamp,
-        string? paymentGatewayReferenceId)
+        string? paymentGatewayReferenceId,
+        UserId? paidByUserId)
         : base(paymentTransactionId)
     {
         PaymentMethodType = paymentMethodType;
@@ -33,6 +36,7 @@ public sealed class PaymentTransaction : Entity<PaymentTransactionId>
         Status = PaymentStatus.Pending;
         Timestamp = timestamp;
         PaymentGatewayReferenceId = paymentGatewayReferenceId;
+        PaidByUserId = paidByUserId;
     }
 
     public static Result<PaymentTransaction> Create(
@@ -41,7 +45,8 @@ public sealed class PaymentTransaction : Entity<PaymentTransactionId>
         Money amount,
         DateTime timestamp,
         string? paymentMethodDisplay = null,
-        string? paymentGatewayReferenceId = null)
+        string? paymentGatewayReferenceId = null,
+        UserId? paidByUserId = null)
     {
         if (amount.Amount <= 0)
         {
@@ -55,7 +60,8 @@ public sealed class PaymentTransaction : Entity<PaymentTransactionId>
             type,
             amount,
             timestamp,
-            paymentGatewayReferenceId);
+            paymentGatewayReferenceId,
+            paidByUserId);
     }
 
     public void MarkAsSucceeded()

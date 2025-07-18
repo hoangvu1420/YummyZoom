@@ -1,4 +1,3 @@
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -8,6 +7,7 @@ using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.Events;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
@@ -120,6 +120,12 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     public RestaurantId RestaurantId { get; private set; }
 
     /// <summary>
+    /// Gets the ID of the source TeamCart if this order was created from a team cart.
+    /// Null for regular individual orders.
+    /// </summary>
+    public TeamCartId? SourceTeamCartId { get; private set; }
+
+    /// <summary>
     /// Gets a read-only list of items included in the order.
     /// </summary>
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
@@ -206,6 +212,8 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <param name="tipAmount">Optional tip amount.</param>
     /// <param name="taxAmount">Optional tax amount.</param>
     /// <param name="appliedCouponIds">Optional list of applied coupon IDs.</param>
+    /// <param name="sourceTeamCartId">Optional ID of the team cart this order was created from.</param>
+    /// <param name="paymentTransactions">Optional list of payment transactions for the order.</param>
     /// <returns>A <see cref="Result{Order}"/> indicating success or failure.</returns>
     public static Result<Order> Create(
         UserId customerId,
@@ -217,7 +225,9 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money? deliveryFee = null,
         Money? tipAmount = null,
         Money? taxAmount = null,
-        List<CouponId>? appliedCouponIds = null)
+        List<CouponId>? appliedCouponIds = null,
+        TeamCartId? sourceTeamCartId = null,
+        List<PaymentTransaction>? paymentTransactions = null)
     {
         if (!orderItems.Any())
         {
@@ -240,6 +250,28 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             taxAmount ?? Money.Zero(currency),
             orderItems,
             appliedCouponIds);
+
+        // Set the source TeamCart ID if provided
+        order.SourceTeamCartId = sourceTeamCartId;
+
+        // Add payment transactions if provided
+        if (paymentTransactions is not null && paymentTransactions.Any())
+        {
+            order._paymentTransactions.AddRange(paymentTransactions);
+            
+            // Ensure totals are calculated before validating payment
+            order.RecalculateTotals();
+            
+            // Validate payment transactions total matches order total (round to 2 decimals to avoid precision issues)
+            var totalPaid = order._paymentTransactions.Sum(p => p.Amount.Amount);
+            var roundedPaid = Math.Round(totalPaid, 2);
+            var roundedTotal = Math.Round(order.TotalAmount.Amount, 2);
+            
+            if (Math.Abs(roundedPaid - roundedTotal) > 0.01m)
+            {
+                return Result.Failure<Order>(OrderErrors.PaymentMismatch);
+            }
+        }
 
         if (order.TotalAmount.Amount < 0)
         {
@@ -522,12 +554,12 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
             case CouponScope.SpecificItems:
                 return _orderItems
-                    .Where(oi => appliesTo.ItemIds!.Contains(oi.Snapshot_MenuItemId))
+                    .Where(oi => appliesTo.ItemIds.Contains(oi.Snapshot_MenuItemId))
                     .Sum(oi => oi.LineItemTotal.Amount);
 
             case CouponScope.SpecificCategories:
                 return _orderItems
-                    .Where(oi => appliesTo.CategoryIds!.Contains(oi.Snapshot_MenuCategoryId))
+                    .Where(oi => appliesTo.CategoryIds.Contains(oi.Snapshot_MenuCategoryId))
                     .Sum(oi => oi.LineItemTotal.Amount);
 
             default:

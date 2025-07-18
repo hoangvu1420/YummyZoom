@@ -491,3 +491,6 @@ $RECYCLE.BIN/
 # Git internal directory - should never be tracked
 .git/
 .git/**/*
+
+.trae/
+.kiro/
