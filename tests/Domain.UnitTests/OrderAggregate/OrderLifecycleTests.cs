@@ -18,15 +18,16 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreateValidOrder();
         var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Accept(estimatedDeliveryTime);
+        var result = order.Accept(estimatedDeliveryTime, timestamp);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Accepted);
         order.EstimatedDeliveryTime.Should().Be(estimatedDeliveryTime);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderAccepted));
@@ -39,7 +40,7 @@ public class OrderLifecycleTests : OrderTestHelpers
     {
         // Arrange
         var order = CreateValidOrder();
-        order.Accept(DateTime.UtcNow.AddHours(1)); // Move to Accepted state
+        order.Accept(DateTime.UtcNow.AddHours(1), DateTime.UtcNow); // Move to Accepted state
         var estimatedDeliveryTime = DateTime.UtcNow.AddHours(2);
         var initialEventCount = order.DomainEvents.Count;
 
@@ -63,14 +64,15 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreateAcceptedOrder();
         var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.MarkAsPreparing();
+        var result = order.MarkAsPreparing(timestamp);
 
         // Assert
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Preparing);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderPreparing));
@@ -84,6 +86,8 @@ public class OrderLifecycleTests : OrderTestHelpers
     [TestCase(OrderStatus.Delivered)]
     [TestCase(OrderStatus.Cancelled)]
     [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PendingPayment)]
+    [TestCase(OrderStatus.PaymentFailed)]
     public void MarkAsPreparing_WhenOrderIsNotAccepted_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
     {
         // Arrange
@@ -107,6 +111,12 @@ public class OrderLifecycleTests : OrderTestHelpers
             case OrderStatus.Rejected:
                 order = CreateValidOrder(); // Transition to Rejected
                 order.Reject().ShouldBeSuccessful(); 
+                break;
+            case OrderStatus.PendingPayment:
+                order = CreatePendingPaymentOrder();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
@@ -134,14 +144,15 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreatePreparingOrder();
         var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.MarkAsReadyForDelivery();
+        var result = order.MarkAsReadyForDelivery(timestamp);
 
         // Assert
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.ReadyForDelivery);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderReadyForDelivery));
@@ -155,6 +166,8 @@ public class OrderLifecycleTests : OrderTestHelpers
     [TestCase(OrderStatus.Delivered)]
     [TestCase(OrderStatus.Cancelled)]
     [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PendingPayment)]
+    [TestCase(OrderStatus.PaymentFailed)]
     public void MarkAsReadyForDelivery_WhenOrderIsNotPreparing_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
     {
         // Arrange
@@ -178,6 +191,12 @@ public class OrderLifecycleTests : OrderTestHelpers
             case OrderStatus.Rejected:
                 order = CreateValidOrder(); // Transition to Rejected
                 order.Reject().ShouldBeSuccessful(); 
+                break;
+            case OrderStatus.PendingPayment:
+                order = CreatePendingPaymentOrder();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
@@ -205,15 +224,16 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreateReadyForDeliveryOrder();
         var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.MarkAsDelivered();
+        var result = order.MarkAsDelivered(timestamp);
 
         // Assert
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Delivered);
-        order.ActualDeliveryTime.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.ActualDeliveryTime.Should().Be(timestamp);
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().HaveCount(initialEventCount + 1); 
@@ -229,6 +249,8 @@ public class OrderLifecycleTests : OrderTestHelpers
     [TestCase(OrderStatus.Preparing)]
     [TestCase(OrderStatus.Cancelled)]
     [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PendingPayment)]
+    [TestCase(OrderStatus.PaymentFailed)]
     public void MarkAsDelivered_WhenOrderIsNotReadyForDelivery_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
     {
         // Arrange
@@ -251,6 +273,12 @@ public class OrderLifecycleTests : OrderTestHelpers
             case OrderStatus.Rejected:
                 order = CreateValidOrder(); // Transition to Rejected
                 order.Reject().ShouldBeSuccessful(); 
+                break;
+            case OrderStatus.PendingPayment:
+                order = CreatePendingPaymentOrder();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
@@ -277,14 +305,15 @@ public class OrderLifecycleTests : OrderTestHelpers
     {
         // Arrange
         var order = CreateValidOrder();
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Reject();
+        var result = order.Reject(timestamp);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Rejected);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderRejected));
@@ -297,7 +326,7 @@ public class OrderLifecycleTests : OrderTestHelpers
     {
         // Arrange
         var order = CreateValidOrder();
-        order.Accept(DateTime.UtcNow.AddHours(1)); // Move to Accepted state
+        order.Accept(DateTime.UtcNow.AddHours(1), DateTime.UtcNow); // Move to Accepted state
         var initialEventCount = order.DomainEvents.Count;
 
         // Act
@@ -319,14 +348,15 @@ public class OrderLifecycleTests : OrderTestHelpers
     {
         // Arrange
         var order = CreateValidOrder();
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Cancel();
+        var result = order.Cancel(timestamp);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Cancelled);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderCancelled));
@@ -339,14 +369,16 @@ public class OrderLifecycleTests : OrderTestHelpers
     {
         // Arrange
         var order = CreateValidOrder();
-        order.Accept(DateTime.UtcNow.AddHours(1));
+        order.Accept(DateTime.UtcNow.AddHours(1), DateTime.UtcNow);
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Cancel();
+        var result = order.Cancel(timestamp);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Cancelled);
+        order.LastUpdateTimestamp.Should().Be(timestamp);
     }
 
     [Test]
@@ -355,14 +387,15 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreatePreparingOrder();
         var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Cancel();
+        var result = order.Cancel(timestamp);
 
         // Assert
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Cancelled);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().HaveCount(initialEventCount + 1);
@@ -375,14 +408,15 @@ public class OrderLifecycleTests : OrderTestHelpers
         // Arrange
         var order = CreateReadyForDeliveryOrder();
         var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
 
         // Act
-        var result = order.Cancel();
+        var result = order.Cancel(timestamp);
 
         // Assert
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Cancelled);
-        order.LastUpdateTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        order.LastUpdateTimestamp.Should().Be(timestamp);
         
         // Verify domain event
         order.DomainEvents.Should().HaveCount(initialEventCount + 1);
@@ -392,6 +426,8 @@ public class OrderLifecycleTests : OrderTestHelpers
     [Test]
     [TestCase(OrderStatus.Delivered)]
     [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PendingPayment)]
+    [TestCase(OrderStatus.PaymentFailed)]
     public void Cancel_WhenOrderIsInvalidStatus_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
     {
         // Arrange
@@ -406,6 +442,12 @@ public class OrderLifecycleTests : OrderTestHelpers
                 order = CreateValidOrder();
                 order.Reject().ShouldBeSuccessful();
                 break;
+            case OrderStatus.PendingPayment:
+                order = CreatePendingPaymentOrder();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
         }
@@ -418,6 +460,176 @@ public class OrderLifecycleTests : OrderTestHelpers
 
         // Assert
         result.ShouldBeFailure(OrderErrors.InvalidOrderStatusForCancel.Code);
+        order.Status.Should().Be(initialStatus); // Status unchanged
+        order.DomainEvents.Should().HaveCount(initialEventCount); // No new events
+    }
+
+    #endregion
+
+    #region ConfirmPayment() Method Tests
+
+    [Test]
+    public void ConfirmPayment_WhenOrderIsPendingPayment_ShouldSucceedAndUpdateStatus()
+    {
+        // Arrange
+        var order = CreatePendingPaymentOrder();
+        var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
+
+        // Act
+        var result = order.ConfirmPayment(timestamp);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        order.Status.Should().Be(OrderStatus.Placed);
+        order.LastUpdateTimestamp.Should().Be(timestamp);
+        
+        // Verify domain event
+        order.DomainEvents.Should().HaveCount(initialEventCount + 1);
+        order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderPaymentSucceeded));
+        var orderPaymentSucceededEvent = order.DomainEvents.OfType<OrderPaymentSucceeded>().Single();
+        orderPaymentSucceededEvent.OrderId.Should().Be(order.Id);
+    }
+
+    [Test]
+    [TestCase(OrderStatus.Placed)]
+    [TestCase(OrderStatus.Accepted)]
+    [TestCase(OrderStatus.Preparing)]
+    [TestCase(OrderStatus.ReadyForDelivery)]
+    [TestCase(OrderStatus.Delivered)]
+    [TestCase(OrderStatus.Cancelled)]
+    [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PaymentFailed)]
+    public void ConfirmPayment_WhenOrderIsNotPendingPayment_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
+    {
+        // Arrange
+        Order order;
+        switch (invalidStatus)
+        {
+            case OrderStatus.Placed:
+                order = CreateValidOrder();
+                break;
+            case OrderStatus.Accepted:
+                order = CreateAcceptedOrder();
+                break;
+            case OrderStatus.Preparing:
+                order = CreatePreparingOrder();
+                break;
+            case OrderStatus.ReadyForDelivery:
+                order = CreateReadyForDeliveryOrder();
+                break;
+            case OrderStatus.Delivered:
+                order = CreateReadyForDeliveryOrder();
+                order.MarkAsDelivered().ShouldBeSuccessful();
+                break;
+            case OrderStatus.Cancelled:
+                order = CreateValidOrder();
+                order.Cancel().ShouldBeSuccessful();
+                break;
+            case OrderStatus.Rejected:
+                order = CreateValidOrder();
+                order.Reject().ShouldBeSuccessful();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
+        }
+        
+        var initialStatus = order.Status;
+        var initialEventCount = order.DomainEvents.Count;
+
+        // Act
+        var result = order.ConfirmPayment();
+
+        // Assert
+        result.ShouldBeFailure(OrderErrors.InvalidStatusForPaymentConfirmation.Code);
+        order.Status.Should().Be(initialStatus); // Status unchanged
+        order.DomainEvents.Should().HaveCount(initialEventCount); // No new events
+    }
+
+    #endregion
+
+    #region MarkAsPaymentFailed() Method Tests
+
+    [Test]
+    public void MarkAsPaymentFailed_WhenOrderIsPendingPayment_ShouldSucceedAndUpdateStatus()
+    {
+        // Arrange
+        var order = CreatePendingPaymentOrder();
+        var initialEventCount = order.DomainEvents.Count;
+        var timestamp = DateTime.UtcNow;
+
+        // Act
+        var result = order.MarkAsPaymentFailed(timestamp);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        order.Status.Should().Be(OrderStatus.PaymentFailed);
+        order.LastUpdateTimestamp.Should().Be(timestamp);
+        
+        // Verify domain event
+        order.DomainEvents.Should().HaveCount(initialEventCount + 1);
+        order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderPaymentFailed));
+        var orderPaymentFailedEvent = order.DomainEvents.OfType<OrderPaymentFailed>().Single();
+        orderPaymentFailedEvent.OrderId.Should().Be(order.Id);
+    }
+
+    [Test]
+    [TestCase(OrderStatus.Placed)]
+    [TestCase(OrderStatus.Accepted)]
+    [TestCase(OrderStatus.Preparing)]
+    [TestCase(OrderStatus.ReadyForDelivery)]
+    [TestCase(OrderStatus.Delivered)]
+    [TestCase(OrderStatus.Cancelled)]
+    [TestCase(OrderStatus.Rejected)]
+    [TestCase(OrderStatus.PaymentFailed)]
+    public void MarkAsPaymentFailed_WhenOrderIsNotPendingPayment_ShouldFailWithInvalidStatusError(OrderStatus invalidStatus)
+    {
+        // Arrange
+        Order order;
+        switch (invalidStatus)
+        {
+            case OrderStatus.Placed:
+                order = CreateValidOrder();
+                break;
+            case OrderStatus.Accepted:
+                order = CreateAcceptedOrder();
+                break;
+            case OrderStatus.Preparing:
+                order = CreatePreparingOrder();
+                break;
+            case OrderStatus.ReadyForDelivery:
+                order = CreateReadyForDeliveryOrder();
+                break;
+            case OrderStatus.Delivered:
+                order = CreateReadyForDeliveryOrder();
+                order.MarkAsDelivered().ShouldBeSuccessful();
+                break;
+            case OrderStatus.Cancelled:
+                order = CreateValidOrder();
+                order.Cancel().ShouldBeSuccessful();
+                break;
+            case OrderStatus.Rejected:
+                order = CreateValidOrder();
+                order.Reject().ShouldBeSuccessful();
+                break;
+            case OrderStatus.PaymentFailed:
+                order = CreatePaymentFailedOrder();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
+        }
+        
+        var initialStatus = order.Status;
+        var initialEventCount = order.DomainEvents.Count;
+
+        // Act
+        var result = order.MarkAsPaymentFailed();
+
+        // Assert
+        result.ShouldBeFailure(OrderErrors.InvalidStatusForPaymentConfirmation.Code);
         order.Status.Should().Be(initialStatus); // Status unchanged
         order.DomainEvents.Should().HaveCount(initialEventCount); // No new events
     }

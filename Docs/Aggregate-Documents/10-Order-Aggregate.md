@@ -47,7 +47,9 @@ public static Result<Order> Create(
     Money? deliveryFee = null,
     Money? tipAmount = null,
     Money? taxAmount = null,
-    List<CouponId>? appliedCouponIds = null)
+    CouponId? appliedCouponId = null,
+    TeamCartId? sourceTeamCartId = null,
+    List<PaymentTransaction>? paymentTransactions = null)
 ```
 
 | Parameter | Type | Description |
@@ -62,10 +64,13 @@ public static Result<Order> Create(
 | `tipAmount` | `Money?` | Optional tip amount |
 | `taxAmount` | `Money?` | Optional tax amount |
 | `appliedCouponId` | `CouponId?` | Optional applied coupon ID |
+| `sourceTeamCartId` | `TeamCartId?` | Optional ID of the team cart this order was created from. |
+| `paymentTransactions` | `List<PaymentTransaction>?` | Optional list of payment transactions for the order. |
 
 **Validation Rules & Potential Errors:**
 
 * At least one order item is required. (Returns `OrderErrors.OrderItemRequired`)
+* If `paymentTransactions` are provided, their total must match the order's `TotalAmount`. (Returns `OrderErrors.PaymentMismatch`)
 * Total amount cannot be negative. (Returns `OrderErrors.NegativeTotalAmount`)
 * Order is created with status `Placed` and current timestamp
 * Order number is auto-generated in format `ORD-YYYYMMDD-HHMMSS-XXXX`
@@ -81,7 +86,7 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `Result Cancel()` | Cancels the order | Order must be in `Placed`, `Accepted`, `Preparing`, or `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForCancel` |
 | `Result MarkAsPreparing()` | Marks the order as preparing | Order must be in `Accepted` status | `OrderErrors.InvalidOrderStatusForPreparing` |
 | `Result MarkAsReadyForDelivery()` | Marks the order as ready for delivery | Order must be in `Preparing` status | `OrderErrors.InvalidOrderStatusForReadyForDelivery` |
-| `Result MarkAsDelivered()` | Marks the order as delivered | Order must be in `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForDelivered` |
+| `Result MarkAsDelivered()` | Marks the order as delivered and records the actual delivery time. | Order must be in `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForDelivered` |
 | `Result AddPaymentAttempt(PaymentTransaction payment)` | Adds a payment transaction | None - always succeeds with valid input | None |
 | `Result MarkAsPaid(PaymentTransactionId paymentTransactionId)` | Marks payment as successful | Payment transaction must exist | `OrderErrors.PaymentNotFound` |
 | `Result ApplyCoupon(CouponId, CouponValue, AppliesTo, Money?)` | Applies a coupon discount | Order must be `Placed`, no existing coupon, meets minimum amount | `OrderErrors.CouponCannotBeAppliedToOrderStatus`, `OrderErrors.CouponAlreadyApplied`, `OrderErrors.CouponNotApplicable` |
@@ -99,6 +104,7 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `PlacementTimestamp` | `DateTime` | When the order was placed (UTC) |
 | `LastUpdateTimestamp` | `DateTime` | When the order was last modified (UTC) |
 | `EstimatedDeliveryTime` | `DateTime?` | Estimated delivery time (set when accepted) |
+| `ActualDeliveryTime` | `DateTime?` | Actual delivery time (set when delivered) |
 | `SpecialInstructions` | `string` | Customer's special instructions |
 | `DeliveryAddress` | `DeliveryAddress` | Snapshot of delivery address |
 | `Subtotal` | `Money` | Sum of all line items before discounts |
@@ -109,9 +115,12 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `TotalAmount` | `Money` | Final amount to be charged |
 | `CustomerId` | `UserId` | The customer who placed the order |
 | `RestaurantId` | `RestaurantId` | The restaurant fulfilling the order |
+| `SourceTeamCartId` | `TeamCartId?` | The source TeamCart ID if this order was created from a team cart. |
 | `OrderItems` | `IReadOnlyList<OrderItem>` | Read-only collection of ordered items |
 | `PaymentTransactions` | `IReadOnlyList<PaymentTransaction>` | Read-only collection of payment attempts |
 | `AppliedCouponId` | `CouponId?` | The applied coupon ID |
+| `Created` | `DateTimeOffset` | Timestamp of when the entity was created |
+| `CreatedBy` | `string?` | The user who created the entity |
 
 #### 4.2. Public Query Methods
 
@@ -130,7 +139,7 @@ The aggregate raises the following domain events to communicate significant stat
 | `OrderPaid` | After a successful call to `MarkAsPaid` | Signals that payment has been successfully processed |
 | `OrderPreparing` | After a successful call to `MarkAsPreparing` | Signals that order preparation has begun |
 | `OrderReadyForDelivery` | After a successful call to `MarkAsReadyForDelivery` | Signals that the order is ready for delivery/pickup |
-| `OrderDelivered` | After a successful call to `MarkAsDelivered` | Signals that the order has been delivered |
+| `OrderDelivered` | After a successful call to `MarkAsDelivered` | Signals that the order has been delivered and includes the `ActualDeliveryTime` |
 
 ### 6. Order Status Lifecycle
 

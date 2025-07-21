@@ -9,7 +9,6 @@ using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
@@ -24,45 +23,149 @@ public abstract class OrderTestHelpers
     protected static readonly Money DefaultDeliveryFee = new Money(5.00m, Currencies.Default);
     protected static readonly Money DefaultTipAmount = new Money(2.00m, Currencies.Default);
     protected static readonly Money DefaultTaxAmount = new Money(1.50m, Currencies.Default);
+    protected const string DefaultPaymentIntentId = "pi_test_123456789";
 
+    /// <summary>
+    /// Creates a valid order with default values and proper financial calculations
+    /// </summary>
     protected static Order CreateValidOrder()
     {
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        // Create payment transactions that match the total amount
+        var paymentTransactions = CreatePaymentTransactionsWithTotal(totalAmount);
+        
         return Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
-            DefaultTaxAmount).Value;
+            DefaultTaxAmount,
+            totalAmount,
+            paymentTransactions,
+            null).Value;
     }
 
-    protected static Order CreateAcceptedOrder()
+    /// <summary>
+    /// Creates an order in the PendingPayment status
+    /// </summary>
+    protected static Order CreatePendingPaymentOrder()
+    {
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        // For pending payment, we don't need payment transactions
+        var result = Order.Create(
+            DefaultCustomerId,
+            DefaultRestaurantId,
+            DefaultDeliveryAddress,
+            DefaultOrderItems,
+            DefaultSpecialInstructions,
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            new List<PaymentTransaction>(), // Empty payment transactions
+            null,
+            OrderStatus.PendingPayment,
+            DefaultPaymentIntentId);
+        
+        result.ShouldBeSuccessful(); // Ensure creation was successful
+        return result.Value;
+    }
+
+    /// <summary>
+    /// Creates an order in the PaymentFailed status
+    /// </summary>
+    protected static Order CreatePaymentFailedOrder()
+    {
+        var order = CreatePendingPaymentOrder();
+        var timestamp = DateTime.UtcNow;
+        var result = order.MarkAsPaymentFailed(timestamp);
+        result.ShouldBeSuccessful(); // Ensure the transition was successful
+        return order;
+    }
+
+    /// <summary>
+    /// Creates an order with a specific payment intent ID
+    /// </summary>
+    protected static Order CreateOrderWithPaymentIntent(string paymentIntentId)
+    {
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        return Order.Create(
+            DefaultCustomerId,
+            DefaultRestaurantId,
+            DefaultDeliveryAddress,
+            DefaultOrderItems,
+            DefaultSpecialInstructions,
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            new List<PaymentTransaction>(),
+            null,
+            OrderStatus.PendingPayment,
+            paymentIntentId).Value;
+    }
+
+    /// <summary>
+    /// Creates an order in the Accepted status with a specific timestamp
+    /// </summary>
+    protected static Order CreateAcceptedOrder(DateTime? timestamp = null)
     {
         var order = CreateValidOrder();
-        var result = order.Accept(DateTime.UtcNow.AddHours(1));
+        var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
+        var result = order.Accept(estimatedDeliveryTime, timestamp ?? DateTime.UtcNow);
         result.ShouldBeSuccessful(); // Ensure the transition was successful
         return order;
     }
 
-    protected static Order CreatePreparingOrder()
+    /// <summary>
+    /// Creates an order in the Preparing status with a specific timestamp
+    /// </summary>
+    protected static Order CreatePreparingOrder(DateTime? timestamp = null)
     {
-        var order = CreateAcceptedOrder();
-        var result = order.MarkAsPreparing();
+        var order = CreateAcceptedOrder(timestamp);
+        var result = order.MarkAsPreparing(timestamp);
         result.ShouldBeSuccessful(); // Ensure the transition was successful
         return order;
     }
 
-    protected static Order CreateReadyForDeliveryOrder()
+    /// <summary>
+    /// Creates an order in the ReadyForDelivery status with a specific timestamp
+    /// </summary>
+    protected static Order CreateReadyForDeliveryOrder(DateTime? timestamp = null)
     {
-        var order = CreatePreparingOrder();
-        var result = order.MarkAsReadyForDelivery();
+        var order = CreatePreparingOrder(timestamp);
+        var result = order.MarkAsReadyForDelivery(timestamp);
         result.ShouldBeSuccessful(); // Ensure the transition was successful
         return order;
     }
 
+    /// <summary>
+    /// Creates a default delivery address for testing
+    /// </summary>
     protected static DeliveryAddress CreateDefaultDeliveryAddress()
     {
         return DeliveryAddress.Create(
@@ -73,6 +176,9 @@ public abstract class OrderTestHelpers
             "USA").Value;
     }
 
+    /// <summary>
+    /// Creates default order items for testing
+    /// </summary>
     protected static List<OrderItem> CreateDefaultOrderItems()
     {
         var orderItem = OrderItem.Create(
@@ -85,6 +191,9 @@ public abstract class OrderTestHelpers
         return new List<OrderItem> { orderItem };
     }
 
+    /// <summary>
+    /// Creates a valid payment transaction for testing
+    /// </summary>
     protected static PaymentTransaction CreateValidPaymentTransaction()
     {
         return PaymentTransaction.Create(
@@ -94,26 +203,57 @@ public abstract class OrderTestHelpers
             DateTime.UtcNow).Value;
     }
 
-    #region Phase 4 Helper Methods - TeamCart Integration
+    /// <summary>
+    /// Creates payment transactions for online payment
+    /// </summary>
+    protected static List<PaymentTransaction> CreatePaymentTransactionsForOnlinePayment(Money totalAmount)
+    {
+        var transactions = new List<PaymentTransaction>();
+        
+        var transaction = PaymentTransaction.Create(
+            PaymentMethodType.CreditCard,
+            PaymentTransactionType.Payment,
+            totalAmount,
+            DateTime.UtcNow,
+            "Online Payment",
+            "stripe_pi_online_123",
+            UserId.CreateUnique()).Value;
+        
+        transactions.Add(transaction);
+        
+        return transactions;
+    }
+
+    #region TeamCart Integration Helper Methods
 
     /// <summary>
     /// Creates an order from a TeamCart with minimal required parameters
     /// </summary>
     protected static Order CreateOrderFromTeamCart(TeamCartId teamCartId, List<PaymentTransaction> paymentTransactions)
     {
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
         return Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null, 
-            teamCartId,
-            paymentTransactions).Value;
+            totalAmount,
+            paymentTransactions,
+            null,
+            OrderStatus.Placed,
+            null,
+            teamCartId).Value;
     }
 
     /// <summary>
@@ -127,19 +267,29 @@ public abstract class OrderTestHelpers
         DeliveryAddress deliveryAddress,
         List<OrderItem> orderItems)
     {
+        // Calculate subtotal from order items
+        var subtotal = new Money(orderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
         return Order.Create(
             customerId,
             restaurantId,
             deliveryAddress,
             orderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null, 
-            teamCartId,
-            paymentTransactions).Value;
+            totalAmount,
+            paymentTransactions,
+            null,
+            OrderStatus.Placed,
+            null,
+            teamCartId).Value;
     }
 
     /// <summary>
@@ -150,8 +300,8 @@ public abstract class OrderTestHelpers
         var transactions = new List<PaymentTransaction>();
         
         // Split the total into multiple transactions
-        var halfAmount = new Money(totalAmount.Amount / 2, totalAmount.Currency);
-        var remainingAmount = new Money(totalAmount.Amount - halfAmount.Amount, totalAmount.Currency);
+        var halfAmount = new Money(Math.Round(totalAmount.Amount / 2, 2), totalAmount.Currency);
+        var remainingAmount = new Money(Math.Round(totalAmount.Amount - halfAmount.Amount, 2), totalAmount.Currency);
         
         var transaction1 = PaymentTransaction.Create(
             PaymentMethodType.CreditCard,
@@ -195,6 +345,45 @@ public abstract class OrderTestHelpers
             "stripe_pi_mismatch",
             UserId.CreateUnique());
         transactions.Add(transaction.Value);
+        
+        return transactions;
+    }
+
+    /// <summary>
+    /// Creates payment transactions with a specific paidByUserId
+    /// </summary>
+    protected static List<PaymentTransaction> CreatePaymentTransactionsWithPaidByUserId()
+    {
+        var transactions = new List<PaymentTransaction>();
+        
+        // Calculate what the total order amount should be
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        var expectedTotal = subtotal.Amount + DefaultDeliveryFee.Amount + DefaultTipAmount.Amount + DefaultTaxAmount.Amount - DefaultDiscountAmount.Amount;
+        
+        // Create transactions that match the total - round to avoid floating point precision issues
+        var firstAmount = Math.Round(expectedTotal * 0.6m, 2); // 60% of total
+        var secondAmount = Math.Round(expectedTotal - firstAmount, 2); // Remainder to ensure exact match
+        
+        var firstTransaction = PaymentTransaction.Create(
+            PaymentMethodType.CreditCard,
+            PaymentTransactionType.Payment,
+            new Money(firstAmount, Currencies.Default),
+            DateTime.UtcNow,
+            "Online Payment",
+            "txn_123",
+            UserId.CreateUnique()).Value;
+        
+        var secondTransaction = PaymentTransaction.Create(
+            PaymentMethodType.CashOnDelivery,
+            PaymentTransactionType.Payment,
+            new Money(secondAmount, Currencies.Default),
+            DateTime.UtcNow,
+            "Cash on Delivery",
+            null,
+            UserId.CreateUnique()).Value;
+        
+        transactions.Add(firstTransaction);
+        transactions.Add(secondTransaction);
         
         return transactions;
     }
@@ -267,8 +456,8 @@ public abstract class OrderTestHelpers
     /// </summary>
     protected static Money CalculateDefaultOrderTotal()
     {
-        var itemsTotal = DefaultOrderItems.Sum(item => item.Snapshot_BasePriceAtOrder.Amount * item.Quantity);
-        var total = itemsTotal + DefaultDeliveryFee.Amount + DefaultTipAmount.Amount + DefaultTaxAmount.Amount - DefaultDiscountAmount.Amount;
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        var total = subtotal.Amount - DefaultDiscountAmount.Amount + DefaultDeliveryFee.Amount + DefaultTipAmount.Amount + DefaultTaxAmount.Amount;
         return new Money(total, Currencies.Default);
     }
 
@@ -278,6 +467,28 @@ public abstract class OrderTestHelpers
     protected static TeamCartId CreateSampleTeamCartId()
     {
         return TeamCartId.CreateUnique();
+    }
+
+    /// <summary>
+    /// Creates payment transactions with wrong total for testing
+    /// </summary>
+    protected static List<PaymentTransaction> CreatePaymentTransactionsWithWrongTotal()
+    {
+        var transactions = new List<PaymentTransaction>();
+        
+        // Create transactions that don't match the order total
+        var transaction = PaymentTransaction.Create(
+            PaymentMethodType.CreditCard,
+            PaymentTransactionType.Payment,
+            new Money(10.00m, Currencies.Default), // Much less than order total
+            DateTime.UtcNow,
+            "Online Payment",
+            "txn_123",
+            UserId.CreateUnique()).Value;
+        
+        transactions.Add(transaction);
+        
+        return transactions;
     }
 
     #endregion

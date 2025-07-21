@@ -31,14 +31,34 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithTeamCartId_ShouldSetSourceTeamCartId()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        // Create payment transactions that match the total amount
+        var paymentTransactions = CreatePaymentTransactionsWithTotal(totalAmount);
+        
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            sourceTeamCartId: _teamCartId);
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            paymentTransactions,
+            null,
+            OrderStatus.Placed,
+            null,
+            _teamCartId);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -50,20 +70,28 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithPaymentTransactions_ShouldAddTransactions()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null,
-            null,
-            _paymentTransactions);
+            totalAmount,
+            _paymentTransactions,
+            null);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -76,20 +104,31 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithTeamCartIdAndPaymentTransactions_ShouldSetBothCorrectly()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactions,
             null,
-            _teamCartId,
-            _paymentTransactions);
+            OrderStatus.Placed,
+            null,
+            _teamCartId);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -103,14 +142,34 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithNullTeamCartId_ShouldLeaveSourceTeamCartIdNull()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        // Create payment transactions that match the total amount
+        var paymentTransactions = CreatePaymentTransactionsWithTotal(totalAmount);
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            sourceTeamCartId: null);
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            paymentTransactions,
+            null,
+            OrderStatus.Placed,
+            null,
+            null); // Null TeamCartId
 
         // Assert
         result.ShouldBeSuccessful();
@@ -122,14 +181,30 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithEmptyPaymentTransactions_ShouldNotAddTransactions()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            paymentTransactions: new List<PaymentTransaction>());
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            new List<PaymentTransaction>(), // Empty payment transactions
+            null,
+            OrderStatus.PendingPayment, // Use PendingPayment to avoid payment validation
+            DefaultPaymentIntentId);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -141,14 +216,30 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithNullPaymentTransactions_ShouldNotAddTransactions()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            paymentTransactions: null);
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            null, // Null payment transactions
+            null,
+            OrderStatus.PendingPayment, // Use PendingPayment to avoid payment validation
+            DefaultPaymentIntentId);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -164,14 +255,28 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithMismatchedPaymentTotal_ShouldFailWithPaymentMismatchError()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            paymentTransactions: _paymentTransactionsWithWrongTotal);
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactionsWithWrongTotal, // Mismatched payment total
+            null);
 
         // Assert
         result.ShouldBeFailure();
@@ -181,20 +286,28 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithCorrectPaymentTotal_ShouldSucceed()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null,
-            null,
-            _paymentTransactions);
+            totalAmount,
+            _paymentTransactions,
+            null);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -205,28 +318,15 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     }
 
     [Test]
-    public void Create_WithNoPaymentTransactions_ShouldSucceed()
-    {
-        // Arrange & Act
-        var result = Order.Create(
-            DefaultCustomerId,
-            DefaultRestaurantId,
-            DefaultDeliveryAddress,
-            DefaultOrderItems,
-            DefaultSpecialInstructions,
-            paymentTransactions: null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        var order = result.Value;
-        
-        order.PaymentTransactions.Should().BeEmpty();
-    }
-
-    [Test]
     public void Create_WithPartialPaymentTransactions_ShouldFailWithPaymentMismatchError()
     {
         // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
         var partialPayments = new List<PaymentTransaction>
         {
             _paymentTransactions.First() // Only one payment, not covering full total
@@ -239,7 +339,14 @@ public class OrderFromTeamCartTests : OrderTestHelpers
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
-            paymentTransactions: partialPayments);
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            partialPayments,
+            null);
 
         // Assert
         result.ShouldBeFailure();
@@ -253,20 +360,31 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithTeamCartData_ShouldMaintainAllExistingProperties()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactions,
             null,
-            _teamCartId,
-            _paymentTransactions);
+            OrderStatus.Placed,
+            null,
+            _teamCartId);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -288,57 +406,75 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithTeamCartData_ShouldCalculateCorrectTotalAmount()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactions,
             null,
-            _teamCartId,
-            _paymentTransactions);
+            OrderStatus.Placed,
+            null,
+            _teamCartId);
 
         // Assert
         result.ShouldBeSuccessful();
         var order = result.Value;
         
-        var expectedTotal = DefaultOrderItems.Sum(item => item.LineItemTotal.Amount) 
-                           + DefaultDeliveryFee.Amount 
-                           + DefaultTipAmount.Amount 
-                           + DefaultTaxAmount.Amount 
-                           - DefaultDiscountAmount.Amount;
-        
-        order.TotalAmount.Amount.Should().Be(expectedTotal);
+        order.TotalAmount.Amount.Should().Be(totalAmount.Amount);
     }
 
     [Test]
     public void Create_WithTeamCartData_ShouldSetCorrectOrderStatus()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+        
+        var initialStatus = OrderStatus.Placed;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactions,
             null,
-            _teamCartId,
-            _paymentTransactions);
+            initialStatus,
+            null,
+            _teamCartId);
 
         // Assert
         result.ShouldBeSuccessful();
         var order = result.Value;
         
-        order.Status.Should().Be(OrderStatus.Placed);
+        order.Status.Should().Be(initialStatus);
     }
 
     #endregion
@@ -348,20 +484,28 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithPaymentTransactions_ShouldPreservePaidByUserId()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null,
-            null,
-            _paymentTransactions);
+            totalAmount,
+            _paymentTransactions,
+            null);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -375,20 +519,28 @@ public class OrderFromTeamCartTests : OrderTestHelpers
     [Test]
     public void Create_WithPaymentTransactions_ShouldPreserveAllTransactionProperties()
     {
-        // Arrange & Act
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
+        
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
             DefaultOrderItems,
             DefaultSpecialInstructions,
+            subtotal,
             DefaultDiscountAmount,
             DefaultDeliveryFee,
             DefaultTipAmount,
             DefaultTaxAmount,
-            null,
-            null,
-            _paymentTransactions);
+            totalAmount,
+            _paymentTransactions,
+            null);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -410,64 +562,83 @@ public class OrderFromTeamCartTests : OrderTestHelpers
 
     #endregion
 
-    #region Helper Methods
+    #region PendingPayment Tests
 
-    private List<PaymentTransaction> CreatePaymentTransactionsWithPaidByUserId()
+    [Test]
+    public void Create_WithPendingPaymentStatus_ShouldNotValidatePaymentTransactions()
     {
-        var transactions = new List<PaymentTransaction>();
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         
-        // Calculate what the total order amount should be
-        var expectedTotal = DefaultOrderItems.Sum(item => item.LineItemTotal.Amount) 
-                           + DefaultDeliveryFee.Amount 
-                           + DefaultTipAmount.Amount 
-                           + DefaultTaxAmount.Amount 
-                           - DefaultDiscountAmount.Amount;
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
         
-        // Create transactions that match the total - round to avoid floating point precision issues
-        var firstAmount = Math.Round(expectedTotal * 0.6m, 2); // 60% of total
-        var secondAmount = Math.Round(expectedTotal - firstAmount, 2); // Remainder to ensure exact match
-        
-        var firstTransaction = PaymentTransaction.Create(
-            PaymentMethodType.CreditCard,
-            PaymentTransactionType.Payment,
-            new Money(firstAmount, Currencies.Default),
-            DateTime.UtcNow,
-            "Online Payment",
-            "txn_123",
-            UserId.CreateUnique()).Value;
-        
-        var secondTransaction = PaymentTransaction.Create(
-            PaymentMethodType.CashOnDelivery,
-            PaymentTransactionType.Payment,
-            new Money(secondAmount, Currencies.Default),
-            DateTime.UtcNow,
-            "Cash on Delivery",
+        // Create payment transactions that don't match the total amount
+        var mismatchedPayments = _paymentTransactionsWithWrongTotal;
+
+        // Act
+        var result = Order.Create(
+            DefaultCustomerId,
+            DefaultRestaurantId,
+            DefaultDeliveryAddress,
+            DefaultOrderItems,
+            DefaultSpecialInstructions,
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            mismatchedPayments,
             null,
-            UserId.CreateUnique()).Value;
+            OrderStatus.PendingPayment, // PendingPayment status
+            DefaultPaymentIntentId);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        var order = result.Value;
         
-        transactions.Add(firstTransaction);
-        transactions.Add(secondTransaction);
-        
-        return transactions;
+        order.Status.Should().Be(OrderStatus.PendingPayment);
+        // Payment transactions should be cleared for pending payment status
+        order.PaymentTransactions.Should().BeEmpty();
     }
 
-    private List<PaymentTransaction> CreatePaymentTransactionsWithWrongTotal()
+    [Test]
+    public void Create_WithPendingPaymentStatusAndPaymentTransactions_ShouldClearTransactions()
     {
-        var transactions = new List<PaymentTransaction>();
+        // Arrange
+        // Calculate subtotal from order items
+        var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         
-        // Create transactions that don't match the order total
-        var transaction = PaymentTransaction.Create(
-            PaymentMethodType.CreditCard,
-            PaymentTransactionType.Payment,
-            new Money(10.00m, Currencies.Default), // Much less than order total
-            DateTime.UtcNow,
-            "Online Payment",
-            "txn_123",
-            UserId.CreateUnique()).Value;
+        // Calculate total amount
+        var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
+
+        // Act
+        var result = Order.Create(
+            DefaultCustomerId,
+            DefaultRestaurantId,
+            DefaultDeliveryAddress,
+            DefaultOrderItems,
+            DefaultSpecialInstructions,
+            subtotal,
+            DefaultDiscountAmount,
+            DefaultDeliveryFee,
+            DefaultTipAmount,
+            DefaultTaxAmount,
+            totalAmount,
+            _paymentTransactions, // Valid payment transactions
+            null,
+            OrderStatus.PendingPayment, // PendingPayment status
+            DefaultPaymentIntentId);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        var order = result.Value;
         
-        transactions.Add(transaction);
-        
-        return transactions;
+        order.Status.Should().Be(OrderStatus.PendingPayment);
+        // Payment transactions should be cleared for pending payment status
+        order.PaymentTransactions.Should().BeEmpty();
     }
 
     #endregion

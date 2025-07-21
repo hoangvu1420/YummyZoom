@@ -89,19 +89,42 @@ public sealed class TeamCartConversionService
         var paymentTransactions = CreatePaymentTransactionsFrom(teamCart);
 
         // 4. Create the Order using the enhanced factory method
+        // Determine the initial status based on payment method
+        var hasOnlinePayments = teamCart.MemberPayments.Any(p => p.Method == PaymentMethod.Online);
+        var hasCodPayments = teamCart.MemberPayments.Any(p => p.Method == PaymentMethod.CashOnDelivery);
+        
+        // If we have online payments, start in PendingPayment status
+        // Otherwise, use Placed status for COD orders
+        var initialStatus = hasOnlinePayments ? OrderStatus.PendingPayment : OrderStatus.Placed;
+        
+        // For online payments, we'll need to store the payment intent ID
+        // This would typically come from the payment gateway when creating the payment intent
+        // For this example, we'll use null as it would be set by the application layer
+        string? paymentIntentId = null;
+        
+        // Calculate subtotal from order items
+        var subtotal = CalculateSubtotal(orderItems);
+        
+        // Calculate total amount (subtotal - discount + tip)
+        var totalAmount = CalculateTotalAmount(subtotal, teamCart.DiscountAmount, teamCart.TipAmount);
+        
         var orderResult = Order.Create(
             teamCart.HostUserId,
             teamCart.RestaurantId,
             deliveryAddress,
             orderItems,
             specialInstructions,
+            subtotal: subtotal, 
             discountAmount: teamCart.DiscountAmount,
-            deliveryFee: null, // Delivery fee might be calculated at the last minute
+            deliveryFee: Money.Zero(teamCart.TipAmount.Currency), 
             tipAmount: teamCart.TipAmount,
-            taxAmount: null, // Tax is typically calculated later
+            taxAmount: Money.Zero(teamCart.TipAmount.Currency), 
+            totalAmount: totalAmount, 
+            paymentTransactions: paymentTransactions,
             appliedCouponId: teamCart.AppliedCouponId,
-            sourceTeamCartId: teamCart.Id,
-            paymentTransactions: paymentTransactions);
+            initialStatus: initialStatus,
+            paymentIntentId: paymentIntentId,
+            sourceTeamCartId: teamCart.Id);
 
         if (orderResult.IsFailure)
         {
@@ -122,6 +145,44 @@ public sealed class TeamCartConversionService
         return (order, teamCart);
     }
 
+    /// <summary>
+    /// Calculates the subtotal of all order items.
+    /// </summary>
+    /// <param name="orderItems">The list of order items.</param>
+    /// <returns>The subtotal as a Money value.</returns>
+    private Money CalculateSubtotal(List<OrderItem> orderItems)
+    {
+        if (!orderItems.Any())
+        {
+            return Money.Zero(Currencies.Default);
+        }
+        
+        var currency = orderItems.First().LineItemTotal.Currency;
+        return orderItems.Sum(item => item.LineItemTotal, currency);
+    }
+    
+    /// <summary>
+    /// Calculates the total amount based on subtotal, discount, and tip.
+    /// </summary>
+    /// <param name="subtotal">The subtotal amount.</param>
+    /// <param name="discountAmount">The discount amount.</param>
+    /// <param name="tipAmount">The tip amount.</param>
+    /// <returns>The total amount as a Money value.</returns>
+    private Money CalculateTotalAmount(Money subtotal, Money discountAmount, Money tipAmount)
+    {
+        // Total = Subtotal - Discount + Tip
+        // Note: Delivery fee and tax are set to zero in the current implementation
+        var totalAmount = subtotal - discountAmount + tipAmount;
+        
+        // Ensure total is not negative
+        if (totalAmount.Amount < 0)
+        {
+            return Money.Zero(totalAmount.Currency);
+        }
+        
+        return totalAmount;
+    }
+    
     /// <summary>
     /// Creates PaymentTransaction entities from TeamCart MemberPayments.
     /// </summary>

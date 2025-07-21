@@ -105,4 +105,20 @@ public static class CouponErrors
     public static Error InvalidAmount => Error.Validation(
         "CouponValue.InvalidAmount",
         "Fixed amount must be greater than 0");
+        
+    public static Error UserUsageLimitExceeded => Error.Validation(
+        "Coupon.UserUsageLimitExceeded",
+        "You have already used this coupon the maximum number of times allowed.");
+        
+    public static Error MinAmountNotMet => Error.Validation(
+        "Coupon.MinAmountNotMet",
+        "The order total does not meet the minimum amount required for this coupon.");
+        
+    public static Error NotApplicable => Error.Validation(
+        "Coupon.NotApplicable",
+        "This coupon is not applicable to the items in your order.");
+        
+    public static Error InvalidType => Error.Validation(
+        "Coupon.InvalidType",
+        "The coupon type is not valid or not supported.");
 }
