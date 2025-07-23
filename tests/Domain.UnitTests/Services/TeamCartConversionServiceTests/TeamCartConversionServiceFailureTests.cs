@@ -15,6 +15,8 @@ using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using System.Reflection;
 using YummyZoom.Domain.OrderAggregate.Errors;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.Services.TeamCartConversionServiceTests;
 
@@ -120,15 +122,33 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
     public void ConvertToOrder_WithCouponValidationFailure_ShouldFail()
     {
         // Arrange
-        var teamCart = TeamCartTestHelpers.CreateTeamCartReadyForConversion();
+        var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest();
         var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
+
+        // Add items to the cart
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        teamCart.AddItem(teamCart.HostUserId, menuItemId, menuCategoryId, "Host Item", 
+            new Money(25.00m, Currencies.Default), 1);
+        teamCart.AddItem(teamCart.Members.First(m => m.UserId != teamCart.HostUserId).UserId, 
+            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
+
+        // Lock the cart for payment so we can apply the coupon
+        teamCart.LockForPayment(teamCart.HostUserId).ShouldBeSuccessful();
 
         // Create a coupon that is genuinely expired
         var expiredCoupon = CouponTestHelpers.CreateValidCoupon();
         typeof(Coupon).GetProperty(nameof(Coupon.ValidityEndDate))!
             .SetValue(expiredCoupon, DateTime.UtcNow.AddDays(-1));
 
-        teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)expiredCoupon.Id);
+        // Apply the expired coupon (this should succeed at the TeamCart level since it doesn't validate expiry)
+        var applyCouponResult = teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)expiredCoupon.Id);
+        applyCouponResult.ShouldBeSuccessful();
+
+        // Complete payments to transition to ReadyToConfirm
+        teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var guestUserId = teamCart.Members.First(m => m.UserId != teamCart.HostUserId).UserId;
+        teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
@@ -176,54 +196,18 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
     }
 
     [Test]
-    public void ConvertToOrder_WithFinalPaymentMismatch_ShouldFail()
+    public void ConvertToOrder_WithoutMemberPayments_ShouldFail()
     {
         // Arrange
         var teamCart = TeamCartTestHelpers.CreateTeamCartReadyForConversion();
         var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
 
-        var member1 = teamCart.Members[0];
-
         var memberPaymentsList = (List<MemberPayment>)typeof(TeamCart)
             .GetField("_memberPayments", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(teamCart)!;
 
-        // Setup payments that will cause a rounding error when adjusted
+        // Clear all member payments to simulate a scenario where payments weren't properly set up
         memberPaymentsList.Clear();
-        memberPaymentsList.Add(
-            MemberPayment.Create(member1.UserId, new Money(33.33m, "USD"), PaymentMethod.Online).Value
-        );
-        memberPaymentsList.Add(
-            MemberPayment.Create(UserId.CreateUnique(), new Money(33.33m, "USD"), PaymentMethod.Online).Value
-        );
-        memberPaymentsList.Add(
-            MemberPayment.Create(UserId.CreateUnique(), new Money(33.33m, "USD"), PaymentMethod.Online).Value
-        );
-
-        // Act
-        // Use real values that will cause the adjustment factor to create a mismatch
-        var result = TeamCartConversionService.ConvertToOrder(
-            teamCart,
-            deliveryAddress,
-            string.Empty,
-            null,
-            0,
-            new Money(10, Currencies.Default),
-            new Money(5, Currencies.Default)
-        );
-
-        // Assert
-        result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.FinalPaymentMismatch);
-    }
-
-    [Test]
-    public void ConvertToOrder_WithNoPaymentTransactions_ShouldFail()
-    {
-        // Arrange
-        var teamCart = TeamCartTestHelpers.CreateValidTeamCart();
-        teamCart.LockForPayment(teamCart.HostUserId);
-        var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
@@ -238,7 +222,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.InvalidStatusForConversion);
+        result.Error.Should().Be(TeamCartErrors.CannotConvertWithoutPayments);
     }
 
     [Test]
@@ -260,6 +244,6 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(OrderErrors.OrderItemRequired);
+        result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 }

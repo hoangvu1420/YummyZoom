@@ -227,6 +227,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             return Result.Failure<Order>(OrderErrors.OrderItemRequired);
         }
 
+        if (deliveryAddress is null)
+        {
+            return Result.Failure<Order>(OrderErrors.AddressInvalid);
+        }
+
         var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;
         if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
         {
@@ -307,6 +312,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         if (!orderItems.Any())
         {
             return Result.Failure<Order>(OrderErrors.OrderItemRequired);
+        }
+
+        if (deliveryAddress is null)
+        {
+            return Result.Failure<Order>(OrderErrors.AddressInvalid);
         }
 
         var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;

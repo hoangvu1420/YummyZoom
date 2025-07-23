@@ -214,17 +214,41 @@ public static class TeamCartTestHelpers
     /// <summary>
     /// Creates a TeamCart in a ReadyToConfirm state but with no items.
     /// This is an invalid state used to test boundary conditions of the conversion service.
+    /// We properly set up payments but bypass the items requirement to test the Order validation.
     /// </summary>
     public static TeamCart CreateReadyForConversionCartWithNoItems()
     {
-        var teamCart = CreateValidTeamCart();
-
-        // Use reflection to force the cart into a ReadyToConfirm state
-        // without satisfying the business rule of having items.
-        typeof(TeamCart).GetProperty(nameof(TeamCart.Status))!.SetValue(teamCart, TeamCartStatus.ReadyToConfirm);
+        var teamCart = CreateTeamCartWithGuest();
+        
+        // Add items for both members temporarily to allow locking and payment setup
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Host Temp Item", 
+            new Money(25.00m, Currencies.Default), 1);
+        
+        var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
+        teamCart.AddItem(guestUserId, menuItemId, menuCategoryId, "Guest Temp Item", 
+            new Money(30.00m, Currencies.Default), 1);
+        
+        // Lock the cart for payment
+        var lockResult = teamCart.LockForPayment(DefaultHostUserId);
+        lockResult.IsSuccess.Should().BeTrue();
+        
+        // Set up payments for both members (amounts must match their item totals)
+        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        hostResult.IsSuccess.Should().BeTrue();
+        
+        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
+        guestResult.IsSuccess.Should().BeTrue();
+        
+        // Now use reflection to remove all items while keeping the ReadyToConfirm status and payments
+        var itemsField = typeof(TeamCart).GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var itemsList = (List<TeamCartItem>)itemsField.GetValue(teamCart)!;
+        itemsList.Clear();
 
         teamCart.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
         teamCart.Items.Should().BeEmpty();
+        teamCart.MemberPayments.Should().NotBeEmpty(); // Ensure payments are still there
     
         return teamCart;
     }

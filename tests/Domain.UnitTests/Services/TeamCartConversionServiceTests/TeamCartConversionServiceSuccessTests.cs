@@ -142,11 +142,39 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
     public void ConvertToOrder_WithValidCoupon_ShouldApplyDiscountAndSucceed()
     {
         // Arrange
-        var teamCart = TeamCartTestHelpers.CreateTeamCartReadyForConversion();
+        var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest();
         var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
         // Create a 10% discount coupon
         var coupon = CouponTestHelpers.CreatePercentageCoupon(10);
+
+        // Add items to the cart
+        teamCart.AddItem(
+            teamCart.HostUserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Host Item",
+            new Money(25.00m, Currencies.Default),
+            1
+        );
+        teamCart.AddItem(
+            teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Guest Item",
+            new Money(30.00m, Currencies.Default),
+            1
+        );
+
+        // Lock the cart for payment
+        teamCart.LockForPayment(teamCart.HostUserId);
+        
+        // Apply coupon while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
+
+        // Record payments to move cart to ReadyToConfirm status
+        teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var guestUserId = teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId;
+        teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
 
         var deliveryFee = new Money(10, Currencies.Default);
         var taxAmount = new Money(5, Currencies.Default);
@@ -178,11 +206,38 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
     public void ConvertToOrder_WithTip_ShouldIncludeTipInTotal()
     {
         // Arrange
-        var teamCart = TeamCartTestHelpers.CreateTeamCartReadyForConversion();
+        var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest();
         var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
         var tipAmount = new Money(15m, Currencies.Default);
-        teamCart.LockForPayment(teamCart.HostUserId); // Need to lock before applying tip
+
+        // Add items to the cart
+        teamCart.AddItem(
+            teamCart.HostUserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Host Item",
+            new Money(25.00m, Currencies.Default),
+            1
+        );
+        teamCart.AddItem(
+            teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Guest Item",
+            new Money(30.00m, Currencies.Default),
+            1
+        );
+
+        // Lock the cart for payment
+        teamCart.LockForPayment(teamCart.HostUserId);
+        
+        // Apply tip while cart is in Locked status
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);
+
+        // Record payments to move cart to ReadyToConfirm status
+        teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var guestUserId = teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId;
+        teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
 
         var deliveryFee = new Money(10, Currencies.Default);
         var taxAmount = new Money(5, Currencies.Default);
@@ -210,14 +265,40 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
     public void ConvertToOrder_WithCouponAndTip_ShouldApplyBothCorrectly()
     {
         // Arrange
-        var teamCart = TeamCartTestHelpers.CreateTeamCartReadyForConversion();
+        var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest(); // Status: Open
         var deliveryAddress = DeliveryAddress.Create("123 Main St", "Anytown", "Anystate", "12345", "USA").Value;
         var coupon = CouponTestHelpers.CreatePercentageCoupon(20); // 20% discount
         var tipAmount = new Money(10m, Currencies.Default);
 
-        teamCart.LockForPayment(teamCart.HostUserId);
+        // Add items to the cart
+        teamCart.AddItem(
+            teamCart.HostUserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Host Item",
+            new Money(25.00m, Currencies.Default),
+            1
+        );
+        teamCart.AddItem(
+            teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId,
+            MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            "Guest Item",
+            new Money(30.00m, Currencies.Default),
+            1
+        );
+
+        // Lock the cart for payment
+        teamCart.LockForPayment(teamCart.HostUserId); // Status: Locked
+        
+        // Apply coupon and tip while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);
+
+        // Record payments to move cart to ReadyToConfirm status
+        teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var guestUserId = teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId;
+        teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
 
         var deliveryFee = new Money(10, Currencies.Default);
         var taxAmount = new Money(5, Currencies.Default);

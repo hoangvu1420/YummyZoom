@@ -1,7 +1,13 @@
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.Entities;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 namespace YummyZoom.Domain.UnitTests.Services.TeamCartConversionServiceTests;
@@ -82,7 +88,32 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
     public void ConvertToOrder_WithCustomizationsOnMultipleItems_ShouldMapAllCorrectly()
     {
         // Arrange
-        var teamCart = TeamCartTestHelpers.CreateTeamCartWithCustomizations();
+        var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest();
+
+        // Add items with customizations for both host and guest
+        var menuItemId1 = MenuItemId.CreateUnique();
+        var menuItemId2 = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+
+        var hostCustomizations = new List<TeamCartItemCustomization>
+            {
+                TeamCartItemCustomization.Create("Size", "Extra Cheese", new Money(2.50m, Currencies.Default)).Value,
+                TeamCartItemCustomization.Create("Toppings", "Pepperoni", new Money(3.00m, Currencies.Default)).Value
+            };
+
+        var guestCustomizations = new List<TeamCartItemCustomization>
+            {
+                TeamCartItemCustomization.Create("Size", "Large", new Money(3.00m, Currencies.Default)).Value,
+                TeamCartItemCustomization.Create("Crust", "Thin", new Money(1.50m, Currencies.Default)).Value
+            };
+
+        // Host adds item with customizations
+        teamCart.AddItem(teamCart.HostUserId, menuItemId1, menuCategoryId, "Custom Pizza", new Money(20.00m, Currencies.Default), 1, hostCustomizations);
+
+        // Guest adds item with customizations
+        var guestUserId = teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId;
+        teamCart.AddItem(guestUserId, menuItemId2, menuCategoryId, "Custom Burger", new Money(15.00m, Currencies.Default), 1, guestCustomizations);
+
         teamCart.LockForPayment(teamCart.HostUserId);
         foreach (var member in teamCart.Members)
         {
