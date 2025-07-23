@@ -53,7 +53,7 @@ public class TeamCartCustomizationTests
             customizations);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var item = teamCart.Items.First();
         
         // Base price (10.00) + customization (3.00) = 13.00
@@ -86,7 +86,7 @@ public class TeamCartCustomizationTests
             customizations);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var item = teamCart.Items.First();
         
         // Base price: 10.00
@@ -120,7 +120,7 @@ public class TeamCartCustomizationTests
             customizations);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var item = teamCart.Items.First();
         
         // Base price: 10.00
@@ -152,7 +152,7 @@ public class TeamCartCustomizationTests
             customizations);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var item = teamCart.Items.First();
         
         // Base price should remain unchanged
@@ -283,8 +283,8 @@ public class TeamCartCustomizationTests
             burgerCustomizations);
 
         // Assert
-        pizzaResult.IsSuccess.Should().BeTrue();
-        burgerResult.IsSuccess.Should().BeTrue();
+        pizzaResult.ShouldBeSuccessful();
+        burgerResult.ShouldBeSuccessful();
         teamCart.Items.Should().HaveCount(2);
         
         var pizzaItem = teamCart.Items.First(i => i.Snapshot_ItemName == "Custom Pizza");

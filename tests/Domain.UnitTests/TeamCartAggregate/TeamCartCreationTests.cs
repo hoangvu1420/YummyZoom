@@ -4,12 +4,12 @@ using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.Events;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
+using static YummyZoom.Domain.UnitTests.TeamCartAggregate.TeamCartTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 [TestFixture]
-public class TeamCartCreationTests : TeamCartTestHelpers
+public class TeamCartCreationTests
 {
     [Test]
     public void Create_WithValidInputs_ShouldSucceedAndInitializeTeamCartCorrectly()
@@ -22,7 +22,7 @@ public class TeamCartCreationTests : TeamCartTestHelpers
             DefaultDeadline);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var teamCart = result.Value;
         
         teamCart.Id.Value.Should().NotBe(Guid.Empty);
@@ -54,7 +54,7 @@ public class TeamCartCreationTests : TeamCartTestHelpers
             DefaultHostName);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var teamCart = result.Value;
         
         // Default deadline should be set to 24 hours from creation
@@ -77,8 +77,7 @@ public class TeamCartCreationTests : TeamCartTestHelpers
             pastDeadline);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.DeadlineInPast);
+        result.ShouldBeFailure(TeamCartErrors.DeadlineInPast.Code);
     }
 
     [Test]
@@ -95,7 +94,6 @@ public class TeamCartCreationTests : TeamCartTestHelpers
             DefaultDeadline);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.HostNameRequired);
+        result.ShouldBeFailure(TeamCartErrors.HostNameRequired.Code);
     }
 }

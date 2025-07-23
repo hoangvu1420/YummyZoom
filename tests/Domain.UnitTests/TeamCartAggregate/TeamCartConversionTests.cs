@@ -1,13 +1,16 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.TeamCartAggregate;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
+using static YummyZoom.Domain.UnitTests.TeamCartAggregate.TeamCartTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 [TestFixture]
-public class TeamCartConversionTests : TeamCartTestHelpers
+public class TeamCartConversionTests
 {
     #region MarkAsConverted() Method Tests
 
@@ -30,6 +33,21 @@ public class TeamCartConversionTests : TeamCartTestHelpers
     {
         // Arrange
         var teamCart = CreateValidTeamCart();
+        
+        // First add an item to the cart so we can lock it
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        teamCart.AddItem(
+            DefaultHostUserId, 
+            menuItemId, 
+            menuCategoryId, 
+            "Test Item", 
+            new Money(10.99m, "USD"), 
+            1).ShouldBeSuccessful();
+        
+        // Lock the cart
+        teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        teamCart.Status.Should().Be(TeamCartStatus.Locked);
 
         // Act
         var result = teamCart.MarkAsConverted();
@@ -37,6 +55,7 @@ public class TeamCartConversionTests : TeamCartTestHelpers
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.InvalidStatusForConversion);
+        teamCart.Status.Should().Be(TeamCartStatus.Locked); // Ensure status remains Locked
     }
 
     [Test]
@@ -66,6 +85,7 @@ public class TeamCartConversionTests : TeamCartTestHelpers
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.InvalidStatusForConversion);
+        teamCart.Status.Should().Be(TeamCartStatus.Locked); // Ensure status remains Locked
     }
 
     [Test]

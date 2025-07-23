@@ -5,12 +5,10 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
-using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
+using static YummyZoom.Domain.UnitTests.TeamCartAggregate.TeamCartTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
@@ -18,9 +16,7 @@ namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 public class TeamCartFinancialTests
 {
     private TeamCart _teamCart = null!;
-    private UserId _hostUserId = null!;
     private UserId _guestUserId = null!;
-    private RestaurantId _restaurantId = null!;
     private MenuItemId _menuItemId1 = null!;
     private MenuItemId _menuItemId2 = null!;
     private MenuCategoryId _menuCategoryId = null!;
@@ -28,25 +24,23 @@ public class TeamCartFinancialTests
     [SetUp]
     public void SetUp()
     {
-        _hostUserId = UserId.CreateUnique();
         _guestUserId = UserId.CreateUnique();
-        _restaurantId = RestaurantId.CreateUnique();
         _menuItemId1 = MenuItemId.CreateUnique();
         _menuItemId2 = MenuItemId.CreateUnique();
         _menuCategoryId = MenuCategoryId.CreateUnique();
 
         // Create a team cart and add members
-        _teamCart = TeamCart.Create(_hostUserId, _restaurantId, "Host User").Value;
-        _teamCart.AddMember(_guestUserId, "Guest User");
+        _teamCart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
+        _teamCart.AddMember(_guestUserId, DefaultGuestName).ShouldBeSuccessful();
 
         // Add items to the cart
         _teamCart.AddItem(
-            _hostUserId,
+            DefaultHostUserId,
             _menuItemId1,
             _menuCategoryId,
             "Test Item 1",
             new Money(10.00m, Currencies.Default),
-            1);
+            1).ShouldBeSuccessful();
 
         _teamCart.AddItem(
             _guestUserId,
@@ -54,14 +48,10 @@ public class TeamCartFinancialTests
             _menuCategoryId,
             "Test Item 2",
             new Money(15.00m, Currencies.Default),
-            1);
+            1).ShouldBeSuccessful();
 
-        // Initiate checkout to move to AwaitingPayments status
-        _teamCart.InitiateCheckout(_hostUserId);
-
-        // Add payment commitments
-        _teamCart.CommitToCashOnDelivery(_hostUserId, new Money(10.00m, Currencies.Default));
-        _teamCart.RecordSuccessfulOnlinePayment(_guestUserId, new Money(15.00m, Currencies.Default), "txn_123");
+        // Lock the cart for payment
+        _teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
     }
 
     #region ApplyTip Tests
@@ -73,7 +63,7 @@ public class TeamCartFinancialTests
         var tipAmount = new Money(5.00m, Currencies.Default);
 
         // Act
-        var result = _teamCart.ApplyTip(_hostUserId, tipAmount);
+        var result = _teamCart.ApplyTip(DefaultHostUserId, tipAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -102,7 +92,7 @@ public class TeamCartFinancialTests
         var tipAmount = new Money(-5.00m, Currencies.Default);
 
         // Act
-        var result = _teamCart.ApplyTip(_hostUserId, tipAmount);
+        var result = _teamCart.ApplyTip(DefaultHostUserId, tipAmount);
 
         // Assert
         result.ShouldBeFailure();
@@ -114,30 +104,31 @@ public class TeamCartFinancialTests
     public void ApplyTip_InOpenStatus_ShouldFail()
     {
         // Arrange
-        var teamCart = TeamCart.Create(_hostUserId, _restaurantId, "Host User").Value;
+        var teamCart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
         var tipAmount = new Money(5.00m, Currencies.Default);
 
         // Act
-        var result = teamCart.ApplyTip(_hostUserId, tipAmount);
+        var result = teamCart.ApplyTip(DefaultHostUserId, tipAmount);
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.CannotModifyFinancialsInCurrentStatus);
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
         teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default));
     }
 
     [Test]
-    public void ApplyTip_InReadyToConfirmStatus_ShouldSucceed()
+    public void ApplyTip_InReadyToConfirmStatus_ShouldFail()
     {
         // Arrange - Set up a cart in ReadyToConfirm status
+        var teamCart = CreateTeamCartReadyForConversion();
         var tipAmount = new Money(5.00m, Currencies.Default);
 
         // Act
-        var result = _teamCart.ApplyTip(_hostUserId, tipAmount);
+        var result = teamCart.ApplyTip(DefaultHostUserId, tipAmount);
 
         // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.TipAmount.Should().Be(tipAmount);
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
     }
 
     [Test]
@@ -148,8 +139,8 @@ public class TeamCartFinancialTests
         var updatedTip = new Money(7.50m, Currencies.Default);
 
         // Act
-        _teamCart.ApplyTip(_hostUserId, initialTip);
-        var result = _teamCart.ApplyTip(_hostUserId, updatedTip);
+        _teamCart.ApplyTip(DefaultHostUserId, initialTip).ShouldBeSuccessful();
+        var result = _teamCart.ApplyTip(DefaultHostUserId, updatedTip);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -165,16 +156,14 @@ public class TeamCartFinancialTests
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
+        var result = _teamCart.ApplyCoupon(DefaultHostUserId, couponId);
 
         // Assert
         result.ShouldBeSuccessful();
         _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m);
+        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default)); // Tip should be reset
     }
 
     [Test]
@@ -182,17 +171,14 @@ public class TeamCartFinancialTests
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Act
-        var result = _teamCart.ApplyCoupon(_guestUserId, couponId, couponValue, appliesTo, null);
+        var result = _teamCart.ApplyCoupon(_guestUserId, couponId);
 
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.OnlyHostCanModifyFinancials);
         _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
     }
 
     [Test]
@@ -201,144 +187,78 @@ public class TeamCartFinancialTests
         // Arrange
         var couponId1 = CouponId.CreateUnique();
         var couponId2 = CouponId.CreateUnique();
-        var couponValue1 = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var couponValue2 = CouponValue.CreateFixedAmount(new Money(10.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Apply first coupon
-        _teamCart.ApplyCoupon(_hostUserId, couponId1, couponValue1, appliesTo, null);
+        _teamCart.ApplyCoupon(DefaultHostUserId, couponId1).ShouldBeSuccessful();
 
         // Act - Try to apply second coupon
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId2, couponValue2, appliesTo, null);
+        var result = _teamCart.ApplyCoupon(DefaultHostUserId, couponId2);
 
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.CouponAlreadyApplied);
         _teamCart.AppliedCouponId.Should().Be(couponId1); // First coupon should still be applied
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m); // Discount should remain from first coupon
     }
 
     [Test]
-    public void ApplyCoupon_WithInsufficientSubtotal_ShouldFail()
+    public void ApplyCoupon_InOpenStatus_ShouldFail()
     {
         // Arrange
+        var teamCart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
-        var minOrderAmount = new Money(50.00m, Currencies.Default); // Higher than cart total
 
         // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, minOrderAmount);
+        var result = teamCart.ApplyCoupon(DefaultHostUserId, couponId);
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.CouponNotApplicable);
-        _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+        teamCart.AppliedCouponId.Should().BeNull();
     }
 
     [Test]
-    public void ApplyCoupon_WithValidFixedAmountCoupon_ShouldCalculateCorrectDiscount()
+    public void ApplyCoupon_InReadyToConfirmStatus_ShouldFail()
     {
         // Arrange
+        var teamCart = CreateTeamCartReadyForConversion();
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m);
-    }
-
-    [Test]
-    public void ApplyCoupon_WithValidPercentageCoupon_ShouldCalculateCorrectDiscount()
-    {
-        // Arrange
-        var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreatePercentage(20).Value; // 20% off
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
-
-        // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m); // 20% of 25.00 = 5.00
-    }
-
-    [Test]
-    public void ApplyCoupon_WithSpecificItemScope_ShouldCalculateCorrectDiscount()
-    {
-        // Arrange
-        var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreatePercentage(50).Value; // 50% off
-        var appliesTo = AppliesTo.CreateForSpecificItems(new List<MenuItemId> { _menuItemId1 }).Value;
-
-        // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m); // 50% of 10.00 = 5.00
-    }
-
-    [Test]
-    public void ApplyCoupon_WithSpecificCategoryScope_ShouldCalculateCorrectDiscount()
-    {
-        // Arrange
-        var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreatePercentage(40).Value; // 40% off
-        var appliesTo = AppliesTo.CreateForSpecificCategories(new List<MenuCategoryId> { _menuCategoryId }).Value;
-
-        // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(10.00m); // 40% of 25.00 = 10.00
-    }
-
-    [Test]
-    public void ApplyCoupon_WithFreeItemCoupon_ShouldCalculateCorrectDiscount()
-    {
-        // Arrange
-        var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFreeItem(_menuItemId1).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
-
-        // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.DiscountAmount.Amount.Should().Be(10.00m); // Free item worth 10.00
-    }
-
-    [Test]
-    public void ApplyCoupon_WithFreeItemNotInCart_ShouldFail()
-    {
-        // Arrange
-        var couponId = CouponId.CreateUnique();
-        var nonExistentItemId = MenuItemId.CreateUnique();
-        var couponValue = CouponValue.CreateFreeItem(nonExistentItemId).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
-
-        // Act
-        var result = _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
+        var result = teamCart.ApplyCoupon(DefaultHostUserId, couponId);
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.CouponNotApplicable);
-        _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+    }
+
+    [Test]
+    public void ApplyCoupon_InConvertedStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = CreateConvertedTeamCart();
+        var couponId = CouponId.CreateUnique();
+
+        // Act
+        var result = teamCart.ApplyCoupon(DefaultHostUserId, couponId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+    }
+
+    [Test]
+    public void ApplyCoupon_InExpiredStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = CreateExpiredTeamCart();
+        var couponId = CouponId.CreateUnique();
+
+        // Act
+        var result = teamCart.ApplyCoupon(DefaultHostUserId, couponId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
     }
 
     #endregion
@@ -346,35 +266,32 @@ public class TeamCartFinancialTests
     #region RemoveCoupon Tests
 
     [Test]
-    public void RemoveCoupon_WhenCouponApplied_ShouldRemoveCouponAndResetDiscount()
+    public void RemoveCoupon_WhenCouponApplied_ShouldRemoveCoupon()
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Apply coupon first
-        _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
+        _teamCart.ApplyCoupon(DefaultHostUserId, couponId).ShouldBeSuccessful();
 
         // Act
-        var result = _teamCart.RemoveCoupon(_hostUserId);
+        var result = _teamCart.RemoveCoupon(DefaultHostUserId);
 
         // Assert
         result.ShouldBeSuccessful();
         _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
+        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default)); // Tip should be reset
     }
 
     [Test]
     public void RemoveCoupon_WhenNoCouponApplied_ShouldSucceed()
     {
         // Act
-        var result = _teamCart.RemoveCoupon(_hostUserId);
+        var result = _teamCart.RemoveCoupon(DefaultHostUserId);
 
         // Assert
         result.ShouldBeSuccessful();
         _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
     }
 
     [Test]
@@ -382,11 +299,9 @@ public class TeamCartFinancialTests
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        var couponValue = CouponValue.CreateFixedAmount(new Money(5.00m, Currencies.Default)).Value;
-        var appliesTo = AppliesTo.CreateForWholeOrder().Value;
 
         // Apply coupon first
-        _teamCart.ApplyCoupon(_hostUserId, couponId, couponValue, appliesTo, null);
+        _teamCart.ApplyCoupon(DefaultHostUserId, couponId).ShouldBeSuccessful();
 
         // Act
         var result = _teamCart.RemoveCoupon(_guestUserId);
@@ -395,7 +310,78 @@ public class TeamCartFinancialTests
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.OnlyHostCanModifyFinancials);
         _teamCart.AppliedCouponId.Should().Be(couponId); // Coupon should still be applied
-        _teamCart.DiscountAmount.Amount.Should().Be(5.00m); // Discount should remain
+    }
+
+    [Test]
+    public void RemoveCoupon_InOpenStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
+        var couponId = CouponId.CreateUnique();
+        // Note: ApplyCoupon in open status will fail, but this setup is for testing RemoveCoupon's behavior in that state.
+        // The actual ApplyCoupon test for Open status already asserts failure.
+        teamCart.ApplyCoupon(DefaultHostUserId, couponId); 
+
+        // Act
+        var result = teamCart.RemoveCoupon(DefaultHostUserId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+    }
+
+    [Test]
+    public void RemoveCoupon_InReadyToConfirmStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = CreateTeamCartReadyForConversion();
+        var couponId = CouponId.CreateUnique();
+        
+        // We need to set the AppliedCouponId directly since we can't apply a coupon in ReadyToConfirm status
+        typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
+
+        // Act
+        var result = teamCart.RemoveCoupon(DefaultHostUserId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+    }
+
+    [Test]
+    public void RemoveCoupon_InConvertedStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = CreateConvertedTeamCart();
+        var couponId = CouponId.CreateUnique();
+        
+        // We need to set the AppliedCouponId directly since we can't apply a coupon in Converted status
+        typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
+
+        // Act
+        var result = teamCart.RemoveCoupon(DefaultHostUserId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+    }
+
+    [Test]
+    public void RemoveCoupon_InExpiredStatus_ShouldFail()
+    {
+        // Arrange
+        var teamCart = CreateExpiredTeamCart();
+        var couponId = CouponId.CreateUnique();
+        
+        // We need to set the AppliedCouponId directly since we can't apply a coupon in Expired status
+        typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
+
+        // Act
+        var result = teamCart.RemoveCoupon(DefaultHostUserId);
+
+        // Assert
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
     }
 
     #endregion

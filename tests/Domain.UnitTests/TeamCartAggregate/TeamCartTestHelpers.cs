@@ -1,26 +1,31 @@
+using FluentAssertions;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
-using YummyZoom.Domain.TeamCartAggregate.Entities;
-using YummyZoom.Domain.TeamCartAggregate.Enums;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
+using YummyZoom.Domain.TeamCartAggregate.Entities;
+using System.Reflection;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
-public abstract class TeamCartTestHelpers
+public static class TeamCartTestHelpers
 {
-    protected static readonly UserId DefaultHostUserId = UserId.CreateUnique();
-    protected static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
-    protected const string DefaultHostName = "Host User";
-    protected const string DefaultGuestName = "Guest User";
-    protected static readonly DateTime DefaultDeadline = DateTime.UtcNow.AddHours(2);
+    public static readonly UserId DefaultHostUserId = UserId.CreateUnique();
+    public static readonly RestaurantId DefaultRestaurantId = RestaurantId.CreateUnique();
+    public const string DefaultHostName = "Host User";
+    public const string DefaultGuestName = "Guest User";
+    public static readonly UserId DefaultGuestUserId1 = UserId.CreateUnique();
+    public static readonly UserId DefaultGuestUserId2 = UserId.CreateUnique();
+    public static readonly DateTime DefaultDeadline = DateTime.UtcNow.AddHours(2);
     
-    protected static TeamCart CreateValidTeamCart()
+    public static TeamCart CreateValidTeamCart()
     {
         return TeamCart.Create(
             DefaultHostUserId,
@@ -29,42 +34,30 @@ public abstract class TeamCartTestHelpers
             DefaultDeadline).Value;
     }
     
-    protected static TeamCart CreateTeamCartWithGuest()
+    public static TeamCart CreateTeamCartWithGuest()
     {
         var teamCart = CreateValidTeamCart();
         var guestUserId = UserId.CreateUnique();
         var result = teamCart.AddMember(guestUserId, DefaultGuestName);
-        result.ShouldBeSuccessful(); // Ensure the addition was successful
+        result.IsSuccess.Should().BeTrue(); // Ensure the addition was successful
         return teamCart;
     }
     
-    protected static TeamCart CreateExpiredTeamCart()
+    public static TeamCart CreateExpiredTeamCart()
     {
-        // Create a valid team cart first (with a future deadline)
         var teamCart = CreateValidTeamCart();
-        
-        // Use reflection to set the ExpiresAt and Deadline to a past date
-        // This is necessary because we can't directly set these properties
         var pastDate = DateTime.UtcNow.AddHours(-1);
-        typeof(TeamCart).GetProperty("ExpiresAt")?.SetValue(teamCart, pastDate);
-        typeof(TeamCart).GetProperty("Deadline")?.SetValue(teamCart, pastDate);
-        
-        // Explicitly mark as expired
+        typeof(TeamCart).GetProperty(nameof(TeamCart.ExpiresAt))!.SetValue(teamCart, pastDate);
+        typeof(TeamCart).GetProperty(nameof(TeamCart.Deadline))!.SetValue(teamCart, pastDate);
         var result = teamCart.MarkAsExpired();
-        result.ShouldBeSuccessful(); // Ensure the transition was successful
+        result.IsSuccess.Should().BeTrue();
         return teamCart;
     }
-    
-    #region Phase 4 Helper Methods
 
-    /// <summary>
-    /// Creates a team cart with all payment information collected - ready for conversion
-    /// </summary>
-    protected static TeamCart CreateTeamCartReadyForConversion()
+    public static TeamCart CreateTeamCartReadyForConversion()
     {
         var teamCart = CreateTeamCartWithGuest();
         
-        // Add some items first
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         
@@ -73,29 +66,23 @@ public abstract class TeamCartTestHelpers
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, 
             menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
         
-        // Initiate checkout
-        var checkoutResult = teamCart.InitiateCheckout(DefaultHostUserId);
-        checkoutResult.ShouldBeSuccessful();
+        var lockResult = teamCart.LockForPayment(DefaultHostUserId);
+        lockResult.IsSuccess.Should().BeTrue();
         
-        // Add payment information using the new payment methods
         var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
-        hostResult.ShouldBeSuccessful();
+        hostResult.IsSuccess.Should().BeTrue();
         
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
         var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
-        guestResult.ShouldBeSuccessful();
+        guestResult.IsSuccess.Should().BeTrue();
         
         return teamCart;
     }
 
-    /// <summary>
-    /// Creates a team cart with partial payment information - not ready for conversion
-    /// </summary>
-    protected static TeamCart CreateTeamCartWithPartialPayment()
+    public static TeamCart CreateTeamCartWithPartialPayment()
     {
         var teamCart = CreateTeamCartWithGuest();
         
-        // Add some items first
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         
@@ -104,25 +91,19 @@ public abstract class TeamCartTestHelpers
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, 
             menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
         
-        // Initiate checkout
-        var checkoutResult = teamCart.InitiateCheckout(DefaultHostUserId);
-        checkoutResult.ShouldBeSuccessful();
+        var lockResult = teamCart.LockForPayment(DefaultHostUserId);
+        lockResult.IsSuccess.Should().BeTrue();
         
-        // Add payment information to only the host member
         var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
-        hostResult.ShouldBeSuccessful();
+        hostResult.IsSuccess.Should().BeTrue();
         
         return teamCart;
     }
 
-    /// <summary>
-    /// Creates a team cart with Cash on Delivery payment method
-    /// </summary>
-    protected static TeamCart CreateTeamCartWithCODPayment()
+    public static TeamCart CreateTeamCartWithCODPayment()
     {
         var teamCart = CreateTeamCartWithGuest();
         
-        // Add some items first
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         
@@ -131,72 +112,28 @@ public abstract class TeamCartTestHelpers
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, 
             menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
         
-        // Initiate checkout
-        var checkoutResult = teamCart.InitiateCheckout(DefaultHostUserId);
-        checkoutResult.ShouldBeSuccessful();
+        var lockResult = teamCart.LockForPayment(DefaultHostUserId);
+        lockResult.IsSuccess.Should().BeTrue();
         
-        // Add COD payment (both members)
         var hostResult = teamCart.CommitToCashOnDelivery(DefaultHostUserId, new Money(25.00m, Currencies.Default));
-        hostResult.ShouldBeSuccessful();
+        hostResult.IsSuccess.Should().BeTrue();
         
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
         var guestResult = teamCart.CommitToCashOnDelivery(guestUserId, new Money(30.00m, Currencies.Default));
-        guestResult.ShouldBeSuccessful();
+        guestResult.IsSuccess.Should().BeTrue();
         
         return teamCart;
     }
 
-    /// <summary>
-    /// Creates a team cart that has already been converted to order
-    /// </summary>
-    protected static TeamCart CreateConvertedTeamCart()
+    public static TeamCart CreateConvertedTeamCart()
     {
         var teamCart = CreateTeamCartReadyForConversion();
-        
-        // Mark as converted
         var result = teamCart.MarkAsConverted();
-        result.ShouldBeSuccessful();
-        
+        result.IsSuccess.Should().BeTrue();
         return teamCart;
     }
-
-    /// <summary>
-    /// Creates sample payment transactions for testing
-    /// </summary>
-    protected static List<PaymentTransaction> CreateSamplePaymentTransactions()
-    {
-        var transactions = new List<PaymentTransaction>();
-        
-        // Host payment
-        var hostPayment = PaymentTransaction.Create(
-            PaymentMethodType.CreditCard,
-            PaymentTransactionType.Payment,
-            new Money(25.00m, Currencies.Default),
-            DateTime.UtcNow,
-            "Visa ending in 1234",
-            "stripe_pi_host_123",
-            DefaultHostUserId);
-        transactions.Add(hostPayment.Value);
-        
-        // Guest payment
-        var guestUserId = UserId.CreateUnique();
-        var guestPayment = PaymentTransaction.Create(
-            PaymentMethodType.CreditCard,
-            PaymentTransactionType.Payment,
-            new Money(30.00m, Currencies.Default),
-            DateTime.UtcNow,
-            "Mastercard ending in 5678",
-            "stripe_pi_guest_456",
-            guestUserId);
-        transactions.Add(guestPayment.Value);
-        
-        return transactions;
-    }
-
-    /// <summary>
-    /// Creates payment transactions that match the team cart's payment structure
-    /// </summary>
-    protected static List<PaymentTransaction> CreatePaymentTransactionsForTeamCart(TeamCart teamCart)
+    
+    public static List<PaymentTransaction> CreatePaymentTransactionsForTeamCart(TeamCart teamCart)
     {
         var transactions = new List<PaymentTransaction>();
         
@@ -207,36 +144,88 @@ public abstract class TeamCartTestHelpers
                 PaymentTransactionType.Payment,
                 memberPayment.Amount,
                 DateTime.UtcNow,
-                "Online Payment",
-                $"stripe_pi_{memberPayment.UserId.Value}",
-                memberPayment.UserId);
-            transactions.Add(transaction.Value);
+                paidByUserId: memberPayment.UserId).Value;
+            transactions.Add(transaction);
         }
         
         return transactions;
     }
 
-    /// <summary>
-    /// Creates COD payment transactions (host as guarantor)
-    /// </summary>
-    protected static List<PaymentTransaction> CreateCODPaymentTransactions(TeamCart teamCart)
+    public static TeamCart CreateTeamCartReadyForConversionWithCODPayment()
     {
-        var transactions = new List<PaymentTransaction>();
+        var teamCart = CreateTeamCartWithCODPayment();
+        teamCart.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
+        return teamCart;
+    }
+    
+    public static TeamCart CreateTeamCartReadyForConversionWithPartialPayment()
+    {
+        var teamCart = CreateTeamCartWithPartialPayment();
+        var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
+        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
+        guestResult.IsSuccess.Should().BeTrue();
+        teamCart.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
+        return teamCart;
+    }
+    
+    public static TeamCart CreateTeamCartWithMultipleItems()
+    {
+        var teamCart = CreateTeamCartWithGuest();
         
-        var totalAmount = teamCart.MemberPayments.Sum(mp => mp.Amount.Amount);
+        var menuItemId1 = MenuItemId.CreateUnique();
+        var menuItemId2 = MenuItemId.CreateUnique();
+        var menuItemId3 = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
         
-        var codTransaction = PaymentTransaction.Create(
-            PaymentMethodType.CashOnDelivery,
-            PaymentTransactionType.Payment,
-            new Money(totalAmount, Currencies.Default),
-            DateTime.UtcNow,
-            "Cash on Delivery",
-            null,
-            teamCart.HostUserId);
-        transactions.Add(codTransaction.Value);
+        teamCart.AddItem(DefaultHostUserId, menuItemId1, menuCategoryId, "Pizza Margherita", new Money(15.00m, Currencies.Default), 2);
+        teamCart.AddItem(DefaultHostUserId, menuItemId2, menuCategoryId, "Caesar Salad", new Money(12.00m, Currencies.Default), 1);
+        teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, menuItemId3, menuCategoryId, "Pasta Carbonara", new Money(18.00m, Currencies.Default), 1);
         
-        return transactions;
+        return teamCart;
+    }
+    
+    public static TeamCart CreateTeamCartWithCustomizations()
+    {
+        var teamCart = CreateTeamCartWithGuest();
+        
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        
+        var customizations = new List<TeamCartItemCustomization>
+        {
+            TeamCartItemCustomization.Create("Size", "Extra Cheese", new Money(2.50m, Currencies.Default)).Value,
+            TeamCartItemCustomization.Create("Toppings", "Pepperoni", new Money(3.00m, Currencies.Default)).Value
+        };
+        
+        var addResult = teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Custom Pizza", new Money(20.00m, Currencies.Default), 1, customizations);
+        addResult.IsSuccess.Should().BeTrue();
+        
+        return teamCart;
+    }
+    
+    public static TeamCart CreateAlreadyConvertedTeamCart()
+    {
+        var teamCart = CreateTeamCartReadyForConversion();
+        var result = teamCart.MarkAsConverted();
+        result.IsSuccess.Should().BeTrue();
+        return teamCart;
     }
 
-    #endregion
+    /// <summary>
+    /// Creates a TeamCart in a ReadyToConfirm state but with no items.
+    /// This is an invalid state used to test boundary conditions of the conversion service.
+    /// </summary>
+    public static TeamCart CreateReadyForConversionCartWithNoItems()
+    {
+        var teamCart = CreateValidTeamCart();
+
+        // Use reflection to force the cart into a ReadyToConfirm state
+        // without satisfying the business rule of having items.
+        typeof(TeamCart).GetProperty(nameof(TeamCart.Status))!.SetValue(teamCart, TeamCartStatus.ReadyToConfirm);
+
+        teamCart.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
+        teamCart.Items.Should().BeEmpty();
+    
+        return teamCart;
+    }
 }

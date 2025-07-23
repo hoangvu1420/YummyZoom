@@ -29,7 +29,7 @@ The `TeamCart` aggregate represents a collaborative shopping cart where multiple
   * `ShareableLinkToken`: Token used for inviting others to join the team cart.
   * `TeamCartItemCustomization`: Represents customization choices for menu items.
 * **Key Enums:**
-  * `TeamCartStatus`: Cart lifecycle states (Open, AwaitingPayments, ReadyToConfirm, Converted, Expired).
+  * `TeamCartStatus`: Cart lifecycle states (Open, Locked, ReadyToConfirm, Converted, Expired).
   * `MemberRole`: Role of a member in the team cart (Host, Guest).
   * `PaymentMethod`: Payment method types (Online, CashOnDelivery).
   * `PaymentStatus`: Status of a payment (Pending, CommittedToCOD, PaidOnline, Failed).
@@ -69,11 +69,11 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `Result AddMember(UserId userId, string name, MemberRole role = MemberRole.Guest)` | Adds a new member to the team cart. | Checks if cart is open and member doesn't already exist. | `TeamCartErrors.MemberNameRequired`, `TeamCartErrors.CannotAddMembersToClosedCart`, `TeamCartErrors.MemberAlreadyExists` |
 | `Result SetDeadline(UserId requestingUserId, DateTime deadline)` | Sets or updates the deadline for the team cart. | Validates that requestor is host and deadline is in future. | `TeamCartErrors.OnlyHostCanSetDeadline`, `TeamCartErrors.CannotModifyClosedCart`, `TeamCartErrors.DeadlineInPast` |
 | `Result AddItem(UserId userId, MenuItemId menuItemId, MenuCategoryId menuCategoryId, string itemName, Money basePrice, int quantity, List<TeamCartItemCustomization>? customizations = null)` | Adds an item to the team cart with optional customizations. | Checks if cart is open and user is a member. | `TeamCartErrors.CannotAddItemsToClosedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidQuantity` |
-| `Result InitiateCheckout(UserId requestingUserId)` | Initiates the checkout process, transitioning the cart to AwaitingPayments status. | Validates that requestor is host and cart has items. | `TeamCartErrors.OnlyHostCanInitiateCheckout`, `TeamCartErrors.CannotModifyClosedCart`, `TeamCartErrors.CannotInitiateCheckoutWithoutItems`, `TeamCartErrors.CannotInitiateCheckoutWithoutMembers` |
-| `Result CommitToCashOnDelivery(UserId userId, Money amount)` | Records a member's firm commitment to pay with Cash on Delivery. | Validates user is member and amount matches their items. | `TeamCartErrors.CannotCommitPaymentInCurrentStatus`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount` |
-| `Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)` | Records a successful online payment after confirmation by payment gateway. | Validates user is member, amount matches their items, and transaction ID is valid. | `TeamCartErrors.CannotCommitPaymentInCurrentStatus`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount`, `TeamCartErrors.InvalidTransactionId` |
-| `Result ApplyTip(UserId requestingUserId, Money tipAmount)` | Adds or updates the tip amount for the team cart. | Validates requestor is host and tip is non-negative. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CannotModifyFinancialsInCurrentStatus`, `TeamCartErrors.InvalidTip` |
-| `Result ApplyCoupon(UserId requestingUserId, CouponId couponId, CouponValue couponValue, AppliesTo appliesTo, Money? minOrderAmount)` | Applies a coupon to the team cart, calculating the discount. | Validates requestor is host and coupon is applicable. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CannotModifyFinancialsInCurrentStatus`, `TeamCartErrors.CouponAlreadyApplied`, `TeamCartErrors.CouponNotApplicable` |
+| `Result LockForPayment(UserId requestingUserId)` | Locks the team cart, preventing further item modifications and initiating the payment phase. | Validates that requestor is host and cart has items. | `TeamCartErrors.OnlyHostCanLockCart`, `TeamCartErrors.CannotLockCartInCurrentStatus`, `TeamCartErrors.CannotLockEmptyCart` |
+| `Result CommitToCashOnDelivery(UserId userId, Money amount)` | Records a member's firm commitment to pay with Cash on Delivery. | Validates user is member and amount matches their items. | `TeamCartErrors.CanOnlyPayOnLockedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount` |
+| `Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)` | Records a successful online payment after confirmation by payment gateway. | Validates user is member, amount matches their items, and transaction ID is valid. | `TeamCartErrors.CanOnlyPayOnLockedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount`, `TeamCartErrors.InvalidTransactionId` |
+| `Result ApplyTip(UserId requestingUserId, Money tipAmount)` | Adds or updates the tip amount for the team cart. | Validates requestor is host and tip is non-negative. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CanOnlyApplyFinancialsToLockedCart`, `TeamCartErrors.InvalidTip` |
+| `Result ApplyCoupon(UserId requestingUserId, CouponId couponId)` | Applies a coupon to the team cart by storing its ID. | Validates requestor is host and cart is locked. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CanOnlyApplyFinancialsToLockedCart`, `TeamCartErrors.CouponAlreadyApplied` |
 | `Result RemoveCoupon(UserId requestingUserId)` | Removes the currently applied coupon. | Validates requestor is host. | `TeamCartErrors.OnlyHostCanModifyFinancials` |
 | `Result MarkAsExpired()` | Marks the team cart as expired. | None | None |
 | `Result MarkAsConverted()` | Marks the TeamCart as converted after successful Order creation. | Validates cart is in ReadyToConfirm status. | `TeamCartErrors.InvalidStatusForConversion` |
@@ -97,7 +97,6 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `MemberPayments` | `IReadOnlyList<MemberPayment>` | A read-only list of member payments in this team cart. |
 | `TipAmount` | `Money` | The tip amount for the order, set by the Host. |
 | `AppliedCouponId` | `CouponId?` | The ID of the coupon applied to the team cart. |
-| `DiscountAmount` | `Money` | The discount amount calculated from the applied coupon. |
 
 ### 4.2. Public Query Methods
 
@@ -117,9 +116,10 @@ The aggregate raises the following domain events to communicate significant stat
 | `TeamCartCreated` | During the `Create` factory method. | Signals that a new team cart has been created with initial details. |
 | `MemberJoined` | After a successful call to `AddMember` (for guests only). | Signals that a new member has joined the team cart. |
 | `ItemAddedToTeamCart` | After a successful call to `AddItem`. | Signals that a new item has been added to the team cart. |
+| `TeamCartLockedForPayment` | After a successful call to `LockForPayment`. | Signals that the team cart has been locked for payment. |
 | `MemberCommittedToPayment` | After a successful call to `CommitToCashOnDelivery`. | Signals that a member has committed to pay with cash on delivery. |
 | `OnlinePaymentSucceeded` | After a successful call to `RecordSuccessfulOnlinePayment`. | Signals that a member has successfully completed an online payment. |
-| `TeamCartReadyForConfirmation` | When all members have committed to payment. | Signals that the team cart is ready to be converted to an order. |
+| `TeamCartReadyForConfirmation` | When all members have committed to payment. | Signals that the team cart is ready to be converted to an order, including total and cash amounts. |
 | `TeamCartExpired` | After a successful call to `MarkAsExpired`. | Signals that the team cart has expired. |
 | `TeamCartConverted` | After a successful conversion to an Order. | Signals that the team cart has been successfully converted to an Order. |
 
@@ -205,8 +205,8 @@ public static Result<MemberPayment> Create(UserId userId, Money amount, PaymentM
 ### 7.2. Status Transitions
 
 * Valid transitions are enforced by business logic:
-  * Open → AwaitingPayments (via InitiateCheckout)
-  * AwaitingPayments → ReadyToConfirm (automatic when all payments complete)
+  * Open → Locked (via LockForPayment)
+  * Locked → ReadyToConfirm (automatic when all payments complete)
   * ReadyToConfirm → Converted (via external conversion service)
   * Any status → Expired (via expiration)
 
@@ -221,8 +221,8 @@ public static Result<MemberPayment> Create(UserId userId, Money amount, PaymentM
 ### 7.4. Financial Management
 
 * Only the host can modify financial details (tip, coupons)
-* Financial details can only be modified in AwaitingPayments or ReadyToConfirm status
-* Only one coupon can be applied at a time
+* Financial details can only be modified in Locked or ReadyToConfirm status
+* Only one coupon can be applied at a time, and it's stored by ID without immediate calculation.
 * Tip amount cannot be negative
 
 ### 7.5. Conversion Rules

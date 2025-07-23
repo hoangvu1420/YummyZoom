@@ -1,11 +1,11 @@
-using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
+using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.Events;
@@ -19,38 +19,231 @@ namespace YummyZoom.Domain.Services;
 /// </summary>
 public sealed class TeamCartConversionService
 {
+    private readonly OrderFinancialService _financialService;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TeamCartConversionService"/> class.
+    /// </summary>
+    /// <param name="financialService">The financial service for calculating order totals and discounts.</param>
+    public TeamCartConversionService(OrderFinancialService financialService)
+    {
+        _financialService = financialService;
+    }
+
     /// <summary>
     /// Converts a TeamCart to an Order with the provided delivery details.
     /// </summary>
     /// <param name="teamCart">The TeamCart to convert.</param>
     /// <param name="deliveryAddress">The delivery address for the order.</param>
     /// <param name="specialInstructions">Special instructions for the order.</param>
+    /// <param name="coupon">The full Coupon object, if one was applied.</param>
+    /// <param name="currentUserCouponUsageCount">For validation.</param>
+    /// <param name="deliveryFee">The delivery fee for the order.</param>
+    /// <param name="taxAmount">The tax amount for the order.</param>
     /// <returns>A tuple containing the created Order and updated TeamCart.</returns>
     public Result<(Order Order, TeamCart TeamCart)> ConvertToOrder(
         TeamCart teamCart,
         DeliveryAddress deliveryAddress,
-        string specialInstructions)
+        string specialInstructions,
+        Coupon? coupon,
+        int currentUserCouponUsageCount,
+        Money deliveryFee,
+        Money taxAmount)
     {
-        // 1. Validate the TeamCart's state
+        Console.WriteLine("\n--- [DEBUG] Starting ConvertToOrder ---");
+        Console.WriteLine($"[DEBUG] TeamCart Status: {teamCart.Status}");
+        Console.WriteLine($"[DEBUG] Expected Status: {TeamCartStatus.ReadyToConfirm}");
+        Console.WriteLine($"[DEBUG] Status Check Result: {teamCart.Status != TeamCartStatus.ReadyToConfirm}");
+        
+        // 1. Validate State
         if (teamCart.Status != TeamCartStatus.ReadyToConfirm)
         {
+            Console.WriteLine($"[DEBUG] !!! Status validation FAILED. Returning InvalidStatusForConversion error.");
             return Result.Failure<(Order, TeamCart)>(TeamCartErrors.InvalidStatusForConversion);
         }
-
-        if (teamCart.Items.Count == 0)
-        {
-            return Result.Failure<(Order, TeamCart)>(TeamCartErrors.ConversionDataIncomplete);
-        }
-
-        if (teamCart.MemberPayments.Count == 0)
-        {
-            return Result.Failure<(Order, TeamCart)>(TeamCartErrors.CannotConvertWithoutPayments);
-        }
-
+        
+        Console.WriteLine("[DEBUG] Status validation PASSED. Proceeding with conversion...");
+        
         // 2. Map TeamCartItems to OrderItems
+        var orderItems = MapToOrderItems(teamCart.Items);
+
+        // 3. Perform All Financial Calculations using OrderFinancialService
+        var subtotal = _financialService.CalculateSubtotal(orderItems);
+        Console.WriteLine($"[DEBUG] Calculated Subtotal: {subtotal.Amount}");
+
+        Money discountAmount = Money.Zero(subtotal.Currency);
+        
+        if (coupon is not null && teamCart.AppliedCouponId is not null && teamCart.AppliedCouponId == coupon.Id)
+        {
+            var discountResult = _financialService.ValidateAndCalculateDiscount(
+                coupon,
+                currentUserCouponUsageCount,
+                orderItems,
+                subtotal);
+
+            if (discountResult.IsFailure)
+            {
+                Console.WriteLine($"[DEBUG] !!! Coupon validation FAILED. Error: {discountResult.Error.Code}");
+                // Pass the coupon validation error directly from the financial service
+                return Result.Failure<(Order, TeamCart)>(discountResult.Error);
+            }
+            discountAmount = discountResult.Value;
+            Console.WriteLine($"[DEBUG] Coupon applied. Discount Amount: {discountAmount.Amount}");
+        }
+
+        var totalAmount = _financialService.CalculateFinalTotal(
+            subtotal, 
+            discountAmount, 
+            deliveryFee, 
+            teamCart.TipAmount, 
+            taxAmount);
+        Console.WriteLine($"[DEBUG] Calculated Final Order Total: {totalAmount.Amount}");
+
+        // 4. Create Succeeded PaymentTransactions for the Order
+        Console.WriteLine("[DEBUG] ==> Calling CreateSucceededPaymentTransactions...");
+        var paymentTransactionsResult = CreateSucceededPaymentTransactions(teamCart, totalAmount);
+        Console.WriteLine($"[DEBUG] <== CreateSucceededPaymentTransactions Result: IsFailure={paymentTransactionsResult.IsFailure}");
+        if (paymentTransactionsResult.IsFailure)
+        {
+            Console.WriteLine($"[DEBUG] !!! Conversion failed at CreateSucceededPaymentTransactions. Error: {paymentTransactionsResult.Error.Code}");
+            return Result.Failure<(Order, TeamCart)>(paymentTransactionsResult.Error);
+        }
+
+        // 5. Create the Order using the new, correct overload
+        Console.WriteLine("[DEBUG] ==> Calling Order.Create...");
+        var orderResult = Order.Create(
+            teamCart.HostUserId,
+            teamCart.RestaurantId,
+            deliveryAddress,
+            orderItems,
+            specialInstructions,
+            subtotal,
+            discountAmount,
+            deliveryFee,
+            teamCart.TipAmount,
+            taxAmount,
+            totalAmount,
+            paymentTransactionsResult.Value, 
+            teamCart.AppliedCouponId,
+            OrderStatus.Placed,
+            sourceTeamCartId: teamCart.Id);
+
+        Console.WriteLine($"[DEBUG] <== Order.Create Result: IsFailure={orderResult.IsFailure}");
+        if (orderResult.IsFailure)
+        {
+            Console.WriteLine($"[DEBUG] !!! Conversion failed at Order.Create. Error: {orderResult.Error.Code}");
+            return Result.Failure<(Order, TeamCart)>(orderResult.Error);
+        }
+
+        // 6. Finalize TeamCart State
+        Console.WriteLine("[DEBUG] ==> Calling teamCart.MarkAsConverted...");
+        var conversionResult = teamCart.MarkAsConverted();
+        Console.WriteLine($"[DEBUG] <== teamCart.MarkAsConverted Result: IsFailure={conversionResult.IsFailure}");
+        if (conversionResult.IsFailure)
+        {
+            Console.WriteLine($"[DEBUG] !!! Conversion failed at MarkAsConverted. Error: {conversionResult.Error.Code}");
+            return Result.Failure<(Order, TeamCart)>(conversionResult.Error);
+        }
+
+        var order = orderResult.Value;
+        teamCart.AddDomainEvent(new TeamCartConverted(teamCart.Id, order.Id, DateTime.UtcNow, teamCart.HostUserId));
+
+        Console.WriteLine("[DEBUG] --- Conversion Succeeded ---");
+        return (order, teamCart);
+    }
+
+    /// <summary>
+    /// Creates PaymentTransaction entities from TeamCart MemberPayments.
+    /// </summary>
+    private Result<List<PaymentTransaction>> CreateSucceededPaymentTransactions(
+        TeamCart teamCart, 
+        Money totalAmount)
+    {
+        Console.WriteLine("\n--- [DEBUG] Inside CreateSucceededPaymentTransactions ---");
+        Console.WriteLine($"[DEBUG] Target Order Total: {totalAmount.Amount}");
+        
+        var transactions = new List<PaymentTransaction>();
+        
+        // Check if MemberPayments is null or empty
+        if (teamCart.MemberPayments is null || !teamCart.MemberPayments.Any())
+        {
+            Console.WriteLine("[DEBUG] !!! No member payments found. Returning CannotConvertWithoutPayments error.");
+            return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.CannotConvertWithoutPayments);
+        }
+        
+        Console.WriteLine($"[DEBUG] Found {teamCart.MemberPayments.Count} member payments");
+        
+        // Check if totalAmount is null
+        if (totalAmount is null)
+        {
+            Console.WriteLine("[DEBUG] !!! Total amount is null. Returning FinalPaymentMismatch error.");
+            return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
+        }
+        
+        var totalPaidByMembers = teamCart.MemberPayments.Sum(p => p.Amount.Amount);
+        Console.WriteLine($"[DEBUG] Sum of Member Payments: {totalPaidByMembers}");
+        
+        var adjustmentFactor = totalPaidByMembers > 0 ? totalAmount.Amount / totalPaidByMembers : 1;
+        Console.WriteLine($"[DEBUG] Calculated Adjustment Factor: {adjustmentFactor}");
+
+        foreach (var memberPayment in teamCart.MemberPayments)
+        {
+            // Check if memberPayment.Amount is null
+            if (memberPayment.Amount is null)
+            {
+                Console.WriteLine("[DEBUG] !!! Member payment amount is null. Returning FinalPaymentMismatch error.");
+                return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
+            }
+            
+            var adjustedAmount = new Money(memberPayment.Amount.Amount * adjustmentFactor, memberPayment.Amount.Currency);
+            Console.WriteLine($"[DEBUG]   - Member paid {memberPayment.Amount.Amount}, adjusted to {adjustedAmount.Amount}");
+            
+            var paymentMethodType = memberPayment.Method == PaymentMethod.Online 
+                ? PaymentMethodType.CreditCard
+                : PaymentMethodType.CashOnDelivery;
+
+            var transactionResult = PaymentTransaction.Create(
+                paymentMethodType,
+                PaymentTransactionType.Payment,
+                adjustedAmount,
+                DateTime.UtcNow,
+                paymentGatewayReferenceId: memberPayment.OnlineTransactionId,
+                paidByUserId: memberPayment.UserId);
+                
+            if(transactionResult.IsFailure) 
+            {
+                Console.WriteLine($"[DEBUG] !!! PaymentTransaction.Create failed. Error: {transactionResult.Error.Code}");
+                return Result.Failure<List<PaymentTransaction>>(transactionResult.Error);
+            }
+
+            var transaction = transactionResult.Value;
+            transaction.MarkAsSucceeded();
+            transactions.Add(transaction);
+        }
+        
+        var finalTransactionSum = transactions.Sum(t => t.Amount.Amount);
+        var difference = Math.Abs(finalTransactionSum - totalAmount.Amount);
+        Console.WriteLine($"[DEBUG] Final Sum of Adjusted Transactions: {finalTransactionSum}");
+        Console.WriteLine($"[DEBUG] Difference from Target: {difference}");
+        
+        if (difference > 0.01m)
+        {
+            Console.WriteLine("[DEBUG] !!! Mismatch DETECTED. Returning failure.");
+            return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
+        }
+
+        Console.WriteLine("[DEBUG] Mismatch NOT detected. Returning success.");
+        return Result.Success(transactions);
+    }
+
+    /// <summary>
+    /// Maps TeamCartItems to OrderItems.
+    /// </summary>
+    private List<OrderItem> MapToOrderItems(IReadOnlyList<TeamCartItem> cartItems)
+    {
         var orderItems = new List<OrderItem>();
         
-        foreach (var cartItem in teamCart.Items)
+        foreach (var cartItem in cartItems)
         {
             var customizations = new List<OrderItemCustomization>();
             
@@ -61,12 +254,10 @@ public sealed class TeamCartConversionService
                     customization.Snapshot_ChoiceName,
                     customization.Snapshot_ChoicePriceAdjustmentAtOrder);
 
-                if (customizationResult.IsFailure)
+                if (customizationResult.IsSuccess)
                 {
-                    return Result.Failure<(Order, TeamCart)>(customizationResult.Error);
+                    customizations.Add(customizationResult.Value);
                 }
-
-                customizations.Add(customizationResult.Value);
             }
 
             var orderItemResult = OrderItem.Create(
@@ -77,175 +268,12 @@ public sealed class TeamCartConversionService
                 cartItem.Quantity,
                 customizations.Any() ? customizations : null);
 
-            if (orderItemResult.IsFailure)
+            if (orderItemResult.IsSuccess)
             {
-                return Result.Failure<(Order, TeamCart)>(orderItemResult.Error);
+                orderItems.Add(orderItemResult.Value);
             }
-
-            orderItems.Add(orderItemResult.Value);
         }
 
-        // 3. Map MemberPayments to PaymentTransactions
-        var paymentTransactions = CreatePaymentTransactionsFrom(teamCart);
-
-        // 4. Create the Order using the enhanced factory method
-        // Determine the initial status based on payment method
-        var hasOnlinePayments = teamCart.MemberPayments.Any(p => p.Method == PaymentMethod.Online);
-        var hasCodPayments = teamCart.MemberPayments.Any(p => p.Method == PaymentMethod.CashOnDelivery);
-        
-        // If we have online payments, start in PendingPayment status
-        // Otherwise, use Placed status for COD orders
-        var initialStatus = hasOnlinePayments ? OrderStatus.PendingPayment : OrderStatus.Placed;
-        
-        // For online payments, we'll need to store the payment intent ID
-        // This would typically come from the payment gateway when creating the payment intent
-        // For this example, we'll use null as it would be set by the application layer
-        string? paymentIntentId = null;
-        
-        // Calculate subtotal from order items
-        var subtotal = CalculateSubtotal(orderItems);
-        
-        // Calculate total amount (subtotal - discount + tip)
-        var totalAmount = CalculateTotalAmount(subtotal, teamCart.DiscountAmount, teamCart.TipAmount);
-        
-        var orderResult = Order.Create(
-            teamCart.HostUserId,
-            teamCart.RestaurantId,
-            deliveryAddress,
-            orderItems,
-            specialInstructions,
-            subtotal: subtotal, 
-            discountAmount: teamCart.DiscountAmount,
-            deliveryFee: Money.Zero(teamCart.TipAmount.Currency), 
-            tipAmount: teamCart.TipAmount,
-            taxAmount: Money.Zero(teamCart.TipAmount.Currency), 
-            totalAmount: totalAmount, 
-            paymentTransactions: paymentTransactions,
-            appliedCouponId: teamCart.AppliedCouponId,
-            initialStatus: initialStatus,
-            paymentIntentId: paymentIntentId,
-            sourceTeamCartId: teamCart.Id);
-
-        if (orderResult.IsFailure)
-        {
-            return Result.Failure<(Order, TeamCart)>(orderResult.Error);
-        }
-
-        // 5. Mark the TeamCart as converted
-        var conversionResult = teamCart.MarkAsConverted();
-        if (conversionResult.IsFailure)
-        {
-            return Result.Failure<(Order, TeamCart)>(conversionResult.Error);
-        }
-
-        // 6. Raise the final conversion event
-        var order = orderResult.Value;
-        teamCart.AddDomainEvent(new TeamCartConverted(teamCart.Id, order.Id, DateTime.UtcNow, teamCart.HostUserId));
-
-        return (order, teamCart);
-    }
-
-    /// <summary>
-    /// Calculates the subtotal of all order items.
-    /// </summary>
-    /// <param name="orderItems">The list of order items.</param>
-    /// <returns>The subtotal as a Money value.</returns>
-    private Money CalculateSubtotal(List<OrderItem> orderItems)
-    {
-        if (!orderItems.Any())
-        {
-            return Money.Zero(Currencies.Default);
-        }
-        
-        var currency = orderItems.First().LineItemTotal.Currency;
-        return orderItems.Sum(item => item.LineItemTotal, currency);
-    }
-    
-    /// <summary>
-    /// Calculates the total amount based on subtotal, discount, and tip.
-    /// </summary>
-    /// <param name="subtotal">The subtotal amount.</param>
-    /// <param name="discountAmount">The discount amount.</param>
-    /// <param name="tipAmount">The tip amount.</param>
-    /// <returns>The total amount as a Money value.</returns>
-    private Money CalculateTotalAmount(Money subtotal, Money discountAmount, Money tipAmount)
-    {
-        // Total = Subtotal - Discount + Tip
-        // Note: Delivery fee and tax are set to zero in the current implementation
-        var totalAmount = subtotal - discountAmount + tipAmount;
-        
-        // Ensure total is not negative
-        if (totalAmount.Amount < 0)
-        {
-            return Money.Zero(totalAmount.Currency);
-        }
-        
-        return totalAmount;
-    }
-    
-    /// <summary>
-    /// Creates PaymentTransaction entities from TeamCart MemberPayments.
-    /// </summary>
-    /// <param name="teamCart">The TeamCart containing payment information.</param>
-    /// <returns>A list of PaymentTransaction entities.</returns>
-    private List<PaymentTransaction> CreatePaymentTransactionsFrom(TeamCart teamCart)
-    {
-        var transactions = new List<PaymentTransaction>();
-
-        // Calculate the base total from member payments
-        var baseTotal = teamCart.MemberPayments.Sum(p => p.Amount.Amount);
-        
-        // Calculate the adjusted total including tip and discount
-        var adjustedTotal = baseTotal + teamCart.TipAmount.Amount - teamCart.DiscountAmount.Amount;
-        
-        // Calculate adjustment factor to distribute tip and discount proportionally
-        var adjustmentFactor = baseTotal > 0 ? adjustedTotal / baseTotal : 1;
-
-        // Handle online payments - each member gets their own transaction
-        var onlinePayments = teamCart.MemberPayments
-            .Where(p => p.Method == PaymentMethod.Online && p.Status == TeamCartAggregate.Enums.PaymentStatus.PaidOnline)
-            .ToList();
-
-        foreach (var payment in onlinePayments)
-        {
-            // Adjust payment amount proportionally
-            var adjustedAmount = Math.Round(payment.Amount.Amount * adjustmentFactor, 2);
-            
-            var transaction = PaymentTransaction.Create(
-                PaymentMethodType.CreditCard, // Use CreditCard as representative of online payments
-                PaymentTransactionType.Payment,
-                new Money(adjustedAmount, payment.Amount.Currency),
-                DateTime.UtcNow,
-                paymentMethodDisplay: "Online Payment",
-                paymentGatewayReferenceId: payment.OnlineTransactionId,
-                paidByUserId: payment.UserId).Value; // Assuming success for domain service
-
-            transactions.Add(transaction);
-        }
-
-        // Handle COD payments - single transaction for all COD payments
-        var codPayments = teamCart.MemberPayments
-            .Where(p => p.Method == PaymentMethod.CashOnDelivery && p.Status == TeamCartAggregate.Enums.PaymentStatus.CommittedToCOD)
-            .ToList();
-
-        if (codPayments.Any())
-        {
-            // Calculate adjusted COD amount
-            var baseCodAmount = codPayments.Sum(p => p.Amount.Amount);
-            var adjustedCodAmount = Math.Round(baseCodAmount * adjustmentFactor, 2);
-            
-            var transaction = PaymentTransaction.Create(
-                PaymentMethodType.CashOnDelivery,
-                PaymentTransactionType.Payment,
-                new Money(adjustedCodAmount, Currencies.Default),
-                DateTime.UtcNow,
-                paymentMethodDisplay: "Cash on Delivery",
-                paymentGatewayReferenceId: null,
-                paidByUserId: teamCart.HostUserId).Value; // Host is guarantor for COD
-
-            transactions.Add(transaction);
-        }
-
-        return transactions;
+        return orderItems;
     }
 }

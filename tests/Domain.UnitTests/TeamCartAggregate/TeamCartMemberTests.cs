@@ -1,18 +1,18 @@
 using FluentAssertions;
 using NUnit.Framework;
-using System.Reflection;
-using YummyZoom.Domain.TeamCartAggregate;
-using YummyZoom.Domain.TeamCartAggregate.Entities;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.Events;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
+using static YummyZoom.Domain.UnitTests.TeamCartAggregate.TeamCartTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 [TestFixture]
-public class TeamCartMemberTests : TeamCartTestHelpers
+public class TeamCartMemberTests
 {
     [Test]
     public void AddMember_WithValidInputs_ShouldSucceedAndAddMember()
@@ -26,7 +26,7 @@ public class TeamCartMemberTests : TeamCartTestHelpers
         var result = teamCart.AddMember(guestUserId, guestName);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         
         // Verify member was added
         var members = teamCart.Members;
@@ -57,7 +57,7 @@ public class TeamCartMemberTests : TeamCartTestHelpers
         var result = teamCart.AddMember(DefaultHostUserId, "Another Name");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.MemberAlreadyExists);
     }
 
@@ -73,22 +73,57 @@ public class TeamCartMemberTests : TeamCartTestHelpers
         var result = teamCart.AddMember(guestUserId, emptyName);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.MemberNameRequired);
     }
 
     [Test]
-    public void AddMember_ToExpiredCart_ShouldFailWithCartExpiredError()
+    public void AddMember_WhenCartIsNotOpen_ShouldFailWithCannotModifyCartOnceLockedError()
     {
         // Arrange
-        var expiredTeamCart = CreateExpiredTeamCart();
         var guestUserId = UserId.CreateUnique();
+        var guestName = "Guest User";
 
-        // Act
-        var result = expiredTeamCart.AddMember(guestUserId, "Guest User");
+        // Test when cart is Locked
+        var teamCartLocked = CreateValidTeamCart();
+        
+        // First add an item to the cart so we can lock it
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        teamCartLocked.AddItem(
+            DefaultHostUserId, 
+            menuItemId, 
+            menuCategoryId, 
+            "Test Item", 
+            new Money(10.99m, "USD"), 
+            1).ShouldBeSuccessful();
+        teamCartLocked.ClearDomainEvents(); // Clear events from adding item
+        
+        teamCartLocked.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        teamCartLocked.ClearDomainEvents();
+        var resultLocked = teamCartLocked.AddMember(guestUserId, guestName);
+        resultLocked.ShouldBeFailure();
+        resultLocked.Error.Should().Be(TeamCartErrors.CannotModifyCartOnceLocked);
 
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.CannotAddMembersToClosedCart);
+        // Test when cart is ReadyToConfirm
+        var teamCartReady = CreateTeamCartReadyForConversion();
+        teamCartReady.ClearDomainEvents();
+        var resultReady = teamCartReady.AddMember(guestUserId, guestName);
+        resultReady.ShouldBeFailure();
+        resultReady.Error.Should().Be(TeamCartErrors.CannotModifyCartOnceLocked);
+
+        // Test when cart is Converted
+        var teamCartConverted = CreateConvertedTeamCart();
+        teamCartConverted.ClearDomainEvents();
+        var resultConverted = teamCartConverted.AddMember(guestUserId, guestName);
+        resultConverted.ShouldBeFailure();
+        resultConverted.Error.Should().Be(TeamCartErrors.CannotModifyCartOnceLocked);
+
+        // Test when cart is Expired
+        var teamCartExpired = CreateExpiredTeamCart();
+        teamCartExpired.ClearDomainEvents();
+        var resultExpired = teamCartExpired.AddMember(guestUserId, guestName);
+        resultExpired.ShouldBeFailure();
+        resultExpired.Error.Should().Be(TeamCartErrors.CannotModifyCartOnceLocked);
     }
 }

@@ -190,24 +190,25 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 #### 10. `Order` Aggregate
 
 * **Aggregate Root:** `Order`
-* **Description:** Represents a customer's confirmed request for items from a restaurant. It is a transactional, immutable record of a purchase, ensuring historical accuracy.
+* **Description:** Represents a customer's confirmed request for items from a restaurant. It is a transactional record of a purchase. The aggregate manages the complete order lifecycle from placement through fulfillment, including status transitions and payment processing. Financial calculations and coupon validations are handled by dedicated domain services before an order is created.
 * **Entities/Value Objects (VOs) within:**
   * `Order` (Entity - Root):
     * `OrderID` (Identifier)
     * `OrderNumber` (Human-readable sequence)
-    * `Status` (Enum: Placed, Accepted, Preparing, ReadyForDelivery, Delivered, Cancelled, Rejected)
+    * `Status` (Enum: `PendingPayment`, `PaymentFailed`, `Placed`, `Accepted`, `Preparing`, `ReadyForDelivery`, `Delivered`, `Cancelled`, `Rejected`)
+    * `PaymentIntentId` (string, optional - correlates with payment gateway transaction)
     * `PlacementTimestamp`
     * `LastUpdateTimestamp`
     * `EstimatedDeliveryTime` (Timestamp or Duration)
     * `SpecialInstructions` (From customer)
     * `DeliveryAddress` (`Address` VO - A snapshot of the customer's chosen address)
-    * **Financials (Money VOs):**
-      * `Subtotal` (Sum of all line items)
+    * **Financials (Money VOs - Pre-calculated and passed in):**
+      * `Subtotal`
       * `DiscountAmount`
       * `DeliveryFee`
       * `TipAmount`
-      * `TaxAmount` (If applicable)
-      * `TotalAmount` (The final amount charged)
+      * `TaxAmount`
+      * `TotalAmount`
   * `OrderItem` (List of Child Entities):
     * `OrderItemID` (Identifier)
     * `Snapshot_MenuItemID` (ID of the original `MenuItem`)
@@ -225,14 +226,14 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `PaymentMethodDisplay` (String, optional, e.g., "Visa **** 4242")
     * `Type` (Enum: Payment, Refund)
     * `Amount` (Money VO)
-    * `Status` (Enum: Pending, Succeeded, Failed)
     * `Timestamp`
     * `PaymentGatewayReferenceID` (Optional)
 * **Invariants:**
-  * `TotalAmount` must strictly equal `Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount`.
+  * The `TotalAmount` provided during creation must strictly equal the sum of the other financial components (`Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount`).
   * `Subtotal` must equal the sum of all `OrderItem.LineItemTotal`s.
-  * Order status transitions must be enforced by methods on the aggregate root (e.g., `accept()`, `markAsPreparing()`) to ensure a valid lifecycle. An order cannot be accepted if its status is not `Placed`.
+  * Order status transitions are enforced by methods on the aggregate root (e.g., `confirmPayment()`, `accept()`). An order cannot be accepted if its status is not `Placed`.
   * An order cannot be created with a negative `TotalAmount`.
+  * A `PaymentIntentId` is required if the initial status is `PendingPayment`.
 * **References to other aggregates (by ID):**
   * `CustomerID` (`UserID` of the customer).
   * `RestaurantID` (The restaurant fulfilling the order).

@@ -27,7 +27,7 @@ public abstract class ValueObject : IEquatable<ValueObject>
             .Aggregate((x, y) => x ^ y);
     }
     
-    public static bool operator ==(ValueObject a, ValueObject b)
+    public static bool operator ==(ValueObject? a, ValueObject b)
     {
         return Equals(a, b);
     }

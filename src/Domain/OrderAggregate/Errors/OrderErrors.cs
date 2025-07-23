@@ -49,8 +49,8 @@ public static class OrderErrors
     public static readonly Error InvalidStatusForReject =
         Error.Validation("Order.InvalidStatusForReject", "Order cannot be rejected at its current stage.");
 
-    public static readonly Error PaymentNotFound =
-        Error.Validation("Order.PaymentNotFound", "The specified payment transaction was not found.");
+    public static readonly Error PaymentTransactionNotFound =
+        Error.Validation("Order.PaymentTransactionNotFound", "The specified payment transaction was not found.");
 
     public static readonly Error InvalidOrderStatusForPreparing =
         Error.Validation("Order.InvalidOrderStatusForPreparing", "Order cannot be marked as preparing from its current status.");
@@ -62,11 +62,11 @@ public static class OrderErrors
         Error.Validation("Order.InvalidOrderStatusForDelivered", "Order cannot be marked as delivered from its current status.");
         
     public static readonly Error InvalidStatusForPaymentConfirmation =
-        Error.Validation("Order.InvalidStatusForPaymentConfirmation", "Payment can only be confirmed for orders in 'PendingPayment' status.");
+        Error.Validation("Order.InvalidStatusForPaymentConfirmation", "Payment can only be confirmed for orders in 'AwaitingPayment' status.");
         
     public static readonly Error FinancialMismatch =
         Error.Validation("Order.FinancialMismatch", "The calculated total amount does not match the provided total amount.");
         
-    public static readonly Error PaymentIntentIdRequired =
-        Error.Validation("Order.PaymentIntentIdRequired", "Payment intent ID is required for orders in 'PendingPayment' status.");
+    public static readonly Error PaymentGatewayReferenceIdRequired =
+        Error.Validation("Order.PaymentGatewayReferenceIdRequired", "A gateway reference is required for online payments at creation.");
 }

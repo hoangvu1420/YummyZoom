@@ -1,15 +1,18 @@
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Domain.TeamCartAggregate;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.Events;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using static YummyZoom.Domain.UnitTests.TeamCartAggregate.TeamCartTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 [TestFixture]
-public class TeamCartExpirationTests : TeamCartTestHelpers
+public class TeamCartExpirationTests
 {
     [Test]
     public void IsExpired_WithFutureDeadline_ShouldReturnFalse()
@@ -41,7 +44,7 @@ public class TeamCartExpirationTests : TeamCartTestHelpers
         var result = teamCart.MarkAsExpired();
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         teamCart.Status.Should().Be(TeamCartStatus.Expired);
         
         // Verify domain event
@@ -94,22 +97,37 @@ public class TeamCartExpirationTests : TeamCartTestHelpers
         var result = teamCart.SetDeadline(DefaultHostUserId, pastDeadline);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.DeadlineInPast);
+        result.ShouldBeFailure(TeamCartErrors.DeadlineInPast.Code);
     }
 
     [Test]
-    public void SetDeadline_OnExpiredCart_ShouldFailWithCartExpiredError()
+    public void SetDeadline_WhenCartIsNotOpen_ShouldFail()
     {
         // Arrange
-        var expiredTeamCart = CreateExpiredTeamCart();
+        var teamCart = CreateTeamCartWithGuest();
+        
+        // First add an item to the cart so we can lock it
+        var menuItemId = MenuItemId.CreateUnique();
+        var menuCategoryId = MenuCategoryId.CreateUnique();
+        teamCart.AddItem(
+            DefaultHostUserId, 
+            menuItemId, 
+            menuCategoryId, 
+            "Test Item", 
+            new Money(10.99m, "USD"), 
+            1).ShouldBeSuccessful();
+        teamCart.ClearDomainEvents(); // Clear events from adding item
+        
+        teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful(); // Transition to Locked status
+        teamCart.ClearDomainEvents(); // Clear events from locking
+
         var newDeadline = DateTime.UtcNow.AddHours(5);
 
         // Act
-        var result = expiredTeamCart.SetDeadline(DefaultHostUserId, newDeadline);
+        var result = teamCart.SetDeadline(DefaultHostUserId, newDeadline);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.CannotModifyClosedCart);
+        result.ShouldBeFailure();
+        result.Error.Should().Be(TeamCartErrors.CannotModifyCartOnceLocked);
     }
 }

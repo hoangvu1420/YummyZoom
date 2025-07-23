@@ -1,7 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.Events;
 
 namespace YummyZoom.Domain.UnitTests.MenuItemAggregate;

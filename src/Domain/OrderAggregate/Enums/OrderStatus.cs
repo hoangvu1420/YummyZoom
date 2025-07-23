@@ -6,14 +6,14 @@ namespace YummyZoom.Domain.OrderAggregate.Enums;
 public enum OrderStatus
 {
     /// <summary>
-    /// Order is awaiting payment confirmation from the payment provider.
-    /// This is the initial state for orders with online payment.
+    /// The order has been created but is awaiting successful payment 
+    /// before being sent to the restaurant. It is not yet actionable.
     /// </summary>
-    PendingPayment,
+    AwaitingPayment, 
     
     /// <summary>
-    /// Order has been placed and payment has been confirmed.
-    /// This is the initial state for cash-on-delivery orders.
+    /// Order has been successfully placed (payment confirmed or COD) 
+    /// and is ready for restaurant review.
     /// </summary>
     Placed,
     
@@ -45,10 +45,5 @@ public enum OrderStatus
     /// <summary>
     /// Order has been rejected by the restaurant.
     /// </summary>
-    Rejected,
-    
-    /// <summary>
-    /// Payment for the order has failed.
-    /// </summary>
-    PaymentFailed
+    Rejected
 }

@@ -4,7 +4,6 @@ using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate.Entities;
 
@@ -21,7 +20,7 @@ public class TeamCartMemberTests
         var result = TeamCartMember.Create(_userId, _validName, MemberRole.Guest);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var member = result.Value;
         
         member.Id.Value.Should().NotBe(Guid.Empty);
@@ -40,7 +39,7 @@ public class TeamCartMemberTests
         var result = TeamCartMember.Create(_userId, emptyName, MemberRole.Guest);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.NameRequired);
     }
 
@@ -51,7 +50,6 @@ public class TeamCartMemberTests
         var result = TeamCartMember.Create(null!, _validName, MemberRole.Guest);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.UserIdRequired);
+        result.ShouldBeFailure(TeamCartErrors.UserIdRequired.Code);
     }
 }

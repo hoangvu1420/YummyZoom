@@ -3,7 +3,6 @@ using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate;
-using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
 using YummyZoom.Domain.CustomizationGroupAggregate.Errors;
 using YummyZoom.Domain.CustomizationGroupAggregate.Events;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;

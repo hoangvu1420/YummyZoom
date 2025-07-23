@@ -102,11 +102,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// </summary>
     public CouponId? AppliedCouponId { get; private set; }
 
-    /// <summary>
-    /// Gets the discount amount calculated from the applied coupon.
-    /// </summary>
-    public Money DiscountAmount { get; private set; }
-
     #endregion
 
     #region Constructors
@@ -137,7 +132,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         // Initialize financial properties
         var defaultCurrency = Currencies.Default;
         TipAmount = Money.Zero(defaultCurrency);
-        DiscountAmount = Money.Zero(defaultCurrency);
         AppliedCouponId = null;
     }
 
@@ -230,7 +224,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
 
         if (Status != TeamCartStatus.Open)
         {
-            return Result.Failure(TeamCartErrors.CannotAddMembersToClosedCart);
+            return Result.Failure(TeamCartErrors.CannotModifyCartOnceLocked);
         }
 
         // Check if member already exists
@@ -273,7 +267,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
 
         if (Status != TeamCartStatus.Open)
         {
-            return Result.Failure(TeamCartErrors.CannotModifyClosedCart);
+            return Result.Failure(TeamCartErrors.CannotModifyCartOnceLocked);
         }
 
         if (deadline <= DateTime.UtcNow)
@@ -322,7 +316,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         // Validate cart status
         if (Status != TeamCartStatus.Open)
         {
-            return Result.Failure(TeamCartErrors.CannotAddItemsToClosedCart);
+            return Result.Failure(TeamCartErrors.CannotModifyCartOnceLocked);
         }
 
         // Validate user is a member
@@ -363,6 +357,34 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     #endregion
 
     #region Public Methods - Status Management
+
+    /// <summary>
+    /// Locks the team cart, preventing further item modifications and initiating the payment phase.
+    /// Only the host can perform this action.
+    /// </summary>
+    /// <param name="requestingUserId">The ID of the user requesting to lock the cart.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result LockForPayment(UserId requestingUserId)
+    {
+        if (requestingUserId != HostUserId)
+        {
+            return Result.Failure(TeamCartErrors.OnlyHostCanLockCart);
+        }
+
+        if (Status != TeamCartStatus.Open)
+        {
+            return Result.Failure(TeamCartErrors.CannotLockCartInCurrentStatus);
+        }
+
+        if (!_items.Any())
+        {
+            return Result.Failure(TeamCartErrors.CannotLockEmptyCart);
+        }
+
+        Status = TeamCartStatus.Locked;
+        AddDomainEvent(new TeamCartLockedForPayment(Id, HostUserId));
+        return Result.Success();
+    }
 
     /// <summary>
     /// Marks the team cart as expired.
@@ -424,38 +446,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     #region Public Methods - Payment Workflow
 
     /// <summary>
-    /// Initiates the checkout process, transitioning the cart to AwaitingPayments status.
-    /// Only the host can initiate checkout.
-    /// </summary>
-    /// <param name="requestingUserId">The ID of the user requesting to initiate checkout.</param>
-    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
-    public Result InitiateCheckout(UserId requestingUserId)
-    {
-        if (requestingUserId != HostUserId)
-        {
-            return Result.Failure(TeamCartErrors.OnlyHostCanInitiateCheckout);
-        }
-
-        if (Status != TeamCartStatus.Open)
-        {
-            return Result.Failure(TeamCartErrors.CannotModifyClosedCart);
-        }
-
-        if (!_items.Any())
-        {
-            return Result.Failure(TeamCartErrors.CannotInitiateCheckoutWithoutItems);
-        }
-
-        if (_members.Count <= 1) // Only host
-        {
-            return Result.Failure(TeamCartErrors.CannotInitiateCheckoutWithoutMembers);
-        }
-
-        Status = TeamCartStatus.AwaitingPayments;
-        return Result.Success();
-    }
-
-    /// <summary>
     /// Records a member's firm commitment to pay with Cash on Delivery.
     /// This action is reversible if the user decides to pay online instead.
     /// </summary>
@@ -465,9 +455,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public Result CommitToCashOnDelivery(UserId userId, Money amount)
     {
         // Validate status
-        if (Status != TeamCartStatus.AwaitingPayments)
+        if (Status != TeamCartStatus.Locked)
         {
-            return Result.Failure(TeamCartErrors.CannotCommitPaymentInCurrentStatus);
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
         }
 
         // Validate user is a member
@@ -519,9 +509,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
     {
         // Validate status
-        if (Status != TeamCartStatus.AwaitingPayments)
+        if (Status != TeamCartStatus.Locked)
         {
-            return Result.Failure(TeamCartErrors.CannotCommitPaymentInCurrentStatus);
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
         }
 
         // Validate user is a member
@@ -585,9 +575,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return Result.Failure(TeamCartErrors.OnlyHostCanModifyFinancials);
         }
 
-        if (Status is not (TeamCartStatus.AwaitingPayments or TeamCartStatus.ReadyToConfirm))
+        if (Status != TeamCartStatus.Locked)
         {
-            return Result.Failure(TeamCartErrors.CannotModifyFinancialsInCurrentStatus);
+            return Result.Failure(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
         }
 
         if (tipAmount.Amount < 0)
@@ -600,30 +590,22 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     }
 
     /// <summary>
-    /// Applies a coupon to the team cart, calculating the discount.
-    /// This logic mirrors the Order.ApplyCoupon method.
+    /// Applies a coupon to the team cart by storing its ID. The actual discount
+    /// is calculated upon conversion to an order.
     /// </summary>
     /// <param name="requestingUserId">The ID of the user applying the coupon (must be the host).</param>
     /// <param name="couponId">The ID of the coupon.</param>
-    /// <param name="couponValue">The value and type of the coupon.</param>
-    /// <param name="appliesTo">The application scope of the coupon.</param>
-    /// <param name="minOrderAmount">The minimum subtotal required.</param>
     /// <returns>A Result indicating success or failure.</returns>
-    public Result ApplyCoupon(
-        UserId requestingUserId,
-        CouponId couponId,
-        CouponValue couponValue,
-        AppliesTo appliesTo,
-        Money? minOrderAmount)
+    public Result ApplyCoupon(UserId requestingUserId, CouponId couponId)
     {
         if (requestingUserId != HostUserId)
         {
             return Result.Failure(TeamCartErrors.OnlyHostCanModifyFinancials);
         }
 
-        if (Status is not (TeamCartStatus.AwaitingPayments or TeamCartStatus.ReadyToConfirm))
+        if (Status != TeamCartStatus.Locked)
         {
-            return Result.Failure(TeamCartErrors.CannotModifyFinancialsInCurrentStatus);
+            return Result.Failure(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
         }
 
         if (AppliedCouponId is not null)
@@ -631,19 +613,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return Result.Failure(TeamCartErrors.CouponAlreadyApplied);
         }
 
-        var subtotal = CalculateSubtotal();
-        if (minOrderAmount is not null && subtotal.Amount < minOrderAmount.Amount)
-        {
-            return Result.Failure(TeamCartErrors.CouponNotApplicable);
-        }
-
-        var discountResult = CalculateDiscount(subtotal, couponValue, appliesTo);
-        if (discountResult.IsFailure)
-        {
-            return Result.Failure(discountResult.Error);
-        }
-
-        DiscountAmount = discountResult.Value;
         AppliedCouponId = couponId;
         return Result.Success();
     }
@@ -660,19 +629,23 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return Result.Failure(TeamCartErrors.OnlyHostCanModifyFinancials);
         }
 
+        if (Status != TeamCartStatus.Locked)
+        {
+            return Result.Failure(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+        }
+
         if (AppliedCouponId is null)
         {
             return Result.Success();
         }
 
-        DiscountAmount = Money.Zero(DiscountAmount.Currency);
         AppliedCouponId = null;
         return Result.Success();
     }
 
-#endregion
+    #endregion
 
-#region Private Helper Methods
+    #region Private Helper Methods
 
     /// <summary>
     /// Calculates the total amount for items added by a specific member.
@@ -691,7 +664,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// </summary>
     private void CheckAndTransitionToReadyToConfirm()
     {
-        if (Status != TeamCartStatus.AwaitingPayments)
+        if (Status != TeamCartStatus.Locked)
         {
             return;
         }
@@ -758,117 +731,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         var totalAmount = _items.Sum(item => item.LineItemTotal.Amount);
         return new Money(totalAmount, currency);
     }
-    
-    /// <summary>
-    /// Calculates the discount amount based on the coupon value and application scope.
-    /// </summary>
-    /// <param name="subtotal">The subtotal to base the discount on.</param>
-    /// <param name="couponValue">The value and type of the coupon.</param>
-    /// <param name="appliesTo">The scope and criteria for coupon application.</param>
-    /// <returns>A Result containing the calculated discount amount.</returns>
-    private Result<Money> CalculateDiscount(Money subtotal, CouponValue couponValue, AppliesTo appliesTo)
-    {
-        // Get the base amount for discount calculation based on the coupon's scope
-        var discountBaseAmount = GetDiscountBaseAmount(couponValue, appliesTo);
-        if (discountBaseAmount <= 0)
-        {
-            return Result.Failure<Money>(TeamCartErrors.CouponNotApplicable);
-        }
-
-        var discountBaseMoney = new Money(discountBaseAmount, subtotal.Currency);
-        Money discount;
-        
-        switch (couponValue.Type)
-        {
-            case CouponType.Percentage:
-                discount = discountBaseMoney * (couponValue.PercentageValue!.Value / 100m);
-                break;
-                
-            case CouponType.FixedAmount:
-                // Discount cannot be more than the value of the items it applies to
-                var fixedAmount = couponValue.FixedAmountValue!;
-                discount = new Money(Math.Min(discountBaseMoney.Amount, fixedAmount.Amount), subtotal.Currency);
-                break;
-                
-            case CouponType.FreeItem:
-                // For free item coupons, the discount is the price of one unit of the cheapest matching item
-                discount = discountBaseMoney;
-                break;
-                
-            default:
-                return Result.Failure<Money>(TeamCartErrors.CouponNotApplicable);
-        }
-
-        // Ensure discount doesn't exceed subtotal
-        if (discount.Amount > subtotal.Amount)
-        {
-            discount = subtotal;
-        }
-
-        return Result.Success(discount);
-    }
-    
-    /// <summary>
-    /// Calculates the base amount on which the coupon discount will be applied.
-    /// </summary>
-    /// <param name="couponValue">The value and type of the coupon.</param>
-    /// <param name="appliesTo">The scope and criteria for coupon application.</param>
-    /// <returns>The decimal amount to base the discount calculation on.</returns>
-    private decimal GetDiscountBaseAmount(CouponValue couponValue, AppliesTo appliesTo)
-    {
-        // For FreeItem coupons, calculate based on the specific free item
-        if (couponValue is { Type: CouponType.FreeItem, FreeItemValue: not null })
-        {
-            return GetFreeItemDiscountAmount(couponValue.FreeItemValue);
-        }
-
-        switch (appliesTo.Scope)
-        {
-            case CouponScope.WholeOrder:
-                return _items.Sum(item => item.LineItemTotal.Amount);
-
-            case CouponScope.SpecificItems:
-                return _items
-                    .Where(item => appliesTo.ItemIds.Contains(item.Snapshot_MenuItemId))
-                    .Sum(item => item.LineItemTotal.Amount);
-
-            case CouponScope.SpecificCategories:
-                return _items
-                    .Where(item => appliesTo.CategoryIds.Contains(item.Snapshot_MenuCategoryId))
-                    .Sum(item => item.LineItemTotal.Amount);
-
-            default:
-                return 0;
-        }
-    }
-    
-    /// <summary>
-    /// Calculates the discount amount for a free item coupon.
-    /// </summary>
-    /// <param name="freeItemId">The ID of the menu item that is free.</param>
-    /// <returns>The decimal value representing the discount for the free item.</returns>
-    private decimal GetFreeItemDiscountAmount(MenuItemId freeItemId)
-    {
-        // Find all items that match the free item
-        var matchingItems = _items
-            .Where(item => item.Snapshot_MenuItemId == freeItemId)
-            .ToList();
-
-        if (!matchingItems.Any())
-        {
-            return 0; // No matching items found
-        }
-
-        // For free item coupons, typically apply to the cheapest occurrence
-        // Calculate per-unit price
-        var cheapestItem = matchingItems
-            .OrderBy(item => item.LineItemTotal.Amount / item.Quantity)
-            .First();
-
-        // Return the price for one unit of the cheapest matching item
-        return cheapestItem.LineItemTotal.Amount / cheapestItem.Quantity;
-    }
 
     #endregion
-
 }

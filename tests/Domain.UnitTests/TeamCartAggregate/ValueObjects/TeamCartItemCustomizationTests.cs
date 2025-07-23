@@ -23,7 +23,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var customization = result.Value;
         customization.Snapshot_CustomizationGroupName.Should().Be(ValidCustomizationGroupName);
         customization.Snapshot_ChoiceName.Should().Be(ValidChoiceName);
@@ -40,8 +40,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]
@@ -54,8 +53,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]
@@ -68,8 +66,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]
@@ -82,8 +79,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]
@@ -96,8 +92,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]
@@ -110,8 +105,7 @@ public class TeamCartItemCustomizationTests
             ValidPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidCustomization);
+        result.ShouldBeFailure(TeamCartErrors.InvalidCustomization.Code);
     }
 
     [Test]

@@ -15,7 +15,7 @@ public class OrderFinancialService
     /// <summary>
     /// Calculates the pre-discount, pre-tax, pre-fee subtotal of an order.
     /// </summary>
-    public Money CalculateSubtotal(IReadOnlyList<OrderItem> orderItems)
+    public virtual Money CalculateSubtotal(IReadOnlyList<OrderItem> orderItems)
     {
         if (!orderItems.Any())
         {
@@ -36,7 +36,7 @@ public class OrderFinancialService
     /// <param name="subtotal">The subtotal of the order before discounts.</param>
     /// <param name="currentTime">The current time to use for validation (defaults to DateTime.UtcNow if not provided).</param>
     /// <returns>A Result containing the calculated discount amount if successful.</returns>
-    public Result<Money> ValidateAndCalculateDiscount(
+    public virtual Result<Money> ValidateAndCalculateDiscount(
         Coupon coupon,
         int currentUserUsageCount,
         IReadOnlyList<OrderItem> orderItems,
@@ -108,7 +108,7 @@ public class OrderFinancialService
     /// <summary>
     /// Calculates the final total amount to be charged.
     /// </summary>
-    public Money CalculateFinalTotal(Money subtotal, Money discount, Money deliveryFee, Money tip, Money tax)
+    public virtual Money CalculateFinalTotal(Money subtotal, Money discount, Money deliveryFee, Money tip, Money tax)
     {
         var finalAmount = subtotal - discount + deliveryFee + tip + tax;
         // Ensure total is not negative

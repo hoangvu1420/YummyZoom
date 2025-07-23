@@ -5,13 +5,12 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
-using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate.Entities;
 
 [TestFixture]
-public class MemberPaymentTests : TeamCartTestHelpers
+public class MemberPaymentTests
 {
     private static readonly UserId DefaultUserId = UserId.CreateUnique();
     private static readonly Money DefaultAmount = new Money(25.50m, Currencies.Default);

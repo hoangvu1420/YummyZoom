@@ -33,7 +33,7 @@ public class TeamCartItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         var item = result.Value;
         
         item.Id.Should().NotBeNull();
@@ -114,8 +114,7 @@ public class TeamCartItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.MenuItemRequired);
+        result.ShouldBeFailure(TeamCartErrors.MenuItemRequired.Code);
     }
 
     [Test]
@@ -235,7 +234,7 @@ public class TeamCartItemTests
         var result = item.UpdateQuantity(newQuantity);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.ShouldBeSuccessful();
         item.Quantity.Should().Be(newQuantity);
         
         // (12.99 + 2.00) * 3 = 44.97
@@ -280,7 +279,6 @@ public class TeamCartItemTests
         var result = item.UpdateQuantity(-1);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(TeamCartErrors.InvalidQuantity);
+        result.ShouldBeFailure(TeamCartErrors.InvalidQuantity.Code);
     }
 }

@@ -1,40 +1,45 @@
+
 # Order Aggregate
 
 ## Aggregate Documentation: `Order`
 
-* **Version:** 1.0
-* **Last Updated:** 2024-12-13
+* **Version:** 2.1
+* **Last Updated:** 2025-07-22
 * **Source File:** `src/Domain/OrderAggregate/Order.cs`
 
 ### 1. Overview
 
 **Description:**
-Represents a customer's confirmed request for items from a restaurant. It is a transactional, immutable record of a purchase, ensuring historical accuracy. The aggregate manages the complete order lifecycle from placement through fulfillment, including financial calculations, status transitions, and payment processing.
+Represents a customer's confirmed request for items from a restaurant. It is a transactional record of a purchase. The aggregate manages the complete order lifecycle from placement through fulfillment, including status transitions and payment processing. Financial calculations and coupon validations are handled by dedicated domain services before an order is created.
 
 **Core Responsibilities:**
 
-* Manages the lifecycle of customer orders from placement to completion
-* Acts as the transactional boundary for all order-related operations
-* Enforces business rules for order status transitions and financial calculations
-* Enforces business rules for coupon application and payment processing
+* Manages the lifecycle of customer orders from creation to completion.
+* Acts as the transactional boundary for all order-related operations.
+* Enforces business rules for order status transitions.
+* Tracks payment status through the `PaymentTransaction` child entity.
+* Handles payment status updates driven by external webhooks.
 
 ### 2. Structure
 
 * **Aggregate Root:** `Order`
 * **Key Child Entities:**
-  * `OrderItem`: Represents individual items in the order with snapshot pricing and customizations
-  * `PaymentTransaction`: Tracks payment attempts and their outcomes
+  * `OrderItem`: Represents individual items in the order with snapshot pricing and customizations.
+  * `PaymentTransaction`: Tracks payment attempts and their outcomes.
 * **Key Value Objects:**
-  * `OrderId`: Strongly-typed identifier for the aggregate
-  * `DeliveryAddress`: Snapshot of customer's delivery address at order time
-  * `OrderItemCustomization`: Snapshot of customization choices and pricing
-  * `Money`: Represents all monetary amounts (subtotal, total, fees, etc.)
+  * `OrderId`: Strongly-typed identifier for the aggregate.
+  * `DeliveryAddress`: Snapshot of the customer's delivery address at the time of the order.
+  * `OrderItemCustomization`: Snapshot of customization choices and their pricing.
+  * `Money`: Represents all monetary values (subtotal, total, fees, etc.).
 
 ### 3. Lifecycle & State Management
 
-#### 3.1. Creation (Factory Method)
+#### 3.1. Creation (Factory Methods)
 
-The only valid way to create an `Order` is through its static factory method.
+The `Order` aggregate provides two factory methods for its creation, catering to different scenarios. Both methods require pre-calculated financial values, enforcing a separation of concerns where financial logic is handled by a dedicated domain service.
+
+##### Factory 1: `Create` (Standard Flow)
+This method is used for standard single-payment orders (e.g., online credit card or Cash on Delivery). It internally creates the initial `PaymentTransaction`.
 
 ```csharp
 public static Result<Order> Create(
@@ -43,37 +48,62 @@ public static Result<Order> Create(
     DeliveryAddress deliveryAddress,
     List<OrderItem> orderItems,
     string specialInstructions,
-    Money? discountAmount = null,
-    Money? deliveryFee = null,
-    Money? tipAmount = null,
-    Money? taxAmount = null,
-    CouponId? appliedCouponId = null,
+    Money subtotal,
+    Money discountAmount,
+    Money deliveryFee,
+    Money tipAmount,
+    Money taxAmount,
+    Money totalAmount, 
+    PaymentMethodType paymentMethodType,
+    CouponId? appliedCouponId,
+    string? paymentGatewayReferenceId = null,
     TeamCartId? sourceTeamCartId = null,
-    List<PaymentTransaction>? paymentTransactions = null)
+    DateTime? timestamp = null)
 ```
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-| `customerId` | `UserId` | The customer placing the order |
-| `restaurantId` | `RestaurantId` | The restaurant fulfilling the order |
-| `deliveryAddress` | `DeliveryAddress` | Snapshot of delivery address |
-| `orderItems` | `List<OrderItem>` | List of items being ordered (at least one required) |
-| `specialInstructions` | `string` | Customer's special instructions |
-| `discountAmount` | `Money?` | Optional discount amount from coupons |
-| `deliveryFee` | `Money?` | Optional delivery fee |
-| `tipAmount` | `Money?` | Optional tip amount |
-| `taxAmount` | `Money?` | Optional tax amount |
-| `appliedCouponId` | `CouponId?` | Optional applied coupon ID |
-| `sourceTeamCartId` | `TeamCartId?` | Optional ID of the team cart this order was created from. |
-| `paymentTransactions` | `List<PaymentTransaction>?` | Optional list of payment transactions for the order. |
+| `paymentMethodType` | `PaymentMethodType` | The method of payment (e.g., `CreditCard`, `CashOnDelivery`). |
+| `paymentGatewayReferenceId` | `string?` | The payment gateway's transaction ID. Required for online payment types. |
+| *... (other parameters as before)* | | |
+
+
+##### Factory 2: `Create` (Trusted Process Flow)
+This method is designed for trusted internal processes, like converting a `TeamCart` into an order, where payment transactions and the initial status are pre-determined.
+
+```csharp
+public static Result<Order> Create(
+    UserId customerId,
+    RestaurantId restaurantId,
+    DeliveryAddress deliveryAddress,
+    List<OrderItem> orderItems,
+    string specialInstructions,
+    Money subtotal,
+    Money discountAmount,
+    Money deliveryFee,
+    Money tipAmount,
+    Money taxAmount,
+    Money totalAmount, 
+    List<PaymentTransaction> paymentTransactions,
+    CouponId? appliedCouponId,
+    OrderStatus initialStatus,
+    TeamCartId? sourceTeamCartId = null,
+    DateTime? timestamp = null)
+```
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `paymentTransactions`| `List<PaymentTransaction>` | A pre-built list of payment transactions. |
+| `initialStatus` | `OrderStatus` | The pre-determined initial status of the order. |
+| *... (other parameters as before)* | | |
 
 **Validation Rules & Potential Errors:**
 
-* At least one order item is required. (Returns `OrderErrors.OrderItemRequired`)
-* If `paymentTransactions` are provided, their total must match the order's `TotalAmount`. (Returns `OrderErrors.PaymentMismatch`)
-* Total amount cannot be negative. (Returns `OrderErrors.NegativeTotalAmount`)
-* Order is created with status `Placed` and current timestamp
-* Order number is auto-generated in format `ORD-YYYYMMDD-HHMMSS-XXXX`
+* At least one order item is required (`OrderErrors.OrderItemRequired`).
+* The provided financial totals must be consistent (`OrderErrors.FinancialMismatch`).
+* The total amount cannot be negative (`OrderErrors.NegativeTotalAmount`).
+* A `paymentGatewayReferenceId` is required for online payments (`OrderErrors.PaymentGatewayReferenceIdRequired`).
+* The total of payment transactions must match the order's total amount (`OrderErrors.PaymentMismatch`).
 
 #### 3.2. State Transitions & Commands (Public Methods)
 
@@ -81,16 +111,14 @@ These methods modify the state of the aggregate. All state changes must go throu
 
 | Method Signature | Description | Key Invariants Checked | Potential Errors |
 | :--- | :--- | :--- | :--- |
-| `Result Accept(DateTime estimatedDeliveryTime)` | Restaurant accepts the order | Order must be in `Placed` status | `OrderErrors.InvalidOrderStatusForAccept` |
-| `Result Reject()` | Restaurant rejects the order | Order must be in `Placed` status | `OrderErrors.InvalidStatusForReject` |
-| `Result Cancel()` | Cancels the order | Order must be in `Placed`, `Accepted`, `Preparing`, or `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForCancel` |
-| `Result MarkAsPreparing()` | Marks the order as preparing | Order must be in `Accepted` status | `OrderErrors.InvalidOrderStatusForPreparing` |
-| `Result MarkAsReadyForDelivery()` | Marks the order as ready for delivery | Order must be in `Preparing` status | `OrderErrors.InvalidOrderStatusForReadyForDelivery` |
-| `Result MarkAsDelivered()` | Marks the order as delivered and records the actual delivery time. | Order must be in `ReadyForDelivery` status | `OrderErrors.InvalidOrderStatusForDelivered` |
-| `Result AddPaymentAttempt(PaymentTransaction payment)` | Adds a payment transaction | None - always succeeds with valid input | None |
-| `Result MarkAsPaid(PaymentTransactionId paymentTransactionId)` | Marks payment as successful | Payment transaction must exist | `OrderErrors.PaymentNotFound` |
-| `Result ApplyCoupon(CouponId, CouponValue, AppliesTo, Money?)` | Applies a coupon discount | Order must be `Placed`, no existing coupon, meets minimum amount | `OrderErrors.CouponCannotBeAppliedToOrderStatus`, `OrderErrors.CouponAlreadyApplied`, `OrderErrors.CouponNotApplicable` |
-| `Result RemoveCoupon()` | Removes applied coupon | None - always succeeds | None |
+| `Result Accept(DateTime estimatedDeliveryTime, ...)` | Restaurant accepts the order. | Order must be in `Placed` status. | `OrderErrors.InvalidOrderStatusForAccept` |
+| `Result Reject(DateTime? timestamp = null)` | Restaurant rejects the order. | Order must be in `Placed` status. | `OrderErrors.InvalidStatusForReject` |
+| `Result Cancel(DateTime? timestamp = null)` | Cancels the order. | Order must be in `Placed`, `Accepted`, `Preparing`, or `ReadyForDelivery` status. | `OrderErrors.InvalidOrderStatusForCancel` |
+| `Result MarkAsPreparing(DateTime? timestamp = null)` | Marks the order as being prepared. | Order must be in `Accepted` status. | `OrderErrors.InvalidOrderStatusForPreparing` |
+| `Result MarkAsReadyForDelivery(DateTime? timestamp = null)`| Marks the order as ready for delivery. | Order must be in `Preparing` status. | `OrderErrors.InvalidOrderStatusForReadyForDelivery` |
+| `Result MarkAsDelivered(DateTime? timestamp = null)` | Marks the order as delivered. | Order must be in `ReadyForDelivery` status. | `OrderErrors.InvalidOrderStatusForDelivered` |
+| `Result RecordPaymentSuccess(string paymentGatewayReferenceId, ...)` | Confirms a successful payment. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
+| `Result RecordPaymentFailure(string paymentGatewayReferenceId, ...)` | Marks a payment as failed and cancels the order. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
 
 ### 4. Exposed State & Queries
 
@@ -98,29 +126,24 @@ These methods modify the state of the aggregate. All state changes must go throu
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
-| `Id` | `OrderId` | The unique identifier of the order |
-| `OrderNumber` | `string` | Human-readable order number |
-| `Status` | `OrderStatus` | Current status in the order lifecycle |
-| `PlacementTimestamp` | `DateTime` | When the order was placed (UTC) |
-| `LastUpdateTimestamp` | `DateTime` | When the order was last modified (UTC) |
-| `EstimatedDeliveryTime` | `DateTime?` | Estimated delivery time (set when accepted) |
-| `ActualDeliveryTime` | `DateTime?` | Actual delivery time (set when delivered) |
-| `SpecialInstructions` | `string` | Customer's special instructions |
-| `DeliveryAddress` | `DeliveryAddress` | Snapshot of delivery address |
-| `Subtotal` | `Money` | Sum of all line items before discounts |
-| `DiscountAmount` | `Money` | Total discount from applied coupons |
-| `DeliveryFee` | `Money` | Delivery fee charged |
-| `TipAmount` | `Money` | Tip amount |
-| `TaxAmount` | `Money` | Tax amount (if applicable) |
-| `TotalAmount` | `Money` | Final amount to be charged |
-| `CustomerId` | `UserId` | The customer who placed the order |
-| `RestaurantId` | `RestaurantId` | The restaurant fulfilling the order |
-| `SourceTeamCartId` | `TeamCartId?` | The source TeamCart ID if this order was created from a team cart. |
-| `OrderItems` | `IReadOnlyList<OrderItem>` | Read-only collection of ordered items |
-| `PaymentTransactions` | `IReadOnlyList<PaymentTransaction>` | Read-only collection of payment attempts |
-| `AppliedCouponId` | `CouponId?` | The applied coupon ID |
-| `Created` | `DateTimeOffset` | Timestamp of when the entity was created |
-| `CreatedBy` | `string?` | The user who created the entity |
+| `Id` | `OrderId` | The unique identifier of the order. |
+| `OrderNumber` | `string` | Human-readable order number. |
+| `Status` | `OrderStatus` | Current status in the order lifecycle. |
+| `PlacementTimestamp` | `DateTime` | When the order was placed (UTC). |
+| `LastUpdateTimestamp` | `DateTime` | When the order was last modified (UTC). |
+| `EstimatedDeliveryTime` | `DateTime?` | The estimated delivery time from the restaurant. |
+| `ActualDeliveryTime` | `DateTime?` | The actual time the order was delivered. |
+| `Subtotal` | `Money` | The subtotal of the order. |
+| `DiscountAmount` | `Money` | The discount applied to the order. |
+| `DeliveryFee` | `Money` | The delivery fee for the order. |
+| `TipAmount` | `Money` | The tip for the order. |
+| `TaxAmount` | `Money` | The tax amount for the order. |
+| `TotalAmount` | `Money` | The final amount to be charged. |
+| `CustomerId` | `UserId` | The customer who placed the order. |
+| `RestaurantId` | `RestaurantId` | The restaurant fulfilling the order. |
+| `AppliedCouponId` | `CouponId?` | The ID of the coupon applied. |
+| `OrderItems` | `IReadOnlyList<OrderItem>` | Read-only collection of ordered items. |
+| `PaymentTransactions` | `IReadOnlyList<PaymentTransaction>` | Read-only collection of payment attempts. The `PaymentGatewayReferenceId` is stored here. |
 
 #### 4.2. Public Query Methods
 
@@ -128,52 +151,41 @@ This aggregate does not expose any additional query methods beyond property acce
 
 ### 5. Communication (Domain Events)
 
-The aggregate raises the following domain events to communicate significant state changes to the rest of the system.
+The aggregate raises the following domain events to communicate significant state changes.
 
 | Event Name | When It's Raised | Description |
 | :--- | :--- | :--- |
-| `OrderCreated` | During the `Create` factory method | Signals that a new order has been successfully placed |
-| `OrderAccepted` | After a successful call to `Accept` | Signals that the restaurant has accepted the order |
-| `OrderRejected` | After a successful call to `Reject` | Signals that the restaurant has rejected the order |
-| `OrderCancelled` | After a successful call to `Cancel` | Signals that the order has been cancelled |
-| `OrderPaid` | After a successful call to `MarkAsPaid` | Signals that payment has been successfully processed |
-| `OrderPreparing` | After a successful call to `MarkAsPreparing` | Signals that order preparation has begun |
-| `OrderReadyForDelivery` | After a successful call to `MarkAsReadyForDelivery` | Signals that the order is ready for delivery/pickup |
-| `OrderDelivered` | After a successful call to `MarkAsDelivered` | Signals that the order has been delivered and includes the `ActualDeliveryTime` |
+| `OrderCreated` | During the `Create` factory method. | Signals that a new order has been successfully created. |
+| `OrderPaymentSucceeded` | After a successful call to `RecordPaymentSuccess`. | Signals that the payment for the order has succeeded. |
+| `OrderPaymentFailed` | After a successful call to `RecordPaymentFailure`. | Signals that the payment for the order has failed. |
+| `OrderAccepted` | After a successful call to `Accept`. | Signals that the restaurant has accepted the order. |
+| `OrderRejected` | After a successful call to `Reject`. | Signals that the restaurant has rejected the order. |
+| `OrderCancelled` | After a successful call to `Cancel` or `RecordPaymentFailure`. | Signals that the order has been cancelled. |
+| `OrderPreparing` | After a successful call to `MarkAsPreparing`. | Signals that order preparation has begun. |
+| `OrderReadyForDelivery` | After a successful call to `MarkAsReadyForDelivery`. | Signals that the order is ready for delivery. |
+| `OrderDelivered` | After a successful call to `MarkAsDelivered`. | Signals that the order has been delivered. |
 
 ### 6. Order Status Lifecycle
 
-The `OrderStatus` enum defines the following valid statuses and their transitions:
+The `OrderStatus` enum defines the following valid statuses and their transitions, now including a two-phase payment flow.
 
 | Status | Description | Valid Transitions |
 | :--- | :--- | :--- |
-| `Placed` | Initial status when order is created | → Accepted, Rejected, Cancelled |
-| `Accepted` | Restaurant has accepted the order | → Preparing, Cancelled, Rejected |
-| `Preparing` | Order is being prepared | → ReadyForDelivery, Cancelled |
-| `ReadyForDelivery` | Order is ready for pickup/delivery | → Delivered, Cancelled |
-| `Delivered` | Order has been completed | (Terminal state) |
-| `Cancelled` | Order was cancelled | (Terminal state) |
-| `Rejected` | Order was rejected by restaurant | (Terminal state) |
+| `AwaitingPayment` | Initial status for online payments, awaiting confirmation. | → `Placed`, `Cancelled` |
+| `Placed` | Initial status for cash-on-delivery or confirmed online payments. | → `Accepted`, `Rejected`, `Cancelled` |
+| `Accepted` | Restaurant has accepted the order. | → `Preparing`, `Cancelled` |
+| `Preparing` | Order is being prepared. | → `ReadyForDelivery`, `Cancelled` |
+| `ReadyForDelivery` | Order is ready for pickup/delivery. | → `Delivered`, `Cancelled` |
+| `Delivered` | Order has been completed. | (Terminal state) |
+| `Cancelled` | Order was cancelled (by user, restaurant, or due to payment failure). | (Terminal state) |
+| `Rejected` | Order was rejected by the restaurant. | (Terminal state) |
 
-### 7. Financial Calculations
+### 7. Financial Calculations & Integrity
 
-The aggregate maintains strict financial integrity through the following invariants:
+The `Order` aggregate no longer performs financial calculations (e.g., subtotal, discounts, final total). This responsibility has been moved to the `OrderFinancialService` to adhere to the Single Responsibility Principle.
 
-* **Subtotal** = Sum of all `OrderItem.LineItemTotal`s
-* **TotalAmount** = `Subtotal - DiscountAmount + TaxAmount + DeliveryFee + TipAmount`
-* **LineItemTotal** (per item) = `(BasePrice + CustomizationAdjustments) × Quantity`
-* **Discount** cannot exceed the subtotal amount
-* **TotalAmount** cannot be negative
+The `Order.Create` factory method now enforces financial integrity by validating that the sum of the provided financial components (`subtotal`, `discountAmount`, `deliveryFee`, `tipAmount`, `taxAmount`) equals the `totalAmount`. This ensures that the order is created in a consistent and valid state.
 
-### 8. Coupon Application Rules
+### 8. Coupon Application
 
-* Only one coupon can be applied per order
-* Coupons can only be applied to orders in `Placed` status
-* Discount calculation varies by coupon type:
-  * **Percentage**: Applied to eligible items based on scope
-  * **FixedAmount**: Limited to the value of eligible items
-  * **FreeItem**: Discount equals the price of one unit of the cheapest matching item
-* Coupon scope determines eligible items:
-  * **WholeOrder**: Applied to entire subtotal
-  * **SpecificItems**: Applied only to matching menu items
-  * **SpecificCategories**: Applied only to items in matching categories
+Coupon application logic, including validation and discount calculation, has been removed from the `Order` aggregate and is now handled exclusively by the `OrderFinancialService`. The `Order` aggregate now only stores the `AppliedCouponId` as a reference.

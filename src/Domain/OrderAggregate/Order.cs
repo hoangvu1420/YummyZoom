@@ -128,11 +128,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     public CouponId? AppliedCouponId { get; private set; }
 
     /// <summary>
-    /// Gets the payment intent ID for online payments. This is used to link webhook events back to the order.
-    /// </summary>
-    public string? PaymentIntentId { get; private set; }
-
-    /// <summary>
     /// Gets a read-only list of all items in this order.
     /// </summary>
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
@@ -168,7 +163,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         CouponId? appliedCouponId,
         TeamCartId? sourceTeamCartId,
         OrderStatus initialStatus,
-        string? paymentIntentId,
         DateTime timestamp)
         : base(orderId)
     {
@@ -186,7 +180,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         TotalAmount = totalAmount;
         AppliedCouponId = appliedCouponId;
         SourceTeamCartId = sourceTeamCartId;
-        PaymentIntentId = paymentIntentId;
 
         _paymentTransactions = new List<PaymentTransaction>(paymentTransactions);
         _orderItems = new List<OrderItem>(orderItems);
@@ -208,8 +201,8 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     #region Static Factory Methods
 
     /// <summary>
-    /// Creates a new order instance after all business logic and calculations have been performed.
-    /// This factory acts as a final consistency gatekeeper.
+    /// Creates a new order for a standard single-payment flow (online or COD),
+    /// where the order itself is responsible for creating the initial payment transaction.
     /// </summary>
     public static Result<Order> Create(
         UserId customerId,
@@ -223,103 +216,114 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money tipAmount,
         Money taxAmount,
         Money totalAmount, 
-        List<PaymentTransaction> paymentTransactions,
+        PaymentMethodType paymentMethodType,
         CouponId? appliedCouponId,
-        TeamCartId? sourceTeamCartId = null)
-    {
-        // Default to Placed status for backward compatibility (COD orders)
-        return Create(
-            customerId,
-            restaurantId,
-            deliveryAddress,
-            orderItems,
-            specialInstructions,
-            subtotal,
-            discountAmount,
-            deliveryFee,
-            tipAmount,
-            taxAmount,
-            totalAmount,
-            paymentTransactions,
-            appliedCouponId,
-            OrderStatus.Placed,
-            null,
-            sourceTeamCartId);
-    }
-
-    /// <summary>
-    /// Creates a new order instance with support for the two-phase payment flow.
-    /// </summary>
-    public static Result<Order> Create(
-        UserId customerId,
-        RestaurantId restaurantId,
-        DeliveryAddress deliveryAddress,
-        List<OrderItem> orderItems,
-        string specialInstructions,
-        Money subtotal,
-        Money discountAmount,
-        Money deliveryFee,
-        Money tipAmount,
-        Money taxAmount,
-        Money totalAmount, 
-        List<PaymentTransaction>? paymentTransactions,
-        CouponId? appliedCouponId,
-        OrderStatus initialStatus,
-        string? paymentIntentId = null,
+        string? paymentGatewayReferenceId = null,
         TeamCartId? sourceTeamCartId = null,
         DateTime? timestamp = null)
     {
-        // Initialize paymentTransactions to empty list if null
-        paymentTransactions ??= new List<PaymentTransaction>();
-        
         if (!orderItems.Any())
         {
             return Result.Failure<Order>(OrderErrors.OrderItemRequired);
         }
 
-        // Invariant Check 1 (Financial Integrity):
-        // Asserts that the internally calculated total equals the `totalAmount` parameter.
         var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;
-        if (calculatedTotal.Amount != totalAmount.Amount)
+        if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
         {
             return Result.Failure<Order>(OrderErrors.FinancialMismatch);
         }
         
-        // Ensure total is not negative
         if (totalAmount.Amount < 0)
         {
             return Result.Failure<Order>(OrderErrors.NegativeTotalAmount);
         }
+        
+        var currentTimestamp = timestamp ?? DateTime.UtcNow;
+        var paymentTransactions = new List<PaymentTransaction>();
+        var initialStatus = OrderStatus.AwaitingPayment;
 
-        // For PendingPayment status, we require a payment intent ID and don't require payment transactions yet
-        // They will be created after payment confirmation
-        if (initialStatus == OrderStatus.PendingPayment)
+        if (paymentMethodType == PaymentMethodType.CashOnDelivery)
         {
-            // Require payment intent ID for PendingPayment status
-            if (string.IsNullOrEmpty(paymentIntentId))
+            var codTransactionResult = PaymentTransaction.Create(
+                PaymentMethodType.CashOnDelivery, PaymentTransactionType.Payment, totalAmount, currentTimestamp);
+            
+            if (codTransactionResult.IsFailure)
             {
-                return Result.Failure<Order>(OrderErrors.PaymentIntentIdRequired);
+                return Result.Failure<Order>(codTransactionResult.Error);
             }
             
-            // If status is PendingPayment, we shouldn't have any payment transactions yet
-            if (paymentTransactions.Any())
-            {
-                paymentTransactions = new List<PaymentTransaction>();
-            }
+            codTransactionResult.Value.MarkAsSucceeded();
+            paymentTransactions.Add(codTransactionResult.Value);
+            initialStatus = OrderStatus.Placed;
         }
         else
         {
-            // Invariant Check 2 (Payment Integrity):
-            // Calculates the sum of all `paymentTransactions` amounts.
-            var totalPaid = paymentTransactions.Sum(p => p.Amount.Amount);
-            
-            // Invariant Check 3 (Payment Match):
-            // Asserts that the sum of payments equals the `totalAmount`.
-            // Use a small tolerance for floating-point comparisons.
-            if (Math.Abs(totalPaid - totalAmount.Amount) > 0.01m)
+            if (string.IsNullOrEmpty(paymentGatewayReferenceId))
             {
-                return Result.Failure<Order>(OrderErrors.PaymentMismatch);
+                return Result.Failure<Order>(OrderErrors.PaymentGatewayReferenceIdRequired);
             }
+            
+            var onlinePaymentResult = PaymentTransaction.Create(
+                paymentMethodType, PaymentTransactionType.Payment, totalAmount, currentTimestamp, 
+                paymentGatewayReferenceId: paymentGatewayReferenceId);
+
+            if (onlinePaymentResult.IsFailure)
+            {
+                return Result.Failure<Order>(onlinePaymentResult.Error);
+            }
+            
+            paymentTransactions.Add(onlinePaymentResult.Value);
+        }
+
+        // This calls the new factory method internally for consistency
+        return Create(
+            customerId, restaurantId, deliveryAddress, orderItems, specialInstructions,
+            subtotal, discountAmount, deliveryFee, tipAmount, taxAmount, totalAmount,
+            paymentTransactions, appliedCouponId, initialStatus, sourceTeamCartId, currentTimestamp);
+    }
+
+    /// <summary>
+    /// Creates a new order from a pre-validated set of data, including a list of payment transactions.
+    /// This is ideal for trusted processes like TeamCart conversion.
+    /// </summary>
+    public static Result<Order> Create(
+        UserId customerId,
+        RestaurantId restaurantId,
+        DeliveryAddress deliveryAddress,
+        List<OrderItem> orderItems,
+        string specialInstructions,
+        Money subtotal,
+        Money discountAmount,
+        Money deliveryFee,
+        Money tipAmount,
+        Money taxAmount,
+        Money totalAmount, 
+        List<PaymentTransaction> paymentTransactions, // Accepts a pre-built list
+        CouponId? appliedCouponId,
+        OrderStatus initialStatus, // Accepts a pre-determined status
+        TeamCartId? sourceTeamCartId = null,
+        DateTime? timestamp = null)
+    {
+        if (!orderItems.Any())
+        {
+            return Result.Failure<Order>(OrderErrors.OrderItemRequired);
+        }
+
+        var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;
+        if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
+        {
+            return Result.Failure<Order>(OrderErrors.FinancialMismatch);
+        }
+        
+        if (totalAmount.Amount < 0)
+        {
+            return Result.Failure<Order>(OrderErrors.NegativeTotalAmount);
+        }
+        
+        var totalPaid = paymentTransactions.Sum(p => p.Amount.Amount);
+        if (Math.Abs(totalPaid - totalAmount.Amount) > 0.01m)
+        {
+            return Result.Failure<Order>(OrderErrors.PaymentMismatch);
         }
 
         var currentTimestamp = timestamp ?? DateTime.UtcNow;
@@ -342,7 +346,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             appliedCouponId,
             sourceTeamCartId,
             initialStatus,
-            paymentIntentId,
             currentTimestamp);
 
         order.AddDomainEvent(new OrderCreated(order.Id, order.CustomerId, order.RestaurantId, order.TotalAmount));
@@ -478,41 +481,49 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     }
 
     /// <summary>
-    /// Confirms payment for an order that was in PendingPayment status.
-    /// This method is called by the payment webhook handler when payment is successful.
+    /// Records a successful payment transaction, moving the Order to Placed status.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
-    public Result ConfirmPayment(DateTime? timestamp = null)
+    public Result RecordPaymentSuccess(string paymentGatewayReferenceId, DateTime? timestamp = null)
     {
-        if (Status != OrderStatus.PendingPayment)
+        if (Status != OrderStatus.AwaitingPayment)
         {
             return Result.Failure(OrderErrors.InvalidStatusForPaymentConfirmation);
         }
 
+        var transaction = _paymentTransactions.FirstOrDefault(p => p.PaymentGatewayReferenceId == paymentGatewayReferenceId);
+        if (transaction is null)
+        {
+            return Result.Failure(OrderErrors.PaymentTransactionNotFound);
+        }
+        
+        transaction.MarkAsSucceeded();
+
         Status = OrderStatus.Placed;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
-
         AddDomainEvent(new OrderPaymentSucceeded(Id));
         return Result.Success();
     }
 
     /// <summary>
-    /// Marks an order as having a failed payment.
-    /// This method is called by the payment webhook handler when payment fails.
+    /// Records a failed payment transaction, moving the Order to Cancelled status.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
-    public Result MarkAsPaymentFailed(DateTime? timestamp = null)
+    public Result RecordPaymentFailure(string paymentGatewayReferenceId, DateTime? timestamp = null)
     {
-        if (Status != OrderStatus.PendingPayment)
+        if (Status != OrderStatus.AwaitingPayment)
         {
             return Result.Failure(OrderErrors.InvalidStatusForPaymentConfirmation);
         }
 
-        Status = OrderStatus.PaymentFailed;
-        LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        var transaction = _paymentTransactions.FirstOrDefault(p => p.PaymentGatewayReferenceId == paymentGatewayReferenceId);
+        if (transaction is null)
+        {
+            return Result.Failure(OrderErrors.PaymentTransactionNotFound);
+        }
 
+        transaction.MarkAsFailed();
+
+        Status = OrderStatus.Cancelled; 
+        LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
         AddDomainEvent(new OrderPaymentFailed(Id));
         return Result.Success();
     }

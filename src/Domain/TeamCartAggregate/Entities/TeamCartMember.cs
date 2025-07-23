@@ -30,10 +30,6 @@ public sealed class TeamCartMember : Entity<TeamCartMemberId>
     /// <summary>
     /// Initializes a new instance of the <see cref="TeamCartMember"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the member.</param>
-    /// <param name="userId">The ID of the user associated with this member.</param>
-    /// <param name="name">The display name of the member.</param>
-    /// <param name="role">The role of the member in the team cart.</param>
     private TeamCartMember(
         TeamCartMemberId id,
         UserId userId,
@@ -56,10 +52,6 @@ public sealed class TeamCartMember : Entity<TeamCartMemberId>
     /// <summary>
     /// Creates a new team cart member.
     /// </summary>
-    /// <param name="userId">The ID of the user associated with this member.</param>
-    /// <param name="name">The display name of the member.</param>
-    /// <param name="role">The role of the member in the team cart.</param>
-    /// <returns>A result containing the new team cart member if successful, or an error if validation fails.</returns>
     public static Result<TeamCartMember> Create(
         UserId userId,
         string name,

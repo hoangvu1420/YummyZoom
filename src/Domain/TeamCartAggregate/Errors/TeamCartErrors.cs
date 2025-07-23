@@ -218,4 +218,33 @@ public static class TeamCartErrors
     public static readonly Error CouponNotApplicable = Error.Validation(
         "TeamCart.CouponNotApplicable",
         "This coupon is not applicable to the items in the team cart");
+
+    // New errors for the Lock, Settle, Convert lifecycle
+    public static readonly Error OnlyHostCanLockCart = Error.Validation(
+        "TeamCart.OnlyHostCanLockCart",
+        "Only the host can lock the cart for payment");
+
+    public static readonly Error CannotLockCartInCurrentStatus = Error.Validation(
+        "TeamCart.CannotLockCartInCurrentStatus",
+        "Cannot lock the cart in its current status");
+
+    public static readonly Error CannotLockEmptyCart = Error.Validation(
+        "TeamCart.CannotLockEmptyCart",
+        "Cannot lock an empty cart");
+
+    public static readonly Error CannotModifyCartOnceLocked = Error.Validation(
+        "TeamCart.CannotModifyCartOnceLocked",
+        "Cannot modify items or members once the cart is locked");
+
+    public static readonly Error CanOnlyApplyFinancialsToLockedCart = Error.Validation(
+        "TeamCart.CanOnlyApplyFinancialsToLockedCart",
+        "Financial adjustments can only be applied to a locked cart");
+
+    public static readonly Error CanOnlyPayOnLockedCart = Error.Validation(
+        "TeamCart.CanOnlyPayOnLockedCart",
+        "Payments can only be made on a locked cart");
+
+    public static readonly Error FinalPaymentMismatch = Error.Validation(
+        "TeamCart.FinalPaymentMismatch",
+        "The sum of payment transactions does not match the total order amount");
 }
