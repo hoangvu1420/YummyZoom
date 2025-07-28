@@ -1,4 +1,4 @@
-namespace YummyZoom.SharedKernel.Models;
+namespace YummyZoom.Application.Common.Models;
 
 /// <summary>
 /// Infrastructure entity representing a user's session on a specific device.

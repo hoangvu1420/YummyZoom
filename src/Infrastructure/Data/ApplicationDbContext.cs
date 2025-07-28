@@ -4,12 +4,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Models;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
-using YummyZoom.SharedKernel.Models;
+using Result = YummyZoom.SharedKernel.Result;
+using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.RestaurantAggregate;
+using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.CouponAggregate;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -22,11 +27,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
+    public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents => Set<ProcessedWebhookEvent>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Restaurant> Restaurants => Set<Restaurant>();
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        builder.Entity<ProcessedWebhookEvent>().HasKey(e => e.Id);
         
         // Apply global query filters for soft delete
         ApplySoftDeleteQueryFilters(builder);

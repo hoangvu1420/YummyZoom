@@ -1,0 +1,146 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Stripe;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Models;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.SharedKernel;
+using Result = YummyZoom.SharedKernel.Result;
+
+namespace YummyZoom.Infrastructure.Payments.Stripe;
+
+public class StripeService : IPaymentGatewayService
+{
+    private readonly PaymentIntentService _paymentIntentService;
+    private readonly RefundService _refundService;
+    private readonly string _webhookSecret;
+    private readonly ILogger<StripeService> _logger;
+
+    public StripeService(
+        IOptions<StripeOptions> stripeOptions,
+        ILogger<StripeService> logger)
+    {
+        _paymentIntentService = new PaymentIntentService();
+        _refundService = new RefundService();
+        _webhookSecret = stripeOptions.Value.WebhookSecret;
+        _logger = logger;
+    }
+
+    public async Task<Result<PaymentIntentResult>> CreatePaymentIntentAsync(
+        Money amount,
+        string currency,
+        IDictionary<string, string> metadata,
+        CancellationToken cancellationToken = default)
+    {
+        metadata.TryGetValue("order_id", out var orderId);
+
+        try
+        {
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(amount.Amount * 100),
+                Currency = currency.ToLower(),
+                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                {
+                    Enabled = true,
+                },
+                Metadata = new Dictionary<string, string>(metadata)
+            };
+
+            _logger.LogInformation(
+                "Creating Stripe Payment Intent for Order ID: {OrderId}", orderId);
+
+            var paymentIntent = await _paymentIntentService.CreateAsync(
+                options, cancellationToken: cancellationToken);
+
+            _logger.LogInformation(
+                "Successfully created Stripe Payment Intent ID: {PaymentIntentId} for Order ID: {OrderId}",
+                paymentIntent.Id, orderId);
+
+            return Result.Success(
+                new PaymentIntentResult(paymentIntent.Id, paymentIntent.ClientSecret));
+        }
+        catch (StripeException e)
+        {
+            _logger.LogError(
+                e, "Stripe API error during payment intent creation for Order ID: {OrderId}", orderId);
+
+            return Result.Failure<PaymentIntentResult>(
+                Error.Failure("Stripe.CreatePaymentIntentFailed", e.Message));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(
+                e, "Unexpected error during payment intent creation for Order ID: {OrderId}", orderId);
+
+            return Result.Failure<PaymentIntentResult>(
+                Error.Problem("Stripe.UnexpectedPaymentIntentError", e.Message));
+        }
+    }
+
+    public Result<WebhookEventResult> ConstructWebhookEvent(string json, string stripeSignatureHeader)
+    {
+        try
+        {
+            var stripeEvent = EventUtility.ConstructEvent(json, stripeSignatureHeader, _webhookSecret);
+
+            var relevantObject = stripeEvent.Data.Object as IHasId;
+            if (relevantObject is null)
+            {
+                _logger.LogWarning("Stripe webhook event data object does not contain an ID. Event ID: {EventId}", stripeEvent.Id);
+                return Result.Failure<WebhookEventResult>(Error.Validation("Webhook.MissingId", "The webhook event data object does not contain an ID."));
+            }
+
+            var result = new WebhookEventResult(
+                EventId: stripeEvent.Id,
+                EventType: stripeEvent.Type,
+                RelevantObjectId: relevantObject.Id
+            );
+
+            _logger.LogInformation("Successfully constructed WebhookEventResult for Event ID: {EventId}, Type: {EventType}", result.EventId, result.EventType);
+            return Result.Success(result);
+        }
+        catch (StripeException e)
+        {
+            _logger.LogError(e, "Stripe webhook signature validation failed.");
+            return Result.Failure<WebhookEventResult>(Error.Validation("Stripe.WebhookSignatureInvalid", e.Message));
+        }
+    }
+
+    public async Task<Result<string>> RefundPaymentAsync(string gatewayTransactionId, Money amountToRefund, string reason, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var options = new RefundCreateOptions
+            {
+                PaymentIntent = gatewayTransactionId,
+                Amount = (long)(amountToRefund.Amount * 100),
+                Reason = reason
+            };
+
+            _logger.LogInformation("Creating Stripe Refund for Payment Intent ID: {PaymentIntentId}", gatewayTransactionId);
+            var stripeRefund = await _refundService.CreateAsync(options, null, cancellationToken);
+
+            if (stripeRefund.Status == "succeeded")
+            {
+                _logger.LogInformation("Successfully created Stripe Refund ID: {RefundId} for Payment Intent ID: {PaymentIntentId}", stripeRefund.Id, gatewayTransactionId);
+                return Result.Success(stripeRefund.Id);
+            }
+            else
+            {
+                _logger.LogWarning("Stripe refund for Payment Intent ID: {PaymentIntentId} was not successful. Status: {Status}, Reason: {FailureReason}", gatewayTransactionId, stripeRefund.Status, stripeRefund.FailureReason);
+                return Result.Failure<string>(Error.Failure("Stripe.RefundFailed", stripeRefund.FailureReason ?? "Refund was not successful."));
+            }
+        }
+        catch (StripeException e)
+        {
+            _logger.LogError(e, "Stripe API error during refund for transaction {TransactionId}", gatewayTransactionId);
+            return Result.Failure<string>(Error.Failure("Stripe.RefundApiError", e.Message));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unexpected error during refund for transaction {TransactionId}", gatewayTransactionId);
+            return Result.Failure<string>(Error.Problem("Stripe.UnexpectedRefundError", e.Message));
+        }
+    }
+}

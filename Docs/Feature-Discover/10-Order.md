@@ -87,44 +87,44 @@
 
 This handler creates the initial order record and, if necessary, a payment intent.
 
-1.  **Start Transaction & Fetch/Validate Data:**
-    *   Begin a transaction using `IUnitOfWork`.
-    *   Fetch `restaurant`, `menuItems`, etc. Validate item availability and restaurant status.
-2.  **Calculate Financials (In-Memory):**
-    *   Use the `OrderFinancialService` to calculate `subtotal`, `discountAmount`, and `totalAmount`.
-3.  **Handle Payment Method Logic:**
-    *   **If Online Payment (Stripe):**
-        *   **Create Payment Intent (External I/O):** Call `_paymentGatewayService.CreatePaymentIntentAsync(totalAmount, ...)`. If this fails, the command fails.
-        *   **Create the Order Aggregate:** Call `Order.Create(..., initialStatus: OrderStatus.PendingPayment, paymentIntentId: intentResult.PaymentIntentId)`.
-    *   **If COD Payment:**
-        *   Call `Order.Create(..., initialStatus: OrderStatus.Placed)`. No `PaymentIntent` is created.
-4.  **Persist and Commit:**
-    *   `await _orderRepository.AddAsync(orderResult.Value);`
-    *   Commit the `IUnitOfWork` transaction. This will dispatch `OrderInitiated` (for online) or `CodOrderPlaced` (for COD).
-5.  **Return Response to Frontend:**
-    *   **For Online Payment:** Return an `InitiateOrderResponse` containing the `OrderId` and the `client_secret` from the payment intent.
-    *   **For COD Payment:** Return an `InitiateOrderResponse` with just the `OrderId`.
+1. **Start Transaction & Fetch/Validate Data:**
+    * Begin a transaction using `IUnitOfWork`.
+    * Fetch `restaurant`, `menuItems`, etc. Validate item availability and restaurant status.
+2. **Calculate Financials (In-Memory):**
+    * Use the `OrderFinancialService` to calculate `subtotal`, `discountAmount`, and `totalAmount`.
+3. **Handle Payment Method Logic:**
+    * **If Online Payment (Stripe):**
+        * **Create Payment Intent (External I/O):** Call `_paymentGatewayService.CreatePaymentIntentAsync(totalAmount, ...)`. If this fails, the command fails.
+        * **Create the Order Aggregate:** Call `Order.Create(..., initialStatus: OrderStatus.AwaitingPayment, paymentIntentId: intentResult.PaymentIntentId)`.
+    * **If COD Payment:**
+        * Call `Order.Create(..., initialStatus: OrderStatus.Placed)`. No `PaymentIntent` is created.
+4. **Persist and Commit:**
+    * `await _orderRepository.AddAsync(orderResult.Value);`
+    * Commit the `IUnitOfWork` transaction. This will dispatch `OrderInitiated` (for online) or `CodOrderPlaced` (for COD).
+5. **Return Response to Frontend:**
+    * **For Online Payment:** Return an `InitiateOrderResponse` containing the `OrderId` and the `client_secret` from the payment intent.
+    * **For COD Payment:** Return an `InitiateOrderResponse` with just the `OrderId`.
 
 #### **Process 2: `HandleStripeWebhookCommandHandler` Orchestration (System-to-System)**
 
 This handler acts as the trusted listener for the definitive payment outcome from Stripe.
 
-1.  **Verify Signature & Deserialize:** The handler receives the raw JSON payload and signature. It uses `IPaymentGatewayService` to verify the signature and deserialize the event. If invalid, it fails.
-2.  **Idempotency Check:** It checks a persistent store (e.g., `ProcessedEvents` table) to see if this `event.Id` has already been handled. If so, it returns success immediately.
-3.  **Find the Order:**
-    *   Extract the `PaymentIntent.Id` from the event data.
-    *   Fetch the order: `var order = await _orderRepository.GetByPaymentIntentIdAsync(paymentIntent.Id);`. If not found, log a warning and exit successfully.
-4.  **Invoke Aggregate Method based on Event Type:**
-    *   `case "payment_intent.succeeded":`
-        *   Call `var result = order.ConfirmPayment();`.
-        *   If `result.IsSuccess`, create a successful `PaymentTransaction` entity and add it to the order.
-    *   `case "payment_intent.payment_failed":`
-        *   Call `var result = order.MarkAsPaymentFailed();`.
-        *   Create a failed `PaymentTransaction` with the failure reason.
-5.  **Persist Changes and Log Event:**
-    *   `await _orderRepository.UpdateAsync(order);`
-    *   Log the `event.Id` to the `ProcessedEvents` table.
-    *   Commit the `UnitOfWork`. This dispatches `OrderPaymentSucceeded` or `OrderPaymentFailed`.
+1. **Verify Signature & Deserialize:** The handler receives the raw JSON payload and signature. It uses `IPaymentGatewayService` to verify the signature and deserialize the event. If invalid, it fails.
+2. **Idempotency Check:** It checks a persistent store (e.g., `ProcessedEvents` table) to see if this `event.Id` has already been handled. If so, it returns success immediately.
+3. **Find the Order:**
+    * Extract the `PaymentIntent.Id` from the event data.
+    * Fetch the order: `var order = await _orderRepository.GetByPaymentIntentIdAsync(paymentIntent.Id);`. If not found, log a warning and exit successfully.
+4. **Invoke Aggregate Method based on Event Type:**
+    * `case "payment_intent.succeeded":`
+        * Call `var result = order.RecordPaymentSuccess();`.
+        * If `result.IsSuccess`, create a successful `PaymentTransaction` entity and add it to the order.
+    * `case "payment_intent.payment_failed":`
+        * Call `var result = order.RecordPaymentFailure();`.
+        * Create a failed `PaymentTransaction` with the failure reason.
+5. **Persist Changes and Log Event:**
+    * `await _orderRepository.UpdateAsync(order);`
+    * Log the `event.Id` to the `ProcessedEvents` table.
+    * Commit the `UnitOfWork`. This dispatches `OrderPaymentSucceeded` or `OrderPaymentFailed`.
 
 ---
 
@@ -132,15 +132,15 @@ This handler acts as the trusted listener for the definitive payment outcome fro
 
 ***Instructions:*** *Add any additional notes, considerations, or suggestions for the design of this aggregate. This could include performance considerations, future extensibility, or architectural patterns.*
 
-1.  **Clear Separation of Concerns:** This refactored design is a prime example of DDD principles.
-    *   **Application Layer (`CreateOrderCommandHandler`):** Acts as a pure orchestrator of a business process.
-    *   **Domain Service (`OrderFinancialService`):** Encapsulates complex, stateless business logic and calculations.
-    *   **Aggregate (`Order`):** Protects the integrity of a transactional record and manages its post-creation lifecycle.
-2.  **Enhanced Transactional Integrity:** The "all-or-nothing" nature of order creation is now explicit. An `Order` is only ever created if all preconditions—item availability, coupon validity, and successful payment—have been met. This dramatically reduces the risk of data inconsistencies.
-3.  **Aggregate Immutability:** The `Order` aggregate is now truly immutable upon creation regarding its financial details and items. This makes it a reliable and auditable historical record, which is critical for a food ordering platform.
-4.  **Handling the "Point of No Return":** The design correctly identifies that the moment a payment succeeds is the most critical point. Robust `try...catch` logic in the command handler is essential to trigger a compensating action (an immediate refund) if any subsequent step fails, preventing "lost money" scenarios.
-5.  **Extensibility with the Saga Pattern:** The post-creation lifecycle (`Accepted` -> `Delivered`) is still a good candidate for the Saga pattern if coordination with external services (like a delivery fleet) is required in the future.
-6.  **Concurrency Management:** The risk of an item's availability changing during checkout remains. An optimistic concurrency check on `MenuItem`s or a Reservation Pattern are potential future enhancements for high-volume scenarios.
+1. **Clear Separation of Concerns:** This refactored design is a prime example of DDD principles.
+    * **Application Layer (`CreateOrderCommandHandler`):** Acts as a pure orchestrator of a business process.
+    * **Domain Service (`OrderFinancialService`):** Encapsulates complex, stateless business logic and calculations.
+    * **Aggregate (`Order`):** Protects the integrity of a transactional record and manages its post-creation lifecycle.
+2. **Enhanced Transactional Integrity:** The "all-or-nothing" nature of order creation is now explicit. An `Order` is only ever created if all preconditions—item availability, coupon validity, and successful payment—have been met. This dramatically reduces the risk of data inconsistencies.
+3. **Aggregate Immutability:** The `Order` aggregate is now truly immutable upon creation regarding its financial details and items. This makes it a reliable and auditable historical record, which is critical for a food ordering platform.
+4. **Handling the "Point of No Return":** The design correctly identifies that the moment a payment succeeds is the most critical point. Robust `try...catch` logic in the command handler is essential to trigger a compensating action (an immediate refund) if any subsequent step fails, preventing "lost money" scenarios.
+5. **Extensibility with the Saga Pattern:** The post-creation lifecycle (`Accepted` -> `Delivered`) is still a good candidate for the Saga pattern if coordination with external services (like a delivery fleet) is required in the future.
+6. **Concurrency Management:** The risk of an item's availability changing during checkout remains. An optimistic concurrency check on `MenuItem`s or a Reservation Pattern are potential future enhancements for high-volume scenarios.
 
 ### 7. Order Payment Process & Gateway Abstraction
 
@@ -151,6 +151,7 @@ This section details the orchestration of payments within the `CreateOrderComman
 To keep the application decoupled from a specific payment provider like Stripe, we define an abstraction in the Application Layer, with its implementation in the Infrastructure Layer.
 
 **Interface Definition (`src/Application/Common/Interfaces/IPaymentGatewayService.cs`)**
+
 ```csharp
 // A record to standardize the result from any payment provider.
 public record PaymentIntentResult(string PaymentIntentId, string ClientSecret);
@@ -198,16 +199,16 @@ The COD flow is now a simplified path within the `InitiateOrderCommand`. The ord
 
 This is now a two-step, asynchronous process:
 
-1.  **Initiation (User-driven):**
-    *   The `InitiateOrderCommandHandler` validates the cart, calculates the final `totalAmount`, and calls `_paymentGatewayService.CreatePaymentIntentAsync(...)`.
-    *   It creates the `Order` in the database with `Status = PendingPayment` and stores the `PaymentIntentId`.
-    *   It returns the `client_secret` to the frontend.
-2.  **Confirmation (Frontend & Stripe-driven):**
-    *   The frontend uses the `client_secret` to confirm the payment with Stripe. The user may go through 3D Secure authentication.
-    *   Stripe processes the payment and sends a `payment_intent.succeeded` (or `failed`) webhook to our backend.
-3.  **Finalization (System-driven):**
-    *   The `HandleStripeWebhookCommandHandler` receives the webhook.
-    *   It finds the corresponding `Order` via the `PaymentIntentId`.
-    *   It calls `order.ConfirmPayment()`, which changes the status to `Placed`.
-    *   It saves the order, which dispatches the `OrderPaymentSucceeded` event.
-    *   **Only now** do the downstream processes (notifying the restaurant, recording revenue) begin.
+1. **Initiation (User-driven):**
+    * The `InitiateOrderCommandHandler` validates the cart, calculates the final `totalAmount`, and calls `_paymentGatewayService.CreatePaymentIntentAsync(...)`.
+    * It creates the `Order` in the database with `Status = PendingPayment` and stores the `PaymentIntentId`.
+    * It returns the `client_secret` to the frontend.
+2. **Confirmation (Frontend & Stripe-driven):**
+    * The frontend uses the `client_secret` to confirm the payment with Stripe. The user may go through 3D Secure authentication.
+    * Stripe processes the payment and sends a `payment_intent.succeeded` (or `failed`) webhook to our backend.
+3. **Finalization (System-driven):**
+    * The `HandleStripeWebhookCommandHandler` receives the webhook.
+    * It finds the corresponding `Order` via the `PaymentIntentId`.
+    * It calls `order.RecordPaymentSuccess()`, which changes the status to `Placed`.
+    * It saves the order, which dispatches the `OrderPaymentSucceeded` event.
+    * **Only now** do the downstream processes (notifying the restaurant, recording revenue) begin.

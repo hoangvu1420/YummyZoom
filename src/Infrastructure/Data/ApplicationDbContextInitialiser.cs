@@ -11,9 +11,9 @@ using YummyZoom.Domain.TodoListAggregate.Enums;
 using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Models;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel.Models;
 
 namespace YummyZoom.Infrastructure.Data;
 

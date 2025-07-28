@@ -1,8 +1,8 @@
-using YummyZoom.SharedKernel;
-using YummyZoom.SharedKernel.Models;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Models;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Application.Users.Commands.RegisterDevice;
 

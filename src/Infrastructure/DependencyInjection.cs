@@ -1,4 +1,4 @@
-﻿using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
@@ -19,6 +19,9 @@ using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Infrastructure.Payments.Stripe;
+using YummyZoom.Domain.Services;
+using Stripe;
 
 namespace YummyZoom.Infrastructure;
 
@@ -71,11 +74,16 @@ public static class DependencyInjection
             .AddApiEndpoints();
 
         builder.Services.AddSingleton(TimeProvider.System);
-        builder.Services.AddTransient<IIdentityService, IdentityService>();
+        builder.Services.AddTransient<IIdentityService, Identity.IdentityService>();
+        
         builder.Services.AddScoped<IUserAggregateRepository, UserAggregateRepository>();
         builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
         builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
         builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+        builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+        builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+        builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
@@ -94,17 +102,32 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, YummyZoomClaimsPrincipalFactory>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        // Stripe configuration
+        builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection(StripeOptions.SectionName));
+
+        var stripeOptions = builder.Configuration.GetSection(StripeOptions.SectionName).Get<StripeOptions>();
+        if (stripeOptions is not null)
+        {
+            StripeConfiguration.ApiKey = stripeOptions.SecretKey;
+        }
+        
+        builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
+        
+        // Register Domain Services
+        builder.Services.AddScoped<OrderFinancialService>();
+        builder.Services.AddScoped<TeamCartConversionService>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
     {
-        var fcmAdminKeyJson = builder.Configuration["yummyzoom-fcm-admin-key"];
+        var fcmAdminKeyJson = builder.Configuration["YummyZoomFcmAdminKey"];
         
         if (string.IsNullOrWhiteSpace(fcmAdminKeyJson))
         {
             using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
             var logger = loggerFactory.CreateLogger("Firebase.Initialization");
-            logger.LogWarning("Firebase Admin SDK key 'yummyzoom-fcm-admin-key' not found in configuration. FCM will not be initialized.");
+            logger.LogWarning("Firebase Admin SDK key 'YummyZoomFcmAdminKey' not found in configuration. FCM will not be initialized.");
             return;
         }
 

@@ -1,4 +1,4 @@
-using YummyZoom.SharedKernel.Models;
+using YummyZoom.Application.Common.Models;
 
 namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 

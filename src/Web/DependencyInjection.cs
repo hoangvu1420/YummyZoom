@@ -77,15 +77,18 @@ public static class DependencyInjection
             // Attempt to list secrets as a connectivity check (minimal call)
             using IEnumerator<SecretProperties> enumerator = client.GetPropertiesOfSecrets().GetEnumerator();
             enumerator.MoveNext();
-                
+
             builder.Configuration.AddAzureKeyVault(
                 new Uri(keyVaultUri),
                 credential);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Log or handle the exception as needed
-            throw new InvalidOperationException($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.", ex);
+            using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
+            var logger = loggerFactory.CreateLogger("AzureKeyVault.Initialization");
+            logger.LogCritical($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.");
+            // throw new InvalidOperationException($"Failed to connect to Azure Key Vault at '{keyVaultUri}'.", ex);
         }
     }
 }

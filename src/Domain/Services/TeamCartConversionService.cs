@@ -98,7 +98,7 @@ public sealed class TeamCartConversionService
         var orderResult = Order.Create(
             teamCart.HostUserId,
             teamCart.RestaurantId,
-            deliveryAddress!,
+            deliveryAddress,
             orderItems,
             specialInstructions,
             subtotal,

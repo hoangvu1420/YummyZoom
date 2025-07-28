@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.SharedKernel.Models;
+using YummyZoom.Application.Common.Models;
 
 namespace YummyZoom.Application.FunctionalTests.Notifications;
 

@@ -57,6 +57,7 @@
     <!-- External Services -->
     <PackageVersion Include="FirebaseAdmin" Version="3.2.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageVersion Include="Stripe.net" Version="48.3.0" />
     <!-- Configuration -->
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
     <!-- Testing Framework -->

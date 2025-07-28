@@ -222,6 +222,49 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         TeamCartId? sourceTeamCartId = null,
         DateTime? timestamp = null)
     {
+        return Create(
+            OrderId.CreateUnique(),
+            customerId,
+            restaurantId,
+            deliveryAddress,
+            orderItems,
+            specialInstructions,
+            subtotal,
+            discountAmount,
+            deliveryFee,
+            tipAmount,
+            taxAmount,
+            totalAmount,
+            paymentMethodType,
+            appliedCouponId,
+            paymentGatewayReferenceId,
+            sourceTeamCartId,
+            timestamp);
+    }
+
+    /// <summary>
+    /// Creates a new order for a standard single-payment flow (online or COD) with a specific OrderId,
+    /// where the order itself is responsible for creating the initial payment transaction.
+    /// </summary>
+    public static Result<Order> Create(
+        OrderId orderId,
+        UserId customerId,
+        RestaurantId restaurantId,
+        DeliveryAddress deliveryAddress,
+        List<OrderItem> orderItems,
+        string specialInstructions,
+        Money subtotal,
+        Money discountAmount,
+        Money deliveryFee,
+        Money tipAmount,
+        Money taxAmount,
+        Money totalAmount, 
+        PaymentMethodType paymentMethodType,
+        CouponId? appliedCouponId,
+        string? paymentGatewayReferenceId = null,
+        TeamCartId? sourceTeamCartId = null,
+        DateTime? timestamp = null)
+    {
         if (!orderItems.Any())
         {
             return Result.Failure<Order>(OrderErrors.OrderItemRequired);
@@ -280,11 +323,25 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             paymentTransactions.Add(onlinePaymentResult.Value);
         }
 
-        // This calls the new factory method internally for consistency
+        // This calls the Create method that accepts List<PaymentTransaction> internally for consistency
         return Create(
-            customerId, restaurantId, deliveryAddress, orderItems, specialInstructions,
-            subtotal, discountAmount, deliveryFee, tipAmount, taxAmount, totalAmount,
-            paymentTransactions, appliedCouponId, initialStatus, sourceTeamCartId, currentTimestamp);
+            orderId,
+            customerId,
+            restaurantId,
+            deliveryAddress,
+            orderItems,
+            specialInstructions,
+            subtotal,
+            discountAmount,
+            deliveryFee,
+            tipAmount,
+            taxAmount,
+            totalAmount,
+            paymentTransactions,
+            appliedCouponId,
+            initialStatus,
+            sourceTeamCartId,
+            currentTimestamp);
     }
 
     /// <summary>
@@ -292,6 +349,49 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// This is ideal for trusted processes like TeamCart conversion.
     /// </summary>
     public static Result<Order> Create(
+        UserId customerId,
+        RestaurantId restaurantId,
+        DeliveryAddress deliveryAddress,
+        List<OrderItem> orderItems,
+        string specialInstructions,
+        Money subtotal,
+        Money discountAmount,
+        Money deliveryFee,
+        Money tipAmount,
+        Money taxAmount,
+        Money totalAmount, 
+        List<PaymentTransaction> paymentTransactions, // Accepts a pre-built list
+        CouponId? appliedCouponId,
+        OrderStatus initialStatus, // Accepts a pre-determined status
+        TeamCartId? sourceTeamCartId = null,
+        DateTime? timestamp = null)
+    {
+        return Create(
+            OrderId.CreateUnique(),
+            customerId,
+            restaurantId,
+            deliveryAddress,
+            orderItems,
+            specialInstructions,
+            subtotal,
+            discountAmount,
+            deliveryFee,
+            tipAmount,
+            taxAmount,
+            totalAmount,
+            paymentTransactions,
+            appliedCouponId,
+            initialStatus,
+            sourceTeamCartId,
+            timestamp);
+    }
+
+    /// <summary>
+    /// Creates a new order from a pre-validated set of data with a specific OrderId, including a list of payment transactions.
+    /// This is ideal for trusted processes like TeamCart conversion.
+    /// </summary>
+    public static Result<Order> Create(
+        OrderId orderId,
         UserId customerId,
         RestaurantId restaurantId,
         DeliveryAddress deliveryAddress,
@@ -339,7 +439,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         var currentTimestamp = timestamp ?? DateTime.UtcNow;
         
         var order = new Order(
-            OrderId.CreateUnique(),
+            orderId,
             GenerateOrderNumber(currentTimestamp),
             customerId,
             restaurantId,

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace YummyZoom.SharedKernel.Models;
+namespace YummyZoom.Application.Common.Models;
 
 /// <summary>
 /// Infrastructure entity representing a physical device.

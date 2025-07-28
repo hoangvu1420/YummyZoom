@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.SharedKernel.Models;
+using YummyZoom.Application.Common.Models;
 
 namespace YummyZoom.Infrastructure.Data.Repositories;
 
