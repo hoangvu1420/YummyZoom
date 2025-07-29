@@ -2,11 +2,11 @@
 
 You've already implemented most of these in your `UserConfiguration`, but let's formalize them into a set of principles you can apply everywhere.
 
-1.  **One Configuration File per Aggregate Root/Independent Entity:** Just as you did with `UserConfiguration`, create a separate `IEntityTypeConfiguration<T>` for each aggregate root (e.g., `Restaurant`, `Order`, `MenuItem`) and each "Independent Entity" (e.g., `Tag`, `AccountTransaction`). This keeps your mapping logic organized and decoupled from the `DbContext`.
+1. **One Configuration File per Aggregate Root/Independent Entity:** Just as you did with `UserConfiguration`, create a separate `IEntityTypeConfiguration<T>` for each aggregate root (e.g., `Restaurant`, `Order`, `MenuItem`) and each "Independent Entity" (e.g., `Tag`, `AccountTransaction`). This keeps your mapping logic organized and decoupled from the `DbContext`.
 
-2.  **Explicit Table Naming:** Always use `builder.ToTable("TableName")` to explicitly name your tables. This avoids EF Core's default pluralization rules, giving you full control and clarity.
+2. **Explicit Table Naming:** Always use `builder.ToTable("TableName")` to explicitly name your tables. This avoids EF Core's default pluralization rules, giving you full control and clarity.
 
-3.  **Configure Strongly-Typed IDs:** For every strongly-typed ID (e.g., `RestaurantId`, `OrderId`), consistently use the `HasConversion` method. The key is to use `ValueGeneratedNever()` for the aggregate root's ID, as the domain is responsible for creating it (`Guid.NewGuid()` or a Hi/Lo algorithm), not the database.
+3. **Configure Strongly-Typed IDs:** For every strongly-typed ID (e.g., `RestaurantId`, `OrderId`), consistently use the `HasConversion` method. The key is to use `ValueGeneratedNever()` for the aggregate root's ID, as the domain is responsible for creating it (`Guid.NewGuid()` or a Hi/Lo algorithm), not the database.
 
     ```csharp
     // For the aggregate root's primary key
@@ -18,12 +18,12 @@ You've already implemented most of these in your `UserConfiguration`, but let's 
             value => YourIdType.Create(value));
     ```
 
-4.  **Map Child Entities with `OwnsMany`:** For collections of child entities that only exist as part of the aggregate (like `User.Addresses` or `Order.OrderItems`), `OwnsMany` is the perfect tool.
-    *   Give the owned collection its own table with `addressBuilder.ToTable("UserAddresses")`.
-    *   Establish the relationship with `addressBuilder.WithOwner().HasForeignKey("UserId")`.
-    *   If the child entity has its own identity within the aggregate (like your `Address` with `AddressId`), configure its key using `addressBuilder.HasKey(a => a.Id)`.
+4. **Map Child Entities with `OwnsMany`:** For collections of child entities that only exist as part of the aggregate (like `User.Addresses` or `Order.OrderItems`), `OwnsMany` is the perfect tool.
+    * Give the owned collection its own table with `addressBuilder.ToTable("UserAddresses")`.
+    * Establish the relationship with `addressBuilder.WithOwner().HasForeignKey("UserId")`.
+    * If the child entity has its own identity within the aggregate (like your `Address` with `AddressId`), configure its key using `addressBuilder.HasKey(a => a.Id)`.
 
-5.  **Map Value Objects (VOs) with `OwnsOne`:** For single value objects that represent a concept without identity (like `Restaurant.Location`), use `OwnsOne`. The properties of the VO will be mapped as columns on the parent table (e.g., `Location_Street`, `Location_City`).
+5. **Map Value Objects (VOs) with `OwnsOne`:** For single value objects that represent a concept without identity (like `Restaurant.Location`), use `OwnsOne`. The properties of the VO will be mapped as columns on the parent table (e.g., `Location_Street`, `Location_City`).
 
     ```csharp
     builder.OwnsOne(r => r.Location, locationBuilder =>
@@ -34,20 +34,21 @@ You've already implemented most of these in your `UserConfiguration`, but let's 
     });
     ```
 
-6.  **Reference Other Aggregates by ID Only:** Your design correctly states that aggregates should only reference each other by their ID. **Do not create navigation properties (e.g., `public virtual Order Order { get; set; }`) for other aggregates.**
-    *   Simply map the foreign key property.
-    *   Use the same `HasConversion` pattern for these foreign key IDs.
-    *   You can optionally configure the relationship with `HasOne`/`WithMany` to enforce database-level foreign key constraints, but it's not strictly necessary for reads/writes if your application services correctly manage IDs.
+6. **Reference Other Aggregates by ID Only:** Your design correctly states that aggregates should only reference each other by their ID. **Do not create navigation properties (e.g., `public virtual Order Order { get; set; }`) for other aggregates.**
+    * Simply map the foreign key property.
+    * Use the same `HasConversion` pattern for these foreign key IDs.
+    * You can optionally configure the relationship with `HasOne`/`WithMany` to enforce database-level foreign key constraints, but it's not strictly necessary for reads/writes if your application services correctly manage IDs.
 
-7.  **Map Collections of Primitive/VOs:** For simple collections like `MenuItem.DietaryTagIDs` (a list of `TagID`s), you have two main options:
+7. **Map Collections of Primitive/VOs:** For simple collections like `MenuItem.DietaryTagIDs` (a list of `TagID`s), you have two main options:
 
-    *   **A. Recommended Approach: Use a JSON/JSONB Column**
+    * **A. Recommended Approach: Use a JSON/JSONB Column**
 
         This approach treats the collection of VOs as a single, atomic attribute of the parent entity, which aligns perfectly with DDD principles.
 
         **How:** Serialize the `List<T>` or `IReadOnlyList<T>` into a JSON string and store it in a single `jsonb` (for PostgreSQL) or `nvarchar(max)` (for SQL Server) column. Use EF Core's `HasConversion` feature combined with a `ValueComparer`.
 
         **Example Code (for a `List<TagId>` on a `MenuItem`):**
+
         ```csharp
         builder.Property(mi => mi.DietaryTagIDs)
             .HasColumnType("jsonb") // Be explicit for PostgreSQL for performance and features
@@ -62,10 +63,19 @@ You've already implemented most of these in your `UserConfiguration`, but let's 
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c.ToList()));
         ```
-    *   **B. Alternative Approach: Use a Join Table**
+
+        **⚠️ Important: Type Consistency Warning**
+
+        When using `HasConversion` with `ValueComparer` for collections, ensure the generic type in `ValueComparer<T>` exactly matches the property type in your domain entity. For example:
+        * If your property is `IReadOnlyList<AppliedCustomization>`, use `ValueComparer<IReadOnlyList<AppliedCustomization>>`
+        * If your property is `List<AppliedCustomization>`, use `ValueComparer<List<AppliedCustomization>>`
+
+        A type mismatch will cause a `System.InvalidOperationException` at runtime with a message like "ValueComparer for 'List<T>' cannot be used for 'IReadOnlyList<T>'".
+
+    * **B. Alternative Approach: Use a Join Table**
         The more traditional relational approach, creating a `MenuItemTags` table. This is more complex to set up and is often overkill.
 
-8.  **Use `.HasConversion<string>()` for Enums:** Storing enums as strings in the database is far more readable and resilient to changes in the enum's integer values.
+8. **Use `.HasConversion<string>()` for Enums:** Storing enums as strings in the database is far more readable and resilient to changes in the enum's integer values.
 
 ---
 

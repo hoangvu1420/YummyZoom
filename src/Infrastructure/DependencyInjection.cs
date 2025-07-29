@@ -3,6 +3,7 @@ using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Notifications;
+using YummyZoom.Infrastructure.Notifications.Firebase;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -22,6 +23,7 @@ using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Domain.Services;
 using Stripe;
+using System.Text.Json;
 
 namespace YummyZoom.Infrastructure;
 
@@ -121,22 +123,31 @@ public static class DependencyInjection
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
     {
-        var fcmAdminKeyJson = builder.Configuration["YummyZoomFcmAdminKey"];
+        using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
+        var logger = loggerFactory.CreateLogger("Firebase.Initialization");
         
-        if (string.IsNullOrWhiteSpace(fcmAdminKeyJson))
-        {
-            using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
-            var logger = loggerFactory.CreateLogger("Firebase.Initialization");
-            logger.LogWarning("Firebase Admin SDK key 'YummyZoomFcmAdminKey' not found in configuration. FCM will not be initialized.");
-            return;
-        }
-
         try
         {
+            var firebaseConfig = new FirebaseAdminSdkConfig();
+            builder.Configuration.GetSection(FirebaseAdminSdkConfig.SectionName).Bind(firebaseConfig);
+
+            if (string.IsNullOrEmpty(firebaseConfig.PrivateKey))
+            {
+                logger.LogWarning("Firebase Admin SDK configuration is incomplete. FCM will not be initialized.");
+                return;
+            }
+
+            // Convert the FirebaseAdminSdkConfig object back to a JSON string
+            // The GoogleCredential.FromJson method expects a JSON string
+            var jsonCredentials = JsonSerializer.Serialize(firebaseConfig, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            });
+
             // Create the app instance from our explicit credentials.
             var app = FirebaseApp.Create(new AppOptions()
             {
-                Credential = GoogleCredential.FromJson(fcmAdminKeyJson)
+                Credential = GoogleCredential.FromJson(jsonCredentials)
             });
 
             // Get the messaging client FROM OUR EXPLICIT APP INSTANCE.
@@ -145,14 +156,10 @@ public static class DependencyInjection
             // Register this specific instance as a singleton in the DI container.
             builder.Services.AddSingleton(firebaseMessaging);
 
-            using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
-            var logger = loggerFactory.CreateLogger("Firebase.Initialization");
-            logger.LogInformation("Firebase Admin SDK initialized and FirebaseMessaging registered as a singleton.");
+            logger.LogInformation("Firebase Admin SDK initialized successfully from configuration and FirebaseMessaging registered as a singleton.");
         }
         catch (Exception ex)
         {
-            using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
-            var logger = loggerFactory.CreateLogger("Firebase.Initialization");
             logger.LogCritical(ex, "Failed to initialize Firebase Admin SDK. FCM will not be available.");
         }
     }

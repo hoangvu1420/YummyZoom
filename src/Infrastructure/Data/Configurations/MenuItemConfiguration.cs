@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -67,9 +66,10 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         });
 
         // --- 5. Collections ---
-        
-        // Map DietaryTagIds as JSON column
+
+        // Map DietaryTagIds as JSONB column
         builder.Property(m => m.DietaryTagIds)
+            .HasColumnType("jsonb")
             .HasConversion(
                 tagIds => JsonSerializer.Serialize(tagIds.Select(id => id.Value).ToList(), (JsonSerializerOptions?)null),
                 json => JsonSerializer.Deserialize<List<Guid>>(json, (JsonSerializerOptions?)null)!
@@ -77,16 +77,17 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
                 new ValueComparer<IReadOnlyList<TagId>>(
                     (c1, c2) => c1!.SequenceEqual(c2!),
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()))
-            .HasColumnType("nvarchar(max)");
+                    c => c.ToList()
+                )
+            );
 
-        // BEST PRACTICE: Configure collection of Value Objects as a JSONB column.
+        // Configure collection of Value Objects as a JSONB column.
         builder.Property(m => m.AppliedCustomizations)
             .HasColumnType("jsonb") 
             .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v => JsonSerializer.Deserialize<List<AppliedCustomization>>(v, (JsonSerializerOptions?)null)!,
-                new ValueComparer<List<AppliedCustomization>>(
+                customizations => JsonSerializer.Serialize(customizations, (JsonSerializerOptions?)null),
+                json => JsonSerializer.Deserialize<List<AppliedCustomization>>(json, (JsonSerializerOptions?)null)!,
+                new ValueComparer<IReadOnlyList<AppliedCustomization>>(
                     (c1, c2) => c1!.SequenceEqual(c2!),
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c.ToList()

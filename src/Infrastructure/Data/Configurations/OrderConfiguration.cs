@@ -191,13 +191,13 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
                     .HasMaxLength(3);
             });
 
-            // BEST PRACTICE: Configure collection of Value Objects as a JSONB column.
+            // Configure collection of Value Objects as a JSONB column.
             itemBuilder.Property(oi => oi.SelectedCustomizations)
-                .HasColumnType("jsonb") // Use PostgreSQL's efficient binary JSON type
+                .HasColumnType("jsonb") 
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<List<OrderItemCustomization>>(v, (JsonSerializerOptions?)null)!,
-                    new ValueComparer<List<OrderItemCustomization>>(
+                    new ValueComparer<IReadOnlyList<OrderItemCustomization>>(
                         (c1, c2) => c1!.SequenceEqual(c2!),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()
