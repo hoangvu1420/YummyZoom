@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.SupportTicketAggregate.ValueObjects;
 

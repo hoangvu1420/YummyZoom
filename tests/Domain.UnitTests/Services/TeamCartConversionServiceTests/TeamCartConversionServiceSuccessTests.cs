@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -8,7 +6,6 @@ using YummyZoom.Domain.UnitTests.CouponAggregate;
 using YummyZoom.Domain.UnitTests.TeamCartAggregate;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 

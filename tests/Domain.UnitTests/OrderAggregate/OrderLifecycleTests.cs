@@ -1,14 +1,13 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.Events;
+using static YummyZoom.Domain.UnitTests.OrderAggregate.OrderTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
 [TestFixture]
-public class OrderLifecycleTests : OrderTestHelpers
+public class OrderLifecycleTests
 {
     #region Accept() Method Tests
 

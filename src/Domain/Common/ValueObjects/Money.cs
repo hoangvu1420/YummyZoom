@@ -58,6 +58,11 @@ public static class MoneyExtensions
 {
     public static Money Sum<T>(this IEnumerable<T> source, Func<T, Money> selector, string currency)
     {
-        return source.Select(selector).Aggregate(Money.Zero(currency), (current, next) => current + next);
+        return source.Select(selector).Aggregate(Money.Zero(currency), (current, next) => 
+        {
+            // Convert next to the target currency before adding
+            var nextInTargetCurrency = new Money(next.Amount, currency);
+            return current + nextInTargetCurrency;
+        });
     }
 }

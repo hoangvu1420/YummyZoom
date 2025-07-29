@@ -1,23 +1,24 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.Enums;
+using static YummyZoom.Domain.UnitTests.OrderAggregate.OrderTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
 [TestFixture]
-public class OrderPropertyImmutabilityTests : OrderTestHelpers
+public class OrderPropertyImmutabilityTests
 {
     [Test]
     public void OrderItems_ShouldBeReadOnly()
     {
         // Arrange
         var orderItem = OrderItem.Create(
-            YummyZoom.Domain.MenuEntity.ValueObjects.MenuCategoryId.CreateUnique(),
-            YummyZoom.Domain.MenuItemAggregate.ValueObjects.MenuItemId.CreateUnique(),
+            MenuCategoryId.CreateUnique(),
+            MenuItemId.CreateUnique(),
             "Test Item",
             new Money(10.00m, Currencies.Default),
             2).Value;

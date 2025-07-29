@@ -55,9 +55,13 @@ public class OrderFinancialService
 
         // 2. Usage Limit Checks
         if (coupon.TotalUsageLimit.HasValue && coupon.CurrentTotalUsageCount >= coupon.TotalUsageLimit.Value)
+        {
             return Result.Failure<Money>(CouponErrors.UsageLimitExceeded);
+        }
         if (coupon.UsageLimitPerUser.HasValue && currentUserUsageCount >= coupon.UsageLimitPerUser.Value)
+        {
             return Result.Failure<Money>(CouponErrors.UserUsageLimitExceeded);
+        }
 
         // 3. Order Condition Checks
         if (coupon.MinOrderAmount is not null && subtotal.Amount < coupon.MinOrderAmount.Amount)
@@ -83,7 +87,8 @@ public class OrderFinancialService
         switch (coupon.Value.Type)
         {
             case CouponType.Percentage:
-                calculatedDiscount = new Money(discountBaseAmount * (coupon.Value.PercentageValue!.Value / 100m), subtotal.Currency);
+                var discountAmount = discountBaseAmount * (coupon.Value.PercentageValue!.Value / 100m);
+                calculatedDiscount = new Money(discountAmount, subtotal.Currency);
                 break;
             case CouponType.FixedAmount:
                 var fixedAmount = coupon.Value.FixedAmountValue!.Amount;
@@ -107,14 +112,22 @@ public class OrderFinancialService
 
     /// <summary>
     /// Calculates the final total amount to be charged.
+    /// Uses the subtotal's currency for the final result when dealing with mixed currencies.
     /// </summary>
     public virtual Money CalculateFinalTotal(Money subtotal, Money discount, Money deliveryFee, Money tip, Money tax)
     {
-        var finalAmount = subtotal - discount + deliveryFee + tip + tax;
+        // Convert all amounts to use the subtotal's currency to handle mixed currency scenarios
+        var discountInSubtotalCurrency = new Money(discount.Amount, subtotal.Currency);
+        var deliveryFeeInSubtotalCurrency = new Money(deliveryFee.Amount, subtotal.Currency);
+        var tipInSubtotalCurrency = new Money(tip.Amount, subtotal.Currency);
+        var taxInSubtotalCurrency = new Money(tax.Amount, subtotal.Currency);
+        
+        var finalAmount = subtotal - discountInSubtotalCurrency + deliveryFeeInSubtotalCurrency + tipInSubtotalCurrency + taxInSubtotalCurrency;
+        
         // Ensure total is not negative
         if (finalAmount.Amount < 0)
         {
-            return Money.Zero(finalAmount.Currency);
+            return Money.Zero(subtotal.Currency);
         }
         return finalAmount;
     }

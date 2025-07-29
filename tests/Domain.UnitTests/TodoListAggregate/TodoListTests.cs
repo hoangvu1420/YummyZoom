@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.TodoListAggregate.Entities;
 using YummyZoom.Domain.TodoListAggregate.Enums;

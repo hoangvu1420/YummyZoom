@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -22,7 +20,7 @@ public abstract class TeamCartConversionServiceTestsBase
     public virtual void SetUp()
     {
         // Instantiate the real dependencies. No more mocks.
-        var financialService = new OrderFinancialService();
+        var financialService = new Domain.Services.OrderFinancialService();
         TeamCartConversionService = new TeamCartConversionService(financialService);
     }
     

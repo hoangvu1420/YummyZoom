@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.MenuEntity.ValueObjects;

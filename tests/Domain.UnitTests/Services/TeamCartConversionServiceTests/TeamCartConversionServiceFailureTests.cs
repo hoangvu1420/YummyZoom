@@ -1,7 +1,4 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.CouponAggregate;
-using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.UnitTests.CouponAggregate;
 using YummyZoom.Domain.UnitTests.TeamCartAggregate;
 using YummyZoom.Domain.Common.ValueObjects;
@@ -12,7 +9,6 @@ using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.Entities;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 using System.Reflection;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;

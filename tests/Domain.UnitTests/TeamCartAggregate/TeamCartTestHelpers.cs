@@ -1,4 +1,3 @@
-using FluentAssertions;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;

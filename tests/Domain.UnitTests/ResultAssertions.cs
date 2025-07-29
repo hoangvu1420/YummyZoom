@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentAssertions.Primitives;
 using YummyZoom.SharedKernel;
 

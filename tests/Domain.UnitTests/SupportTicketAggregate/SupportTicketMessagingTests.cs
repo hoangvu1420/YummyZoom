@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.SupportTicketAggregate;
 using YummyZoom.Domain.SupportTicketAggregate.Enums;
 using YummyZoom.Domain.SupportTicketAggregate.Errors;

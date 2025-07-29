@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -7,11 +5,12 @@ using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.Errors;
 using YummyZoom.Domain.OrderAggregate.Events;
+using static YummyZoom.Domain.UnitTests.OrderAggregate.OrderTestHelpers;
 
 namespace YummyZoom.Domain.UnitTests.OrderAggregate;
 
 [TestFixture]
-public class OrderCreationTests : OrderTestHelpers
+public class OrderCreationTests
 {
     [Test]
     public void Create_WithCashOnDelivery_ShouldSucceedAndInitializeOrderAsPlaced()

@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;

@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-using NUnit.Framework;
-using YummyZoom.Domain.TodoListAggregate.ValueObjects;
+﻿using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.ValueObjects;
 
