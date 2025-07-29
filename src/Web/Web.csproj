@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>YummyZoom.Web</RootNamespace>
     <AssemblyName>YummyZoom.Web</AssemblyName>
+    <UserSecretsId>879603a8-843c-46bb-aeb6-7bd6ee54f440</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
