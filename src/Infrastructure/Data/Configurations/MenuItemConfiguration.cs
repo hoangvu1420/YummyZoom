@@ -80,28 +80,19 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
                     c => c.ToList()))
             .HasColumnType("nvarchar(max)");
 
-        // Map AppliedCustomizations as JSON column
+        // BEST PRACTICE: Configure collection of Value Objects as a JSONB column.
         builder.Property(m => m.AppliedCustomizations)
+            .HasColumnType("jsonb") 
             .HasConversion(
-                customizations => JsonSerializer.Serialize(
-                    customizations.Select(c => new
-                    {
-                        CustomizationGroupId = c.CustomizationGroupId.Value,
-                        DisplayTitle = c.DisplayTitle,
-                        DisplayOrder = c.DisplayOrder
-                    }).ToList(), (JsonSerializerOptions?)null),
-                json => JsonSerializer.Deserialize<List<dynamic>>(json, (JsonSerializerOptions?)null)!
-                    .Select(c => AppliedCustomization.Create(
-                        CustomizationGroupId.Create(((JsonElement)c).GetProperty("CustomizationGroupId").GetGuid()),
-                        ((JsonElement)c).GetProperty("DisplayTitle").GetString()!,
-                        ((JsonElement)c).GetProperty("DisplayOrder").GetInt32()))
-                    .ToList(),
-                new ValueComparer<IReadOnlyList<AppliedCustomization>>(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<AppliedCustomization>>(v, (JsonSerializerOptions?)null)!,
+                new ValueComparer<List<AppliedCustomization>>(
                     (c1, c2) => c1!.SequenceEqual(c2!),
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()))
-            .HasColumnType("nvarchar(max)");
-
+                    c => c.ToList()
+                )
+            );
+            
         // --- 6. Indexes ---
         builder.HasIndex(m => m.RestaurantId)
             .HasDatabaseName("IX_MenuItems_RestaurantId");
