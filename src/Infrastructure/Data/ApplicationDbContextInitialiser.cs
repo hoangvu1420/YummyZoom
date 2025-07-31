@@ -116,7 +116,7 @@ public class ApplicationDbContextInitialiser
             "Android", "seed-device-1", "Seed Device 1");
 
         await SeedDefaultUserWithDeviceAsync("User 2", "hoangnguyenvu1220@gmail.com", "123456",
-            "cQ9KY8l7TxSVFN0p-Z36rx:APA91bESwLQivfzOkzxnOviBsDNIl4wuDcBRI8j39x5zyi87R3fVS7g4lkLhdU6iXSVg6vQSk_ShL_E5f84mf4oSZaD92AAoEcim0VFYsTUoebhCF82P4Xk",
+            "cjYujyIsRHGCBNHQaIsvy2:APA91bErEQrSMTKusz8AkdpswagbOwt4x2FqkTJRURMa6xg1HpcDANoxEH0RTz-J4hlC1QXOIKsjBtwBk6pn8JVWNLliQxRYtYHHVrI77doOwPOrLxHQruE",
             "Android", "seed-device-2", "Seed Device 2");
 
         // Default data

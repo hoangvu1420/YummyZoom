@@ -1,185 +1,168 @@
-# Context for Compilation Errors in `TeamCartConversionServiceFailureTests.cs`
+# HandleStripeWebhookCommand Implementation Analysis & Outline
 
-## 1. Introduction
+## Project Analysis
 
-The compilation errors in `TeamCartConversionServiceFailureTests.cs` are due to a recent refactoring of the `TeamCartConversionService`. The service's primary responsibility is to convert a `TeamCart` into a final `Order`. The refactoring introduced a dependency on `OrderFinancialService` to handle all financial calculations, which changed the method signature for `ConvertToOrder`. The tests were not updated to reflect this new signature, causing them to fail during compilation.
+### Current Architecture Overview
 
-This document provides the necessary context to understand and fix these errors.
+The YummyZoom project follows Clean Architecture with DDD principles, organized into layers:
 
-## 2. The Logic Under Test: `TeamCartConversionService`
+- **Domain Layer**: Core business logic, entities, aggregates, domain events
+- **Application Layer**: CQRS pattern with Commands/Queries, handlers, DTOs, validators
+- **Infrastructure Layer**: Concrete implementations, data access, external services
+- **Web Layer**: API endpoints and presentation logic
 
-The `TeamCartConversionService` orchestrates the conversion of a `TeamCart` that is in the `ReadyToConfirm` state into an `Order`. It validates the cart, calculates the final financials, creates payment records, and finalizes the state of both the `Order` and the `TeamCart`.
+### Application Layer Patterns
 
-### `TeamCartConversionService.cs`
+Based on the Application Layer Guidelines and existing `InitiateOrderCommand` implementation:
+
+#### Command Pattern Structure
+
+- Commands use `IRequest<Result<TResponse>>` from MediatR
+- Handlers implement `IRequestHandler<TCommand, Result<TResponse>>`
+- All commands are wrapped in `IUnitOfWork.ExecuteInTransactionAsync`
+- Authorization via `[Authorize]` attributes
+- Validation using FluentValidation with `AbstractValidator<T>`
+- Consistent error handling using `Result` pattern
+
+#### Existing Infrastructure
+
+- **IPaymentGatewayService**: Already has `ConstructWebhookEvent(string json, string stripeSignatureHeader)` method
+- **ProcessedWebhookEvent**: Entity exists in `Application.Common.Models` with `Id` (string) and `ProcessedAt` (DateTime)
+- **ApplicationDbContext**: Has `DbSet<ProcessedWebhookEvent>` configured
+- **IOrderRepository**: Has `GetByPaymentGatewayReferenceIdAsync(string paymentGatewayReferenceId)` method
+- **Order Aggregate**: Has `RecordPaymentSuccess(string paymentGatewayReferenceId)` and `RecordPaymentFailure(string paymentGatewayReferenceId)` methods
+
+## Implementation Outline
+
+### 1. Command Structure
+
+#### File: `src/Application/Orders/Commands/HandleStripeWebhook/HandleStripeWebhookCommand.cs`
 
 ```csharp
-using Domain.AggregationModels.Order;
-using Domain.AggregationModels.TeamCart;
-using Domain.Common.Interfaces;
-using Domain.Common.Models;
-using Domain.Common.Services;
-using Domain.Errors;
-using Domain.Services.Interfaces;
+public record HandleStripeWebhookCommand(
+    string RawJson,
+    string StripeSignatureHeader
+) : IRequest<Result>;
+```
 
-namespace Domain.Services;
+**Key Design Decisions:**
 
-public class TeamCartConversionService : ITeamCartConversionService
+- No authorization required (webhook endpoint is public)
+- Returns `Result` (not `Result<T>`) since webhooks only need success/failure indication
+- Takes raw JSON and signature header as required by Stripe webhook verification
+
+### 2. Command Handler Structure
+
+#### File: `src/Application/Orders/Commands/HandleStripeWebhook/HandleStripeWebhookCommandHandler.cs`
+
+**Dependencies Required:**
+
+- `IPaymentGatewayService` - for webhook event construction and verification
+- `IOrderRepository` - for finding orders by payment gateway reference ID
+- `IApplicationDbContext` - for direct access to ProcessedWebhookEvents (no repository pattern needed)
+- `IUnitOfWork` - for transaction management
+- `ILogger<HandleStripeWebhookCommandHandler>` - for logging
+
+**Handler Logic Flow:**
+
+1. **Webhook Event Construction & Verification**
+   - Call `_paymentGatewayService.ConstructWebhookEvent(request.RawJson, request.StripeSignatureHeader)`
+   - If verification fails, return failure result immediately
+   - Extract `WebhookEventResult` with `EventId`, `EventType`, and `RelevantObjectId`
+
+2. **Idempotency Check**
+   - Check if `stripeEvent.EventId` exists in `ProcessedWebhookEvents` table
+   - If exists, return success immediately (already processed)
+   - Use raw SQL or direct DbContext access for performance
+
+3. **Order Lookup**
+   - Use `_orderRepository.GetByPaymentGatewayReferenceIdAsync(webhookEventResult.RelevantObjectId)`
+   - If order not found, log warning and return success (event might not be order-related)
+
+4. **Event Processing**
+   - Switch on `webhookEventResult.EventType`:
+     - `"payment_intent.succeeded"`: Call `order.RecordPaymentSuccess(webhookEventResult.RelevantObjectId)`
+     - `"payment_intent.payment_failed"`: Call `order.RecordPaymentFailure(webhookEventResult.RelevantObjectId)`
+     - Other events: Log info and return success (not handled)
+
+5. **Persistence**
+   - Add processed event record to `ProcessedWebhookEvents`
+   - Update order via `_orderRepository.UpdateAsync(order)`
+   - All wrapped in transaction via `IUnitOfWork.ExecuteInTransactionAsync`
+
+### 3. Error Handling Strategy
+
+#### Application-Specific Errors
+
+Define custom errors for webhook processing in the same file as the command handler.
+
+```csharp
+public static class HandleStripeWebhookErrors
 {
-    private readonly IOrderFinancialService _orderFinancialService;
-
-    public TeamCartConversionService(IOrderFinancialService orderFinancialService)
-    {
-        _orderFinancialService = orderFinancialService;
-    }
-
-    public Result<(Order Order, TeamCart TeamCart)> ConvertToOrder(
-        TeamCart teamCart,
-        DeliveryAddress deliveryAddress,
-        string specialInstructions,
-        Coupon? coupon,
-        int currentUserCouponUsageCount,
-        Money deliveryFee,
-        Money taxAmount)
-    {
-        if (teamCart.Status is not TeamCartStatus.ReadyToConfirm)
-            return Result.Failure<(Order, TeamCart)>(TeamCartErrors.InvalidStatusForConversion(teamCart.Status));
-
-        var orderItems = teamCart.Items.Select(item => OrderItem.Create(
-            item.DishId,
-            item.DishName,
-            item.DishPrice,
-            item.Quantity,
-            item.SpecialInstructions).Value).ToList();
-
-        var financialDetailsResult = _orderFinancialService.CalculateFinalOrderFinancials(
-            orderItems,
-            coupon,
-            currentUserCouponUsageCount,
-            deliveryFee,
-            taxAmount);
-
-        if (financialDetailsResult.IsFailure)
-            return Result.Failure<(Order, TeamCart)>(financialDetailsResult.Error);
-
-        var (subtotal, discount, finalTotal) = financialDetailsResult.Value;
-
-        var paymentTransactions = CreatePaymentTransactions(
-            teamCart.MemberPayments,
-            finalOrderTotal);
-
-        var orderResult = Order.Create(
-            teamCart.HostId,
-            teamCart.RestaurantId,
-            deliveryAddress,
-            orderItems,
-            paymentTransactions,
-            subtotal,
-            discount,
-            deliveryFee,
-            taxAmount,
-            finalTotal,
-            specialInstructions,
-            coupon?.Id);
-
-        if (orderResult.IsFailure)
-            return Result.Failure<(Order, TeamCart)>(orderResult.Error);
-
-        var updatedTeamCart = teamCart.MarkAsConverted(orderResult.Value.Id).Value;
-
-        return (orderResult.Value, updatedTeamCart);
-    }
-
-    private static List<PaymentTransaction> CreatePaymentTransactions(
-        IReadOnlyCollection<MemberPayment> memberPayments,
-        Money finalOrderTotal)
-    {
-        var totalPaid = memberPayments.Aggregate(Money.Zero, (acc, mp) => acc + mp.Amount);
-        var adjustmentFactor = finalOrderTotal / totalPaid;
-
-        return memberPayments.Select(mp => PaymentTransaction.Create(
-            mp.UserId,
-            mp.Amount * adjustmentFactor,
-            mp.PaymentMethod).Value).ToList();
-    }
+    public static Error WebhookVerificationFailed() => 
+        Error.Validation("HandleStripeWebhook.VerificationFailed", "Webhook signature verification failed.");
+    
+    public static Error EventProcessingFailed(string eventType) => 
+        Error.Validation("HandleStripeWebhook.ProcessingFailed", $"Failed to process event type: {eventType}");
 }
 ```
 
-## 3. The Failing Tests: `TeamCartConversionServiceFailureTests.cs`
+### 4. Validation Considerations
 
-This test file contains scenarios where the `TeamCart` conversion is expected to fail. All tests are currently failing to compile because they call the old `ConvertToOrder` method signature.
+#### File: `src/Application/Orders/Commands/HandleStripeWebhook/HandleStripeWebhookCommandValidator.cs`
 
-### `TeamCartConversionServiceFailureTests.cs` (Illustrative Snippets)
+**Validation Rules:**
 
-```csharp
-// Note: This is the original, non-compiling code.
+- `RawJson`: NotEmpty, valid JSON format
+- `StripeSignatureHeader`: NotEmpty, proper Stripe signature format
 
-[Theory]
-[InlineData(TeamCartStatus.Open)]
-[InlineData(TeamCartStatus.Converted)]
-[InlineData(TeamCartStatus.Expired)]
-public void ConvertToOrder_Should_Fail_When_TeamCart_Is_In_Invalid_Status(TeamCartStatus status)
-{
-    // Arrange
-    var teamCart = TeamCartTestHelpers.CreateTeamCartWithStatus(status);
-    // ... other arrangements
+### 5. Integration Points
 
-    // Act
-    var result = _sut.ConvertToOrder(teamCart, // ... other params); // COMPILE ERROR HERE
+#### Database Access Pattern
 
-    // Assert
-    result.IsFailure.Should().BeTrue();
-    result.Error.Should().Be(TeamCartErrors.InvalidStatusForConversion(status));
-}
+- **ProcessedWebhookEvents**: Direct `IApplicationDbContext` access (no repository needed for simple CRUD)
+- **Orders**: Use existing `IOrderRepository` following established patterns
+- **Transaction Management**: Use `IUnitOfWork.ExecuteInTransactionAsync` for consistency
 
-[Fact]
-public void ConvertToOrder_Should_Fail_When_Financial_Calculation_Fails()
-{
-    // Arrange
-    var teamCart = TeamCartTestHelpers.CreateReadyToConfirmTeamCart();
-    var coupon = CouponTestHelpers.CreateActiveCoupon();
-    SetupFailedFinancialCalculation(coupon); // Mocks the financial service to fail
+#### Logging Strategy
 
-    // Act
-    var result = _sut.ConvertToOrder(teamCart, // ... other params); // COMPILE ERROR HERE
+- Log webhook event reception and verification
+- Log idempotency checks (duplicate events)
+- Log order lookup results
+- Log successful/failed payment processing
+- Use structured logging with event IDs and order IDs
 
-    // Assert
-    result.IsFailure.Should().BeTrue();
-    result.Error.Should().Be(CouponErrors.NotApplicable);
-}
-```
+### 6. Performance Considerations
 
-## 4. Supporting Code and Definitions
+- **Idempotency Check**: Use efficient database query on indexed `Id` field
+- **Order Lookup**: Leverage existing repository method with proper indexing
+- **Transaction Scope**: Keep transaction minimal to avoid long-running locks
+- **Error Handling**: Fail fast on verification errors
 
-### `TeamCart` Aggregate
-The `TeamCart` holds items for a group order. Its status must be `ReadyToConfirm` for conversion. After conversion, its status becomes `Converted`.
+### 7. Security Considerations
 
-### `Order` Aggregate
-The `Order` is created by the service. Its `Create` method requires all financial details to be passed in, as it does not perform calculations itself.
+- **Webhook Verification**: Always verify Stripe signature before processing
+- **Idempotency**: Prevent replay attacks and duplicate processing
+- **Error Information**: Don't leak sensitive information in error responses
+- **Logging**: Avoid logging sensitive payment information
 
-### `TeamCartTestHelpers.cs`
-This class provides factory methods to create `TeamCart` instances in various states for testing purposes (e.g., `CreateReadyToConfirmTeamCart`, `CreateExpiredTeamCart`).
+## Next Steps
 
-### Error Definitions
-Errors like `TeamCartErrors.InvalidStatusForConversion` and `CouponErrors.NotApplicable` are custom error types used to return specific failure reasons from the service.
+1. Implement `HandleStripeWebhookCommand` record
+2. Implement `HandleStripeWebhookCommandHandler` with full logic
+3. Implement `HandleStripeWebhookCommandValidator`
+4. Add comprehensive unit tests
+5. Add integration tests for webhook processing scenarios
+6. Update Web layer endpoint to use the new command
 
-## 5. Desired Outcome: The Fix
+## Alignment with Existing Patterns
 
-The goal is to make the tests in `TeamCartConversionServiceFailureTests.cs` compile and pass. This requires updating all calls to `_sut.ConvertToOrder` to match the new method signature:
+This implementation follows the established patterns in the codebase:
 
-**New Signature:**
-```csharp
-public Result<(Order Order, TeamCart TeamCart)> ConvertToOrder(
-    TeamCart teamCart,
-    DeliveryAddress deliveryAddress,
-    string specialInstructions,
-    Coupon? coupon,
-    int currentUserCouponUsageCount,
-    Money deliveryFee,
-    Money taxAmount)
-```
-
-Each test needs to be updated to provide the required arguments. For failure tests, many of these can be dummy values, as the test is designed to fail before the full logic is executed. For example, when testing for an invalid `TeamCart` status, the values for `deliveryAddress`, `coupon`, etc., are irrelevant.
-
-## 6. Conclusion
-
-The compilation errors are a direct result of the `TeamCartConversionService` refactoring. By updating the test methods to use the new `ConvertToOrder` signature and providing the necessary arguments, the tests can be fixed to correctly validate the failure scenarios of the conversion logic.
+- Consistent with `InitiateOrderCommand` structure and error handling
+- Uses same dependency injection and transaction patterns
+- Follows Application Layer Guidelines for command implementation
+- Maintains separation of concerns between layers
+- Uses existing domain methods for payment state transitions
+- Aligns with the design specified in `/Docs/Feature-Discover/10-Order.md` for webhook processing
+- Uses payment gateway reference ID for order lookup (PaymentIntent.Id from Stripe webhook)

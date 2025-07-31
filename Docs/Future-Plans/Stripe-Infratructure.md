@@ -144,4 +144,58 @@ Finally, expose the functionality through API endpoints.
         5. Send the command via MediatR.
         6. Return a `200 OK` response to Stripe.
 
+## The Webhook Endpoint Implementation
+
+Your `HandleStripeWebhookCommand` and its handler remain as designed. The only change is how you define the API endpoint in the `Web` layer. You will not use `[FromBody]`. Instead, you will access the raw `HttpRequest` to extract the data needed to build the command.
+
+Here's how you would define the endpoint using Minimal APIs:
+
+```csharp
+// In your Web/Endpoints file (e.g., StripeWebhooks.cs)
+
+group.MapPost("/stripe-webhook", async (HttpRequest request, ISender sender, ILogger<Program> logger) =>
+{
+    // 1. Get the raw JSON body as a string
+    string jsonBody;
+    using (var reader = new StreamReader(request.Body))
+    {
+        jsonBody = await reader.ReadToEndAsync();
+    }
+    
+    // 2. Get the signature from the header
+    var signatureHeader = request.Headers["Stripe-Signature"];
+
+    if (string.IsNullOrEmpty(signatureHeader))
+    {
+        logger.LogWarning("Stripe-Signature header is missing.");
+        return Results.BadRequest("Missing Stripe-Signature header.");
+    }
+    
+    // 3. Manually create the command with the data from the request
+    var command = new HandleStripeWebhookCommand(jsonBody, signatureHeader);
+    
+    // 4. Send the command to the handler, just like any other endpoint
+    var result = await sender.Send(command);
+
+    // Stripe expects a 200 OK for successful receipt or a server error.
+    // BadRequests are also acceptable for client-side issues like a missing header.
+    return result.IsSuccess
+        ? Results.Ok()
+        : result.ToIResult(); // Your custom error handling
+})
+.WithName("HandleStripeWebhook")
+.WithTags("Webhooks");
+
+```
+
+### Key Differences Summarized
+
+| Feature | `RegisterUser` Endpoint (Standard) | `HandleStripeWebhook` Endpoint (Webhook) |
+| :--- | :--- | :--- |
+| **Command Source** | Bound automatically from the request body via `[FromBody]`. | Created **manually** inside the endpoint code. |
+| **Input** | A clean DTO (`RegisterUserCommand`). | The raw `HttpRequest` object. |
+| **Data Extraction** | Done automatically by the framework. | You manually read the body string and header values. |
+
+This pattern allows your `HandleStripeWebhookCommandHandler` in the Application layer to remain simple and testable, completely unaware of HTTP specifics, while the Web layer handles the messy work of parsing the incoming request.
+
 After completing these steps, you'll have a fully functional, secure, and robust Stripe payment integration that follows the architecture of your project.

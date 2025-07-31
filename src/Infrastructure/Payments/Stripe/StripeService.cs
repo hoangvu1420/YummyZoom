@@ -84,17 +84,24 @@ public class StripeService : IPaymentGatewayService
         {
             var stripeEvent = EventUtility.ConstructEvent(json, stripeSignatureHeader, _webhookSecret);
 
-            var relevantObject = stripeEvent.Data.Object as IHasId;
-            if (relevantObject is null)
+            if (stripeEvent.Data.Object is not IHasId relevantObject)
             {
                 _logger.LogWarning("Stripe webhook event data object does not contain an ID. Event ID: {EventId}", stripeEvent.Id);
                 return Result.Failure<WebhookEventResult>(Error.Validation("Webhook.MissingId", "The webhook event data object does not contain an ID."));
             }
 
+            // Attempt to get metadata from the object
+            IDictionary<string, string>? metadata = null;
+            if (stripeEvent.Data.Object is IHasMetadata objectWithMetadata)
+            {
+                metadata = objectWithMetadata.Metadata;
+            }
+
             var result = new WebhookEventResult(
                 EventId: stripeEvent.Id,
                 EventType: stripeEvent.Type,
-                RelevantObjectId: relevantObject.Id
+                RelevantObjectId: relevantObject.Id,
+                Metadata: metadata 
             );
 
             _logger.LogInformation("Successfully constructed WebhookEventResult for Event ID: {EventId}, Type: {EventType}", result.EventId, result.EventType);
