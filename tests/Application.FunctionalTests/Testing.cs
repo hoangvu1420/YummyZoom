@@ -1,342 +1,284 @@
-﻿using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Identity;
-using YummyZoom.SharedKernel;
+﻿using YummyZoom.SharedKernel;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
+using YummyZoom.Application.FunctionalTests.UserManagement;
+using YummyZoom.Application.FunctionalTests.Authorization;
 
 namespace YummyZoom.Application.FunctionalTests;
 
+/// <summary>
+/// Unified facade for functional test infrastructure.
+/// Provides a clean, organized API for test setup, user management, authorization, and database operations.
+/// </summary>
 [SetUpFixture]
 public partial class Testing
 {
-    private static ITestDatabase _database = null!;
-    private static CustomWebApplicationFactory _factory = null!;
-    private static IServiceScopeFactory _scopeFactory = null!;
-    private static Guid? _userId; 
+    #region Test Infrastructure Setup and Teardown
 
+    /// <summary>
+    /// Initializes the test infrastructure before any tests run.
+    /// </summary>
     [OneTimeSetUp]
     public async Task RunBeforeAnyTests()
     {
-        _database = await TestDatabaseFactory.CreateAsync();
-
-        _factory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString());
-
-        _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
+        await TestInfrastructure.RunBeforeAnyTests();
     }
 
-    public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
+    /// <summary>
+    /// Cleans up the test infrastructure after all tests complete.
+    /// </summary>
+    [OneTimeTearDown]
+    public async Task RunAfterAnyTests()
     {
-        using var scope = _scopeFactory.CreateScope();
-
-        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-
-        return await mediator.Send(request);
+        await TestInfrastructure.RunAfterAnyTests();
     }
 
-    // Helper method to unwrap Result<T> to T if needed
-    public static async Task<T> SendAndUnwrapAsync<T>(IRequest<Result<T>> request)
-    {
-        var result = await SendAsync(request);
-        return result.ValueOrFail();
-    }
-
-    public static async Task SendAsync(IBaseRequest request)
-    {
-        using var scope = _scopeFactory.CreateScope();
-
-        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-
-        await mediator.Send(request);
-    }
-
-    public static Guid? GetUserId() 
-    {
-        return _userId;
-    }
-
-    public static void SetUserId(Guid? userId)
-    {
-        _userId = userId;
-        
-        // Update the TestUserService with the new user context
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        testUserService.SetUserId(userId);
-    }
-
-    public static async Task RefreshUserClaimsAsync()
-    {
-        // Refresh claims from the current database state
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        if (_factory?.Services != null)
-        {
-            await testUserService.RefreshClaimsFromDatabase(_factory.Services);
-        }
-    }
-
-    public static async Task<Guid> RunAsDefaultUserAsync() 
-    {
-        return await RunAsUserAsync("test@local", "Testing1234!", Array.Empty<string>());
-    }
-
-    public static async Task<Guid> RunAsAdministratorAsync() 
-    {
-        return await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
-    }
-
-    public static async Task<Guid> RunAsUserAsync(string userName, string password, string[] roles) 
-    {
-        await EnsureRolesExistAsync(roles);
-        
-        using var scope = _scopeFactory.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-        var user = await userManager.FindByEmailAsync(userName);
-        if (user == null)
-        {
-            user = new ApplicationUser { UserName = userName, Email = userName };
-            var result = await userManager.CreateAsync(user, password);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(Environment.NewLine, result.ToApplicationResult().Errors);
-                throw new Exception($"Unable to create {userName}.{Environment.NewLine}{errors}");
-            }
-        }
-
-        if (roles.Any())
-        {
-            var userRoles = await userManager.GetRolesAsync(user);
-            var missingRoles = roles.Except(userRoles).ToArray();
-            if (missingRoles.Any())
-            {
-                await userManager.AddToRolesAsync(user, missingRoles);
-            }
-        }
-
-        _userId = user.Id;
-        
-        // Update the TestUserService with the new user context
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        testUserService.SetUserId(user.Id);
-        
-        // Add administrator claims if user has Administrator role
-        if (roles.Contains(Roles.Administrator))
-        {
-            testUserService.AddAdminClaim();
-        }
-        
-        return _userId.Value;
-    }
-
+    /// <summary>
+    /// Resets the test state between tests, including database and user context.
+    /// </summary>
     public static async Task ResetState()
     {
-        try
-        {
-            await _database.ResetAsync();
-        }
-        catch (Exception) 
-        {
-        }
-
-        _userId = null;
-        
-        // Clear the test user service as well
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        testUserService.SetUserId(null);
+        await TestInfrastructure.ResetState();
+        TestUserManager.ClearUserContext();
     }
 
+    #endregion
+
+    #region Command and Query Execution
+
+    /// <summary>
+    /// Sends a request and returns the response.
+    /// </summary>
+    /// <typeparam name="TResponse">The response type.</typeparam>
+    /// <param name="request">The request to send.</param>
+    /// <returns>The response from the request.</returns>
+    public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
+    {
+        return await TestInfrastructure.SendAsync(request);
+    }
+
+    /// <summary>
+    /// Sends a request that returns a Result&lt;T&gt; and unwraps the value.
+    /// </summary>
+    /// <typeparam name="T">The value type wrapped in the Result.</typeparam>
+    /// <param name="request">The request to send.</param>
+    /// <returns>The unwrapped value from the Result.</returns>
+    public static async Task<T> SendAndUnwrapAsync<T>(IRequest<Result<T>> request)
+    {
+        return await TestInfrastructure.SendAndUnwrapAsync(request);
+    }
+
+    /// <summary>
+    /// Sends a request without expecting a response.
+    /// </summary>
+    /// <param name="request">The request to send.</param>
+    public static async Task SendAsync(IBaseRequest request)
+    {
+        await TestInfrastructure.SendAsync(request);
+    }
+
+    #endregion
+
+    #region User Management and Authentication
+
+    /// <summary>
+    /// Gets the current user ID from the test context.
+    /// </summary>
+    /// <returns>The current user ID, or null if no user is set.</returns>
+    public static Guid? GetUserId() 
+    {
+        return TestUserManager.GetCurrentUserId();
+    }
+
+    /// <summary>
+    /// Sets the current user ID in the test context.
+    /// </summary>
+    /// <param name="userId">The user ID to set as current.</param>
+    public static void SetUserId(Guid? userId)
+    {
+        TestUserManager.SetCurrentUserId(userId);
+    }
+
+    /// <summary>
+    /// Refreshes the current user's claims from the database.
+    /// </summary>
+    public static async Task RefreshUserClaimsAsync()
+    {
+        await TestAuthenticationService.RefreshUserClaimsAsync();
+    }
+
+    /// <summary>
+    /// Creates and runs as the default test user.
+    /// </summary>
+    /// <returns>The ID of the created user.</returns>
+    public static async Task<Guid> RunAsDefaultUserAsync() 
+    {
+        return await TestUserManager.RunAsDefaultUserAsync();
+    }
+
+    /// <summary>
+    /// Creates and runs as an administrator user.
+    /// </summary>
+    /// <returns>The ID of the created administrator user.</returns>
+    public static async Task<Guid> RunAsAdministratorAsync() 
+    {
+        return await TestUserManager.RunAsAdministratorAsync();
+    }
+
+    /// <summary>
+    /// Creates and runs as a user with specified credentials and roles.
+    /// </summary>
+    /// <param name="userName">The username for the user.</param>
+    /// <param name="password">The password for the user.</param>
+    /// <param name="roles">The roles to assign to the user.</param>
+    /// <returns>The ID of the created user.</returns>
+    public static async Task<Guid> RunAsUserAsync(string userName, string password, string[] roles) 
+    {
+        return await TestUserManager.RunAsUserAsync(userName, password, roles);
+    }
+
+    /// <summary>
+    /// Creates a new user with specified credentials and roles.
+    /// </summary>
+    /// <param name="email">The email for the user.</param>
+    /// <param name="password">The password for the user.</param>
+    /// <param name="roles">The roles to assign to the user.</param>
+    /// <returns>The ID of the created user.</returns>
+    public static async Task<Guid> CreateUserAsync(string email, string password, params string[] roles)
+    {
+        return await TestUserManager.CreateUserAsync(email, password, roles);
+    }
+
+    /// <summary>
+    /// Ensures that the specified roles exist in the system.
+    /// </summary>
+    /// <param name="roleNames">The role names to ensure exist.</param>
+    public static async Task EnsureRolesExistAsync(params string[]? roleNames)
+    {
+        await TestUserManager.EnsureRolesExistAsync(roleNames);
+    }
+
+    /// <summary>
+    /// Sets up the test environment for user registration tests.
+    /// </summary>
+    public static async Task SetupForUserRegistrationTestsAsync()
+    {
+        await TestUserManager.SetupForUserRegistrationTestsAsync();
+    }
+
+    #endregion
+
+    #region Database Operations
+
+    /// <summary>
+    /// Finds an entity by its key values.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <param name="keyValues">The key values to search for.</param>
+    /// <returns>The found entity, or null if not found.</returns>
     public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
         where TEntity : class
     {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        return await context.FindAsync<TEntity>(keyValues);
+        return await TestDatabaseManager.FindAsync<TEntity>(keyValues);
     }
 
-    public static T GetService<T>()
-        where T : notnull
-    {
-        using var scope = _scopeFactory.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<T>();
-    }
-
+    /// <summary>
+    /// Adds an entity to the database.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <param name="entity">The entity to add.</param>
     public static async Task AddAsync<TEntity>(TEntity entity)
         where TEntity : class
     {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        context.Add(entity);
-
-        await context.SaveChangesAsync();
+        await TestDatabaseManager.AddAsync(entity);
     }
 
+    /// <summary>
+    /// Counts the number of entities of the specified type.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <returns>The count of entities.</returns>
     public static async Task<int> CountAsync<TEntity>() where TEntity : class
     {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        return await context.Set<TEntity>().CountAsync();
+        return await TestDatabaseManager.CountAsync<TEntity>();
     }
 
+    #endregion
+
+    #region Service Access
+
+    /// <summary>
+    /// Gets a service from the test service provider.
+    /// </summary>
+    /// <typeparam name="T">The service type.</typeparam>
+    /// <returns>The requested service.</returns>
+    public static T GetService<T>()
+        where T : notnull
+    {
+        return TestInfrastructure.GetService<T>();
+    }
+
+    /// <summary>
+    /// Creates a new service scope for dependency injection.
+    /// </summary>
+    /// <returns>A new service scope.</returns>
     public static IServiceScope CreateScope()
     {
-        return _scopeFactory.CreateScope();
+        return TestInfrastructure.CreateScope();
     }
-    
-    // Helper to ensure roles exist, can be called by other helpers
-    public static async Task EnsureRolesExistAsync(params string[]? roleNames)
-    {
-        if (roleNames == null || roleNames.Length == 0)
-        {
-            return;
-        }
 
-        using var scope = _scopeFactory.CreateScope(); // Essential: new scope for this operation
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-        foreach (var roleName in roleNames)
-        {
-            if (string.IsNullOrWhiteSpace(roleName)) continue; // Skip empty role names
+    #endregion
 
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                var result = await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
-                if (!result.Succeeded)
-                {
-                    // Log or handle more gracefully if this is a common test setup issue
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    Console.WriteLine($"Warning: Failed to create role {roleName} during test setup. Errors: {errors}");
-                }
-            }
-        }
-    }
-    
-    public static async Task SetupForUserRegistrationTestsAsync()
-    {
-        await EnsureRolesExistAsync(Roles.User, Roles.Administrator, Roles.RestaurantOwner); 
-    }
+    #region Authorization and Restaurant Roles
 
     /// <summary>
     /// Creates a role assignment for a user in a restaurant with the specified role.
     /// Requires an administrator to be logged in.
     /// </summary>
+    /// <param name="userId">The ID of the user to assign the role to.</param>
+    /// <param name="restaurantId">The ID of the restaurant.</param>
+    /// <param name="role">The restaurant role to assign.</param>
+    /// <returns>The ID of the created role assignment.</returns>
     public static async Task<Guid> CreateRoleAssignmentAsync(Guid userId, Guid restaurantId, RestaurantRole role)
     {
-        var command = new CreateRoleAssignmentCommand(userId, restaurantId, role);
-        var result = await SendAsync(command);
-        
-        if (result.IsFailure)
-        {
-            throw new Exception($"Failed to create role assignment: {result.Error.Description}");
-        }
-        
-        return result.Value.RoleAssignmentId;
+        return await RestaurantRoleTestHelper.CreateRoleAssignmentAsync(userId, restaurantId, role);
     }
 
     /// <summary>
     /// Sets up a user as a restaurant owner for the specified restaurant.
     /// Creates the user, assigns administrator role temporarily to create role assignment, then switches to the user.
     /// </summary>
+    /// <param name="email">The email for the restaurant owner user.</param>
+    /// <param name="restaurantId">The ID of the restaurant to own.</param>
+    /// <returns>The ID of the created restaurant owner user.</returns>
     public static async Task<Guid> RunAsRestaurantOwnerAsync(string email, Guid restaurantId)
     {
-        // First ensure we have admin access to create role assignments
-        await EnsureRolesExistAsync(Roles.Administrator);
-        var adminUserId = await RunAsAdministratorAsync();
-        
-        // Create the target user
-        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
-        
-        // Switch back to admin to create role assignment
-        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
-        
-        // Create the restaurant owner role assignment
-        await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Owner);
-        
-        // Switch back to the target user and add the restaurant owner claim
-        SetUserId(userId);
-        
-        // Add the restaurant owner permission claim to the test user service
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        testUserService.AddPermissionClaim(Roles.RestaurantOwner, restaurantId.ToString());
-        
-        return userId;
+        return await RestaurantRoleTestHelper.RunAsRestaurantOwnerAsync(email, restaurantId);
     }
 
     /// <summary>
     /// Sets up a user as restaurant staff for the specified restaurant.
     /// Creates the user, assigns administrator role temporarily to create role assignment, then switches to the user.
     /// </summary>
+    /// <param name="email">The email for the restaurant staff user.</param>
+    /// <param name="restaurantId">The ID of the restaurant to work for.</param>
+    /// <returns>The ID of the created restaurant staff user.</returns>
     public static async Task<Guid> RunAsRestaurantStaffAsync(string email, Guid restaurantId)
     {
-        // First ensure we have admin access to create role assignments
-        await EnsureRolesExistAsync(Roles.Administrator);
-        var adminUserId = await RunAsAdministratorAsync();
-        
-        // Create the target user
-        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
-        
-        // Switch back to admin to create role assignment
-        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
-        
-        // Create the restaurant staff role assignment
-        await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Staff);
-        
-        // Switch back to the target user and add the restaurant staff claim
-        SetUserId(userId);
-        
-        // Add the restaurant staff permission claim to the test user service
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        testUserService.AddPermissionClaim(Roles.RestaurantStaff, restaurantId.ToString());
-        
-        return userId;
+        return await RestaurantRoleTestHelper.RunAsRestaurantStaffAsync(email, restaurantId);
     }
 
     /// <summary>
     /// Sets up a user with multiple restaurant roles for testing complex authorization scenarios.
     /// </summary>
+    /// <param name="email">The email for the user.</param>
+    /// <param name="roleAssignments">Array of restaurant ID and role pairs to assign.</param>
+    /// <returns>The ID of the created user with multiple roles.</returns>
     public static async Task<Guid> RunAsUserWithMultipleRestaurantRolesAsync(string email, (Guid restaurantId, RestaurantRole role)[] roleAssignments)
     {
-        // First ensure we have admin access to create role assignments
-        await EnsureRolesExistAsync(Roles.Administrator);
-        var adminUserId = await RunAsAdministratorAsync();
-        
-        // Create the target user
-        var userId = await RunAsUserAsync(email, "Password123!", Array.Empty<string>());
-        
-        // Switch back to admin to create role assignments
-        await RunAsUserAsync("administrator@local", "Administrator1234!", new[] { Roles.Administrator });
-        
-        // Create all role assignments
-        foreach (var (restaurantId, role) in roleAssignments)
-        {
-            await CreateRoleAssignmentAsync(userId, restaurantId, role);
-        }
-        
-        // Switch back to the target user and add all permission claims
-        SetUserId(userId);
-        
-        // Add all permission claims to the test user service
-        var testUserService = CustomWebApplicationFactory.GetTestUserService();
-        foreach (var (restaurantId, role) in roleAssignments)
-        {
-            var roleConstant = role switch
-            {
-                RestaurantRole.Owner => Roles.RestaurantOwner,
-                RestaurantRole.Staff => Roles.RestaurantStaff,
-                _ => role.ToString()
-            };
-            testUserService.AddPermissionClaim(roleConstant, restaurantId.ToString());
-        }
-        
-        return userId;
+        return await RestaurantRoleTestHelper.RunAsUserWithMultipleRestaurantRolesAsync(email, roleAssignments);
     }
 
     /// <summary>
@@ -344,13 +286,8 @@ public partial class Testing
     /// </summary>
     public static async Task SetupForAuthorizationTestsAsync()
     {
-        await EnsureRolesExistAsync(Roles.Administrator, Roles.RestaurantOwner, Roles.RestaurantStaff, Roles.User);
+        await AuthorizationTestSetup.SetupForAuthorizationTestsAsync();
     }
 
-    [OneTimeTearDown]
-    public async Task RunAfterAnyTests()
-    {
-        await _database.DisposeAsync();
-        await _factory.DisposeAsync();
-    }
+    #endregion
 }

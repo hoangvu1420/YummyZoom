@@ -1,4 +1,5 @@
 using YummyZoom.Application.Common.Exceptions;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;

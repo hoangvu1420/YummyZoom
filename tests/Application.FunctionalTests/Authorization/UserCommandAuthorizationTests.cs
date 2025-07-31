@@ -1,6 +1,7 @@
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.FunctionalTests.Common;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 

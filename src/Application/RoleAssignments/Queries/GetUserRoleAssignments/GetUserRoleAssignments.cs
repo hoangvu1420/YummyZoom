@@ -14,8 +14,8 @@ public record RoleAssignmentDto(
     Guid UserId,
     Guid RestaurantId,
     RestaurantRole Role,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime Created, 
+    string? CreatedBy);
 
 /// <summary>
 /// Query handler that uses the new CQRS pattern with IDbConnectionFactory + Dapper.
@@ -41,8 +41,8 @@ public class GetUserRoleAssignmentsQueryHandler : IRequestHandler<GetUserRoleAss
                 ra."UserId",
                 ra."RestaurantId",
                 ra."Role",
-                ra."CreatedAt",
-                ra."UpdatedAt"
+                ra."Created",
+                ra."CreatedBy"
             FROM "RoleAssignments" AS ra
             WHERE ra."UserId" = @UserId
             """;

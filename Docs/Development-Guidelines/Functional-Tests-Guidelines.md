@@ -2,7 +2,37 @@
 
 This document outlines how to write new functional tests for the YummyZoom application, leveraging the existing test infrastructure. Functional tests are crucial for verifying the end-to-end behavior of your application's features, including command/query handling, business logic, database interactions, and authorization.
 
-**1. Understanding the Test Environment**
+**1. Test Project Structure**
+
+The functional test project is organized into specialized layers for better maintainability:
+
+```
+tests/Application.FunctionalTests/
+├── Infrastructure/           # Core test infrastructure
+│   ├── TestInfrastructure.cs      # Setup, teardown, service management
+│   ├── TestDatabaseManager.cs     # Database operations and entity management
+│   ├── TestConfiguration.cs       # Centralized test constants and configuration
+│   └── Database/                   # Database-specific implementations
+├── UserManagement/          # User creation and authentication
+│   ├── TestUserManager.cs         # User operations and basic authentication
+│   └── TestAuthenticationService.cs # Authentication state and claims
+├── Authorization/           # Authorization helpers and tests
+│   ├── RestaurantRoleTestHelper.cs # Restaurant-specific role scenarios
+│   ├── AuthorizationTestSetup.cs  # Common authorization setup
+│   └── [authorization test files]  # Existing authorization tests
+├── Features/                # Feature-specific tests organized by domain
+│   ├── Users/
+│   ├── Notifications/
+│   ├── RoleAssignments/
+│   └── [other feature folders]
+├── Common/                  # Shared utilities and base classes
+│   ├── BaseTestFixture.cs         # Base test fixture
+│   ├── ResultAssertions.cs        # Result assertion helpers
+│   └── CustomWebApplicationFactory.cs # Enhanced web application factory
+└── Testing.cs               # Clean facade API for all test operations
+```
+
+**2. Understanding the Test Environment**
 
 Our functional test environment is designed for reliability and isolation:
 
@@ -12,36 +42,44 @@ Our functional test environment is designed for reliability and isolation:
   * Allow mocking of certain services (like `IUser` to simulate authenticated users).
 * **Data Isolation (Respawner):** Between each individual test method, the `Respawner` tool is used to quickly wipe data from all tables (except schema and migration history). This ensures each test starts with a clean data slate.
 * **Centralized Test Helpers (`Testing.cs`):** Common operations like sending MediatR requests, simulating user logins, and direct database interaction are provided as static helper methods in `Testing.cs`.
-* **Base Fixture (`BaseTestFixture.cs`):** Test classes should inherit from `BaseTestFixture` to automatically get per-test setup (like data reset).
+* **Base Fixture (`Common/BaseTestFixture.cs`):** Test classes should inherit from `BaseTestFixture` to automatically get per-test setup (like data reset).
 
-**2. Key Files and Concepts**
+**3. Key Infrastructure Components**
 
-* **`Testing.cs` (`[SetUpFixture]`):**
-  * `RunBeforeAnyTests()` (`[OneTimeSetUp]`): Initializes the database container and web application factory once before all tests run.
-  * `RunAfterAnyTests()` (`[OneTimeTearDown]`): Cleans up the database container after all tests.
-  * **Static Helper Methods:**
-    * `SendAsync<TResponse>(IRequest<TResponse> request)`: Sends a MediatR command or query.
-    * `RunAsUserAsync(userName, password, roles[])`: Creates/simulates a user login for subsequent `SendAsync` calls.
-    * `RunAsDefaultUserAsync()`, `RunAsAdministratorAsync()`: Pre-configured user simulation.
-    * `ResetState()`: Cleans the database and resets the simulated user. Called before each test.
-    * `FindAsync<TEntity>(...)`, `AddAsync<TEntity>(...)`, `CountAsync<TEntity>()`: For direct DB interaction.
-    * `EnsureRolesExistAsync(params string[] roleNames)`: Ensures specified Identity roles exist in the DB.
-    * `SetupForUserRegistrationTestsAsync()`: Example of a module-specific setup ensuring necessary roles for user registration tests.
-* **`BaseTestFixture.cs`:**
-  * Inherit your test classes from this.
-  * Its `[SetUp]` method calls `ResetState()` before each test.
-* **`CustomWebApplicationFactory.cs`:**
-  * Manages the test application host.
-  * Crucially, it mocks `IUser` based on `Testing.GetUserId()` to simulate authenticated users.
-* **`ITestDatabase` / `PostgreSQLTestcontainersTestDatabase.cs`:**
-  * Manages the lifecycle of the Testcontainer database.
-* **`SharedKernel/Constants/Roles.cs` & `Policies.cs`:**
-  * Use these constants when specifying roles or policies for authorization.
+* **`Testing.cs` (Unified Facade):**
+  * **Test Infrastructure Setup:** `RunBeforeAnyTests()`, `RunAfterAnyTests()`, `ResetState()`
+  * **Command/Query Execution:** `SendAsync<TResponse>()`, `SendAndUnwrapAsync<TResponse>()`
+  * **User Management:** `RunAsUserAsync()`, `RunAsDefaultUserAsync()`, `RunAsAdministratorAsync()`, `CreateUserAsync()`
+  * **Database Operations:** `FindAsync<TEntity>()`, `AddAsync<TEntity>()`, `CountAsync<TEntity>()`
+  * **Authorization Helpers:** `CreateRoleAssignmentAsync()`, `RunAsRestaurantOwnerAsync()`, `SetupForAuthorizationTestsAsync()`
 
-**3. Writing a New Functional Test Class**
+* **Infrastructure Layer:**
+  * **`TestInfrastructure.cs`:** Core test setup, teardown, and service provider management
+  * **`TestDatabaseManager.cs`:** Database operations and entity management with Respawner integration
+  * **`TestConfiguration.cs`:** Centralized test constants (users, roles, database settings, test data)
+  * **`Database/`:** Database implementations (`ITestDatabase`, `PostgreSQLTestcontainersTestDatabase`, etc.)
+
+* **User Management Layer:**
+  * **`TestUserManager.cs`:** User creation, authentication, and basic user operations
+  * **`TestAuthenticationService.cs`:** Authentication state and claims management
+
+* **Authorization Layer:**
+  * **`RestaurantRoleTestHelper.cs`:** Restaurant-specific role assignments and test scenarios
+  * **`AuthorizationTestSetup.cs`:** Common authorization test setup and configuration
+
+* **Common Utilities:**
+  * **`BaseTestFixture.cs`:** Base class for test fixtures with automatic state reset
+  * **`ResultAssertions.cs`:** Custom assertions for `Result<T>` pattern
+  * **`CustomWebApplicationFactory.cs`:** Enhanced web application factory with organized service registration
+
+* **Constants:**
+  * **`SharedKernel/Constants/Roles.cs` & `Policies.cs`:** Use these constants when specifying roles or policies for authorization
+  * **`TestConfiguration`:** Centralized test-specific constants and configuration values
+
+**4. Writing a New Functional Test Class**
 
 1. **Create a New Test File:**
-    * In the `Application.FunctionalTests` project, create a new folder corresponding to your domain module (e.g., `Restaurants`, `Orders`).
+    * In the `Application.FunctionalTests/Features/` directory, create or navigate to the folder corresponding to your domain module (e.g., `Features/Restaurants/`, `Features/Orders/`).
     * Add a new C# class file (e.g., `CreateRestaurantTests.cs`).
 
 2. **Inherit from `BaseTestFixture`:**
@@ -51,7 +89,7 @@ Our functional test environment is designed for reliability and isolation:
     using YummyZoom.Domain.RestaurantAggregate; // Your domain entity
     using YummyZoom.SharedKernel.Constants;
 
-    namespace YummyZoom.Application.FunctionalTests.Restaurants;
+    namespace YummyZoom.Application.FunctionalTests.Features.Restaurants;
 
     using static Testing; // Allows direct use of helper methods like SendAsync, RunAsUserAsync
 
@@ -77,7 +115,7 @@ Our functional test environment is designed for reliability and isolation:
 
     * Remember, `ResetState()` from `BaseTestFixture` already runs before this `[SetUp]`.
 
-**4. Writing Test Methods**
+**5. Writing Test Methods**
 
 Follow the Arrange-Act-Assert pattern:
 
@@ -87,7 +125,7 @@ public async Task CreateRestaurant_AsRestaurantOwner_ShouldSucceedAndCreateResta
 {
     // Arrange
     // 1. Simulate a user login (if the command requires authentication/authorization)
-    var restaurantOwnerUserId = await RunAsUserAsync("owner@example.com", "Password123!", new[] { Roles.RestaurantOwner });
+    var restaurantOwnerUserId = await RunAsUserAsync("owner@example.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.RestaurantOwner });
 
     // 2. Create the command with valid data
     var command = new CreateRestaurantCommand
@@ -118,7 +156,7 @@ public async Task CreateRestaurant_AsRestaurantOwner_ShouldSucceedAndCreateResta
 }
 ```
 
-**5. Key Considerations When Writing Tests**
+**6. Key Considerations When Writing Tests**
 
 * **Authentication & Authorization:**
   * If your command/query is decorated with `[AuthorizeAttribute]`, you **must** use one of the `RunAs...Async()` methods before `SendAsync()` to simulate an authenticated user.
@@ -139,7 +177,7 @@ public async Task CreateRestaurant_AsRestaurantOwner_ShouldSucceedAndCreateResta
     public async Task CreateRestaurant_WithMissingName_ShouldFailValidation()
     {
         // Arrange
-        await RunAsUserAsync("owner@example.com", "Password123!", new[] { Roles.RestaurantOwner });
+        await RunAsUserAsync("owner@example.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.RestaurantOwner });
         var command = new CreateRestaurantCommand { Name = null, /* ... */ };
 
         // Act
@@ -151,15 +189,21 @@ public async Task CreateRestaurant_AsRestaurantOwner_ShouldSucceedAndCreateResta
     ```
 
 * **`Result` Pattern:**
-  * Many commands/queries will return `Result<T>` or `Result`. Use the custom assertions in `ResultAssertions.cs` (e.g., `ShouldBeSuccessful()`, `ShouldBeFailure()`, `ValueOrFail()`).
+  * Many commands/queries will return `Result<T>` or `Result`. Use the custom assertions in `Common/ResultAssertions.cs` (e.g., `ShouldBeSuccessful()`, `ShouldBeFailure()`, `ValueOrFail()`).
+* **Test Configuration:**
+  * Use `TestConfiguration` constants instead of hardcoded values:
+    * `TestConfiguration.DefaultUsers.Email` for default test user email
+    * `TestConfiguration.DefaultUsers.CommonTestPassword` for test passwords
+    * `TestConfiguration.Roles.*` for role names
+    * `TestConfiguration.TestData.*` for common test data values
 * **Idempotency of Setup:** Try to make your test setup steps (especially data seeding) idempotent if they might be called multiple times. `EnsureRolesExistAsync` is an example.
 
-**6. Running Functional Tests**
+**7. Running Functional Tests**
 
 * Ensure Docker is running if you are using `PostgreSQLTestcontainersTestDatabase`.
 * Run tests via your IDE's test runner or the `dotnet test` command.
 
-**7. Troubleshooting Common Issues**
+**8. Troubleshooting Common Issues**
 
 * **`System.InvalidOperationException: Role X does not exist.`:**
   * Ensure `await EnsureRolesExistAsync("X")` or a broader setup method that includes role "X" is called in your test's `[SetUp]` or a relevant helper before the code that assigns/checks role "X" executes.

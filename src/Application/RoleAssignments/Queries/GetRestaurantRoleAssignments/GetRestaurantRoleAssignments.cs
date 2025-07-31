@@ -14,8 +14,8 @@ public record RoleAssignmentDto(
     Guid UserId,
     Guid RestaurantId,
     RestaurantRole Role,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime Created, 
+    string? CreatedBy);
 
 public class GetRestaurantRoleAssignmentsQueryHandler : IRequestHandler<GetRestaurantRoleAssignmentsQuery, Result<GetRestaurantRoleAssignmentsResponse>>
 {
@@ -36,8 +36,8 @@ public class GetRestaurantRoleAssignmentsQueryHandler : IRequestHandler<GetResta
                 ra."UserId",
                 ra."RestaurantId",
                 ra."Role",
-                ra."CreatedAt",
-                ra."UpdatedAt"
+                ra."Created",
+                ra."CreatedBy"
             FROM "RoleAssignments" AS ra
             WHERE ra."RestaurantId" = @RestaurantId
             """;
