@@ -75,7 +75,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             maxSelections,
             choices);
 
-        var groupId = (CustomizationGroupId)group.Id;
+        var groupId = group.Id;
         group.AddDomainEvent(new Events.CustomizationGroupCreated(groupId, group.RestaurantId, group.GroupName));
         return Result.Success(group);
     }
@@ -96,7 +96,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
 
         // Note: We allow duplicate display orders - items with same order will be sorted by name
         _choices.Add(choiceResult.Value);
-        var groupId = (CustomizationGroupId)Id;
+        var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceAdded(groupId, choiceResult.Value.Id, name));
         return Result.Success();
     }
@@ -119,7 +119,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         }
         _choices.Remove(choice);
         
-        var groupId = (CustomizationGroupId)Id;
+        var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceRemoved(groupId, choice.Id, choice.Name));
         
         return Result.Success();
@@ -149,7 +149,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         }
         _choices[_choices.IndexOf(choice)] = updated.Value;
         
-        var groupId = (CustomizationGroupId)Id;
+        var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceUpdated(groupId, choiceId, newName, newPriceAdjustment, isDefault, newDisplayOrder));
         
         return Result.Success();
@@ -180,7 +180,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
 
         // Validate all choice IDs exist
         var invalidChoiceIds = orderChanges
-            .Where(change => !_choices.Any(c => c.Id == change.choiceId))
+            .Where(change => _choices.All(c => c.Id != change.choiceId))
             .Select(change => change.choiceId)
             .ToList();
 
@@ -216,7 +216,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             reorderedChoices.Add(choiceId, newDisplayOrder);
         }
 
-        var groupId = (CustomizationGroupId)Id;
+        var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoicesReordered(groupId, reorderedChoices));
 
         return Result.Success();
@@ -239,7 +239,7 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new Events.CustomizationGroupDeleted((CustomizationGroupId)Id));
+        AddDomainEvent(new Events.CustomizationGroupDeleted(Id));
 
         return Result.Success();
     }

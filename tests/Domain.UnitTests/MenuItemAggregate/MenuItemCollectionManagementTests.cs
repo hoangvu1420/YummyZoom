@@ -30,7 +30,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         menuItem.DomainEvents.Should().HaveCount(2); // MenuItemCreated + MenuItemCustomizationAssigned
         var assignedEvent = menuItem.DomainEvents.OfType<MenuItemCustomizationAssigned>().FirstOrDefault();
         assignedEvent.Should().NotBeNull();
-        assignedEvent!.MenuItemId.Should().Be((MenuItemId)menuItem.Id);
+        assignedEvent!.MenuItemId.Should().Be(menuItem.Id);
         assignedEvent.CustomizationGroupId.Should().Be(customization.CustomizationGroupId);
         assignedEvent.DisplayTitle.Should().Be(customization.DisplayTitle);
     }
@@ -92,7 +92,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         // Verify domain event was raised
         var removedEvent = menuItem.DomainEvents.OfType<MenuItemCustomizationRemoved>().FirstOrDefault();
         removedEvent.Should().NotBeNull();
-        removedEvent!.MenuItemId.Should().Be((MenuItemId)menuItem.Id);
+        removedEvent!.MenuItemId.Should().Be(menuItem.Id);
         removedEvent.CustomizationGroupId.Should().Be(customization.CustomizationGroupId);
     }
 
@@ -160,7 +160,7 @@ public class MenuItemDietaryTagManagementTests : MenuItemTestHelpers
         // Verify domain event was raised
         var updatedEvent = menuItem.DomainEvents.OfType<MenuItemDietaryTagsUpdated>().LastOrDefault();
         updatedEvent.Should().NotBeNull();
-        updatedEvent!.MenuItemId.Should().Be((MenuItemId)menuItem.Id);
+        updatedEvent!.MenuItemId.Should().Be(menuItem.Id);
         updatedEvent.TagIds.Should().BeEquivalentTo(newTags);
     }
 

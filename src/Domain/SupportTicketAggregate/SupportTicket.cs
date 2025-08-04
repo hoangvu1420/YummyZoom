@@ -127,8 +127,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
             priority,
             now,
             contextLinks.ToList(),
-            [messageResult.Value],
-            SupportTicketStatus.Open);
+            [messageResult.Value]);
 
         // Add domain event
         ticket.AddDomainEvent(new SupportTicketCreated(
@@ -228,7 +227,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
 
         // Add domain event
         AddDomainEvent(new TicketMessageAdded(
-            (SupportTicketId)Id,
+            Id,
             messageResult.Value.Id,
             authorId,
             authorType,
@@ -276,7 +275,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
 
         // Add domain event
         AddDomainEvent(new SupportTicketStatusChanged(
-            (SupportTicketId)Id,
+            Id,
             previousStatus,
             newStatus,
             adminId));
@@ -297,7 +296,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
 
         // Add domain event
         AddDomainEvent(new SupportTicketAssigned(
-            (SupportTicketId)Id,
+            Id,
             adminId,
             previousAdminId));
 
@@ -317,7 +316,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
 
         // Add domain event
         AddDomainEvent(new SupportTicketPriorityChanged(
-            (SupportTicketId)Id,
+            Id,
             previousPriority,
             newPriority,
             adminId));
@@ -343,7 +342,7 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
 
         // Add domain event
         AddDomainEvent(new SupportTicketAssigned(
-            (SupportTicketId)Id,
+            Id,
             adminId, // The admin who performed the unassignment
             previousAdminId));
 

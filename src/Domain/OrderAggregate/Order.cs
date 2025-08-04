@@ -31,11 +31,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     // Properties from ICreationAuditable
     public DateTimeOffset Created { get; set; }
     public string? CreatedBy { get; set; }
-
-    /// <summary>
-    /// Gets the unique identifier for this order.
-    /// </summary>
-    public new OrderId Id { get; private set; }
     
     /// <summary>
     /// Gets the human-readable order number displayed to users.
@@ -166,7 +161,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         DateTime timestamp)
         : base(orderId)
     {
-        Id = orderId;
         OrderNumber = orderNumber;
         CustomerId = customerId;
         RestaurantId = restaurantId;
@@ -275,8 +269,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             return Result.Failure<Order>(OrderErrors.AddressInvalid);
         }
 
-        var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;
-        if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
+        var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
         {
             return Result.Failure<Order>(OrderErrors.FinancialMismatch);
         }
@@ -292,14 +285,20 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         if (paymentMethodType == PaymentMethodType.CashOnDelivery)
         {
+            var codAmount = totalAmount.Copy();
+
             var codTransactionResult = PaymentTransaction.Create(
-                PaymentMethodType.CashOnDelivery, PaymentTransactionType.Payment, totalAmount, currentTimestamp);
-            
+                PaymentMethodType.CashOnDelivery,
+                PaymentTransactionType.Payment,
+                codAmount,
+                currentTimestamp
+            );
+
             if (codTransactionResult.IsFailure)
             {
                 return Result.Failure<Order>(codTransactionResult.Error);
             }
-            
+
             codTransactionResult.Value.MarkAsSucceeded();
             paymentTransactions.Add(codTransactionResult.Value);
             initialStatus = OrderStatus.Placed;
@@ -310,16 +309,22 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             {
                 return Result.Failure<Order>(OrderErrors.PaymentGatewayReferenceIdRequired);
             }
-            
+
+            var txAmount = totalAmount.Copy();
+
             var onlinePaymentResult = PaymentTransaction.Create(
-                paymentMethodType, PaymentTransactionType.Payment, totalAmount, currentTimestamp, 
-                paymentGatewayReferenceId: paymentGatewayReferenceId);
+                paymentMethodType,
+                PaymentTransactionType.Payment,
+                txAmount,
+                currentTimestamp,
+                paymentGatewayReferenceId: paymentGatewayReferenceId
+            );
 
             if (onlinePaymentResult.IsFailure)
             {
                 return Result.Failure<Order>(onlinePaymentResult.Error);
             }
-            
+
             paymentTransactions.Add(onlinePaymentResult.Value);
         }
 

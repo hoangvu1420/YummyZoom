@@ -43,7 +43,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             payoutMethodDetails: null);
 
         account.AddDomainEvent(new RestaurantAccountCreated(
-            (RestaurantAccountId)account.Id, 
+            account.Id, 
             restaurantId));
 
         return Result.Success(account);
@@ -56,7 +56,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             return Result.Failure(RestaurantAccountErrors.OrderRevenueMustBePositive(amount));
         }
         CurrentBalance += amount;
-        AddDomainEvent(new RevenueRecorded((RestaurantAccountId)Id, orderId, amount));
+        AddDomainEvent(new RevenueRecorded(Id, orderId, amount));
         return Result.Success();
     }
 
@@ -67,7 +67,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             return Result.Failure(RestaurantAccountErrors.PlatformFeeMustBeNegative(feeAmount));
         }
         CurrentBalance += feeAmount;
-        AddDomainEvent(new PlatformFeeRecorded((RestaurantAccountId)Id, orderId, feeAmount));
+        AddDomainEvent(new PlatformFeeRecorded(Id, orderId, feeAmount));
         return Result.Success();
     }
     
@@ -78,7 +78,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             return Result.Failure(RestaurantAccountErrors.RefundDeductionMustBeNegative(refundAmount));
         }
         CurrentBalance += refundAmount;
-        AddDomainEvent(new RefundDeducted((RestaurantAccountId)Id, orderId, refundAmount));
+        AddDomainEvent(new RefundDeducted(Id, orderId, refundAmount));
         return Result.Success();
     }
     
@@ -95,7 +95,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         }
 
         CurrentBalance -= payoutAmount;
-        AddDomainEvent(new PayoutSettled((RestaurantAccountId)Id, payoutAmount, CurrentBalance));
+        AddDomainEvent(new PayoutSettled(Id, payoutAmount, CurrentBalance));
         return Result.Success();
     }
 
@@ -107,14 +107,14 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         }
 
         CurrentBalance += adjustmentAmount;
-        AddDomainEvent(new ManualAdjustmentMade((RestaurantAccountId)Id, adjustmentAmount, reason, adminId));
+        AddDomainEvent(new ManualAdjustmentMade(Id, adjustmentAmount, reason, adminId));
         return Result.Success();
     }
 
     public Result UpdatePayoutMethod(PayoutMethodDetails payoutMethodDetails)
     {
         PayoutMethodDetails = payoutMethodDetails;
-        AddDomainEvent(new PayoutMethodUpdated((RestaurantAccountId)Id, payoutMethodDetails));
+        AddDomainEvent(new PayoutMethodUpdated(Id, payoutMethodDetails));
         return Result.Success();
     }
 
@@ -124,7 +124,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
     /// <returns>A Result indicating success</returns>
     public Result MarkAsDeleted()
     {
-        AddDomainEvent(new RestaurantAccountDeleted((RestaurantAccountId)Id));
+        AddDomainEvent(new RestaurantAccountDeleted(Id));
 
         return Result.Success();
     }

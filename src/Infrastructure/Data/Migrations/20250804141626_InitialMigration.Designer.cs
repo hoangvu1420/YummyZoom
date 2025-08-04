@@ -12,7 +12,7 @@ using YummyZoom.Infrastructure.Data;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250729143516_InitialMigration")]
+    [Migration("20250804141626_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -322,6 +322,152 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Coupons", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.MenuEntity.Menu", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who deleted the entity");
+
+                    b.Property<DateTimeOffset?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was deleted");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasComment("Indicates if the entity is soft-deleted");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was last modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who last modified the entity");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_Menu_Created");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_Menu_DeletedOn");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Menu_IsDeleted");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("IX_Menu_LastModified");
+
+                    b.HasIndex("RestaurantId")
+                        .HasDatabaseName("IX_Menus_RestaurantId");
+
+                    b.ToTable("Menus", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.MenuEntity.MenuCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who deleted the entity");
+
+                    b.Property<DateTimeOffset?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was deleted");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasComment("Indicates if the entity is soft-deleted");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was last modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who last modified the entity");
+
+                    b.Property<Guid>("MenuId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_MenuCategory_Created");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_MenuCategory_DeletedOn");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_MenuCategory_IsDeleted");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("IX_MenuCategory_LastModified");
+
+                    b.HasIndex("MenuId")
+                        .HasDatabaseName("IX_MenuCategories_MenuId");
+
+                    b.HasIndex("MenuId", "DisplayOrder")
+                        .HasDatabaseName("IX_MenuCategories_MenuId_DisplayOrder");
+
+                    b.ToTable("MenuCategories", (string)null);
                 });
 
             modelBuilder.Entity("YummyZoom.Domain.MenuItemAggregate.MenuItem", b =>
@@ -1101,12 +1247,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
                     b.OwnsMany("YummyZoom.Domain.OrderAggregate.Entities.PaymentTransaction", "PaymentTransactions", b1 =>
                         {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uuid");
+
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uuid")
                                 .HasColumnName("PaymentTransactionId");
-
-                            b1.Property<Guid>("OrderId")
-                                .HasColumnType("uuid");
 
                             b1.Property<Guid?>("PaidByUserId")
                                 .HasColumnType("uuid");
@@ -1137,9 +1283,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                 .HasMaxLength(50)
                                 .HasColumnType("character varying(50)");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("OrderId");
+                            b1.HasKey("OrderId", "Id");
 
                             b1.ToTable("PaymentTransactions", (string)null);
 
@@ -1148,25 +1292,28 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
                             b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "Amount", b2 =>
                                 {
+                                    b2.Property<Guid>("PaymentTransactionOrderId")
+                                        .HasColumnType("uuid");
+
                                     b2.Property<Guid>("PaymentTransactionId")
                                         .HasColumnType("uuid");
 
                                     b2.Property<decimal>("Amount")
                                         .HasColumnType("decimal(18,2)")
-                                        .HasColumnName("Amount");
+                                        .HasColumnName("Transaction_Amount");
 
                                     b2.Property<string>("Currency")
                                         .IsRequired()
                                         .HasMaxLength(3)
                                         .HasColumnType("character varying(3)")
-                                        .HasColumnName("Currency");
+                                        .HasColumnName("Transaction_Currency");
 
-                                    b2.HasKey("PaymentTransactionId");
+                                    b2.HasKey("PaymentTransactionOrderId", "PaymentTransactionId");
 
                                     b2.ToTable("PaymentTransactions");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("PaymentTransactionId");
+                                        .HasForeignKey("PaymentTransactionOrderId", "PaymentTransactionId");
                                 });
 
                             b1.Navigation("Amount")

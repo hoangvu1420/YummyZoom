@@ -681,7 +681,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         // Check if all online payments are complete
         var allOnlinePaymentsComplete = _memberPayments
             .Where(p => p.Method == PaymentMethod.Online)
-            .All(p => p.Status == TeamCartAggregate.Enums.PaymentStatus.PaidOnline);
+            .All(p => p.Status == Enums.PaymentStatus.PaidOnline);
 
         if (!allOnlinePaymentsComplete)
         {

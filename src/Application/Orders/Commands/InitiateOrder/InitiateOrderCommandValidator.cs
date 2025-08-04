@@ -26,7 +26,9 @@ public class InitiateOrderCommandValidator : AbstractValidator<InitiateOrderComm
             .SetValidator(new DeliveryAddressDtoValidator());
 
         RuleFor(x => x.PaymentMethod)
-            .IsInEnum()
+            .NotEmpty()
+            .WithMessage("Payment method is required.")
+            .Must(BeValidPaymentMethod)
             .WithMessage("Invalid payment method.");
 
         RuleFor(x => x.CouponCode)
@@ -43,6 +45,12 @@ public class InitiateOrderCommandValidator : AbstractValidator<InitiateOrderComm
             .MaximumLength(500)
             .WithMessage("Special instructions cannot exceed 500 characters.")
             .When(x => !string.IsNullOrEmpty(x.SpecialInstructions));
+    }
+
+    private static bool BeValidPaymentMethod(string paymentMethod)
+    {
+        var validPaymentMethods = new[] { "CreditCard", "PayPal", "ApplePay", "GooglePay", "CashOnDelivery" };
+        return validPaymentMethods.Contains(paymentMethod, StringComparer.OrdinalIgnoreCase);
     }
 }
 

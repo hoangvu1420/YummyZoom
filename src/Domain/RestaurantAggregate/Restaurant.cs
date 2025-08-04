@@ -109,7 +109,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             isVerified: false,
             isAcceptingOrders: false);
 
-        restaurant.AddDomainEvent(new RestaurantCreated((RestaurantId)restaurant.Id));
+        restaurant.AddDomainEvent(new RestaurantCreated(restaurant.Id));
 
         return Result.Success(restaurant);
     }
@@ -151,7 +151,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             isVerified: false,
             isAcceptingOrders: false);
 
-        restaurant.AddDomainEvent(new RestaurantCreated((RestaurantId)restaurant.Id));
+        restaurant.AddDomainEvent(new RestaurantCreated(restaurant.Id));
 
         return Result.Success(restaurant);
     }
@@ -164,21 +164,21 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
     {
         if (IsVerified) return;
         IsVerified = true;
-        AddDomainEvent(new RestaurantVerified((RestaurantId)Id));
+        AddDomainEvent(new RestaurantVerified(Id));
     }
 
     public void AcceptOrders()
     {
         if (IsAcceptingOrders) return;
         IsAcceptingOrders = true;
-        AddDomainEvent(new RestaurantAcceptingOrders((RestaurantId)Id));
+        AddDomainEvent(new RestaurantAcceptingOrders(Id));
     }
 
     public void DeclineOrders()
     {
         if (!IsAcceptingOrders) return;
         IsAcceptingOrders = false;
-        AddDomainEvent(new RestaurantNotAcceptingOrders((RestaurantId)Id));
+        AddDomainEvent(new RestaurantNotAcceptingOrders(Id));
     }
 
     public Result MarkAsDeleted(DateTimeOffset deletedOn, string? deletedBy = null)
@@ -204,7 +204,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new RestaurantDeleted((RestaurantId)Id));
+        AddDomainEvent(new RestaurantDeleted(Id));
 
         return Result.Success();
     }
@@ -226,7 +226,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldName = Name;
         Name = name.Trim();
         
-        AddDomainEvent(new RestaurantNameChanged((RestaurantId)Id, oldName, Name));
+        AddDomainEvent(new RestaurantNameChanged(Id, oldName, Name));
         
         return Result.Success();
     }
@@ -244,7 +244,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldDescription = Description;
         Description = description.Trim();
         
-        AddDomainEvent(new RestaurantDescriptionChanged((RestaurantId)Id, oldDescription, Description));
+        AddDomainEvent(new RestaurantDescriptionChanged(Id, oldDescription, Description));
         
         return Result.Success();
     }
@@ -262,7 +262,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldCuisineType = CuisineType;
         CuisineType = cuisineType.Trim();
         
-        AddDomainEvent(new RestaurantCuisineTypeChanged((RestaurantId)Id, oldCuisineType, CuisineType));
+        AddDomainEvent(new RestaurantCuisineTypeChanged(Id, oldCuisineType, CuisineType));
         
         return Result.Success();
     }
@@ -280,7 +280,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldLogoUrl = LogoUrl;
         LogoUrl = logoUrl?.Trim() ?? string.Empty;
         
-        AddDomainEvent(new RestaurantLogoChanged((RestaurantId)Id, oldLogoUrl, LogoUrl));
+        AddDomainEvent(new RestaurantLogoChanged(Id, oldLogoUrl, LogoUrl));
         
         return Result.Success();
     }
@@ -293,7 +293,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldLocation = Location;
         Location = location;
         
-        AddDomainEvent(new RestaurantLocationChanged((RestaurantId)Id, oldLocation, Location));
+        AddDomainEvent(new RestaurantLocationChanged(Id, oldLocation, Location));
         
         return Result.Success();
     }
@@ -307,7 +307,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldLocation = Location;
         Location = addressResult.Value;
         
-        AddDomainEvent(new RestaurantLocationChanged((RestaurantId)Id, oldLocation, Location));
+        AddDomainEvent(new RestaurantLocationChanged(Id, oldLocation, Location));
         
         return Result.Success();
     }
@@ -320,7 +320,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldContactInfo = ContactInfo;
         ContactInfo = contactInfo;
         
-        AddDomainEvent(new RestaurantContactInfoChanged((RestaurantId)Id, oldContactInfo, ContactInfo));
+        AddDomainEvent(new RestaurantContactInfoChanged(Id, oldContactInfo, ContactInfo));
         
         return Result.Success();
     }
@@ -334,7 +334,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldContactInfo = ContactInfo;
         ContactInfo = contactInfoResult.Value;
         
-        AddDomainEvent(new RestaurantContactInfoChanged((RestaurantId)Id, oldContactInfo, ContactInfo));
+        AddDomainEvent(new RestaurantContactInfoChanged(Id, oldContactInfo, ContactInfo));
         
         return Result.Success();
     }
@@ -347,7 +347,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldBusinessHours = BusinessHours;
         BusinessHours = businessHours;
         
-        AddDomainEvent(new RestaurantBusinessHoursChanged((RestaurantId)Id, oldBusinessHours, BusinessHours));
+        AddDomainEvent(new RestaurantBusinessHoursChanged(Id, oldBusinessHours, BusinessHours));
         
         return Result.Success();
     }
@@ -361,7 +361,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         var oldBusinessHours = BusinessHours;
         BusinessHours = businessHoursResult.Value;
         
-        AddDomainEvent(new RestaurantBusinessHoursChanged((RestaurantId)Id, oldBusinessHours, BusinessHours));
+        AddDomainEvent(new RestaurantBusinessHoursChanged(Id, oldBusinessHours, BusinessHours));
         
         return Result.Success();
     }
@@ -400,7 +400,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         LogoUrl = logoUrl?.Trim() ?? string.Empty;
         
         AddDomainEvent(new RestaurantBrandingUpdated(
-            (RestaurantId)Id, 
+            Id, 
             oldName, 
             Name, 
             oldLogoUrl, 
@@ -431,7 +431,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         Description = description.Trim();
         CuisineType = cuisineType.Trim();
         
-        AddDomainEvent(new RestaurantUpdated((RestaurantId)Id));
+        AddDomainEvent(new RestaurantUpdated(Id));
         
         return Result.Success();
     }
@@ -487,7 +487,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         BusinessHours = businessHoursResult.Value;
         
         AddDomainEvent(new RestaurantProfileUpdated(
-            (RestaurantId)Id,
+            Id,
             oldName,
             Name,
             oldDescription,

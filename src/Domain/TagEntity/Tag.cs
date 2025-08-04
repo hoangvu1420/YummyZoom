@@ -60,7 +60,7 @@ public sealed class Tag : Entity<TagId>, IAuditableEntity, ISoftDeletableEntity
             tagCategory,
             string.IsNullOrWhiteSpace(tagDescription) ? null : tagDescription.Trim());
 
-        tag.AddDomainEvent(new TagCreated((TagId)tag.Id, tag.TagName, tag.TagCategory.ToStringValue()));
+        tag.AddDomainEvent(new TagCreated(tag.Id, tag.TagName, tag.TagCategory.ToStringValue()));
 
         return Result.Success(tag);
     }
@@ -85,7 +85,7 @@ public sealed class Tag : Entity<TagId>, IAuditableEntity, ISoftDeletableEntity
         // Only raise event if the name actually changed
         if (oldName != TagName)
         {
-            AddDomainEvent(new TagUpdated((TagId)Id, TagName, TagCategory.ToStringValue()));
+            AddDomainEvent(new TagUpdated(Id, TagName, TagCategory.ToStringValue()));
         }
 
         return Result.Success();
@@ -99,7 +99,7 @@ public sealed class Tag : Entity<TagId>, IAuditableEntity, ISoftDeletableEntity
         // Only raise event if the category actually changed
         if (oldCategory != TagCategory)
         {
-            AddDomainEvent(new TagCategoryChanged((TagId)Id, oldCategory.ToStringValue(), TagCategory.ToStringValue()));
+            AddDomainEvent(new TagCategoryChanged(Id, oldCategory.ToStringValue(), TagCategory.ToStringValue()));
         }
 
         return Result.Success();
@@ -116,7 +116,7 @@ public sealed class Tag : Entity<TagId>, IAuditableEntity, ISoftDeletableEntity
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new TagDeleted((TagId)Id));
+        AddDomainEvent(new TagDeleted(Id));
 
         return Result.Success();
     }

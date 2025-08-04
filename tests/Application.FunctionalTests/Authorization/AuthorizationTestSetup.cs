@@ -1,5 +1,4 @@
 using YummyZoom.Application.FunctionalTests.UserManagement;
-using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;

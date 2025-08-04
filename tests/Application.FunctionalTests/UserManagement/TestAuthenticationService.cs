@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 

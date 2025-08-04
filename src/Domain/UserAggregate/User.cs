@@ -63,7 +63,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
             []);
 
         // Add domain event
-        user.AddDomainEvent(new UserCreated((UserId)user.Id));
+        user.AddDomainEvent(new UserCreated(user.Id));
 
         return Result.Success(user);
     }
@@ -97,7 +97,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         _addresses.Add(address);
         
         // Raise domain event
-        AddDomainEvent(new UserAddressAdded((UserId)Id, address));
+        AddDomainEvent(new UserAddressAdded(Id, address));
         
         return Result.Success();
     }
@@ -114,7 +114,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         _addresses.Remove(addressToRemove);
         
         // Raise domain event
-        AddDomainEvent(new UserAddressRemoved((UserId)Id, addressId));
+        AddDomainEvent(new UserAddressRemoved(Id, addressId));
         
         return Result.Success();
     }
@@ -133,7 +133,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         _paymentMethods.Add(paymentMethod);
         
         // Raise domain event
-        AddDomainEvent(new UserPaymentMethodAdded((UserId)Id, paymentMethod));
+        AddDomainEvent(new UserPaymentMethodAdded(Id, paymentMethod));
         
         return Result.Success();
     }
@@ -150,7 +150,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         _paymentMethods.Remove(paymentMethodToRemove);
         
         // Raise domain event
-        AddDomainEvent(new UserPaymentMethodRemoved((UserId)Id, paymentMethodId));
+        AddDomainEvent(new UserPaymentMethodRemoved(Id, paymentMethodId));
         
         return Result.Success();
     }
@@ -171,10 +171,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         }
 
         // Set the specified one as default
-        paymentMethod.SetAsDefault(true);
+        paymentMethod.SetAsDefault();
         
         // Raise domain event
-        AddDomainEvent(new UserDefaultPaymentMethodChanged((UserId)Id, paymentMethodId));
+        AddDomainEvent(new UserDefaultPaymentMethodChanged(Id, paymentMethodId));
         
         return Result.Success();
     }
@@ -185,7 +185,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         PhoneNumber = phoneNumber;
         
         // Raise domain event
-        AddDomainEvent(new UserProfileUpdated((UserId)Id, name, phoneNumber));
+        AddDomainEvent(new UserProfileUpdated(Id, name, phoneNumber));
         
         return Result.Success();
     }
@@ -199,7 +199,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         Email = email;
         
         // Raise domain event
-        AddDomainEvent(new UserEmailChanged((UserId)Id, oldEmail, email));
+        AddDomainEvent(new UserEmailChanged(Id, oldEmail, email));
         
         return Result.Success();
     }
@@ -209,7 +209,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         IsActive = true;
         
         // Raise domain event
-        AddDomainEvent(new UserActivated((UserId)Id));
+        AddDomainEvent(new UserActivated(Id));
         
         return Result.Success();
     }
@@ -219,7 +219,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         IsActive = false;
         
         // Raise domain event
-        AddDomainEvent(new UserDeactivated((UserId)Id));
+        AddDomainEvent(new UserDeactivated(Id));
         
         return Result.Success();
     }
@@ -236,7 +236,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         DeletedOn = deletedOn; // Explicitly set the timestamp here.
         DeletedBy = deletedBy;
         
-        AddDomainEvent(new UserDeleted((UserId)Id));
+        AddDomainEvent(new UserDeleted(Id));
         return Result.Success();
     }
 
@@ -252,7 +252,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         DeletedOn = null;
         DeletedBy = null;
         
-        AddDomainEvent(new UserRestored((UserId)Id));
+        AddDomainEvent(new UserRestored(Id));
         return Result.Success();
     }
 

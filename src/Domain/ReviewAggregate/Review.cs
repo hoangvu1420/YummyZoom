@@ -92,7 +92,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
 
         // Add domain event
         review.AddDomainEvent(new ReviewCreated(
-            (ReviewId)review.Id,
+            review.Id,
             orderId,
             customerId,
             restaurantId,
@@ -112,7 +112,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         IsModerated = true;
         
         AddDomainEvent(new ReviewModerated(
-            (ReviewId)Id,
+            Id,
             DateTime.UtcNow));
 
         return Result.Success();
@@ -128,7 +128,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         IsHidden = true;
         
         AddDomainEvent(new ReviewHidden(
-            (ReviewId)Id,
+            Id,
             DateTime.UtcNow));
 
         return Result.Success();
@@ -144,7 +144,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         IsHidden = false;
         
         AddDomainEvent(new ReviewShown(
-            (ReviewId)Id,
+            Id,
             DateTime.UtcNow));
 
         return Result.Success();
@@ -165,7 +165,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         Reply = reply;
 
         AddDomainEvent(new ReviewReplied(
-            (ReviewId)Id,
+            Id,
             reply,
             DateTime.UtcNow));
 
@@ -190,7 +190,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new ReviewDeleted((ReviewId)Id));
+        AddDomainEvent(new ReviewDeleted(Id));
 
         return Result.Success();
     }

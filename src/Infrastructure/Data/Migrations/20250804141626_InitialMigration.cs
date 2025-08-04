@@ -127,6 +127,27 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MenuCategories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MenuId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was last modified"),
+                    LastModifiedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who last modified the entity"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "Indicates if the entity is soft-deleted"),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "Timestamp when the entity was deleted"),
+                    DeletedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who deleted the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuCategories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MenuItems",
                 columns: table => new
                 {
@@ -152,6 +173,28 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MenuItems", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Menus",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was last modified"),
+                    LastModifiedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who last modified the entity"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "Indicates if the entity is soft-deleted"),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "Timestamp when the entity was deleted"),
+                    DeletedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who deleted the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Menus", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -477,20 +520,20 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     PaymentTransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
                     PaymentMethodType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     PaymentMethodDisplay = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Transaction_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Transaction_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PaymentGatewayReferenceId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    PaidByUserId = table.Column<Guid>(type: "uuid", nullable: true),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: false)
+                    PaidByUserId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PaymentTransactions", x => x.PaymentTransactionId);
+                    table.PrimaryKey("PK_PaymentTransactions", x => new { x.OrderId, x.PaymentTransactionId });
                     table.ForeignKey(
                         name: "FK_PaymentTransactions_Orders_OrderId",
                         column: x => x.OrderId,
@@ -623,6 +666,36 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "LastModified");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MenuCategories_MenuId",
+                table: "MenuCategories",
+                column: "MenuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuCategories_MenuId_DisplayOrder",
+                table: "MenuCategories",
+                columns: new[] { "MenuId", "DisplayOrder" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuCategory_Created",
+                table: "MenuCategories",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuCategory_DeletedOn",
+                table: "MenuCategories",
+                column: "DeletedOn");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuCategory_IsDeleted",
+                table: "MenuCategories",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuCategory_LastModified",
+                table: "MenuCategories",
+                column: "LastModified");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MenuItem_Created",
                 table: "MenuItems",
                 column: "Created");
@@ -673,6 +746,31 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "RestaurantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Menu_Created",
+                table: "Menus",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Menu_DeletedOn",
+                table: "Menus",
+                column: "DeletedOn");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Menu_IsDeleted",
+                table: "Menus",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Menu_LastModified",
+                table: "Menus",
+                column: "LastModified");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Menus_RestaurantId",
+                table: "Menus",
+                column: "RestaurantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
                 table: "OrderItems",
                 column: "OrderId");
@@ -687,11 +785,6 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 table: "Orders",
                 column: "OrderNumber",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentTransactions_OrderId",
-                table: "PaymentTransactions",
-                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Restaurant_Created",
@@ -815,7 +908,13 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "Devices");
 
             migrationBuilder.DropTable(
+                name: "MenuCategories");
+
+            migrationBuilder.DropTable(
                 name: "MenuItems");
+
+            migrationBuilder.DropTable(
+                name: "Menus");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");

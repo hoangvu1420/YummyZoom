@@ -1,8 +1,8 @@
 namespace YummyZoom.Domain.UserAggregate.ValueObjects;
 
-public sealed class AddressId : AggregateRootId<Guid>
+public sealed class AddressId : ValueObject
 {
-    public override Guid Value { get; protected set; }
+    public Guid Value { get; private set; }
 
     private AddressId(Guid value)
     {

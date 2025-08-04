@@ -79,7 +79,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>, ICre
 
         // Raise domain event
         roleAssignment.AddDomainEvent(new RoleAssignmentCreated(
-            (RoleAssignmentId)roleAssignment.Id,
+            roleAssignment.Id,
             userId,
             restaurantId,
             role));
@@ -144,7 +144,7 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>, ICre
         
         // Raise domain event for the update
         AddDomainEvent(new RoleAssignmentUpdated(
-            (RoleAssignmentId)Id, 
+            Id, 
             UserId, 
             RestaurantId, 
             previousRole, 

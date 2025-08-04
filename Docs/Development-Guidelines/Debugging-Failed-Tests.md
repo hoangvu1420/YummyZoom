@@ -14,7 +14,7 @@ Before changing any code, understand the failure.
 
     ```bash
     # Example:
-    dotnet test path/to/test/project.csproj --filter "NameOfFailingTest --verbosity detailed"
+    dotnet test path/to/test/project.csproj --filter "NameOfFailingTest" --verbosity detailed
     ```
 
 2. **State the Test's Goal:** In one sentence, articulate what the test is supposed to prove.

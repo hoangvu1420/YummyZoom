@@ -43,7 +43,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
             if (webhookEventResult.IsFailure)
             {
                 _logger.LogWarning("Webhook signature verification failed: {Error}", webhookEventResult.Error.Description);
-                return Result.Failure(HandleStripeWebhookErrors.WebhookVerificationFailed());
+                return Result.Failure(webhookEventResult.Error);
             }
 
             var webhookEvent = webhookEventResult.Value;

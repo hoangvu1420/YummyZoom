@@ -94,7 +94,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
             dietaryTagIds ?? [],
             appliedCustomizations ?? []);
 
-        menuItem.AddDomainEvent(new MenuItemCreated((MenuItemId)menuItem.Id, menuItem.RestaurantId, menuItem.MenuCategoryId));
+        menuItem.AddDomainEvent(new MenuItemCreated(menuItem.Id, menuItem.RestaurantId, menuItem.MenuCategoryId));
         
         return Result.Success(menuItem);
     }
@@ -103,14 +103,14 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
     {
         if (!IsAvailable) return;
         IsAvailable = false;
-        AddDomainEvent(new MenuItemAvailabilityChanged((MenuItemId)Id, IsAvailable));
+        AddDomainEvent(new MenuItemAvailabilityChanged(Id, IsAvailable));
     }
 
     public void MarkAsAvailable()
     {
         if (IsAvailable) return;
         IsAvailable = true;
-        AddDomainEvent(new MenuItemAvailabilityChanged((MenuItemId)Id, IsAvailable));
+        AddDomainEvent(new MenuItemAvailabilityChanged(Id, IsAvailable));
     }
 
     public Result UpdateDetails(string name, string description)
@@ -132,7 +132,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
             return Result.Failure(MenuItemErrors.NegativePrice);
 
         BasePrice = newPrice;
-        AddDomainEvent(new MenuItemPriceChanged((MenuItemId)Id, newPrice));
+        AddDomainEvent(new MenuItemPriceChanged(Id, newPrice));
         return Result.Success();
     }
 
@@ -140,7 +140,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
     {
         var oldCategoryId = MenuCategoryId;
         MenuCategoryId = newCategoryId;
-        AddDomainEvent(new MenuItemAssignedToCategory((MenuItemId)Id, oldCategoryId, newCategoryId));
+        AddDomainEvent(new MenuItemAssignedToCategory(Id, oldCategoryId, newCategoryId));
         return Result.Success();
     }
 
@@ -150,7 +150,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
     /// <returns>A Result indicating success</returns>
     public Result MarkAsDeleted()
     {
-        AddDomainEvent(new MenuItemDeleted((MenuItemId)Id));
+        AddDomainEvent(new MenuItemDeleted(Id));
 
         return Result.Success();
     }
@@ -171,7 +171,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
 
         _appliedCustomizations.Add(customization);
         AddDomainEvent(new MenuItemCustomizationAssigned(
-            (MenuItemId)Id, 
+            Id, 
             customization.CustomizationGroupId, 
             customization.DisplayTitle));
 
@@ -190,7 +190,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
             return Result.Failure(MenuItemErrors.CustomizationNotFound(groupId.Value.ToString()));
 
         _appliedCustomizations.Remove(existingCustomization);
-        AddDomainEvent(new MenuItemCustomizationRemoved((MenuItemId)Id, groupId));
+        AddDomainEvent(new MenuItemCustomizationRemoved(Id, groupId));
 
         return Result.Success();
     }
@@ -209,7 +209,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
             _dietaryTagIds.AddRange(tagIds);
         }
 
-        AddDomainEvent(new MenuItemDietaryTagsUpdated((MenuItemId)Id, new List<TagId>(_dietaryTagIds)));
+        AddDomainEvent(new MenuItemDietaryTagsUpdated(Id, new List<TagId>(_dietaryTagIds)));
 
         return Result.Success();
     }
@@ -232,7 +232,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new MenuItemDeleted((MenuItemId)Id));
+        AddDomainEvent(new MenuItemDeleted(Id));
         
         return Result.Success();
     }

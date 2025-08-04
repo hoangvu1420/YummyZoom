@@ -105,7 +105,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             // Check availability
             foreach (var menuItem in menuItems)
             {
-                var isAvailable = await _menuItemRepository.IsAvailableAsync((MenuItemId)menuItem.Id, cancellationToken);
+                var isAvailable = await _menuItemRepository.IsAvailableAsync(menuItem.Id, cancellationToken);
                 if (!isAvailable)
                 {
                     _logger.LogWarning("Menu item {MenuItemId} is not available", menuItem.Id.Value);
@@ -135,7 +135,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 var menuItem = menuItems.First(m => m.Id == menuItemId);
                 var orderItemResult = OrderItem.Create(
                     menuItem.MenuCategoryId,
-                    (MenuItemId)menuItem.Id,
+                    menuItem.Id,
                     menuItem.Name,
                     menuItem.BasePrice, 
                     requestItem.Quantity);
@@ -193,7 +193,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             var taxAmount = new Money(subtotal.Amount * 0.08m, "USD"); // TODO: Make tax rate configurable
             
             var totalAmount = _orderFinancialService.CalculateFinalTotal(
-                subtotal, deliveryFee, tipAmount, taxAmount, discountAmount);
+                subtotal, discountAmount, deliveryFee, tipAmount, taxAmount);
 
             // 6. Generate OrderId before payment intent creation for metadata
             var orderId = OrderId.CreateUnique();

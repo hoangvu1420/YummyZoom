@@ -1,6 +1,5 @@
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Security;
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 using MediatR;

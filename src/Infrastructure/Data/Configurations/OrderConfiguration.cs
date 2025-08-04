@@ -6,6 +6,7 @@ using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
@@ -155,6 +156,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             itemBuilder.ToTable("OrderItems");
             itemBuilder.WithOwner().HasForeignKey("OrderId");
 
+            itemBuilder.HasKey("OrderId", "Id");
             itemBuilder.HasKey(oi => oi.Id);
             itemBuilder.Property(oi => oi.Id)
                 .HasColumnName("OrderItemId")
@@ -213,7 +215,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             ptBuilder.ToTable("PaymentTransactions");
             ptBuilder.WithOwner().HasForeignKey("OrderId");
 
-            ptBuilder.HasKey(pt => pt.Id);
+            ptBuilder.HasKey("OrderId", "Id");
             ptBuilder.Property(pt => pt.Id)
                 .HasColumnName("PaymentTransactionId")
                 .ValueGeneratedNever()
@@ -243,10 +245,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             ptBuilder.OwnsOne(pt => pt.Amount, moneyBuilder =>
             {
                 moneyBuilder.Property(m => m.Amount)
-                    .HasColumnName("Amount")
+                    .HasColumnName("Transaction_Amount")
                     .HasColumnType("decimal(18,2)");
                 moneyBuilder.Property(m => m.Currency)
-                    .HasColumnName("Currency")
+                    .HasColumnName("Transaction_Currency")
                     .HasMaxLength(3);
             });
 

@@ -141,7 +141,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
 
         // Raise domain event
         coupon.AddDomainEvent(new CouponCreated(
-            (CouponId)coupon.Id,
+            coupon.Id,
             coupon.RestaurantId,
             coupon.Code,
             coupon.Value.Type,
@@ -228,7 +228,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
 
         // Raise domain event
         AddDomainEvent(new CouponUsed(
-            (CouponId)Id,
+            Id,
             previousCount,
             CurrentTotalUsageCount,
             now));
@@ -249,7 +249,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
 
         IsEnabled = true;
 
-        AddDomainEvent(new CouponEnabled((CouponId)Id, enabledTime ?? DateTime.UtcNow));
+        AddDomainEvent(new CouponEnabled(Id, enabledTime ?? DateTime.UtcNow));
 
         return Result.Success();
     }
@@ -267,7 +267,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
 
         IsEnabled = false;
 
-        AddDomainEvent(new CouponDisabled((CouponId)Id, disabledTime ?? DateTime.UtcNow));
+        AddDomainEvent(new CouponDisabled(Id, disabledTime ?? DateTime.UtcNow));
 
         return Result.Success();
     }
@@ -400,7 +400,7 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
         DeletedOn = deletedOn;
         DeletedBy = deletedBy;
 
-        AddDomainEvent(new CouponDeleted((CouponId)Id));
+        AddDomainEvent(new CouponDeleted(Id));
 
         return Result.Success();
     }

@@ -119,6 +119,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 public class TestUserService : IUser
 {
     private Guid? _userId;
+    
     private readonly List<Claim> _additionalClaims = new();
 
     public string? Id => _userId?.ToString();

@@ -1,4 +1,4 @@
-﻿using ValidationException = YummyZoom.Application.Common.Exceptions.ValidationException;
+using ValidationException = YummyZoom.Application.Common.Exceptions.ValidationException;
 
 namespace YummyZoom.Application.Common.Behaviours;
 
@@ -28,7 +28,9 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
                 .ToList();
 
             if (failures.Any())
+            {
                 throw new ValidationException(failures);
+            }
         }
         return await next();
     }

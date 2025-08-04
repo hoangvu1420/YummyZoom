@@ -14,6 +14,13 @@ using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAggregate;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.MenuEntity;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.Common.ValueObjects;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -133,6 +140,9 @@ public class ApplicationDbContextInitialiser
             await _context.SaveChangesAsync();
         }
 
+        // Seed restaurant data
+        await SeedRestaurantDataAsync();
+
         _logger.LogInformation("Database seeding completed successfully.");
     }
 
@@ -217,7 +227,7 @@ public class ApplicationDbContextInitialiser
 
                     await transaction.CommitAsync();
 
-                    _logger.LogInformation("Successfully seeded default user {Email} with device {DeviceId}", email, deviceId);
+                    _logger.LogInformation("Successfully seeded default user {Email} with device {DeviceId} (ID: {UserId})", email, deviceId, idResult.Value);
                 }
                 catch (Exception ex)
                 {
@@ -230,5 +240,188 @@ public class ApplicationDbContextInitialiser
         {
             _logger.LogError(ex, "Failed to seed default user {Email}", email);
         }
+    }
+
+    private async Task SeedRestaurantDataAsync()
+    {
+        // Check if restaurants already exist
+        if (_context.Restaurants.Any())
+        {
+            _logger.LogInformation("Restaurants already exist, skipping seeding");
+            return;
+        }
+       
+        await SeedRestaurantWithMenuAsync(
+            "YummyZoom Italian",
+            "Authentic Italian cuisine with a modern twist",
+            "Italian",
+            "https://example.com/logo.png");
+    }
+
+    private async Task SeedRestaurantWithMenuAsync(string name, string description, string cuisineType, string logoUrl)
+    {
+        try
+        {
+            // Use execution strategy for resilient database operations
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+               
+                try
+                {
+                    // 1. Create Restaurant
+                    var restaurantResult = Restaurant.Create(
+                        name,
+                        logoUrl,
+                        description,
+                        cuisineType,
+                        "123 Main St",
+                        "Anytown",
+                        "CA",
+                        "12345",
+                        "USA",
+                        "+1 (555) 123-4567",
+                        "contact@yummyzoom.com",
+                        "Mon-Fri: 9AM-9PM, Sat-Sun: 10AM-10PM");
+
+                    if (restaurantResult.IsFailure)
+                    {
+                        _logger.LogWarning("Failed to create restaurant: {Error}", restaurantResult.Error);
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+                   
+                    // Verify and accept orders for this restaurant
+                    restaurantResult.Value.Verify();
+                    restaurantResult.Value.AcceptOrders();
+
+                    // Add restaurant to context
+                    _context.Restaurants.Add(restaurantResult.Value);
+                    
+                    await _context.SaveChangesAsync();
+                   
+                    // 2. Create Menu
+                    var menuResult = Menu.Create(
+                        restaurantResult.Value.Id,
+                        "Main Menu",
+                        "Our delicious offerings",
+                        isEnabled: true);
+                       
+                    if (menuResult.IsFailure)
+                    {
+                        _logger.LogWarning("Failed to create menu: {Error}", menuResult.Error);
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+                   
+                    _context.Menus.Add(menuResult.Value);
+                    await _context.SaveChangesAsync();
+                   
+                    // 3. Create MenuCategory
+                    var categoryResult = MenuCategory.Create(
+                        menuResult.Value.Id,
+                        "Popular Items",
+                        1);
+                       
+                    if (categoryResult.IsFailure)
+                    {
+                        _logger.LogWarning("Failed to create menu category: {Error}", categoryResult.Error);
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+                   
+                    _context.MenuCategories.Add(categoryResult.Value);
+                    await _context.SaveChangesAsync();
+                   
+                    // 4. Create MenuItems
+                    var item1 = await CreateMenuItem(
+                        restaurantResult.Value.Id,
+                        categoryResult.Value.Id, 
+                        "Pizza Margherita", 
+                        "Classic pizza with tomato, mozzarella, and basil",
+                        12.99m,
+                        "https://example.com/pizza.jpg");
+                       
+                    var item2 = await CreateMenuItem(
+                        restaurantResult.Value.Id,
+                        categoryResult.Value.Id, 
+                        "Spaghetti Carbonara", 
+                        "Creamy pasta with pancetta and parmesan",
+                        14.99m,
+                        "https://example.com/pasta.jpg");
+                       
+                    var item3 = await CreateMenuItem(
+                        restaurantResult.Value.Id,
+                        categoryResult.Value.Id, 
+                        "Tiramisu", 
+                        "Classic Italian coffee-flavored dessert",
+                        7.99m,
+                        "https://example.com/dessert.jpg");
+                   
+                    await transaction.CommitAsync();
+                   
+                    _logger.LogInformation("Restaurant data seeding completed successfully");
+                    _logger.LogInformation("Seeded entities hierarchy:");
+                    _logger.LogInformation("- Restaurant: {RestaurantName} (ID: {RestaurantId}, Verified: {IsVerified}, Accepting Orders: {IsAccepting})", 
+                        restaurantResult.Value.Name, restaurantResult.Value.Id.Value, 
+                        restaurantResult.Value.IsVerified, restaurantResult.Value.IsAcceptingOrders);
+                    _logger.LogInformation("  └─ Menu: {MenuName} (ID: {MenuId})", 
+                        menuResult.Value.Name, menuResult.Value.Id.Value);
+                    _logger.LogInformation("     └─ Category: {CategoryName} (ID: {CategoryId})", 
+                        categoryResult.Value.Name, categoryResult.Value.Id.Value);
+                    
+                    if (item1 is not null)
+                        _logger.LogInformation("        ├─ MenuItem: {Item1Name} (ID: {Item1Id})", 
+                            item1.Name, item1.Id.Value);
+                    if (item2 is not null)
+                        _logger.LogInformation("        ├─ MenuItem: {Item2Name} (ID: {Item2Id})", 
+                            item2.Name, item2.Id.Value);
+                    if (item3 is not null)
+                        _logger.LogInformation("        └─ MenuItem: {Item3Name} (ID: {Item3Id})", 
+                            item3.Name, item3.Id.Value);
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error occurred while seeding restaurant data: {Message}", ex.Message);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to seed restaurant data: {Message}", ex.Message);
+        }
+    }
+
+    private async Task<MenuItem?> CreateMenuItem(
+        RestaurantId restaurantId, 
+        MenuCategoryId categoryId, 
+        string name, 
+        string description, 
+        decimal price, 
+        string? imageUrl = null)
+    {
+        var priceObj = new Money(price, "USD");
+       
+        var menuItemResult = MenuItem.Create(
+            restaurantId,
+            categoryId,
+            name,
+            description,
+            priceObj,
+            imageUrl);
+           
+        if (menuItemResult.IsFailure)
+        {
+            _logger.LogWarning("Failed to create menu item '{Name}': {Error}", name, menuItemResult.Error);
+            return null;
+        }
+       
+        _context.MenuItems.Add(menuItemResult.Value);
+        await _context.SaveChangesAsync();
+            
+        return menuItemResult.Value;
     }
 }

@@ -3,7 +3,8 @@
     <PropertyGroup>
         <RootNamespace>YummyZoom.Application.FunctionalTests</RootNamespace>
         <AssemblyName>YummyZoom.Application.FunctionalTests</AssemblyName>
-    </PropertyGroup>
+      <UserSecretsId>4eed8a12-b2c5-42e7-94f6-30287e30bdea</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
       <None Remove="appsettings.json" />
