@@ -13,6 +13,9 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CouponAggregate;
+using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Application.Common.Exceptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
@@ -94,6 +97,22 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Store the actual MenuItem IDs for use in tests
         _menuItemId1 = menuItem1.Id.Value;
         _menuItemId2 = menuItem2.Id.Value;
+        
+        // Create a valid coupon for testing
+        var coupon = Domain.CouponAggregate.Coupon.Create(
+            restaurant.Id,
+            "SAVE10",
+            "Save 10% on your order",
+            CouponValue.CreatePercentage(10m).Value,
+            AppliesTo.CreateForWholeOrder().Value,
+            DateTime.UtcNow.AddDays(-1), // Start yesterday (valid)
+            DateTime.UtcNow.AddDays(30), // End in 30 days (valid)
+            new Money(25.00m, "USD"), // Minimum order amount
+            totalUsageLimit: 100,
+            usageLimitPerUser: 5,
+            isEnabled: true).Value;
+        
+        await AddAsync(coupon);
         
         // Get Stripe configuration from user secrets
         _stripeOptions = GetService<IOptions<StripeOptions>>().Value;
@@ -275,7 +294,8 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Arrange
         var codOrderCommand = PaymentTestHelper.BuildValidCODOrderCommand(
             customerId: _customerId,
-            restaurantId: _restaurantId);
+            restaurantId: _restaurantId,
+            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
 
         // Act
         var result = await SendAsync(codOrderCommand);
@@ -369,14 +389,12 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var invalidOrderCommand = PaymentTestHelper.BuildInvalidOrderCommand(
-            invalidField: "paymentmethod");
+            invalidField: "paymentmethod",
+            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
 
-        // Act
-        var result = await SendAsync(invalidOrderCommand);
-
-        // Assert
-        result.ShouldBeFailure();
-        result.Error.Description.Should().Contain("validation");
+        // Act & Assert
+        await FluentActions.Invoking(() => 
+            SendAsync(invalidOrderCommand)).Should().ThrowAsync<ValidationException>();
     }
 
     /// <summary>
@@ -424,7 +442,8 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         var orderWithCouponCommand = PaymentTestHelper.BuildOrderCommandWithCoupon(
             couponCode: "SAVE10",
             customerId: _customerId,
-            restaurantId: _restaurantId);
+            restaurantId: _restaurantId,
+            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
 
         // Act
         var result = await SendAsync(orderWithCouponCommand);

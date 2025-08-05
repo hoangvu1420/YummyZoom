@@ -43,6 +43,7 @@ public class StripeService : IPaymentGatewayService
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true,
+                    AllowRedirects = "never"
                 },
                 Metadata = new Dictionary<string, string>(metadata)
             };

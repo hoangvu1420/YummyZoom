@@ -29,10 +29,20 @@ public static class PaymentTestHelper
     public static async Task<PaymentIntent> ConfirmPaymentAsync(string paymentIntentId, string paymentMethod)
     {
         var service = new PaymentIntentService();
-        return await service.ConfirmAsync(paymentIntentId, new PaymentIntentConfirmOptions
+        try
         {
-            PaymentMethod = paymentMethod
-        });
+            // happy-path: card succeeds (or SCA in-page)
+            return await service.ConfirmAsync(paymentIntentId, new PaymentIntentConfirmOptions
+            {
+                PaymentMethod = paymentMethod
+            });
+        }
+        catch (StripeException)
+        {
+            // for declined cards and “requires_action” cases, ConfirmAsync throws,
+            // so grab the current state of the intent and return that instead.
+            return await service.GetAsync(paymentIntentId);
+        }
     }
 
     /// <summary>
@@ -93,15 +103,15 @@ public static class PaymentTestHelper
     public static string GenerateWebhookSignature(string payload, string secret, long? timestamp = null)
     {
         timestamp ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        
+
         var signedPayload = $"{timestamp}.{payload}";
         var secretBytes = Encoding.UTF8.GetBytes(secret);
         var payloadBytes = Encoding.UTF8.GetBytes(signedPayload);
-        
+
         using var hmac = new HMACSHA256(secretBytes);
         var hash = hmac.ComputeHash(payloadBytes);
         var signature = Convert.ToHexString(hash).ToLowerInvariant();
-        
+
         return $"t={timestamp},v1={signature}";
     }
 
@@ -113,8 +123,8 @@ public static class PaymentTestHelper
     /// <param name="metadata">Optional metadata to attach.</param>
     /// <returns>The created PaymentIntent.</returns>
     public static async Task<PaymentIntent> CreateTestPaymentIntentAsync(
-        long amount = 2500, 
-        string currency = "usd", 
+        long amount = 2500,
+        string currency = "usd",
         Dictionary<string, string>? metadata = null)
     {
         var service = new PaymentIntentService();
@@ -124,7 +134,7 @@ public static class PaymentTestHelper
             Currency = currency,
             Metadata = metadata ?? new Dictionary<string, string>()
         };
-        
+
         return await service.CreateAsync(options);
     }
 
@@ -221,7 +231,7 @@ public static class PaymentTestHelper
     public static List<OrderItemDto> BuildTestOrderItems(List<Guid> menuItemIds)
     {
         var items = new List<OrderItemDto>();
-        
+
         for (int i = 0; i < menuItemIds.Count; i++)
         {
             items.Add(new OrderItemDto(
@@ -229,7 +239,7 @@ public static class PaymentTestHelper
                 Quantity: i + 1 // Vary quantities: 1, 2, 3, etc.
             ));
         }
-        
+
         return items;
     }
 
@@ -242,7 +252,7 @@ public static class PaymentTestHelper
     public static List<OrderItemDto> BuildTestOrderItems(int itemCount = 2)
     {
         var items = new List<OrderItemDto>();
-        
+
         for (int i = 0; i < itemCount; i++)
         {
             items.Add(new OrderItemDto(
@@ -250,7 +260,7 @@ public static class PaymentTestHelper
                 Quantity: i + 1 // Vary quantities: 1, 2, 3, etc.
             ));
         }
-        
+
         return items;
     }
 
@@ -268,17 +278,17 @@ public static class PaymentTestHelper
             RestaurantId.Create(restaurantId),
             "Test Menu",
             "Test menu description").Value;
-        
+
         await AddAsync(menu);
-        
+
         // Create MenuCategory for organizing menu items
         var menuCategory = MenuCategory.Create(
             menu.Id,
             "Test Category",
             1).Value;
-        
+
         await AddAsync(menuCategory);
-        
+
         // Create MenuItem entities
         var menuItemIds = new List<Guid>();
         for (int i = 0; i < itemCount; i++)
@@ -289,11 +299,11 @@ public static class PaymentTestHelper
                 $"Test Item {i + 1}",
                 $"Description for test item {i + 1}",
                 new Money(10.00m + (i * 2.50m), "USD")).Value;
-            
+
             await AddAsync(menuItem);
             menuItemIds.Add(menuItem.Id.Value);
         }
-        
+
         // Build OrderItemDto list using the real MenuItemIds
         return BuildTestOrderItems(menuItemIds);
     }

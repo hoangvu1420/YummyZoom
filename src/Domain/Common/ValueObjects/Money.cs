@@ -16,11 +16,6 @@ public sealed class Money : ValueObject
         Currency = currency;
     }
     
-    /// <summary>
-    /// Creates a new instance of Money with the same amount and currency.
-    /// This ensures each entity has its own instance of Money value object.
-    /// </summary>
-    /// <returns>A new Money instance with the same values.</returns>
     public Money Copy() => new Money(Amount, Currency);
 
     public static Money Zero(string currency) => new Money(0, currency);

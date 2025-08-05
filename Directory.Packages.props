@@ -4,7 +4,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <AspireVersion>9.3.1</AspireVersion>
     <AspnetVersion>9.0.6</AspnetVersion>
-    <EfcoreVersion>9.0.1</EfcoreVersion>
+    <EfcoreVersion>9.0.6</EfcoreVersion>
     <MicrosoftExtensionsVersion>9.0.6</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -21,7 +21,7 @@
     <!-- Entity Framework Core -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(EfcoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EfcoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfcoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EfcoreVersion)" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
