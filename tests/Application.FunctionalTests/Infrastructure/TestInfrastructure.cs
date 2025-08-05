@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure.Database;
+using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.FunctionalTests.Infrastructure;
@@ -23,6 +24,9 @@ public static class TestInfrastructure
         _database = await TestDatabaseFactory.CreateAsync();
         _factory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString());
         _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
+        
+        // Initialize the test data factory with default entities
+        await TestDataFactory.InitializeAsync();
     }
 
     /// <summary>
@@ -30,6 +34,9 @@ public static class TestInfrastructure
     /// </summary>
     public static async Task RunAfterAnyTests()
     {
+        // Reset the test data factory state
+        TestDataFactory.Reset();
+        
         await _database.DisposeAsync();
         await _factory.DisposeAsync();
     }
@@ -88,8 +95,11 @@ public static class TestInfrastructure
         try
         {
             await _database.ResetAsync();
+
+            // Ensure test data is restored after database reset
+            await TestDataFactory.EnsureTestDataAsync();
         }
-        catch (Exception)
+        catch 
         {
             // Silently handle database reset failures
         }

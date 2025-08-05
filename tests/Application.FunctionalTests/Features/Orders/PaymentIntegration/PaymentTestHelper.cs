@@ -3,7 +3,6 @@ using YummyZoom.Application.Orders.Commands.InitiateOrder;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using YummyZoom.Application.FunctionalTests.Infrastructure.Database;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.Common.ValueObjects;

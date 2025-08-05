@@ -1,22 +1,16 @@
-using System.Reflection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.Orders.Commands.HandleStripeWebhook;
 using YummyZoom.Domain.OrderAggregate.Enums;
-using YummyZoom.SharedKernel.Constants;
 using Stripe;
 using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Infrastructure.Payments.Stripe;
-using Microsoft.Extensions.Options;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.MenuEntity;
-using YummyZoom.Domain.MenuItemAggregate;
-using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.CouponAggregate;
-using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Payments.Stripe;
+using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Exceptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
+using YummyZoom.Application.FunctionalTests.TestData;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
 
@@ -26,97 +20,17 @@ namespace YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegrati
 /// </summary>
 public class OnlineOrderPaymentTests : BaseTestFixture
 {
-    private Guid _customerId;
-    private Guid _restaurantId;
-    private Guid _menuItemId1;
-    private Guid _menuItemId2;
     private StripeOptions _stripeOptions = null!;
 
     [SetUp]
-    public async Task SetUp()
+    public void SetUp()
     {
-        // Ensure required roles exist
-        await EnsureRolesExistAsync(Roles.User);
-        
-        // Create test user and set as current user
-        _customerId = await RunAsDefaultUserAsync();
-        
-        // Create and add restaurant entity to database first
-        var restaurant = Restaurant.Create(
-            "Test Restaurant",
-            "http://example.com/logo.png",
-            "Test Description",
-            "Test Cuisine",
-            Domain.RestaurantAggregate.ValueObjects.Address.Create("123 Main St", "Test City", "Test State", "12345", "Test Country").Value,
-            ContactInfo.Create("123-456-7890", "test@example.com").Value,
-            BusinessHours.Create("Mon-Fri: 9am-5pm").Value).Value;
-        
-        // Verify and activate the restaurant to accept orders
-        restaurant.Verify();
-        restaurant.AcceptOrders();
-        
-        await AddAsync(restaurant);
-        
-        // Use the generated restaurant ID for our test data
-        _restaurantId = restaurant.Id.Value;
-        
-        // Create Menu entity for the restaurant
-        var menu = Menu.Create(
-            restaurant.Id,
-            "Test Menu",
-            "Test menu description").Value;
-        
-        await AddAsync(menu);
-        
-        // Create MenuCategory for organizing menu items
-        var menuCategory = MenuCategory.Create(
-            menu.Id,
-            "Main Dishes",
-            1).Value;
-        
-        await AddAsync(menuCategory);
-        
-        // Create actual MenuItem entities instead of using random GUIDs
-        var menuItem1 = MenuItem.Create(
-            restaurant.Id,
-            menuCategory.Id,
-            "Test Burger",
-            "Delicious test burger with all the fixings",
-            new Money(15.99m, "USD")).Value;
-        
-        var menuItem2 = MenuItem.Create(
-            restaurant.Id,
-            menuCategory.Id,
-            "Test Pizza",
-            "Authentic test pizza with fresh ingredients",
-            new Money(22.50m, "USD")).Value;
-        
-        await AddAsync(menuItem1);
-        await AddAsync(menuItem2);
-        
-        // Store the actual MenuItem IDs for use in tests
-        _menuItemId1 = menuItem1.Id.Value;
-        _menuItemId2 = menuItem2.Id.Value;
-        
-        // Create a valid coupon for testing
-        var coupon = Domain.CouponAggregate.Coupon.Create(
-            restaurant.Id,
-            "SAVE10",
-            "Save 10% on your order",
-            CouponValue.CreatePercentage(10m).Value,
-            AppliesTo.CreateForWholeOrder().Value,
-            DateTime.UtcNow.AddDays(-1), // Start yesterday (valid)
-            DateTime.UtcNow.AddDays(30), // End in 30 days (valid)
-            new Money(25.00m, "USD"), // Minimum order amount
-            totalUsageLimit: 100,
-            usageLimitPerUser: 5,
-            isEnabled: true).Value;
-        
-        await AddAsync(coupon);
-        
+        // Set the default customer as the current user
+        SetUserId(Testing.TestData.DefaultCustomerId);
+
         // Get Stripe configuration from user secrets
         _stripeOptions = GetService<IOptions<StripeOptions>>().Value;
-        
+
         // Set up Stripe test configuration with actual test key
         StripeConfiguration.ApiKey = _stripeOptions.SecretKey;
     }
@@ -132,9 +46,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var initiateOrderCommand = PaymentTestHelper.BuildValidOnlineOrderCommand(
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act Part 1: Create order
         var initiateOrderResult = await SendAsync(initiateOrderCommand);
@@ -154,7 +69,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
 
         // Act Part 2: Simulate successful Stripe payment confirmation
         await PaymentTestHelper.ConfirmPaymentAsync(
-            orderResponse.PaymentIntentId!, 
+            orderResponse.PaymentIntentId!,
             TestConfiguration.Payment.TestPaymentMethods.VisaSuccess);
 
         // Act Part 3: Process payment success webhook
@@ -162,10 +77,13 @@ public class OnlineOrderPaymentTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             orderResponse.PaymentIntentId!,
             amount: 2500, // $25.00
-            metadata: new Dictionary<string, string> { { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "payment_success" } });
+            metadata: new Dictionary<string, string>
+            {
+                { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "payment_success" }
+            });
 
         var webhookSignature = PaymentTestHelper.GenerateWebhookSignature(
-            webhookPayload, 
+            webhookPayload,
             _stripeOptions.WebhookSecret);
 
         var webhookCommand = new HandleStripeWebhookCommand(
@@ -181,7 +99,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         var updatedOrder = await FindAsync<Order>(orderResponse.OrderId);
         updatedOrder.Should().NotBeNull();
         updatedOrder!.Status.Should().Be(OrderStatus.Placed);
-        
+
         // Verify payment transaction is recorded
         updatedOrder.PaymentTransactions.Should().HaveCount(1);
         var paymentTransaction = updatedOrder.PaymentTransactions.First();
@@ -202,9 +120,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var initiateOrderCommand = PaymentTestHelper.BuildValidOnlineOrderCommand(
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act Part 1: Create order
         var initiateOrderResult = await SendAsync(initiateOrderCommand);
@@ -225,7 +144,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentPaymentFailed,
             orderResponse.PaymentIntentId!,
             amount: 2500,
-            metadata: new Dictionary<string, string> { { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "payment_failure" } });
+            metadata: new Dictionary<string, string>
+            {
+                { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "payment_failure" }
+            });
 
         var webhookSignature = PaymentTestHelper.GenerateWebhookSignature(
             webhookPayload,
@@ -244,7 +166,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         var updatedOrder = await FindAsync<Order>(orderResponse.OrderId);
         updatedOrder.Should().NotBeNull();
         updatedOrder!.Status.Should().Be(OrderStatus.Cancelled);
-        
+
         // Verify payment transaction failure is recorded
         updatedOrder.PaymentTransactions.Should().HaveCount(1);
         var paymentTransaction = updatedOrder.PaymentTransactions.First();
@@ -261,9 +183,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var initiateOrderCommand = PaymentTestHelper.BuildValidOnlineOrderCommand(
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act Part 1: Create order
         var initiateOrderResult = await SendAsync(initiateOrderCommand);
@@ -273,7 +196,8 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Act Part 2: Simulate payment requiring authentication
         await PaymentTestHelper.ConfirmPaymentAsync(
             orderResponse.PaymentIntentId!,
-            TestConfiguration.Payment.TestPaymentMethods.VisaAuthentication); // This should succeed but require additional steps
+            TestConfiguration.Payment.TestPaymentMethods
+                .VisaAuthentication); // This should succeed but require additional steps
 
         // Verify order remains in AwaitingPayment status until authentication completes
         var orderAfterAuth = await FindAsync<Order>(orderResponse.OrderId);
@@ -293,9 +217,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var codOrderCommand = PaymentTestHelper.BuildValidCODOrderCommand(
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act
         var result = await SendAsync(codOrderCommand);
@@ -303,7 +228,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
         var orderResponse = result.Value;
-        
+
         // Verify response structure for COD orders
         orderResponse.OrderId.Should().NotBeNull();
         orderResponse.PaymentIntentId.Should().BeNull(); // No payment intent for COD
@@ -314,7 +239,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         createdOrder.Should().NotBeNull();
         createdOrder!.Status.Should().Be(OrderStatus.Placed);
         createdOrder.PaymentTransactions.First().PaymentMethodType.Should().Be(PaymentMethodType.CashOnDelivery);
-        
+
         // Verify payment transaction is recorded
         createdOrder.PaymentTransactions.Should().HaveCount(1);
         var paymentTransaction = createdOrder.PaymentTransactions.First();
@@ -333,19 +258,13 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var initiateOrderCommand = PaymentTestHelper.BuildValidOnlineOrderCommand(
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         var initiateOrderResult = await SendAsync(initiateOrderCommand);
-        
-        // Debug: Check if InitiateOrder failed
-        if (initiateOrderResult.IsFailure)
-        {
-            Console.WriteLine($"InitiateOrder failed: {initiateOrderResult.Error}");
-            throw new InvalidOperationException($"InitiateOrder failed: {initiateOrderResult.Error}");
-        }
-        
+
         var orderResponse = initiateOrderResult.Value;
 
         // Confirm payment
@@ -358,7 +277,10 @@ public class OnlineOrderPaymentTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             orderResponse.PaymentIntentId!,
             amount: 2500,
-            metadata: new Dictionary<string, string> { { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "idempotency_test" } });
+            metadata: new Dictionary<string, string>
+            {
+                { "order_id", orderResponse.OrderId.ToString() ?? "" }, { "test_case", "idempotency_test" }
+            });
 
         var webhookSignature = PaymentTestHelper.GenerateWebhookSignature(
             webhookPayload,
@@ -390,10 +312,11 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Arrange
         var invalidOrderCommand = PaymentTestHelper.BuildInvalidOrderCommand(
             invalidField: "paymentmethod",
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act & Assert
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
             SendAsync(invalidOrderCommand)).Should().ThrowAsync<ValidationException>();
     }
 
@@ -405,14 +328,14 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange: Create webhook for non-existent payment intent
         var unknownPaymentIntentId = "pi_unknown_" + Guid.NewGuid().ToString("N")[..16];
-        
+
         // Use a simple, known payload format that matches Stripe's actual format
         var webhookPayload = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentRequiresAction,
             unknownPaymentIntentId,
             amount: 2500,
             metadata: new Dictionary<string, string> { { "order_id", "unknown" }, { "test_case", "unknown_order" } });
-        
+
         var webhookSignature = PaymentTestHelper.GenerateWebhookSignature(
             webhookPayload,
             _stripeOptions.WebhookSecret);
@@ -440,10 +363,11 @@ public class OnlineOrderPaymentTests : BaseTestFixture
     {
         // Arrange
         var orderWithCouponCommand = PaymentTestHelper.BuildOrderCommandWithCoupon(
-            couponCode: "SAVE10",
-            customerId: _customerId,
-            restaurantId: _restaurantId,
-            menuItemIds: new List<Guid> { _menuItemId1, _menuItemId2 });
+            couponCode: Testing.TestData.DefaultCouponCode,
+            customerId: Testing.TestData.DefaultCustomerId,
+            restaurantId: Testing.TestData.DefaultRestaurantId,
+            menuItemIds: Testing.TestData.GetMenuItemIds(Testing.TestData.MenuItems.ClassicBurger,
+                Testing.TestData.MenuItems.MargheritaPizza));
 
         // Act
         var result = await SendAsync(orderWithCouponCommand);
@@ -451,12 +375,12 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
         var orderResponse = result.Value;
-        
+
         // Verify order creation
         var createdOrder = await FindAsync<Order>(orderResponse.OrderId);
         createdOrder.Should().NotBeNull();
         createdOrder!.Status.Should().Be(OrderStatus.AwaitingPayment);
-        
+
         // Note: Coupon validation and discount application would be tested 
         // in the actual order aggregate and pricing logic
     }

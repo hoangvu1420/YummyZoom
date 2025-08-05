@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
@@ -33,7 +32,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSetting(TestConfiguration.Database.ConnectionStringKey, _connectionString);
+        builder.UseSetting("ConnectionStrings:YummyZoomDb", _connectionString);
         builder.ConfigureTestServices(services =>
         {
             ConfigureTestUserService(services);

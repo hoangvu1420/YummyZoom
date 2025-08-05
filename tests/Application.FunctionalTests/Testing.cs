@@ -5,6 +5,7 @@ using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.FunctionalTests.Authorization;
+using YummyZoom.Application.FunctionalTests.TestData;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -287,6 +288,88 @@ public partial class Testing
     public static async Task SetupForAuthorizationTestsAsync()
     {
         await AuthorizationTestSetup.SetupForAuthorizationTestsAsync();
+    }
+
+    #endregion
+
+    #region Test Data Access
+
+    /// <summary>
+    /// Gets access to the centralized test data factory.
+    /// Provides access to default test entities created once per test suite run.
+    /// </summary>
+    public static class TestData
+    {
+        /// <summary>
+        /// Gets the ID of the default test customer.
+        /// </summary>
+        public static Guid DefaultCustomerId => TestDataFactory.DefaultCustomerId;
+
+        /// <summary>
+        /// Gets the ID of the default test restaurant.
+        /// </summary>
+        public static Guid DefaultRestaurantId => TestDataFactory.DefaultRestaurantId;
+
+        /// <summary>
+        /// Gets the ID of the default test menu.
+        /// </summary>
+        public static Guid DefaultMenuId => TestDataFactory.DefaultMenuId;
+
+        /// <summary>
+        /// Gets the ID of the default test coupon.
+        /// </summary>
+        public static Guid DefaultCouponId => TestDataFactory.DefaultCouponId;
+
+        /// <summary>
+        /// Gets the code of the default test coupon.
+        /// </summary>
+        public static string DefaultCouponCode => TestDataFactory.DefaultCouponCode;
+
+        /// <summary>
+        /// Gets the menu item ID by name.
+        /// </summary>
+        public static Guid GetMenuItemId(string itemName) => TestDataFactory.GetMenuItemId(itemName);
+
+        /// <summary>
+        /// Gets multiple menu item IDs by names.
+        /// </summary>
+        public static List<Guid> GetMenuItemIds(params string[] itemNames) => TestDataFactory.GetMenuItemIds(itemNames);
+
+        /// <summary>
+        /// Gets the menu category ID by name.
+        /// </summary>
+        public static Guid GetMenuCategoryId(string categoryName) => TestDataFactory.GetMenuCategoryId(categoryName);
+
+        /// <summary>
+        /// Checks if the test data factory has been initialized.
+        /// </summary>
+        public static bool IsInitialized() => TestDataFactory.IsInitialized();
+
+        /// <summary>
+        /// Common menu item names for easy access in tests.
+        /// </summary>
+        public static class MenuItems
+        {
+            public const string ClassicBurger = "Classic Beef Burger";
+            public const string MargheritaPizza = "Margherita Pizza";
+            public const string GrilledSalmon = "Grilled Atlantic Salmon";
+            public const string BuffaloWings = "Buffalo Chicken Wings";
+            public const string CaesarSalad = "Caesar Salad";
+            public const string ChocolateCake = "Chocolate Fudge Cake";
+            public const string CraftBeer = "Local Craft Beer";
+            public const string FreshJuice = "Fresh Orange Juice";
+        }
+
+        /// <summary>
+        /// Common menu category names for easy access in tests.
+        /// </summary>
+        public static class MenuCategories
+        {
+            public const string MainDishes = "Main Dishes";
+            public const string Appetizers = "Appetizers";
+            public const string Desserts = "Desserts";
+            public const string Beverages = "Beverages";
+        }
     }
 
     #endregion
