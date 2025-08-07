@@ -92,7 +92,7 @@ public class CustomizationChoiceTests
         var result = CustomizationChoice.Create(invalidName, DefaultPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Type.Should().Be(ErrorType.Validation);
         result.Error.Description.Should().Be("Choice name is required.");
     }
@@ -106,7 +106,7 @@ public class CustomizationChoiceTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Type.Should().Be(ErrorType.Validation);
         result.Error.Description.Should().Be("Choice name is required.");
     }
@@ -265,7 +265,7 @@ public class CustomizationChoiceTests
         var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, invalidDisplayOrder);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Code.Should().Be("CustomizationGroup.InvalidDisplayOrder");
     }
 
@@ -320,7 +320,7 @@ public class CustomizationChoiceTests
         var result = choice.UpdateDisplayOrder(invalidDisplayOrder);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Code.Should().Be("CustomizationGroup.InvalidDisplayOrder");
         choice.DisplayOrder.Should().Be(originalDisplayOrder); // Should remain unchanged
     }

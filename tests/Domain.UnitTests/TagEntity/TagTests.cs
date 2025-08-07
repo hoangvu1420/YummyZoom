@@ -59,7 +59,7 @@ public class TagTests
         var result = Tag.Create(invalidName, DefaultTagCategory, DefaultTagDescription);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameIsRequired);
     }
 
@@ -72,7 +72,7 @@ public class TagTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameIsRequired);
     }
 
@@ -83,7 +83,7 @@ public class TagTests
         var result = Tag.Create(LongTagName, DefaultTagCategory, DefaultTagDescription);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameTooLong);
     }
 
@@ -179,7 +179,7 @@ public class TagTests
         var result = tag.UpdateDetails(invalidName, "New description");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameIsRequired);
         tag.TagName.Should().Be(originalName); // State unchanged
         tag.TagDescription.Should().Be(originalDescription); // State unchanged
@@ -201,7 +201,7 @@ public class TagTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameIsRequired);
         tag.TagName.Should().Be(originalName); // State unchanged
         tag.TagDescription.Should().Be(originalDescription); // State unchanged
@@ -221,7 +221,7 @@ public class TagTests
         var result = tag.UpdateDetails(LongTagName, "New description");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TagErrors.NameTooLong);
         tag.TagName.Should().Be(originalName); // State unchanged
         tag.TagDescription.Should().Be(originalDescription); // State unchanged

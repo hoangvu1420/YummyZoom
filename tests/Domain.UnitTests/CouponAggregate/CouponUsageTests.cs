@@ -59,7 +59,7 @@ public class CouponUsageTests
         var result = coupon.Use(usageTime);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.CouponDisabled);
         coupon.CurrentTotalUsageCount.Should().Be(0); // No change
         coupon.DomainEvents.Should().NotContain(e => e.GetType() == typeof(CouponUsed));
@@ -76,7 +76,7 @@ public class CouponUsageTests
         var result = coupon.Use(beforeStartTime);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.CouponNotYetValid);
         coupon.CurrentTotalUsageCount.Should().Be(0);
         coupon.DomainEvents.Should().NotContain(e => e.GetType() == typeof(CouponUsed));
@@ -93,7 +93,7 @@ public class CouponUsageTests
         var result = coupon.Use(afterEndTime);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.CouponExpired);
         coupon.CurrentTotalUsageCount.Should().Be(0);
         coupon.DomainEvents.Should().NotContain(e => e.GetType() == typeof(CouponUsed));
@@ -150,7 +150,7 @@ public class CouponUsageTests
         var result = coupon.Use(usageTime);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.UsageLimitExceeded);
         coupon.CurrentTotalUsageCount.Should().Be(2); // No change
         coupon.DomainEvents.Should().BeEmpty();
@@ -179,7 +179,7 @@ public class CouponUsageTests
         var result = coupon.Use(usageTime);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.UsageLimitExceeded);
         coupon.CurrentTotalUsageCount.Should().Be(1);
     }

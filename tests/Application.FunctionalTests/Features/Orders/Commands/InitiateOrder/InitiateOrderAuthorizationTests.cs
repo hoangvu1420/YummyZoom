@@ -1,5 +1,3 @@
-using YummyZoom.Application.Orders.Commands.InitiateOrder;
-using YummyZoom.Domain.OrderAggregate;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;

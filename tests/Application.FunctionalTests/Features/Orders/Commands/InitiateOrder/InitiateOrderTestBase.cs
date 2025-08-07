@@ -1,4 +1,3 @@
-using Moq;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using static YummyZoom.Application.FunctionalTests.Testing;

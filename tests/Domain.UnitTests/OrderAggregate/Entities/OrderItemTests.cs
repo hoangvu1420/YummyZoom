@@ -118,7 +118,7 @@ public class OrderItemTests
             invalidQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemInvalidQuantity);
     }
 
@@ -135,7 +135,7 @@ public class OrderItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemInvalidName);
     }
 
@@ -153,7 +153,7 @@ public class OrderItemTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemInvalidName);
     }
 

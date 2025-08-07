@@ -62,7 +62,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.UpdateDescription(invalidDescription);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.CouponDescriptionEmpty);
         coupon.Description.Should().Be(originalDescription); // No change
     }
@@ -80,7 +80,7 @@ public class CouponUpdateMethodsTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.CouponDescriptionEmpty);
         coupon.Description.Should().Be(originalDescription);
     }
@@ -130,7 +130,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.SetMinimumOrderAmount(negativeAmount);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidMinOrderAmount);
         coupon.MinOrderAmount.Should().Be(originalAmount); // No change
     }
@@ -146,7 +146,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.SetMinimumOrderAmount(zeroAmount);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidMinOrderAmount);
     }
 
@@ -228,7 +228,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.SetTotalUsageLimit(invalidLimit);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidUsageLimit);
         coupon.TotalUsageLimit.Should().Be(originalLimit); // No change
     }
@@ -253,7 +253,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.SetTotalUsageLimit(3); // Try to set limit lower than current usage
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.UsageCountCannotExceedLimit(5, 3));
         coupon.TotalUsageLimit.Should().BeNull(); // No change
     }
@@ -360,7 +360,7 @@ public class CouponUpdateMethodsTests
         var result = coupon.SetPerUserUsageLimit(invalidLimit);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidPerUserLimit);
         coupon.UsageLimitPerUser.Should().Be(originalLimit); // No change
     }

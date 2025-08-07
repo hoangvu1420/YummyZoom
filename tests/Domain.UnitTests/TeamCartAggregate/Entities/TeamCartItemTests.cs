@@ -95,7 +95,7 @@ public class TeamCartItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.ItemUserIdRequired);
     }
 
@@ -128,7 +128,7 @@ public class TeamCartItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.ItemNameRequired);
     }
 
@@ -145,7 +145,7 @@ public class TeamCartItemTests
             DefaultQuantity);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.ItemNameRequired);
     }
 
@@ -162,7 +162,7 @@ public class TeamCartItemTests
             0);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.InvalidQuantity);
     }
 
@@ -179,7 +179,7 @@ public class TeamCartItemTests
             -1);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.InvalidQuantity);
     }
 
@@ -257,7 +257,7 @@ public class TeamCartItemTests
         var result = item.UpdateQuantity(0);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(TeamCartErrors.InvalidQuantity);
     }
 

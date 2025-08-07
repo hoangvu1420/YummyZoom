@@ -93,7 +93,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.InvalidOrderId);
     }
 
@@ -111,7 +111,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.InvalidCustomerId);
     }
 
@@ -129,7 +129,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.InvalidRestaurantId);
     }
 
@@ -303,7 +303,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.EmptyReply);
         review.Reply.Should().BeNull();
         review.DomainEvents.OfType<ReviewReplied>().Should().BeEmpty();
@@ -322,7 +322,7 @@ public class ReviewCoreTests
         var result = review.AddReply(invalidReply);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.EmptyReply);
         review.Reply.Should().BeNull();
         review.DomainEvents.OfType<ReviewReplied>().Should().BeEmpty();
@@ -340,7 +340,7 @@ public class ReviewCoreTests
         var result = review.AddReply("Second reply attempt");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(ReviewErrors.ReviewAlreadyReplied);
         review.Reply.Should().Be(DefaultReply, "because the original reply should remain unchanged");
         review.DomainEvents.Should().BeEmpty("because no new event should be added for failed reply attempt");

@@ -119,7 +119,7 @@ public class UserAggregateTests
         var result = user.RemoveAddress(nonExistentAddressId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(UserErrors.AddressNotFound(nonExistentAddressId.Value));
         user.Addresses.Should().ContainSingle(); // Address should not have been removed
         user.Addresses.Should().Contain(existingAddress);
@@ -203,7 +203,7 @@ public class UserAggregateTests
         var result = user.RemovePaymentMethod(nonExistentPaymentMethodId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(UserErrors.PaymentMethodNotFound(nonExistentPaymentMethodId.Value));
         user.PaymentMethods.Should().ContainSingle(); // Payment method should not have been removed
         user.PaymentMethods.Should().Contain(existingPaymentMethod);
@@ -243,7 +243,7 @@ public class UserAggregateTests
         var result = user.SetDefaultPaymentMethod(nonExistentPaymentMethodId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(UserErrors.PaymentMethodNotFound(nonExistentPaymentMethodId.Value));
     }
 

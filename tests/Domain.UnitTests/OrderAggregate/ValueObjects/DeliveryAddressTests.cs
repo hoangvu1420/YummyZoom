@@ -70,7 +70,7 @@ public class DeliveryAddressTests
             DefaultCountry);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -88,7 +88,7 @@ public class DeliveryAddressTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -105,7 +105,7 @@ public class DeliveryAddressTests
             DefaultCountry);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -122,7 +122,7 @@ public class DeliveryAddressTests
             DefaultCountry);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -139,7 +139,7 @@ public class DeliveryAddressTests
             DefaultCountry);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -156,7 +156,7 @@ public class DeliveryAddressTests
             invalidCountry);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 
@@ -167,7 +167,7 @@ public class DeliveryAddressTests
         var result = DeliveryAddress.Create("", "", "", "", "");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.AddressInvalid);
     }
 

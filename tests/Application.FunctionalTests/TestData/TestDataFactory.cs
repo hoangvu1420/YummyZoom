@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -8,7 +7,6 @@ using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.TestData;

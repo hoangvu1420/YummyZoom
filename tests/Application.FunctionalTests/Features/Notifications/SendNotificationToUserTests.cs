@@ -265,8 +265,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(NotificationErrors.NoActiveDevices(UserId.Create(userWithoutDevices)).Code);
+        result.ShouldBeFailure(NotificationErrors.NoActiveDevices(UserId.Create(userWithoutDevices)).Code);
     }
 
     [Test]
@@ -285,8 +284,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(NotificationErrors.NoActiveDevices(UserId.Create(nonExistentUserId)).Code);
+        result.ShouldBeFailure(NotificationErrors.NoActiveDevices(UserId.Create(nonExistentUserId)).Code);
     }
 
     [Test]
@@ -305,8 +303,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(NotificationErrors.NoActiveDevices(UserId.Create(targetUserId)).Code);
+        result.ShouldBeFailure(NotificationErrors.NoActiveDevices(UserId.Create(targetUserId)).Code);
     }
 
     #endregion

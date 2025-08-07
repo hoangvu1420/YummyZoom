@@ -252,7 +252,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         // No devices registered
-        
+
         var command = new SendBroadcastNotificationCommand(
             "No Devices Test",
             "No users have registered devices");
@@ -261,8 +261,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(NotificationErrors.NoActiveDevicesForBroadcast().Code);
+        result.ShouldBeFailure(NotificationErrors.NoActiveDevicesForBroadcast().Code);
     }
 
     [Test]
@@ -271,7 +270,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         await SetupUsersWithOnlyInactiveDevicesAsync();
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Only Inactive Test",
             "All devices are inactive");
@@ -280,8 +279,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(NotificationErrors.NoActiveDevicesForBroadcast().Code);
+        result.ShouldBeFailure(NotificationErrors.NoActiveDevicesForBroadcast().Code);
     }
 
     #endregion

@@ -95,7 +95,7 @@ public class SupportTicketAssignmentTests
         var result = ticket.AssignToAdmin(Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 
@@ -171,7 +171,7 @@ public class SupportTicketAssignmentTests
         var result = ticket.UnassignFromAdmin(Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 
@@ -186,7 +186,7 @@ public class SupportTicketAssignmentTests
         var result = ticket.UnassignFromAdmin(adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Ticket is not currently assigned to any admin"));
     }
 

@@ -83,7 +83,7 @@ public class SupportTicketContextLinkTests
         var result = ticket.AddContextLink(existingContextLink, adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Context link already exists"));
     }
 
@@ -98,7 +98,7 @@ public class SupportTicketContextLinkTests
         var result = ticket.AddContextLink(newContextLink, Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 
@@ -138,7 +138,7 @@ public class SupportTicketContextLinkTests
         var result = ticket.RemoveContextLink(nonExistentLink.EntityType, nonExistentLink.EntityID, adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Context link not found"));
     }
 
@@ -154,7 +154,7 @@ public class SupportTicketContextLinkTests
         var result = ticket.RemoveContextLink(linkToRemove.EntityType, linkToRemove.EntityID, adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.NoContextLinksProvided);
     }
 
@@ -169,7 +169,7 @@ public class SupportTicketContextLinkTests
         var result = ticket.RemoveContextLink(linkToRemove.EntityType, linkToRemove.EntityID, Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 

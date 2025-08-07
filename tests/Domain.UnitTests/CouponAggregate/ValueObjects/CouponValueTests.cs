@@ -55,7 +55,7 @@ public class CouponValueTests
         var result = CouponValue.CreatePercentage(invalidPercentage);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidPercentageZeroOrNegative);
     }
 
@@ -68,7 +68,7 @@ public class CouponValueTests
         var result = CouponValue.CreatePercentage(invalidPercentage);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidPercentageExceedsMaximum);
     }
 
@@ -123,7 +123,7 @@ public class CouponValueTests
         var result = CouponValue.CreateFixedAmount(zeroAmount);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidAmount);
     }
 
@@ -137,7 +137,7 @@ public class CouponValueTests
         var result = CouponValue.CreateFixedAmount(negativeAmount);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(CouponErrors.InvalidAmount);
     }
 

@@ -190,7 +190,7 @@ public class SupportTicketBusinessRulesTests
         var result = ticket.UpdatePriority(newPriority, Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 
@@ -255,7 +255,7 @@ public class SupportTicketBusinessRulesTests
         var result = ticket.UpdateSubject("", adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot be empty"));
     }
 
@@ -271,7 +271,7 @@ public class SupportTicketBusinessRulesTests
         var result = ticket.UpdateSubject(longSubject, adminId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot exceed 200 characters"));
     }
 
@@ -286,7 +286,7 @@ public class SupportTicketBusinessRulesTests
         var result = ticket.UpdateSubject(newSubject, Guid.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAdminId("Admin ID cannot be empty"));
     }
 

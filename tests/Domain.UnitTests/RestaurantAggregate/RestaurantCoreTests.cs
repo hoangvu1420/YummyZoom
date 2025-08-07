@@ -108,7 +108,7 @@ public class RestaurantCoreTests
             CreateValidBusinessHours());
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.NameIsRequired());
     }
 
@@ -126,7 +126,7 @@ public class RestaurantCoreTests
             CreateValidBusinessHours());
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.DescriptionIsRequired());
     }
 
@@ -144,7 +144,7 @@ public class RestaurantCoreTests
             CreateValidBusinessHours());
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.CuisineTypeIsRequired());
     }
 
@@ -162,7 +162,7 @@ public class RestaurantCoreTests
             CreateValidBusinessHours());
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.InvalidLogoUrl("invalid-url"));
     }
 

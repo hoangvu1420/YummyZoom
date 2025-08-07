@@ -77,7 +77,7 @@ public class OrderItemCustomizationTests
             DefaultPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemCustomizationInvalid);
     }
 
@@ -93,7 +93,7 @@ public class OrderItemCustomizationTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemCustomizationInvalid);
     }
 
@@ -108,7 +108,7 @@ public class OrderItemCustomizationTests
             DefaultPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemCustomizationInvalid);
     }
 
@@ -124,7 +124,7 @@ public class OrderItemCustomizationTests
 #pragma warning restore CS8625
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemCustomizationInvalid);
     }
 
@@ -138,7 +138,7 @@ public class OrderItemCustomizationTests
             DefaultPriceAdjustment);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.OrderItemCustomizationInvalid);
     }
 

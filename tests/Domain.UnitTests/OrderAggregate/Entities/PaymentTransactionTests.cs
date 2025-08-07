@@ -95,7 +95,7 @@ public class PaymentTransactionTests
             DefaultTimestamp);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(OrderErrors.PaymentTransactionInvalidAmount);
     }
 

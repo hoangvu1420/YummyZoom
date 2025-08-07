@@ -60,7 +60,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeName(string.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.NameIsRequired());
         restaurant.Name.Should().Be(DefaultName); // Should not change
     }
@@ -76,7 +76,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeName(tooLongName);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.NameTooLong(100));
         restaurant.Name.Should().Be(DefaultName); // Should not change
     }
@@ -115,7 +115,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateDescription(string.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.DescriptionIsRequired());
         restaurant.Description.Should().Be(DefaultDescription); // Should not change
     }
@@ -131,7 +131,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateDescription(tooLongDescription);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.DescriptionTooLong(500));
         restaurant.Description.Should().Be(DefaultDescription); // Should not change
     }
@@ -170,7 +170,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeCuisineType(string.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.CuisineTypeIsRequired());
         restaurant.CuisineType.Should().Be(DefaultCuisineType); // Should not change
     }
@@ -186,7 +186,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeCuisineType(tooLongCuisineType);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.CuisineTypeTooLong(50));
         restaurant.CuisineType.Should().Be(DefaultCuisineType); // Should not change
     }
@@ -241,7 +241,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateLogo(invalidLogoUrl);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.InvalidLogoUrl(invalidLogoUrl));
         restaurant.LogoUrl.Should().Be(DefaultLogoUrl); // Should not change
     }
@@ -304,7 +304,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeLocation((Address)null!);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.LocationIsRequired());
     }
 
@@ -318,7 +318,7 @@ public class RestaurantUpdateTests
         var result = restaurant.ChangeLocation(string.Empty, "City", "State", "12345", "Country");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.AddressStreetIsRequired());
     }
 
@@ -374,7 +374,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateContactInfo((ContactInfo)null!);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.ContactInfoIsRequired());
     }
 
@@ -388,7 +388,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateContactInfo("123-456-7890", "invalid-email");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.ContactEmailInvalidFormat("invalid-email"));
     }
 
@@ -442,7 +442,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateBusinessHours((BusinessHours)null!);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursIsRequired());
     }
 
@@ -456,7 +456,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateBusinessHours(string.Empty);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursFormatIsRequired());
     }
 
@@ -504,7 +504,7 @@ public class RestaurantUpdateTests
         var result = restaurant.UpdateBranding(string.Empty, newLogoUrl, newDescription);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.NameIsRequired());
         restaurant.Name.Should().Be(DefaultName); // Should not change
         restaurant.LogoUrl.Should().Be(DefaultLogoUrl); // Should not change
@@ -616,7 +616,7 @@ public class RestaurantUpdateTests
             newBusinessHours);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantErrors.ContactEmailInvalidFormat(invalidEmail));
         restaurant.Name.Should().Be(DefaultName); // Should not change
         restaurant.Description.Should().Be(DefaultDescription); // Should not change

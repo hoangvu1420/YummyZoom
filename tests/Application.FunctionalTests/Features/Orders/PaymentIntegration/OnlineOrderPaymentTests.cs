@@ -3,7 +3,6 @@ using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.Orders.Commands.HandleStripeWebhook;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using Stripe;
-using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Exceptions;

@@ -162,7 +162,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(DefaultAuthorId, AuthorType.Customer, DefaultInternalNote, isInternalNote: true);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Only admins can add internal notes"));
     }
 
@@ -176,7 +176,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(DefaultAuthorId, AuthorType.RestaurantOwner, DefaultInternalNote, isInternalNote: true);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Only admins can add internal notes"));
     }
 
@@ -190,7 +190,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(DefaultAuthorId, AuthorType.Customer, DefaultMessage);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Cannot add messages to a closed ticket"));
     }
 
@@ -204,7 +204,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(DefaultAuthorId, AuthorType.Customer, "");
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidMessageText("Message text cannot be empty"));
     }
 
@@ -218,7 +218,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(Guid.Empty, AuthorType.Customer, DefaultMessage);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidAuthorId("Author ID cannot be empty"));
     }
 
@@ -233,7 +233,7 @@ public class SupportTicketMessagingTests
         var result = ticket.AddMessage(DefaultAuthorId, AuthorType.Customer, longMessage);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(SupportTicketErrors.InvalidMessageText("Message text cannot exceed 5000 characters"));
     }
 

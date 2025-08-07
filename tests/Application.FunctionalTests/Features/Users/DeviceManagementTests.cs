@@ -383,8 +383,8 @@ public class DeviceManagementTests : BaseTestFixture
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(UserDeviceErrors.TokenNotFound("non-existent-token").Code);
+        result.ShouldBeFailure();
+        result.Error.Should().Be(UserDeviceErrors.TokenNotFound("non-existent-token"));
     }
 
     [Test]
@@ -456,8 +456,8 @@ public class DeviceManagementTests : BaseTestFixture
         var result = await SendAsync(command);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(UserDeviceErrors.TokenNotFound("inactive-token").Code);
+        result.ShouldBeFailure();
+        result.Error.Should().Be(UserDeviceErrors.TokenNotFound("inactive-token"));
     }
 
     #endregion

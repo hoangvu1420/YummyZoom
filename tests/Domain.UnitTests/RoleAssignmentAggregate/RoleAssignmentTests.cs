@@ -85,7 +85,7 @@ public class RoleAssignmentTests
         var result = RoleAssignment.Create(userId!, restaurantId, role);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidUserId("null"));
     }
 
@@ -101,7 +101,7 @@ public class RoleAssignmentTests
         var result = RoleAssignment.Create(userId, restaurantId!, role);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidRestaurantId("null"));
     }
 
@@ -117,7 +117,7 @@ public class RoleAssignmentTests
         var result = RoleAssignment.Create(userId, restaurantId, invalidRole);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidRole(invalidRole.ToString()));
     }
 
@@ -134,7 +134,7 @@ public class RoleAssignmentTests
         var result = RoleAssignment.Create(roleAssignmentId!, userId, restaurantId, role);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidRoleAssignmentId("null"));
     }
 
@@ -180,7 +180,7 @@ public class RoleAssignmentTests
         var result = roleAssignment.UpdateRole(invalidRole);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RoleAssignmentErrors.InvalidRole(invalidRole.ToString()));
         roleAssignment.Role.Should().Be(originalRole, "Role should not change on failure");
     }

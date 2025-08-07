@@ -87,7 +87,7 @@ public class AccountTransactionTests
             DefaultOrderId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantAccountErrors.OrderRevenueMustBePositive(NegativeTenDollars));
     }
 
@@ -102,7 +102,7 @@ public class AccountTransactionTests
             DefaultOrderId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantAccountErrors.PlatformFeeMustBeNegative(TenDollars));
     }
 
@@ -117,7 +117,7 @@ public class AccountTransactionTests
             DefaultOrderId);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.ShouldBeSuccessful();
         result.Error.Should().Be(RestaurantAccountErrors.RefundDeductionMustBeNegative(TenDollars));
     }
 
