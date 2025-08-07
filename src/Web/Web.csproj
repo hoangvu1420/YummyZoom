@@ -33,8 +33,4 @@
     <PackageReference Include="FluentValidation.AspNetCore" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Responses\" />
-  </ItemGroup>
-
 </Project>

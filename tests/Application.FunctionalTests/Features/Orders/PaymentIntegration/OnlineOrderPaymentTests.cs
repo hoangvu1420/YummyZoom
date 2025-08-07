@@ -4,13 +4,10 @@ using YummyZoom.Application.Orders.Commands.HandleStripeWebhook;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using Stripe;
 using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Domain.RestaurantAggregate;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Exceptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.TestData;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
 
@@ -62,7 +59,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         orderResponse.ClientSecret.Should().NotBeNullOrEmpty();
 
         // Verify order is in AwaitingPayment status
-        var createdOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var createdOrder = await FindOrderAsync(orderResponse.OrderId);
         createdOrder.Should().NotBeNull();
         createdOrder!.Status.Should().Be(OrderStatus.AwaitingPayment);
         createdOrder.PaymentTransactions.First().PaymentGatewayReferenceId.Should().Be(orderResponse.PaymentIntentId);
@@ -96,7 +93,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         webhookResult.ShouldBeSuccessful();
 
         // Verify order status is now Placed
-        var updatedOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var updatedOrder = await FindOrderAsync(orderResponse.OrderId);
         updatedOrder.Should().NotBeNull();
         updatedOrder!.Status.Should().Be(OrderStatus.Placed);
 
@@ -131,7 +128,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         var orderResponse = initiateOrderResult.Value;
 
         // Verify initial order state
-        var createdOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var createdOrder = await FindOrderAsync(orderResponse.OrderId);
         createdOrder!.Status.Should().Be(OrderStatus.AwaitingPayment);
 
         // Act Part 2: Simulate payment failure with declined card
@@ -163,7 +160,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         webhookResult.ShouldBeSuccessful();
 
         // Verify order status is now Cancelled
-        var updatedOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var updatedOrder = await FindOrderAsync(orderResponse.OrderId);
         updatedOrder.Should().NotBeNull();
         updatedOrder!.Status.Should().Be(OrderStatus.Cancelled);
 
@@ -200,7 +197,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
                 .VisaAuthentication); // This should succeed but require additional steps
 
         // Verify order remains in AwaitingPayment status until authentication completes
-        var orderAfterAuth = await FindAsync<Order>(orderResponse.OrderId);
+        var orderAfterAuth = await FindOrderAsync(orderResponse.OrderId);
         orderAfterAuth!.Status.Should().Be(OrderStatus.AwaitingPayment);
     }
 
@@ -235,7 +232,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         orderResponse.ClientSecret.Should().BeNull(); // No client secret for COD
 
         // Verify order is created with Placed status immediately
-        var createdOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var createdOrder = await FindOrderAsync(orderResponse.OrderId);
         createdOrder.Should().NotBeNull();
         createdOrder!.Status.Should().Be(OrderStatus.Placed);
         createdOrder.PaymentTransactions.First().PaymentMethodType.Should().Be(PaymentMethodType.CashOnDelivery);
@@ -299,7 +296,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         secondResult.ShouldBeSuccessful();
 
         // Verify order state is consistent
-        var finalOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var finalOrder = await FindOrderAsync(orderResponse.OrderId);
         finalOrder!.Status.Should().Be(OrderStatus.Placed);
     }
 
@@ -377,7 +374,7 @@ public class OnlineOrderPaymentTests : BaseTestFixture
         var orderResponse = result.Value;
 
         // Verify order creation
-        var createdOrder = await FindAsync<Order>(orderResponse.OrderId);
+        var createdOrder = await FindOrderAsync(orderResponse.OrderId);
         createdOrder.Should().NotBeNull();
         createdOrder!.Status.Should().Be(OrderStatus.AwaitingPayment);
 

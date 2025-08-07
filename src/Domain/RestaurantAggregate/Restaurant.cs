@@ -508,6 +508,15 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
     #endregion
 
+    #region Public Methods - Queries
+
+    public bool IsActive()
+    {
+        return IsVerified && IsAcceptingOrders;
+    }
+
+    #endregion
+
     #region Private Helper Methods
 
     private static Result ValidateRestaurantFields(string name, string? logoUrl, string description, string cuisineType)
@@ -519,21 +528,21 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         // Validate name
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure(RestaurantErrors.NameIsRequired());
-        
+
         if (name.Length > maxNameLength)
             return Result.Failure(RestaurantErrors.NameTooLong(maxNameLength));
 
         // Validate description
         if (string.IsNullOrWhiteSpace(description))
             return Result.Failure(RestaurantErrors.DescriptionIsRequired());
-        
+
         if (description.Length > maxDescriptionLength)
             return Result.Failure(RestaurantErrors.DescriptionTooLong(maxDescriptionLength));
 
         // Validate cuisine type
         if (string.IsNullOrWhiteSpace(cuisineType))
             return Result.Failure(RestaurantErrors.CuisineTypeIsRequired());
-        
+
         if (cuisineType.Length > maxCuisineTypeLength)
             return Result.Failure(RestaurantErrors.CuisineTypeTooLong(maxCuisineTypeLength));
 

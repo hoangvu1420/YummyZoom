@@ -33,4 +33,11 @@ public static class ResultAssertions
     {
         result.IsSuccess.Should().BeTrue("the operation should have succeeded");
     }
+
+    public static void ShouldBeFailure(this Result result, string? errorCode = null)
+    {
+        result.IsSuccess.Should().BeFalse("the operation should have failed");
+        if (errorCode != null)
+            result.Error.Code.Should().Be(errorCode, $"the error code should be '{errorCode}'");
+    }
 }

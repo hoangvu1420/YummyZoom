@@ -21,6 +21,20 @@ public static class TestDatabaseManager
     }
 
     /// <summary>
+    /// Finds an Order entity by its key values, including related entities with split query optimization.
+    /// </summary>
+    public static async Task<Domain.OrderAggregate.Order?> FindOrderAsync(Domain.OrderAggregate.ValueObjects.OrderId orderId)
+    {
+        using var scope = TestInfrastructure.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.Orders
+            .AsSplitQuery()
+            .Include(o => o.OrderItems)
+            .Include(o => o.PaymentTransactions)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+    }
+
+    /// <summary>
     /// Adds an entity to the database.
     /// </summary>
     public static async Task AddAsync<TEntity>(TEntity entity)
@@ -40,6 +54,18 @@ public static class TestDatabaseManager
         using var scope = TestInfrastructure.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         return await context.Set<TEntity>().CountAsync();
+    }
+
+    /// <summary>
+    /// Updates an entity in the database.
+    /// </summary>
+    public static async Task UpdateAsync<TEntity>(TEntity entity)
+        where TEntity : class
+    {
+        using var scope = TestInfrastructure.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        context.Update(entity);
+        await context.SaveChangesAsync();
     }
 
     /// <summary>

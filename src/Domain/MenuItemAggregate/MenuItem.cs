@@ -237,6 +237,15 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Returns the currency of the base price.
+    /// </summary>
+    /// <returns>The currency of the base price</returns>
+    public string GetCurrency()
+    {
+        return BasePrice.Currency;
+    }
+
 #pragma warning disable CS8618
     private MenuItem() { }
 #pragma warning restore CS8618

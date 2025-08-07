@@ -1,11 +1,14 @@
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.TestData;
@@ -449,6 +452,163 @@ public static class TestDataFactory
         {
             return _isInitialized;
         }
+    }
+
+    /// <summary>
+    /// Creates an inactive restaurant (not verified and not accepting orders) for testing inactive restaurant validation.
+    /// </summary>
+    /// <returns>The ID of the created inactive restaurant.</returns>
+    public static async Task<Guid> CreateInactiveRestaurantAsync()
+    {
+        // Create restaurant address
+        var addressResult = Domain.RestaurantAggregate.ValueObjects.Address.Create(
+            "456 Inactive Street",
+            "Test City",
+            "TS",
+            "54321",
+            "US");
+
+        if (addressResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create restaurant address: {addressResult.Error}");
+
+        // Create restaurant contact info
+        var contactInfoResult = ContactInfo.Create(
+            "+1-555-0123",
+            "inactive@restaurant.com");
+
+        if (contactInfoResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create restaurant contact info: {contactInfoResult.Error}");
+
+        // Create business hours
+        var businessHoursResult = BusinessHours.Create("Mon-Sun: 9:00 AM - 10:00 PM");
+
+        if (businessHoursResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create restaurant business hours: {businessHoursResult.Error}");
+
+        // Create the restaurant entity
+        var restaurantResult = Restaurant.Create(
+            "Inactive Test Restaurant",
+            "https://example.com/inactive-logo.jpg",
+            "A test restaurant that is not accepting orders",
+            "Test Cuisine",
+            addressResult.Value,
+            contactInfoResult.Value,
+            businessHoursResult.Value);
+
+        if (restaurantResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create restaurant: {restaurantResult.Error}");
+
+        var restaurant = restaurantResult.Value;
+
+        // DO NOT verify or activate the restaurant - this makes it inactive
+        // restaurant.Verify();     // <- Not called, so IsVerified = false
+        // restaurant.AcceptOrders(); // <- Not called, so IsAcceptingOrders = false
+
+        // Save to database
+        await AddAsync(restaurant);
+
+        return restaurant.Id.Value;
+    }
+
+    /// <summary>
+    /// Creates a second restaurant with menu items for testing cross-restaurant validation.
+    /// </summary>
+    /// <returns>A tuple containing the restaurant ID and a menu item ID from that restaurant.</returns>
+    public static async Task<(Guid RestaurantId, Guid MenuItemId)> CreateSecondRestaurantWithMenuItemsAsync()
+    {
+        // Create second restaurant address
+        var addressResult = Domain.RestaurantAggregate.ValueObjects.Address.Create(
+            "789 Second Street",
+            "Test City",
+            "TS",
+            "67890",
+            "US");
+
+        if (addressResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create second restaurant address: {addressResult.Error}");
+
+        // Create second restaurant contact info
+        var contactInfoResult = ContactInfo.Create(
+            "+1-555-0456",
+            "second@restaurant.com");
+
+        if (contactInfoResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create second restaurant contact info: {contactInfoResult.Error}");
+
+        // Create business hours
+        var businessHoursResult = BusinessHours.Create("Mon-Sun: 8:00 AM - 11:00 PM");
+
+        if (businessHoursResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create second restaurant business hours: {businessHoursResult.Error}");
+
+        // Create the second restaurant entity
+        var restaurantResult = Restaurant.Create(
+            "Second Test Restaurant",
+            "https://example.com/second-logo.jpg",
+            "A second test restaurant with different menu items",
+            "Different Cuisine",
+            addressResult.Value,
+            contactInfoResult.Value,
+            businessHoursResult.Value);
+
+        if (restaurantResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create second restaurant: {restaurantResult.Error}");
+
+        var restaurant = restaurantResult.Value;
+
+        // Verify and activate the restaurant
+        restaurant.Verify();
+        restaurant.AcceptOrders();
+
+        // Save restaurant to database
+        await AddAsync(restaurant);
+
+        // Create a menu category for the second restaurant
+        var menuCategoryResult = MenuCategory.Create(
+            MenuId.CreateUnique(),
+            "Second Restaurant Items",
+            1);
+
+        if (menuCategoryResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create menu category: {menuCategoryResult.Error}");
+
+        var menuCategory = menuCategoryResult.Value;
+        await AddAsync(menuCategory);
+
+        // Create a menu item for the second restaurant
+        var menuItemResult = MenuItem.Create(
+            restaurant.Id,
+            menuCategory.Id,
+            "Special Pizza",
+            "A special pizza only available at the second restaurant",
+            new Money(18.99m, "USD"));
+
+        if (menuItemResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create menu item: {menuItemResult.Error}");
+
+        var menuItem = menuItemResult.Value;
+        await AddAsync(menuItem);
+
+        return (restaurant.Id.Value, menuItem.Id.Value);
+    }
+
+    /// <summary>
+    /// Marks a specific menu item as unavailable for testing unavailable menu item validation.
+    /// </summary>
+    /// <param name="itemName">The name of the menu item to mark as unavailable.</param>
+    /// <returns>The name of the menu item that was marked as unavailable.</returns>
+    public static async Task<string> MarkMenuItemAsUnavailableAsync(string itemName)
+    {
+        var menuItemGuid = GetMenuItemId(itemName);
+        var menuItemId = MenuItemId.Create(menuItemGuid);
+        
+        var menuItem = await FindAsync<MenuItem>(menuItemId);
+        menuItem!.MarkAsUnavailable();
+        
+        // Update the menu item in the database
+        await UpdateAsync(menuItem);
+        
+        return itemName;
     }
 
     #endregion

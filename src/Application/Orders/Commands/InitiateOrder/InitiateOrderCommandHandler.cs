@@ -1,8 +1,7 @@
-using MediatR;
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -27,6 +26,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
     private readonly ICouponRepository _couponRepository;
     private readonly IPaymentGatewayService _paymentGatewayService;
     private readonly OrderFinancialService _orderFinancialService;
+    private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<InitiateOrderCommandHandler> _logger;
 
@@ -48,6 +48,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         _paymentGatewayService = paymentGatewayService ?? throw new ArgumentNullException(nameof(paymentGatewayService));
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -58,12 +59,26 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             // Convert simple types to domain value objects
             var customerId = UserId.Create(request.CustomerId);
             var restaurantId = RestaurantId.Create(request.RestaurantId);
-            
+
             // Convert string to PaymentMethodType enum
             if (!Enum.TryParse<PaymentMethodType>(request.PaymentMethod, true, out var paymentMethodType))
             {
                 _logger.LogWarning("Invalid payment method: {PaymentMethod}", request.PaymentMethod);
                 return Result.Failure<InitiateOrderResponse>(Error.Validation("InitiateOrder.InvalidPaymentMethod", "The specified payment method is not valid."));
+            }
+
+            // Validate customer is the same as current user (Authorization check)
+            if (_currentUser.DomainUserId is null)
+            {
+                _logger.LogWarning("User is not authenticated");
+                throw new UnauthorizedAccessException();
+            }
+
+            if (!_currentUser.DomainUserId.Equals(customerId))
+            {
+                _logger.LogWarning("User {CurrentUserId} attempting to create order for different customer {CustomerId}",
+                    _currentUser.DomainUserId.Value, customerId.Value);
+                throw new ForbiddenAccessException();
             }
 
             // 1. Validate restaurant exists and is active
@@ -74,8 +89,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.RestaurantNotFound());
             }
 
-            var isRestaurantActive = await _restaurantRepository.IsActiveAsync(restaurantId, cancellationToken);
-            if (!isRestaurantActive)
+            if (!restaurant.IsActive())
             {
                 _logger.LogWarning("Restaurant {RestaurantId} is not active", restaurantId.Value);
                 return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.RestaurantNotActive());
@@ -83,12 +97,19 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
             // 2. Validate menu items exist and are available
             var menuItemIds = request.Items.Select(i => MenuItemId.Create(i.MenuItemId)).ToList();
-            var menuItems = await _menuItemRepository.GetByIdsAsync(menuItemIds, cancellationToken);
-            
-            if (menuItems.Count != menuItemIds.Count)
+
+            // Get unique menu item IDs to avoid duplicate database lookups
+            var uniqueMenuItemIds = menuItemIds.Distinct().ToList();
+
+            var menuItems = await _menuItemRepository.GetByIdsAsync(uniqueMenuItemIds, cancellationToken);
+
+            string currency = menuItems.First().GetCurrency();
+
+            // Check if all unique menu items were found
+            if (menuItems.Count != uniqueMenuItemIds.Count)
             {
                 var foundIds = menuItems.Select(m => m.Id).ToHashSet();
-                var missingIds = menuItemIds.Where(id => !foundIds.Contains(id)).ToList();
+                var missingIds = uniqueMenuItemIds.Where(id => !foundIds.Contains(id)).ToList();
                 _logger.LogWarning("Menu items not found: {MissingIds}", string.Join(", ", missingIds.Select(id => id.Value)));
                 return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.MenuItemsNotFound());
             }
@@ -97,20 +118,16 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             var invalidItems = menuItems.Where(m => m.RestaurantId != restaurantId).ToList();
             if (invalidItems.Count != 0)
             {
-                _logger.LogWarning("Menu items {InvalidItemIds} do not belong to restaurant {RestaurantId}", 
+                _logger.LogWarning("Menu items {InvalidItemIds} do not belong to restaurant {RestaurantId}",
                     string.Join(", ", invalidItems.Select(i => i.Id.Value)), restaurantId.Value);
                 return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.MenuItemsNotFromRestaurant());
             }
 
             // Check availability
-            foreach (var menuItem in menuItems)
+            foreach (var menuItem in menuItems.Where(menuItem => !menuItem.IsAvailable))
             {
-                var isAvailable = await _menuItemRepository.IsAvailableAsync(menuItem.Id, cancellationToken);
-                if (!isAvailable)
-                {
-                    _logger.LogWarning("Menu item {MenuItemId} is not available", menuItem.Id.Value);
-                    return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.MenuItemNotAvailable(menuItem.Name));
-                }
+                _logger.LogWarning("Menu item {MenuItemId} is not available", menuItem.Id.Value);
+                return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.MenuItemNotAvailable(menuItem.Name));
             }
 
             // 3. Create delivery address value object
@@ -137,12 +154,12 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                     menuItem.MenuCategoryId,
                     menuItem.Id,
                     menuItem.Name,
-                    menuItem.BasePrice, 
+                    menuItem.BasePrice.Copy(),
                     requestItem.Quantity);
 
                 if (orderItemResult.IsFailure)
                 {
-                    _logger.LogWarning("Failed to create order item for {MenuItemId}: {Error}", 
+                    _logger.LogWarning("Failed to create order item for {MenuItemId}: {Error}",
                         menuItem.Id.Value, orderItemResult.Error);
                     return Result.Failure<InitiateOrderResponse>(orderItemResult.Error);
                 }
@@ -152,8 +169,8 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
             // 5. Calculate financial amounts using OrderFinancialService
             var subtotal = _orderFinancialService.CalculateSubtotal(orderItems);
-            
-            var discountAmount = new Money(0, "USD");
+
+            var discountAmount = new Money(0, currency);
             CouponId? appliedCouponId = null;
             if (!string.IsNullOrEmpty(request.CouponCode))
             {
@@ -161,37 +178,37 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 if (coupon is not null)
                 {
                     var userUsageCount = await _couponRepository.GetUserUsageCountAsync(
-                        (CouponId)coupon.Id, customerId, cancellationToken);
-                    
+                        coupon.Id, customerId, cancellationToken);
+
                     var couponResult = _orderFinancialService.ValidateAndCalculateDiscount(
                         coupon, userUsageCount, orderItems, subtotal);
-                    
+
                     if (couponResult.IsSuccess)
                     {
                         discountAmount = couponResult.Value;
-                        appliedCouponId = (CouponId)coupon.Id;
-                        _logger.LogInformation("Applied coupon {CouponCode} with discount {DiscountAmount}", 
+                        appliedCouponId = coupon.Id;
+                        _logger.LogInformation("Applied coupon {CouponCode} with discount {DiscountAmount}",
                             request.CouponCode, discountAmount.Amount);
                     }
                     else
                     {
-                        _logger.LogWarning("Coupon validation failed for {CouponCode}: {Error}", 
+                        _logger.LogWarning("Coupon validation failed for {CouponCode}: {Error}",
                             request.CouponCode, couponResult.Error);
                         return Result.Failure<InitiateOrderResponse>(couponResult.Error);
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("Coupon {CouponCode} not found for restaurant {RestaurantId}", 
+                    _logger.LogWarning("Coupon {CouponCode} not found for restaurant {RestaurantId}",
                         request.CouponCode, restaurantId.Value);
-                    return Result.Failure<InitiateOrderResponse>(Error.NotFound("Coupon.NotFound", "The specified coupon code is not valid."));
+                    return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.CouponNotFound(request.CouponCode));
                 }
             }
-            
-            var tipAmount = new Money(request.TipAmount ?? 0m, "USD");
-            var deliveryFee = new Money(2.99m, "USD"); // TODO: Make configurable
-            var taxAmount = new Money(subtotal.Amount * 0.08m, "USD"); // TODO: Make tax rate configurable
-            
+
+            var tipAmount = new Money(request.TipAmount ?? 0m, currency);
+            var deliveryFee = new Money(2.99m, currency); 
+            var taxAmount = new Money(subtotal.Amount * 0.08m, currency); 
+
             var totalAmount = _orderFinancialService.CalculateFinalTotal(
                 subtotal, discountAmount, deliveryFee, tipAmount, taxAmount);
 
@@ -214,7 +231,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
                 var paymentResult = await _paymentGatewayService.CreatePaymentIntentAsync(
                     totalAmount,
-                    "usd", // TODO: Make currency configurable
+                    currency,
                     metadata,
                     cancellationToken);
 
@@ -226,7 +243,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
                 paymentIntentId = paymentResult.Value.PaymentIntentId;
                 clientSecret = paymentResult.Value.ClientSecret;
-                
+
                 _logger.LogInformation("Created payment intent {PaymentIntentId}", paymentIntentId);
             }
 
@@ -237,7 +254,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 restaurantId,
                 deliveryAddressResult.Value,
                 orderItems,
-                request.SpecialInstructions ?? string.Empty, 
+                request.SpecialInstructions ?? string.Empty,
                 subtotal,
                 discountAmount,
                 deliveryFee,
@@ -246,7 +263,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 totalAmount,
                 paymentMethodType,
                 appliedCouponId,
-                paymentIntentId, 
+                paymentIntentId,
                 request.TeamCartId.HasValue ? TeamCartId.Create(request.TeamCartId.Value) : null);
 
             if (orderResult.IsFailure)
@@ -256,7 +273,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             }
 
             var order = orderResult.Value;
-            
+
             if (paymentMethodType == PaymentMethodType.CashOnDelivery)
             {
                 _logger.LogInformation("Order {OrderId} created with Cash on Delivery payment method", order.Id.Value);
@@ -264,8 +281,25 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
             // 8. Save the order
             await _orderRepository.AddAsync(order, cancellationToken);
-            
-            _logger.LogInformation("Successfully created order {OrderId} for user {UserId} at restaurant {RestaurantId}", 
+
+            // 9. Increment coupon usage count if a coupon was applied
+            if (appliedCouponId is not null)
+            {
+                var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode!, restaurantId, cancellationToken);
+                if (coupon is not null)
+                {
+                    var useResult = coupon.Use();
+                    if (useResult.IsFailure)
+                    {
+                        _logger.LogError("Failed to increment coupon usage count for {CouponCode}: {Error}",
+                            request.CouponCode, useResult.Error);
+                        // This is logged as an error but doesn't fail the transaction since the order was already created
+                        // In a real system, you might want to handle this differently
+                    }
+                }
+            }
+
+            _logger.LogInformation("Successfully created order {OrderId} for user {UserId} at restaurant {RestaurantId}",
                 order.Id.Value, customerId.Value, restaurantId.Value);
 
             return Result.Success(new InitiateOrderResponse(
@@ -281,18 +315,21 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 // Application-specific error definitions for InitiateOrder command
 public static class InitiateOrderErrors
 {
-    public static Error RestaurantNotFound() => 
+    public static Error RestaurantNotFound() =>
         Error.NotFound("InitiateOrder.RestaurantNotFound", "The specified restaurant was not found.");
-    
-    public static Error RestaurantNotActive() => 
+
+    public static Error RestaurantNotActive() =>
         Error.Validation("InitiateOrder.RestaurantNotActive", "The restaurant is currently not accepting orders.");
-    
-    public static Error MenuItemsNotFound() => 
+
+    public static Error MenuItemsNotFound() =>
         Error.NotFound("InitiateOrder.MenuItemsNotFound", "One or more menu items were not found.");
-    
-    public static Error MenuItemsNotFromRestaurant() => 
+
+    public static Error MenuItemsNotFromRestaurant() =>
         Error.Validation("InitiateOrder.MenuItemsNotFromRestaurant", "All menu items must belong to the same restaurant.");
-    
-    public static Error MenuItemNotAvailable(string itemName) => 
+
+    public static Error MenuItemNotAvailable(string itemName) =>
         Error.Validation("InitiateOrder.MenuItemNotAvailable", $"Menu item '{itemName}' is currently not available.");
+
+    public static Error CouponNotFound(string couponCode) =>
+        Error.NotFound("Coupon.CouponNotFound", $"The specified coupon code {couponCode} is not valid.");
 }

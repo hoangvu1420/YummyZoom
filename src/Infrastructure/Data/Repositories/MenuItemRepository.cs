@@ -41,6 +41,6 @@ public class MenuItemRepository : IMenuItemRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == menuItemId, cancellationToken);
         
-        return menuItem is not  null && menuItem.IsAvailable;
+        return menuItem is not null && menuItem.IsAvailable;
     }
 } 

@@ -103,12 +103,59 @@ public partial class Testing
     }
 
     /// <summary>
+    /// Clears the current user ID in the test context (sets to null).
+    /// </summary>
+    public static void ClearUserId()
+    {
+        TestUserManager.SetCurrentUserId(null);
+    }
+
+    /// <summary>
     /// Refreshes the current user's claims from the database.
     /// </summary>
     public static async Task RefreshUserClaimsAsync()
     {
         await TestAuthenticationService.RefreshUserClaimsAsync();
     }
+
+    #endregion
+
+    #region Service Replacement
+
+    /// <summary>
+    /// Replaces a service with a specific implementation instance.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type</typeparam>
+    /// <param name="implementation">The implementation instance</param>
+    public static void ReplaceService<TInterface>(TInterface implementation)
+        where TInterface : class
+    {
+        TestInfrastructure.ReplaceService<TInterface>(implementation);
+    }
+
+    /// <summary>
+    /// Replaces a service with a specific implementation type.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type</typeparam>
+    /// <typeparam name="TImplementation">The implementation type</typeparam>
+    public static void ReplaceService<TInterface, TImplementation>()
+        where TInterface : class
+        where TImplementation : class, TInterface
+    {
+        TestInfrastructure.ReplaceService<TInterface, TImplementation>();
+    }
+
+    /// <summary>
+    /// Clears all service replacements and resets to original factory.
+    /// </summary>
+    public static async Task ResetServiceReplacements()
+    {
+        await TestInfrastructure.ResetServiceReplacements();
+    }
+
+    #endregion
+
+    #region User Management
 
     /// <summary>
     /// Creates and runs as the default test user.
@@ -204,6 +251,27 @@ public partial class Testing
     public static async Task<int> CountAsync<TEntity>() where TEntity : class
     {
         return await TestDatabaseManager.CountAsync<TEntity>();
+    }
+
+    /// <summary>
+    /// Updates an entity in the database.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
+    /// <param name="entity">The entity to update.</param>
+    public static async Task UpdateAsync<TEntity>(TEntity entity)
+        where TEntity : class
+    {
+        await TestDatabaseManager.UpdateAsync(entity);
+    }
+
+    /// <summary>
+    /// Finds an Order entity by its ID, including related entities with optimized queries.
+    /// </summary>
+    /// <param name="orderId">The order ID to search for.</param>
+    /// <returns>The found order, or null if not found.</returns>
+    public static async Task<Domain.OrderAggregate.Order?> FindOrderAsync(Domain.OrderAggregate.ValueObjects.OrderId orderId)
+    {
+        return await TestDatabaseManager.FindOrderAsync(orderId);
     }
 
     #endregion

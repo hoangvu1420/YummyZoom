@@ -19,13 +19,4 @@ public class RestaurantRepository : IRestaurantRepository
         return await _dbContext.Restaurants
             .FirstOrDefaultAsync(r => r.Id == restaurantId, cancellationToken);
     }
-
-    public async Task<bool> IsActiveAsync(RestaurantId restaurantId, CancellationToken cancellationToken = default)
-    {
-        var restaurant = await _dbContext.Restaurants
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.Id == restaurantId, cancellationToken);
-        
-        return restaurant is not null && restaurant.IsVerified && restaurant.IsAcceptingOrders;
-    }
 }

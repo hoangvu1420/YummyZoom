@@ -20,6 +20,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly DbConnection _connection;
     private readonly string _connectionString;
+    private readonly Dictionary<Type, object>? _serviceReplacements;
     
     // Static singleton instance to ensure consistency across all scopes
     private static readonly TestUserService _testUserService = new();
@@ -28,6 +29,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         _connection = connection;
         _connectionString = connectionString;
+        _serviceReplacements = null;
+    }
+
+    public CustomWebApplicationFactory(DbConnection connection, string connectionString, Dictionary<Type, object> serviceReplacements)
+    {
+        _connection = connection;
+        _connectionString = connectionString;
+        _serviceReplacements = serviceReplacements;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -38,6 +47,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             ConfigureTestUserService(services);
             ConfigureMockServices(services);
             ConfigureTestCommandHandlers(services);
+            services.ApplyServiceReplacements(_serviceReplacements);
         });
     }
 
@@ -222,6 +232,42 @@ public class TestUserService : IUser
             catch
             {
                 // If we can't refresh from database, continue with existing claims
+            }
+        }
+    }
+}
+
+/// <summary>
+/// Extensions for the CustomWebApplicationFactory to handle service replacements.
+/// </summary>
+public static class CustomWebApplicationFactoryExtensions
+{
+    /// <summary>
+    /// Applies service replacements if any are configured.
+    /// </summary>
+    public static void ApplyServiceReplacements(this IServiceCollection services, Dictionary<Type, object>? serviceReplacements)
+    {
+        if (serviceReplacements == null || serviceReplacements.Count == 0)
+            return;
+
+        foreach (var replacement in serviceReplacements)
+        {
+            var serviceType = replacement.Key;
+            var implementation = replacement.Value;
+
+            // Remove existing registrations
+            services.RemoveAll(serviceType);
+
+            // Add replacement based on type
+            if (implementation is Type implementationType)
+            {
+                // Type-based replacement
+                services.AddTransient(serviceType, implementationType);
+            }
+            else
+            {
+                // Instance-based replacement
+                services.AddSingleton(serviceType, implementation);
             }
         }
     }

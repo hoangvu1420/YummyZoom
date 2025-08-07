@@ -22,6 +22,7 @@ public class OrderRepository : IOrderRepository
     public async Task<Order?> GetByIdAsync(OrderId orderId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsSplitQuery()
             .Include(o => o.OrderItems)
             .Include(o => o.PaymentTransactions)
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
@@ -30,6 +31,7 @@ public class OrderRepository : IOrderRepository
     public async Task<Order?> GetByPaymentGatewayReferenceIdAsync(string paymentGatewayReferenceId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsSplitQuery()
             .Include(o => o.OrderItems)
             .Include(o => o.PaymentTransactions)
             .FirstOrDefaultAsync(o => o.PaymentTransactions.Any(pt => pt.PaymentGatewayReferenceId == paymentGatewayReferenceId), cancellationToken);

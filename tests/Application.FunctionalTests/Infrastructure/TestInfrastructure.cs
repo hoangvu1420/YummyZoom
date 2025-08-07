@@ -15,6 +15,10 @@ public static class TestInfrastructure
     private static ITestDatabase _database = null!;
     private static CustomWebApplicationFactory _factory = null!;
     private static IServiceScopeFactory _scopeFactory = null!;
+    
+    // Service replacement tracking
+    private static readonly Dictionary<Type, object> _serviceReplacements = new();
+    private static CustomWebApplicationFactory? _customFactory;
 
     /// <summary>
     /// Initializes the test infrastructure before any tests run.
@@ -88,7 +92,7 @@ public static class TestInfrastructure
     }
 
     /// <summary>
-    /// Resets the test state by resetting the database.
+    /// Resets the test state by resetting the database and clearing service replacements.
     /// </summary>
     public static async Task ResetState()
     {
@@ -98,6 +102,9 @@ public static class TestInfrastructure
 
             // Ensure test data is restored after database reset
             await TestDataFactory.EnsureTestDataAsync();
+            
+            // Clear service replacements to prevent leakage between test classes
+            await ResetServiceReplacements();
         }
         catch 
         {
@@ -118,5 +125,73 @@ public static class TestInfrastructure
     /// <summary>
     /// Gets the current service scope factory instance.
     /// </summary>
-    internal static IServiceScopeFactory GetScopeFactory() => _scopeFactory;
+    internal static IServiceScopeFactory GetScopeFactory() => _customFactory?.Services.GetRequiredService<IServiceScopeFactory>() ?? _scopeFactory;
+
+    #region Service Replacement
+
+    /// <summary>
+    /// Replaces a service with a specific implementation instance.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type</typeparam>
+    /// <param name="implementation">The implementation instance</param>
+    public static void ReplaceService<TInterface>(TInterface implementation)
+        where TInterface : class
+    {
+        _serviceReplacements[typeof(TInterface)] = implementation;
+        RebuildContainerWithReplacements();
+    }
+
+    /// <summary>
+    /// Replaces a service with a specific implementation type.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type</typeparam>
+    /// <typeparam name="TImplementation">The implementation type</typeparam>
+    public static void ReplaceService<TInterface, TImplementation>()
+        where TInterface : class
+        where TImplementation : class, TInterface
+    {
+        _serviceReplacements[typeof(TInterface)] = typeof(TImplementation);
+        RebuildContainerWithReplacements();
+    }
+
+    /// <summary>
+    /// Clears all service replacements and resets to original factory.
+    /// </summary>
+    public static async Task ResetServiceReplacements()
+    {
+        _serviceReplacements.Clear();
+        
+        if (_customFactory != null)
+        {
+            await _customFactory.DisposeAsync();
+            _customFactory = null;
+        }
+        
+        // Reset scope factory to use original factory
+        _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
+    }
+
+    /// <summary>
+    /// Rebuilds the DI container with current service replacements.
+    /// </summary>
+    private static void RebuildContainerWithReplacements()
+    {
+        if (_serviceReplacements.Count == 0)
+        {
+            // No replacements needed, use original factory
+            _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
+            return;
+        }
+
+        // Dispose existing custom factory
+        _customFactory?.Dispose();
+
+        // Create new factory with replacements
+        _customFactory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _serviceReplacements);
+        
+        // Update the scope factory to use the custom factory with service replacements
+        _scopeFactory = _customFactory.Services.GetRequiredService<IServiceScopeFactory>();
+    }
+
+    #endregion
 }

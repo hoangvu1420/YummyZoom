@@ -3,6 +3,7 @@ using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using AuthorizeAttribute = YummyZoom.Application.Common.Security.AuthorizeAttribute;
 
 namespace YummyZoom.Application.Common.Behaviours;
 
@@ -37,12 +38,12 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
 
             // Role-based authorization
             var authorizeAttributesWithRoles = attributes.Where(a => !string.IsNullOrWhiteSpace(a.Roles));
-
-            if (authorizeAttributesWithRoles.Any())
+            IEnumerable<AuthorizeAttribute> attributesWithRoles = authorizeAttributesWithRoles.ToList();
+            if (attributesWithRoles.Any())
             {
                 var authorized = false;
 
-                foreach (var roles in authorizeAttributesWithRoles.Select(a => a.Roles.Split(',')))
+                foreach (var roles in attributesWithRoles.Select(a => a.Roles.Split(',')))
                 {
                     foreach (var role in roles)
                     {
@@ -64,9 +65,10 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
 
             // Policy-based authorization
             var authorizeAttributesWithPolicies = attributes.Where(a => !string.IsNullOrWhiteSpace(a.Policy));
-            if (authorizeAttributesWithPolicies.Any())
+            IEnumerable<AuthorizeAttribute> attributesWithPolicies = authorizeAttributesWithPolicies.ToList();
+            if (attributesWithPolicies.Any())
             {
-                foreach (var policy in authorizeAttributesWithPolicies.Select(a => a.Policy))
+                foreach (var policy in attributesWithPolicies.Select(a => a.Policy))
                 {
                     // Pass the request as a resource for policy-based authorization if it implements IContextualCommand
                     object? resource = request is IContextualCommand ? request : null;

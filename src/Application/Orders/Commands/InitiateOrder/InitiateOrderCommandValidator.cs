@@ -1,6 +1,3 @@
-using FluentValidation;
-using YummyZoom.Domain.OrderAggregate.Enums;
-
 namespace YummyZoom.Application.Orders.Commands.InitiateOrder;
 
 public class InitiateOrderCommandValidator : AbstractValidator<InitiateOrderCommand>
