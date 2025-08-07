@@ -216,25 +216,40 @@ public static class InitiateOrderTestHelper
     {
         var times = shouldBeCalled ? Times.Once() : Times.Never();
         
-        if (shouldBeCalled)
+        // For simplicity and reliability, use straightforward verification
+        // Specific parameter validation can be done separately if needed
+        mock.Verify(x => x.CreatePaymentIntentAsync(
+            It.IsAny<Money>(),
+            It.IsAny<string>(),
+            It.IsAny<IDictionary<string, string>>(),
+            It.IsAny<CancellationToken>()), times);
+            
+        // If specific validations are needed, perform them separately
+        if (shouldBeCalled && expectedAmount.HasValue)
         {
             mock.Verify(x => x.CreatePaymentIntentAsync(
-                expectedAmount.HasValue 
-                    ? It.Is<Money>(m => m.Amount == expectedAmount.Value)
-                    : It.IsAny<Money>(),
-                expectedCurrency ?? It.IsAny<string>(),
-                expectedMetadata != null 
-                    ? It.Is<IDictionary<string, string>>(d => expectedMetadata.All(key => d.ContainsKey(key)))
-                    : It.IsAny<IDictionary<string, string>>(),
-                It.IsAny<CancellationToken>()), times);
+                It.Is<Money>(m => m.Amount == expectedAmount.Value),
+                It.IsAny<string>(),
+                It.IsAny<IDictionary<string, string>>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
-        else
+        
+        if (shouldBeCalled && expectedCurrency != null)
+        {
+            mock.Verify(x => x.CreatePaymentIntentAsync(
+                It.IsAny<Money>(),
+                expectedCurrency,
+                It.IsAny<IDictionary<string, string>>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+        
+        if (shouldBeCalled && expectedMetadata != null)
         {
             mock.Verify(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
                 It.IsAny<string>(),
-                It.IsAny<IDictionary<string, string>>(),
-                It.IsAny<CancellationToken>()), times);
+                It.Is<IDictionary<string, string>>(d => expectedMetadata.All(key => d.ContainsKey(key))),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 

@@ -103,8 +103,6 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
             var menuItems = await _menuItemRepository.GetByIdsAsync(uniqueMenuItemIds, cancellationToken);
 
-            string currency = menuItems.First().GetCurrency();
-
             // Check if all unique menu items were found
             if (menuItems.Count != uniqueMenuItemIds.Count)
             {
@@ -113,6 +111,8 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 _logger.LogWarning("Menu items not found: {MissingIds}", string.Join(", ", missingIds.Select(id => id.Value)));
                 return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.MenuItemsNotFound());
             }
+
+            string currency = menuItems.First().GetCurrency();
 
             // Validate all menu items belong to the restaurant
             var invalidItems = menuItems.Where(m => m.RestaurantId != restaurantId).ToList();

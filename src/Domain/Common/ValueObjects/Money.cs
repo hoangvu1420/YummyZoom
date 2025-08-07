@@ -12,7 +12,8 @@ public sealed class Money : ValueObject
             // In a real domain, this should be a custom exception. For now, ArgumentNull is fine.
             throw new ArgumentNullException(nameof(currency), "Currency cannot be null or empty.");
         }
-        Amount = amount;
+        // Round to 2 decimal places to match database precision and ensure consistency
+        Amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
         Currency = currency;
     }
     
