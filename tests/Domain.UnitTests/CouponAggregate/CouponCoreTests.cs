@@ -151,7 +151,7 @@ public class CouponCoreTests
             DefaultEndDate);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.CouponCodeEmpty);
     }
 
@@ -171,7 +171,7 @@ public class CouponCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.CouponCodeEmpty);
     }
 
@@ -192,7 +192,7 @@ public class CouponCoreTests
             DefaultEndDate);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.CouponCodeTooLong(50));
     }
 
@@ -211,7 +211,7 @@ public class CouponCoreTests
             DefaultEndDate);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.CouponDescriptionEmpty);
     }
 
@@ -233,7 +233,7 @@ public class CouponCoreTests
             endDate);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.InvalidValidityPeriod);
     }
 
@@ -254,7 +254,7 @@ public class CouponCoreTests
             sameDate);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.InvalidValidityPeriod);
     }
 
@@ -274,7 +274,7 @@ public class CouponCoreTests
             totalUsageLimit: invalidLimit);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.InvalidUsageLimit);
     }
 
@@ -294,7 +294,7 @@ public class CouponCoreTests
             usageLimitPerUser: invalidLimit);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.InvalidPerUserLimit);
     }
 
@@ -316,7 +316,7 @@ public class CouponCoreTests
             invalidAmount);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.InvalidMinOrderAmount);
     }
 
@@ -371,7 +371,7 @@ public class CouponCoreTests
             totalUsageLimit: 10);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.UsageCountCannotExceedLimit(15, 10));
     }
 

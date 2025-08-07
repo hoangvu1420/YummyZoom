@@ -40,7 +40,7 @@ public class RatingTests
         var result = Rating.Create(invalidRating);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidRating);
     }
 
@@ -54,7 +54,7 @@ public class RatingTests
         var result = Rating.Create(belowMinimum);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidRating);
     }
 
@@ -68,7 +68,7 @@ public class RatingTests
         var result = Rating.Create(aboveMaximum);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidRating);
     }
 

@@ -221,7 +221,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.Resolved, DefaultAdminId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidStatusTransition("Open", "Resolved"));
     }
 
@@ -235,7 +235,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.PendingCustomerResponse);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidStatusTransition("Open", "PendingCustomerResponse"));
     }
 
@@ -249,7 +249,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.Open);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidStatusTransition("InProgress", "Open"));
     }
 
@@ -283,7 +283,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.Resolved, DefaultAdminId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidStatusTransition("PendingCustomerResponse", "Resolved"));
     }
 
@@ -301,7 +301,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.Resolved);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.UnauthorizedStatusChange("Resolved"));
     }
 
@@ -315,7 +315,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.Closed);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.UnauthorizedStatusChange("Closed"));
     }
 
@@ -361,7 +361,7 @@ public class SupportTicketStatusTests
         var result = ticket.UpdateStatus(SupportTicketStatus.InProgress);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.TicketUpdateFailed("Ticket is already in 'InProgress' status"));
     }
 

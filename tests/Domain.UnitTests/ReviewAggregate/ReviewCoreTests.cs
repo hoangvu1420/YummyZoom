@@ -51,7 +51,7 @@ public class ReviewCoreTests
         // Verify domain event
         review.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(ReviewCreated));
         var reviewCreatedEvent = review.DomainEvents.OfType<ReviewCreated>().Single();
-        reviewCreatedEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        reviewCreatedEvent.ReviewId.Should().Be(review.Id);
         reviewCreatedEvent.OrderId.Should().Be(DefaultOrderId);
         reviewCreatedEvent.CustomerId.Should().Be(DefaultCustomerId);
         reviewCreatedEvent.RestaurantId.Should().Be(DefaultRestaurantId);
@@ -93,7 +93,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidOrderId);
     }
 
@@ -111,7 +111,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidCustomerId);
     }
 
@@ -129,7 +129,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.InvalidRestaurantId);
     }
 
@@ -156,7 +156,7 @@ public class ReviewCoreTests
         IEnumerable<ReviewModerated> reviewModerateds = moderatedEvents as ReviewModerated[] ?? moderatedEvents.ToArray();
         reviewModerateds.Should().ContainSingle();
         var moderatedEvent = reviewModerateds.Single();
-        moderatedEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        moderatedEvent.ReviewId.Should().Be(review.Id);
         moderatedEvent.ModeratedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -200,7 +200,7 @@ public class ReviewCoreTests
         IEnumerable<ReviewHidden> reviewHiddens = hiddenEvents as ReviewHidden[] ?? hiddenEvents.ToArray();
         reviewHiddens.Should().ContainSingle();
         var hiddenEvent = reviewHiddens.Single();
-        hiddenEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        hiddenEvent.ReviewId.Should().Be(review.Id);
         hiddenEvent.HiddenAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -225,7 +225,7 @@ public class ReviewCoreTests
         IEnumerable<ReviewShown> reviewShowns = shownEvents as ReviewShown[] ?? shownEvents.ToArray();
         reviewShowns.Should().ContainSingle();
         var shownEvent = reviewShowns.Single();
-        shownEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        shownEvent.ReviewId.Should().Be(review.Id);
         shownEvent.ShownAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -286,7 +286,7 @@ public class ReviewCoreTests
         IEnumerable<ReviewReplied> reviewReplieds = repliedEvents as ReviewReplied[] ?? repliedEvents.ToArray();
         reviewReplieds.Should().ContainSingle();
         var repliedEvent = reviewReplieds.Single();
-        repliedEvent.ReviewId.Should().Be((ReviewId)review.Id);
+        repliedEvent.ReviewId.Should().Be(review.Id);
         repliedEvent.Reply.Should().Be(DefaultReply);
         repliedEvent.RepliedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
@@ -303,7 +303,7 @@ public class ReviewCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.EmptyReply);
         review.Reply.Should().BeNull();
         review.DomainEvents.OfType<ReviewReplied>().Should().BeEmpty();
@@ -322,7 +322,7 @@ public class ReviewCoreTests
         var result = review.AddReply(invalidReply);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.EmptyReply);
         review.Reply.Should().BeNull();
         review.DomainEvents.OfType<ReviewReplied>().Should().BeEmpty();
@@ -340,7 +340,7 @@ public class ReviewCoreTests
         var result = review.AddReply("Second reply attempt");
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(ReviewErrors.ReviewAlreadyReplied);
         review.Reply.Should().Be(DefaultReply, "because the original reply should remain unchanged");
         review.DomainEvents.Should().BeEmpty("because no new event should be added for failed reply attempt");

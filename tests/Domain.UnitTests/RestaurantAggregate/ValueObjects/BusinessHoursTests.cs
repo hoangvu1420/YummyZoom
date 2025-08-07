@@ -34,7 +34,7 @@ public class BusinessHoursTests
         var result = BusinessHours.Create(string.Empty);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursFormatIsRequired());
     }
 
@@ -45,7 +45,7 @@ public class BusinessHoursTests
         var result = BusinessHours.Create(null!);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursFormatIsRequired());
     }
 
@@ -56,7 +56,7 @@ public class BusinessHoursTests
         var result = BusinessHours.Create("   ");
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursFormatIsRequired());
     }
 
@@ -70,7 +70,7 @@ public class BusinessHoursTests
         var result = BusinessHours.Create(tooLongHours);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.BusinessHoursFormatTooLong(200));
     }
 

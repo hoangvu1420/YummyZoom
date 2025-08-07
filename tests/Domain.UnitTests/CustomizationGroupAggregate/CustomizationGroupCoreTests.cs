@@ -87,7 +87,7 @@ public class CustomizationGroupCoreTests
             DefaultMaxSelections);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.GroupNameRequired);
     }
 
@@ -104,7 +104,7 @@ public class CustomizationGroupCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.GroupNameRequired);
     }
 
@@ -119,7 +119,7 @@ public class CustomizationGroupCoreTests
             maxSelections: 1);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.InvalidSelectionRange);
     }
 
@@ -196,7 +196,7 @@ public class CustomizationGroupCoreTests
         var result = group.UpdateGroupDetails(invalidName, DefaultMinSelections, DefaultMaxSelections);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.GroupNameRequired);
         group.GroupName.Should().Be(originalGroupName); // Should remain unchanged
     }
@@ -214,7 +214,7 @@ public class CustomizationGroupCoreTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.GroupNameRequired);
         group.GroupName.Should().Be(originalGroupName); // Should remain unchanged
     }
@@ -231,7 +231,7 @@ public class CustomizationGroupCoreTests
         var result = group.UpdateGroupDetails(DefaultGroupName, minSelections: 3, maxSelections: 1);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.InvalidSelectionRange);
         group.MinSelections.Should().Be(originalMinSelections); // Should remain unchanged
         group.MaxSelections.Should().Be(originalMaxSelections); // Should remain unchanged

@@ -80,7 +80,7 @@ public class TeamCartExpirationTests
         var result = teamCart.SetDeadline(guestUserId, newDeadline);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.OnlyHostCanSetDeadline);
     }
 

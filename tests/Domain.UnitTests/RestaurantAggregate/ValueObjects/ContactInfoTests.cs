@@ -36,7 +36,7 @@ public class ContactInfoTests
         var result = ContactInfo.Create(string.Empty, ValidEmail);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactPhoneIsRequired());
     }
 
@@ -49,7 +49,7 @@ public class ContactInfoTests
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactPhoneIsRequired());
     }
 
@@ -60,7 +60,7 @@ public class ContactInfoTests
         var result = ContactInfo.Create(ValidPhoneNumber, string.Empty);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactEmailIsRequired());
     }
 
@@ -73,7 +73,7 @@ public class ContactInfoTests
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactEmailIsRequired());
     }
 
@@ -84,7 +84,7 @@ public class ContactInfoTests
         var result = ContactInfo.Create(ValidPhoneNumber, "invalid-email");
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactEmailInvalidFormat("invalid-email"));
     }
 
@@ -132,7 +132,7 @@ public class ContactInfoTests
         var result = ContactInfo.Create(ValidPhoneNumber, email);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.ContactEmailInvalidFormat(email));
     }
 

@@ -96,7 +96,7 @@ public class RestaurantAccountTests
         var result = account.RecordRevenue(NegativeFiveDollars, DefaultOrderId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.OrderRevenueMustBePositive(NegativeFiveDollars));
         account.CurrentBalance.Should().Be(initialBalance);
         account.DomainEvents.Should().BeEmpty();
@@ -113,7 +113,7 @@ public class RestaurantAccountTests
         var result = account.RecordRevenue(ZeroDollars, DefaultOrderId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.OrderRevenueMustBePositive(ZeroDollars));
     }
 
@@ -147,7 +147,7 @@ public class RestaurantAccountTests
         var result = account.RecordPlatformFee(FiveDollars, DefaultOrderId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.PlatformFeeMustBeNegative(FiveDollars));
         account.DomainEvents.Should().BeEmpty();
     }
@@ -182,7 +182,7 @@ public class RestaurantAccountTests
         var result = account.RecordRefundDeduction(FiveDollars, DefaultOrderId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.RefundDeductionMustBeNegative(FiveDollars));
     }
 
@@ -221,7 +221,7 @@ public class RestaurantAccountTests
         var result = account.SettlePayout(TenDollars);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Code.Should().Be(RestaurantAccountErrors.InsufficientBalance(initialBalance, TenDollars).Code);
         account.CurrentBalance.Should().Be(initialBalance);
         account.DomainEvents.Should().BeEmpty();
@@ -237,7 +237,7 @@ public class RestaurantAccountTests
         var result = account.SettlePayout(ZeroDollars);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.PayoutAmountMustBePositive(ZeroDollars));
     }
 
@@ -285,7 +285,7 @@ public class RestaurantAccountTests
         var result = account.MakeManualAdjustment(TenDollars, string.Empty, DefaultAdminId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.ManualAdjustmentReasonRequired);
     }
 

@@ -96,7 +96,7 @@ public class ContextLinkTests
         var entityType = ContextEntityType.Restaurant;
 
         // Act
-        var result = ContextLink.Create(entityType, (string)null!);
+        var result = ContextLink.Create(entityType, null!);
 
         // Assert
         result.ShouldBeFailure();

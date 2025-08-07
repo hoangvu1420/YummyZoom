@@ -62,7 +62,7 @@ public class AddressTests
         var result = Address.Create(null!, ValidCity, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressStreetIsRequired());
     }
 
@@ -73,7 +73,7 @@ public class AddressTests
         var result = Address.Create(string.Empty, ValidCity, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressStreetIsRequired());
     }
 
@@ -84,7 +84,7 @@ public class AddressTests
         var result = Address.Create("   ", ValidCity, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressStreetIsRequired());
     }
 
@@ -98,7 +98,7 @@ public class AddressTests
         var result = Address.Create(tooLongStreet, ValidCity, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressFieldTooLong("Street", 100));
     }
 
@@ -113,7 +113,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, null!, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressCityIsRequired());
     }
 
@@ -124,7 +124,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, string.Empty, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressCityIsRequired());
     }
 
@@ -138,7 +138,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, tooLongCity, ValidState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressFieldTooLong("City", 100));
     }
 
@@ -153,7 +153,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, null!, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressStateIsRequired());
     }
 
@@ -164,7 +164,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, string.Empty, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressStateIsRequired());
     }
 
@@ -178,7 +178,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, tooLongState, ValidZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressFieldTooLong("State", 100));
     }
 
@@ -193,7 +193,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, null!, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressZipCodeIsRequired());
     }
 
@@ -204,7 +204,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, string.Empty, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressZipCodeIsRequired());
     }
 
@@ -218,7 +218,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, tooLongZipCode, ValidCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressFieldTooLong("ZipCode", 20));
     }
 
@@ -233,7 +233,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, ValidZipCode, null!);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressCountryIsRequired());
     }
 
@@ -244,7 +244,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, ValidZipCode, string.Empty);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressCountryIsRequired());
     }
 
@@ -258,7 +258,7 @@ public class AddressTests
         var result = Address.Create(ValidStreet, ValidCity, ValidState, ValidZipCode, tooLongCountry);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantErrors.AddressFieldTooLong("Country", 100));
     }
 

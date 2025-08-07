@@ -130,7 +130,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot be empty"));
     }
 
@@ -152,7 +152,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot be empty"));
     }
 
@@ -175,7 +175,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot exceed 200 characters"));
     }
 
@@ -220,7 +220,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.NoContextLinksProvided);
     }
 
@@ -239,7 +239,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.NoContextLinksProvided);
     }
 
@@ -261,7 +261,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidMessageText("Message text cannot be empty"));
     }
 
@@ -283,7 +283,7 @@ public class SupportTicketCoreTests
             DefaultTicketSequenceNumber);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidAuthorId("Author ID cannot be empty"));
     }
 
@@ -410,7 +410,7 @@ public class SupportTicketCoreTests
             messages);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.InvalidSubject("Subject cannot be empty"));
     }
 
@@ -437,7 +437,7 @@ public class SupportTicketCoreTests
             messages);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(SupportTicketErrors.NoContextLinksProvided);
     }
 

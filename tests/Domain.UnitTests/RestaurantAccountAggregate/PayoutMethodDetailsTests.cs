@@ -44,7 +44,7 @@ public class PayoutMethodDetailsTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.InvalidPayoutMethod);
     }
 
@@ -55,7 +55,7 @@ public class PayoutMethodDetailsTests
         var result = PayoutMethodDetails.Create(string.Empty);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.InvalidPayoutMethod);
     }
 
@@ -66,7 +66,7 @@ public class PayoutMethodDetailsTests
         var result = PayoutMethodDetails.Create("   ");
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(RestaurantAccountErrors.InvalidPayoutMethod);
     }
 

@@ -60,7 +60,7 @@ public class CustomizationGroupChoiceManagementTests
         var result = group.AddChoice("Large", PriceAdjustment, false, 2); // Same name
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNameNotUnique);
         group.Choices.Should().ContainSingle(); // Only the first choice should remain
         group.Choices.Single().Name.Should().Be("Large");
@@ -148,7 +148,7 @@ public class CustomizationGroupChoiceManagementTests
         var result = group.RemoveChoice(nonExistentChoiceId);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.InvalidChoiceId);
     }
 
@@ -221,7 +221,7 @@ public class CustomizationGroupChoiceManagementTests
         var result = group.UpdateChoice(nonExistentChoiceId, "New Name", DefaultPrice, false);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.InvalidChoiceId);
     }
 
@@ -240,7 +240,7 @@ public class CustomizationGroupChoiceManagementTests
         var result = group.UpdateChoice(choice2.Id, "Small", DefaultPrice, false);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNameNotUnique);
         // Verify the original choice remains unchanged
         var unchangedChoice = group.Choices.First(c => c.Name == "Large");
@@ -417,7 +417,7 @@ public class CustomizationGroupChoiceManagementTests
         var result = group.AddChoiceWithAutoOrder("Large", PriceAdjustment); // Duplicate name
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNameNotUnique);
         group.Choices.Should().ContainSingle(); // Only first choice should remain
     }

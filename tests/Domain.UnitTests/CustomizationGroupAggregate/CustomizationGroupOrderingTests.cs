@@ -135,7 +135,7 @@ public class CustomizationGroupOrderingTests
         var result = group.ReorderChoices(orderChanges);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.ChoiceNotFoundForReordering);
         choice.DisplayOrder.Should().Be(1); // Should remain unchanged
     }
@@ -157,7 +157,7 @@ public class CustomizationGroupOrderingTests
         var result = group.ReorderChoices(orderChanges);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.InvalidDisplayOrder);
         choice.DisplayOrder.Should().Be(1); // Should remain unchanged
     }
@@ -186,7 +186,7 @@ public class CustomizationGroupOrderingTests
         var result = group.ReorderChoices(orderChanges);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CustomizationGroupErrors.DuplicateDisplayOrder);
         choice1.DisplayOrder.Should().Be(1); // Should remain unchanged
         choice2.DisplayOrder.Should().Be(2); // Should remain unchanged

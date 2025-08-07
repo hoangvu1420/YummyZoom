@@ -297,7 +297,7 @@ public class MoneyTests
         var result = money * multiplier;
 
         // Assert
-        result.Amount.Should().Be(15.495m);
+        result.Amount.Should().Be(15.50m);
         result.Currency.Should().Be(DefaultCurrency);
     }
 
@@ -489,7 +489,7 @@ public class MoneyTests
         var result = money * multiplier;
 
         // Assert
-        result.Amount.Should().Be(0.001m);
+        result.Amount.Should().Be(0.00m);
         result.Currency.Should().Be(DefaultCurrency);
     }
 

@@ -91,7 +91,7 @@ public class AppliesToTests
         var result = AppliesTo.CreateForSpecificItems(emptyItemIds);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.EmptyItemIds);
     }
 
@@ -104,7 +104,7 @@ public class AppliesToTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.EmptyItemIds);
     }
 
@@ -119,7 +119,7 @@ public class AppliesToTests
         var result = AppliesTo.CreateForSpecificItems(itemIds);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.DuplicateItemIds);
     }
 
@@ -194,7 +194,7 @@ public class AppliesToTests
         var result = AppliesTo.CreateForSpecificCategories(emptyCategoryIds);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.EmptyCategoryIds);
     }
 
@@ -207,7 +207,7 @@ public class AppliesToTests
 #pragma warning restore CS8625
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.EmptyCategoryIds);
     }
 
@@ -222,7 +222,7 @@ public class AppliesToTests
         var result = AppliesTo.CreateForSpecificCategories(categoryIds);
 
         // Assert
-        result.ShouldBeSuccessful();
+        result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.DuplicateCategoryIds);
     }
 
