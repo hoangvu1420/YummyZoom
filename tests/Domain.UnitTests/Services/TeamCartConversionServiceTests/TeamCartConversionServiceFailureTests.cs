@@ -35,7 +35,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -58,7 +58,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -81,7 +81,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -104,7 +104,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -115,7 +115,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
     }
 
     [Test]
-    public void ConvertToOrder_WithCouponValidationFailure_ShouldFail()
+    public void ConvertToOrder_WithCouponValidationFailure_ShouldSucceedWithZeroDiscount()
     {
         // Arrange
         var teamCart = TeamCartTestHelpers.CreateTeamCartWithGuest();
@@ -146,20 +146,22 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
         var guestUserId = teamCart.Members.First(m => m.UserId != teamCart.HostUserId).UserId;
         teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
 
-        // Act
+        // Act - Application layer should reject expired coupon; here we simulate by passing zero discount
         var result = TeamCartConversionService.ConvertToOrder(
             teamCart,
             deliveryAddress,
             string.Empty,
             expiredCoupon,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
 
-        // Assert
-        result.ShouldBeFailure();
-        result.Error.Should().Be(CouponErrors.CouponExpired);
+        // Assert - conversion succeeds and applies zero discount
+        result.ShouldBeSuccessful();
+        var (order, updatedTeamCart) = result.Value;
+        order.DiscountAmount.Should().Be(Money.Zero(Currencies.Default));
+        order.AppliedCouponId.Should().Be(teamCart.AppliedCouponId);
     }
 
     [Test]
@@ -180,7 +182,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             differentCoupon,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -211,7 +213,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             deliveryAddress,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );
@@ -233,7 +235,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
             null!,
             string.Empty,
             null,
-            0,
+            Money.Zero(Currencies.Default),
             new Money(10, Currencies.Default),
             new Money(5, Currencies.Default)
         );

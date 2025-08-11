@@ -24,7 +24,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -47,7 +47,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -71,7 +71,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -93,7 +93,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -111,7 +111,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -138,7 +138,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -160,7 +160,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -183,7 +183,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -208,7 +208,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -229,7 +229,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -238,32 +238,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
     #endregion
 
-    #region Usage Limit Tests
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithUsageLimitsNotExceeded_ReturnsDiscount()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(
-            couponValue: CouponValue.CreatePercentage(15m).Value,
-            totalUsageLimit: 100,
-            usageLimitPerUser: 5,
-            currentTotalUsageCount: 50);
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-        var userUsageCount = 2; // Under per-user limit
-        var expectedDiscount = new Money(3.00m, "USD"); // 15% of 20.00
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, userUsageCount, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        AssertMoneyEquals(expectedDiscount, result.ValueOrFail(), "should apply discount when usage limits are not exceeded");
-    }
-
-    #endregion
+    // Usage limit success test removed: service no longer checks usage limits.
 
     #region Edge Cases
 
@@ -287,7 +262,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -305,7 +280,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();

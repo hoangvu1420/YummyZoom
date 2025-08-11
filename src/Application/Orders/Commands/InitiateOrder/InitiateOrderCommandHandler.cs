@@ -1,8 +1,11 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.CouponAggregate.Events;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
@@ -28,6 +31,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
     private readonly OrderFinancialService _orderFinancialService;
     private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
     private readonly ILogger<InitiateOrderCommandHandler> _logger;
 
     public InitiateOrderCommandHandler(
@@ -39,6 +43,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         OrderFinancialService orderFinancialService,
         IUnitOfWork unitOfWork,
         IUser currentUser,
+        IMediator mediator,
         ILogger<InitiateOrderCommandHandler> logger)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
@@ -49,6 +54,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -175,27 +181,48 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             if (!string.IsNullOrEmpty(request.CouponCode))
             {
                 var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode, restaurantId, cancellationToken);
+                
                 if (coupon is not null)
                 {
-                    var userUsageCount = await _couponRepository.GetUserUsageCountAsync(
-                        coupon.Id, customerId, cancellationToken);
+                    // 1) Validate & compute discount (no usage checks here)
+                    var validationResult = _orderFinancialService.ValidateAndCalculateDiscount(
+                        coupon, orderItems, subtotal);
 
-                    var couponResult = _orderFinancialService.ValidateAndCalculateDiscount(
-                        coupon, userUsageCount, orderItems, subtotal);
+                    if (validationResult.IsFailure)
+                    {
+                        _logger.LogWarning("Coupon pre-validation failed for {CouponCode}: {Error}", request.CouponCode, validationResult.Error);
+                        return Result.Failure<InitiateOrderResponse>(validationResult.Error);
+                    }
 
-                    if (couponResult.IsSuccess)
+                    // 2) Atomically enforce per-user usage limit
+                    var perUserIncOk = await _couponRepository.TryIncrementUserUsageCountAsync(
+                        coupon.Id, customerId, coupon.UsageLimitPerUser, cancellationToken);
+
+                    if (!perUserIncOk)
                     {
-                        discountAmount = couponResult.Value;
-                        appliedCouponId = coupon.Id;
-                        _logger.LogInformation("Applied coupon {CouponCode} with discount {DiscountAmount}",
-                            request.CouponCode, discountAmount.Amount);
+                        _logger.LogWarning("Per-user usage limit reached for coupon {CouponCode} by user {UserId}", request.CouponCode, customerId.Value);
+                        return Result.Failure<InitiateOrderResponse>(CouponErrors.UserUsageLimitExceeded);
                     }
-                    else
+
+                    // 3) Atomically enforce total usage limit
+                    var totalIncOk = await _couponRepository.TryIncrementUsageCountAsync(coupon.Id, cancellationToken);
+
+                    if (!totalIncOk)
                     {
-                        _logger.LogWarning("Coupon validation failed for {CouponCode}: {Error}",
-                            request.CouponCode, couponResult.Error);
-                        return Result.Failure<InitiateOrderResponse>(couponResult.Error);
+                        _logger.LogWarning("Failed to apply coupon {CouponCode}: usage limit reached during atomic increment.", request.CouponCode);
+                        return Result.Failure<InitiateOrderResponse>(CouponErrors.UsageLimitExceeded);
                     }
+
+                    // 4) Publish coupon used domain event
+                    var previousCount = coupon.CurrentTotalUsageCount;
+                    var newCount = previousCount + 1;
+                    var couponUsedEvent = new CouponUsed(coupon.Id, previousCount, newCount, DateTime.UtcNow);
+                    await _mediator.Publish(couponUsedEvent, cancellationToken);
+
+                    discountAmount = validationResult.Value;
+                    appliedCouponId = coupon.Id;
+                    _logger.LogInformation("Successfully applied and incremented coupon {CouponCode} with discount {DiscountAmount}",
+                        request.CouponCode, discountAmount.Amount);
                 }
                 else
                 {
@@ -281,23 +308,6 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
 
             // 8. Save the order
             await _orderRepository.AddAsync(order, cancellationToken);
-
-            // 9. Increment coupon usage count if a coupon was applied
-            if (appliedCouponId is not null)
-            {
-                var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode!, restaurantId, cancellationToken);
-                if (coupon is not null)
-                {
-                    var useResult = coupon.Use();
-                    if (useResult.IsFailure)
-                    {
-                        _logger.LogError("Failed to increment coupon usage count for {CouponCode}: {Error}",
-                            request.CouponCode, useResult.Error);
-                        // This is logged as an error but doesn't fail the transaction since the order was already created
-                        // In a real system, you might want to handle this differently
-                    }
-                }
-            }
 
             _logger.LogInformation("Successfully created order {OrderId} for user {UserId} at restaurant {RestaurantId}",
                 order.Id.Value, customerId.Value, restaurantId.Value);

@@ -40,8 +40,7 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
         builder.Property(c => c.ValidityEndDate)
             .IsRequired();
 
-        builder.Property(c => c.TotalUsageLimit)
-            .IsRequired();
+        builder.Property(c => c.TotalUsageLimit);
 
         builder.Property(c => c.CurrentTotalUsageCount)
             .IsRequired()
@@ -78,11 +77,11 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
                 .HasColumnName("Value_Type")
                 .HasConversion<string>()
                 .IsRequired();
-            
+
             valueBuilder.Property(v => v.PercentageValue)
                 .HasColumnName("Value_PercentageValue")
                 .HasColumnType("decimal(5,2)");
-            
+
             valueBuilder.OwnsOne(v => v.FixedAmountValue, moneyBuilder =>
             {
                 moneyBuilder.Property(m => m.Amount)
@@ -92,10 +91,10 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
                     .HasColumnName("Value_FixedAmount_Currency")
                     .HasMaxLength(3);
             });
-            
+
             valueBuilder.Property(v => v.FreeItemValue)
                 .HasColumnName("Value_FreeItemValue")
-                .HasConversion(id => id != null ? id.Value : (Guid?)null, 
+                .HasConversion(id => id != null ? id.Value : (Guid?)null,
                               value => value.HasValue ? MenuItemId.Create(value.Value) : null);
         });
 
@@ -106,10 +105,10 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
                 .HasColumnName("AppliesTo_Scope")
                 .HasConversion<string>()
                 .IsRequired();
-            
+
             appliesToBuilder.Property(a => a.ItemIds)
                 .HasColumnName("AppliesTo_ItemIds")
-                .HasColumnType("jsonb") 
+                .HasColumnType("jsonb")
                 .HasConversion(
                     itemIds => JsonSerializer.Serialize(itemIds.Select(id => id.Value).ToList(), (JsonSerializerOptions?)null),
                     json => JsonSerializer.Deserialize<List<Guid>>(json, (JsonSerializerOptions?)null)!
@@ -118,10 +117,10 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
                         (c1, c2) => c1!.SequenceEqual(c2!),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList().AsReadOnly()));
-            
+
             appliesToBuilder.Property(a => a.CategoryIds)
                 .HasColumnName("AppliesTo_CategoryIds")
-                .HasColumnType("jsonb") 
+                .HasColumnType("jsonb")
                 .HasConversion(
                     categoryIds => JsonSerializer.Serialize(categoryIds.Select(id => id.Value).ToList(), (JsonSerializerOptions?)null),
                     json => JsonSerializer.Deserialize<List<Guid>>(json, (JsonSerializerOptions?)null)!
@@ -135,5 +134,9 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
         // --- 5. Auditing & Soft Delete ---
         builder.ConfigureAuditProperties();
         builder.ConfigureSoftDeleteProperties();
+
+        // --- 6. Indexes ---
+        builder.HasIndex(c => c.CurrentTotalUsageCount)
+            .IsUnique(false);
     }
 }

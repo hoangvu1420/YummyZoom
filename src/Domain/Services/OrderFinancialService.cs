@@ -27,18 +27,17 @@ public class OrderFinancialService
     }
 
     /// <summary>
-    /// Validates a coupon's rules and calculates the resulting discount amount.
-    /// This method is pure and receives all necessary data.
+    /// Validates a coupon's business rules and calculates the resulting discount amount.
+    /// This method performs all validations except total usage limit checks, which are handled
+    /// atomically at the repository level to prevent race conditions.
     /// </summary>
     /// <param name="coupon">The coupon to validate and apply.</param>
-    /// <param name="currentUserUsageCount">The number of times the current user has used this coupon.</param>
     /// <param name="orderItems">The items in the order to which the coupon will be applied.</param>
     /// <param name="subtotal">The subtotal of the order before discounts.</param>
     /// <param name="currentTime">The current time to use for validation (defaults to DateTime.UtcNow if not provided).</param>
     /// <returns>A Result containing the calculated discount amount if successful.</returns>
     public virtual Result<Money> ValidateAndCalculateDiscount(
         Coupon coupon,
-        int currentUserUsageCount,
         IReadOnlyList<OrderItem> orderItems,
         Money subtotal,
         DateTime? currentTime = null)
@@ -54,14 +53,8 @@ public class OrderFinancialService
             return Result.Failure<Money>(CouponErrors.CouponExpired);
 
         // 2. Usage Limit Checks
-        if (coupon.TotalUsageLimit.HasValue && coupon.CurrentTotalUsageCount >= coupon.TotalUsageLimit.Value)
-        {
-            return Result.Failure<Money>(CouponErrors.UsageLimitExceeded);
-        }
-        if (coupon.UsageLimitPerUser.HasValue && currentUserUsageCount >= coupon.UsageLimitPerUser.Value)
-        {
-            return Result.Failure<Money>(CouponErrors.UserUsageLimitExceeded);
-        }
+        // Note: Total and per-user usage limit checks are handled atomically at the repository level
+        // to prevent race conditions in concurrent scenarios. This service does not validate usage counts.
 
         // 3. Order Condition Checks
         if (coupon.MinOrderAmount is not null && subtotal.Amount < coupon.MinOrderAmount.Amount)

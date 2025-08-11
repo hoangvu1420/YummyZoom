@@ -1,328 +1,114 @@
-## Implementation Plan
-
-This section outlines the sequential steps to implement the InitiateOrder command tests, ensuring a logical and efficient development process.
-
-### Phase 1: Infrastructure Setup
-
-#### Step 1: Create Test Folder Structure
-**Estimated Time**: 15 minutes
-**Prerequisites**: None
-
-1. Create the new folder structure:
-   ```
-   tests/Application.FunctionalTests/Features/Orders/Commands/InitiateOrder/
-   ```
-
-2. Add placeholder files for all test classes:
-   - `InitiateOrderHappyPathTests.cs`
-   - `InitiateOrderValidationTests.cs`
-   - `InitiateOrderBusinessRuleTests.cs`
-   - `InitiateOrderFinancialTests.cs`
-   - `InitiateOrderPaymentTests.cs`
-   - `InitiateOrderAuthorizationTests.cs`
-   - `InitiateOrderEdgeCaseTests.cs`
-   - `InitiateOrderTestHelper.cs`
-
-#### Step 2: Implement InitiateOrderTestHelper
-**Estimated Time**: 2-3 hours
-**Prerequisites**: Step 1 complete
-
-1. **Create the helper class structure**:
-   ```csharp
-   public static class InitiateOrderTestHelper
-   {
-       #region Command Builders
-       #region Mock Setup Helpers  
-       #region Assertion Helpers
-       #region Test Data
-   }
-   ```
-
-2. **Implement command builders** (start simple, extend as needed):
-   - `BuildValidCommand()` - Basic valid command with default test data
-   - `BuildValidCommandWithCoupon()` - Command with coupon applied
-   - `BuildValidCommandWithTip()` - Command with tip amount
-   - `BuildInvalidCommand()` - Various invalid command variations
-
-3. **Implement mock setup helpers**:
-   - `SetupSuccessfulPaymentGatewayMock()` - Returns successful payment intent
-   - `SetupFailingPaymentGatewayMock()` - Returns payment gateway failure
-   - `SetupPaymentGatewayMockWithCustomResponse()` - Configurable response
-
-4. **Implement assertion helpers**:
-   - `ValidateOrderFinancials()` - Check financial calculations
-   - `ValidatePaymentIntentCreation()` - Verify payment gateway calls
-   - `ValidateOrderPersistence()` - Check database state
-
-5. **Define test data constants**:
-   - `DefaultDeliveryAddress` - Standard test address
-   - `PaymentMethods` - Supported payment method constants
-   - `TestAmounts` - Common test amounts and calculations
-
-#### Step 3: Create Base Test Class
-**Estimated Time**: 30 minutes
-**Prerequisites**: Step 2 complete
-
-1. **Implement `InitiateOrderTestBase`**:
-   ```csharp
-   public abstract class InitiateOrderTestBase : BaseTestFixture
-   {
-       protected Mock<IPaymentGatewayService> PaymentGatewayMock { get; private set; }
-       
-       [SetUp]
-       public virtual async Task SetUp()
-       {
-           // Common setup for all InitiateOrder tests
-       }
-   }
-   ```
-
-2. **Add service replacement logic**:
-   - Check if `ReplaceService<T>()` method exists in test infrastructure
-   - If not, implement alternative service replacement approach
-   - Document the approach for consistency across test files
-
-### Phase 2: Core Test Implementation
-
-#### Step 4: Implement Authorization Tests (Start Simple)
-**Estimated Time**: 1 hour
-**Prerequisites**: Phase 1 complete
-
-**Why start here**: Authorization tests are typically simple and help validate the test infrastructure setup.
-
-1. **Create `InitiateOrderAuthorizationTests.cs`**:
-   - Implement authentication required test
-   - Implement user context validation test
-   - Verify test infrastructure works correctly
-
-2. **Run and validate**:
-   - Ensure tests pass
-   - Verify mock setup works
-   - Check database interactions
-
-#### Step 5: Implement Happy Path Tests
-**Estimated Time**: 2-3 hours
-**Prerequisites**: Step 4 complete and validated
-
-**Why next**: Happy path tests establish the baseline functionality and test data patterns.
-
-1. **Create `InitiateOrderHappyPathTests.cs`**:
-   - Basic order creation test
-   - Cash on delivery test
-   - Order with coupon test
-   - Order with tip test
-   - Order with special instructions test
-   - Multiple menu items test
-
-2. **Focus on**:
-   - Establishing proper test data usage patterns
-   - Validating helper methods work correctly
-   - Ensuring database persistence verification works
-
-3. **Validate and refine**:
-   - Run tests and fix any issues
-   - Refine helper methods based on actual usage
-   - Document any patterns discovered
-
-#### Step 6: Implement Validation Tests
-**Estimated Time**: 2-3 hours
-**Prerequisites**: Step 5 complete
-
-**Why next**: Validation tests are straightforward and help catch input-related issues early.
-
-1. **Create `InitiateOrderValidationTests.cs`**:
-   - Required field validation tests
-   - Item quantity validation tests
-   - Order size validation tests
-   - Address validation tests
-   - Payment method validation tests
-   - Optional field validation tests
-
-2. **Focus on**:
-   - Testing FluentValidation rules
-   - Ensuring proper exception handling
-   - Validating error message accuracy
-
-### Phase 3: Business Logic Implementation
-
-#### Step 7: Implement Financial Calculation Tests
-**Estimated Time**: 3-4 hours
-**Prerequisites**: Step 6 complete
-
-**Why next**: Financial calculations are core business logic and relatively isolated from other concerns.
-
-1. **Create `InitiateOrderFinancialTests.cs`**:
-   - Subtotal calculation tests
-   - Tax and fee calculation tests
-   - Discount calculation tests (percentage and fixed)
-   - Total calculation tests
-
-2. **Focus on**:
-   - Accurate financial calculations
-   - Proper money handling
-   - Coupon discount logic validation
-
-3. **Test with real data**:
-   - Use actual menu item prices from test data
-   - Verify calculations match expected business rules
-   - Test edge cases (zero amounts, large numbers)
-
-#### Step 8: Implement Business Rule Tests
-**Estimated Time**: 4-5 hours
-**Prerequisites**: Step 7 complete
-
-**Why next**: Business rules build on financial logic and require more complex test scenarios.
-
-1. **Create `InitiateOrderBusinessRuleTests.cs`**:
-   - Restaurant validation tests (exists, active)
-   - Menu item validation tests (exists, belongs to restaurant, available)
-   - Coupon business rule tests (expiry, usage limits, conditions)
-
-2. **Focus on**:
-   - Creating test scenarios that require custom data setup
-   - Testing error conditions and error messages
-   - Validating business rule enforcement
-
-3. **Data setup considerations**:
-   - Create inactive restaurants for testing
-   - Create expired/disabled coupons
-   - Mark menu items as unavailable
-   - Test cross-restaurant menu item scenarios
-
-### Phase 4: Integration and Edge Cases
-
-#### Step 9: Implement Payment Gateway Interaction Tests
-**Estimated Time**: 3-4 hours
-**Prerequisites**: Step 8 complete
-
-**Why next**: Payment logic builds on business rules and requires mock verification skills.
-
-1. **Create `InitiateOrderPaymentTests.cs`**:
-   - Payment intent creation tests for different methods
-   - Payment gateway error handling tests
-   - Metadata validation tests
-   - Cash on delivery handling tests
-
-2. **Focus on**:
-   - Mock verification and interaction testing
-   - Payment method handling differences
-   - Error propagation from payment gateway
-   - Metadata correctness
-
-3. **Mock verification patterns**:
-   - Verify payment gateway called with correct parameters
-   - Verify payment gateway not called for COD
-   - Verify proper error handling when payment fails
-
-#### Step 10: Implement Edge Case Tests
-**Estimated Time**: 2-3 hours
-**Prerequisites**: Step 9 complete
-
-**Why last**: Edge cases often depend on understanding gained from implementing other test categories.
-
-1. **Create `InitiateOrderEdgeCaseTests.cs`**:
-   - Transaction consistency tests
-   - Concurrent operation tests
-   - Audit trail tests
-   - Domain event tests
-
-2. **Focus on**:
-   - Advanced scenarios that test system boundaries
-   - Transaction rollback scenarios
-   - Data consistency verification
-   - Event publishing validation
-
-### Phase 5: Integration and Refinement
-
-#### Step 11: Integration Testing and Cleanup
-**Estimated Time**: 2-3 hours
-**Prerequisites**: All test files implemented
-
-1. **Run complete test suite**:
-   - Execute all InitiateOrder tests together
-   - Identify and fix any conflicts or dependencies
-   - Verify test isolation and parallel execution
-
-2. **Performance validation**:
-   - Check test execution times
-   - Identify any slow tests and optimize
-   - Ensure database cleanup is efficient
-
-3. **Refactor and optimize**:
-   - Extract common patterns to helper methods
-   - Eliminate code duplication across test files
-   - Improve test readability and maintainability
-
-#### Step 12: Documentation and Review
-**Estimated Time**: 1-2 hours
-**Prerequisites**: Step 11 complete
-
-1. **Update documentation**:
-   - Document any deviations from the original plan
-   - Update helper method documentation
-   - Add inline code comments for complex test scenarios
-
-2. **Code review preparation**:
-   - Ensure consistent coding patterns across all test files
-   - Verify error messages and test names are clear
-   - Check that all tests follow established conventions
-
-3. **Final validation**:
-   - Run tests in CI/CD environment if available
-   - Verify tests work on different developer machines
-   - Confirm no external dependencies beyond what's documented
-
-### Implementation Guidelines
-
-#### Development Best Practices
-
-1. **Iterative Development**:
-   - Implement one test file completely before moving to the next
-   - Run tests frequently during development
-   - Refactor helper methods as patterns emerge
-
-2. **Test Naming Conventions**:
-   - Use descriptive test names that explain the scenario
-   - Follow the pattern: `MethodName_Scenario_ExpectedResult`
-   - Be consistent across all test files
-
-3. **Error Handling**:
-   - Test both success and failure scenarios
-   - Verify specific error types and messages
-   - Ensure proper exception propagation
-
-4. **Data Management**:
-   - Leverage existing test data where possible
-   - Create minimal custom data for specific scenarios
-   - Ensure test data cleanup between tests
-
-#### Common Pitfalls to Avoid
-
-1. **Over-mocking**: Don't mock services that are better tested with real implementations
-2. **Test interdependence**: Ensure tests can run independently and in any order
-3. **Hardcoded values**: Use constants and helper methods for test data
-4. **Insufficient assertions**: Verify both positive outcomes and side effects
-5. **Ignoring edge cases**: Test boundary conditions and error scenarios
-
-#### Success Criteria
-
-Each phase should meet these criteria before proceeding:
-
-- [ ] All tests in the phase pass consistently
-- [ ] Code follows established patterns and conventions
-- [ ] Helper methods are properly documented and reusable
-- [ ] No test pollution or interdependencies
-- [ ] Performance is acceptable (tests complete in reasonable time)
-- [ ] Error messages are clear and actionable
-
-### Estimated Total Implementation Time
-
-- **Phase 1** (Infrastructure): 3-4 hours
-- **Phase 2** (Core Tests): 5-7 hours  
-- **Phase 3** (Business Logic): 7-9 hours
-- **Phase 4** (Integration): 5-7 hours
-- **Phase 5** (Refinement): 3-5 hours
-
-**Total Estimated Time**: 23-32 hours (3-4 working days)
-
-This implementation plan ensures a systematic approach to building comprehensive test coverage while maintaining code quality and following established patterns.
+Based on the refactoring outline, here's the comprehensive plan of changes needed:
+
+## Implementation Plan for Concurrent Coupon Usage Fix
+
+### 1. **Update ICouponRepository Interface**
+**File**: `src/Application/Common/Interfaces/IRepositories/ICouponRepository.cs`
+
+**Changes**:
+- Add new method: `Task<bool> TryIncrementUsageCountAsync(CouponId couponId, CancellationToken cancellationToken = default)`
+- This method will perform atomic increment and return success/failure
+
+### 2. **Implement Atomic Increment in CouponRepository**
+**File**: `src/Infrastructure/Data/Repositories/CouponRepository.cs`
+
+**Changes**:
+- Implement `TryIncrementUsageCountAsync` using raw SQL for atomicity:
+  ```sql
+  UPDATE Coupons 
+  SET CurrentTotalUsageCount = CurrentTotalUsageCount + 1 
+  WHERE Id = @couponId 
+    AND CurrentTotalUsageCount < TotalUsageLimit
+    AND TotalUsageLimit IS NOT NULL
+  ```
+- Return `true` if `ExecuteSqlRawAsync` affects 1 row, `false` if 0 rows (limit exceeded)
+- Include proper error handling and logging
+
+### 3. **Modify OrderFinancialService**
+**File**: `src/Domain/Services/OrderFinancialService.cs`
+
+**Changes**:
+- **Remove** the total usage limit check from `ValidateAndCalculateDiscount` method
+- Keep all other validations (date range, user limit, min amount, etc.)
+- Update method documentation to clarify that total usage limits are handled elsewhere
+- The method should focus only on business rule validation, not concurrency control
+
+### 4. **Refactor InitiateOrderCommandHandler**
+**File**: `src/Application/Orders/Commands/InitiateOrder/InitiateOrderCommandHandler.cs`
+
+**Changes**:
+- Implement the new logic flow as outlined:
+  1. Pre-validate coupon (everything except total usage limit)
+  2. Attempt atomic increment via `TryIncrementUsageCountAsync`
+  3. If increment fails, return `CouponErrors.UsageLimitExceeded`
+  4. If increment succeeds, proceed with discount calculation
+- Remove the old post-order coupon usage increment logic
+- Update logging to reflect the new flow
+- Clean up debug traces
+
+### 5. **Add CouponErrors for Consistency**
+**File**: `src/Domain/CouponAggregate/Errors/CouponErrors.cs`
+
+**Changes**:
+- Ensure `UsageLimitExceeded` error exists and has appropriate message
+- Add any additional errors needed for the new flow
+
+### 6. **Update Domain Logic (Optional)**
+**File**: `src/Domain/CouponAggregate/Coupon.cs`
+
+**Changes**:
+- Consider adding a method to validate business rules without usage increment
+- Or keep existing `Use()` method but document that total usage limits are handled at repository level
+- Ensure domain events are still raised appropriately
+
+### 7. **Database Considerations**
+**Files**: Database migration (if needed)
+
+**Changes**:
+- Ensure database supports concurrent updates properly
+- Consider adding database index on `CurrentTotalUsageCount` for performance
+- No schema changes needed for this approach
+
+### 8. **Update Tests**
+**Files**: Multiple test files
+
+**Changes**:
+- **Functional Tests**: The existing test should pass once implemented
+- **Unit Tests**: Update `OrderFinancialService` tests to reflect removed usage limit check
+- **Repository Tests**: Add tests for `TryIncrementUsageCountAsync` behavior
+- **Integration Tests**: Add tests for concurrent scenarios
+
+### 9. **Error Handling Updates**
+**File**: `src/Application/Orders/Commands/InitiateOrder/InitiateOrderCommandHandler.cs`
+
+**Changes**:
+- Return appropriate domain errors when atomic increment fails
+- Ensure error messages are user-friendly
+- Maintain existing error handling for other coupon validation failures
+
+## Implementation Order
+
+1. **Start with Repository Layer** - Add interface and implementation
+2. **Update Domain Service** - Remove usage limit check
+3. **Refactor Command Handler** - Implement new flow
+4. **Run Tests** - Verify the concurrent test passes
+5. **Clean up** - Remove debug traces and old logic
+6. **Add Comprehensive Tests** - Cover edge cases
+
+## Key Benefits of This Approach
+
+- **Maintains Clean Architecture** - Business logic stays in domain layer
+- **Atomic Operations** - Database ensures consistency
+- **Minimal Schema Changes** - Uses existing table structure
+- **Clear Separation of Concerns** - Repository handles concurrency, domain handles business rules
+- **Graceful Failure** - Third request gets clear error message
+
+## Rollback Plan
+
+If issues arise:
+1. Revert command handler changes
+2. Restore original `OrderFinancialService` logic
+3. Remove new repository method
+4. System returns to previous (broken but functional) state
+
+This plan provides a surgical fix to the concurrency issue while maintaining architectural integrity and providing a clear path forward.

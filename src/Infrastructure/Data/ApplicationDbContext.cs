@@ -16,6 +16,7 @@ using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.MenuEntity;
+using YummyZoom.Infrastructure.Data.Models;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -35,6 +36,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<Menu> Menus => Set<Menu>();
     public DbSet<MenuCategory> MenuCategories => Set<MenuCategory>();
+    public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

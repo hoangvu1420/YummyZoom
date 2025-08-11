@@ -31,7 +31,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", null, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", null, Money.Zero(Currencies.Default), deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -65,7 +65,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", null, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", null, Money.Zero(Currencies.Default), deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -119,7 +119,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", null, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", null, Money.Zero(Currencies.Default), deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -182,8 +182,10 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
         var expectedTotal = new Money(64.50m, Currencies.Default);
 
         // Act
+        // Precomputed discount: 10% of 55.00 = 5.50
+        var precomputedDiscount = new Money(5.50m, Currencies.Default);
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", coupon, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", coupon, precomputedDiscount, deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -244,7 +246,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", null, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", null, Money.Zero(Currencies.Default), deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -306,8 +308,10 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
         var expectedTotal = new Money(69m, Currencies.Default);
 
         // Act
+        // Precomputed discount: 20% of 55.00 = 11.00
+        var precomputedDiscount = new Money(11.00m, Currencies.Default);
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", coupon, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", coupon, precomputedDiscount, deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -335,7 +339,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Act
         var result = TeamCartConversionService.ConvertToOrder(
-            teamCart, deliveryAddress, "", null, 0, deliveryFee, taxAmount);
+            teamCart, deliveryAddress, "", null, Money.Zero(Currencies.Default), deliveryFee, taxAmount);
 
         // Assert
         result.ShouldBeSuccessful();

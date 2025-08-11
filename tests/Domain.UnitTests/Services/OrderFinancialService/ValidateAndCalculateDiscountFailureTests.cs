@@ -24,7 +24,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.CouponDisabled.Code);
@@ -44,7 +44,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.CouponExpired.Code);
@@ -64,7 +64,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.CouponNotYetValid.Code);
@@ -72,79 +72,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
     #endregion
 
-    #region Usage Limit Tests
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithTotalUsageLimitExceeded_ReturnsFailure()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(
-            totalUsageLimit: 10,
-            currentTotalUsageCount: 10); // At limit
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeFailure(CouponErrors.UsageLimitExceeded.Code);
-    }
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithTotalUsageLimitExceededByOne_ReturnsFailure()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(
-            totalUsageLimit: 5,
-            currentTotalUsageCount: 5); // At limit, so next use will exceed
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeFailure(CouponErrors.UsageLimitExceeded.Code);
-    }
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithUserUsageLimitExceeded_ReturnsFailure()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(usageLimitPerUser: 3);
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-        var userUsageCount = 3; // At limit
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, userUsageCount, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeFailure(CouponErrors.UserUsageLimitExceeded.Code);
-    }
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithUserUsageLimitExceededByOne_ReturnsFailure()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(usageLimitPerUser: 2);
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-        var userUsageCount = 3; // Over limit
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, userUsageCount, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeFailure(CouponErrors.UserUsageLimitExceeded.Code);
-    }
-
-    #endregion
+    // Usage limit tests removed: per-user and total usage limits are enforced atomically in the repository/Application layer, not here.
 
     #region Minimum Order Amount Tests
 
@@ -159,7 +87,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.MinAmountNotMet.Code);
@@ -176,7 +104,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.MinAmountNotMet.Code);
@@ -202,7 +130,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.NotApplicable.Code);
@@ -224,7 +152,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.NotApplicable.Code);
@@ -245,7 +173,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.NotApplicable.Code);
@@ -265,7 +193,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.NotApplicable.Code);
@@ -284,7 +212,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.NotApplicable.Code);
@@ -318,7 +246,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.InvalidType.Code);
@@ -343,31 +271,13 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.CouponDisabled.Code);
     }
 
-    [Test]
-    public void ValidateAndCalculateDiscount_WithUsageLimitAndMinAmountFailures_ReturnsUsageLimitFailure()
-    {
-        // Arrange - Coupon with usage limit exceeded AND min amount not met
-        var minOrderAmount = new Money(100.00m, "USD");
-        var coupon = CreateValidCoupon(
-            totalUsageLimit: 5,
-            currentTotalUsageCount: 5, // Usage limit exceeded (checked first)
-            minOrderAmount: minOrderAmount);
-        var orderItems = CreateOrderItems((20.00m, 1, null, null)); // Below min amount
-        var subtotal = new Money(20.00m, "USD");
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeFailure(CouponErrors.UsageLimitExceeded.Code);
-    }
+    // Combined usage-limit-first failure test removed: service no longer checks usage limits.
 
     #endregion
 }

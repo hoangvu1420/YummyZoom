@@ -39,7 +39,7 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            0,
+            Money.Zero("USD"),
             new Money(5, "USD"),
             new Money(2, "USD")
         );
@@ -130,7 +130,7 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            0,
+            Money.Zero("USD"),
             new Money(5, "USD"),
             new Money(2, "USD")
         );
@@ -189,7 +189,7 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            0,
+            Money.Zero("USD"),
             new Money(5, "USD"),
             new Money(2, "USD")
         );

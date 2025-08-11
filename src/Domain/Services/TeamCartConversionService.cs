@@ -36,8 +36,8 @@ public sealed class TeamCartConversionService
     /// <param name="teamCart">The TeamCart to convert.</param>
     /// <param name="deliveryAddress">The delivery address for the order.</param>
     /// <param name="specialInstructions">Special instructions for the order.</param>
-    /// <param name="coupon">The full Coupon object, if one was applied.</param>
-    /// <param name="currentUserCouponUsageCount">For validation.</param>
+    /// <param name="coupon">The full Coupon object, if one was applied. Optional; only used to ensure consistency with TeamCart's applied coupon.</param>
+    /// <param name="discountAmount">Precomputed discount amount to apply. Must be computed and validated by the Application layer.</param>
     /// <param name="deliveryFee">The delivery fee for the order.</param>
     /// <param name="taxAmount">The tax amount for the order.</param>
     /// <returns>A tuple containing the created Order and updated TeamCart.</returns>
@@ -46,7 +46,7 @@ public sealed class TeamCartConversionService
         DeliveryAddress deliveryAddress,
         string specialInstructions,
         Coupon? coupon,
-        int currentUserCouponUsageCount,
+        Money discountAmount,
         Money deliveryFee,
         Money taxAmount)
     {
@@ -62,22 +62,12 @@ public sealed class TeamCartConversionService
         // 3. Perform All Financial Calculations using OrderFinancialService
         var subtotal = _financialService.CalculateSubtotal(orderItems);
 
-        Money discountAmount = Money.Zero(subtotal.Currency);
-        
-        if (coupon is not null && teamCart.AppliedCouponId is not null && teamCart.AppliedCouponId == coupon.Id)
+        // The discount must be provided by the caller (Application layer) after performing
+        // all necessary coupon validations and atomic usage increments. Here we ensure
+        // the provided discount currency aligns with subtotal.
+        if (discountAmount.Currency != subtotal.Currency)
         {
-            var discountResult = _financialService.ValidateAndCalculateDiscount(
-                coupon,
-                currentUserCouponUsageCount,
-                orderItems,
-                subtotal);
-
-            if (discountResult.IsFailure)
-            {
-                // Pass the coupon validation error directly from the financial service
-                return Result.Failure<(Order, TeamCart)>(discountResult.Error);
-            }
-            discountAmount = discountResult.Value;
+            discountAmount = new Money(discountAmount.Amount, subtotal.Currency);
         }
 
         var totalAmount = _financialService.CalculateFinalTotal(

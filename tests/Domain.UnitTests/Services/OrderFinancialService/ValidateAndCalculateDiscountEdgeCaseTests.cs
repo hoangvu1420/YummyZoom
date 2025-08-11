@@ -28,7 +28,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, exactStartTime);
+            coupon, orderItems, subtotal, exactStartTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -49,7 +49,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, exactEndTime);
+            coupon, orderItems, subtotal, exactEndTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -69,30 +69,11 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
         AssertMoneyEquals(expectedDiscount, result.ValueOrFail(), "should work when usage is one below limit");
-    }
-
-    [Test]
-    public void ValidateAndCalculateDiscount_WithUserUsageLimitAtBoundary_ReturnsDiscount()
-    {
-        // Arrange
-        var coupon = CreateValidCoupon(usageLimitPerUser: 3);
-        var orderItems = CreateOrderItems((20.00m, 1, null, null));
-        var subtotal = new Money(20.00m, "USD");
-        var userUsageCount = 2; // One below limit
-        var expectedDiscount = new Money(2.00m, "USD"); // 10% default
-
-        // Act
-        var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, userUsageCount, orderItems, subtotal, _fixedDateTime);
-
-        // Assert
-        result.ShouldBeSuccessful();
-        AssertMoneyEquals(expectedDiscount, result.ValueOrFail(), "should work when user usage is one below limit");
     }
 
     #endregion
@@ -110,7 +91,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -128,7 +109,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -148,7 +129,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -171,7 +152,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -202,7 +183,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -229,7 +210,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -257,7 +238,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -282,7 +263,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -312,7 +293,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -337,7 +318,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, _fixedDateTime);
+            coupon, orderItems, subtotal, _fixedDateTime);
 
         // Assert
         result.ShouldBeSuccessful();
@@ -363,7 +344,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Act
         var result = _orderFinancialService.ValidateAndCalculateDiscount(
-            coupon, 0, orderItems, subtotal, checkTime);
+            coupon, orderItems, subtotal, checkTime);
 
         // Assert
         result.ShouldBeFailure(CouponErrors.CouponExpired.Code);

@@ -193,7 +193,17 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
     }
 
     /// <summary>
-    /// Increments the usage count when coupon is used
+    /// Increments the usage count when coupon is used.
+    /// 
+    /// NOTE: In production scenarios with potential concurrent access, total usage limit 
+    /// enforcement is handled atomically at the repository level (TryIncrementUsageCountAsync) 
+    /// to prevent race conditions. This method is primarily used for:
+    /// - Unit testing business rules
+    /// - Non-concurrent scenarios  
+    /// - Domain logic validation
+    /// - Single-threaded operations
+    /// 
+    /// For concurrent scenarios, use the atomic repository operation instead.
     /// </summary>
     /// <param name="usageTime">The time when the coupon is being used. If not provided, uses current UTC time.</param>
     public Result Use(DateTime? usageTime = null)

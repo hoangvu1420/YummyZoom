@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YummyZoom.Infrastructure.Data;
@@ -11,9 +12,11 @@ using YummyZoom.Infrastructure.Data;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250807143046_AddIndexInCoupon")]
+    partial class AddIndexInCoupon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -893,24 +896,6 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .HasDatabaseName("IX_User_LastModified");
 
                     b.ToTable("DomainUsers", (string)null);
-                });
-
-            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.CouponUserUsage", b =>
-                {
-                    b.Property<Guid>("CouponId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("UsageCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
-                    b.HasKey("CouponId", "UserId");
-
-                    b.ToTable("CouponUserUsages", (string)null);
                 });
 
             modelBuilder.Entity("YummyZoom.Infrastructure.Identity.ApplicationUser", b =>

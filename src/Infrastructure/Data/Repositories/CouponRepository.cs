@@ -38,6 +38,66 @@ public class CouponRepository : ICouponRepository
             .CountAsync(cancellationToken);
     }
 
+    public async Task<bool> TryIncrementUsageCountAsync(CouponId couponId, CancellationToken cancellationToken = default)
+    {
+        // Perform atomic increment with condition check to prevent race conditions
+        var sql = """
+            UPDATE "Coupons" 
+            SET "CurrentTotalUsageCount" = "CurrentTotalUsageCount" + 1 
+            WHERE "Id" = {0} 
+              AND ("TotalUsageLimit" IS NULL OR "CurrentTotalUsageCount" < "TotalUsageLimit")
+            """;
+
+        try
+        {
+            var rowsAffected = await _dbContext.Database.ExecuteSqlRawAsync(sql, [couponId.Value], cancellationToken);
+            return rowsAffected == 1;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> TryIncrementUserUsageCountAsync(
+        CouponId couponId,
+        UserId userId,
+        int? perUserLimit,
+        CancellationToken cancellationToken = default)
+    {
+        if (perUserLimit.HasValue)
+        {
+            var sql = """
+                INSERT INTO "CouponUserUsages" ("CouponId", "UserId", "UsageCount")
+                VALUES ({0}, {1}, 1)
+                ON CONFLICT ("CouponId", "UserId")
+                DO UPDATE SET "UsageCount" = "CouponUserUsages"."UsageCount" + 1
+                WHERE "CouponUserUsages"."UsageCount" < {2};
+                """;
+
+            var rows = await _dbContext.Database.ExecuteSqlRawAsync(
+                sql,
+                [couponId.Value, userId.Value, perUserLimit.Value],
+                cancellationToken);
+            return rows == 1;
+        }
+        else
+        {
+            var sql = """
+                INSERT INTO "CouponUserUsages" ("CouponId", "UserId", "UsageCount")
+                VALUES ({0}, {1}, 1)
+                ON CONFLICT ("CouponId", "UserId")
+                DO UPDATE SET "UsageCount" = "CouponUserUsages"."UsageCount" + 1;
+                """;
+
+            var rows = await _dbContext.Database.ExecuteSqlRawAsync(
+                sql,
+                [couponId.Value, userId.Value],
+                cancellationToken);
+            return rows == 1;
+        }
+    }
+
     public async Task AddAsync(Coupon coupon, CancellationToken cancellationToken = default)
     {
         await _dbContext.Coupons.AddAsync(coupon, cancellationToken);
