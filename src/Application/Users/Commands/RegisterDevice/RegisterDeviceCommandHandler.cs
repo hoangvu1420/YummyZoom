@@ -79,16 +79,11 @@ public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceComman
             if (device == null)
             {
                 // Create new device
-                device = new Device
-                {
-                    Id = Guid.NewGuid(),
-                    DeviceId = deviceId,
-                    Platform = request.Platform.Trim(),
-                    ModelName = request.ModelName?.Trim(),
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                await _deviceRepository.AddAsync(device, cancellationToken);
+                device = await _deviceRepository.AddAsync(
+                    deviceId,
+                    request.Platform.Trim(),
+                    request.ModelName?.Trim(),
+                    cancellationToken);
                 _logger.LogInformation("Created new Device record for DeviceId {DeviceId}", device.DeviceId);
             }
             else
@@ -124,17 +119,11 @@ public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceComman
             await _userDeviceSessionRepository.DeactivateSessionsForDeviceAsync(device.Id, cancellationToken);
 
             // Create a new active session
-            var newSession = new UserDeviceSession
-            {
-                Id = Guid.NewGuid(),
-                UserId = _currentUser.DomainUserId!.Value, // Safe to use ! since authorization pipeline guarantees authentication
-                DeviceId = device.Id,
-                FcmToken = request.FcmToken.Trim(),
-                IsActive = true,
-                LastLoginAt = DateTime.UtcNow,
-                LoggedOutAt = null
-            };
-            await _userDeviceSessionRepository.AddSessionAsync(newSession, cancellationToken);
+            await _userDeviceSessionRepository.AddSessionAsync(
+                _currentUser.DomainUserId!.Value,
+                device.Id,
+                request.FcmToken.Trim(),
+                cancellationToken);
             _logger.LogInformation("Created new UserDeviceSession for UserId {UserId} on DeviceId {DeviceId}", _currentUser.DomainUserId.Value, device.DeviceId);
 
             return Result.Success();

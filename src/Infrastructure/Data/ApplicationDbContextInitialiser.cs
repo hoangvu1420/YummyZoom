@@ -199,30 +199,17 @@ public class ApplicationDbContextInitialiser
                     var device = await _deviceRepository.GetByDeviceIdAsync(deviceId);
                     if (device == null)
                     {
-                        device = new Device
-                        {
-                            Id = Guid.NewGuid(),
-                            DeviceId = deviceId,
-                            Platform = platform,
-                            ModelName = modelName,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        };
-                        await _deviceRepository.AddAsync(device);
+                        device = await _deviceRepository.AddAsync(
+                            deviceId,
+                            platform,
+                            modelName);
                         await _context.SaveChangesAsync(); // Save device before creating session
                     }
 
-                    var newSession = new UserDeviceSession
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = idResult.Value,
-                        DeviceId = device.Id,
-                        FcmToken = fcmToken,
-                        IsActive = true,
-                        LastLoginAt = DateTime.UtcNow,
-                        LoggedOutAt = null
-                    };
-                    await _userDeviceSessionRepository.AddSessionAsync(newSession);
+                    await _userDeviceSessionRepository.AddSessionAsync(
+                        idResult.Value,
+                        device.Id,
+                        fcmToken);
                     await _context.SaveChangesAsync(); // Save session
 
                     await transaction.CommitAsync();

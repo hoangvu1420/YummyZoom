@@ -7,11 +7,13 @@ namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 public interface IUserDeviceSessionRepository
 {
     /// <summary>
-    /// Adds a new user device session.
+    /// Creates and persists a new active user device session for the given user and device.
     /// </summary>
-    /// <param name="session">The UserDeviceSession entity to add.</param>
+    /// <param name="userId">The ID of the user.</param>
+    /// <param name="deviceId">The ID of the device.</param>
+    /// <param name="fcmToken">The FCM token associated with the session.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task AddSessionAsync(UserDeviceSession session, CancellationToken cancellationToken = default);
+    Task AddSessionAsync(Guid userId, Guid deviceId, string fcmToken, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deactivates all active sessions for a given device.

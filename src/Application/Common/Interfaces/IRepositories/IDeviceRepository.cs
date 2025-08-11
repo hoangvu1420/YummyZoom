@@ -21,9 +21,12 @@ public interface IDeviceRepository
     Task<Device?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Adds a new device to the repository.
+    /// Creates and persists a new device using the provided primitive parameters.
     /// </summary>
-    /// <param name="device">The Device entity to add.</param>
+    /// <param name="deviceId">The stable, unique identifier from the OS. Can be null.</param>
+    /// <param name="platform">Platform type (e.g., "Android", "iOS", "Web").</param>
+    /// <param name="modelName">Optional device model name.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task AddAsync(Device device, CancellationToken cancellationToken = default);
+    /// <returns>The created Device entity.</returns>
+    Task<Device> AddAsync(string? deviceId, string platform, string? modelName, CancellationToken cancellationToken = default);
 }

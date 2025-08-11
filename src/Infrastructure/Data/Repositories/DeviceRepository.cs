@@ -28,8 +28,19 @@ public class DeviceRepository : IDeviceRepository
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
     }
 
-    public async Task AddAsync(Device device, CancellationToken cancellationToken = default)
+    public async Task<Device> AddAsync(string? deviceId, string platform, string? modelName, CancellationToken cancellationToken = default)
     {
+        var device = new Device
+        {
+            Id = Guid.NewGuid(),
+            DeviceId = deviceId,
+            Platform = platform,
+            ModelName = modelName,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
         await _context.Devices.AddAsync(device, cancellationToken);
+        return device;
     }
 }

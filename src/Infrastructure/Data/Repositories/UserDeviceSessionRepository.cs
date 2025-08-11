@@ -13,8 +13,19 @@ public class UserDeviceSessionRepository : IUserDeviceSessionRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task AddSessionAsync(UserDeviceSession session, CancellationToken cancellationToken = default)
+    public async Task AddSessionAsync(Guid userId, Guid deviceId, string fcmToken, CancellationToken cancellationToken = default)
     {
+        var session = new UserDeviceSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            DeviceId = deviceId,
+            FcmToken = fcmToken,
+            IsActive = true,
+            LastLoginAt = DateTime.UtcNow,
+            LoggedOutAt = null
+        };
+
         await _context.UserDeviceSessions.AddAsync(session, cancellationToken);
     }
 
