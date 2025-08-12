@@ -228,6 +228,52 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("UserDeviceSessions");
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.AccountTransactionEntity.AccountTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("RelatedOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RestaurantAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_AccountTransaction_Created");
+
+                    b.HasIndex("RestaurantAccountId")
+                        .HasDatabaseName("IX_AccountTransactions_RestaurantAccountId");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_AccountTransactions_Timestamp");
+
+                    b.ToTable("AccountTransactions", (string)null);
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.CouponAggregate.Coupon", b =>
                 {
                     b.Property<Guid>("Id")
@@ -321,6 +367,75 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Coupons", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.CustomizationGroupAggregate.CustomizationGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who deleted the entity");
+
+                    b.Property<DateTimeOffset?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was deleted");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasComment("Indicates if the entity is soft-deleted");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was last modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who last modified the entity");
+
+                    b.Property<int>("MaxSelections")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinSelections")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_CustomizationGroup_Created");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_CustomizationGroup_DeletedOn");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_CustomizationGroup_IsDeleted");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("IX_CustomizationGroup_LastModified");
+
+                    b.ToTable("CustomizationGroups", (string)null);
                 });
 
             modelBuilder.Entity("YummyZoom.Domain.MenuEntity.Menu", b =>
@@ -637,6 +752,35 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("Orders", (string)null);
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.RestaurantAccountAggregate.RestaurantAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_RestaurantAccount_Created");
+
+                    b.HasIndex("RestaurantId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RestaurantAccounts_RestaurantId");
+
+                    b.ToTable("RestaurantAccounts", (string)null);
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.RestaurantAggregate.Restaurant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -736,6 +880,96 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("Restaurants", (string)null);
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.ReviewAggregate.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who deleted the entity");
+
+                    b.Property<DateTimeOffset?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was deleted");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasComment("Indicates if the entity is soft-deleted");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsModerated")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was last modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who last modified the entity");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reply")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SubmissionTimestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_Review_Created");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_Reviews_CustomerId");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_Review_DeletedOn");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Review_IsDeleted");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("IX_Review_LastModified");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("IX_Reviews_OrderId");
+
+                    b.HasIndex("RestaurantId", "SubmissionTimestamp")
+                        .HasDatabaseName("IX_Reviews_Restaurant_SubmissionTimestamp");
+
+                    b.ToTable("Reviews", (string)null);
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.RoleAssignmentAggregate.RoleAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -779,6 +1013,187 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .HasDatabaseName("IX_RoleAssignments_User_Restaurant_Role");
 
                     b.ToTable("RoleAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.SupportTicketAggregate.SupportTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToAdminId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<DateTimeOffset>("LastUpdateTimestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("SubmissionTimestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedToAdminId");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_SupportTicket_Created");
+
+                    b.HasIndex("LastUpdateTimestamp");
+
+                    b.HasIndex("Priority");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("SubmissionTimestamp");
+
+                    b.ToTable("SupportTickets", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.TagEntity.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who deleted the entity");
+
+                    b.Property<DateTimeOffset?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was deleted");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasComment("Indicates if the entity is soft-deleted");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was last modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who last modified the entity");
+
+                    b.Property<string>("TagCategory")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TagDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TagName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_Tag_Created");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_Tag_DeletedOn");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Tag_IsDeleted");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("IX_Tag_LastModified");
+
+                    b.HasIndex("TagCategory")
+                        .HasDatabaseName("IX_Tags_TagCategory");
+
+                    b.HasIndex("TagName")
+                        .HasDatabaseName("IX_Tags_TagName");
+
+                    b.ToTable("Tags", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.TeamCartAggregate.TeamCart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AppliedCouponId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("Timestamp when the entity was created");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasComment("Identifier of who created the entity");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HostUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_TeamCart_Created");
+
+                    b.ToTable("TeamCarts", (string)null);
                 });
 
             modelBuilder.Entity("YummyZoom.Domain.TodoListAggregate.TodoList", b =>
@@ -1029,6 +1444,35 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.AccountTransactionEntity.AccountTransaction", b =>
+                {
+                    b.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "Amount", b1 =>
+                        {
+                            b1.Property<Guid>("AccountTransactionId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("AccountTransactionId");
+
+                            b1.ToTable("AccountTransactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountTransactionId");
+                        });
+
+                    b.Navigation("Amount")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.CouponAggregate.Coupon", b =>
                 {
                     b.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "MinOrderAmount", b1 =>
@@ -1142,6 +1586,68 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.CustomizationGroupAggregate.CustomizationGroup", b =>
+                {
+                    b.OwnsMany("YummyZoom.Domain.CustomizationGroupAggregate.Entities.CustomizationChoice", "Choices", b1 =>
+                        {
+                            b1.Property<Guid>("CustomizationGroupId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("ChoiceId");
+
+                            b1.Property<int>("DisplayOrder")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool>("IsDefault")
+                                .HasColumnType("boolean");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
+
+                            b1.HasKey("CustomizationGroupId", "Id");
+
+                            b1.ToTable("CustomizationChoices", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomizationGroupId");
+
+                            b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "PriceAdjustment", b2 =>
+                                {
+                                    b2.Property<Guid>("CustomizationChoiceCustomizationGroupId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("CustomizationChoiceId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnName("PriceAdjustment_Amount");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("character varying(3)")
+                                        .HasColumnName("PriceAdjustment_Currency");
+
+                                    b2.HasKey("CustomizationChoiceCustomizationGroupId", "CustomizationChoiceId");
+
+                                    b2.ToTable("CustomizationChoices");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CustomizationChoiceCustomizationGroupId", "CustomizationChoiceId");
+                                });
+
+                            b1.Navigation("PriceAdjustment")
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Choices");
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.MenuItemAggregate.MenuItem", b =>
                 {
                     b.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "BasePrice", b1 =>
@@ -1175,12 +1681,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 {
                     b.OwnsMany("YummyZoom.Domain.OrderAggregate.Entities.OrderItem", "OrderItems", b1 =>
                         {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uuid");
+
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uuid")
                                 .HasColumnName("OrderItemId");
-
-                            b1.Property<Guid>("OrderId")
-                                .HasColumnType("uuid");
 
                             b1.Property<int>("Quantity")
                                 .HasColumnType("integer");
@@ -1200,9 +1706,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                             b1.Property<Guid>("Snapshot_MenuItemId")
                                 .HasColumnType("uuid");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("OrderId");
+                            b1.HasKey("OrderId", "Id");
 
                             b1.ToTable("OrderItems", (string)null);
 
@@ -1211,6 +1715,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
                             b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "LineItemTotal", b2 =>
                                 {
+                                    b2.Property<Guid>("OrderItemOrderId")
+                                        .HasColumnType("uuid");
+
                                     b2.Property<Guid>("OrderItemId")
                                         .HasColumnType("uuid");
 
@@ -1224,16 +1731,19 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                         .HasColumnType("character varying(3)")
                                         .HasColumnName("LineItemTotal_Currency");
 
-                                    b2.HasKey("OrderItemId");
+                                    b2.HasKey("OrderItemOrderId", "OrderItemId");
 
                                     b2.ToTable("OrderItems");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("OrderItemId");
+                                        .HasForeignKey("OrderItemOrderId", "OrderItemId");
                                 });
 
                             b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "Snapshot_BasePriceAtOrder", b2 =>
                                 {
+                                    b2.Property<Guid>("OrderItemOrderId")
+                                        .HasColumnType("uuid");
+
                                     b2.Property<Guid>("OrderItemId")
                                         .HasColumnType("uuid");
 
@@ -1247,12 +1757,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                         .HasColumnType("character varying(3)")
                                         .HasColumnName("BasePrice_Currency");
 
-                                    b2.HasKey("OrderItemId");
+                                    b2.HasKey("OrderItemOrderId", "OrderItemId");
 
                                     b2.ToTable("OrderItems");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("OrderItemId");
+                                        .HasForeignKey("OrderItemOrderId", "OrderItemId");
                                 });
 
                             b1.Navigation("LineItemTotal")
@@ -1539,6 +2049,56 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.RestaurantAccountAggregate.RestaurantAccount", b =>
+                {
+                    b.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "CurrentBalance", b1 =>
+                        {
+                            b1.Property<Guid>("RestaurantAccountId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("CurrentBalance_Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("CurrentBalance_Currency");
+
+                            b1.HasKey("RestaurantAccountId");
+
+                            b1.ToTable("RestaurantAccounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RestaurantAccountId");
+                        });
+
+                    b.OwnsOne("YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects.PayoutMethodDetails", "PayoutMethodDetails", b1 =>
+                        {
+                            b1.Property<Guid>("RestaurantAccountId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Details")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("PayoutMethod_Details");
+
+                            b1.HasKey("RestaurantAccountId");
+
+                            b1.ToTable("RestaurantAccounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RestaurantAccountId");
+                        });
+
+                    b.Navigation("CurrentBalance")
+                        .IsRequired();
+
+                    b.Navigation("PayoutMethodDetails");
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.RestaurantAggregate.Restaurant", b =>
                 {
                     b.OwnsOne("YummyZoom.Domain.RestaurantAggregate.ValueObjects.Address", "Location", b1 =>
@@ -1638,6 +2198,373 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("YummyZoom.Domain.ReviewAggregate.Review", b =>
+                {
+                    b.OwnsOne("YummyZoom.Domain.ReviewAggregate.ValueObjects.Rating", "Rating", b1 =>
+                        {
+                            b1.Property<Guid>("ReviewId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Value")
+                                .HasColumnType("integer")
+                                .HasColumnName("Rating");
+
+                            b1.HasKey("ReviewId");
+
+                            b1.ToTable("Reviews");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ReviewId");
+                        });
+
+                    b.Navigation("Rating")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.SupportTicketAggregate.SupportTicket", b =>
+                {
+                    b.OwnsMany("YummyZoom.Domain.SupportTicketAggregate.Entities.TicketMessage", "Messages", b1 =>
+                        {
+                            b1.Property<Guid>("SupportTicketId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("MessageId");
+
+                            b1.Property<Guid>("AuthorId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("AuthorType")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.Property<bool>("IsInternalNote")
+                                .HasColumnType("boolean");
+
+                            b1.Property<string>("MessageText")
+                                .IsRequired()
+                                .HasMaxLength(5000)
+                                .HasColumnType("character varying(5000)");
+
+                            b1.Property<DateTimeOffset>("Timestamp")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.HasKey("SupportTicketId", "Id");
+
+                            b1.ToTable("SupportTicketMessages", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("SupportTicketId");
+                        });
+
+                    b.OwnsMany("YummyZoom.Domain.SupportTicketAggregate.ValueObjects.ContextLink", "ContextLinks", b1 =>
+                        {
+                            b1.Property<Guid>("SupportTicketId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("EntityID")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("EntityType")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.HasKey("SupportTicketId", "EntityID", "EntityType");
+
+                            b1.ToTable("SupportTicketContextLinks", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("SupportTicketId");
+                        });
+
+                    b.OwnsOne("YummyZoom.Domain.SupportTicketAggregate.ValueObjects.TicketNumber", "TicketNumber", b1 =>
+                        {
+                            b1.Property<Guid>("SupportTicketId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("TicketNumber");
+
+                            b1.HasKey("SupportTicketId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
+
+                            b1.ToTable("SupportTickets");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SupportTicketId");
+                        });
+
+                    b.Navigation("ContextLinks");
+
+                    b.Navigation("Messages");
+
+                    b.Navigation("TicketNumber")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("YummyZoom.Domain.TeamCartAggregate.TeamCart", b =>
+                {
+                    b.OwnsMany("YummyZoom.Domain.TeamCartAggregate.Entities.MemberPayment", "MemberPayments", b1 =>
+                        {
+                            b1.Property<Guid>("TeamCartId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("MemberPaymentId");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Method")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.Property<string>("OnlineTransactionId")
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)");
+
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("TeamCartId", "Id");
+
+                            b1.ToTable("TeamCartMemberPayments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamCartId");
+
+                            b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "Amount", b2 =>
+                                {
+                                    b2.Property<Guid>("MemberPaymentTeamCartId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("MemberPaymentId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnName("Payment_Amount");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("character varying(3)")
+                                        .HasColumnName("Payment_Currency");
+
+                                    b2.HasKey("MemberPaymentTeamCartId", "MemberPaymentId");
+
+                                    b2.ToTable("TeamCartMemberPayments");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MemberPaymentTeamCartId", "MemberPaymentId");
+                                });
+
+                            b1.Navigation("Amount")
+                                .IsRequired();
+                        });
+
+                    b.OwnsMany("YummyZoom.Domain.TeamCartAggregate.Entities.TeamCartItem", "Items", b1 =>
+                        {
+                            b1.Property<Guid>("TeamCartId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("TeamCartItemId");
+
+                            b1.Property<Guid>("AddedByUserId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Quantity")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("SelectedCustomizations")
+                                .IsRequired()
+                                .HasColumnType("jsonb");
+
+                            b1.Property<string>("Snapshot_ItemName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
+
+                            b1.Property<Guid>("Snapshot_MenuCategoryId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Snapshot_MenuItemId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("TeamCartId", "Id");
+
+                            b1.ToTable("TeamCartItems", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamCartId");
+
+                            b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "LineItemTotal", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamCartItemTeamCartId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("TeamCartItemId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnName("LineItemTotal_Amount");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("character varying(3)")
+                                        .HasColumnName("LineItemTotal_Currency");
+
+                                    b2.HasKey("TeamCartItemTeamCartId", "TeamCartItemId");
+
+                                    b2.ToTable("TeamCartItems");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamCartItemTeamCartId", "TeamCartItemId");
+                                });
+
+                            b1.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "Snapshot_BasePriceAtOrder", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamCartItemTeamCartId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("TeamCartItemId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnName("BasePrice_Amount");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("character varying(3)")
+                                        .HasColumnName("BasePrice_Currency");
+
+                                    b2.HasKey("TeamCartItemTeamCartId", "TeamCartItemId");
+
+                                    b2.ToTable("TeamCartItems");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamCartItemTeamCartId", "TeamCartItemId");
+                                });
+
+                            b1.Navigation("LineItemTotal")
+                                .IsRequired();
+
+                            b1.Navigation("Snapshot_BasePriceAtOrder")
+                                .IsRequired();
+                        });
+
+                    b.OwnsMany("YummyZoom.Domain.TeamCartAggregate.Entities.TeamCartMember", "Members", b1 =>
+                        {
+                            b1.Property<Guid>("TeamCartId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("TeamCartMemberId");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("TeamCartId", "Id");
+
+                            b1.ToTable("TeamCartMembers", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamCartId");
+                        });
+
+                    b.OwnsOne("YummyZoom.Domain.Common.ValueObjects.Money", "TipAmount", b1 =>
+                        {
+                            b1.Property<Guid>("TeamCartId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("TipAmount_Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("TipAmount_Currency");
+
+                            b1.HasKey("TeamCartId");
+
+                            b1.ToTable("TeamCarts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamCartId");
+                        });
+
+                    b.OwnsOne("YummyZoom.Domain.TeamCartAggregate.ValueObjects.ShareableLinkToken", "ShareToken", b1 =>
+                        {
+                            b1.Property<Guid>("TeamCartId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("ExpiresAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("ShareToken_ExpiresAt");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("ShareToken_Value");
+
+                            b1.HasKey("TeamCartId");
+
+                            b1.ToTable("TeamCarts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamCartId");
+                        });
+
+                    b.Navigation("Items");
+
+                    b.Navigation("MemberPayments");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("ShareToken")
+                        .IsRequired();
+
+                    b.Navigation("TipAmount")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("YummyZoom.Domain.TodoListAggregate.TodoList", b =>
                 {
                     b.OwnsMany("YummyZoom.Domain.TodoListAggregate.Entities.TodoItem", "Items", b1 =>
@@ -1715,6 +2642,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 {
                     b.OwnsMany("YummyZoom.Domain.UserAggregate.Entities.Address", "Addresses", b1 =>
                         {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uuid")
                                 .HasColumnName("AddressId");
@@ -1746,17 +2676,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                 .HasMaxLength(255)
                                 .HasColumnType("character varying(255)");
 
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
-
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
                                 .HasColumnType("character varying(20)");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("UserId");
+                            b1.HasKey("UserId", "Id");
 
                             b1.ToTable("UserAddresses", (string)null);
 
@@ -1766,6 +2691,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
                     b.OwnsMany("YummyZoom.Domain.UserAggregate.Entities.PaymentMethod", "PaymentMethods", b1 =>
                         {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uuid")
                                 .HasColumnName("PaymentMethodId");
@@ -1795,12 +2723,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                                 .HasMaxLength(50)
                                 .HasColumnType("character varying(50)");
 
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("UserId");
+                            b1.HasKey("UserId", "Id");
 
                             b1.ToTable("UserPaymentMethods", (string)null);
 

@@ -157,7 +157,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             itemBuilder.WithOwner().HasForeignKey("OrderId");
 
             itemBuilder.HasKey("OrderId", "Id");
-            itemBuilder.HasKey(oi => oi.Id);
             itemBuilder.Property(oi => oi.Id)
                 .HasColumnName("OrderItemId")
                 .ValueGeneratedNever()

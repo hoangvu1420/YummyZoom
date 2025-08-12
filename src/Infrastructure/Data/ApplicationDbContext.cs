@@ -17,6 +17,13 @@ using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Domain.CustomizationGroupAggregate;
+using YummyZoom.Domain.TagEntity;
+using YummyZoom.Domain.RestaurantAccountAggregate;
+using YummyZoom.Domain.AccountTransactionEntity;
+using YummyZoom.Domain.ReviewAggregate;
+using YummyZoom.Domain.TeamCartAggregate;
+using YummyZoom.Domain.SupportTicketAggregate;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -24,19 +31,29 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+    // Infrastructure Entities
     public DbSet<TodoList> TodoLists => Set<TodoList>();
-    public DbSet<User> DomainUsers => Set<User>();
-    public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
     public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents => Set<ProcessedWebhookEvent>();
+    public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
+
+    // Domain Entities
+    public DbSet<User> DomainUsers => Set<User>();
+    public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<MenuItem> MenuItems => Set<MenuItem>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<Menu> Menus => Set<Menu>();
     public DbSet<MenuCategory> MenuCategories => Set<MenuCategory>();
-    public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
+    public DbSet<CustomizationGroup> CustomizationGroups => Set<CustomizationGroup>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<RestaurantAccount> RestaurantAccounts => Set<RestaurantAccount>();
+    public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
+    public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<TeamCart> TeamCarts => Set<TeamCart>();
+    public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

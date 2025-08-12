@@ -45,10 +45,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             addressBuilder.ToTable("UserAddresses");
             addressBuilder.WithOwner().HasForeignKey("UserId");
 
-            // Address is an Entity with AddressId, so we need to configure the key properly
-            addressBuilder.HasKey(a => a.Id);
+            addressBuilder.HasKey("UserId", "Id");
 
-            // Configure AddressId value conversion
             addressBuilder.Property(a => a.Id)
                 .HasColumnName("AddressId")
                 .ValueGeneratedNever()
@@ -70,13 +68,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.OwnsMany(u => u.PaymentMethods, paymentBuilder =>
         {
             paymentBuilder.ToTable("UserPaymentMethods");
-            paymentBuilder.WithOwner().HasForeignKey("UserId"); // Establishes the FK to Users table
+            paymentBuilder.WithOwner().HasForeignKey("UserId"); 
 
-            // PaymentMethod has its own Id, which is its primary key in this table.
-            // Assuming PaymentMethodId is globally unique.
-            paymentBuilder.HasKey(pm => pm.Id);
+            paymentBuilder.HasKey("UserId", "Id");
 
-            paymentBuilder.Property(i => i.Id)
+            paymentBuilder.Property(pm => pm.Id)
                 .HasColumnName("PaymentMethodId")
                 .ValueGeneratedNever()
                 .HasConversion(
@@ -94,5 +90,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             paymentBuilder.Property(pm => pm.IsDefault)
                 .IsRequired();
         });
+
+        // Use field access for collections to enforce encapsulation
+        builder.Metadata.FindNavigation(nameof(User.Addresses))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(User.PaymentMethods))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

@@ -13,6 +13,26 @@ namespace YummyZoom.Infrastructure.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AccountTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RestaurantAccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RelatedOrderId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountTransactions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -71,7 +91,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     MinOrderAmount_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true),
                     ValidityStartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ValidityEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TotalUsageLimit = table.Column<int>(type: "integer", nullable: false),
+                    TotalUsageLimit = table.Column<int>(type: "integer", nullable: true),
                     CurrentTotalUsageCount = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     UsageLimitPerUser = table.Column<int>(type: "integer", nullable: false),
@@ -86,6 +106,41 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Coupons", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CouponUserUsages",
+                columns: table => new
+                {
+                    CouponId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UsageCount = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CouponUserUsages", x => new { x.CouponId, x.UserId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomizationGroups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GroupName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    MinSelections = table.Column<int>(type: "integer", nullable: false),
+                    MaxSelections = table.Column<int>(type: "integer", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was last modified"),
+                    LastModifiedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who last modified the entity"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "Indicates if the entity is soft-deleted"),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "Timestamp when the entity was deleted"),
+                    DeletedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who deleted the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomizationGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,6 +306,23 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RestaurantAccounts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CurrentBalance_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    CurrentBalance_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    PayoutMethod_Details = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RestaurantAccounts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Restaurants",
                 columns: table => new
                 {
@@ -283,6 +355,33 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    SubmissionTimestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsModerated = table.Column<bool>(type: "boolean", nullable: false),
+                    IsHidden = table.Column<bool>(type: "boolean", nullable: false),
+                    Reply = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was last modified"),
+                    LastModifiedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who last modified the entity"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "Indicates if the entity is soft-deleted"),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "Timestamp when the entity was deleted"),
+                    DeletedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who deleted the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RoleAssignments",
                 columns: table => new
                 {
@@ -296,6 +395,72 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RoleAssignments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SupportTickets",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TicketNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Subject = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Priority = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    SubmissionTimestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastUpdateTimestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AssignedToAdminId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportTickets", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TagName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    TagDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TagCategory = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was last modified"),
+                    LastModifiedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who last modified the entity"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "Indicates if the entity is soft-deleted"),
+                    DeletedOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "Timestamp when the entity was deleted"),
+                    DeletedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who deleted the entity")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeamCarts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "Timestamp when the entity was created"),
+                    CreatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true, comment: "Identifier of who created the entity"),
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    HostUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ShareToken_Value = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ShareToken_ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TipAmount_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    TipAmount_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    AppliedCouponId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeamCarts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -439,22 +604,45 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CustomizationChoices",
+                columns: table => new
+                {
+                    ChoiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CustomizationGroupId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    PriceAdjustment_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    PriceAdjustment_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    IsDefault = table.Column<bool>(type: "boolean", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomizationChoices", x => new { x.CustomizationGroupId, x.ChoiceId });
+                    table.ForeignKey(
+                        name: "FK_CustomizationChoices_CustomizationGroups_CustomizationGroup~",
+                        column: x => x.CustomizationGroupId,
+                        principalTable: "CustomizationGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserAddresses",
                 columns: table => new
                 {
                     AddressId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Street = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     State = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ZipCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Label = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    DeliveryInstructions = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    DeliveryInstructions = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserAddresses", x => x.AddressId);
+                    table.PrimaryKey("PK_UserAddresses", x => new { x.UserId, x.AddressId });
                     table.ForeignKey(
                         name: "FK_UserAddresses_DomainUsers_UserId",
                         column: x => x.UserId,
@@ -468,18 +656,18 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     PaymentMethodId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     TokenizedDetails = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     IsDefault = table.Column<bool>(type: "boolean", nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserPaymentMethods", x => x.PaymentMethodId);
+                    table.PrimaryKey("PK_UserPaymentMethods", x => new { x.UserId, x.PaymentMethodId });
                     table.ForeignKey(
                         name: "FK_UserPaymentMethods_DomainUsers_UserId",
                         column: x => x.UserId,
@@ -493,6 +681,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     OrderItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
                     Snapshot_MenuCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Snapshot_MenuItemId = table.Column<Guid>(type: "uuid", nullable: false),
                     Snapshot_ItemName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -501,12 +690,11 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     LineItemTotal_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     LineItemTotal_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                    SelectedCustomizations = table.Column<string>(type: "jsonb", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: false)
+                    SelectedCustomizations = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItems", x => x.OrderItemId);
+                    table.PrimaryKey("PK_OrderItems", x => new { x.OrderId, x.OrderItemId });
                     table.ForeignKey(
                         name: "FK_OrderItems_Orders_OrderId",
                         column: x => x.OrderId,
@@ -543,6 +731,123 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SupportTicketContextLinks",
+                columns: table => new
+                {
+                    EntityType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    EntityID = table.Column<Guid>(type: "uuid", nullable: false),
+                    SupportTicketId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportTicketContextLinks", x => new { x.SupportTicketId, x.EntityID, x.EntityType });
+                    table.ForeignKey(
+                        name: "FK_SupportTicketContextLinks_SupportTickets_SupportTicketId",
+                        column: x => x.SupportTicketId,
+                        principalTable: "SupportTickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SupportTicketMessages",
+                columns: table => new
+                {
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SupportTicketId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AuthorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AuthorType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    MessageText = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: false),
+                    Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    IsInternalNote = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportTicketMessages", x => new { x.SupportTicketId, x.MessageId });
+                    table.ForeignKey(
+                        name: "FK_SupportTicketMessages_SupportTickets_SupportTicketId",
+                        column: x => x.SupportTicketId,
+                        principalTable: "SupportTickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeamCartItems",
+                columns: table => new
+                {
+                    TeamCartItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamCartId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AddedByUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Snapshot_MenuItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Snapshot_MenuCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Snapshot_ItemName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    BasePrice_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    BasePrice_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    LineItemTotal_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    LineItemTotal_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    SelectedCustomizations = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeamCartItems", x => new { x.TeamCartId, x.TeamCartItemId });
+                    table.ForeignKey(
+                        name: "FK_TeamCartItems_TeamCarts_TeamCartId",
+                        column: x => x.TeamCartId,
+                        principalTable: "TeamCarts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeamCartMemberPayments",
+                columns: table => new
+                {
+                    MemberPaymentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamCartId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Payment_Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Payment_Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Method = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    OnlineTransactionId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeamCartMemberPayments", x => new { x.TeamCartId, x.MemberPaymentId });
+                    table.ForeignKey(
+                        name: "FK_TeamCartMemberPayments_TeamCarts_TeamCartId",
+                        column: x => x.TeamCartId,
+                        principalTable: "TeamCarts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeamCartMembers",
+                columns: table => new
+                {
+                    TeamCartMemberId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamCartId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeamCartMembers", x => new { x.TeamCartId, x.TeamCartMemberId });
+                    table.ForeignKey(
+                        name: "FK_TeamCartMembers_TeamCarts_TeamCartId",
+                        column: x => x.TeamCartId,
+                        principalTable: "TeamCarts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TodoItems",
                 columns: table => new
                 {
@@ -568,6 +873,21 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountTransaction_Created",
+                table: "AccountTransactions",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountTransactions_RestaurantAccountId",
+                table: "AccountTransactions",
+                column: "RestaurantAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountTransactions_Timestamp",
+                table: "AccountTransactions",
+                column: "Timestamp");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -631,6 +951,31 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 table: "Coupons",
                 columns: new[] { "Code", "RestaurantId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Coupons_CurrentTotalUsageCount",
+                table: "Coupons",
+                column: "CurrentTotalUsageCount");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomizationGroup_Created",
+                table: "CustomizationGroups",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomizationGroup_DeletedOn",
+                table: "CustomizationGroups",
+                column: "DeletedOn");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomizationGroup_IsDeleted",
+                table: "CustomizationGroups",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomizationGroup_LastModified",
+                table: "CustomizationGroups",
+                column: "LastModified");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Devices_DeviceId",
@@ -771,11 +1116,6 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "RestaurantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_OrderId",
-                table: "OrderItems",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Order_Created",
                 table: "Orders",
                 column: "Created");
@@ -784,6 +1124,17 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "IX_Orders_OrderNumber",
                 table: "Orders",
                 column: "OrderNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantAccount_Created",
+                table: "RestaurantAccounts",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantAccounts_RestaurantId",
+                table: "RestaurantAccounts",
+                column: "RestaurantId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -832,6 +1183,41 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 columns: new[] { "IsVerified", "IsAcceptingOrders" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Review_Created",
+                table: "Reviews",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Review_DeletedOn",
+                table: "Reviews",
+                column: "DeletedOn");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Review_IsDeleted",
+                table: "Reviews",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Review_LastModified",
+                table: "Reviews",
+                column: "LastModified");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CustomerId",
+                table: "Reviews",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_OrderId",
+                table: "Reviews",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_Restaurant_SubmissionTimestamp",
+                table: "Reviews",
+                columns: new[] { "RestaurantId", "SubmissionTimestamp" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoleAssignment_Created",
                 table: "RoleAssignments",
                 column: "Created");
@@ -858,6 +1244,77 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SupportTicket_Created",
+                table: "SupportTickets",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_AssignedToAdminId",
+                table: "SupportTickets",
+                column: "AssignedToAdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_LastUpdateTimestamp",
+                table: "SupportTickets",
+                column: "LastUpdateTimestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_Priority",
+                table: "SupportTickets",
+                column: "Priority");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_Status",
+                table: "SupportTickets",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_SubmissionTimestamp",
+                table: "SupportTickets",
+                column: "SubmissionTimestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_TicketNumber",
+                table: "SupportTickets",
+                column: "TicketNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tag_Created",
+                table: "Tags",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tag_DeletedOn",
+                table: "Tags",
+                column: "DeletedOn");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tag_IsDeleted",
+                table: "Tags",
+                column: "IsDeleted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tag_LastModified",
+                table: "Tags",
+                column: "LastModified");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_TagCategory",
+                table: "Tags",
+                column: "TagCategory");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_TagName",
+                table: "Tags",
+                column: "TagName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeamCart_Created",
+                table: "TeamCarts",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TodoList_Created",
                 table: "TodoLists",
                 column: "Created");
@@ -868,24 +1325,17 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "LastModified");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserAddresses_UserId",
-                table: "UserAddresses",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserDeviceSessions_DeviceId_IsActive",
                 table: "UserDeviceSessions",
                 columns: new[] { "DeviceId", "IsActive" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPaymentMethods_UserId",
-                table: "UserPaymentMethods",
-                column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AccountTransactions");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -903,6 +1353,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Coupons");
+
+            migrationBuilder.DropTable(
+                name: "CouponUserUsages");
+
+            migrationBuilder.DropTable(
+                name: "CustomizationChoices");
 
             migrationBuilder.DropTable(
                 name: "Devices");
@@ -926,10 +1382,34 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "ProcessedWebhookEvents");
 
             migrationBuilder.DropTable(
+                name: "RestaurantAccounts");
+
+            migrationBuilder.DropTable(
                 name: "Restaurants");
 
             migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
                 name: "RoleAssignments");
+
+            migrationBuilder.DropTable(
+                name: "SupportTicketContextLinks");
+
+            migrationBuilder.DropTable(
+                name: "SupportTicketMessages");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "TeamCartItems");
+
+            migrationBuilder.DropTable(
+                name: "TeamCartMemberPayments");
+
+            migrationBuilder.DropTable(
+                name: "TeamCartMembers");
 
             migrationBuilder.DropTable(
                 name: "TodoItems");
@@ -950,7 +1430,16 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+                name: "CustomizationGroups");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "SupportTickets");
+
+            migrationBuilder.DropTable(
+                name: "TeamCarts");
 
             migrationBuilder.DropTable(
                 name: "TodoLists");
