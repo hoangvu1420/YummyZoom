@@ -16,7 +16,6 @@ using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.MenuEntity;
-using YummyZoom.Infrastructure.Data.Models;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.RestaurantAccountAggregate;
@@ -24,6 +23,7 @@ using YummyZoom.Domain.AccountTransactionEntity;
 using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.SupportTicketAggregate;
+using YummyZoom.Infrastructure.Data.Models;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -37,6 +37,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
     public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents => Set<ProcessedWebhookEvent>();
     public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
+    public DbSet<RestaurantReviewSummary> RestaurantReviewSummaries => Set<RestaurantReviewSummary>();
+    public DbSet<FullMenuView> FullMenuViews => Set<FullMenuView>();
 
     // Domain Entities
     public DbSet<User> DomainUsers => Set<User>();
