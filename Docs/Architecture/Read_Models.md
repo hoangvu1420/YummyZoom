@@ -1,5 +1,3 @@
-Awesome—your domain model is already clean and very CQRS-friendly. Building on what you have, here are additional **read models / lookup tables** that will make the most common queries and cross-aggregate checks fast and simple. I grouped them roughly by bounded context and matched the format you used.
-
 # Identity & Access
 
 | Read Model / Lookup Table   | Description                                                                                               | Triggering Domain Events                                              | Purpose & Use Case                                                                       |

@@ -631,6 +631,7 @@ public class RestaurantUpdateTests
         var result = Restaurant.Create(
             DefaultName,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             CreateValidAddress(),

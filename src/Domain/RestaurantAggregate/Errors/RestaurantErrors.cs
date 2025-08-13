@@ -109,4 +109,17 @@ public static class RestaurantErrors
     public static Error CannotDeleteVerifiedRestaurantWithoutConfirmation() => Error.Validation(
         "Restaurant.CannotDeleteVerifiedRestaurantWithoutConfirmation",
         "Cannot delete verified restaurant without explicit confirmation due to potential impact on existing customers.");
+
+    // GeoCoordinates validation errors
+    public static Error GeoCoordinatesAreRequired() => Error.Validation(
+        "Restaurant.GeoCoordinates.IsRequired",
+        "Restaurant geolocation coordinates are required.");
+
+    public static Error LatitudeOutOfRange(double value) => Error.Validation(
+        "Restaurant.GeoCoordinates.LatitudeOutOfRange",
+        $"Latitude '{value}' must be between -90 and 90.");
+
+    public static Error LongitudeOutOfRange(double value) => Error.Validation(
+        "Restaurant.GeoCoordinates.LongitudeOutOfRange",
+        $"Longitude '{value}' must be between -180 and 180.");
 }

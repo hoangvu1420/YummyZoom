@@ -13,9 +13,11 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
     public string Name { get; private set; }
     public string LogoUrl { get; private set; }
+    public string BackgroundImageUrl { get; private set; }
     public string Description { get; private set; }
     public string CuisineType { get; private set; }
     public Address Location { get; private set; }
+    public GeoCoordinates? GeoCoordinates { get; private set; }
     public ContactInfo ContactInfo { get; private set; }
     public BusinessHours BusinessHours { get; private set; }
     public bool IsVerified { get; private set; }
@@ -40,6 +42,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         RestaurantId id,
         string name,
         string logoUrl,
+        string backgroundImageUrl,
         string description,
         string cuisineType,
         Address location,
@@ -51,6 +54,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
     {
         Name = name;
         LogoUrl = logoUrl;
+        BackgroundImageUrl = backgroundImageUrl;
         Description = description;
         CuisineType = cuisineType;
         Location = location;
@@ -67,6 +71,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
     public static Result<Restaurant> Create(
         string name,
         string? logoUrl,
+        string? backgroundImageUrl,
         string description,
         string cuisineType,
         string street,
@@ -76,7 +81,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         string country,
         string phoneNumber,
         string email,
-        string businessHours)
+        string businessHours,
+        double? latitude = null,
+        double? longitude = null)
     {
         // Validate restaurant-level fields
         var validationResult = ValidateRestaurantFields(name, logoUrl, description, cuisineType);
@@ -96,11 +103,21 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         if (businessHoursResult.IsFailure)
             return Result.Failure<Restaurant>(businessHoursResult.Error);
 
+        GeoCoordinates? coords = null;
+        if (latitude.HasValue && longitude.HasValue)
+        {
+            var coordResult = GeoCoordinates.Create(latitude.Value, longitude.Value);
+            if (coordResult.IsFailure)
+                return Result.Failure<Restaurant>(coordResult.Error);
+            coords = coordResult.Value;
+        }
+
         // Create the restaurant
         var restaurant = new Restaurant(
             RestaurantId.CreateUnique(),
             name.Trim(),
             logoUrl?.Trim() ?? string.Empty,
+            backgroundImageUrl?.Trim() ?? string.Empty,
             description.Trim(),
             cuisineType.Trim(),
             addressResult.Value,
@@ -108,6 +125,11 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             businessHoursResult.Value,
             isVerified: false,
             isAcceptingOrders: false);
+
+        if (coords is not null)
+        {
+            restaurant.GeoCoordinates = coords;
+        }
 
         restaurant.AddDomainEvent(new RestaurantCreated(restaurant.Id));
 
@@ -117,11 +139,13 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
     public static Result<Restaurant> Create(
         string name,
         string? logoUrl,
+        string? backgroundImageUrl,
         string description,
         string cuisineType,
         Address location,
         ContactInfo contactInfo,
-        BusinessHours businessHours)
+        BusinessHours businessHours,
+        GeoCoordinates? geoCoordinates = null)
     {
         // Validate restaurant-level fields
         var validationResult = ValidateRestaurantFields(name, logoUrl, description, cuisineType);
@@ -143,6 +167,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             RestaurantId.CreateUnique(),
             name.Trim(),
             logoUrl?.Trim() ?? string.Empty,
+            backgroundImageUrl?.Trim() ?? string.Empty,
             description.Trim(),
             cuisineType.Trim(),
             location,
@@ -150,6 +175,11 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             businessHours,
             isVerified: false,
             isAcceptingOrders: false);
+
+        if (geoCoordinates is not null)
+        {
+            restaurant.GeoCoordinates = geoCoordinates;
+        }
 
         restaurant.AddDomainEvent(new RestaurantCreated(restaurant.Id));
 
@@ -284,6 +314,16 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         
         return Result.Success();
     }
+    
+    public Result UpdateBackgroundImage(string? backgroundImageUrl)
+    {
+        var oldBackgroundImageUrl = BackgroundImageUrl;
+        BackgroundImageUrl = backgroundImageUrl?.Trim() ?? string.Empty;
+        
+        AddDomainEvent(new RestaurantLogoChanged(Id, oldBackgroundImageUrl, BackgroundImageUrl));
+        
+        return Result.Success();
+    }
 
     public Result ChangeLocation(Address location)
     {
@@ -292,9 +332,22 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldLocation = Location;
         Location = location;
-        
+
         AddDomainEvent(new RestaurantLocationChanged(Id, oldLocation, Location));
-        
+
+        return Result.Success();
+    }
+
+    public Result ChangeGeoCoordinates(double latitude, double longitude)
+    {
+        var coordResult = GeoCoordinates.Create(latitude, longitude);
+        if (coordResult.IsFailure)
+            return Result.Failure(coordResult.Error);
+
+        var oldCoords = GeoCoordinates;
+        GeoCoordinates = coordResult.Value;
+
+        AddDomainEvent(new RestaurantGeoCoordinatesChanged(Id, oldCoords, GeoCoordinates));
         return Result.Success();
     }
 
@@ -436,10 +489,11 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         return Result.Success();
     }
 
+    // IMPORTANT: Avoid using this method. Use the granular update methods instead.
     public Result UpdateCompleteProfile(
-        string name, 
-        string description, 
-        string cuisineType, 
+        string name,
+        string description,
+        string cuisineType,
         string? logoUrl,
         string street,
         string city,
@@ -485,7 +539,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         Location = addressResult.Value;
         ContactInfo = contactInfoResult.Value;
         BusinessHours = businessHoursResult.Value;
-        
+
         AddDomainEvent(new RestaurantProfileUpdated(
             Id,
             oldName,
@@ -502,7 +556,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
             ContactInfo,
             oldBusinessHours,
             BusinessHours));
-        
+
         return Result.Success();
     }
 

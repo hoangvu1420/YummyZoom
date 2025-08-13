@@ -262,6 +262,7 @@ public class ApplicationDbContextInitialiser
                     var restaurantResult = Restaurant.Create(
                         name,
                         logoUrl,
+                        backgroundImageUrl: null,
                         description,
                         cuisineType,
                         "123 Main St",

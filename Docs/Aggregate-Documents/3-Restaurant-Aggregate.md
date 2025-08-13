@@ -1,6 +1,6 @@
 # Aggregate Documentation: `Restaurant`
 
-* **Version:** 1.0
+* **Version:** 1.1
 * **Last Updated:** 2025-07-05
 * **Source File:** `e:\source\repos\CA\YummyZoom\src\Domain\RestaurantAggregate\Restaurant.cs`
 
@@ -14,7 +14,7 @@
 * Manages the lifecycle of a restaurant profile.
 * Acts as the transactional boundary for all restaurant-related operations.
 * Enforces business rules for restaurant information, such as name, description, and cuisine type.
-* Manages the restaurant's location, contact information, and business hours.
+* Manages the restaurant's location, geocoordinates, contact information, and business hours.
 * Controls the restaurant's verification and order acceptance status.
 
 ## 2. Structure
@@ -24,6 +24,7 @@
 * **Key Value Objects:**
   * `RestaurantId`: The unique identifier for the `Restaurant` aggregate.
   * `Address`: Represents the restaurant's physical location.
+  * `GeoCoordinates`: Represents the restaurant's latitude and longitude.
   * `ContactInfo`: Represents the restaurant's contact details (phone and email).
   * `BusinessHours`: Represents the restaurant's operating hours.
 
@@ -46,7 +47,9 @@ public static Result<Restaurant> Create(
   string country,
   string phoneNumber,
   string email,
-  string businessHours
+  string businessHours,
+  double? latitude = null,
+  double? longitude = null
 )
 ```
 
@@ -64,6 +67,8 @@ public static Result<Restaurant> Create(
 | `phoneNumber` | `string` | The contact phone number. |
 | `email` | `string` | The contact email address. |
 | `businessHours` | `string` | The business hours. |
+| `latitude` | `double?` | Optional latitude (-90..90). |
+| `longitude` | `double?` | Optional longitude (-180..180). |
 
 **Validation Rules & Potential Errors:**
 
@@ -74,6 +79,7 @@ public static Result<Restaurant> Create(
 * All `Address` fields are required and have maximum lengths. (Returns various `Address` related errors)
 * `phoneNumber` and `email` are required and must be in a valid format. (Returns various `ContactInfo` related errors)
 * `businessHours` is required and has a maximum length. (Returns `RestaurantErrors.BusinessHoursFormatIsRequired`, `RestaurantErrors.BusinessHoursFormatTooLong`)
+* If `latitude` and `longitude` are provided, they must be within valid ranges. (Returns `RestaurantErrors.LatitudeOutOfRange`, `RestaurantErrors.LongitudeOutOfRange`)
 
 ### 3.2. State Transitions & Commands (Public Methods)
 
@@ -84,6 +90,7 @@ public static Result<Restaurant> Create(
 | `Result ChangeCuisineType(string cuisineType)` | Updates the restaurant's cuisine type. | Cuisine type is required and within length limits. | `RestaurantErrors.CuisineTypeIsRequired`, `RestaurantErrors.CuisineTypeTooLong` |
 | `Result UpdateLogo(string? logoUrl)` | Updates the restaurant's logo URL. | URL format is valid if provided. | `RestaurantErrors.InvalidLogoUrl` |
 | `Result ChangeLocation(Address location)` | Updates the restaurant's location. | Location is not null. | `RestaurantErrors.LocationIsRequired` |
+| `Result ChangeGeoCoordinates(double latitude, double longitude)` | Updates the restaurant's geo coordinates. | Latitude in [-90, 90], Longitude in [-180, 180]. | `RestaurantErrors.LatitudeOutOfRange`, `RestaurantErrors.LongitudeOutOfRange` |
 | `Result UpdateContactInfo(ContactInfo contactInfo)` | Updates the restaurant's contact information. | Contact info is not null. | `RestaurantErrors.ContactInfoIsRequired` |
 | `Result UpdateBusinessHours(BusinessHours businessHours)` | Updates the restaurant's business hours. | Business hours are not null. | `RestaurantErrors.BusinessHoursIsRequired` |
 | `void Verify()` | Marks the restaurant as verified. | None. | None. |
@@ -103,6 +110,7 @@ public static Result<Restaurant> Create(
 | `Description` | `string` | A description of the restaurant. |
 | `CuisineType` | `string` | The type of cuisine served. |
 | `Location` | `Address` | The restaurant's physical location. |
+| `GeoCoordinates` | `GeoCoordinates?` | The restaurant's optional geospatial coordinates. |
 | `ContactInfo` | `ContactInfo` | The restaurant's contact details. |
 | `BusinessHours` | `BusinessHours` | The restaurant's operating hours. |
 | `IsVerified` | `bool` | Whether the restaurant is verified. |
@@ -118,6 +126,7 @@ public static Result<Restaurant> Create(
 | `RestaurantCuisineTypeChanged` | After a successful call to `ChangeCuisineType`. | Signals that the restaurant's cuisine type has changed. |
 | `RestaurantLogoChanged` | After a successful call to `UpdateLogo`. | Signals that the restaurant's logo URL has changed. |
 | `RestaurantLocationChanged` | After a successful call to `ChangeLocation`. | Signals that the restaurant's location has changed. |
+| `RestaurantGeoCoordinatesChanged` | After a successful call to `ChangeGeoCoordinates`. | Signals that the restaurant's geospatial coordinates have changed. |
 | `RestaurantContactInfoChanged` | After a successful call to `UpdateContactInfo`. | Signals that the restaurant's contact information has changed. |
 | `RestaurantBusinessHoursChanged` | After a successful call to `UpdateBusinessHours`. | Signals that the restaurant's business hours have changed. |
 | `RestaurantVerified` | After a successful call to `Verify`. | Signals that the restaurant has been verified. |

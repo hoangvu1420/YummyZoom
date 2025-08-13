@@ -5,7 +5,24 @@ The diagram illustrates the tables, columns, primary keys (PK), foreign keys (FK
 ### Database Schema (Mermaid ER Diagram)
 
 ```mermaid
+---
+config:
+  theme: default
+---
+
 erDiagram
+    %% =============================================================
+    %% BOUNDED CONTEXTS (See Domain_Design.md)
+    %%   Identity & Access
+    %%   Restaurant Catalog
+    %%   Order & Fulfillment (includes TeamCart)
+    %%   Payouts & Monetization
+    %%   Support & Governance
+    %%   Misc / Shared
+    %% Legend: solid line = enforced FK / ownership inside boundary; dotted = logical cross-context reference (no FK)
+    %% =============================================================
+
+    %% ---------------- Identity & Access Context ----------------
     %% --- ASP.NET Core Identity Aggregate ---
     AspNetUsers {
         UUID Id PK
@@ -94,6 +111,7 @@ erDiagram
         boolean IsDefault
     }
 
+    %% ---------------- Restaurant Catalog Context ----------------
     %% --- Restaurant Aggregate ---
     Restaurants {
         UUID Id PK
@@ -101,6 +119,7 @@ erDiagram
         string Description
         string CuisineType
         string LogoUrl
+        string BackgroundImageUrl
         boolean IsVerified
         boolean IsAcceptingOrders
         string Location_Street "Location VO"
@@ -108,11 +127,14 @@ erDiagram
         string Location_State "Location VO"
         string Location_Country "Location VO"
         string Location_ZipCode "Location VO"
+        decimal Geo_Latitude "GeoCoordinates VO"
+        decimal Geo_Longitude "GeoCoordinates VO"
         string ContactInfo_PhoneNumber "Contact VO"
         string ContactInfo_Email "Contact VO"
         string BusinessHours "BusinessHours VO"
     }
 
+    %% ---------------- Cross-Context Bridge (Identity ↔ Catalog) ----------------
     %% --- RoleAssignments Aggregate ---
     RoleAssignments {
         UUID Id PK
@@ -177,6 +199,7 @@ erDiagram
         string TagCategory
     }
 
+    %% ---------------- Order & Fulfillment Context ----------------
     %% --- Order Aggregate ---
     Orders {
         UUID Id PK
@@ -276,6 +299,7 @@ erDiagram
         string Reply
     }
 
+    %% ---------------- Payouts & Monetization Context ----------------
     %% --- Payouts & Monetization ---
     RestaurantAccounts {
         UUID Id PK
@@ -296,6 +320,7 @@ erDiagram
         string Notes
     }
 
+    %% ---------------- Support & Governance Context ----------------
     %% --- Support & Governance ---
     SupportTickets {
         UUID Id PK
@@ -325,6 +350,7 @@ erDiagram
         string EntityType PK
     }
     
+    %% ---------------- TeamCart (Order & Fulfillment Context) ----------------
     %% --- TeamCart Aggregate ---
     TeamCarts {
         UUID Id PK
@@ -377,6 +403,7 @@ erDiagram
         timestamp UpdatedAt
     }
     
+    %% ---------------- Misc / Shared Tables ----------------
     %% --- Misc / Application Service Tables ---
     Devices {
         UUID Id PK
@@ -392,26 +419,13 @@ erDiagram
         string FcmToken
         boolean IsActive
     }
-
-    %% --- TodoList Aggregate (Example) ---
-    TodoLists {
-        UUID Id PK
-        string Title
-        string Colour "Color VO"
-    }
-
-    TodoItems {
-        UUID TodoListId PK, FK
-        UUID TodoItemId PK
-        string Title
-        string Note
-        int Priority
-        boolean IsDone
-    }
     
     %% --- Relationships ---
+    %% =============================================================
+    %% RELATIONSHIPS GROUPED BY BOUNDED CONTEXT
+    %% =============================================================
 
-    %% Identity & User
+    %% Identity & Access
     AspNetUsers ||--o{ AspNetUserRoles : "has"
     AspNetRoles ||--o{ AspNetUserRoles : "has"
     AspNetUsers ||--o{ AspNetUserClaims : "has"
@@ -422,13 +436,45 @@ erDiagram
     DomainUsers ||--o{ UserAddresses : "owns"
     DomainUsers ||--o{ UserPaymentMethods : "owns"
 
-    %% Restaurant & Catalog
+    %% Restaurant Catalog
     Restaurants ||..o| Menus : "has"
     Restaurants ||..o| CustomizationGroups : "defines"
     Menus }o--|| MenuCategories : "contains"
     MenuCategories ||..o| MenuItems : "groups"
     CustomizationGroups ||--o{ CustomizationChoices : "owns"
 
+    %% MenuItems tagged with Tags 
+    MenuItems }o..o{ Tags : "tagged with"
+
+    %% Additional Catalog Relationships
+    Restaurants ||..o| MenuItems : "offers"
+
+    %% --- Added logical reference relationships for Id/Ids fields ---
+    %% Coupons and their scopes
+    Restaurants      ||..o| Coupons : "issues"
+    Coupons          ||..o| TeamCarts : "applied to"
+    Coupons          }o..o{ MenuItems : "applies to items"
+    Coupons          }o..o{ MenuCategories : "applies to categories"
+
+    %% Snapshot references (historical copies, not enforced FKs)
+    MenuItems        ||..o| OrderItems : "snapshotted by"
+    MenuItems        ||..o| TeamCartItems : "snapshotted by"
+    MenuCategories   ||..o| TeamCartItems : "snapshotted by"
+
+    %% Payment & Accounting cross references
+    DomainUsers      ||..o| PaymentTransactions : "pays"
+    Orders           ||..o| AccountTransactions : "referenced by"
+
+    %% Support system references
+    DomainUsers      ||..o| SupportTickets : "assigned"
+    DomainUsers      ||..o| SupportTicketMessages : "authors"
+
+    %% Team cart user participation
+    DomainUsers      ||..o| TeamCartMembers : "joins"
+    DomainUsers      ||..o| TeamCartItems : "adds"
+    DomainUsers      ||..o| TeamCartMemberPayments : "pays"
+
+    %% Cross-Context Bridge
     %% Role Assignments (connects Users and Restaurants)
     DomainUsers      ||..|| RoleAssignments : "is assigned"
     Restaurants      ||..|| RoleAssignments : "has roles for"
@@ -446,30 +492,94 @@ erDiagram
     Restaurants      ||..o| Reviews : "is reviewed for"
     Orders           |o..o| Reviews : "is basis of"
 
-    %% Payouts
-    Restaurants      |o--|| RestaurantAccounts : "has"
-    RestaurantAccounts ||--o{ AccountTransactions : "has ledger of"
+    %% Payouts & Monetization
+    Restaurants      ||..o| RestaurantAccounts : "has"
+    RestaurantAccounts ||..o{ AccountTransactions : "has ledger of"
     
-    %% Support
+    %% Support & Governance
     SupportTickets ||--o{ SupportTicketMessages : "owns"
     SupportTickets ||--o{ SupportTicketContextLinks : "owns"
 
-    %% Team Carts
+    %% Team Carts (Order & Fulfillment)
     TeamCarts ||--o{ TeamCartMembers : "owns"
     TeamCarts ||--o{ TeamCartItems : "owns"
     TeamCarts ||--o{ TeamCartMemberPayments : "owns"
     DomainUsers ||..o| TeamCarts : "hosts"
     Restaurants ||..o| TeamCarts : "is for"
-
-    %% Example TodoList
-    TodoLists ||--o{ TodoItems : "owns"
     
-    %% Device Tracking
+    %% Device Tracking (Misc / Shared)
     DomainUsers ||..|| UserDeviceSessions : "is referenced by"
     Devices     ||..|| UserDeviceSessions : "is referenced by"
+    
+    %% ---------------- Styling (Bounded Context Colors) ----------------
+    %% Identity & Access (Blue)
+    style AspNetUsers fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetRoles fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetUserRoles fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetUserClaims fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetUserLogins fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetUserTokens fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style AspNetRoleClaims fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style DomainUsers fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style UserAddresses fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+    style UserPaymentMethods fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
+
+    %% Cross-Context Bridge (Teal)
+    style RoleAssignments fill:#E0F7FA,stroke:#00838F,stroke-width:1px
+
+    %% Restaurant Catalog (Green)
+    style Restaurants fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style Menus fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style MenuCategories fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style MenuItems fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style CustomizationGroups fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style CustomizationChoices fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style Tags fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+
+    %% Order & Fulfillment (Orange)
+    style Orders fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style OrderItems fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style PaymentTransactions fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style Coupons fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style Reviews fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style TeamCarts fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style TeamCartMembers fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style TeamCartItems fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style TeamCartMemberPayments fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+
+    %% Payouts & Monetization (Purple)
+    style RestaurantAccounts fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1px
+    style AccountTransactions fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1px
+
+    %% Support & Governance (Red / Pink)
+    style SupportTickets fill:#FFEBEE,stroke:#C62828,stroke-width:1px
+    style SupportTicketMessages fill:#FFEBEE,stroke:#C62828,stroke-width:1px
+    style SupportTicketContextLinks fill:#FFEBEE,stroke:#C62828,stroke-width:1px
+
+    %% Misc / Shared (Gray)
+    style Devices fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+    style UserDeviceSessions fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+
+    %% ------------------------------------------------------------------
+    %% NOTE: Mermaid's erDiagram styling support may vary by renderer.
+    %% If styles do not apply in your environment, consider switching
+    %% to a flowchart-based diagram for richer theming.
+    %% ------------------------------------------------------------------
 ```
 
 ### Key Changes and Rationale
+
+#### Bounded Context Color Legend
+
+| Bounded Context | Color |
+|-----------------|-------|
+| Identity & Access | Blue |
+| Cross-Context Bridge | Teal |
+| Restaurant Catalog | Green |
+| Order & Fulfillment (incl. TeamCart) | Orange |
+| Payouts & Monetization | Purple |
+| Support & Governance | Red/Pink |
+| Misc / Shared | Gray |
 
 1.  **Full Schema Representation**: The diagram has been expanded to include all aggregates and entities defined in `Domain_Design.md` and implemented in the `ApplicationDbContextModelSnapshot.cs`. This includes new tables for `SupportTickets`, `TeamCarts`, `Reviews`, `Coupons`, `RestaurantAccounts`, and their child entities.
 2.  **Owned Entities and VOs**:

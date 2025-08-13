@@ -37,6 +37,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName, 
             DefaultLogoUrl, 
+            backgroundImageUrl: null,
             DefaultDescription, 
             DefaultCuisineType, 
             CreateValidAddress(), 
@@ -68,6 +69,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             DefaultStreet,
@@ -101,6 +103,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             string.Empty,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             CreateValidAddress(),
@@ -119,6 +122,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             string.Empty,
             DefaultCuisineType,
             CreateValidAddress(),
@@ -137,6 +141,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             DefaultDescription,
             string.Empty,
             CreateValidAddress(),
@@ -155,6 +160,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             "invalid-url",
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             CreateValidAddress(),
@@ -173,6 +179,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             null,
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             CreateValidAddress(),
@@ -291,6 +298,7 @@ public class RestaurantCoreTests
         var result = Restaurant.Create(
             DefaultName,
             DefaultLogoUrl,
+            backgroundImageUrl: null,
             DefaultDescription,
             DefaultCuisineType,
             CreateValidAddress(),

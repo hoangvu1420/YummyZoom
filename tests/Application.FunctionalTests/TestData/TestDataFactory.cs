@@ -207,6 +207,7 @@ public static class TestDataFactory
         var restaurantResult = Restaurant.Create(
             DefaultTestData.Restaurant.Name,
             DefaultTestData.Restaurant.LogoUrl,
+            backgroundImageUrl: null,
             DefaultTestData.Restaurant.Description,
             DefaultTestData.Restaurant.CuisineType,
             addressResult.Value,
@@ -487,6 +488,7 @@ public static class TestDataFactory
         var restaurantResult = Restaurant.Create(
             "Inactive Test Restaurant",
             "https://example.com/inactive-logo.jpg",
+            backgroundImageUrl: null,
             "A test restaurant that is not accepting orders",
             "Test Cuisine",
             addressResult.Value,
@@ -543,6 +545,7 @@ public static class TestDataFactory
         var restaurantResult = Restaurant.Create(
             "Second Test Restaurant",
             "https://example.com/second-logo.jpg",
+            backgroundImageUrl: null,
             "A second test restaurant with different menu items",
             "Different Cuisine",
             addressResult.Value,

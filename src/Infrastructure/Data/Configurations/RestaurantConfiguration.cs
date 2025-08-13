@@ -28,6 +28,10 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .HasMaxLength(500)
             .IsRequired(false);
 
+        builder.Property(r => r.BackgroundImageUrl)
+            .HasMaxLength(500)
+            .IsRequired(false);
+
         builder.Property(r => r.Description)
             .HasMaxLength(1000)
             .IsRequired();
@@ -94,6 +98,20 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
                 .HasMaxLength(200)
                 .IsRequired();
         });
+
+        // Map GeoCoordinates Value Object (optional)
+        builder.OwnsOne(r => r.GeoCoordinates, geoBuilder =>
+        {
+            geoBuilder.Property(g => g.Latitude)
+                .HasColumnName("Geo_Latitude")
+                .HasPrecision(9, 6);
+
+            geoBuilder.Property(g => g.Longitude)
+                .HasColumnName("Geo_Longitude")
+                .HasPrecision(9, 6);
+        });
+        // Mark the owned navigation as optional so its columns are nullable
+        builder.Navigation(r => r.GeoCoordinates).IsRequired(false);
 
         // --- 4. Indexes for Performance ---
         builder.HasIndex(r => r.Name)

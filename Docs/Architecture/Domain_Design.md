@@ -66,6 +66,7 @@ This document outlines the domain design for the YummyZoom platform, focusing on
     * `Description`
     * `CuisineType` (String or list of strings)
     * `Location` (`Address` VO - The physical address)
+    * `GeoCoordinates` (VO: `Latitude`, `Longitude` – optional geospatial coordinates)
     * `ContactInfo` (VO: `PhoneNumber`, `Email`)
     * `BusinessHours` (VO or structured data)
     * `IsVerified` (Boolean - Admin controlled)
