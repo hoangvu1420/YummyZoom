@@ -6,4 +6,4 @@ namespace YummyZoom.Domain.OrderAggregate.Events;
 /// Domain event raised when an order payment is successfully confirmed.
 /// </summary>
 public record OrderPaymentSucceeded(
-    OrderId OrderId) : IDomainEvent;
+    OrderId OrderId) : DomainEventBase;

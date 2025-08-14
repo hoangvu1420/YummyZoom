@@ -7,4 +7,4 @@ public sealed record RestaurantGeoCoordinatesChanged(
     RestaurantId RestaurantId,
     GeoCoordinates? OldCoordinates,
     GeoCoordinates NewCoordinates
-) : IDomainEvent;
+) : DomainEventBase;

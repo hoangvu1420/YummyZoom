@@ -5,4 +5,4 @@ namespace YummyZoom.Domain.RestaurantAggregate.Events;
 public record RestaurantLogoChanged(
     RestaurantId RestaurantId,
     string? OldLogoUrl,
-    string? NewLogoUrl) : IDomainEvent;
+    string? NewLogoUrl) : DomainEventBase;

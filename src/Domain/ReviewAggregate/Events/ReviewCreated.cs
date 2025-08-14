@@ -11,4 +11,4 @@ public record ReviewCreated(
     UserId CustomerId,
     RestaurantId RestaurantId,
     Rating Rating,
-    DateTime SubmissionTimestamp) : IDomainEvent;
+    DateTime SubmissionTimestamp) : DomainEventBase;

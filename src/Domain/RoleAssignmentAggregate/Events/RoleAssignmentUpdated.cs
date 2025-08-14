@@ -10,4 +10,4 @@ public record RoleAssignmentUpdated(
     UserId UserId,
     RestaurantId RestaurantId,
     RestaurantRole PreviousRole,
-    RestaurantRole NewRole) : IDomainEvent;
+    RestaurantRole NewRole) : DomainEventBase;

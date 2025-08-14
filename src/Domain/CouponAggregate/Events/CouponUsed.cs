@@ -9,4 +9,4 @@ public record CouponUsed(
     CouponId CouponId,
     int PreviousUsageCount,
     int NewUsageCount,
-    DateTime UsedAt) : IDomainEvent;
+    DateTime UsedAt) : DomainEventBase;

@@ -9,4 +9,4 @@ public record OrderCreated(
     OrderId OrderId,
     UserId CustomerId,
     RestaurantId RestaurantId,
-    Money TotalAmount) : IDomainEvent;
+    Money TotalAmount) : DomainEventBase;

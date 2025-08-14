@@ -8,4 +8,4 @@ namespace YummyZoom.Domain.RestaurantAccountAggregate.Events;
 public record PlatformFeeRecorded(
     RestaurantAccountId RestaurantAccountId,
     OrderId RelatedOrderId,
-    Money Amount) : IDomainEvent;
+    Money Amount) : DomainEventBase;

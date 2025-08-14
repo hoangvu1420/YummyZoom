@@ -3,4 +3,4 @@ using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UserAggregate.Events;
 
-public record UserAddressAdded(UserId UserId, Address Address) : IDomainEvent;
+public record UserAddressAdded(UserId UserId, Address Address) : DomainEventBase;

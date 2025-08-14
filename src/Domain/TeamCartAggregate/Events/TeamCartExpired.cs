@@ -7,4 +7,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 /// Domain event raised when a team cart expires.
 /// </summary>
 public sealed record TeamCartExpired(
-    TeamCartId TeamCartId) : IDomainEvent;
+    TeamCartId TeamCartId) : DomainEventBase;

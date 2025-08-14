@@ -7,4 +7,4 @@ namespace YummyZoom.Domain.CouponAggregate.Events;
 /// </summary>
 public record CouponEnabled(
     CouponId CouponId,
-    DateTime EnabledAt) : IDomainEvent;
+    DateTime EnabledAt) : DomainEventBase;

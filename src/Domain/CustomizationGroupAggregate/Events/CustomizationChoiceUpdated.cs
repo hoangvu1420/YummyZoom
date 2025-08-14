@@ -10,4 +10,4 @@ public record CustomizationChoiceUpdated(
     Money NewPriceAdjustment,
     bool IsDefault,
     int DisplayOrder
-) : IDomainEvent;
+) : DomainEventBase;

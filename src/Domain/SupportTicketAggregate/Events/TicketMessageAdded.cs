@@ -9,4 +9,4 @@ public record TicketMessageAdded(
     Guid AuthorId,
     AuthorType AuthorType,
     string MessageText,
-    bool IsInternalNote) : IDomainEvent;
+    bool IsInternalNote) : DomainEventBase;

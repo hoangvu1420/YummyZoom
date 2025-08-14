@@ -8,4 +8,4 @@ namespace YummyZoom.Domain.RestaurantAccountAggregate.Events;
 public record RefundDeducted(
     RestaurantAccountId RestaurantAccountId,
     OrderId RelatedOrderId,
-    Money Amount) : IDomainEvent;
+    Money Amount) : DomainEventBase;

@@ -18,4 +18,4 @@ public record ItemAddedToTeamCart(
     TeamCartItemId TeamCartItemId,
     UserId AddedByUserId,
     MenuItemId MenuItemId,
-    int Quantity) : IDomainEvent;
+    int Quantity) : DomainEventBase;

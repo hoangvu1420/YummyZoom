@@ -14,4 +14,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 public record OnlinePaymentFailed(
     TeamCartId TeamCartId,
     UserId UserId,
-    Money Amount) : IDomainEvent;
+    Money Amount) : DomainEventBase;

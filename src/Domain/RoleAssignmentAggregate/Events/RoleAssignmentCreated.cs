@@ -9,4 +9,4 @@ public record RoleAssignmentCreated(
     RoleAssignmentId RoleAssignmentId,
     UserId UserId,
     RestaurantId RestaurantId,
-    RestaurantRole Role) : IDomainEvent;
+    RestaurantRole Role) : DomainEventBase;

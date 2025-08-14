@@ -6,4 +6,4 @@ namespace YummyZoom.Domain.MenuItemAggregate.Events;
 public record MenuItemAvailabilityChanged(
     MenuItemId MenuItemId,
     bool IsAvailable
-) : IDomainEvent;
+) : DomainEventBase;

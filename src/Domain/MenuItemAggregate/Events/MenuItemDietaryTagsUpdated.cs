@@ -7,4 +7,4 @@ namespace YummyZoom.Domain.MenuItemAggregate.Events;
 public record MenuItemDietaryTagsUpdated(
     MenuItemId MenuItemId,
     List<TagId> TagIds
-) : IDomainEvent;
+) : DomainEventBase;

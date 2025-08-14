@@ -4,4 +4,4 @@ namespace YummyZoom.Domain.ReviewAggregate.Events;
 
 public record ReviewShown(
     ReviewId ReviewId,
-    DateTime ShownAt) : IDomainEvent;
+    DateTime ShownAt) : DomainEventBase;

@@ -4,4 +4,4 @@ namespace YummyZoom.Domain.ReviewAggregate.Events;
 
 public record ReviewHidden(
     ReviewId ReviewId,
-    DateTime HiddenAt) : IDomainEvent;
+    DateTime HiddenAt) : DomainEventBase;

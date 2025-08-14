@@ -7,4 +7,4 @@ public record SupportTicketPriorityChanged(
     SupportTicketId SupportTicketId,
     SupportTicketPriority PreviousPriority,
     SupportTicketPriority NewPriority,
-    Guid ChangedByAdminId) : IDomainEvent;
+    Guid ChangedByAdminId) : DomainEventBase;

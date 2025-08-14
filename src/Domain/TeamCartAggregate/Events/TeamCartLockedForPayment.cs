@@ -10,4 +10,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 /// </summary>
 public sealed record TeamCartLockedForPayment(
     TeamCartId TeamCartId,
-    UserId HostUserId) : IDomainEvent;
+    UserId HostUserId) : DomainEventBase;

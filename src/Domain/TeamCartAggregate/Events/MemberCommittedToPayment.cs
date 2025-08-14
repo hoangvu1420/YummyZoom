@@ -17,4 +17,4 @@ public record MemberCommittedToPayment(
     TeamCartId TeamCartId,
     UserId UserId,
     PaymentMethod Method,
-    Money Amount) : IDomainEvent;
+    Money Amount) : DomainEventBase;

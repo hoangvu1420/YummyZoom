@@ -6,4 +6,4 @@ namespace YummyZoom.Domain.RestaurantAccountAggregate.Events;
 public record PayoutSettled(
     RestaurantAccountId RestaurantAccountId,
     Money PayoutAmount,
-    Money NewBalance) : IDomainEvent;
+    Money NewBalance) : DomainEventBase;

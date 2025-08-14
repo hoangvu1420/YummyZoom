@@ -5,4 +5,4 @@ namespace YummyZoom.Domain.RestaurantAggregate.Events;
 public record RestaurantLocationChanged(
     RestaurantId RestaurantId,
     Address OldLocation,
-    Address NewLocation) : IDomainEvent;
+    Address NewLocation) : DomainEventBase;

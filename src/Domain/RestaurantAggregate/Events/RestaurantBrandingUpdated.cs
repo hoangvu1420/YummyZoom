@@ -9,4 +9,4 @@ public record RestaurantBrandingUpdated(
     string? OldLogoUrl,
     string? NewLogoUrl,
     string OldDescription,
-    string NewDescription) : IDomainEvent;
+    string NewDescription) : DomainEventBase;

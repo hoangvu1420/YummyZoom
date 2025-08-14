@@ -11,4 +11,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 public sealed record MemberRoleUpdated(
     TeamCartId TeamCartId,
     UserId UserId,
-    MemberRole NewRole) : IDomainEvent;
+    MemberRole NewRole) : DomainEventBase;

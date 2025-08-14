@@ -7,4 +7,4 @@ namespace YummyZoom.Domain.MenuItemAggregate.Events;
 public record MenuItemPriceChanged(
     MenuItemId MenuItemId,
     Money NewPrice
-) : IDomainEvent;
+) : DomainEventBase;

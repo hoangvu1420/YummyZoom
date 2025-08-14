@@ -9,4 +9,4 @@ public record MenuItemCreated(
     MenuItemId MenuItemId,
     RestaurantId RestaurantId,
     MenuCategoryId MenuCategoryId
-) : IDomainEvent;
+) : DomainEventBase;

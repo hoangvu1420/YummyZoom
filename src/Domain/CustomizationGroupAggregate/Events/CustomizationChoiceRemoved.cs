@@ -6,4 +6,4 @@ public record CustomizationChoiceRemoved(
     CustomizationGroupId CustomizationGroupId,
     ChoiceId ChoiceId,
     string Name
-) : IDomainEvent;
+) : DomainEventBase;

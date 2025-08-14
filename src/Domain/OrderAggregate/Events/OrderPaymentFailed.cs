@@ -6,4 +6,4 @@ namespace YummyZoom.Domain.OrderAggregate.Events;
 /// Domain event raised when an order payment fails.
 /// </summary>
 public record OrderPaymentFailed(
-    OrderId OrderId) : IDomainEvent;
+    OrderId OrderId) : DomainEventBase;

@@ -13,4 +13,4 @@ public record TeamCartConverted(
     TeamCartId TeamCartId,
     OrderId OrderId,
     DateTime ConvertedAt,
-    UserId ConvertedByUserId) : IDomainEvent;
+    UserId ConvertedByUserId) : DomainEventBase;

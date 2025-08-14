@@ -1,5 +1,6 @@
 ﻿using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.TodoListAggregate.Enums;
+using YummyZoom.Domain.TodoListAggregate.Events;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.TodoListAggregate.Entities;
@@ -40,7 +41,9 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
         PriorityLevel priority,
         DateTime? reminder)
     {
-        return new TodoItem(TodoItemId.CreateUnique(), title, note, priority, reminder);
+        var todoItem = new TodoItem(TodoItemId.CreateUnique(), title, note, priority, reminder);
+        todoItem.AddDomainEvent(new TodoItemCreatedEvent(todoItem));
+        return todoItem;
     }
 
     // Factory method for creating a TodoItem with a specific ID (e.g., for hydration from persistence)
@@ -79,6 +82,7 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
         if (!IsDone)
         {
             IsDone = true;
+            AddDomainEvent(new TodoItemCompletedEvent(this));
         }
     }
 

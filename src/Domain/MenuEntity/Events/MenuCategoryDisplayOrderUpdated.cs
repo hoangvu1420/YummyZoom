@@ -3,4 +3,4 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuEntity.Events;
 
-public record MenuCategoryDisplayOrderUpdated(MenuId MenuId, MenuCategoryId CategoryId, int NewDisplayOrder) : IDomainEvent;
+public record MenuCategoryDisplayOrderUpdated(MenuId MenuId, MenuCategoryId CategoryId, int NewDisplayOrder) : DomainEventBase;

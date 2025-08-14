@@ -13,4 +13,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 public record TeamCartReadyForConfirmation(
     TeamCartId TeamCartId,
     Money TotalAmount,
-    Money CashAmount) : IDomainEvent;
+    Money CashAmount) : DomainEventBase;

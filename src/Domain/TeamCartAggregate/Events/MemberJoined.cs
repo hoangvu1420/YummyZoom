@@ -10,4 +10,4 @@ namespace YummyZoom.Domain.TeamCartAggregate.Events;
 public sealed record MemberJoined(
     TeamCartId TeamCartId,
     UserId UserId,
-    string Name) : IDomainEvent;
+    string Name) : DomainEventBase;

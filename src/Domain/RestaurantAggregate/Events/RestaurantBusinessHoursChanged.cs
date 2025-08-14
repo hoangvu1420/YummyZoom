@@ -5,4 +5,4 @@ namespace YummyZoom.Domain.RestaurantAggregate.Events;
 public record RestaurantBusinessHoursChanged(
     RestaurantId RestaurantId,
     BusinessHours OldBusinessHours,
-    BusinessHours NewBusinessHours) : IDomainEvent;
+    BusinessHours NewBusinessHours) : DomainEventBase;

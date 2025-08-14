@@ -16,4 +16,4 @@ public record OnlinePaymentSucceeded(
     TeamCartId TeamCartId,
     UserId UserId,
     string TransactionId,
-    Money Amount) : IDomainEvent;
+    Money Amount) : DomainEventBase;

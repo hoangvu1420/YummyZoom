@@ -12,4 +12,4 @@ public record CouponCreated(
     string Code,
     CouponType Type,
     DateTime ValidityStartDate,
-    DateTime ValidityEndDate) : IDomainEvent;
+    DateTime ValidityEndDate) : DomainEventBase;

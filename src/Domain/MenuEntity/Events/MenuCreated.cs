@@ -3,4 +3,4 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.MenuEntity.Events;
 
-public record MenuCreated(MenuId MenuId, RestaurantId RestaurantId) : IDomainEvent;
+public record MenuCreated(MenuId MenuId, RestaurantId RestaurantId) : DomainEventBase;

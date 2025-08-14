@@ -5,4 +5,4 @@ namespace YummyZoom.Domain.RestaurantAggregate.Events;
 public record RestaurantCuisineTypeChanged(
     RestaurantId RestaurantId,
     string OldCuisineType,
-    string NewCuisineType) : IDomainEvent;
+    string NewCuisineType) : DomainEventBase;

@@ -8,4 +8,4 @@ public record MenuItemAssignedToCategory(
     MenuItemId MenuItemId,
     MenuCategoryId OldCategoryId,
     MenuCategoryId NewCategoryId
-) : IDomainEvent;
+) : DomainEventBase;

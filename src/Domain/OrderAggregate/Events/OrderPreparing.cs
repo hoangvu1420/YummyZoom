@@ -2,4 +2,4 @@ using YummyZoom.Domain.OrderAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.OrderAggregate.Events;
 
-public record OrderPreparing(OrderId OrderId) : IDomainEvent;
+public record OrderPreparing(OrderId OrderId) : DomainEventBase;

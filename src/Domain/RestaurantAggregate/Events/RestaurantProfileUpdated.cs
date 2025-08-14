@@ -17,4 +17,4 @@ public record RestaurantProfileUpdated(
     ContactInfo OldContactInfo,
     ContactInfo NewContactInfo,
     BusinessHours OldBusinessHours,
-    BusinessHours NewBusinessHours) : IDomainEvent;
+    BusinessHours NewBusinessHours) : DomainEventBase;

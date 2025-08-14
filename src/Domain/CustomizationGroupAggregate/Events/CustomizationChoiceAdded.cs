@@ -6,4 +6,4 @@ public record CustomizationChoiceAdded(
     CustomizationGroupId CustomizationGroupId,
     ChoiceId ChoiceId,
     string Name
-) : IDomainEvent; 
+) : DomainEventBase; 

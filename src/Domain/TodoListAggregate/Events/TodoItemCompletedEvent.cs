@@ -2,4 +2,4 @@
 
 namespace YummyZoom.Domain.TodoListAggregate.Events;
 
-public record TodoItemCompletedEvent(TodoItem Item) : IDomainEvent;
+public record TodoItemCompletedEvent(TodoItem Item) : DomainEventBase;

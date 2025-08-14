@@ -2,4 +2,4 @@ using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UserAggregate.Events;
 
-public record UserRestored(UserId UserId) : IDomainEvent;
+public record UserRestored(UserId UserId) : DomainEventBase;

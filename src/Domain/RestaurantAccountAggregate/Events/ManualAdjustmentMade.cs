@@ -8,4 +8,4 @@ public record ManualAdjustmentMade(
     RestaurantAccountId RestaurantAccountId,
     Money Amount,
     string Reason,
-    Guid AdminId) : IDomainEvent;
+    Guid AdminId) : DomainEventBase;

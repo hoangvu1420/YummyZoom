@@ -9,4 +9,4 @@ public record SupportTicketCreated(
     string Subject,
     SupportTicketType Type,
     SupportTicketPriority Priority,
-    IReadOnlyList<ContextLink> ContextLinks) : IDomainEvent;
+    IReadOnlyList<ContextLink> ContextLinks) : DomainEventBase;

@@ -7,4 +7,4 @@ public record SupportTicketStatusChanged(
     SupportTicketId SupportTicketId,
     SupportTicketStatus PreviousStatus,
     SupportTicketStatus NewStatus,
-    Guid? ChangedByAdminId = null) : IDomainEvent;
+    Guid? ChangedByAdminId = null) : DomainEventBase;

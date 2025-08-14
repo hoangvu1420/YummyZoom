@@ -8,4 +8,4 @@ public record MenuItemCustomizationAssigned(
     MenuItemId MenuItemId,
     CustomizationGroupId CustomizationGroupId,
     string DisplayTitle
-) : IDomainEvent;
+) : DomainEventBase;

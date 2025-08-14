@@ -4,4 +4,4 @@ namespace YummyZoom.Domain.ReviewAggregate.Events;
 
 public record ReviewModerated(
     ReviewId ReviewId,
-    DateTime ModeratedAt) : IDomainEvent;
+    DateTime ModeratedAt) : DomainEventBase;

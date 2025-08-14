@@ -7,4 +7,4 @@ namespace YummyZoom.Domain.MenuItemAggregate.Events;
 public record MenuItemCustomizationRemoved(
     MenuItemId MenuItemId,
     CustomizationGroupId CustomizationGroupId
-) : IDomainEvent;
+) : DomainEventBase;
