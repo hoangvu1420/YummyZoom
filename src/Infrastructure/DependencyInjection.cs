@@ -24,6 +24,8 @@ using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Domain.Services;
 using Stripe;
 using System.Text.Json;
+using YummyZoom.Infrastructure.Outbox;
+using YummyZoom.Infrastructure.Data.Inbox;
 
 namespace YummyZoom.Infrastructure;
 
@@ -36,7 +38,8 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, SoftDeleteInterceptor>();
-        builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
+        // builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>(); // replaced by outbox enqueue
+        builder.Services.AddScoped<ISaveChangesInterceptor, ConvertDomainEventsToOutboxInterceptor>();
 
         builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
@@ -86,6 +89,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
         builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+        builder.Services.AddScoped<IInboxStore, InboxStore>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
@@ -119,6 +123,18 @@ public static class DependencyInjection
         // Register Domain Services
         builder.Services.AddScoped<OrderFinancialService>();
         builder.Services.AddScoped<TeamCartConversionService>();
+
+        // Outbox publisher options and hosted service (enabled here; can be toggled by env later)
+        builder.Services.Configure<OutboxPublisherOptions>(opt =>
+        {
+            opt.BatchSize = 50;
+            opt.PollInterval = TimeSpan.FromMilliseconds(250);
+            opt.MaxBackoff = TimeSpan.FromMinutes(5);
+            opt.MaxAttempts = 10;
+        });
+
+        builder.Services.AddSingleton<IOutboxProcessor, OutboxProcessor>();
+        builder.Services.AddHostedService<OutboxPublisherHostedService>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)

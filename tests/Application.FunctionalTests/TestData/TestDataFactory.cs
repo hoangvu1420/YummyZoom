@@ -102,11 +102,15 @@ public static class TestDataFactory
         // Check if test data still exists in the database
         // Use RestaurantId.Create() to match the entity's primary key type
         var restaurant = await FindAsync<Restaurant>(RestaurantId.Create(DefaultRestaurantId));
-        
+
         if (restaurant is null)
         {
             // Test data was cleared, recreate it
             await CreateTestDataAsync();
+
+            // Drain all outbox events generated during test data setup
+            // This prevents setup events from polluting individual tests
+            await DrainOutboxAsync();
         }
         else
         {
@@ -602,13 +606,13 @@ public static class TestDataFactory
     {
         var menuItemGuid = GetMenuItemId(itemName);
         var menuItemId = MenuItemId.Create(menuItemGuid);
-        
+
         var menuItem = await FindAsync<MenuItem>(menuItemId);
         menuItem!.MarkAsUnavailable();
-        
+
         // Update the menu item in the database
         await UpdateAsync(menuItem);
-        
+
         return itemName;
     }
 

@@ -24,6 +24,8 @@ using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.SupportTicketAggregate;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.Outbox;
+using YummyZoom.Infrastructure.Data.Inbox;
 
 namespace YummyZoom.Infrastructure.Data;
 
@@ -39,6 +41,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
     public DbSet<RestaurantReviewSummary> RestaurantReviewSummaries => Set<RestaurantReviewSummary>();
     public DbSet<FullMenuView> FullMenuViews => Set<FullMenuView>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+	public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
 
     // Domain Entities
     public DbSet<User> DomainUsers => Set<User>();

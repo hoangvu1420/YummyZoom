@@ -6,6 +6,6 @@ public class UpdateTodoItemCommandValidator : AbstractValidator<UpdateTodoItemCo
     {
         RuleFor(v => v.Title)
             .MaximumLength(200)
-            .NotEmpty();
+            .When(v => v.Title is not null); // Only validate length when Title is provided
     }
 }

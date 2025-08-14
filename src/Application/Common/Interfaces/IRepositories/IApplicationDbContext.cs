@@ -6,8 +6,9 @@ namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface IApplicationDbContext
 {
-    DbSet<TodoList> TodoLists { get; }
     DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents { get; }
+    
+    DbSet<TodoList> TodoLists { get; }
     DbSet<Menu> Menus { get; }
     DbSet<MenuCategory> MenuCategories { get; }
 

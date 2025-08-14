@@ -1,18 +1,22 @@
 ﻿using YummyZoom.Domain.TodoListAggregate.Events;
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Notifications;
 
 namespace YummyZoom.Application.TodoItems.EventHandlers;
 
-public class TodoItemCreatedEventHandler : INotificationHandler<TodoItemCreatedEvent>
+public sealed class TodoItemCreatedEventHandler
+    : IdempotentNotificationHandler<TodoItemCreatedEvent>
 {
     private readonly ILogger<TodoItemCreatedEventHandler> _logger;
 
-    public TodoItemCreatedEventHandler(ILogger<TodoItemCreatedEventHandler> logger)
-    {
-        _logger = logger;
-    }
+    public TodoItemCreatedEventHandler(
+        IUnitOfWork uow,
+        IInboxStore inbox,
+        ILogger<TodoItemCreatedEventHandler> logger) : base(uow, inbox)
+        => _logger = logger;
 
-    public Task Handle(TodoItemCreatedEvent notification, CancellationToken cancellationToken)
+    protected override Task HandleCore(TodoItemCreatedEvent notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("YummyZoom Domain Event: {DomainEvent}", notification.GetType().Name);
 

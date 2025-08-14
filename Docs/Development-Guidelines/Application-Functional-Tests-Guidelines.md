@@ -44,6 +44,7 @@ Our functional test environment is designed for reliability and isolation:
 
 *   **`Testing.cs` (Unified Facade):** The primary entry point for all test operations.
     *   **Command/Query Execution:** `SendAsync()`, `SendAndUnwrapAsync()`
+    *   **Outbox Processing:** `DrainOutboxAsync()` (deterministically publish enqueued domain events), `ProcessOutboxOnceAsync()`
     *   **User Management:** `RunAsUserAsync()`, `RunAsDefaultUserAsync()`, `RunAsAdministratorAsync()`
     *   **Database Operations:** `FindAsync<TEntity>()`, `AddAsync<TEntity>()`, `CountAsync<TEntity>()`
     *   **Service Replacement:** `ReplaceService<TInterface>()`
@@ -152,6 +153,9 @@ public async Task CreateRestaurant_AsOwner_ShouldSucceed()
 
     // Act
     var result = await SendAsync(command);
+    // If the command emits domain events that drive side-effects (logs, projections, notifications, etc.)
+    // drain the outbox before asserting those side-effects.
+    await DrainOutboxAsync(); // Act → Drain → Assert
 
     // Assert
     result.ShouldBeSuccessful();
@@ -165,6 +169,7 @@ public async Task CreateRestaurant_AsOwner_ShouldSucceed()
 
 *   **Authentication:** For protected endpoints, always call `RunAs...Async()` before `SendAsync()`.
 *   **Validation:** Test validation failures by sending invalid commands and asserting that a `ValidationException` is thrown.
+*   **Event-Driven Assertions (Outbox/Inbox):** When a command enqueues domain events whose handlers produce side-effects you assert, call `await DrainOutboxAsync()` after `SendAsync(...)` and before assertions. This makes tests deterministic without sleeps or timing flakiness. Leaving background hosted services enabled is fine; draining ensures completion.
 *   **Readability:** Use the static `Testing` class and the test data factories to keep your tests clean, concise, and easy to understand.
 *   **Focus:** Each test should verify a single, specific behavior. Avoid complex tests that try to do too much at once.
 

@@ -25,7 +25,6 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
 
     public Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        // New implementation using the functional UoW pattern
         return _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             // 1) Create identity user + assign Customer role (baseline role)

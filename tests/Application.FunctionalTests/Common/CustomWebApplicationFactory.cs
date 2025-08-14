@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
@@ -47,6 +48,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             ConfigureTestUserService(services);
             ConfigureMockServices(services);
             ConfigureTestCommandHandlers(services);
+            DisableBackgroundOutboxPublisher(services);
             services.ApplyServiceReplacements(_serviceReplacements);
         });
     }
@@ -116,6 +118,23 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         services.AddTransient<IRequestHandler<TestUnprotectedCommand, Result<Unit>>, TestUnprotectedCommandHandler>();
         services.AddTransient<IRequestHandler<TestUserOwnerCommand, Result<Unit>>, TestUserOwnerCommandHandler>();
         services.AddTransient<IRequestHandler<TestUnprotectedUserCommand, Result<Unit>>, TestUnprotectedUserCommandHandler>();
+    }
+
+    /// <summary>
+    /// Disables background hosted services that would introduce nondeterminism during tests.
+    /// Specifically removes the OutboxPublisherHostedService; tests drive outbox processing manually.
+    /// </summary>
+    private static void DisableBackgroundOutboxPublisher(IServiceCollection services)
+    {
+        // Remove only the OutboxPublisherHostedService registration without affecting other hosted services
+        var descriptor = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(IHostedService) &&
+            d.ImplementationType?.FullName == "YummyZoom.Infrastructure.Outbox.OutboxPublisherHostedService");
+
+        if (descriptor is not null)
+        {
+            services.Remove(descriptor);
+        }
     }
     
     // Static method to access the test user service from test methods

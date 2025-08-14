@@ -1,91 +1,174 @@
-## Feature Discovery & Application Layer Design Template
+## Feature Discovery & Application Layer Design — `[AggregateName]`
 
-### Aggregate Under Design: `[Name of the Aggregate, e.g., Order, Restaurant, Coupon]`
-
-### 1. Core Use Cases & Actors
-
-***Instructions:*** *Identify who (which user role or system process) interacts with this aggregate and what their primary goals are. This helps define the scope and purpose of the features.*
-
-| Actor (Role) | Use Case / Goal | Description |
-| :--- | :--- | :--- |
-| `[e.g., Customer]` | `[e.g., Place a new order]` | `[e.g., The primary action of creating an instance with items, address, etc.]` |
-| `[e.g., Restaurant Staff]` | `[e.g., Update menu item availability]` | `[e.g., Mark an item as "out of stock" or "available".]` |
-| `[e.g., Admin]` | `[e.g., Verify a new restaurant]` | `[e.g., Manually approve a restaurant's profile after reviewing it.]` |
-| `[e.g., System (Event Handler)]` | `[e.g., Increment a coupon's usage count]` | `[e.g., A background process that updates the coupon after an order is placed.]` |
+> Target layer: **Application** (Clean Architecture). Backed by Domain aggregate `[AggregateName]` and any relevant read/audit entities. Aligns with overall YummyZoom architecture (DDD + CQRS).
 
 ---
 
-### 2. Commands (Write Operations)
+## 0) Overview & Scope Alignment
 
-***Instructions:*** *List all actions that will create or change the state of this aggregate. Each command represents a single, atomic use case from the Application Layer's perspective.*
+`[AggregateName]` is the `[short, high-level description of purpose and boundaries]`. It owns `[core mutable state/value objects]` and emits domain events for `[audit/integrations/projections]`. Historical records, if needed, live outside the aggregate as immutable `[ReadModelName]` rows produced by event handlers.
 
-| Command Name | Actor / Trigger | Key Parameters | Response DTO | Authorization |
-| :--- | :--- | :--- | :--- | :--- |
-| **`[Action][Aggregate]Command`** | `[e.g., Customer]` | `[e.g., AggregateId, Dto, UserId]` | `[e.g., CreateAggregateResponse(NewId)]` or `Result.Success()` | `[e.g., Customer role, must own the entity]` |
-| `CreateRestaurantCommand` | `Restaurant Owner` | `Name`, `LocationDto`, `CuisineType` | `CreateRestaurantResponse(RestaurantId)` | `Restaurant Owner` role. |
-| `UpdateMenuItemPriceCommand`| `Restaurant Staff` | `MenuItemId`, `NewPrice` | `Result.Success()` | `Restaurant Staff` role, must be associated with the restaurant. |
-| `DeactivateUserCommand` | `Admin` | `UserId` | `Result.Success()` | `Admin` role. |
+Primary goals in the Application layer:
 
----
-
-### 3. Queries (Read Operations)
-
-***Instructions:*** *List all the ways data needs to be retrieved for this aggregate. Remember, queries use Dapper/SQL for performance and can join across tables to create tailored DTOs.*
-
-| Query Name | Actor / Trigger | Key Parameters | Response DTO | SQL Highlights / Key Tables |
-| :--- | :--- | :--- | :--- | :--- |
-| **`[Get/Find][DataShape]Query`** | `[e.g., Customer]` | `[e.g., AggregateId, FilterCriteria]` | `[e.g., AggregateDetailsDto]` or `PaginatedList<SummaryDto>` | `[e.g., SELECT ... FROM "Table" WHERE "Id" = @Id]` |
-| `GetRestaurantMenuQuery` | `Customer` | `RestaurantId` | `RestaurantMenuDto` (with categories and items) | `JOIN "MenuCategories" and "MenuItems" on "RestaurantId"` |
-| `GetUserDetailsQuery` | `Admin`, `User (self)` | `UserId` | `UserDetailsDto` (with addresses, etc.) | `LEFT JOIN "Addresses" on "UserId"` |
-| `SearchRestaurantsQuery`| `Customer` | `SearchTerm`, `Location`, `CuisineFilter`| `PaginatedList<RestaurantSearchResultDto>` | `Full-Text Search on "Restaurants" table, spatial query for location.` |
+* Expose **commands** that safely mutate aggregate state through aggregate methods.
+* Expose **queries** optimized for dashboards (Dapper/SQL) and back-office needs.
+* Handle **domain events** to create audit rows and integrate with external systems.
+* Enforce **authorization** and **cross-aggregate checks**.
+* Provide **idempotency**, **observability**, and **hard invariants** mapping to domain errors.
 
 ---
 
-### 4. Domain Event Handling
+## 1) Core Use Cases & Actors
 
-***Instructions:*** *Identify the domain events this aggregate raises. For each event, list the decoupled side effects (handlers) that should run. This is key for building a loosely coupled system.*
-
-| Domain Event | Triggering Command | Asynchronous Handler(s) | Handler's Responsibility |
-| :--- | :--- | :--- | :--- |
-| **`[Aggregate][PastTenseVerb]Event`** | `[e.g., CreateAggregateCommand]` | `[e.g., NotifyUserOn... ]` | `[e.g., Sends an email or push notification.]` |
-| `RestaurantVerified` | `VerifyRestaurantCommand` | `NotifyOwnerOnRestaurantVerified` | Sends an email to the restaurant owner informing them their profile is now live. |
-| `RestaurantVerified` | `VerifyRestaurantCommand` | `IndexRestaurantForSearch` | Adds/updates the restaurant's data in the search engine (e.g., Elasticsearch). |
-| `OrderPaid` | `(Internal payment process)` | `RecordRevenueForRestaurant` | Finds the `RestaurantAccount` aggregate, calls its `RecordRevenue()` method, and saves it. |
+| Actor                       | Use Case / Goal                     | Description |
+| --------------------------- | ----------------------------------- | ----------- |
+| `[Role or System]`          | `[Primary action for this actor]`   | `[One-line description of what happens and why]` |
+| `[Role or System]`          | `[Another action]`                  | `[Description]` |
+| `[Admin/Owner/Staff]`       | `[Administrative/owner action]`     | `[Description]` |
+| `[Viewer/External System]`  | `[Read/reporting action]`           | `[Description]` |
 
 ---
 
-### 5. Key Business Logic & Application Service Orchestration
+## 2) Commands (Write Operations)
 
-***Instructions:*** *For the most complex command(s), outline the step-by-step logic inside the command handler. This clarifies the orchestration of repository calls, domain service interactions, and aggregate method invocations.*
+> Conventions: MediatR commands returning `Result<T>` or `Result`. Validation via FluentValidation; transactional boundary via `IUnitOfWork.ExecuteInTransactionAsync`.
 
-#### **`[ComplexCommandName]CommandHandler` Orchestration:**
+### 2.1 Command Catalog
 
-1.  **Validate** the command's input using FluentValidation.
-2.  **Authorize** the request (check roles, policies, and ownership).
-3.  **Start a transaction** using `IUnitOfWork.ExecuteInTransactionAsync`.
-4.  **Fetch required aggregates/entities:**
-    *   `var aggregateToUpdate = await _repository.GetByIdAsync(...)`
-    *   `var relatedEntity = await _otherRepository.GetByIdAsync(...)` (Fetch any other data needed for validation).
-5.  **Perform pre-invocation business checks in the handler:**
-    *   *Example:* Check if a related entity is in a valid state (e.g., `if (!restaurant.IsVerified) return Failure(...)`).
-    *   *Example:* Check a cross-aggregate rule using a read model (e.g., `if (_couponUsageLookup.HasBeenUsed(couponId, userId)) return Failure(...)`).
-6.  **(Optional) Use a Domain Service for complex calculations:**
-    *   `var calculatedValue = _pricingService.Calculate(...)`
-7.  **Invoke the Aggregate's Method:**
-    *   `var result = aggregateToUpdate.PerformAction(parameter1, calculatedValue);`
-    *   `if (result.IsFailure) return result;`
-8.  **Persist the aggregate:**
-    *   `await _repository.UpdateAsync(aggregateToUpdate);` (Or `AddAsync` for new aggregates).
-9.  **Complete the transaction.** The `UnitOfWork` will commit, and `MediatR` will publish any domain events raised by the aggregate.
-10. **Map and return** the response DTO.
+| Command                            | Actor/Trigger           | Key Parameters                                   | Response DTO                                 | Authorization |
+| ---------------------------------- | ----------------------- | ------------------------------------------------ | -------------------------------------------- | ------------- |
+| **`[Create][AggregateName]Command`** | `[Admin/User/System]`   | `[AggregateId?]`, `[RequiredDtos]`               | `[CreateXResponse(Id)]`                      | `[Policy/Role]` |
+| **`[Action]Command`**              | `[Role/System]`         | `[AggregateId]`, `[OtherIds]`, `[ValueObjects]`  | `Result.Success()`                           | `[Policy/Role]` |
+| **`[Action]Command`**              | `[Role/System]`         | `[Parameters]`                                   | `[ResponseDto]`                               | `[Policy/Role]` |
+
+### 2.2 Command → Aggregate Method Mapping & Error Surface
+
+| Command                  | Aggregate Method                             | Domain Invariants enforced                                 | Typical Failures surfaced to API |
+| ------------------------ | -------------------------------------------- | ---------------------------------------------------------- | ------------------------------- |
+| `[Create...]`            | `[AggregateName].Create(...)`                | `[e.g., unique per owner, initial state]`                  | `[409 Conflict / 400 ...]` |
+| `[Action...]`            | `[AggregateMethod(ValueObject, ids...)]`     | `[e.g., value sign/constraints, state preconditions]`      | `[400/422 specific domain errors]` |
+| `[Delete/Archive...]`    | `[MarkAsDeleted/Archive]`                    | `[emits deletion event, no further mutations allowed?]`    | `200 OK` |
+
+**Cross-aggregate checks (Application layer):**
+
+* `[Example: verify related aggregate exists and belongs to same owner/context]`
+* `[Example: ensure prerequisites such as configuration/KYC/external state]`
 
 ---
 
-### How to Use This Template
+## 3) Queries (Read Operations)
 
-1.  **Copy-Paste:** Start a new document or section for each aggregate you plan to implement.
-2.  **Top-Down Approach:** Begin with **Use Cases & Actors**. This defines *why* you're building the feature.
-3.  **Define the Interface:** Fill out the **Commands** and **Queries** sections.
-4.  **Connect the Dots:** Use the **Domain Event Handling** section to plan for side effects and communication between different parts of the system.
-5.  **Detail the "How":** For any non-trivial command, write out the **Orchestration** steps in detail.
-6.  **Think hard and practical:** Consider the real-world implications of the features you're designing.
+> Implementation: Dapper SQL; tailored DTOs; indices appropriate for query predicates.
+
+### 3.1 Query Catalog
+
+| Query                               | Actor              | Key Parameters                              | Response DTO                                 | SQL Highlights / Tables |
+| ----------------------------------- | ------------------ | ------------------------------------------- | -------------------------------------------- | ----------------------- |
+| **`Get[Aggregate]SummaryQuery`**    | `[Role(s)]`        | `[AggregateId or Filters]`                   | `[SummaryDto]`                                | `SELECT ... FROM [Table] WHERE ...` |
+| **`Get[Aggregate]DetailsQuery`**    | `[Role(s)]`        | `[AggregateId]`                              | `[DetailsDto]`                                | `JOIN ...` |
+| **`List[Aggregate]ItemsQuery`**     | `[Role(s)]`        | `[Filter, Page]`                             | `PaginatedList<[RowDto]>`                     | `WHERE ... ORDER BY ...` |
+| **`Search[Aggregate]Query`**        | `[Role(s)]`        | `[Text, Filters]`                            | `PaginatedList<[SearchResultDto]>`            | `[FTS, indexes, etc.]` |
+
+### 3.2 DTO Sketches
+
+* `[SummaryDto { ... }]`
+* `[RowDto { ... }]`
+* `[DetailsDto { ... }]`
+
+---
+
+## 4) Domain Events & Application Handlers
+
+> Domain events emitted by the aggregate drive audit/projections/integrations. Handlers are **asynchronous** (outbox) and **idempotent**.
+
+| Domain Event                | Emitted When            | Application Handlers                       | Responsibilities |
+| --------------------------- | ----------------------- | ------------------------------------------ | ---------------- |
+| `[AggregateCreated]`        | `[on create]`           | `[EnsureProjection]`                        | `[Seed projections / notify]` |
+| `[MeaningfulEvent]`         | `[on state change]`     | `[CreateAuditRow(...)]`                     | `[Append immutable audit row]` |
+| `[AnotherEvent]`            | `[on action]`           | `[TriggerExternalIntegration]`              | `[Call provider with idempotency key]` |
+| `[Deleted/Archived]`        | `[on delete/archive]`   | `[FlagProjection/HideFromUI]`               | `[Governance, prevent postings]` |
+
+**Integration events consumed by Application layer:**
+
+* `[InboundEventName]` → orchestrates `[CommandName]`.
+* `[InboundEventName]` → orchestrates `[CommandName]`.
+
+---
+
+## 5) Orchestration for Complex Flows
+
+### 5.1 `[ImportantCommand]CommandHandler`
+
+1. **Validate**: `[rules]`.
+2. **Authorize**: `[policies/ownership checks]`.
+3. **Load**: `[AggregateName]` by id via repo.
+4. **Pre-checks**: `[required configuration/external state/thresholds]`.
+5. **Invoke Aggregate**: ``aggregate.[Method](...)`` → may return domain errors.
+6. **Persist**: repo update; commit transaction.
+7. **Side effects (async)**: outbox publishes events; trigger external processes; notify users.
+8. **Return**: `[Response DTO / Result]`.
+
+### 5.2 `[InboundEvent]` → `[CommandName]`
+
+1. Receive `[InboundEvent(args...)]`.
+2. **Idempotency check**: `[ensure not processed / no duplicate audit row exists]`.
+3. **Load** `[AggregateName]`; `[create if auto-provisioning enabled?]`.
+4. **Call** `[Command/AggregateMethod]`; persist.
+5. **Emit** `[DomainEvent]` → handler writes audit/projection and triggers any integrations.
+
+---
+
+## 6) Read Models & Projections (CQRS)
+
+> Immutable audit: `[AuditTable] (Type, Amount/Value, Timestamp, RelatedId, Notes)`. Denormalized summaries for dashboards.
+
+Recommended projections:
+
+* **`[AuditTable]`**: append-only; indexed by `[keys]`.
+* **`[DashboardView]`**: `{[Key fields and computed summaries]}` maintained by event handlers.
+* **`[HistoryView]`**: separate view (or filter) for quick access to specific subsets.
+
+---
+
+## 7) API Surface (Web Layer Endpoints)
+
+> Minimal APIs/Controllers call Application commands/queries. All endpoints return `Result<>` shapes from `SharedKernel`.
+
+### 7.1 User/Admin APIs
+
+* `POST /[resource]` → `[CreateCommand]` → `201 Created` with resource id.
+* `PUT /[resource]/{id}` → `[UpdateCommand]` → `204 No Content`.
+* `GET /[resource]/{id}/summary` → `[GetSummaryQuery]`.
+* `GET /[resource]/{id}/items` → `[ListItemsQuery]` (paging, filters).
+
+### 7.2 System/Admin APIs
+
+* `POST /internal/[resource]/[action]` → `[SystemCommand]` (idempotent).
+* `POST /admin/[resource]/[action]` → `[AdminCommand]`.
+* `DELETE /admin/[resource]/{id}` → `[DeleteCommand]` (soft delete).
+
+---
+
+## 8) Suggested Refinements (Domain & Code)
+
+1. `[Value Object structure improvements]`.
+2. `[Optimistic concurrency / RowVersion]`.
+3. `[Currency/units discipline or normalization rules]`.
+4. `[Deletion semantics and guards]`.
+5. `[Thresholds/reserves/holds as configuration]`.
+6. `[Outbox + Inbox for idempotency]`.
+7. `[Unique constraints at DB level]`.
+8. `[Snapshot fields to ease reconciliation]`.
+9. `[Back-pressure and state transitions for external providers]`.
+
+---
+
+## 9) Open Questions
+
+* `[Accounting policy / modeling choice?]`
+* `[Do we need additional holds/reserves/limits?]`
+* `[Regulatory/KYC requirements?]`
+
+---
+
+**End of Feature Discovery — `[AggregateName]`.**

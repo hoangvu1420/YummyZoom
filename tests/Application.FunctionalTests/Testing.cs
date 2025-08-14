@@ -6,6 +6,7 @@ using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.TestData;
+using YummyZoom.Infrastructure.Outbox;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -43,6 +44,28 @@ public partial class Testing
     {
         await TestInfrastructure.ResetState();
         TestUserManager.ClearUserContext();
+    }
+
+    #endregion
+
+    #region Outbox Processing Helpers
+
+    /// <summary>
+    /// Processes outbox messages once, returning the number of processed messages.
+    /// </summary>
+    public static async Task<int> ProcessOutboxOnceAsync(CancellationToken ct = default)
+    {
+        var processor = GetService<IOutboxProcessor>();
+        return await processor.ProcessOnceAsync(ct);
+    }
+
+    /// <summary>
+    /// Drains the outbox by repeatedly processing until no work remains (or optional timeout elapses).
+    /// </summary>
+    public static async Task DrainOutboxAsync(TimeSpan? timeout = null, CancellationToken ct = default)
+    {
+        var processor = GetService<IOutboxProcessor>();
+        await processor.DrainAsync(timeout, ct);
     }
 
     #endregion
