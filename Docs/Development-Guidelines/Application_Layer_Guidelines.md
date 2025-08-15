@@ -63,6 +63,7 @@ public class GetSomethingQueryHandler : IRequestHandler<GetSomethingQuery, Resul
 - **DTOs:** Data transfer objects for communication between layers
 - **Validators:** Input validation using FluentValidation
 - **Event Handlers:** React to domain events for decoupled side effects
+ - **Event Handlers (Outbox + Inbox Backed):** React to domain events via MediatR; publication is asynchronous through the Outbox publisher and handlers are idempotent via the Inbox store
 - **Common Directory:**
   - **Interfaces:** Abstractions for infrastructure dependencies
   - **Behaviours:** Cross-cutting concerns (validation, logging, authorization)
@@ -169,6 +170,7 @@ src/Application/<FeatureName>/
 - Wrap in transactions using `IUnitOfWork.ExecuteInTransactionAsync`
 - Validate business rules in domain entities, not handlers
 - Use `[Authorize]` attributes for access control with roles or policies
+- Raise domain events inside aggregates (they are captured and persisted automatically into the Outbox)
 
 ### Queries
 
@@ -182,6 +184,42 @@ src/Application/<FeatureName>/
 - Use FluentValidation for input validation
 - Validate format, length, required fields in validators
 - Handle business logic validation in domain layer
+
+### Domain Events & Outbox Flow
+
+The application uses an Outbox (and Inbox) pattern to ensure reliable, exactly-once (per handler) processing of domain events while keeping aggregate mutations transactional.
+
+Flow:
+1. Aggregates raise domain events (implementing `IDomainEvent`, optional `IHasEventId`).
+2. On `SaveChanges`, `ConvertDomainEventsToOutboxInterceptor` serializes pending domain events and stores them as `OutboxMessage` rows in the same transaction; aggregate event collections are cleared.
+3. A background hosted service (`OutboxPublisherHostedService`) polls and invokes `IOutboxProcessor.ProcessOnceAsync` to fetch unprocessed messages (SKIP LOCKED) in batches.
+4. Each outbox message is deserialized and published via MediatR (`mediator.Publish`).
+5. Handlers deriving from `IdempotentNotificationHandler<TEvent>` ensure idempotency: before executing side-effects they check `InboxMessages` for (EventId + Handler) existence via `IInboxStore`. If absent, they run inside a transactional unit of work, perform side effects, then insert an `InboxMessage` record.
+6. Successful processing marks the outbox row with `ProcessedOnUtc`; failures increment `Attempt`, compute exponential backoff (with jitter) and schedule `NextAttemptOnUtc`.
+
+Key Points:
+- Domain event emission is synchronous with aggregate logic, but publication to handlers is asynchronous.
+- Handlers must be **idempotent** and use `IdempotentNotificationHandler<TEvent>` when they have side-effects or external calls.
+- Do not access `OutboxMessages` directly from application code; treat the outbox as infrastructure.
+- Correlation/Causation IDs are reserved for future enhancement (currently null placeholders) — design handlers anticipating addition of tracing metadata.
+- Serialization: If a domain event contains custom Value Objects (VO) that are not natively serializable, add a dedicated `JsonConverter` (e.g., see `AggregateRootIdJsonConverterFactory`) and register it in `OutboxJson.Options` so events round-trip correctly through the Outbox.
+
+Testing:
+- Functional tests call a helper (e.g., `Testing.DrainOutboxAsync()`) to synchronously drain/publish outbox messages for deterministic assertions.
+- Pre-drain you can assert messages exist in Outbox and none yet in Inbox for corresponding handlers.
+- After draining, assert `ProcessedOnUtc` is set and an Inbox entry exists; draining twice should not duplicate side-effects.
+
+When Adding a New Event Handler:
+1. Define the domain event in the Domain layer (ensure it carries a stable `EventId` if idempotency is required).
+2. Implement a handler inheriting from `IdempotentNotificationHandler<TEvent>` if side-effects must be exactly-once.
+3. Put business logic side-effects in `HandleCore` method only.
+4. Avoid long blocking operations; prefer asynchronous I/O.
+5. Write functional tests that: perform the command, assert pending outbox, drain outbox, assert side effects and inbox record.
+
+Anti-Patterns:
+- Publishing domain events manually from command handlers (let persistence + interceptor handle it).
+- Performing non-idempotent side-effects in plain `INotificationHandler<T>` without inbox protection.
+- Mutating aggregates inside event handlers (handlers should cause external side-effects, not retroactively change originating aggregate state).
 
 ## Common Pitfalls
 

@@ -33,5 +33,4 @@ public sealed class OutboxPublisherHostedService : BackgroundService
                 await Task.Delay(_options.PollInterval, stoppingToken);
         }
 	}
-    // processing moved to OutboxProcessor
 }

@@ -15,7 +15,7 @@ public sealed class OutboxProcessor : IOutboxProcessor
 {
 	private readonly IServiceProvider _serviceProvider;
 	private readonly OutboxPublisherOptions _options;
-	private readonly ILogger<OutboxProcessor>? _logger;
+	private readonly ILogger<OutboxProcessor> _logger;
 	private static readonly JsonSerializerOptions JsonOptions = OutboxJson.Options;
 
 	public OutboxProcessor(
@@ -57,38 +57,41 @@ public sealed class OutboxProcessor : IOutboxProcessor
 
 			foreach (var msg in toPublish)
 			{
-				try
-				{
-					var type = Type.GetType(msg.Type, throwOnError: true)!;
-					var @event = (IDomainEvent?)JsonSerializer.Deserialize(msg.Content, type, JsonOptions);
-					if (@event is null)
-						throw new InvalidOperationException($"Deserialized event is null for {msg.Id} ({msg.Type}).");
+                try
+                {
+                    var type = Type.GetType(msg.Type, throwOnError: true)!;
+                    var @event = (IDomainEvent?)JsonSerializer.Deserialize(msg.Content, type, JsonOptions);
+                    if (@event is null)
+                        throw new InvalidOperationException($"Deserialized event is null for {msg.Id} ({msg.Type}).");
 
-					// Publish the event
-					await mediator.Publish(@event, ct);
+                    // Publish the event
+                    await mediator.Publish(@event, ct);
 
-					// Update the outbox message as processed
-					using var postScope = _serviceProvider.CreateScope();
-					var db2 = postScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-					db2.Attach(msg);
-					msg.ProcessedOnUtc = DateTime.UtcNow;
-					msg.Error = null;
-					await db2.SaveChangesAsync(ct);
+                    // Update the outbox message as processed
+                    using var postScope = _serviceProvider.CreateScope();
+                    var db2 = postScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    db2.Attach(msg);
+                    msg.ProcessedOnUtc = DateTime.UtcNow;
+                    msg.Error = null;
+                    await db2.SaveChangesAsync(ct);
 
-					processedCount++;
-				}
-				catch (Exception ex)
-				{
-					using var errScope = _serviceProvider.CreateScope();
-					var db2 = errScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-					db2.Attach(msg);
+                    processedCount++;
+                    _logger.LogInformation("Outbox: published event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
+                }
+                catch (Exception ex)
+                {
+                    using var errScope = _serviceProvider.CreateScope();
+                    var db2 = errScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    db2.Attach(msg);
 
-					msg.Attempt += 1;
-					var backoff = ComputeBackoff(msg.Attempt, _options.MaxBackoff);
-					msg.NextAttemptOnUtc = now + backoff;
-					msg.Error = ex.ToString();
+                    msg.Attempt += 1;
+                    var backoff = ComputeBackoff(msg.Attempt, _options.MaxBackoff);
+                    msg.NextAttemptOnUtc = now + backoff;
+                    msg.Error = ex.ToString();
 
-					await db2.SaveChangesAsync(ct);
+                    await db2.SaveChangesAsync(ct);
+
+                    _logger.LogError(ex, "Outbox: failed to publish event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
 				}
 			}
 

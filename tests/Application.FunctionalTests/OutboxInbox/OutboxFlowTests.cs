@@ -3,14 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.TodoListAggregate.Entities;
 using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Inbox;
-using YummyZoom.Infrastructure.Data.Outbox;
 using YummyZoom.Application.TodoLists.Commands.CreateTodoList;
 using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;
 using YummyZoom.Application.TodoItems.EventHandlers;
 using YummyZoom.Application.TodoItems.Commands.UpdateTodoItem;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Models;
 
 namespace YummyZoom.Application.FunctionalTests.OutboxInbox;
 

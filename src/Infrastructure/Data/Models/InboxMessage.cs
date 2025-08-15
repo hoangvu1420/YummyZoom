@@ -1,4 +1,4 @@
-namespace YummyZoom.Infrastructure.Data.Inbox;
+namespace YummyZoom.Infrastructure.Data.Models;
 
 public sealed class InboxMessage
 {

@@ -42,7 +42,7 @@ Primary goals in the Application layer:
 | Command                            | Actor/Trigger                | Key Parameters                                       | Response DTO                                 | Authorization                                     |
 | ---------------------------------- | ---------------------------- | ---------------------------------------------------- | -------------------------------------------- | ------------------------------------------------- |
 | **CreateRestaurantAccountCommand** | Admin (or provisioning flow) | `RestaurantId`                                       | `CreateRestaurantAccountResponse(AccountId)` | Admin or System provisioner                       |
-| **RecordRevenueCommand**           | System (OrderPaid)           | `RestaurantId`, `OrderId`, `Amount`                  | `Result.Success()`                           | System; idempotent per (AccountId, OrderId, Type) |
+| **RecordRevenueCommand**           | System (OrderDelivered)           | `RestaurantId`, `OrderId`, `Amount`                  | `Result.Success()`                           | System; idempotent per (AccountId, OrderId, Type) |
 | **RecordPlatformFeeCommand**       | System (Fees)                | `RestaurantId`, `OrderId`, `FeeAmount` (negative)    | `Result.Success()`                           | System; idempotent                                |
 | **RecordRefundDeductionCommand**   | System (Refunds)             | `RestaurantId`, `OrderId`, `RefundAmount` (negative) | `Result.Success()`                           | System; idempotent                                |
 | **SettlePayoutCommand**            | Restaurant Owner             | `RestaurantId`, `Amount` (>0)                        | `SettlePayoutResponse(PayoutId, NewBalance)` | Owner; KYC verified & payout method required      |
@@ -99,16 +99,14 @@ Primary goals in the Application layer:
 
 > Domain events emitted by the aggregate drive audit trail creation and integrations. Handlers are **asynchronous** (fire-and-forget with outbox) and **idempotent**.
 
-| Domain Event               | Emitted When        | Application Handlers                                                  | Responsibilities                                                                                   |
-| -------------------------- | ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `RestaurantAccountCreated` | Account created     | `EnsureAccountProjection`                                             | Optionally seed projections; back-office notifications.                                            |
-| `RevenueRecorded`          | Revenue credited    | `CreateAccountTransaction(OrderRevenue)`                              | Insert immutable `AccountTransaction` row (positive). Recompute denormalized dashboards if needed. |
-| `PlatformFeeRecorded`      | Fee debited         | `CreateAccountTransaction(PlatformFee)`                               | Insert negative amount transaction.                                                                |
-| `RefundDeducted`           | Refund debited      | `CreateAccountTransaction(RefundDeduction)`                           | Insert negative amount transaction.                                                                |
-| `PayoutSettled`            | Payout succeeds     | `CreateAccountTransaction(PayoutSettlement)`; `TriggerPayoutTransfer` | Insert transaction with final `BalanceAfter`. Kick off payout transfer via payments provider.      |
-| `ManualAdjustmentMade`     | Admin adjustment    | `CreateAccountTransaction(ManualAdjustment)`                          | Insert with reason & admin id in notes/metadata.                                                   |
-| `PayoutMethodUpdated`      | Payout method saved | `RotateSecretsIfNeeded`                                               | Persist tokenized details securely; notify compliance if required.                                 |
-| `RestaurantAccountDeleted` | Marked deleted      | `FlagAccountAsDeleted`                                                | Hide from UI; prevent further postings except audits.                                              |
+| Domain Event               | Emitted When     | Application Handlers                                                                                    | Responsibilities                                                                                                                       |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `RestaurantAccountCreated` | Account created  | `EnsureAccountProjection` (sync in UoW if you seed local projections), `PublishAccountCreated` (outbox) | Seed minimal local views; publish integration event.                                                                                   |
+| `RevenueRecorded`          | Revenue credited | `CreateAccountTransaction(OrderRevenue)` (**sync in UoW**), `PublishRevenueRecorded` (outbox)           | Insert **positive** immutable row with `RelatedOrderId`; update denorm summaries if they live locally; publish for external consumers. |
+| `PlatformFeeRecorded`      | Fee debited      | `CreateAccountTransaction(PlatformFee)` (**sync in UoW**), `PublishPlatformFeeRecorded` (outbox)        | Insert **negative** row with `RelatedOrderId`.                                                                                         |
+| `RefundDeducted`           | Refund debited   | `CreateAccountTransaction(RefundDeduction)` (**sync in UoW**), `PublishRefundDeducted` (outbox)         | Insert **negative** row with `RelatedOrderId`.                                                                                         |
+| `PayoutSettled`            | Payout succeeds  | `CreateAccountTransaction(PayoutSettlement)` (**sync in UoW**), `PublishPayoutSettled` (outbox)         | Insert payout row (typically **negative**); publish to payments/BI.                                                                    |
+| `ManualAdjustmentMade`     | Admin adjustment | `CreateAccountTransaction(ManualAdjustment)` (**sync in UoW**), `PublishManualAdjustment` (outbox)      | Insert row (any sign) with notes/actor; publish.                                                                                       |
 
 **Integration events consumed by Application layer:**
 
@@ -130,13 +128,17 @@ Primary goals in the Application layer:
 7. **Side effects (async)**: outbox publishes `PayoutSettled` → `CreateAccountTransaction(PayoutSettlement)`; call payments provider with idempotency key (AccountId + timestamp + amount); send owner notification.
 8. **Return**: `SettlePayoutResponse` (payout id, new balance).
 
-### 5.2 `RecordRevenue` via `OrderPaid`
+### 5.2 `RecordRevenue` via `OrderDelivered`
 
-1. Receive `OrderPaid(orderId, restaurantId, amounts...)`.
-2. **Idempotency check**: ensure no `AccountTransaction` of type `OrderRevenue` exists for `(orderId)`.
+1. Receive `OrderDelivered(orderId, restaurantId, amounts...)` and validate ownership, delivery status.
+2. **Idempotency check**: ensure no `AccountTransaction` of type `OrderRevenue` exists for `(RestaurantAccountId, RelatedOrderId, Type=OrderRevenue)`.
 3. **Load** `RestaurantAccount`; create if auto-provisioning enabled.
-4. **Call** `RecordRevenue(amount, orderId)`; persist.
-5. **Emit** `RevenueRecorded` → handler writes audit transaction; refresh revenue summaries; optionally record `PlatformFee` in same flow based on fee schedule.
+4. **Call** `restaurantAccount.RecordRevenue(amount, orderId)` (aggregate raises `RevenueRecorded` internally).
+5. **Create** `AccountTransaction` (Type=OrderRevenue, amount>0, RelatedOrderId required).
+6. **Persist** both the aggregate and the `AccountTransaction` in the same DB transaction.
+7. Add an **outbox** message for `RevenueRecorded` (for dashboards/analytics/ETL).
+8. **Post-processing**: refresh revenue summaries; optionally record `PlatformFee` in same flow based on fee schedule.
+9. Commit transaction.
 
 ---
 

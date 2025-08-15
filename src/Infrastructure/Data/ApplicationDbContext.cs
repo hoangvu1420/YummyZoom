@@ -24,8 +24,6 @@ using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.SupportTicketAggregate;
 using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.Outbox;
-using YummyZoom.Infrastructure.Data.Inbox;
 
 namespace YummyZoom.Infrastructure.Data;
 

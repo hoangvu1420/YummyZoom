@@ -26,4 +26,8 @@
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Inbox\" />
+  </ItemGroup>
+
 </Project>

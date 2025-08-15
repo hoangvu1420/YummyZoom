@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using YummyZoom.Domain.Common.Models;
-using YummyZoom.Infrastructure.Data.Outbox;
+using YummyZoom.Infrastructure.Data.Models;
 using YummyZoom.Infrastructure.Serialization;
 
 namespace YummyZoom.Infrastructure.Data.Interceptors;

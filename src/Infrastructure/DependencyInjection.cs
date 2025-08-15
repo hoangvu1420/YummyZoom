@@ -25,7 +25,6 @@ using YummyZoom.Domain.Services;
 using Stripe;
 using System.Text.Json;
 using YummyZoom.Infrastructure.Outbox;
-using YummyZoom.Infrastructure.Data.Inbox;
 
 namespace YummyZoom.Infrastructure;
 

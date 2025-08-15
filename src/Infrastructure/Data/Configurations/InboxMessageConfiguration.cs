@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YummyZoom.Infrastructure.Data.Inbox;
+using YummyZoom.Infrastructure.Data.Models;
 
 namespace YummyZoom.Infrastructure.Data.Configurations;
 

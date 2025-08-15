@@ -1,6 +1,4 @@
-using System.Text.Json;
-
-namespace YummyZoom.Infrastructure.Data.Outbox;
+namespace YummyZoom.Infrastructure.Data.Models;
 
 public sealed class OutboxMessage
 {
