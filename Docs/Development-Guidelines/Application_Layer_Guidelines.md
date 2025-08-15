@@ -140,10 +140,12 @@ src/Application/<FeatureName>/
 │       ├── <Action>Command.cs
 │       ├── <Action>CommandHandler.cs
 │       └── <Action>CommandValidator.cs
-└── Queries/
-    └── <ActionName>/
-        ├── <Action>Query.cs
-        └── <Action>QueryHandler.cs
+├── Queries/
+│   └── <ActionName>/
+│       ├── <Action>Query.cs
+│       └── <Action>QueryHandler.cs
+└── EventHandlers/
+    └── <Event>Handler.cs
 ```
 
 ### Naming Conventions

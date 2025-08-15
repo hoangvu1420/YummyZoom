@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces.IRepositories;

@@ -42,6 +42,8 @@ public class CustomExceptionHandler : IExceptionHandler
         await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails(exception.Errors)
         {
             Status = StatusCodes.Status400BadRequest,
+            Title = "One or more validation errors occurred.",
+            Detail = string.Join(" | ", exception.Errors.Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value)}")),
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         });
     }
@@ -55,9 +57,9 @@ public class CustomExceptionHandler : IExceptionHandler
         await httpContext.Response.WriteAsJsonAsync(new ProblemDetails()
         {
             Status = StatusCodes.Status404NotFound,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
             Title = "The specified resource was not found.",
-            Detail = exception.Message
+            Detail = exception.Message,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
         });
     }
 
