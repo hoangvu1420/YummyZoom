@@ -381,6 +381,12 @@ public partial class Testing
         await AuthorizationTestSetup.SetupForAuthorizationTestsAsync();
     }
 
+    public static Task<Guid> RunAsDefaultRestaurantStaffForDefaultAsync() =>
+        Features.Orders.Commands.Lifecycle.OrderLifecycleTestHelper.RunAsDefaultRestaurantStaffAsync();
+
+    public static Task<Guid> RunAsDefaultRestaurantOwnerForDefaultAsync() =>
+        Features.Orders.Commands.Lifecycle.OrderLifecycleTestHelper.RunAsDefaultRestaurantOwnerAsync();
+
     #endregion
 
     #region Test Data Access
