@@ -182,6 +182,33 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FullMenuViews",
+                columns: table => new
+                {
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MenuJson = table.Column<string>(type: "jsonb", nullable: false),
+                    LastRebuiltAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FullMenuViews", x => x.RestaurantId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InboxMessages",
+                columns: table => new
+                {
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Handler = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    ProcessedOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Error = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InboxMessages", x => new { x.EventId, x.Handler });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MenuCategories",
                 columns: table => new
                 {
@@ -294,6 +321,28 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OutboxMessages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OccurredOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    Content = table.Column<string>(type: "jsonb", nullable: false),
+                    CorrelationId = table.Column<string>(type: "text", nullable: true),
+                    CausationId = table.Column<string>(type: "text", nullable: true),
+                    AggregateId = table.Column<string>(type: "text", nullable: true),
+                    AggregateType = table.Column<string>(type: "text", nullable: true),
+                    Attempt = table.Column<int>(type: "integer", nullable: false),
+                    NextAttemptOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ProcessedOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Error = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OutboxMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProcessedWebhookEvents",
                 columns: table => new
                 {
@@ -323,12 +372,26 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RestaurantReviewSummaries",
+                columns: table => new
+                {
+                    RestaurantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AverageRating = table.Column<double>(type: "double precision", nullable: false, defaultValue: 0.0),
+                    TotalReviews = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RestaurantReviewSummaries", x => x.RestaurantId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Restaurants",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     LogoUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    BackgroundImageUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
                     CuisineType = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Location_Street = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
@@ -336,6 +399,8 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     Location_State = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Location_ZipCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Location_Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Geo_Latitude = table.Column<double>(type: "double precision", precision: 9, scale: 6, nullable: true),
+                    Geo_Longitude = table.Column<double>(type: "double precision", precision: 9, scale: 6, nullable: true),
                     ContactInfo_PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     ContactInfo_Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     BusinessHours = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -1011,6 +1076,16 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 column: "LastModified");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FullMenuViews_LastRebuiltAt",
+                table: "FullMenuViews",
+                column: "LastRebuiltAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InboxMessages_ProcessedOnUtc",
+                table: "InboxMessages",
+                column: "ProcessedOnUtc");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MenuCategories_MenuId",
                 table: "MenuCategories",
                 column: "MenuId");
@@ -1127,6 +1202,21 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_OutboxMessages_NextAttemptOnUtc",
+                table: "OutboxMessages",
+                column: "NextAttemptOnUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OutboxMessages_OccurredOnUtc",
+                table: "OutboxMessages",
+                column: "OccurredOnUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OutboxMessages_ProcessedOnUtc",
+                table: "OutboxMessages",
+                column: "ProcessedOnUtc");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RestaurantAccount_Created",
                 table: "RestaurantAccounts",
                 column: "Created");
@@ -1136,6 +1226,11 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 table: "RestaurantAccounts",
                 column: "RestaurantId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RestaurantReviewSummaries_AverageRating",
+                table: "RestaurantReviewSummaries",
+                column: "AverageRating");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Restaurant_Created",
@@ -1364,6 +1459,12 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "Devices");
 
             migrationBuilder.DropTable(
+                name: "FullMenuViews");
+
+            migrationBuilder.DropTable(
+                name: "InboxMessages");
+
+            migrationBuilder.DropTable(
                 name: "MenuCategories");
 
             migrationBuilder.DropTable(
@@ -1376,6 +1477,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
+                name: "OutboxMessages");
+
+            migrationBuilder.DropTable(
                 name: "PaymentTransactions");
 
             migrationBuilder.DropTable(
@@ -1383,6 +1487,9 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "RestaurantAccounts");
+
+            migrationBuilder.DropTable(
+                name: "RestaurantReviewSummaries");
 
             migrationBuilder.DropTable(
                 name: "Restaurants");

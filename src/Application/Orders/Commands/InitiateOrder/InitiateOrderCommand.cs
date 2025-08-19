@@ -20,7 +20,13 @@ public record InitiateOrderCommand(
 
 public record OrderItemDto(
     Guid MenuItemId,
-    int Quantity
+    int Quantity,
+    List<OrderItemCustomizationRequestDto>? Customizations = null
+);
+
+public record OrderItemCustomizationRequestDto(
+    Guid CustomizationGroupId,
+    List<Guid> ChoiceIds
 );
 
 public record DeliveryAddressDto(

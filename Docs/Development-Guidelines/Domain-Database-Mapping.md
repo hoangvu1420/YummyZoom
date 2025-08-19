@@ -2,6 +2,8 @@
 
 You've already implemented most of these in your `UserConfiguration`, but let's formalize them into a set of principles you can apply everywhere.
 
+### Configuration Best Practices
+
 1. **One Configuration File per Aggregate Root/Independent Entity:** Just as you did with `UserConfiguration`, create a separate `IEntityTypeConfiguration<T>` for each aggregate root (e.g., `Restaurant`, `Order`, `MenuItem`) and each "Independent Entity" (e.g., `Tag`, `AccountTransaction`). This keeps your mapping logic organized and decoupled from the `DbContext`.
 
 2. **Explicit Table Naming:** Always use `builder.ToTable("TableName")` to explicitly name your tables. This avoids EF Core's default pluralization rules, giving you full control and clarity.
@@ -39,41 +41,68 @@ You've already implemented most of these in your `UserConfiguration`, but let's 
     * Use the same `HasConversion` pattern for these foreign key IDs.
     * You can optionally configure the relationship with `HasOne`/`WithMany` to enforce database-level foreign key constraints, but it's not strictly necessary for reads/writes if your application services correctly manage IDs.
 
-7. **Map Collections of Primitive/VOs:** For simple collections like `MenuItem.DietaryTagIDs` (a list of `TagID`s), you have two main options:
+7. **Map Collections of Primitive/VOs:** For simple collections like `MenuItem.DietaryTagIds` (a list of `TagId`s), use the **standardized JSONB approach** with our reusable infrastructure:
 
-    * **A. Recommended Approach: Use a JSON/JSONB Column**
+    **Recommended Approach: Use Shared JSONB Infrastructure**
 
-        This approach treats the collection of VOs as a single, atomic attribute of the parent entity, which aligns perfectly with DDD principles.
+    We've implemented a reusable pattern that handles JSON serialization consistently across all aggregates using shared `JsonSerializerOptions` and extension methods.
 
-        **How:** Serialize the `List<T>` or `IReadOnlyList<T>` into a JSON string and store it in a single `jsonb` (for PostgreSQL) or `nvarchar(max)` (for SQL Server) column. Use EF Core's `HasConversion` feature combined with a `ValueComparer`.
+    **Step 1: Use the Extension Method**
+    ```csharp
+    // In your entity configuration (e.g., MenuItemConfiguration.cs)
+    builder.Property(mi => mi.DietaryTagIds).HasJsonbListConversion<TagId>();
+    builder.Property(mi => mi.AppliedCustomizations).HasJsonbListConversion<AppliedCustomization>();
+    ```
 
-        **Example Code (for a `List<TagId>` on a `MenuItem`):**
+    **Step 2: Infrastructure Setup (Already Implemented)**
+    
+    The shared infrastructure consists of:
+    - `DomainJson.cs`: Provides consistent `JsonSerializerOptions` with domain-specific converters
+    - `EfJsonbExtensions.cs`: Reusable extension method for JSONB list conversion with proper `ValueComparer`
 
-        ```csharp
-        builder.Property(mi => mi.DietaryTagIDs)
-            .HasColumnType("jsonb") // Be explicit for PostgreSQL for performance and features
+    **Implementation Details:**
+    ```csharp
+    // src/Infrastructure/Serialization/DomainJson.cs
+    public static class DomainJson
+    {
+        public static JsonSerializerOptions Options { get; } = new()
+        {
+            Converters = { new AggregateRootIdJsonConverterFactory() },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+    }
+
+    // src/Infrastructure/Data/Configurations/Common/EfJsonbExtensions.cs
+    public static PropertyBuilder<IReadOnlyList<T>> HasJsonbListConversion<T>(this PropertyBuilder<IReadOnlyList<T>> propertyBuilder)
+    {
+        return propertyBuilder
+            .HasColumnType("jsonb")
             .HasConversion(
-                // To the database: Serialize the list to a JSON string
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                // From the database: Deserialize the JSON string back to a list
-                v => JsonSerializer.Deserialize<List<TagID>>(v, (JsonSerializerOptions)null),
-                // A ValueComparer helps EF Core's change tracker efficiently detect changes to the list
-                new ValueComparer<List<TagID>>(
-                    (c1, c2) => c1.SequenceEqual(c2),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()));
-        ```
+                v => JsonSerializer.Serialize(v, DomainJson.Options),
+                v => JsonSerializer.Deserialize<IReadOnlyList<T>>(v, DomainJson.Options) ?? new List<T>(),
+                new ValueComparer<IReadOnlyList<T>>(
+                    (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                    c => c?.Aggregate(0, (a, v) => HashCode.Combine(a, v?.GetHashCode() ?? 0)) ?? 0,
+                    c => c?.ToList() ?? new List<T>()));
+    }
+    ```
 
-        **⚠️ Important: Type Consistency Warning**
+    **Benefits of This Approach:**
+    - ✅ Consistent JSON serialization across all aggregates
+    - ✅ Proper handling of strongly-typed IDs with `AggregateRootIdJsonConverterFactory`
+    - ✅ Reusable extension method reduces code duplication
+    - ✅ Null-safe `ValueComparer` handles edge cases
+    - ✅ Type-safe implementation prevents runtime errors
 
-        When using `HasConversion` with `ValueComparer` for collections, ensure the generic type in `ValueComparer<T>` exactly matches the property type in your domain entity. For example:
-        * If your property is `IReadOnlyList<AppliedCustomization>`, use `ValueComparer<IReadOnlyList<AppliedCustomization>>`
-        * If your property is `List<AppliedCustomization>`, use `ValueComparer<List<AppliedCustomization>>`
+    **Important Note for Value Objects in JSON Columns:**
+    When creating value objects that will be stored in JSON columns, ensure they have proper JSON deserialization support:
+    - Add `[JsonConstructor]` attribute to the parameterized constructor
+    - Constructor parameter names must match property names exactly (case-insensitive)
+    - Include `using System.Text.Json.Serialization;` directive
+    - Provide a parameterless constructor for EF Core (marked as `internal`)
 
-        A type mismatch will cause a `System.InvalidOperationException` at runtime with a message like "ValueComparer for 'List<T>' cannot be used for 'IReadOnlyList<T>'".
-
-    * **B. Alternative Approach: Use a Join Table**
-        The more traditional relational approach, creating a `MenuItemTags` table. This is more complex to set up and is often overkill.
+    **Alternative Approach: Join Tables**
+    For relationships requiring querying or complex operations, use join tables. This is more complex but necessary for certain use cases.
 
 8. **Use `.HasConversion<string>()` for Enums:** Storing enums as strings in the database is far more readable and resilient to changes in the enum's integer values.
 
@@ -136,171 +165,60 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
 }
 ```
 
-#### 2. `Order` Aggregate Configuration
+#### 2. `MenuItem` Aggregate Configuration
 
-This is a complex aggregate with child entities (`OrderItem`), owned VOs (`DeliveryAddress`, `Financials`), and references to other aggregates.
+This example demonstrates the new standardized JSONB approach for collections:
 
 ```csharp
-// src/Infrastructure/Data/Configurations/OrderConfiguration.cs
+// src/Infrastructure/Data/Configurations/MenuItemConfiguration.cs
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.ValueObjects; // For UserId
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects; // For RestaurantId
-using YummyZoom.Domain.CouponAggregate.ValueObjects; // For CouponId
+using YummyZoom.Infrastructure.Data.Configurations.Common;
+using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 
-public class OrderConfiguration : IEntityTypeConfiguration<Order>
+public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    public void Configure(EntityTypeBuilder<MenuItem> builder)
     {
-        builder.ToTable("Orders");
+        builder.ToTable("MenuItems");
 
-        builder.HasKey(o => o.Id);
-        builder.Property(o => o.Id)
+        builder.HasKey(mi => mi.Id);
+        builder.Property(mi => mi.Id)
             .ValueGeneratedNever()
-            .HasConversion(id => id.Value, value => OrderId.Create(value));
+            .HasConversion(id => id.Value, value => MenuItemId.Create(value));
 
-        // --- References to other aggregates ---
-        builder.Property(o => o.CustomerID)
-            .IsRequired()
-            .HasConversion(id => id.Value, value => UserId.Create(value));
+        // --- Basic Properties ---
+        builder.Property(mi => mi.Name).HasMaxLength(200).IsRequired();
+        builder.Property(mi => mi.Description).HasMaxLength(1000);
+        
+        // --- Money Value Object ---
+        builder.OwnsOne(mi => mi.BasePrice, priceBuilder =>
+        {
+            priceBuilder.Property(p => p.Amount).HasColumnName("BasePrice").HasColumnType("decimal(18,2)");
+            priceBuilder.Property(p => p.Currency).HasColumnName("Currency").HasMaxLength(3);
+        });
 
-        builder.Property(o => o.RestaurantID)
+        // --- Foreign Key References ---
+        builder.Property(mi => mi.RestaurantId)
             .IsRequired()
             .HasConversion(id => id.Value, value => RestaurantId.Create(value));
-        
-        builder.Property(o => o.AppliedCouponID)
-            .HasConversion(id => id.Value, value => CouponId.Create(value)); // Handle optional ID
 
-        // --- Simple Properties ---
-        builder.Property(o => o.Status).HasConversion<string>().HasMaxLength(50);
-        builder.Property(o => o.OrderNumber).IsRequired();
-        builder.HasIndex(o => o.OrderNumber).IsUnique();
-
-        // --- Owned Value Objects (Snapshot & Financials) ---
-        builder.OwnsOne(o => o.DeliveryAddress, addressBuilder => { /* configure like in RestaurantConfiguration */ });
-
-        // Group financial properties into a component using OwnsOne for clarity
-        builder.OwnsOne(o => o.Financials, financialsBuilder =>
-        {
-            financialsBuilder.Property(f => f.Subtotal).HasColumnType("decimal(18,2)");
-            financialsBuilder.Property(f => f.DiscountAmount).HasColumnType("decimal(18,2)");
-            financialsBuilder.Property(f => f.DeliveryFee).HasColumnType("decimal(18,2)");
-            financialsBuilder.Property(f => f.TipAmount).HasColumnType("decimal(18,2)");
-            financialsBuilder.Property(f => f.TaxAmount).HasColumnType("decimal(18,2)");
-            financialsBuilder.Property(f => f.TotalAmount).HasColumnType("decimal(18,2)");
-        });
-
-        // --- Owned Child Entity Collection: OrderItem ---
-        builder.OwnsMany(o => o.OrderItems, itembuilder =>
-        {
-            itembuilder.ToTable("OrderItems");
-            itembuilder.WithOwner().HasForeignKey("OrderId");
-            itembuilder.HasKey(oi => oi.Id);
-
-            itembuilder.Property(oi => oi.Id)
-                .HasColumnName("OrderItemId")
-                .ValueGeneratedNever()
-                .HasConversion(id => id.Value, value => OrderItemId.Create(value));
-            
-            // Snapshot properties are just regular mapped properties
-            itembuilder.Property(oi => oi.Snapshot_MenuItemID).IsRequired();
-            itembuilder.Property(oi => oi.Snapshot_ItemName).IsRequired().HasMaxLength(200);
-            
-            // Map Money VO for prices
-            itembuilder.OwnsOne(oi => oi.Snapshot_BasePriceAtOrder, moneyBuilder => { /* ... */ });
-            itembuilder.OwnsOne(oi => oi.LineItemTotal, moneyBuilder => { /* ... */ });
-
-            // Snapshot of selected customizations can be stored as JSON
-            itembuilder.Property(oi => oi.SelectedCustomizations)
-                .HasColumnType("jsonb") 
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<OrderItemCustomization>>(v, (JsonSerializerOptions)null)!,
-                    new ValueComparer<List<OrderItemCustomization>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()
-                    )
-                );
-        });
-        
-        // Configure PaymentTransactions similarly to OrderItems if they are child entities
-        builder.OwnsMany(o => o.PaymentTransactions, ptBuilder => { /* ... */ });
-    }
-}
-```
-
-#### 3. `RoleAssignment` Aggregate Configuration
-
-This is a simple mapping table that links two other aggregates. The key here is the composite unique index.
-
-```csharp
-// src/Infrastructure/Data/Configurations/RoleAssignmentConfiguration.cs
-
-public class RoleAssignmentConfiguration : IEntityTypeConfiguration<RoleAssignment>
-{
-    public void Configure(EntityTypeBuilder<RoleAssignment> builder)
-    {
-        builder.ToTable("RoleAssignments");
-
-        builder.HasKey(ra => ra.Id);
-        builder.Property(ra => ra.Id)
-            .ValueGeneratedNever()
-            .HasConversion(id => id.Value, value => RoleAssignmentId.Create(value));
-
-        // Map Foreign Key IDs
-        builder.Property(ra => ra.UserID)
+        builder.Property(mi => mi.MenuCategoryId)
             .IsRequired()
-            .HasConversion(id => id.Value, value => UserId.Create(value));
+            .HasConversion(id => id.Value, value => MenuCategoryId.Create(value));
 
-        builder.Property(ra => ra.RestaurantID)
-            .IsRequired()
-            .HasConversion(id => id.Value, value => RestaurantId.Create(value));
-        
-        builder.Property(ra => ra.Role).HasConversion<string>().HasMaxLength(50);
+        // --- JSONB Collections using Standardized Approach ---
+        builder.Property(mi => mi.DietaryTagIds).HasJsonbListConversion<TagId>();
+        builder.Property(mi => mi.AppliedCustomizations).HasJsonbListConversion<AppliedCustomization>();
 
-        // Enforce the business rule: A user can only have one role per restaurant.
-        builder.HasIndex(ra => new { ra.UserID, ra.RestaurantID }).IsUnique();
-    }
-}
-```
-
-#### 4. `AccountTransaction` (Independent Entity) Configuration
-
-This entity is an immutable record. It's not an aggregate root in the traditional sense, but it has its own lifecycle and table.
-
-```csharp
-// src/Infrastructure/Data/Configurations/AccountTransactionConfiguration.cs
-
-public class AccountTransactionConfiguration : IEntityTypeConfiguration<AccountTransaction>
-{
-    public void Configure(EntityTypeBuilder<AccountTransaction> builder)
-    {
-        builder.ToTable("AccountTransactions");
-
-        builder.HasKey(t => t.Id);
-        builder.Property(t => t.Id)
-            .ValueGeneratedNever() // Or use .ValueGeneratedOnAdd() if domain doesn't create it
-            .HasConversion(id => id.Value, value => AccountTransactionId.Create(value));
-
-        builder.Property(t => t.RestaurantAccountID).IsRequired()
-            .HasConversion(id => id.Value, value => RestaurantAccountId.Create(value));
-        
-        builder.Property(t => t.RelatedOrderID)
-            .HasConversion(id => id.Value, value => OrderId.Create(value));
-
-        builder.Property(t => t.Type).HasConversion<string>().HasMaxLength(50).IsRequired();
-        
-        builder.OwnsOne(t => t.Amount, moneyBuilder =>
-        {
-            moneyBuilder.Property(m => m.Value).HasColumnName("Amount").HasColumnType("decimal(18,2)");
-            moneyBuilder.Property(m => m.Currency).HasColumnName("Currency").HasMaxLength(3);
-        });
-
-        builder.Property(t => t.Timestamp).IsRequired();
+        // --- Other Properties ---
+        builder.Property(mi => mi.IsAvailable).IsRequired();
+        builder.Property(mi => mi.CreatedDateTime).IsRequired();
+        builder.Property(mi => mi.UpdatedDateTime).IsRequired();
     }
 }
 ```

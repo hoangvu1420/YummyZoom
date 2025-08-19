@@ -64,6 +64,28 @@ public class OrderItemDtoValidator : AbstractValidator<OrderItemDto>
             .WithMessage("Quantity must be greater than 0.")
             .LessThanOrEqualTo(10)
             .WithMessage("Maximum quantity per item is 10.");
+
+        When(x => x.Customizations != null && x.Customizations.Count > 0, () =>
+        {
+            RuleForEach(x => x.Customizations!)
+                .SetValidator(new OrderItemCustomizationRequestDtoValidator());
+        });
+    }
+}
+
+public class OrderItemCustomizationRequestDtoValidator : AbstractValidator<OrderItemCustomizationRequestDto>
+{
+    public OrderItemCustomizationRequestDtoValidator()
+    {
+        RuleFor(x => x.CustomizationGroupId)
+            .NotEmpty()
+            .WithMessage("Customization group ID is required.");
+
+        RuleFor(x => x.ChoiceIds)
+            .NotNull().WithMessage("Choice IDs collection is required.")
+            .Must(c => c.Count > 0).WithMessage("At least one choice ID must be provided.")
+            .Must(c => c.Count == c.Distinct().Count()).WithMessage("Duplicate choice IDs are not allowed.")
+            .When(x => x.ChoiceIds != null);
     }
 }
 

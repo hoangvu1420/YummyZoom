@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 
@@ -9,6 +10,7 @@ public sealed class AppliedCustomization : ValueObject
     public string DisplayTitle { get; private set; }
     public int DisplayOrder { get; private set; }
 
+    [JsonConstructor]
     private AppliedCustomization(CustomizationGroupId customizationGroupId, string displayTitle, int displayOrder)
     {
         CustomizationGroupId = customizationGroupId;
@@ -29,6 +31,7 @@ public sealed class AppliedCustomization : ValueObject
     }
     
 #pragma warning disable CS8618
-    private AppliedCustomization() { }
+    // Internal parameterless constructor for EF Core and JSON deserialization
+    internal AppliedCustomization() { }
 #pragma warning restore CS8618
 }

@@ -1,7 +1,6 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -67,32 +66,13 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         // --- 5. Collections ---
 
-        // Map DietaryTagIds as JSONB column
+        // Map DietaryTagIds as JSONB column using shared converter and comparer
         builder.Property(m => m.DietaryTagIds)
-            .HasColumnType("jsonb")
-            .HasConversion(
-                tagIds => JsonSerializer.Serialize(tagIds.Select(id => id.Value).ToList(), (JsonSerializerOptions?)null),
-                json => JsonSerializer.Deserialize<List<Guid>>(json, (JsonSerializerOptions?)null)!
-                    .Select(TagId.Create).ToList(),
-                new ValueComparer<IReadOnlyList<TagId>>(
-                    (c1, c2) => c1!.SequenceEqual(c2!),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()
-                )
-            );
+            .HasJsonbListConversion<TagId>();
 
-        // Configure collection of Value Objects as a JSONB column.
+        // Configure collection of Value Objects as a JSONB column using shared converter and comparer
         builder.Property(m => m.AppliedCustomizations)
-            .HasColumnType("jsonb") 
-            .HasConversion(
-                customizations => JsonSerializer.Serialize(customizations, (JsonSerializerOptions?)null),
-                json => JsonSerializer.Deserialize<List<AppliedCustomization>>(json, (JsonSerializerOptions?)null)!,
-                new ValueComparer<IReadOnlyList<AppliedCustomization>>(
-                    (c1, c2) => c1!.SequenceEqual(c2!),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()
-                )
-            );
+            .HasJsonbListConversion<AppliedCustomization>();
             
         // --- 6. Indexes ---
         builder.HasIndex(m => m.RestaurantId)

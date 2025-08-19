@@ -88,6 +88,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
         builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
         builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+        builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();
         builder.Services.AddScoped<IInboxStore, InboxStore>();
 
         // Register the connection factory for Dapper queries

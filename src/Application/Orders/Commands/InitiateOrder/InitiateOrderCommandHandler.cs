@@ -15,6 +15,8 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.Services;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
+using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.SharedKernel;
 using Result = YummyZoom.SharedKernel.Result;
 
@@ -26,6 +28,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly IMenuItemRepository _menuItemRepository;
     private readonly ICouponRepository _couponRepository;
+    private readonly ICustomizationGroupRepository _customizationGroupRepository;
     private readonly IPaymentGatewayService _paymentGatewayService;
     private readonly OrderFinancialService _orderFinancialService;
     private readonly IUser _currentUser;
@@ -37,7 +40,8 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         IOrderRepository orderRepository,
         IRestaurantRepository restaurantRepository,
         IMenuItemRepository menuItemRepository,
-        ICouponRepository couponRepository,
+    ICouponRepository couponRepository,
+    ICustomizationGroupRepository customizationGroupRepository,
         IPaymentGatewayService paymentGatewayService,
         OrderFinancialService orderFinancialService,
         IUnitOfWork unitOfWork,
@@ -49,6 +53,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         _restaurantRepository = restaurantRepository ?? throw new ArgumentNullException(nameof(restaurantRepository));
         _menuItemRepository = menuItemRepository ?? throw new ArgumentNullException(nameof(menuItemRepository));
         _couponRepository = couponRepository ?? throw new ArgumentNullException(nameof(couponRepository));
+    _customizationGroupRepository = customizationGroupRepository ?? throw new ArgumentNullException(nameof(customizationGroupRepository));
         _paymentGatewayService = paymentGatewayService ?? throw new ArgumentNullException(nameof(paymentGatewayService));
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -149,18 +154,85 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 return Result.Failure<InitiateOrderResponse>(deliveryAddressResult.Error);
             }
 
-            // 4. Create order items with current pricing
+            // 4. Create order items with current pricing and selected customizations
             var orderItems = new List<OrderItem>();
             foreach (var requestItem in request.Items)
             {
                 var menuItemId = MenuItemId.Create(requestItem.MenuItemId);
                 var menuItem = menuItems.First(m => m.Id == menuItemId);
+                var selectedCustomizations = new List<OrderItemCustomization>();
+
+                if (requestItem.Customizations is not null && requestItem.Customizations.Count > 0)
+                {
+                    // Build set of allowed customization group ids from menu item
+                    var allowedGroupIds = menuItem.AppliedCustomizations.Select(c => c.CustomizationGroupId).ToHashSet();
+
+                    // Collect all group ids for this item
+                    var itemGroupIds = requestItem.Customizations.Select(c => c.CustomizationGroupId).Distinct().ToList();
+
+                    // Load groups in batch
+                    var groupIdValueObjects = itemGroupIds.Select(id => CustomizationGroupId.Create(id)).ToList();
+                    var groups = await _customizationGroupRepository.GetByIdsAsync(groupIdValueObjects, cancellationToken);
+                    var groupDict = groups.ToDictionary(g => g.Id, g => g);
+
+                    foreach (var customizationReq in requestItem.Customizations)
+                    {
+                        var groupIdVo = CustomizationGroupId.Create(customizationReq.CustomizationGroupId);
+
+                        if (!allowedGroupIds.Contains(groupIdVo))
+                        {
+                            _logger.LogWarning("Customization group {GroupId} not assigned to menu item {MenuItemId}", customizationReq.CustomizationGroupId, menuItem.Id.Value);
+                            return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.CustomizationGroupNotAssignedToMenuItem(customizationReq.CustomizationGroupId));
+                        }
+
+                        if (!groupDict.TryGetValue(groupIdVo, out var group) || group.IsDeleted || group.RestaurantId != restaurantId)
+                        {
+                            _logger.LogWarning("Customization group {GroupId} not found or invalid for restaurant {RestaurantId}", customizationReq.CustomizationGroupId, restaurantId.Value);
+                            return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.CustomizationGroupNotFound(customizationReq.CustomizationGroupId));
+                        }
+
+                        // Validate selection count
+                        var choiceIdsDistinct = customizationReq.ChoiceIds.Distinct().ToList();
+                        if (choiceIdsDistinct.Count < group.MinSelections || choiceIdsDistinct.Count > group.MaxSelections)
+                        {
+                            _logger.LogWarning("Selection count {Count} invalid for group {GroupId} (min {Min} max {Max})", choiceIdsDistinct.Count, customizationReq.CustomizationGroupId, group.MinSelections, group.MaxSelections);
+                            return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.CustomizationGroupSelectionCountInvalid(customizationReq.CustomizationGroupId, group.MinSelections, group.MaxSelections));
+                        }
+
+                        var choiceDict = group.Choices.ToDictionary(c => c.Id, c => c);
+                        foreach (var choiceIdGuid in choiceIdsDistinct)
+                        {
+                            var choiceIdVo = ChoiceId.Create(choiceIdGuid);
+                            if (!choiceDict.TryGetValue(choiceIdVo, out var choice))
+                            {
+                                _logger.LogWarning("Choice {ChoiceId} not found in group {GroupId}", choiceIdGuid, customizationReq.CustomizationGroupId);
+                                return Result.Failure<InitiateOrderResponse>(InitiateOrderErrors.CustomizationChoiceNotFound(choiceIdGuid));
+                            }
+
+                            // Build snapshot value object
+                            var customizationResult = OrderItemCustomization.Create(
+                                group.GroupName,
+                                choice.Name,
+                                choice.PriceAdjustment.Copy());
+
+                            if (customizationResult.IsFailure)
+                            {
+                                _logger.LogWarning("Failed to create customization snapshot for choice {ChoiceId} in group {GroupId}: {Error}", choiceIdGuid, customizationReq.CustomizationGroupId, customizationResult.Error);
+                                return Result.Failure<InitiateOrderResponse>(customizationResult.Error);
+                            }
+
+                            selectedCustomizations.Add(customizationResult.Value);
+                        }
+                    }
+                }
+
                 var orderItemResult = OrderItem.Create(
                     menuItem.MenuCategoryId,
                     menuItem.Id,
                     menuItem.Name,
                     menuItem.BasePrice.Copy(),
-                    requestItem.Quantity);
+                    requestItem.Quantity,
+                    selectedCustomizations.Any() ? selectedCustomizations : null);
 
                 if (orderItemResult.IsFailure)
                 {
@@ -341,4 +413,17 @@ public static class InitiateOrderErrors
 
     public static Error CouponNotFound(string couponCode) =>
         Error.NotFound("Coupon.CouponNotFound", $"The specified coupon code {couponCode} is not valid.");
+
+    // Customization related
+    public static Error CustomizationGroupNotFound(Guid groupId) =>
+        Error.NotFound("InitiateOrder.CustomizationGroupNotFound", $"Customization group {groupId} was not found.");
+
+    public static Error CustomizationGroupNotAssignedToMenuItem(Guid groupId) =>
+        Error.Validation("InitiateOrder.CustomizationGroupNotAssignedToMenuItem", $"Customization group {groupId} is not assigned to the selected menu item.");
+
+    public static Error CustomizationGroupSelectionCountInvalid(Guid groupId, int min, int max) =>
+        Error.Validation("InitiateOrder.CustomizationGroupSelectionCountInvalid", $"Customization group {groupId} requires between {min} and {max} selections.");
+
+    public static Error CustomizationChoiceNotFound(Guid choiceId) =>
+        Error.NotFound("InitiateOrder.CustomizationChoiceNotFound", $"Customization choice {choiceId} was not found in the specified group.");
 }

@@ -12,8 +12,8 @@ using YummyZoom.Infrastructure.Data;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250814073209_Add_InboxMessages")]
-    partial class Add_InboxMessages
+    [Migration("20250818163206_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1317,28 +1317,6 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("DomainUsers", (string)null);
                 });
 
-            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Inbox.InboxMessage", b =>
-                {
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Handler")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("Error")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ProcessedOnUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("EventId", "Handler");
-
-                    b.HasIndex("ProcessedOnUtc");
-
-                    b.ToTable("InboxMessages", (string)null);
-                });
-
             modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.CouponUserUsage", b =>
                 {
                     b.Property<Guid>("CouponId")
@@ -1378,31 +1356,29 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.ToTable("FullMenuViews", (string)null);
                 });
 
-            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.RestaurantReviewSummary", b =>
+            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.InboxMessage", b =>
                 {
-                    b.Property<Guid>("RestaurantId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
 
-                    b.Property<double>("AverageRating")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("double precision")
-                        .HasDefaultValue(0.0);
+                    b.Property<string>("Handler")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
-                    b.Property<int>("TotalReviews")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
 
-                    b.HasKey("RestaurantId");
+                    b.Property<DateTime>("ProcessedOnUtc")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasIndex("AverageRating")
-                        .HasDatabaseName("IX_RestaurantReviewSummaries_AverageRating");
+                    b.HasKey("EventId", "Handler");
 
-                    b.ToTable("RestaurantReviewSummaries", (string)null);
+                    b.HasIndex("ProcessedOnUtc");
+
+                    b.ToTable("InboxMessages", (string)null);
                 });
 
-            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Outbox.OutboxMessage", b =>
+            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1453,6 +1429,30 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                     b.HasIndex("ProcessedOnUtc");
 
                     b.ToTable("OutboxMessages", (string)null);
+                });
+
+            modelBuilder.Entity("YummyZoom.Infrastructure.Data.Models.RestaurantReviewSummary", b =>
+                {
+                    b.Property<Guid>("RestaurantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("AverageRating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0);
+
+                    b.Property<int>("TotalReviews")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("RestaurantId");
+
+                    b.HasIndex("AverageRating")
+                        .HasDatabaseName("IX_RestaurantReviewSummaries_AverageRating");
+
+                    b.ToTable("RestaurantReviewSummaries", (string)null);
                 });
 
             modelBuilder.Entity("YummyZoom.Infrastructure.Identity.ApplicationUser", b =>

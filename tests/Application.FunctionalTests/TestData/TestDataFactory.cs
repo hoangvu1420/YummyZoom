@@ -57,6 +57,14 @@ public static class TestDataFactory
     /// </summary>
     public static string DefaultCouponCode => DefaultTestData.Coupon.Code;
 
+    // Customization Group & Choice IDs
+    public static Guid CustomizationGroup_BurgerAddOnsId { get; private set; }
+    public static Guid CustomizationChoice_ExtraCheeseId { get; private set; }
+    public static Guid CustomizationChoice_BaconId { get; private set; }
+    public static Guid? CustomizationGroup_RequiredBunTypeId { get; private set; }
+    public static Guid? CustomizationChoice_BriocheBunId { get; private set; }
+    public static Guid? CustomizationChoice_GlutenFreeBunId { get; private set; }
+
     #endregion
 
     #region Initialization
@@ -138,6 +146,9 @@ public static class TestDataFactory
 
         // 5. Create and save the default coupon
         await CreateDefaultCouponAsync();
+
+        // 6. Create customization groups, choices, and assign to menu items
+        await CreateDefaultCustomizationsAsync();
     }
 
     /// <summary>
@@ -154,6 +165,12 @@ public static class TestDataFactory
             DefaultRestaurantId = Guid.Empty;
             DefaultMenuId = Guid.Empty;
             DefaultCouponId = Guid.Empty;
+            CustomizationGroup_BurgerAddOnsId = Guid.Empty;
+            CustomizationChoice_ExtraCheeseId = Guid.Empty;
+            CustomizationChoice_BaconId = Guid.Empty;
+            CustomizationGroup_RequiredBunTypeId = null;
+            CustomizationChoice_BriocheBunId = null;
+            CustomizationChoice_GlutenFreeBunId = null;
         }
     }
 
@@ -401,6 +418,69 @@ public static class TestDataFactory
         var coupon = couponResult.Value;
         await AddAsync(coupon);
         DefaultCouponId = coupon.Id.Value;
+    }
+
+    /// <summary>
+    /// Creates default customization groups & choices and assigns them to selected menu items.
+    /// </summary>
+    private static async Task CreateDefaultCustomizationsAsync()
+    {
+        var restaurantId = RestaurantId.Create(DefaultRestaurantId);
+
+        // Retrieve Classic Burger menu item
+        var classicBurgerId = GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
+        var classicBurger = await FindAsync<MenuItem>(MenuItemId.Create(classicBurgerId));
+        if (classicBurger is null)
+            throw new InvalidOperationException("Classic Burger menu item not found for customization assignment.");
+
+        // Burger Add-ons group (optional group: min 0, max 2)
+        var burgerAddOnsGroupResult = Domain.CustomizationGroupAggregate.CustomizationGroup.Create(
+            restaurantId,
+            "Burger Add-ons",
+            minSelections: 0,
+            maxSelections: 2);
+        if (burgerAddOnsGroupResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create Burger Add-ons group: {burgerAddOnsGroupResult.Error}");
+        var burgerAddOnsGroup = burgerAddOnsGroupResult.Value;
+
+        // Choices
+        burgerAddOnsGroup.AddChoice("Extra Cheese", new Money(1.50m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 1);
+        burgerAddOnsGroup.AddChoice("Bacon", new Money(2.00m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
+
+        await AddAsync(burgerAddOnsGroup);
+
+        CustomizationGroup_BurgerAddOnsId = burgerAddOnsGroup.Id.Value;
+        // Capture choice IDs (need to read after EF sets owned entities). Owned entities already in memory.
+        var extraCheese = burgerAddOnsGroup.Choices.First(c => c.Name == "Extra Cheese");
+        var bacon = burgerAddOnsGroup.Choices.First(c => c.Name == "Bacon");
+        CustomizationChoice_ExtraCheeseId = extraCheese.Id.Value;
+        CustomizationChoice_BaconId = bacon.Id.Value;
+
+        // Assign group to Classic Burger
+        var appliedCustomization = AppliedCustomization.Create(burgerAddOnsGroup.Id, "Add-ons", 1);
+        var assignResult = classicBurger.AssignCustomizationGroup(appliedCustomization);
+        if (assignResult.IsFailure)
+            throw new InvalidOperationException($"Failed to assign Burger Add-ons group to Classic Burger: {assignResult.Error}");
+        await UpdateAsync(classicBurger);
+
+        // Required Bun Type group (min 1, max 1) for validation tests
+        var bunTypeGroupResult = Domain.CustomizationGroupAggregate.CustomizationGroup.Create(
+            restaurantId,
+            "Bun Type",
+            minSelections: 1,
+            maxSelections: 1);
+        if (bunTypeGroupResult.IsSuccess)
+        {
+            var bunTypeGroup = bunTypeGroupResult.Value;
+            bunTypeGroup.AddChoice("Brioche Bun", new Money(0m, DefaultTestData.Currency.Default), isDefault: true, displayOrder: 1);
+            bunTypeGroup.AddChoice("Gluten-Free Bun", new Money(0.75m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
+            await AddAsync(bunTypeGroup);
+            CustomizationGroup_RequiredBunTypeId = bunTypeGroup.Id.Value;
+            CustomizationChoice_BriocheBunId = bunTypeGroup.Choices.First(c => c.Name == "Brioche Bun").Id.Value;
+            CustomizationChoice_GlutenFreeBunId = bunTypeGroup.Choices.First(c => c.Name == "Gluten-Free Bun").Id.Value;
+
+            // Do NOT assign Bun Type group to Classic Burger initially (to enable negative tests for unassigned group)
+        }
     }
 
     #endregion
