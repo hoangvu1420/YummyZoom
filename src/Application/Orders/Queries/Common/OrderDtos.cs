@@ -100,9 +100,9 @@ public static class OrderCustomizationJsonParser
     };
 
     private record RawCustomization(
-        string? GroupName,
-        string? ChoiceName,
-        RawMoney? PriceAdjustment);
+        string? Snapshot_CustomizationGroupName,
+        string? Snapshot_ChoiceName,
+        RawMoney? Snapshot_ChoicePriceAdjustmentAtOrder);
 
     private record RawMoney(decimal? Amount, string? Currency);
 
@@ -113,12 +113,12 @@ public static class OrderCustomizationJsonParser
         {
             var raw = JsonSerializer.Deserialize<List<RawCustomization>>(json, Options) ?? new();
             return raw
-                .Where(r => r is { GroupName: not null, ChoiceName: not null })
+                .Where(r => r is { Snapshot_CustomizationGroupName: not null, Snapshot_ChoiceName: not null })
                 .Select(r => new OrderItemCustomizationDto(
-                    r.GroupName!,
-                    r.ChoiceName!,
-                    r.PriceAdjustment?.Amount,
-                    r.PriceAdjustment?.Currency))
+                    r.Snapshot_CustomizationGroupName!,
+                    r.Snapshot_ChoiceName!,
+                    r.Snapshot_ChoicePriceAdjustmentAtOrder?.Amount,
+                    r.Snapshot_ChoicePriceAdjustmentAtOrder?.Currency))
                 .ToList();
         }
         catch

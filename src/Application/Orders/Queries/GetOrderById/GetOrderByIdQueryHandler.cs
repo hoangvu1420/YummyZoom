@@ -1,12 +1,12 @@
 using Dapper;
 using System.Data;
-using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.SharedKernel;
 using Microsoft.Extensions.Logging;
 using YummyZoom.SharedKernel.Constants;
+using System.Security.Claims;
 
 namespace YummyZoom.Application.Orders.Queries.GetOrderById;
 
@@ -64,7 +64,7 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 o."DeliveryAddress_City"        AS DeliveryAddress_City,
                 o."DeliveryAddress_State"       AS DeliveryAddress_State,
                 o."DeliveryAddress_Country"     AS DeliveryAddress_Country,
-                o."DeliveryAddress_PostalCode"  AS DeliveryAddress_PostalCode
+                o."DeliveryAddress_ZipCode"     AS DeliveryAddress_PostalCode
             FROM "Orders" o
             WHERE o."Id" = @OrderId
             """;
@@ -80,9 +80,17 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
 
         // 2. Authorization check (customer or restaurant staff). If user not authenticated, pipeline would already block.
         var principal = _currentUser.Principal;
-        var userIdClaim = principal?.FindFirst("sub")?.Value ?? principal?.FindFirst("uid")?.Value; // flexible claim naming
+        // Support multiple possible claim types for user id: OIDC (sub), custom (uid), and NameIdentifier (used in test infrastructure)
+        var userIdClaim = principal?.FindFirst("sub")?.Value
+                  ?? principal?.FindFirst("uid")?.Value
+                  ?? principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value; // fallback for tests / generic
         var isCustomer = userIdClaim != null && Guid.TryParse(userIdClaim, out var userGuid) && userGuid == orderRow.CustomerId;
-        var isRestaurantStaff = principal?.IsInRole($"RestaurantStaff:{orderRow.RestaurantId}") == true || principal?.IsInRole(Roles.Administrator) == true; // pattern placeholder
+        
+        // Check for restaurant staff/owner permission using permission claims
+        var restaurantIdString = orderRow.RestaurantId.ToString();
+        var isRestaurantStaff = principal?.HasClaim("permission", $"{Roles.RestaurantStaff}:{restaurantIdString}") == true
+                                || principal?.HasClaim("permission", $"{Roles.RestaurantOwner}:{restaurantIdString}") == true
+                                || principal?.IsInRole(Roles.Administrator) == true;
 
         if (!isCustomer && !isRestaurantStaff)
         {
@@ -94,18 +102,18 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
         // 3. Load items
         const string itemsSql = """
             SELECT
-                i."Id"                AS OrderItemId,
-                i."MenuItemId"        AS MenuItemId,
-                i."Name"              AS Name,
-                i."Quantity"          AS Quantity,
-                i."UnitPrice_Amount"  AS UnitPriceAmount,
-                i."UnitPrice_Currency" AS UnitPriceCurrency,
-                i."LineItemTotal_Amount"  AS LineItemTotalAmount,
-                i."LineItemTotal_Currency" AS LineItemTotalCurrency,
-                i."SelectedCustomizations" AS SelectedCustomizations
+                i."OrderItemId"              AS OrderItemId,
+                i."Snapshot_MenuItemId"      AS MenuItemId,
+                i."Snapshot_ItemName"        AS Name,
+                i."Quantity"                 AS Quantity,
+                i."BasePrice_Amount"         AS UnitPriceAmount,
+                i."BasePrice_Currency"       AS UnitPriceCurrency,
+                i."LineItemTotal_Amount"     AS LineItemTotalAmount,
+                i."LineItemTotal_Currency"   AS LineItemTotalCurrency,
+                i."SelectedCustomizations"   AS SelectedCustomizations
             FROM "OrderItems" i
             WHERE i."OrderId" = @OrderId
-            ORDER BY i."Id"
+            ORDER BY i."OrderItemId"
             """;
 
         var itemRows = await connection.QueryAsync<OrderItemRow>(
@@ -155,7 +163,7 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             orderRow.DeliveryAddress_PostalCode,
             itemDtos);
 
-    _logger.LogInformation("Order {OrderId} retrieved with {ItemCount} items", request.OrderIdGuid, itemDtos.Count);
+        _logger.LogInformation("Order {OrderId} retrieved with {ItemCount} items", request.OrderIdGuid, itemDtos.Count);
         return Result.Success(new GetOrderByIdResponse(details));
     }
 

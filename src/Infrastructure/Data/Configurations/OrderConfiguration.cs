@@ -1,6 +1,4 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
@@ -192,18 +190,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
                     .HasMaxLength(3);
             });
 
-            // Configure collection of Value Objects as a JSONB column.
+            // JSONB collection using standardized reusable infrastructure
             itemBuilder.Property(oi => oi.SelectedCustomizations)
-                .HasColumnType("jsonb") 
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<List<OrderItemCustomization>>(v, (JsonSerializerOptions?)null)!,
-                    new ValueComparer<IReadOnlyList<OrderItemCustomization>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()
-                    )
-                );
+                .HasJsonbListConversion<OrderItemCustomization>();
         });
     }
 
