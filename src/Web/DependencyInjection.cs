@@ -7,6 +7,8 @@ using NSwag.Generation.Processors.Security;
 using Asp.Versioning;
 using Azure.Security.KeyVault.Secrets;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using Microsoft.AspNetCore.Http.Json;
+using YummyZoom.Infrastructure.Serialization;
 
 namespace YummyZoom.Web;
 
@@ -58,6 +60,18 @@ public static class DependencyInjection
             });
 
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+        });
+
+        // Ensure domain AggregateRootId<> value objects serialize as their underlying primitive (e.g. Guid) in API responses
+        // so contract tests and clients see stable primitive values instead of { "value": "..." } objects.
+        builder.Services.ConfigureHttpJsonOptions(o =>
+        {
+            // Avoid duplicate converter registrations if called again (idempotent)
+            var already = o.SerializerOptions.Converters.OfType<AggregateRootIdJsonConverterFactory>().Any();
+            if (!already)
+            {
+                o.SerializerOptions.Converters.Add(new AggregateRootIdJsonConverterFactory());
+            }
         });
     }
 
