@@ -4,7 +4,6 @@ using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.SharedKernel;
-using YummyZoom.Application.Orders.Common;
 using YummyZoom.Application.Orders.Commands.AcceptOrder;
 using YummyZoom.Application.Orders.Commands.RejectOrder;
 using YummyZoom.Application.Orders.Commands.CancelOrder;
@@ -15,6 +14,7 @@ using YummyZoom.Application.Orders.Queries.GetOrderStatus;
 using YummyZoom.Application.Orders.Queries.Common; 
 using YummyZoom.Domain.OrderAggregate.ValueObjects; 
 using System.Text.Json;
+using YummyZoom.Application.Orders.Commands.Common;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 

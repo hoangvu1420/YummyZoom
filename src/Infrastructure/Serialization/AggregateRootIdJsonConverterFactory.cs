@@ -50,7 +50,8 @@ public sealed class AggregateRootIdJsonConverter<TId, TValue> : JsonConverter<TI
 	public override TId? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		var value = JsonSerializer.Deserialize<TValue>(ref reader, options)!;
-		return (TId)_createMethod.Invoke(null, new object[] { value })!;
+		var result = (TId)_createMethod.Invoke(null, new object[] { value })!;
+		return result;
 	}
 
 	public override void Write(Utf8JsonWriter writer, TId value, JsonSerializerOptions options)

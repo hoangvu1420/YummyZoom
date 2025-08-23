@@ -4,7 +4,6 @@ using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
-using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.Common.ValueObjects;

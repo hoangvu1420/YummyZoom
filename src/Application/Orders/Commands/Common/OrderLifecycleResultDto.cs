@@ -1,7 +1,7 @@
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 
-namespace YummyZoom.Application.Orders.Common;
+namespace YummyZoom.Application.Orders.Commands.Common;
 
 public sealed record OrderLifecycleResultDto(
     OrderId OrderId,

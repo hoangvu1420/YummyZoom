@@ -284,7 +284,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                         return Result.Failure<InitiateOrderResponse>(CouponErrors.UsageLimitExceeded);
                     }
 
-                    // 4) Publish coupon used domain event
+                    // 4) Publish coupon used domain event // TODO: Enhance later to avoid race conditions with the Outbox
                     var previousCount = coupon.CurrentTotalUsageCount;
                     var newCount = previousCount + 1;
                     var couponUsedEvent = new CouponUsed(coupon.Id, previousCount, newCount, DateTime.UtcNow);

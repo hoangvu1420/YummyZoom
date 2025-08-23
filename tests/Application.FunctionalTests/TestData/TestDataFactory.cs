@@ -244,6 +244,9 @@ public static class TestDataFactory
         restaurant.Verify();
         restaurant.AcceptOrders();
 
+        // Clear domain events to avoid producing events during seeding
+        restaurant.ClearDomainEvents();
+
         // Save to database
         await AddAsync(restaurant);
 
@@ -265,6 +268,10 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create menu: {menuResult.Error}");
 
         var menu = menuResult.Value;
+
+        // Clear domain events to avoid producing events during seeding
+        menu.ClearDomainEvents();
+
         await AddAsync(menu);
         DefaultMenuId = menu.Id.Value;
 
@@ -288,6 +295,10 @@ public static class TestDataFactory
                 throw new InvalidOperationException($"Failed to create menu category '{name}': {menuCategoryResult.Error}");
 
             var menuCategory = menuCategoryResult.Value;
+
+            // Clear domain events to avoid producing events during seeding
+            menuCategory.ClearDomainEvents();
+
             await AddAsync(menuCategory);
             MenuCategoryIds[name] = menuCategory.Id.Value;
         }
@@ -369,6 +380,10 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create menu item '{name}': {menuItemResult.Error}");
 
         var menuItem = menuItemResult.Value;
+
+        // Clear domain events to avoid producing events during seeding
+        menuItem.ClearDomainEvents();
+
         await AddAsync(menuItem);
         MenuItemIds[name] = menuItem.Id.Value;
     }
@@ -416,6 +431,10 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create coupon: {couponResult.Error}");
 
         var coupon = couponResult.Value;
+
+        // Clear domain events to avoid producing events during seeding
+        coupon.ClearDomainEvents();
+
         await AddAsync(coupon);
         DefaultCouponId = coupon.Id.Value;
     }
@@ -447,6 +466,9 @@ public static class TestDataFactory
         burgerAddOnsGroup.AddChoice("Extra Cheese", new Money(1.50m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 1);
         burgerAddOnsGroup.AddChoice("Bacon", new Money(2.00m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
 
+        // Clear domain events to avoid producing events during seeding
+        burgerAddOnsGroup.ClearDomainEvents();
+
         await AddAsync(burgerAddOnsGroup);
 
         CustomizationGroup_BurgerAddOnsId = burgerAddOnsGroup.Id.Value;
@@ -461,6 +483,10 @@ public static class TestDataFactory
         var assignResult = classicBurger.AssignCustomizationGroup(appliedCustomization);
         if (assignResult.IsFailure)
             throw new InvalidOperationException($"Failed to assign Burger Add-ons group to Classic Burger: {assignResult.Error}");
+
+        // Clear domain events to avoid producing events during seeding
+        classicBurger.ClearDomainEvents();
+
         await UpdateAsync(classicBurger);
 
         // Required Bun Type group (min 1, max 1) for validation tests
@@ -474,6 +500,10 @@ public static class TestDataFactory
             var bunTypeGroup = bunTypeGroupResult.Value;
             bunTypeGroup.AddChoice("Brioche Bun", new Money(0m, DefaultTestData.Currency.Default), isDefault: true, displayOrder: 1);
             bunTypeGroup.AddChoice("Gluten-Free Bun", new Money(0.75m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
+
+            // Clear domain events to avoid producing events during seeding
+            bunTypeGroup.ClearDomainEvents();
+
             await AddAsync(bunTypeGroup);
             CustomizationGroup_RequiredBunTypeId = bunTypeGroup.Id.Value;
             CustomizationChoice_BriocheBunId = bunTypeGroup.Choices.First(c => c.Name == "Brioche Bun").Id.Value;
@@ -588,6 +618,9 @@ public static class TestDataFactory
         // restaurant.Verify();     // <- Not called, so IsVerified = false
         // restaurant.AcceptOrders(); // <- Not called, so IsAcceptingOrders = false
 
+        // Clear domain events to avoid producing events during seeding
+        restaurant.ClearDomainEvents();
+
         // Save to database
         await AddAsync(restaurant);
 
@@ -645,6 +678,9 @@ public static class TestDataFactory
         restaurant.Verify();
         restaurant.AcceptOrders();
 
+        // Clear domain events to avoid producing events during seeding
+        restaurant.ClearDomainEvents();
+
         // Save restaurant to database
         await AddAsync(restaurant);
 
@@ -658,6 +694,10 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create menu category: {menuCategoryResult.Error}");
 
         var menuCategory = menuCategoryResult.Value;
+
+        // Clear domain events to avoid producing events during seeding
+        menuCategory.ClearDomainEvents();
+
         await AddAsync(menuCategory);
 
         // Create a menu item for the second restaurant
@@ -672,6 +712,10 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create menu item: {menuItemResult.Error}");
 
         var menuItem = menuItemResult.Value;
+
+        // Clear domain events to avoid producing events during seeding
+        menuItem.ClearDomainEvents();
+
         await AddAsync(menuItem);
 
         return (restaurant.Id.Value, menuItem.Id.Value);
@@ -689,6 +733,9 @@ public static class TestDataFactory
 
         var menuItem = await FindAsync<MenuItem>(menuItemId);
         menuItem!.MarkAsUnavailable();
+
+        // Clear domain events to avoid producing events during seeding
+        menuItem.ClearDomainEvents();
 
         // Update the menu item in the database
         await UpdateAsync(menuItem);

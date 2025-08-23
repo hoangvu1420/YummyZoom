@@ -3,8 +3,8 @@
 
 ## Aggregate Documentation: `Order`
 
-* **Version:** 2.1
-* **Last Updated:** 2025-07-22
+* **Version:** 2.2
+* **Last Updated:** 2025-08-21
 * **Source File:** `src/Domain/OrderAggregate/Order.cs`
 
 ### 1. Overview
@@ -117,8 +117,8 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `Result MarkAsPreparing(DateTime? timestamp = null)` | Marks the order as being prepared. | Order must be in `Accepted` status. | `OrderErrors.InvalidOrderStatusForPreparing` |
 | `Result MarkAsReadyForDelivery(DateTime? timestamp = null)`| Marks the order as ready for delivery. | Order must be in `Preparing` status. | `OrderErrors.InvalidOrderStatusForReadyForDelivery` |
 | `Result MarkAsDelivered(DateTime? timestamp = null)` | Marks the order as delivered. | Order must be in `ReadyForDelivery` status. | `OrderErrors.InvalidOrderStatusForDelivered` |
-| `Result RecordPaymentSuccess(string paymentGatewayReferenceId, ...)` | Confirms a successful payment. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
-| `Result RecordPaymentFailure(string paymentGatewayReferenceId, ...)` | Marks a payment as failed and cancels the order. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
+| `Result RecordPaymentSuccess(string paymentGatewayReferenceId, ...)` | Confirms a successful payment, transitions to `Placed`, emits `OrderPaymentSucceeded` + `OrderPlaced`. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
+| `Result RecordPaymentFailure(string paymentGatewayReferenceId, ...)` | Marks a payment as failed, transitions to `Cancelled`, emits `OrderPaymentFailed` + `OrderCancelled`. | Order must be in `AwaitingPayment` status. | `OrderErrors.InvalidStatusForPaymentConfirmation`, `OrderErrors.PaymentTransactionNotFound` |
 
 ### 4. Exposed State & Queries
 
@@ -151,19 +151,25 @@ This aggregate does not expose any additional query methods beyond property acce
 
 ### 5. Communication (Domain Events)
 
-The aggregate raises the following domain events to communicate significant state changes.
+Domain events are grouped into two categories:
 
-| Event Name | When It's Raised | Description |
-| :--- | :--- | :--- |
-| `OrderCreated` | During the `Create` factory method. | Signals that a new order has been successfully created. |
-| `OrderPaymentSucceeded` | After a successful call to `RecordPaymentSuccess`. | Signals that the payment for the order has succeeded. |
-| `OrderPaymentFailed` | After a successful call to `RecordPaymentFailure`. | Signals that the payment for the order has failed. |
-| `OrderAccepted` | After a successful call to `Accept`. | Signals that the restaurant has accepted the order. |
-| `OrderRejected` | After a successful call to `Reject`. | Signals that the restaurant has rejected the order. |
-| `OrderCancelled` | After a successful call to `Cancel` or `RecordPaymentFailure`. | Signals that the order has been cancelled. |
-| `OrderPreparing` | After a successful call to `MarkAsPreparing`. | Signals that order preparation has begun. |
-| `OrderReadyForDelivery` | After a successful call to `MarkAsReadyForDelivery`. | Signals that the order is ready for delivery. |
-| `OrderDelivered` | After a successful call to `MarkAsDelivered`. | Signals that the order has been delivered. |
+* **Lifecycle Events (Operational):** Visibility & operational workflow transitions (not financial recognition). Includes: `OrderCreated`, `OrderPlaced`, `OrderAccepted`, `OrderRejected`, `OrderCancelled`, `OrderPreparing`, `OrderReadyForDelivery`, `OrderDelivered`.
+* **Payment Events (Financial Processing):** Results of payment attempt flows. Includes: `OrderPaymentSucceeded`, `OrderPaymentFailed`.
+
+> Revenue recognition remains tied ONLY to fulfillment (`OrderDelivered`) or a future explicit revenue event. `OrderPlaced` does NOT trigger revenue recognition.
+
+| Event Name | Category | When It's Raised | Description |
+| :--- | :--- | :--- | :--- |
+| `OrderCreated` | Lifecycle | During the `Create` factory method. | Order entity instantiated. |
+| `OrderPlaced` | Lifecycle | (a) Immediately after creation if initial status is `Placed` (e.g., COD). (b) After successful payment confirmation transitions status to `Placed`. | Order is actionable by restaurant & visible to user; not financial. |
+| `OrderPaymentSucceeded` | Payment | After `RecordPaymentSuccess`. | Payment confirmed; accompanied by `OrderPlaced`. |
+| `OrderPaymentFailed` | Payment | After `RecordPaymentFailure`. | Payment failed; accompanied by `OrderCancelled`. |
+| `OrderAccepted` | Lifecycle | After `Accept`. | Restaurant accepted; prep can begin next. |
+| `OrderRejected` | Lifecycle | After `Reject`. | Order rejected (terminal). |
+| `OrderCancelled` | Lifecycle | After `Cancel` or `RecordPaymentFailure`. | Order cancelled (terminal). |
+| `OrderPreparing` | Lifecycle | After `MarkAsPreparing`. | Kitchen started prep. |
+| `OrderReadyForDelivery` | Lifecycle | After `MarkAsReadyForDelivery`. | Ready for courier/pickup. |
+| `OrderDelivered` | Lifecycle (Financial Trigger) | After `MarkAsDelivered`. | Fulfillment complete; revenue recognition point. |
 
 ### 6. Order Status Lifecycle
 

@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Domain.TodoListAggregate.Entities;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Application.TodoLists.Commands.CreateTodoList;
 using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;

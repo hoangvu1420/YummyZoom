@@ -1,8 +1,5 @@
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Orders.Commands.CancelOrder;
 using YummyZoom.Domain.OrderAggregate.Enums;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.SharedKernel.Constants;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;

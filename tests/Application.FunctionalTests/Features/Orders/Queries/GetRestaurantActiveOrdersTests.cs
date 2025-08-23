@@ -1,12 +1,7 @@
-using FluentAssertions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
-using YummyZoom.Application.Orders.Commands.AcceptOrder;
-using YummyZoom.Application.Orders.Commands.MarkOrderPreparing;
-using YummyZoom.Application.Orders.Commands.MarkOrderReadyForDelivery;
 using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
-using YummyZoom.SharedKernel.Constants;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 

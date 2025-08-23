@@ -1,6 +1,6 @@
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Security;
-using YummyZoom.Application.Orders.Common;
+using YummyZoom.Application.Orders.Commands.Common;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;

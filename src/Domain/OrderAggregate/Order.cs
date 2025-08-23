@@ -31,92 +31,92 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     // Properties from ICreationAuditable
     public DateTimeOffset Created { get; set; }
     public string? CreatedBy { get; set; }
-    
+
     /// <summary>
     /// Gets the human-readable order number displayed to users.
     /// </summary>
     public string OrderNumber { get; private set; }
-    
+
     /// <summary>
     /// Gets the current status of the order in its lifecycle.
     /// </summary>
     public OrderStatus Status { get; private set; }
-    
+
     /// <summary>
     /// Gets the timestamp when the order was initially placed.
     /// </summary>
     public DateTime PlacementTimestamp { get; private set; }
-    
+
     /// <summary>
     /// Gets the timestamp when the order was last updated.
     /// </summary>
     public DateTime LastUpdateTimestamp { get; private set; }
-    
+
     /// <summary>
     /// Gets the estimated delivery time provided by the restaurant.
     /// </summary>
     public DateTime? EstimatedDeliveryTime { get; private set; }
-    
+
     /// <summary>
     /// Gets the actual time when the order was delivered to the customer.
     /// </summary>
     public DateTime? ActualDeliveryTime { get; private set; }
-    
+
     /// <summary>
     /// Gets any special instructions provided by the customer for this order.
     /// </summary>
     public string SpecialInstructions { get; private set; }
-    
+
     /// <summary>
     /// Gets the delivery address where the order should be delivered.
     /// </summary>
     public DeliveryAddress DeliveryAddress { get; private set; }
-    
+
     /// <summary>
     /// Gets the subtotal amount of the order before discounts, fees, and taxes.
     /// </summary>
     public Money Subtotal { get; private set; }
-    
+
     /// <summary>
     /// Gets the discount amount applied to the order.
     /// </summary>
     public Money DiscountAmount { get; private set; }
-    
+
     /// <summary>
     /// Gets the delivery fee charged for the order.
     /// </summary>
     public Money DeliveryFee { get; private set; }
-    
+
     /// <summary>
     /// Gets the tip amount added by the customer.
     /// </summary>
     public Money TipAmount { get; private set; }
-    
+
     /// <summary>
     /// Gets the tax amount calculated for the order.
     /// </summary>
     public Money TaxAmount { get; private set; }
-    
+
     /// <summary>
     /// Gets the total amount charged for the order.
     /// </summary>
     public Money TotalAmount { get; private set; }
-    
+
     /// <summary>
     /// Gets the ID of the customer who placed the order.
     /// </summary>
     public UserId CustomerId { get; private set; }
-    
+
     /// <summary>
     /// Gets the ID of the restaurant fulfilling the order.
     /// </summary>
     public RestaurantId RestaurantId { get; private set; }
-    
+
     /// <summary>
     /// Gets the ID of the team cart that was converted to this order, if applicable.
     /// </summary>
     public TeamCartId? SourceTeamCartId { get; private set; }
-    
+
     /// <summary>
     /// Gets the ID of the coupon applied to this order, if applicable.
     /// </summary>
@@ -126,7 +126,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// Gets a read-only list of all items in this order.
     /// </summary>
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
-    
+
     /// <summary>
     /// Gets a read-only list of all payment transactions associated with this order.
     /// </summary>
@@ -209,7 +209,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money deliveryFee,
         Money tipAmount,
         Money taxAmount,
-        Money totalAmount, 
+        Money totalAmount,
         PaymentMethodType paymentMethodType,
         CouponId? appliedCouponId,
         string? paymentGatewayReferenceId = null,
@@ -252,7 +252,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money deliveryFee,
         Money tipAmount,
         Money taxAmount,
-        Money totalAmount, 
+        Money totalAmount,
         PaymentMethodType paymentMethodType,
         CouponId? appliedCouponId,
         string? paymentGatewayReferenceId = null,
@@ -269,16 +269,16 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             return Result.Failure<Order>(OrderErrors.AddressInvalid);
         }
 
-        var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount;if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
+        var calculatedTotal = subtotal - discountAmount + deliveryFee + tipAmount + taxAmount; if (Math.Abs(calculatedTotal.Amount - totalAmount.Amount) > 0.01m)
         {
             return Result.Failure<Order>(OrderErrors.FinancialMismatch);
         }
-        
+
         if (totalAmount.Amount < 0)
         {
             return Result.Failure<Order>(OrderErrors.NegativeTotalAmount);
         }
-        
+
         var currentTimestamp = timestamp ?? DateTime.UtcNow;
         var paymentTransactions = new List<PaymentTransaction>();
         var initialStatus = OrderStatus.AwaitingPayment;
@@ -364,7 +364,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money deliveryFee,
         Money tipAmount,
         Money taxAmount,
-        Money totalAmount, 
+        Money totalAmount,
         List<PaymentTransaction> paymentTransactions, // Accepts a pre-built list
         CouponId? appliedCouponId,
         OrderStatus initialStatus, // Accepts a pre-determined status
@@ -407,10 +407,10 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Money deliveryFee,
         Money tipAmount,
         Money taxAmount,
-        Money totalAmount, 
-        List<PaymentTransaction> paymentTransactions, // Accepts a pre-built list
+        Money totalAmount,
+        List<PaymentTransaction> paymentTransactions,
         CouponId? appliedCouponId,
-        OrderStatus initialStatus, // Accepts a pre-determined status
+        OrderStatus initialStatus,
         TeamCartId? sourceTeamCartId = null,
         DateTime? timestamp = null)
     {
@@ -429,12 +429,12 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         {
             return Result.Failure<Order>(OrderErrors.FinancialMismatch);
         }
-        
+
         if (totalAmount.Amount < 0)
         {
             return Result.Failure<Order>(OrderErrors.NegativeTotalAmount);
         }
-        
+
         var totalPaid = paymentTransactions.Sum(p => p.Amount.Amount);
         if (Math.Abs(totalPaid - totalAmount.Amount) > 0.01m)
         {
@@ -442,7 +442,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         }
 
         var currentTimestamp = timestamp ?? DateTime.UtcNow;
-        
+
         var order = new Order(
             orderId,
             GenerateOrderNumber(currentTimestamp),
@@ -464,6 +464,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
             currentTimestamp);
 
         order.AddDomainEvent(new OrderCreated(order.Id, order.CustomerId, order.RestaurantId, order.TotalAmount));
+        if (initialStatus == OrderStatus.Placed)
+        {
+            // Lifecycle event emitted when order starts in Placed status (e.g., COD)
+            order.AddDomainEvent(new OrderPlaced(order.Id));
+        }
 
         return order;
     }
@@ -476,9 +481,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// Accepts the order, setting its status to <see cref="OrderStatus.Accepted"/>
     /// and recording the estimated delivery time.
     /// </summary>
-    /// <param name="estimatedDeliveryTime">The estimated time when the order will be delivered.</param>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result Accept(DateTime estimatedDeliveryTime, DateTime? timestamp = null)
     {
         if (Status != OrderStatus.Placed)
@@ -497,8 +499,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <summary>
     /// Rejects the order, setting its status to <see cref="OrderStatus.Rejected"/>.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result Reject(DateTime? timestamp = null)
     {
         if (Status != OrderStatus.Placed)
@@ -516,8 +516,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <summary>
     /// Cancels the order, setting its status to <see cref="OrderStatus.Cancelled"/>.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result Cancel(DateTime? timestamp = null)
     {
         if (Status != OrderStatus.Placed &&
@@ -538,8 +536,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <summary>
     /// Marks the order as preparing, setting its status to <see cref="OrderStatus.Preparing"/>.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result MarkAsPreparing(DateTime? timestamp = null)
     {
         if (Status != OrderStatus.Accepted)
@@ -557,8 +553,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <summary>
     /// Marks the order as ready for delivery, setting its status to <see cref="OrderStatus.ReadyForDelivery"/>.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result MarkAsReadyForDelivery(DateTime? timestamp = null)
     {
         if (Status != OrderStatus.Preparing)
@@ -577,8 +571,6 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// Marks the order as delivered, setting its status to <see cref="OrderStatus.Delivered"/>
     /// and recording the actual delivery time.
     /// </summary>
-    /// <param name="timestamp">The timestamp when this action occurred.</param>
-    /// <returns>A Result indicating success or failure.</returns>
     public Result MarkAsDelivered(DateTime? timestamp = null)
     {
         if (Status != OrderStatus.ReadyForDelivery)
@@ -610,12 +602,14 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         {
             return Result.Failure(OrderErrors.PaymentTransactionNotFound);
         }
-        
+
         transaction.MarkAsSucceeded();
 
         Status = OrderStatus.Placed;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        // Payment event + lifecycle event
         AddDomainEvent(new OrderPaymentSucceeded(Id));
+        AddDomainEvent(new OrderPlaced(Id));
         return Result.Success();
     }
 
@@ -637,9 +631,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         transaction.MarkAsFailed();
 
-        Status = OrderStatus.Cancelled; 
+        Status = OrderStatus.Cancelled;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        // Payment failure also triggers cancellation lifecycle event
         AddDomainEvent(new OrderPaymentFailed(Id));
+        AddDomainEvent(new OrderCancelled(Id));
         return Result.Success();
     }
 
@@ -650,15 +646,13 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// <summary>
     /// Generates a unique order number.
     /// </summary>
-    /// <param name="timestamp">The timestamp to use for generating the order number.</param>
-    /// <returns>A unique string representing the order number.</returns>
     private static string GenerateOrderNumber(DateTime timestamp)
     {
         // Format: ORD-YYYYMMDD-HHMMSS-XXXX (where XXXX is random)
         var datePart = timestamp.ToString("yyyyMMdd");
         var timePart = timestamp.ToString("HHmmss");
         var randomPart = Random.Shared.Next(1000, 9999);
-        
+
         return $"ORD-{datePart}-{timePart}-{randomPart}";
     }
 

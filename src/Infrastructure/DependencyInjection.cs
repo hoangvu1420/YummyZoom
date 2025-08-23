@@ -25,6 +25,7 @@ using YummyZoom.Domain.Services;
 using Stripe;
 using System.Text.Json;
 using YummyZoom.Infrastructure.Outbox;
+using YummyZoom.Infrastructure.Realtime;
 
 namespace YummyZoom.Infrastructure;
 
@@ -90,6 +91,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<ICouponRepository, CouponRepository>();
         builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();
         builder.Services.AddScoped<IInboxStore, InboxStore>();
+    builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
+    builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();

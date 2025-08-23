@@ -1,7 +1,5 @@
-using FluentAssertions;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
-using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using static YummyZoom.Application.FunctionalTests.Testing;
 using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 using YummyZoom.Application.FunctionalTests.Common;

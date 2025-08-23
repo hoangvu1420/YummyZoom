@@ -1,6 +1,4 @@
-using FluentAssertions;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Orders.Queries.GetOrderStatus;

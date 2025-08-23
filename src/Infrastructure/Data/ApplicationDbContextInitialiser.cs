@@ -131,10 +131,25 @@ public class ApplicationDbContextInitialiser
         if (!_context.TodoLists.Any())
         {
             var todoList = TodoList.Create("Todo List", Color.White);
-            todoList.AddItem(TodoItem.Create("Make a todo list 📃", null, PriorityLevel.None, null));
-            todoList.AddItem(TodoItem.Create("Check off the first item ✅", null, PriorityLevel.None, null));
-            todoList.AddItem(TodoItem.Create("Realise you've already done two things on the list! 🤯", null, PriorityLevel.None, null));
-            todoList.AddItem(TodoItem.Create("Reward yourself with a nice, long nap 🏆", null, PriorityLevel.None, null));
+            
+            var item1 = TodoItem.Create("Make a todo list 📃", null, PriorityLevel.None, null);
+            item1.ClearDomainEvents();
+            todoList.AddItem(item1);
+            
+            var item2 = TodoItem.Create("Check off the first item ✅", null, PriorityLevel.None, null);
+            item2.ClearDomainEvents();
+            todoList.AddItem(item2);
+            
+            var item3 = TodoItem.Create("Realise you've already done two things on the list! 🤯", null, PriorityLevel.None, null);
+            item3.ClearDomainEvents();
+            todoList.AddItem(item3);
+            
+            var item4 = TodoItem.Create("Reward yourself with a nice, long nap 🏆", null, PriorityLevel.None, null);
+            item4.ClearDomainEvents();
+            todoList.AddItem(item4);
+
+            // Clear domain events to avoid producing events during seeding
+            todoList.ClearDomainEvents();
 
             _context.TodoLists.Add(todoList);
             await _context.SaveChangesAsync();
@@ -190,6 +205,9 @@ public class ApplicationDbContextInitialiser
                         await transaction.RollbackAsync();
                         return;
                     }
+
+                    // Clear domain events to avoid producing events during seeding
+                    userResult.Value.ClearDomainEvents();
 
                     // 3) Persist the domain user
                     await _userRepository.AddAsync(userResult.Value);
@@ -285,6 +303,9 @@ public class ApplicationDbContextInitialiser
                     restaurantResult.Value.Verify();
                     restaurantResult.Value.AcceptOrders();
 
+                    // Clear domain events to avoid producing events during seeding
+                    restaurantResult.Value.ClearDomainEvents();
+
                     // Add restaurant to context
                     _context.Restaurants.Add(restaurantResult.Value);
                     
@@ -303,6 +324,9 @@ public class ApplicationDbContextInitialiser
                         await transaction.RollbackAsync();
                         return;
                     }
+
+                    // Clear domain events to avoid producing events during seeding
+                    menuResult.Value.ClearDomainEvents();
                    
                     _context.Menus.Add(menuResult.Value);
                     await _context.SaveChangesAsync();
@@ -319,6 +343,9 @@ public class ApplicationDbContextInitialiser
                         await transaction.RollbackAsync();
                         return;
                     }
+
+                    // Clear domain events to avoid producing events during seeding
+                    categoryResult.Value.ClearDomainEvents();
                    
                     _context.MenuCategories.Add(categoryResult.Value);
                     await _context.SaveChangesAsync();
@@ -406,6 +433,9 @@ public class ApplicationDbContextInitialiser
             _logger.LogWarning("Failed to create menu item '{Name}': {Error}", name, menuItemResult.Error);
             return null;
         }
+
+        // Clear domain events to avoid producing events during seeding
+        menuItemResult.Value.ClearDomainEvents();
        
         _context.MenuItems.Add(menuItemResult.Value);
         await _context.SaveChangesAsync();

@@ -5,7 +5,6 @@ using MediatR;
 using NUnit.Framework;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.Application.Orders.Commands.InitiateOrder;
-using YummyZoom.Application.Orders.Common;
 using YummyZoom.SharedKernel;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;

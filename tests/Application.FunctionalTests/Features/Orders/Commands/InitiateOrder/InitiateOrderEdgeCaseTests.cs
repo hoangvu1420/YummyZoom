@@ -3,11 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.Orders.Commands.InitiateOrder;
-using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Domain.OrderAggregate.Events;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
