@@ -7,8 +7,8 @@ using NSwag.Generation.Processors.Security;
 using Asp.Versioning;
 using Azure.Security.KeyVault.Secrets;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using Microsoft.AspNetCore.Http.Json;
 using YummyZoom.Infrastructure.Serialization;
+using YummyZoom.Web.Realtime;
 
 namespace YummyZoom.Web;
 
@@ -73,6 +73,12 @@ public static class DependencyInjection
                 o.SerializerOptions.Converters.Add(new AggregateRootIdJsonConverterFactory());
             }
         });
+
+        // Real-time (SignalR) services for hubs
+        builder.Services.AddSignalR();
+
+        // Real-time notifier: override Infrastructure's NoOp with SignalR-backed adapter in Web host
+        builder.Services.AddSingleton<IOrderRealtimeNotifier, SignalROrderRealtimeNotifier>();
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

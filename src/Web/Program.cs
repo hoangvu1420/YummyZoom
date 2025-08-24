@@ -1,4 +1,3 @@
-// src\Web\Program.cs
 using YummyZoom.Application;
 using YummyZoom.Infrastructure;
 using YummyZoom.Infrastructure.Data;
@@ -56,6 +55,9 @@ app.MapDefaultEndpoints();
 
 // Map versioned endpoints.
 app.MapVersionedEndpoints();
+
+// Map SignalR hubs
+app.MapHub<YummyZoom.Web.Realtime.Hubs.RestaurantOrdersHub>("/hubs/restaurant-orders");
 
 app.Run();
 
