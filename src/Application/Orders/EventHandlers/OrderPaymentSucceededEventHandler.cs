@@ -47,7 +47,8 @@ public sealed class OrderPaymentSucceededEventHandler : IdempotentNotificationHa
 
         try
         {
-            await _notifier.NotifyOrderPaymentSucceeded(dto, ct);
+            // Notify both restaurant and customer about payment success
+            await _notifier.NotifyOrderPaymentSucceeded(dto, NotificationTarget.Both, ct);
         }
         catch (Exception ex)
         {

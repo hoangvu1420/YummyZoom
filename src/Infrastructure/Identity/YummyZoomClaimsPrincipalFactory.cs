@@ -11,15 +11,18 @@ namespace YummyZoom.Infrastructure.Identity;
 public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
 {
     private readonly IRoleAssignmentRepository _roleAssignmentRepository;
+    private readonly IOrderRepository _orderRepository;
 
     public YummyZoomClaimsPrincipalFactory(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         IOptions<IdentityOptions> optionsAccessor,
-        IRoleAssignmentRepository roleAssignmentRepository)
+        IRoleAssignmentRepository roleAssignmentRepository,
+        IOrderRepository orderRepository)
         : base(userManager, roleManager, optionsAccessor)
     {
         _roleAssignmentRepository = roleAssignmentRepository;
+        _orderRepository = orderRepository;
     }
 
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
@@ -50,6 +53,13 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
         if (await UserManager.IsInRoleAsync(user, Roles.Administrator))
         {
             identity.AddClaim(new Claim("permission", $"{Roles.UserAdmin}:*"));
+        }
+
+        // Add order permissions for active orders
+        var activeOrderIds = await _orderRepository.GetActiveOrderIdsForCustomerAsync(user.Id);
+        foreach (var orderId in activeOrderIds)
+        {
+            identity.AddClaim(new Claim("permission", $"{Roles.OrderOwner}:{orderId}"));
         }
 
         return identity;

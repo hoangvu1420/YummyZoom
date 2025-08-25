@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Web.Realtime.Hubs;
@@ -25,10 +26,9 @@ public sealed class RestaurantOrdersHub : Hub
 
     private static string Group(Guid restaurantId) => $"restaurant:{restaurantId}";
 
-    private sealed record RestaurantResource(Guid Id) : IContextualCommand
+    private sealed record RestaurantResource(Guid Id) : IRestaurantCommand
     {
-        public string ResourceType => "Restaurant";
-        public string ResourceId => Id.ToString();
+        public RestaurantId RestaurantId => RestaurantId.Create(Id);
     }
 
     public async Task SubscribeToRestaurant(Guid restaurantId)

@@ -13,4 +13,8 @@ public abstract class Roles
     public const string UserOwner = nameof(UserOwner);
 
     public const string UserAdmin = nameof(UserAdmin);
+
+    public const string OrderOwner = nameof(OrderOwner);
+
+    public const string OrderManager = nameof(OrderManager);
 }

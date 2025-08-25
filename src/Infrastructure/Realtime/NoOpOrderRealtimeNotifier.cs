@@ -8,8 +8,8 @@ namespace YummyZoom.Infrastructure.Realtime;
 /// </summary>
 public class NoOpOrderRealtimeNotifier : IOrderRealtimeNotifier
 {
-    public Task NotifyOrderPlaced(OrderStatusBroadcastDto dto, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public Task NotifyOrderPaymentSucceeded(OrderStatusBroadcastDto dto, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public Task NotifyOrderPaymentFailed(OrderStatusBroadcastDto dto, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public Task NotifyOrderStatusChanged(OrderStatusBroadcastDto dto, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task NotifyOrderPlaced(OrderStatusBroadcastDto dto, NotificationTarget target = NotificationTarget.Restaurant, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task NotifyOrderPaymentSucceeded(OrderStatusBroadcastDto dto, NotificationTarget target = NotificationTarget.Restaurant, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task NotifyOrderPaymentFailed(OrderStatusBroadcastDto dto, NotificationTarget target = NotificationTarget.Restaurant, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task NotifyOrderStatusChanged(OrderStatusBroadcastDto dto, NotificationTarget target = NotificationTarget.Restaurant, CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

@@ -47,7 +47,8 @@ public sealed class OrderReadyForDeliveryEventHandler : IdempotentNotificationHa
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify customer that order is ready for delivery (restaurant already knows they marked it ready)
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Customer, ct);
         }
         catch (Exception ex)
         {

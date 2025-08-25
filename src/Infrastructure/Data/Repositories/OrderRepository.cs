@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
+using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 
@@ -8,10 +11,12 @@ namespace YummyZoom.Infrastructure.Data.Repositories;
 public class OrderRepository : IOrderRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public OrderRepository(ApplicationDbContext dbContext)
+    public OrderRepository(ApplicationDbContext dbContext, IDbConnectionFactory dbConnectionFactory)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken = default)
@@ -41,5 +46,25 @@ public class OrderRepository : IOrderRepository
     {
         _dbContext.Orders.Update(order);
         return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetActiveOrderIdsForCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+        
+        const string sql = """
+            SELECT o."Id"
+            FROM "Orders" o
+            WHERE o."CustomerId" = @CustomerId
+              AND o."Status" = ANY(@ActiveStatuses)
+            ORDER BY o."PlacedAt" DESC
+            """;
+
+        var orderIds = await connection.QueryAsync<Guid>(
+            new CommandDefinition(sql,
+                new { CustomerId = customerId, ActiveStatuses = OrderQueryConstants.ActiveStatuses },
+                cancellationToken: cancellationToken));
+
+        return orderIds.ToList();
     }
 } 

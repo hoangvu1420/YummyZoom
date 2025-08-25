@@ -58,7 +58,8 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify both restaurant and customer that order has been delivered
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Both, ct);
         }
         catch (Exception ex)
         {

@@ -49,7 +49,8 @@ public sealed class OrderPlacedEventHandler : IdempotentNotificationHandler<Orde
 
         try
         {
-            await _notifier.NotifyOrderPlaced(dto, ct);
+            // Notify restaurant that new order is placed and actionable (customer already knows they placed it)
+            await _notifier.NotifyOrderPlaced(dto, NotificationTarget.Restaurant, ct);
         }
         catch (Exception ex)
         {

@@ -30,6 +30,10 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
             case "User":
                 HandleUserAuthorization(context, requirement, resource);
                 break;
+
+            case "Order":
+                HandleOrderAuthorization(context, requirement, resource);
+                break;
         }
         
         return Task.CompletedTask;
@@ -71,6 +75,22 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
             context.User.HasClaim("permission", $"{Roles.UserAdmin}:*"))
         {
             context.Succeed(requirement);
+        }
+    }
+
+    private void HandleOrderAuthorization(
+        AuthorizationHandlerContext context,
+        HasPermissionRequirement requirement,
+        IContextualCommand resource)
+    {
+        // Business rule: Order managers can perform owner actions
+        if (requirement.Role == Roles.OrderOwner)
+        {
+            var managerPermission = $"{Roles.OrderManager}:{resource.ResourceId}";
+            if (context.User.HasClaim("permission", managerPermission))
+            {
+                context.Succeed(requirement);
+            }
         }
     }
 } 

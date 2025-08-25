@@ -47,7 +47,8 @@ public sealed class OrderAcceptedEventHandler : IdempotentNotificationHandler<Or
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify customer that order has been accepted (restaurant already knows they accepted it)
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Customer, ct);
         }
         catch (Exception ex)
         {

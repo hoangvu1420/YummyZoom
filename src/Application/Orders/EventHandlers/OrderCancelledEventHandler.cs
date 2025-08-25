@@ -46,7 +46,8 @@ public sealed class OrderCancelledEventHandler : IdempotentNotificationHandler<O
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify restaurant that order has been cancelled (customer already knows they cancelled it)
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Restaurant, ct);
         }
         catch (Exception ex)
         {

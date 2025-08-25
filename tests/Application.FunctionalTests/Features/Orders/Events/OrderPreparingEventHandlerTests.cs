@@ -39,18 +39,25 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? capturedDto = null;
         notifierMock
-            .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        notifierMock
-            .Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
+            .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         notifierMock
-            .Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
+            .Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         notifierMock
-            .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, CancellationToken>((dto, _) => capturedDto = dto)
+            .Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        notifierMock
+            .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -121,7 +128,9 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
 
         // Assert broadcast invoked once with expected dto
         notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()), Times.AtLeastOnce);
         capturedDto.Should().NotBeNull();
         capturedDto!.OrderId.Should().Be(initResponse.OrderId.Value);
         capturedDto.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
@@ -154,18 +163,25 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         var capturedDtos = new List<OrderStatusBroadcastDto>();
         notifierMock
-            .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        notifierMock
-            .Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
+            .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         notifierMock
-            .Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
+            .Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         notifierMock
-            .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, CancellationToken>((dto, _) => capturedDtos.Add(dto))
+            .Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        notifierMock
+            .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => capturedDtos.Add(dto))
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -224,7 +240,9 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Assert broadcast invoked correctly despite draining twice
         // Should have exactly 2 calls: 1 for "Accepted" and 1 for "Preparing" (no duplicates from second drain)
         notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+                It.IsAny<NotificationTarget>(),
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
         capturedDtos.Should().HaveCount(2);
         
         // Verify both status changes are captured (Accepted and Preparing)

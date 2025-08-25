@@ -47,7 +47,8 @@ public sealed class OrderPreparingEventHandler : IdempotentNotificationHandler<O
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify customer that order is being prepared (restaurant already knows they started preparation)
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Customer, ct);
         }
         catch (Exception ex)
         {

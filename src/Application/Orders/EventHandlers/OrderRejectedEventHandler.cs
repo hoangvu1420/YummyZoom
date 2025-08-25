@@ -47,7 +47,8 @@ public sealed class OrderRejectedEventHandler : IdempotentNotificationHandler<Or
 
         try
         {
-            await _notifier.NotifyOrderStatusChanged(dto, ct);
+            // Notify customer that order has been rejected (restaurant already knows they rejected it)
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Customer, ct);
         }
         catch (Exception ex)
         {

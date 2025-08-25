@@ -60,7 +60,7 @@ public interface IContextualCommand
 public interface IUser
 {
     string? Id { get; }
-    ClaimsPrincipal? Principal { get; } // NEW: Direct access to cached claims
+    ClaimsPrincipal? Principal { get; } 
 }
 ```
 

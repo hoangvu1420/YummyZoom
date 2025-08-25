@@ -45,7 +45,8 @@ public sealed class OrderPaymentFailedEventHandler : IdempotentNotificationHandl
 
         try
         {
-            await _notifier.NotifyOrderPaymentFailed(dto, ct);
+            // Notify customer about payment failure (restaurant doesn't need failed payment noise)
+            await _notifier.NotifyOrderPaymentFailed(dto, NotificationTarget.Customer, ct);
         }
         catch (Exception ex)
         {

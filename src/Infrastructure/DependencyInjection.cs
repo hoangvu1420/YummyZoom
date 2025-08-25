@@ -106,7 +106,12 @@ public static class DependencyInjection
             .AddPolicy(Policies.MustBeRestaurantStaff, policy =>
                 policy.AddRequirements(new HasPermissionRequirement(Roles.RestaurantStaff)))
             .AddPolicy(Policies.MustBeUserOwner, policy =>
-                policy.AddRequirements(new HasPermissionRequirement(Roles.UserOwner)));
+                policy.AddRequirements(new HasPermissionRequirement(Roles.UserOwner)))
+            // Order policies
+            .AddPolicy(Policies.MustBeOrderOwner, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.OrderOwner)))
+            .AddPolicy(Policies.MustBeOrderManager, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.OrderManager)));
 
         builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, YummyZoomClaimsPrincipalFactory>();
 
