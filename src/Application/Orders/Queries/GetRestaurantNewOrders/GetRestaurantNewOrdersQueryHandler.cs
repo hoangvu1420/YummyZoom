@@ -1,6 +1,3 @@
-using System.Data;
-using Dapper;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Models;

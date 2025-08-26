@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 
 /// <summary>

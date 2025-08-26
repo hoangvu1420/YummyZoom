@@ -2,7 +2,6 @@ using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
-using YummyZoom.Infrastructure.Notifications;
 using YummyZoom.Infrastructure.Notifications.Firebase;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +23,10 @@ using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Domain.Services;
 using Stripe;
 using System.Text.Json;
+using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Infrastructure.Outbox;
 using YummyZoom.Infrastructure.Realtime;
+using YummyZoom.Infrastructure.ReadModels.FullMenu;
 
 namespace YummyZoom.Infrastructure;
 
@@ -143,6 +144,9 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<IOutboxProcessor, OutboxProcessor>();
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
+    
+        // Read model rebuild services
+        builder.Services.AddScoped<IMenuReadModelRebuilder, FullMenuViewRebuilder>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)

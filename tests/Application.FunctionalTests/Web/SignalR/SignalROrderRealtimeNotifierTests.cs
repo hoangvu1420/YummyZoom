@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Orders.Broadcasting;
 using YummyZoom.Web.Realtime;
@@ -17,25 +18,48 @@ public class SignalROrderRealtimeNotifierTests : BaseTestFixture
         return sent.OrderId == expected.OrderId && sent.RestaurantId == expected.RestaurantId;
     }
 
-    private static (SignalROrderRealtimeNotifier sut, Mock<IHubClients> hubClients, Mock<IClientProxy> clientProxy) CreateSut(Guid restaurantId)
+    private record TestSetup(
+        SignalROrderRealtimeNotifier Sut,
+        Mock<IHubClients> RestaurantHubClients,
+        Mock<IClientProxy> RestaurantClientProxy,
+        Mock<IHubClients> CustomerHubClients,
+        Mock<IClientProxy> CustomerClientProxy
+    );
+
+    private static TestSetup CreateSut(Guid restaurantId, Guid orderId)
     {
-        var hubContext = new Mock<IHubContext<RestaurantOrdersHub>>(MockBehavior.Strict);
-        var hubClients = new Mock<IHubClients>(MockBehavior.Strict);
-        var clientProxy = new Mock<IClientProxy>(MockBehavior.Strict);
+        // Restaurant hub setup
+        var restaurantHubContext = new Mock<IHubContext<RestaurantOrdersHub>>(MockBehavior.Strict);
+        var restaurantHubClients = new Mock<IHubClients>(MockBehavior.Strict);
+        var restaurantClientProxy = new Mock<IClientProxy>(MockBehavior.Strict);
+
+        var restaurantGroup = $"restaurant:{restaurantId}";
+        restaurantHubContext.SetupGet(h => h.Clients).Returns(restaurantHubClients.Object);
+        restaurantHubClients.Setup(c => c.Group(restaurantGroup)).Returns(restaurantClientProxy.Object);
+
+        // Customer hub setup
+        var customerHubContext = new Mock<IHubContext<CustomerOrdersHub>>(MockBehavior.Strict);
+        var customerHubClients = new Mock<IHubClients>(MockBehavior.Strict);
+        var customerClientProxy = new Mock<IClientProxy>(MockBehavior.Strict);
+
+        var customerGroup = $"order:{orderId}";
+        customerHubContext.SetupGet(h => h.Clients).Returns(customerHubClients.Object);
+        customerHubClients.Setup(c => c.Group(customerGroup)).Returns(customerClientProxy.Object);
+
         var logger = new Mock<ILogger<SignalROrderRealtimeNotifier>>();
 
-        var expectedGroup = $"restaurant:{restaurantId}";
-        hubContext.SetupGet(h => h.Clients).Returns(hubClients.Object);
-        hubClients.Setup(c => c.Group(expectedGroup)).Returns(clientProxy.Object);
+        var sut = new SignalROrderRealtimeNotifier(
+            restaurantHubContext.Object,
+            customerHubContext.Object,
+            logger.Object);
 
-        var sut = new SignalROrderRealtimeNotifier(hubContext.Object, logger.Object);
-        return (sut, hubClients, clientProxy);
+        return new TestSetup(sut, restaurantHubClients, restaurantClientProxy, customerHubClients, customerClientProxy);
     }
 
-    private static OrderStatusBroadcastDto MakeDto(Guid restaurantId)
+    private static OrderStatusBroadcastDto MakeDto(Guid restaurantId, Guid orderId)
     {
         return new OrderStatusBroadcastDto(
-            OrderId: Guid.NewGuid(),
+            OrderId: orderId,
             OrderNumber: "TEST-ORDER",
             Status: "Placed",
             RestaurantId: restaurantId,
@@ -48,13 +72,15 @@ public class SignalROrderRealtimeNotifierTests : BaseTestFixture
     }
 
     [Test]
-    public async Task NotifyOrderPlaced_sends_expected_hub_call()
+    public async Task NotifyOrderPlaced_Restaurant_Target_Sends_To_Restaurant_Only()
     {
+        // Arrange
         var restaurantId = Guid.NewGuid();
-        var (sut, hubClients, clientProxy) = CreateSut(restaurantId);
-        var dto = MakeDto(restaurantId);
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
 
-        clientProxy
+        setup.RestaurantClientProxy
             .Setup(p => p.SendCoreAsync(
                 "ReceiveOrderPlaced",
                 It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
@@ -62,20 +88,86 @@ public class SignalROrderRealtimeNotifierTests : BaseTestFixture
             .Returns(Task.CompletedTask)
             .Verifiable();
 
-        await sut.NotifyOrderPlaced(dto, default);
+        // Act
+        await setup.Sut.NotifyOrderPlaced(dto, NotificationTarget.Restaurant);
 
-        hubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
-        clientProxy.Verify();
+        // Assert
+        setup.RestaurantHubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
+        setup.RestaurantClientProxy.Verify();
+        setup.CustomerHubClients.Verify(c => c.Group(It.IsAny<string>()), Times.Never);
     }
 
     [Test]
-    public async Task NotifyOrderPaymentSucceeded_sends_expected_hub_call()
+    public async Task NotifyOrderPlaced_Customer_Target_Sends_To_Customer_Only()
     {
+        // Arrange
         var restaurantId = Guid.NewGuid();
-        var (sut, hubClients, clientProxy) = CreateSut(restaurantId);
-        var dto = MakeDto(restaurantId);
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
 
-        clientProxy
+        setup.CustomerClientProxy
+            .Setup(p => p.SendCoreAsync(
+                "ReceiveOrderPlaced",
+                It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        // Act
+        await setup.Sut.NotifyOrderPlaced(dto, NotificationTarget.Customer);
+
+        // Assert
+        setup.CustomerHubClients.Verify(c => c.Group($"order:{orderId}"), Times.Once);
+        setup.CustomerClientProxy.Verify();
+        setup.RestaurantHubClients.Verify(c => c.Group(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task NotifyOrderPlaced_Both_Target_Sends_To_Both_Hubs()
+    {
+        // Arrange
+        var restaurantId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
+
+        setup.RestaurantClientProxy
+            .Setup(p => p.SendCoreAsync(
+                "ReceiveOrderPlaced",
+                It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        setup.CustomerClientProxy
+            .Setup(p => p.SendCoreAsync(
+                "ReceiveOrderPlaced",
+                It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        // Act
+        await setup.Sut.NotifyOrderPlaced(dto, NotificationTarget.Both);
+
+        // Assert
+        setup.RestaurantHubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
+        setup.CustomerHubClients.Verify(c => c.Group($"order:{orderId}"), Times.Once);
+        setup.RestaurantClientProxy.Verify();
+        setup.CustomerClientProxy.Verify();
+    }
+
+    [Test]
+    public async Task NotifyOrderPaymentSucceeded_Both_Target_Sends_To_Both_Hubs()
+    {
+        // Arrange
+        var restaurantId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
+
+        setup.RestaurantClientProxy
             .Setup(p => p.SendCoreAsync(
                 "ReceiveOrderPaymentSucceeded",
                 It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
@@ -83,41 +175,34 @@ public class SignalROrderRealtimeNotifierTests : BaseTestFixture
             .Returns(Task.CompletedTask)
             .Verifiable();
 
-        await sut.NotifyOrderPaymentSucceeded(dto, default);
-
-        hubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
-        clientProxy.Verify();
-    }
-
-    [Test]
-    public async Task NotifyOrderPaymentFailed_sends_expected_hub_call()
-    {
-        var restaurantId = Guid.NewGuid();
-        var (sut, hubClients, clientProxy) = CreateSut(restaurantId);
-        var dto = MakeDto(restaurantId);
-
-        clientProxy
+        setup.CustomerClientProxy
             .Setup(p => p.SendCoreAsync(
-                "ReceiveOrderPaymentFailed",
+                "ReceiveOrderPaymentSucceeded",
                 It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable();
 
-        await sut.NotifyOrderPaymentFailed(dto, default);
+        // Act
+        await setup.Sut.NotifyOrderPaymentSucceeded(dto, NotificationTarget.Both);
 
-        hubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
-        clientProxy.Verify();
+        // Assert
+        setup.RestaurantHubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
+        setup.CustomerHubClients.Verify(c => c.Group($"order:{orderId}"), Times.Once);
+        setup.RestaurantClientProxy.Verify();
+        setup.CustomerClientProxy.Verify();
     }
 
     [Test]
-    public async Task NotifyOrderStatusChanged_sends_expected_hub_call()
+    public async Task NotifyOrderStatusChanged_Customer_Target_Sends_To_Customer_Only()
     {
+        // Arrange
         var restaurantId = Guid.NewGuid();
-        var (sut, hubClients, clientProxy) = CreateSut(restaurantId);
-        var dto = MakeDto(restaurantId);
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
 
-        clientProxy
+        setup.CustomerClientProxy
             .Setup(p => p.SendCoreAsync(
                 "ReceiveOrderStatusChanged",
                 It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
@@ -125,9 +210,38 @@ public class SignalROrderRealtimeNotifierTests : BaseTestFixture
             .Returns(Task.CompletedTask)
             .Verifiable();
 
-        await sut.NotifyOrderStatusChanged(dto, default);
+        // Act
+        await setup.Sut.NotifyOrderStatusChanged(dto, NotificationTarget.Customer);
 
-        hubClients.Verify(c => c.Group($"restaurant:{restaurantId}"), Times.Once);
-        clientProxy.Verify();
+        // Assert
+        setup.CustomerHubClients.Verify(c => c.Group($"order:{orderId}"), Times.Once);
+        setup.CustomerClientProxy.Verify();
+        setup.RestaurantHubClients.Verify(c => c.Group(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task NotifyOrderPaymentFailed_Customer_Target_Sends_To_Customer_Only()
+    {
+        // Arrange
+        var restaurantId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+        var setup = CreateSut(restaurantId, orderId);
+        var dto = MakeDto(restaurantId, orderId);
+
+        setup.CustomerClientProxy
+            .Setup(p => p.SendCoreAsync(
+                "ReceiveOrderPaymentFailed",
+                It.Is<object?[]>(a => MatchesDtoPayload(a, dto)),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        // Act
+        await setup.Sut.NotifyOrderPaymentFailed(dto, NotificationTarget.Customer);
+
+        // Assert
+        setup.CustomerHubClients.Verify(c => c.Group($"order:{orderId}"), Times.Once);
+        setup.CustomerClientProxy.Verify();
+        setup.RestaurantHubClients.Verify(c => c.Group(It.IsAny<string>()), Times.Never);
     }
 }

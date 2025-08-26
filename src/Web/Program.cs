@@ -28,6 +28,9 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseOpenApi(settings =>
 {
     // The path needs to be versioned for NSwag to find the correct document
@@ -58,6 +61,7 @@ app.MapVersionedEndpoints();
 
 // Map SignalR hubs
 app.MapHub<YummyZoom.Web.Realtime.Hubs.RestaurantOrdersHub>("/hubs/restaurant-orders");
+app.MapHub<YummyZoom.Web.Realtime.Hubs.CustomerOrdersHub>("/hubs/customer-orders");
 
 app.Run();
 

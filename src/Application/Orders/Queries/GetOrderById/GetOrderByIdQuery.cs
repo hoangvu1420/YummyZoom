@@ -1,7 +1,6 @@
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.SharedKernel;
 using YummyZoom.Application.Orders.Queries.Common;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 
 namespace YummyZoom.Application.Orders.Queries.GetOrderById;

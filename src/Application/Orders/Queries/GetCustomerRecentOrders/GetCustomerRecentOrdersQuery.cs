@@ -1,4 +1,3 @@
-using MediatR;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.SharedKernel;

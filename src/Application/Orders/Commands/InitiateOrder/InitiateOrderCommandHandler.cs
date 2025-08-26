@@ -16,7 +16,6 @@ using YummyZoom.Domain.Services;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
-using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.SharedKernel;
 using Result = YummyZoom.SharedKernel.Result;
 
