@@ -67,6 +67,7 @@ public static class CouponTestDataFactory
             throw new InvalidOperationException($"Failed to create coupon: {couponResult.Error}");
 
         var coupon = couponResult.Value;
+        coupon.ClearDomainEvents();
         await AddAsync(coupon);
 
         return code;

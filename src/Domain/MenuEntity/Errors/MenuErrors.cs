@@ -29,6 +29,10 @@ public static class MenuErrors
         $"The category with ID '{categoryId}' was not found in this menu.");
 
     public static Error InvalidDisplayOrder(int displayOrder) => Error.Validation(
-        "Menu.InvalidDisplayOrder", 
+        "Menu.InvalidDisplayOrder",
         $"Display order '{displayOrder}' is invalid. Display order must be a positive number.");
+
+    public static Error NoEnabledMenuFound(Guid restaurantId) => Error.NotFound(
+        "Menu.NoEnabledMenuFound",
+        $"No enabled menu found for restaurant '{restaurantId}'.");
 }

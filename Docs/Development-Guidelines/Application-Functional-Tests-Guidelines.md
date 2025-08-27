@@ -14,8 +14,9 @@ tests/Application.FunctionalTests/
 │   └── ...
 ├── TestData/                # Centralized test data setup
 │   ├── TestDataFactory.cs         # Core test data factory for default entities
-│   ├── CouponTestDataFactory.cs   # Specialized factory for coupon scenarios
-│   └── DefaultTestData.cs          # Default test data configuration
+│   ├── CouponTestDataFactory.cs   # Specialized factory for coupon scenarios (options-based)
+│   ├── MenuTestDataFactory.cs     # Specialized factory for menu scenarios (options-based)
+│   └── DefaultTestData.cs         # Default test data configuration
 ├── UserManagement/          # User creation and authentication
 │   ├── TestUserManager.cs         # User operations and authentication
 │   └── ...
@@ -42,18 +43,18 @@ Our functional test environment is designed for reliability and isolation:
 
 **3. Key Infrastructure Components**
 
-*   **`Testing.cs` (Unified Facade):** The primary entry point for all test operations.
-    *   **Command/Query Execution:** `SendAsync()`, `SendAndUnwrapAsync()`
-    *   **Outbox Processing:** `DrainOutboxAsync()` (deterministically publish enqueued domain events), `ProcessOutboxOnceAsync()`
-    *   **User Management:** `RunAsUserAsync()`, `RunAsDefaultUserAsync()`, `RunAsAdministratorAsync()`
-    *   **Database Operations:** `FindAsync<TEntity>()`, `AddAsync<TEntity>()`, `CountAsync<TEntity>()`
-    *   **Service Replacement:** `ReplaceService<TInterface>()`
-    *   **Test Data Access:** `TestData.DefaultCustomerId`, `TestData.DefaultRestaurantId`, etc.
-    *   **Authorization Helpers:** `CreateRoleAssignmentAsync()`, `RunAsRestaurantOwnerAsync()`
+*   **`Testing.cs` (Unified Facade):** The single, minimal API for tests.
+    *   **Commands/Queries:** `SendAsync(request)`, `SendAndUnwrapAsync(request)`
+    *   **Outbox (deterministic side-effects):** `DrainOutboxAsync()`, `ProcessOutboxOnceAsync()`
+    *   **Users/Auth:** `RunAsUserAsync(...)`, `RunAsDefaultUserAsync()`, `RunAsAdministratorAsync()`, `RunAsRestaurantOwnerAsync()`
+    *   **DB Ops:** `AddAsync(entity)`, `UpdateAsync(entity)`, `FindAsync<TEntity>(id)`, `CountAsync<TEntity>()`
+    *   **DI Overrides:** `ReplaceService<TInterface>(replacement)`
+    *   **Test Data Snapshot:** `TestData.Default*` ids and helpers
 
 *   **Test Data Factories:**
     *   **`TestDataFactory.cs`:** Creates the default set of test data (user, restaurant, menu, items, coupon) once per suite. Also provides specialized methods for creating specific scenarios (e.g., `CreateInactiveRestaurantAsync()`).
-    *   **`CouponTestDataFactory.cs`:** A specialized factory for creating various coupon test scenarios using a fluent `CouponTestOptions` builder.
+    *   **`CouponTestDataFactory.cs`:** Options-based factory for coupon scenarios.
+    *   **`MenuTestDataFactory.cs`:** Options-based factory for menu scenarios (enabled/disabled menu, categories, items, tag links, customization links, soft-deletes) returning IDs for assertions.
 
 **4. Writing a New Functional Test**
 
@@ -139,9 +140,32 @@ The test data factories are the cornerstone of efficient and readable tests.
     }
     ```
 
+*   **Custom Menu Scenarios (options-based):** Use `MenuTestDataFactory` for complex menu/category/item/tag/group arrangements.
+
+    ```csharp
+    [Test]
+    public async Task RebuildFullMenu_ShouldComposeGroupsTagsAndOrdering()
+    {
+        var scenario = await MenuTestDataFactory.CreateRestaurantWithMenuAsync(new MenuScenarioOptions
+        {
+            EnabledMenu = true,
+            CategoryCount = 2,
+            CategoryGenerator = i => ($"Cat-{i}", i + 1),
+            ItemGenerator = (categoryId, index) => new []
+            {
+                new ItemOptions { Name = $"Item-{index}-A", PriceAmount = 9.99m },
+                new ItemOptions { Name = $"Item-{index}-B", PriceAmount = 12.50m }
+            }
+        });
+
+        var result = await SendAsync(new RebuildFullMenuCommand { RestaurantId = scenario.RestaurantId });
+        result.ShouldBeSuccessful();
+    }
+    ```
+
 **6. Writing Test Methods**
 
-Follow the Arrange-Act-Assert pattern, keeping tests focused on a single behavior.
+Follow the Arrange-Act-Assert pattern, keeping tests focused on a single behavior. Comments should be used to explain the purpose of each section in a clear and concise manner.
 
 ```csharp
 [Test]
@@ -164,6 +188,11 @@ public async Task CreateRestaurant_AsOwner_ShouldSucceed()
     restaurant.Name.Should().Be("New Restaurant");
 }
 ```
+
+Test names should follow the pattern:
+
+- `[Action]_[Condition]_Should[ExpectedResult]` (e.g., `CreateOrder_WithDefaultData_ShouldSucceed`)
+- `[Action]_Should[ExpectedResult]_When[Condition]` (e.g., `InitiateOrder_ShouldFail_WhenRestaurantIsInactive`)
 
 **7. Key Considerations**
 

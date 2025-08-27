@@ -24,7 +24,7 @@ public sealed class GetRestaurantPublicInfoQueryHandler : IRequestHandler<GetRes
                 r."Id"                  AS RestaurantId,
                 r."Name"                AS Name,
                 r."LogoUrl"             AS LogoUrl,
-                to_jsonb(array_remove(ARRAY[r."CuisineType"], NULL))::text AS CuisineTagsJson,
+                '[]'::text              AS CuisineTagsJson,
                 r."IsAcceptingOrders"   AS IsAcceptingOrders,
                 r."Location_City"       AS City
             FROM "Restaurants" r
