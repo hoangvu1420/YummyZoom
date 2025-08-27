@@ -22,7 +22,11 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
     {
         var userId = Request.Headers["x-test-user-id"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(userId))
-            return Task.FromResult(AuthenticateResult.Fail("No user"));
+        {
+            // For public endpoints, allow anonymous access by returning NoResult
+            // This allows the endpoint to decide if authentication is required
+            return Task.FromResult(AuthenticateResult.NoResult());
+        }
 
         var permissionsRaw = Request.Headers["x-test-permissions"].FirstOrDefault();
         var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };

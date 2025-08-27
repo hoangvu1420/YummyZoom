@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Orders.Queries.GetRestaurantNewOrders;
@@ -13,7 +12,7 @@ namespace YummyZoom.Web.Endpoints;
 /// <summary>
 /// Restaurant-scoped query endpoints (order listings, etc.).
 /// Scoped separately from <see cref="Orders"/> command endpoints to keep route surface organized.
-/// Base route resolves to /api/v1/restaurants via versioned endpoint grouping.
+/// Base route resolves to /api/v1.0/restaurants via versioned endpoint grouping.
 /// </summary>
 public class Restaurants : EndpointGroupBase
 {
@@ -23,7 +22,7 @@ public class Restaurants : EndpointGroupBase
             .MapGroup(this)
             .RequireAuthorization();
 
-        // GET /api/v1/restaurants/{restaurantId}/orders/new
+        // GET /api/v1.0/restaurants/{restaurantId}/orders/new
         group.MapGet("/{restaurantId:guid}/orders/new", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
         {
             var query = new GetRestaurantNewOrdersQuery(restaurantId, pageNumber, pageSize);
@@ -33,7 +32,7 @@ public class Restaurants : EndpointGroupBase
         .WithName("GetRestaurantNewOrders")
         .WithStandardResults<PaginatedList<OrderSummaryDto>>();
 
-        // GET /api/v1/restaurants/{restaurantId}/orders/active
+        // GET /api/v1.0/restaurants/{restaurantId}/orders/active
         group.MapGet("/{restaurantId:guid}/orders/active", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
         {
             var query = new GetRestaurantActiveOrdersQuery(restaurantId, pageNumber, pageSize);
@@ -44,9 +43,9 @@ public class Restaurants : EndpointGroupBase
         .WithStandardResults<PaginatedList<OrderSummaryDto>>();
 
         // Public endpoints (no auth)
-        var publicGroup = app.MapGroup("/api/restaurants");
+        var publicGroup = app.MapGroup(this);
 
-        // GET /api/restaurants/{restaurantId}/menu
+        // GET /api/v1.0/restaurants/{restaurantId}/menu
         publicGroup.MapGet("/{restaurantId:guid}/menu", async (Guid restaurantId, ISender sender, HttpContext http) =>
         {
             var result = await sender.Send(new GetFullMenuQuery(restaurantId));
@@ -58,20 +57,20 @@ public class Restaurants : EndpointGroupBase
             if (HttpCaching.MatchesIfNoneMatch(http.Request, etag) ||
                 HttpCaching.NotModifiedSince(http.Request, result.Value.LastRebuiltAt))
             {
-                http.Response.Headers.ETag = etag;
+                http.Response.Headers.ETag = etag.ToString();
                 http.Response.Headers.LastModified = lastModified;
                 http.Response.Headers.CacheControl = "public, max-age=300";
                 return Results.StatusCode(StatusCodes.Status304NotModified);
             }
 
-            http.Response.Headers.ETag = etag;
+            http.Response.Headers.ETag = etag.ToString();
             http.Response.Headers.LastModified = lastModified;
             http.Response.Headers.CacheControl = "public, max-age=300";
             return Results.Text(result.Value.MenuJson, "application/json");
         })
         .WithName("GetRestaurantPublicMenu");
 
-        // GET /api/restaurants/{restaurantId}/info
+        // GET /api/v1.0/restaurants/{restaurantId}/info
         publicGroup.MapGet("/{restaurantId:guid}/info", async (Guid restaurantId, ISender sender) =>
         {
             var result = await sender.Send(new GetRestaurantPublicInfoQuery(restaurantId));
@@ -79,7 +78,7 @@ public class Restaurants : EndpointGroupBase
         })
         .WithName("GetRestaurantPublicInfo");
 
-        // GET /api/restaurants/search
+        // GET /api/v1.0/restaurants/search
         publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int pageNumber, int pageSize, ISender sender) =>
         {
             var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, pageNumber, pageSize);
