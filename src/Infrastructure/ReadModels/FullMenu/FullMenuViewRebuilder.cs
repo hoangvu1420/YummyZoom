@@ -255,10 +255,10 @@ public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
 
         const string sql = """
             INSERT INTO "FullMenuViews" ("RestaurantId", "MenuJson", "LastRebuiltAt")
-            VALUES (@RestaurantId, @MenuJson, @LastRebuiltAt)
+            VALUES (@RestaurantId, CAST(@MenuJson AS jsonb), @LastRebuiltAt)
             ON CONFLICT ("RestaurantId")
-            DO UPDATE SET 
-                "MenuJson" = EXCLUDED."MenuJson",
+            DO UPDATE SET
+                "MenuJson" = CAST(EXCLUDED."MenuJson" AS jsonb),
                 "LastRebuiltAt" = EXCLUDED."LastRebuiltAt";
             """;
 

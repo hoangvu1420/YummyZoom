@@ -3,6 +3,7 @@ using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Extensions;
 
 namespace YummyZoom.Infrastructure.Data.Repositories;
 
@@ -52,5 +53,17 @@ public class MenuItemRepository : IMenuItemRepository
     public void Update(MenuItem menuItem)
     {
         _dbContext.MenuItems.Update(menuItem);
+    }
+
+    public async Task<RestaurantId?> GetRestaurantIdByIdIncludingDeletedAsync(MenuItemId menuItemId, CancellationToken cancellationToken = default)
+    {
+        // Include soft-deleted to ensure we can resolve RestaurantId after a delete event
+        var restaurantGuid = await _dbContext.MenuItems
+            .IncludeSoftDeleted()
+            .Where(m => m.Id == menuItemId)
+            .Select(m => m.RestaurantId.Value)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return restaurantGuid == default ? null : RestaurantId.Create(restaurantGuid);
     }
 }

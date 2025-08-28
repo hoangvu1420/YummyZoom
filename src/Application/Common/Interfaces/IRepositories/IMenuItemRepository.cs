@@ -12,4 +12,6 @@ public interface IMenuItemRepository
     Task<bool> IsAvailableAsync(MenuItemId menuItemId, CancellationToken cancellationToken = default);
     Task AddAsync(MenuItem menuItem, CancellationToken cancellationToken = default);
     void Update(MenuItem menuItem);
+    Task<RestaurantId?> GetRestaurantIdByIdIncludingDeletedAsync(MenuItemId menuItemId, CancellationToken cancellationToken = default);
+
 }
