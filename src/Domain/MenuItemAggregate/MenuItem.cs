@@ -113,6 +113,13 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
         AddDomainEvent(new MenuItemAvailabilityChanged(Id, IsAvailable));
     }
 
+    public void ChangeAvailability(bool isAvailable)
+    {
+        if (IsAvailable == isAvailable) return;
+        IsAvailable = isAvailable;
+        AddDomainEvent(new MenuItemAvailabilityChanged(Id, IsAvailable));
+    }
+
     public Result UpdateDetails(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -123,6 +130,35 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
 
         Name = name;
         Description = description;
+        AddDomainEvent(new MenuItemDetailsUpdated(Id, Name, Description, ImageUrl));
+        return Result.Success();
+    }
+
+    public Result UpdateDetails(string name, string description, Money basePrice, string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(MenuItemErrors.InvalidName(name));
+
+        if (string.IsNullOrWhiteSpace(description))
+            return Result.Failure(MenuItemErrors.InvalidDescription(description));
+
+        if (basePrice.Amount <= 0)
+            return Result.Failure(MenuItemErrors.NegativePrice);
+
+        var priceChanged = !BasePrice.Equals(basePrice);
+
+        Name = name;
+        Description = description;
+        BasePrice = basePrice;
+        ImageUrl = imageUrl;
+
+        AddDomainEvent(new MenuItemDetailsUpdated(Id, Name, Description, ImageUrl));
+
+        if (priceChanged)
+        {
+            AddDomainEvent(new MenuItemPriceChanged(Id, BasePrice));
+        }
+
         return Result.Success();
     }
 

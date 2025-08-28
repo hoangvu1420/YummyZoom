@@ -88,6 +88,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+        builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+        builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
         builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
         builder.Services.AddScoped<ICouponRepository, CouponRepository>();
         builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();

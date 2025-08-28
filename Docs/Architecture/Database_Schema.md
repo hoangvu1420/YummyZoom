@@ -19,6 +19,7 @@ erDiagram
     %%   Payouts & Monetization
     %%   Support & Governance
     %%   Misc / Shared
+    %%   Read Models
     %% Legend: solid line = enforced FK / ownership inside boundary; dotted = logical cross-context reference (no FK)
     %% =============================================================
 
@@ -89,6 +90,13 @@ erDiagram
         string Email UK
         string PhoneNumber
         boolean IsActive
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     UserAddresses {
@@ -109,6 +117,10 @@ erDiagram
         string Type
         string TokenizedDetails
         boolean IsDefault
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
     }
 
     %% ---------------- Restaurant Catalog Context ----------------
@@ -127,11 +139,18 @@ erDiagram
         string Location_State "Location VO"
         string Location_Country "Location VO"
         string Location_ZipCode "Location VO"
-        decimal Geo_Latitude "GeoCoordinates VO"
-        decimal Geo_Longitude "GeoCoordinates VO"
+        double Geo_Latitude "GeoCoordinates VO"
+        double Geo_Longitude "GeoCoordinates VO"
         string ContactInfo_PhoneNumber "Contact VO"
         string ContactInfo_Email "Contact VO"
         string BusinessHours "BusinessHours VO"
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     %% ---------------- Cross-Context Bridge (Identity ↔ Catalog) ----------------
@@ -141,23 +160,39 @@ erDiagram
         UUID UserId "Ref to DomainUsers"
         UUID RestaurantId "Ref to Restaurants"
         string Role
+        timestamp Created
+        string CreatedBy
         %% UK: (UserId, RestaurantId, Role)
     }
 
     %% --- Menu & Catalog Entities ---
     Menus {
         UUID Id PK
-        UUID RestaurantId FK
+        UUID RestaurantId "Ref to Restaurants"
         string Name
         string Description
         boolean IsEnabled
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     MenuCategories {
         UUID Id PK
-        UUID MenuId FK
+        UUID MenuId "Ref to Menus"
         string Name
         int DisplayOrder
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     MenuItems {
@@ -172,6 +207,13 @@ erDiagram
         boolean IsAvailable
         jsonb AppliedCustomizations "List<CustomizationGroupID>"
         jsonb DietaryTagIds "List<TagID>"
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     CustomizationGroups {
@@ -180,6 +222,13 @@ erDiagram
         string GroupName
         int MinSelections
         int MaxSelections
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     CustomizationChoices {
@@ -194,9 +243,16 @@ erDiagram
     
     Tags {
         UUID Id PK
-        string TagName UK
+        string TagName
         string TagDescription
         string TagCategory
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     %% ---------------- Order & Fulfillment Context ----------------
@@ -231,15 +287,18 @@ erDiagram
         string TaxAmount_Currency "Money VO"
         decimal TotalAmount_Amount "Money VO"
         string TotalAmount_Currency "Money VO"
+        timestamp Created
+        string CreatedBy
     }
 
     OrderItems {
         UUID OrderId PK, FK
         UUID OrderItemId PK
         UUID Snapshot_MenuItemId
+        UUID Snapshot_MenuCategoryId
         string Snapshot_ItemName
-        decimal Snapshot_BasePriceAtOrder_Amount "Money VO"
-        string Snapshot_BasePriceAtOrder_Currency "Money VO"
+        decimal BasePrice_Amount "Money VO"
+        string BasePrice_Currency "Money VO"
         int Quantity
         jsonb SelectedCustomizations
         decimal LineItemTotal_Amount "Money VO"
@@ -282,7 +341,20 @@ erDiagram
         int CurrentTotalUsageCount
         int UsageLimitPerUser
         boolean IsEnabled
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
         %% UK: (Code, RestaurantId)
+    }
+
+    CouponUserUsages {
+        UUID CouponId PK, FK
+        UUID UserId PK, FK
+        int UsageCount
     }
     
     %% --- Review Aggregate ---
@@ -297,6 +369,13 @@ erDiagram
         boolean IsModerated
         boolean IsHidden
         string Reply
+        timestamp Created
+        string CreatedBy
+        timestamp LastModified
+        string LastModifiedBy
+        boolean IsDeleted
+        timestamp DeletedOn
+        string DeletedBy
     }
 
     %% ---------------- Payouts & Monetization Context ----------------
@@ -307,17 +386,21 @@ erDiagram
         decimal CurrentBalance_Amount "Money VO"
         string CurrentBalance_Currency "Money VO"
         string PayoutMethod_Details "PayoutMethod VO"
+        timestamp Created
+        string CreatedBy
     }
 
     AccountTransactions {
         UUID Id PK
-        UUID RestaurantAccountId FK
+        UUID RestaurantAccountId "Ref to RestaurantAccounts"
         string Type
         decimal Amount "Money VO"
         string Currency "Money VO"
         timestamp Timestamp
         UUID RelatedOrderId "Ref to Orders"
         string Notes
+        timestamp Created
+        string CreatedBy
     }
 
     %% ---------------- Support & Governance Context ----------------
@@ -332,6 +415,8 @@ erDiagram
         timestamp SubmissionTimestamp
         timestamp LastUpdateTimestamp
         UUID AssignedToAdminId
+        timestamp Created
+        string CreatedBy
     }
 
     SupportTicketMessages {
@@ -365,6 +450,8 @@ erDiagram
         decimal TipAmount_Amount "Money VO"
         string TipAmount_Currency "Money VO"
         UUID AppliedCouponId "Ref to Coupons"
+        timestamp Created
+        string CreatedBy
     }
 
     TeamCartMembers {
@@ -410,6 +497,8 @@ erDiagram
         string DeviceId UK
         string Platform
         string ModelName
+        timestamp CreatedAt
+        timestamp UpdatedAt
     }
     
     UserDeviceSessions {
@@ -418,8 +507,51 @@ erDiagram
         UUID DeviceId "Ref to Devices"
         string FcmToken
         boolean IsActive
+        timestamp LastLoginAt
+        timestamp LoggedOutAt
     }
-    
+
+    ProcessedWebhookEvents {
+        string Id PK
+        timestamp ProcessedAt
+    }
+
+    InboxMessages {
+        UUID EventId PK
+        string Handler PK
+        timestamp ProcessedOnUtc
+        string Error
+    }
+
+    OutboxMessages {
+        UUID Id PK
+        timestamp OccurredOnUtc
+        string Type
+        jsonb Content
+        string CorrelationId
+        string CausationId
+        string AggregateId
+        string AggregateType
+        int Attempt
+        timestamp NextAttemptOnUtc
+        timestamp ProcessedOnUtc
+        string Error
+    }
+
+    %% ---------------- Read Models ----------------
+
+    FullMenuViews {
+        UUID RestaurantId PK
+        jsonb MenuJson
+        timestamp LastRebuiltAt
+    }
+
+    RestaurantReviewSummaries {
+        UUID RestaurantId PK
+        double AverageRating
+        int TotalReviews
+    }    
+
     %% --- Relationships ---
     %% =============================================================
     %% RELATIONSHIPS GROUPED BY BOUNDED CONTEXT
@@ -432,14 +564,13 @@ erDiagram
     AspNetUsers ||--o{ AspNetUserLogins : "has"
     AspNetUsers ||--o{ AspNetUserTokens : "has"
     AspNetRoles ||--o{ AspNetRoleClaims : "has"
-    AspNetUsers ||--|| DomainUsers : "is"
     DomainUsers ||--o{ UserAddresses : "owns"
     DomainUsers ||--o{ UserPaymentMethods : "owns"
 
     %% Restaurant Catalog
     Restaurants ||..o| Menus : "has"
     Restaurants ||..o| CustomizationGroups : "defines"
-    Menus }o--|| MenuCategories : "contains"
+    Menus }o..o| MenuCategories : "contains"
     MenuCategories ||..o| MenuItems : "groups"
     CustomizationGroups ||--o{ CustomizationChoices : "owns"
 
@@ -455,10 +586,13 @@ erDiagram
     Coupons          ||..o| TeamCarts : "applied to"
     Coupons          }o..o{ MenuItems : "applies to items"
     Coupons          }o..o{ MenuCategories : "applies to categories"
+    Coupons          ||..o{ CouponUserUsages : "tracks"
+    DomainUsers      ||..o{ CouponUserUsages : "usage by"
 
     %% Snapshot references (historical copies, not enforced FKs)
     MenuItems        ||..o| OrderItems : "snapshotted by"
     MenuItems        ||..o| TeamCartItems : "snapshotted by"
+    MenuCategories   ||..o| OrderItems : "snapshotted by"
     MenuCategories   ||..o| TeamCartItems : "snapshotted by"
 
     %% Payment & Accounting cross references
@@ -510,6 +644,10 @@ erDiagram
     %% Device Tracking (Misc / Shared)
     DomainUsers ||..|| UserDeviceSessions : "is referenced by"
     Devices     ||..|| UserDeviceSessions : "is referenced by"
+
+    %% Read Models
+    Restaurants ||..o| FullMenuViews : "is cached by"
+    Restaurants ||..o| RestaurantReviewSummaries : "is summarized by"
     
     %% ---------------- Styling (Bounded Context Colors) ----------------
     %% Identity & Access (Blue)
@@ -541,6 +679,7 @@ erDiagram
     style OrderItems fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
     style PaymentTransactions fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
     style Coupons fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
+    style CouponUserUsages fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
     style Reviews fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
     style TeamCarts fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
     style TeamCartMembers fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px
@@ -559,6 +698,13 @@ erDiagram
     %% Misc / Shared (Gray)
     style Devices fill:#ECEFF1,stroke:#455A64,stroke-width:1px
     style UserDeviceSessions fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+    style InboxMessages fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+    style OutboxMessages fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+    style ProcessedWebhookEvents fill:#ECEFF1,stroke:#455A64,stroke-width:1px
+
+    %% Read Models (Indigo)
+    style FullMenuViews fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style RestaurantReviewSummaries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
 
     %% ------------------------------------------------------------------
     %% NOTE: Mermaid's erDiagram styling support may vary by renderer.
@@ -580,6 +726,7 @@ erDiagram
 | Payouts & Monetization | Purple |
 | Support & Governance | Red/Pink |
 | Misc / Shared | Gray |
+| Read Models | Indigo |
 
 1.  **Full Schema Representation**: The diagram has been expanded to include all aggregates and entities defined in `Domain_Design.md` and implemented in the `ApplicationDbContextModelSnapshot.cs`. This includes new tables for `SupportTickets`, `TeamCarts`, `Reviews`, `Coupons`, `RestaurantAccounts`, and their child entities.
 2.  **Owned Entities and VOs**:

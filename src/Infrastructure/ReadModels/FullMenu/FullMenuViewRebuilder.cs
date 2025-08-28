@@ -13,12 +13,10 @@ namespace YummyZoom.Infrastructure.ReadModels.FullMenu;
 
 public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
 {
-    private readonly ApplicationDbContext _db;
     private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public FullMenuViewRebuilder(ApplicationDbContext db, IDbConnectionFactory dbConnectionFactory)
+    public FullMenuViewRebuilder(IDbConnectionFactory dbConnectionFactory)
     {
-        _db = db;
         _dbConnectionFactory = dbConnectionFactory;
     }
 
@@ -114,17 +112,17 @@ public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
                 : (IReadOnlyList<AppliedCustomization>)(JsonSerializer.Deserialize<List<AppliedCustomization>>(r.AppliedCustomizationsJson, DomainJson.Options) ?? new List<AppliedCustomization>())
         }).ToList();
 
-        // 4) Customization groups referenced
+        // 1) Customization groups referenced by items
         var groupIds = items
             .SelectMany(i => i.AppliedCustomizations.Select(c => c.CustomizationGroupId.Value))
             .Distinct()
             .ToArray();
 
-        // Trip 2: groups + choices + tags in one batch
+        // Trip 2: groups + choices + tags referenced by items
         var groups = new List<GroupRow>();
         var choices = new List<ChoiceRow>();
 
-        // 5) Tag legend
+        // 2) Tag legend referenced by items
         var tagIds = items
             .SelectMany(i => i.DietaryTagIds.Select(t => t.Value))
             .Distinct()
@@ -253,22 +251,18 @@ public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
 
     public async Task UpsertAsync(Guid restaurantId, string menuJson, DateTimeOffset lastRebuiltAt, CancellationToken ct = default)
     {
-        var existing = await _db.FullMenuViews.SingleOrDefaultAsync(v => v.RestaurantId == restaurantId, ct);
-        if (existing is null)
-        {
-            _db.FullMenuViews.Add(new FullMenuView
-            {
-                RestaurantId = restaurantId,
-                MenuJson = menuJson,
-                LastRebuiltAt = lastRebuiltAt
-            });
-        }
-        else
-        {
-            existing.MenuJson = menuJson;
-            existing.LastRebuiltAt = lastRebuiltAt;
-        }
-        await _db.SaveChangesAsync(ct);
+        using var connection = _dbConnectionFactory.CreateConnection();
+
+        const string sql = """
+            INSERT INTO "FullMenuViews" ("RestaurantId", "MenuJson", "LastRebuiltAt")
+            VALUES (@RestaurantId, @MenuJson, @LastRebuiltAt)
+            ON CONFLICT ("RestaurantId")
+            DO UPDATE SET 
+                "MenuJson" = EXCLUDED."MenuJson",
+                "LastRebuiltAt" = EXCLUDED."LastRebuiltAt";
+            """;
+
+        await connection.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId, MenuJson = menuJson, LastRebuiltAt = lastRebuiltAt }, cancellationToken: ct));
     }
 
     // Dapper row-shaping types (private to this rebuilder)
@@ -286,6 +280,13 @@ public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
         string? DietaryTagIdsJson,
         string? AppliedCustomizationsJson);
     private sealed record GroupRow(Guid Id, string GroupName, int MinSelections, int MaxSelections);
-    private sealed record ChoiceRow(Guid CustomizationGroupId, Guid Id, string Name, decimal Amount, string Currency, bool IsDefault, int DisplayOrder);
+    private sealed record ChoiceRow(
+        Guid CustomizationGroupId,
+        Guid Id,
+        string Name,
+        decimal Amount,
+        string Currency,
+        bool IsDefault,
+        int DisplayOrder);
     private sealed record TagRow(Guid Id, string TagName, string TagCategory);
 }

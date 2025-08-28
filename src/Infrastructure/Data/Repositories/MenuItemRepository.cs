@@ -40,7 +40,17 @@ public class MenuItemRepository : IMenuItemRepository
         var menuItem = await _dbContext.MenuItems
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == menuItemId, cancellationToken);
-        
+
         return menuItem is not null && menuItem.IsAvailable;
     }
-} 
+
+    public async Task AddAsync(MenuItem menuItem, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.MenuItems.AddAsync(menuItem, cancellationToken);
+    }
+
+    public void Update(MenuItem menuItem)
+    {
+        _dbContext.MenuItems.Update(menuItem);
+    }
+}

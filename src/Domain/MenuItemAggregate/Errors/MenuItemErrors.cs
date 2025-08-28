@@ -28,6 +28,14 @@ public static class MenuItemErrors
         $"Customization group '{groupId}' is already assigned to this menu item.");
 
     public static Error CustomizationNotFound(string groupId) => Error.NotFound(
-        "MenuItem.CustomizationNotFound", 
+        "MenuItem.CustomizationNotFound",
         $"Customization group '{groupId}' is not assigned to this menu item.");
+
+    public static Error CategoryNotFound(Guid categoryId) => Error.NotFound(
+        "MenuItem.CategoryNotFound",
+        $"Menu category with ID '{categoryId}' was not found.");
+
+    public static Error CategoryNotBelongsToRestaurant(Guid categoryId, Guid restaurantId) => Error.Validation(
+        "MenuItem.CategoryNotBelongsToRestaurant",
+        $"Menu category '{categoryId}' does not belong to restaurant '{restaurantId}'.");
 }
