@@ -73,6 +73,9 @@ public sealed class Menu : Entity<MenuId>, IAuditableEntity, ISoftDeletableEntit
 
         Name = name;
         Description = description;
+
+        AddDomainEvent(new MenuDetailsUpdated(Id, RestaurantId, Name, Description));
+
         return Result.Success();
     }
 

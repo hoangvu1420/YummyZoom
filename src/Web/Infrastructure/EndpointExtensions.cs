@@ -11,12 +11,22 @@ public static class EndpointExtensions
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
-    
+
     public static RouteHandlerBuilder WithStandardResults(this RouteHandlerBuilder builder)
     {
         return builder
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+    }
+
+    public static RouteHandlerBuilder WithStandardCreationResults<T>(this RouteHandlerBuilder builder)
+    {
+        return builder
+            .Produces<T>(StatusCodes.Status201Created)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status500InternalServerError);

@@ -10,6 +10,11 @@ public interface IMenuCategoryRepository
     /// Gets a menu category by its ID.
     /// </summary>
     Task<MenuCategory?> GetByIdAsync(MenuCategoryId categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a menu category by its ID, including soft-deleted categories.
+    /// </summary>
+    Task<MenuCategory?> GetByIdIncludingDeletedAsync(MenuCategoryId categoryId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Gets all categories for a specific menu.

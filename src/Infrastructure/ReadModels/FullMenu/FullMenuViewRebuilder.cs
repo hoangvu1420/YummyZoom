@@ -265,6 +265,18 @@ public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
         await connection.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId, MenuJson = menuJson, LastRebuiltAt = lastRebuiltAt }, cancellationToken: ct));
     }
 
+    public async Task DeleteAsync(Guid restaurantId, CancellationToken ct = default)
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+
+        const string sql = """
+            DELETE FROM "FullMenuViews"
+            WHERE "RestaurantId" = @RestaurantId;
+            """;
+
+        await connection.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId }, cancellationToken: ct));
+    }
+
     // Dapper row-shaping types (private to this rebuilder)
     private sealed record MenuRow(Guid Id, string Name, string Description, bool IsEnabled);
     private sealed record CategoryRow(Guid Id, string Name, int DisplayOrder);

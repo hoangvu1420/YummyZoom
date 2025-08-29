@@ -3,6 +3,7 @@ using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Extensions;
 
 namespace YummyZoom.Infrastructure.Data.Repositories;
 
@@ -18,6 +19,13 @@ public class MenuCategoryRepository : IMenuCategoryRepository
     public async Task<MenuCategory?> GetByIdAsync(MenuCategoryId categoryId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.MenuCategories
+            .FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
+    }
+
+    public async Task<MenuCategory?> GetByIdIncludingDeletedAsync(MenuCategoryId categoryId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.MenuCategories
+            .IncludeSoftDeleted()
             .FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
     }
 
