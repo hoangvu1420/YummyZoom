@@ -54,35 +54,80 @@ public class MenuItemCustomizationRemovedEventHandlerTests : BaseTestFixture
         assignResult.ShouldBeSuccessful();
         await UpdateAsync(item);
 
-        // Remove it
-        var removeResult = item.RemoveCustomizationGroup(group.Id);
-        removeResult.ShouldBeSuccessful();
-        await UpdateAsync(item);
-
-        // Act: drain outbox twice
-        await DrainOutboxAsync();
+        // Build baseline view after assignment
         await DrainOutboxAsync();
 
-        // Assert inbox/outbox
-        using (var scope = CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemCustomizationRemovedEventHandler).FullName!;
-            var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
-            inboxEntries.Should().HaveCount(1);
-
-            var processedOutbox = await db.Set<OutboxMessage>().Where(m => m.Type.Contains("MenuItemCustomizationRemoved")).ToListAsync();
-            processedOutbox.Should().NotBeEmpty();
-            processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
-        }
-
-        // Assert view exists
+        DateTimeOffset baselineRebuiltAt;
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
             view.Should().NotBeNull();
+            baselineRebuiltAt = view!.LastRebuiltAt;
+
+            // Baseline: verify customization group is assigned in view
+            var baselineGroups = FullMenuViewAssertions.GetItemCustomizationGroupIds(view, itemId);
+            baselineGroups.Should().Contain(group.Id.Value, "baseline item should have assigned customization group");
+        }
+
+        // Remove it
+        var removeResult = item.RemoveCustomizationGroup(group.Id);
+        removeResult.ShouldBeSuccessful();
+        await UpdateAsync(item);
+
+        // Act: first outbox drain processes MenuItemCustomizationRemoved and rebuilds the view
+        await DrainOutboxAsync();
+
+        // Assert handler side-effects and post-condition after first drain
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemCustomizationRemovedEventHandler).FullName!;
+            var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
+            inboxEntries.Should().HaveCount(1, "inbox must ensure idempotency");
+
+            var processedOutbox = await db.Set<OutboxMessage>().Where(m => m.Type.Contains("MenuItemCustomizationRemoved")).ToListAsync();
+            processedOutbox.Should().NotBeEmpty();
+            processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
             view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+
+            // Rebuild time should have advanced
+            view.LastRebuiltAt.Should().BeAfter(baselineRebuiltAt, "view should be rebuilt after customization removal event");
+
+            // Post-condition: verify customization group removed from view
+            var remainingGroups = FullMenuViewAssertions.GetItemCustomizationGroupIds(view, itemId);
+            remainingGroups.Should().NotContain(group.Id.Value, "customization group should be removed from item");
+        }
+
+        // Second drain to verify idempotent handler does nothing more
+        DateTimeOffset lastRebuiltAtAfterFirstDrain;
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            lastRebuiltAtAfterFirstDrain = view!.LastRebuiltAt;
+        }
+
+        await DrainOutboxAsync();
+
+        // Assert idempotency: second drain should not change anything
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemCustomizationRemovedEventHandler).FullName!;
+            var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
+            inboxEntries.Should().HaveCount(1, "draining again must not reprocess the same event");
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            view!.LastRebuiltAt.Should().Be(lastRebuiltAtAfterFirstDrain, "idempotent second drain should not update LastRebuiltAt");
+
+            // Verify customization removal persists
+            var persistedGroups = FullMenuViewAssertions.GetItemCustomizationGroupIds(view, itemId);
+            persistedGroups.Should().NotContain(group.Id.Value, "customization group should remain removed after idempotent drain");
         }
     }
 }

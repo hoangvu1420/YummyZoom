@@ -35,6 +35,21 @@ public class MenuItemPriceChangedEventHandlerTests : BaseTestFixture
 
         var itemId = createResult.Value!.MenuItemId;
 
+        // Build baseline view after creation
+        await DrainOutboxAsync();
+
+        DateTimeOffset baselineRebuiltAt;
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            baselineRebuiltAt = view!.LastRebuiltAt;
+
+            // Baseline: verify original price in view
+            FullMenuViewAssertions.GetItemPriceAmount(view, itemId).Should().Be(10m, "baseline item should have original price");
+        }
+
         // Update only price via UpdateMenuItemDetails (per current command shape)
         var update = new UpdateMenuItemDetailsCommand(
             RestaurantId: restaurantId,
@@ -49,10 +64,10 @@ public class MenuItemPriceChangedEventHandlerTests : BaseTestFixture
         var updateResult = await SendAsync(update);
         updateResult.ShouldBeSuccessful();
 
-        await DrainOutboxAsync();
+        // First outbox drain processes MenuItemPriceChanged and rebuilds the view
         await DrainOutboxAsync();
 
-        // Assert: handler idempotency + outbox
+        // Assert handler side-effects and post-condition after first drain
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -61,22 +76,52 @@ public class MenuItemPriceChangedEventHandlerTests : BaseTestFixture
             var inboxEntries = await db.Set<InboxMessage>()
                 .Where(x => x.Handler == handlerName)
                 .ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            inboxEntries.Should().HaveCount(1, "inbox must ensure idempotency");
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains("MenuItemPriceChanged"))
                 .ToListAsync();
             processedOutbox.Should().NotBeEmpty();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+
+            // Rebuild time should have advanced
+            view.LastRebuiltAt.Should().BeAfter(baselineRebuiltAt, "view should be rebuilt after price change event");
+
+            // Post-condition: verify price updated in view
+            FullMenuViewAssertions.GetItemPriceAmount(view, itemId).Should().Be(12.34m, "item price should be updated");
         }
 
-        // Assert: view exists
+        // Second drain to verify idempotent handler does nothing more
+        DateTimeOffset lastRebuiltAtAfterFirstDrain;
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            lastRebuiltAtAfterFirstDrain = view!.LastRebuiltAt;
+        }
+
+        await DrainOutboxAsync();
+
+        // Assert idempotency: second drain should not change anything
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemPriceChangedEventHandler).FullName!;
+            var inboxEntries = await db.Set<InboxMessage>()
+                .Where(x => x.Handler == handlerName)
+                .ToListAsync();
+            inboxEntries.Should().HaveCount(1, "draining again must not reprocess the same event");
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
             view.Should().NotBeNull();
-            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+            view!.LastRebuiltAt.Should().Be(lastRebuiltAtAfterFirstDrain, "idempotent second drain should not update LastRebuiltAt");
+
+            // Verify price change persists
+            FullMenuViewAssertions.GetItemPriceAmount(view, itemId).Should().Be(12.34m, "updated price should remain after idempotent drain");
         }
     }
 }

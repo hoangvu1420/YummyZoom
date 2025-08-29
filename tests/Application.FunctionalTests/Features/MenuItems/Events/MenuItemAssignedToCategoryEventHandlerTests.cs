@@ -35,6 +35,22 @@ public class MenuItemAssignedToCategoryEventHandlerTests : BaseTestFixture
         createResult.ShouldBeSuccessful();
         var itemId = createResult.Value!.MenuItemId;
 
+        // Build baseline view after creation
+        await DrainOutboxAsync();
+
+        DateTimeOffset baselineRebuiltAt;
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            baselineRebuiltAt = view!.LastRebuiltAt;
+
+            // Baseline: verify item is in the original category
+            view.ShouldHaveItem(itemId, categoryId, "baseline item should be in original category");
+            FullMenuViewAssertions.CategoryHasItem(view, newCategoryId, itemId).Should().BeFalse("baseline item should not be in new category yet");
+        }
+
         var assign = new AssignMenuItemToCategoryCommand(
             RestaurantId: restaurantId,
             MenuItemId: itemId,
@@ -44,28 +60,59 @@ public class MenuItemAssignedToCategoryEventHandlerTests : BaseTestFixture
         var assignResult = await SendAsync(assign);
         assignResult.ShouldBeSuccessful();
 
-        await DrainOutboxAsync();
+        // First outbox drain processes MenuItemAssignedToCategory and rebuilds the view
         await DrainOutboxAsync();
 
-        // Assert inbox/outbox
+        // Assert handler side-effects and post-condition after first drain
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemAssignedToCategoryEventHandler).FullName!;
             var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            inboxEntries.Should().HaveCount(1, "inbox must ensure idempotency");
+
             var processedOutbox = await db.Set<OutboxMessage>().Where(m => m.Type.Contains("MenuItemAssignedToCategory")).ToListAsync();
             processedOutbox.Should().NotBeEmpty();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+
+            // Rebuild time should have advanced
+            view.LastRebuiltAt.Should().BeAfter(baselineRebuiltAt, "view should be rebuilt after category assignment event");
+
+            // Post-condition: verify item is in the new category and removed from the old one
+            view.ShouldHaveItem(itemId, newCategoryId, "item should be in new category after assignment");
+            FullMenuViewAssertions.CategoryHasItem(view, categoryId, itemId).Should().BeFalse("item should be removed from old category");
         }
 
-        // Assert view exists
+        // Second drain to verify idempotent handler does nothing more
+        DateTimeOffset lastRebuiltAtAfterFirstDrain;
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            lastRebuiltAtAfterFirstDrain = view!.LastRebuiltAt;
+        }
+
+        await DrainOutboxAsync();
+
+        // Assert idempotency: second drain should not change anything
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemAssignedToCategoryEventHandler).FullName!;
+            var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
+            inboxEntries.Should().HaveCount(1, "draining again must not reprocess the same event");
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
             view.Should().NotBeNull();
-            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+            view!.LastRebuiltAt.Should().Be(lastRebuiltAtAfterFirstDrain, "idempotent second drain should not update LastRebuiltAt");
+
+            // Verify category assignment persists
+            view.ShouldHaveItem(itemId, newCategoryId, "item should remain in new category after idempotent drain");
+            FullMenuViewAssertions.CategoryHasItem(view, categoryId, itemId).Should().BeFalse("item should remain removed from old category");
         }
     }
 }

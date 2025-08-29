@@ -36,14 +36,33 @@ public class MenuItemCreatedEventHandlerTests : BaseTestFixture
             IsAvailable: true,
             DietaryTagIds: null);
 
-        // Act: send command which emits MenuItemCreated, then drain outbox twice to validate idempotency
+        // Pre-condition: establish baseline view state (item should not exist yet)
+        DateTimeOffset baselineRebuiltAt;
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+
+            if (view != null)
+            {
+                baselineRebuiltAt = view.LastRebuiltAt;
+                // Pre-condition: item should not exist yet (we don't have the itemId yet, so skip this check)
+            }
+            else
+            {
+                baselineRebuiltAt = DateTimeOffset.MinValue;
+            }
+        }
+
+        // Act: send command which emits MenuItemCreated
         var result = await SendAsync(cmd);
         result.ShouldBeSuccessful();
+        var itemId = result.Value!.MenuItemId;
 
+        // First outbox drain processes MenuItemCreated and rebuilds the view
         await DrainOutboxAsync();
-        await DrainOutboxAsync(); // idempotency
 
-        // Assert: Inbox/Outbox status first (to diagnose handler execution)
+        // Assert handler side-effects and post-condition after first drain
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -52,23 +71,59 @@ public class MenuItemCreatedEventHandlerTests : BaseTestFixture
             var inboxEntries = await db.Set<InboxMessage>()
                 .Where(x => x.Handler == handlerName)
                 .ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            inboxEntries.Should().HaveCount(1, "inbox must ensure idempotency");
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains("MenuItemCreated"))
                 .ToListAsync();
             processedOutbox.Should().NotBeEmpty();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            view.Should().NotBeNull();
+            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
+
+            // Rebuild time should have advanced
+            view.LastRebuiltAt.Should().BeAfter(baselineRebuiltAt, "view should be rebuilt after create event");
+
+            // Post-condition: verify item exists in view with correct values
+            view.ShouldHaveItem(itemId, menuCategoryId, "created item should be present after create");
+            view.ShouldHaveItemWithValues(itemId,
+                expectedName: cmd.Name,
+                expectedDescription: cmd.Description,
+                expectedPriceAmount: cmd.Price,
+                expectedCurrency: cmd.Currency,
+                expectedAvailability: cmd.IsAvailable,
+                because: "created item should have expected values");
         }
 
-        // Assert: FullMenuView row exists and is updated
+        // Second drain to verify idempotent handler does nothing more
+        DateTimeOffset lastRebuiltAtAfterFirstDrain;
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
+            lastRebuiltAtAfterFirstDrain = view!.LastRebuiltAt;
+        }
+
+        await DrainOutboxAsync();
+
+        // Assert idempotency: second drain should not change anything
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var handlerName = typeof(YummyZoom.Application.MenuItems.EventHandlers.MenuItemCreatedEventHandler).FullName!;
+            var inboxEntries = await db.Set<InboxMessage>()
+                .Where(x => x.Handler == handlerName)
+                .ToListAsync();
+            inboxEntries.Should().HaveCount(1, "draining again must not reprocess the same event");
+
+            var view = await db.Set<FullMenuView>().FirstOrDefaultAsync(v => v.RestaurantId == restaurantId);
             view.Should().NotBeNull();
-            view!.MenuJson.Should().NotBeNullOrWhiteSpace();
-            view.LastRebuiltAt.Should().BeAfter(DateTimeOffset.MinValue);
+            view!.LastRebuiltAt.Should().Be(lastRebuiltAtAfterFirstDrain, "idempotent second drain should not update LastRebuiltAt");
+
+            // Verify item is still present with correct values
+            view.ShouldHaveItem(itemId, menuCategoryId, "created item should remain present after idempotent drain");
         }
     }
 }
