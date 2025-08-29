@@ -22,7 +22,7 @@ public class StatusContractTests
         // matches the captured response type (avoids InvalidCastException in CapturingSender).
         factory.Sender.RespondWith(_ => Result.Failure<GetOrderByIdResponse>(Error.NotFound("Order.NotFound", "Missing order")));
 
-        var path = $"/api/v1.0/orders/{Guid.NewGuid()}";
+        var path = $"/api/v1/orders/{Guid.NewGuid()}";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);

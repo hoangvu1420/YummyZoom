@@ -6,7 +6,7 @@ This revision aligns the original lean contract test concept with the **current 
 
 ## Goals (Confirmed)
 
-* ✅ Verify endpoint **routing and versioning** (segment style: `/api/v1.0/...` for requests; OpenAPI doc at `/api/v1/specification.json`).
+* ✅ Verify endpoint **routing and versioning** (segment style: `/api/v1/...` for requests; OpenAPI doc at `/api/v1/specification.json`).
 * ✅ Ensure **request → command mapping** and **command → response mapping** surface (captured via test double, not by invoking handlers).
 * ✅ Confirm **status codes** and **ProblemDetails formatting** (shape produced by `CustomResults`).
 * ✅ Validate **auth enforcement at boundary** (`401` for missing principal; optionally `403` for forbidden when authenticated without required permission claim).
@@ -206,7 +206,7 @@ public class InitiateOrderContractTests
             new("Street", "City", "State", "Zip", "Country"),
             "card", null, null, 0m, null);
 
-    var resp = await client.PostAsJsonAsync("/api/v1.0/orders/initiate", body); // versioned route
+    var resp = await client.PostAsJsonAsync("/api/v1/orders/initiate", body); // versioned route
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
         var dto = await resp.Content.ReadFromJsonAsync<InitiateOrderResponse>();
         dto!.OrderId.Should().Be(expectedId);
@@ -228,7 +228,7 @@ public class StatusContractTests
 
         factory.Sender.RespondWith(_ => Result<GetOrderByIdResponse>.Failure(Error.NotFound("Order.NotFound", "Missing order")));
 
-    var resp = await client.GetAsync($"/api/v1.0/orders/{Guid.NewGuid()}");
+    var resp = await client.GetAsync($"/api/v1/orders/{Guid.NewGuid()}");
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = await resp.Content.ReadFromJsonAsync<ProblemDetails>();
         problem!.Status.Should().Be(404);
@@ -247,7 +247,7 @@ public class AuthContractTests
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
 
-    var resp = await client.PostAsJsonAsync("/api/v1.0/orders/initiate", new { });
+    var resp = await client.PostAsJsonAsync("/api/v1/orders/initiate", new { });
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }
@@ -303,7 +303,7 @@ Target **.NET 9** (matches `global.json`). No explicit versions (resolved centra
 
 ## Additional / Optional Tests
 * 403 Scenario: Authenticate a user (x-test-user-id) but omit required permission claim (if a policy-protected endpoint is exposed). Expect `403`.
-* Invalid Route Parameter: `GET /api/v1.0/orders/not-a-guid` → 400 (model binding) ensures basic parameter validation surfacing.
+* Invalid Route Parameter: `GET /api/v1/orders/not-a-guid` → 400 (model binding) ensures basic parameter validation surfacing.
 * ProblemDetails Shape: For simulated validation error via `RespondWith(_ => Result.Failure(Error.Validation("Order.InvalidState", "...")))` assert Title == `Order` and Status 400.
 * OpenAPI Security Scheme: Parse JSON and assert `components.securitySchemes.JWT` exists (optional robustness beyond string contains).
 

@@ -13,7 +13,7 @@ using Error = YummyZoom.SharedKernel.Error;
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
 /// <summary>
-/// Contract tests for GET /api/v1.0/restaurants/search
+/// Contract tests for GET /api/v1/restaurants/search
 /// Tests pagination, query parameter binding, and validation error handling without executing real domain logic.
 /// </summary>
 public class SearchContractTests
@@ -56,7 +56,7 @@ public class SearchContractTests
             return Result.Success(paginatedList);
         });
 
-        var path = "/api/v1.0/restaurants/search?q=pizza&cuisine=Italian&lat=40.7128&lng=-74.0060&radiusKm=5.0&pageNumber=1&pageSize=10";
+        var path = "/api/v1/restaurants/search?q=pizza&cuisine=Italian&lat=40.7128&lng=-74.0060&radiusKm=5.0&pageNumber=1&pageSize=10";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -125,7 +125,7 @@ public class SearchContractTests
             return Result.Success(emptyList);
         });
 
-        var path = "/api/v1.0/restaurants/search?pageNumber=1&pageSize=25";
+        var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=25";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -148,7 +148,7 @@ public class SearchContractTests
         factory.Sender.RespondWith(_ => 
             Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.Invalid", "Invalid search parameters")));
 
-        var path = "/api/v1.0/restaurants/search?pageNumber=1&pageSize=25";
+        var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=25";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -169,7 +169,7 @@ public class SearchContractTests
         factory.Sender.RespondWith(_ => 
             Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.PageSizeInvalid", "Page size must be between 1 and 50")));
 
-        var path = "/api/v1.0/restaurants/search?pageNumber=1&pageSize=100";
+        var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=100";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -191,7 +191,7 @@ public class SearchContractTests
             Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.GeoInvalid", "Geo parameters must be provided together")));
 
         // Only providing lat without lng and radiusKm
-        var path = "/api/v1.0/restaurants/search?lat=40.7128&pageNumber=1&pageSize=25";
+        var path = "/api/v1/restaurants/search?lat=40.7128&pageNumber=1&pageSize=25";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();

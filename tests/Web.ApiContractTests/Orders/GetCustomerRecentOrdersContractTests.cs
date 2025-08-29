@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 
-// Contract tests for GET /api/v1.0/orders/my?pageNumber=&pageSize=
+// Contract tests for GET /api/v1/orders/my?pageNumber=&pageSize=
 public class GetCustomerRecentOrdersContractTests
 {
     private static OrderSummaryDto CreateSummary(Guid orderId)
@@ -31,7 +31,7 @@ public class GetCustomerRecentOrdersContractTests
             var list = new PaginatedList<OrderSummaryDto>(new[] { CreateSummary(Guid.NewGuid()) }, count: 1, pageNumber: 1, pageSize: 20);
             return YummyZoom.SharedKernel.Result.Success(list);
         });
-        var path = "/api/v1.0/orders/my?pageNumber=1&pageSize=20";
+        var path = "/api/v1/orders/my?pageNumber=1&pageSize=20";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -54,7 +54,7 @@ public class GetCustomerRecentOrdersContractTests
             var list = new PaginatedList<OrderSummaryDto>(Array.Empty<OrderSummaryDto>(), count: 0, pageNumber: 2, pageSize: 10);
             return YummyZoom.SharedKernel.Result.Success(list);
         });
-        var path = "/api/v1.0/orders/my?pageNumber=2&pageSize=10";
+        var path = "/api/v1/orders/my?pageNumber=2&pageSize=10";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -69,7 +69,7 @@ public class GetCustomerRecentOrdersContractTests
     {
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
-        var path = "/api/v1.0/orders/my?pageNumber=1&pageSize=10";
+        var path = "/api/v1/orders/my?pageNumber=1&pageSize=10";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

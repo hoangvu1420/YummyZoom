@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
 /// <summary>
-/// Contract tests for GET /api/v1.0/restaurants/{restaurantId}/menu
+/// Contract tests for GET /api/v1/restaurants/{restaurantId}/menu
 /// Tests HTTP caching behavior, status codes, and response format without executing real domain logic.
 /// </summary>
 public class MenuContractTests
@@ -33,7 +33,7 @@ public class MenuContractTests
             return Result.Success(new GetFullMenuResponse(menuJson, rebuiltAt));
         });
 
-        var path = $"/api/v1.0/restaurants/{restaurantId}/menu";
+        var path = $"/api/v1/restaurants/{restaurantId}/menu";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -78,7 +78,7 @@ public class MenuContractTests
         var expectedETag = $"W/\"r:{restaurantId}:t:{rebuiltAt.UtcTicks}\"";
         client.DefaultRequestHeaders.Add("If-None-Match", expectedETag);
 
-        var path = $"/api/v1.0/restaurants/{restaurantId}/menu";
+        var path = $"/api/v1/restaurants/{restaurantId}/menu";
         TestContext.WriteLine($"REQUEST GET {path} with If-None-Match: {expectedETag}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -115,7 +115,7 @@ public class MenuContractTests
         var ifModifiedSince = rebuiltAt.AddMinutes(10);
         client.DefaultRequestHeaders.Add("If-Modified-Since", ifModifiedSince.UtcDateTime.ToString("R"));
 
-        var path = $"/api/v1.0/restaurants/{restaurantId}/menu";
+        var path = $"/api/v1/restaurants/{restaurantId}/menu";
         TestContext.WriteLine($"REQUEST GET {path} with If-Modified-Since: {ifModifiedSince:R}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -138,7 +138,7 @@ public class MenuContractTests
         factory.Sender.RespondWith(_ =>
             Result.Failure<GetFullMenuResponse>(Error.NotFound("Public.GetFullMenu.NotFound", "Missing")));
 
-        var path = $"/api/v1.0/restaurants/{Guid.NewGuid()}/menu";
+        var path = $"/api/v1/restaurants/{Guid.NewGuid()}/menu";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();

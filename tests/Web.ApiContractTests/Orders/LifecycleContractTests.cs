@@ -47,7 +47,7 @@ public class LifecycleContractTests
             return Result.Success(CreateLifecycleDto(orderId, "Accepted", est));
         });
 
-        var path = $"/api/v1.0/orders/{orderId}/accept";
+        var path = $"/api/v1/orders/{orderId}/accept";
         var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = est };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -78,7 +78,7 @@ public class LifecycleContractTests
             // Reason property not exposed publicly (internal/private); mapping validated by command type & order id.
             return Result.Success(CreateLifecycleDto(orderId, "Rejected"));
         });
-        var path = $"/api/v1.0/orders/{orderId}/reject";
+        var path = $"/api/v1/orders/{orderId}/reject";
         var body = new { restaurantId = Guid.NewGuid(), reason };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -107,7 +107,7 @@ public class LifecycleContractTests
             cmd.Reason.Should().Be(reason);
             return Result.Success(CreateLifecycleDto(orderId, "Cancelled"));
         });
-        var path = $"/api/v1.0/orders/{orderId}/cancel";
+        var path = $"/api/v1/orders/{orderId}/cancel";
         var body = new { restaurantId = Guid.NewGuid(), actingUserId, reason };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -131,7 +131,7 @@ public class LifecycleContractTests
             ((MarkOrderPreparingCommand)req).OrderId.Should().Be(orderId);
             return Result.Success(CreateLifecycleDto(orderId, "Preparing"));
         });
-        var path = $"/api/v1.0/orders/{orderId}/preparing";
+        var path = $"/api/v1/orders/{orderId}/preparing";
         var body = new { restaurantId = Guid.NewGuid() };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -155,7 +155,7 @@ public class LifecycleContractTests
             ((MarkOrderReadyForDeliveryCommand)req).OrderId.Should().Be(orderId);
             return Result.Success(CreateLifecycleDto(orderId, "ReadyForDelivery"));
         });
-        var path = $"/api/v1.0/orders/{orderId}/ready";
+        var path = $"/api/v1/orders/{orderId}/ready";
         var body = new { restaurantId = Guid.NewGuid() };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -180,7 +180,7 @@ public class LifecycleContractTests
             ((MarkOrderDeliveredCommand)req).OrderId.Should().Be(orderId);
             return Result.Success(CreateLifecycleDto(orderId, "Delivered", actual: deliveredAt));
         });
-        var path = $"/api/v1.0/orders/{orderId}/delivered";
+        var path = $"/api/v1/orders/{orderId}/delivered";
         var body = new { restaurantId = Guid.NewGuid(), deliveredAtUtc = deliveredAt };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -204,7 +204,7 @@ public class LifecycleContractTests
             ((GetOrderStatusQuery)req).OrderIdGuid.Should().Be(orderId);
             return Result.Success(new OrderStatusDto(orderId, "Preparing", DateTime.UtcNow, DateTime.UtcNow.AddMinutes(30)));
         });
-        var path = $"/api/v1.0/orders/{orderId}/status";
+        var path = $"/api/v1/orders/{orderId}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -225,7 +225,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.NotFound("Order.NotFound", "Missing")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/accept";
+        var path = $"/api/v1/orders/{orderId}/accept";
         var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -246,7 +246,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.NotFound("Order.NotFound", "Missing")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/preparing";
+        var path = $"/api/v1/orders/{orderId}/preparing";
         var body = new { restaurantId = Guid.NewGuid() };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -266,7 +266,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderStatusDto>(Error.NotFound("Order.NotFound", "Missing")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/status";
+        var path = $"/api/v1/orders/{orderId}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -289,7 +289,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.Conflict("Order.InvalidState", "Cannot accept order")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/accept";
+        var path = $"/api/v1/orders/{orderId}/accept";
         var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -310,7 +310,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.Conflict("Order.InvalidState", "Cannot deliver order")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/delivered";
+        var path = $"/api/v1/orders/{orderId}/delivered";
         var body = new { restaurantId = Guid.NewGuid(), deliveredAtUtc = DateTime.UtcNow };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -334,7 +334,7 @@ public class LifecycleContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.Validation("Order.InvalidEstimatedDeliveryTime", "Past time")));
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/accept";
+        var path = $"/api/v1/orders/{orderId}/accept";
         var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(-5) };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
@@ -357,7 +357,7 @@ public class LifecycleContractTests
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
         var orderId = Guid.NewGuid();
-        var path = $"/api/v1.0/orders/{orderId}/accept";
+        var path = $"/api/v1/orders/{orderId}/accept";
         var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));

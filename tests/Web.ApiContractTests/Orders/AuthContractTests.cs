@@ -14,7 +14,7 @@ public class AuthContractTests
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
 
-        var path = "/api/v1.0/orders/initiate";
+        var path = "/api/v1/orders/initiate";
         var reqBody = new { };
         var json = System.Text.Json.JsonSerializer.Serialize(reqBody);
         TestContext.WriteLine($"REQUEST POST {path}");

@@ -11,7 +11,7 @@ using System.Text.Json;
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
 /// <summary>
-/// Contract tests for GET /api/v1.0/restaurants/{restaurantId}/info
+/// Contract tests for GET /api/v1/restaurants/{restaurantId}/info
 /// Tests status codes, DTO shape, and error handling without executing real domain logic.
 /// </summary>
 public class InfoContractTests
@@ -42,7 +42,7 @@ public class InfoContractTests
             return Result.Success(expectedDto);
         });
 
-        var path = $"/api/v1.0/restaurants/{restaurantId}/info";
+        var path = $"/api/v1/restaurants/{restaurantId}/info";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -88,7 +88,7 @@ public class InfoContractTests
         factory.Sender.RespondWith(_ =>
             Result.Failure<RestaurantPublicInfoDto>(Error.NotFound("Public.GetRestaurantPublicInfo.NotFound", "Restaurant info was not found.")));
 
-        var path = $"/api/v1.0/restaurants/{Guid.NewGuid()}/info";
+        var path = $"/api/v1/restaurants/{Guid.NewGuid()}/info";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();

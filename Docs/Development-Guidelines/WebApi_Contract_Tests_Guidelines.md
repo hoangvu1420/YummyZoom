@@ -63,7 +63,7 @@ Each contract test follows a consistent shape:
    - Set headers (`x-test-user-id` when auth is needed)
    - Configure `factory.Sender.RespondWith(...)` to produce the desired `Result<T>` or `Result.Failure<T>`
 2. **Act**
-   - Issue HTTP request using real route & versioning (e.g. `/api/v1.0/orders/initiate`)
+   - Issue HTTP request using real route & versioning (e.g. `/api/v1/orders/initiate`)
 3. **Assert**
    - Status code
    - Response body shape / critical fields / ProblemDetails semantics
@@ -97,7 +97,7 @@ Tests log:
 Use `TestContext.WriteLine`. Keep logs concise—avoid dumping huge payloads. This aids PR review and human contract inspection.
 
 ## 11. Adding a New Endpoint Contract Test (Checklist)
-- [ ] Identify route & versioned path (`/api/v1.0/...`)
+- [ ] Identify route & versioned path (`/api/v1/...`)
 - [ ] Determine expected success status + body root shape
 - [ ] Determine failure scenario(s) (e.g. NotFound, Validation)
 - [ ] Decide minimal canned response object (construct DTO or `Result.Failure<T>`)—do **not** involve real data access
@@ -164,7 +164,7 @@ public async Task ExampleEndpoint_WhenDomainReturnsNotFound_Returns404()
 
     factory.Sender.RespondWith(_ => Result.Failure<MyResponseDto>(Error.NotFound("Resource.NotFound", "Missing")));
 
-    var path = "/api/v1.0/resources/" + Guid.NewGuid();
+    var path = "/api/v1/resources/" + Guid.NewGuid();
     TestContext.WriteLine($"REQUEST GET {path}");
     var resp = await client.GetAsync(path);
 

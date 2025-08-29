@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
-// Contract tests for GET /api/v1.0/restaurants/{restaurantId}/orders/active
+// Contract tests for GET /api/v1/restaurants/{restaurantId}/orders/active
 public class RestaurantActiveOrdersContractTests
 {
     private static OrderSummaryDto CreateSummary(Guid orderId)
@@ -33,7 +33,7 @@ public class RestaurantActiveOrdersContractTests
             var list = new PaginatedList<OrderSummaryDto>(new[] { CreateSummary(Guid.NewGuid()) }, 1, 1, 25);
             return YummyZoom.SharedKernel.Result.Success(list);
         });
-        var path = $"/api/v1.0/restaurants/{restId}/orders/active?pageNumber=1&pageSize=25";
+        var path = $"/api/v1/restaurants/{restId}/orders/active?pageNumber=1&pageSize=25";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -56,7 +56,7 @@ public class RestaurantActiveOrdersContractTests
             var list = new PaginatedList<OrderSummaryDto>(Array.Empty<OrderSummaryDto>(), 0, 2, 10);
             return YummyZoom.SharedKernel.Result.Success(list);
         });
-        var path = $"/api/v1.0/restaurants/{restId}/orders/active?pageNumber=2&pageSize=10";
+        var path = $"/api/v1/restaurants/{restId}/orders/active?pageNumber=2&pageSize=10";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -71,7 +71,7 @@ public class RestaurantActiveOrdersContractTests
     {
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
-        var path = $"/api/v1.0/restaurants/{Guid.NewGuid()}/orders/active?pageNumber=1&pageSize=10";
+        var path = $"/api/v1/restaurants/{Guid.NewGuid()}/orders/active?pageNumber=1&pageSize=10";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

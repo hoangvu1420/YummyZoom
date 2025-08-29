@@ -42,10 +42,10 @@ public class InitiateOrderContractTests
             "card", null, null, 0m, null);
 
         var requestJson = JsonSerializer.Serialize(body, DomainJson.Options);
-        TestContext.WriteLine("REQUEST POST /api/v1.0/orders/initiate");
+        TestContext.WriteLine("REQUEST POST /api/v1/orders/initiate");
         TestContext.WriteLine(requestJson);
 
-        var resp = await client.PostAsJsonAsync("/api/v1.0/orders/initiate", body);
+        var resp = await client.PostAsJsonAsync("/api/v1/orders/initiate", body);
 
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
         // Use the same domain serialization options (includes AggregateRootIdJsonConverterFactory) for client-side deserialization

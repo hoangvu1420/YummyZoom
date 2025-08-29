@@ -23,7 +23,7 @@ public class Orders : EndpointGroupBase
             .MapGroup(this)
             .RequireAuthorization();
 
-        // POST /api/orders/initiate
+        // POST /api/v1/orders/initiate
         group.MapPost("/initiate", async ([FromBody] InitiateOrderRequest request, ISender sender) =>
         {
             // Map request DTO -> command (explicit mapping keeps layers decoupled)
@@ -54,7 +54,7 @@ public class Orders : EndpointGroupBase
         .WithName("InitiateOrder")
         .WithStandardResults<InitiateOrderResponse>();
 
-        // POST /api/orders/{orderId}/accept
+        // POST /api/v1/orders/{orderId}/accept
         group.MapPost("/{orderId:guid}/accept", async (Guid orderId, [FromBody] AcceptOrderRequest body, ISender sender) =>
         {
             var command = new AcceptOrderCommand(orderId, body.RestaurantId, body.EstimatedDeliveryTime);
@@ -64,7 +64,7 @@ public class Orders : EndpointGroupBase
         .WithName("AcceptOrder")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // POST /api/orders/{orderId}/reject
+        // POST /api/v1/orders/{orderId}/reject
         group.MapPost("/{orderId:guid}/reject", async (Guid orderId, [FromBody] RejectOrderRequest body, ISender sender) =>
         {
             var command = new RejectOrderCommand(orderId, body.RestaurantId, body.Reason);
@@ -74,7 +74,7 @@ public class Orders : EndpointGroupBase
         .WithName("RejectOrder")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // POST /api/orders/{orderId}/cancel
+        // POST /api/v1/orders/{orderId}/cancel
         group.MapPost("/{orderId:guid}/cancel", async (Guid orderId, [FromBody] CancelOrderRequest body, ISender sender) =>
         {
             // Actor user id inferred from auth principal; body.ActingUserId optional for staff tools
@@ -85,7 +85,7 @@ public class Orders : EndpointGroupBase
         .WithName("CancelOrder")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // POST /api/orders/{orderId}/preparing
+        // POST /api/v1/orders/{orderId}/preparing
         group.MapPost("/{orderId:guid}/preparing", async (Guid orderId, [FromBody] SimpleRestaurantScoped body, ISender sender) =>
         {
             var command = new MarkOrderPreparingCommand(orderId, body.RestaurantId);
@@ -95,7 +95,7 @@ public class Orders : EndpointGroupBase
         .WithName("MarkOrderPreparing")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // POST /api/orders/{orderId}/ready
+        // POST /api/v1/orders/{orderId}/ready
         group.MapPost("/{orderId:guid}/ready", async (Guid orderId, [FromBody] SimpleRestaurantScoped body, ISender sender) =>
         {
             var command = new MarkOrderReadyForDeliveryCommand(orderId, body.RestaurantId);
@@ -105,7 +105,7 @@ public class Orders : EndpointGroupBase
         .WithName("MarkOrderReadyForDelivery")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // POST /api/orders/{orderId}/delivered
+        // POST /api/v1/orders/{orderId}/delivered
         group.MapPost("/{orderId:guid}/delivered", async (Guid orderId, [FromBody] MarkDeliveredRequest body, ISender sender) =>
         {
             var command = new MarkOrderDeliveredCommand(orderId, body.RestaurantId, body.DeliveredAtUtc);
@@ -115,7 +115,7 @@ public class Orders : EndpointGroupBase
         .WithName("MarkOrderDelivered")
         .WithStandardResults<OrderLifecycleResultDto>();
 
-        // GET /api/orders/{orderId}
+        // GET /api/v1/orders/{orderId}
         group.MapGet("/{orderId:guid}", async (Guid orderId, ISender sender) =>
         {
             var query = new GetOrderByIdQuery(orderId);
@@ -125,7 +125,7 @@ public class Orders : EndpointGroupBase
         .WithName("GetOrderById")
         .WithStandardResults<GetOrderByIdResponse>();
 
-        // GET /api/orders/{orderId}/status
+        // GET /api/v1/orders/{orderId}/status
         group.MapGet("/{orderId:guid}/status", async (Guid orderId, ISender sender) =>
         {
             var query = new GetOrderStatusQuery(orderId);
@@ -135,7 +135,7 @@ public class Orders : EndpointGroupBase
         .WithName("GetOrderStatus")
         .WithStandardResults<OrderStatusDto>();
 
-        // GET /api/orders/my?pageNumber=1&pageSize=20
+        // GET /api/v1/orders/my?pageNumber=1&pageSize=20
         group.MapGet("/my", async (int pageNumber, int pageSize, ISender sender) =>
         {
             var query = new GetCustomerRecentOrdersQuery(pageNumber, pageSize);

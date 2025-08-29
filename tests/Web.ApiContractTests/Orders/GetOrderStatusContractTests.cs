@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 
-// Contract tests for GET /api/v1.0/orders/{orderId}/status
+// Contract tests for GET /api/v1/orders/{orderId}/status
 public class GetOrderStatusContractTests
 {
     [Test]
@@ -26,7 +26,7 @@ public class GetOrderStatusContractTests
             ((GetOrderStatusQuery)req).OrderIdGuid.Should().Be(orderId);
             return Result.Success(new OrderStatusDto(orderId, "Preparing", DateTime.UtcNow, DateTime.UtcNow.AddMinutes(20)));
         });
-        var path = $"/api/v1.0/orders/{orderId}/status";
+        var path = $"/api/v1/orders/{orderId}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -44,7 +44,7 @@ public class GetOrderStatusContractTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<OrderStatusDto>(Error.NotFound("Order.NotFound", "Missing")));
-        var path = $"/api/v1.0/orders/{Guid.NewGuid()}/status";
+        var path = $"/api/v1/orders/{Guid.NewGuid()}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -60,7 +60,7 @@ public class GetOrderStatusContractTests
     {
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
-        var path = $"/api/v1.0/orders/{Guid.NewGuid()}/status";
+        var path = $"/api/v1/orders/{Guid.NewGuid()}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

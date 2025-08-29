@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 
-// Contract tests for GET /api/v1.0/orders/{orderId}
+// Contract tests for GET /api/v1/orders/{orderId}
 public class GetOrderByIdContractTests
 {
     private static OrderDetailsDto CreateDetails(Guid orderId)
@@ -51,7 +51,7 @@ public class GetOrderByIdContractTests
             return Result.Success(new GetOrderByIdResponse(CreateDetails(orderId)));
         });
 
-        var path = $"/api/v1.0/orders/{orderId}";
+        var path = $"/api/v1/orders/{orderId}";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -68,7 +68,7 @@ public class GetOrderByIdContractTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
         factory.Sender.RespondWith(_ => Result.Failure<GetOrderByIdResponse>(Error.NotFound("Order.NotFound", "Missing")));
-        var path = $"/api/v1.0/orders/{Guid.NewGuid()}";
+        var path = $"/api/v1/orders/{Guid.NewGuid()}";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         var raw = await resp.Content.ReadAsStringAsync();
@@ -84,7 +84,7 @@ public class GetOrderByIdContractTests
     {
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
-        var path = $"/api/v1.0/orders/{Guid.NewGuid()}";
+        var path = $"/api/v1/orders/{Guid.NewGuid()}";
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
