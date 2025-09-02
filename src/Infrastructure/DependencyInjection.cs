@@ -1,32 +1,33 @@
+using System.Text.Json;
+using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Stripe;
+using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Restaurants.Queries.Common;
+using YummyZoom.Domain.Services;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Notifications.Firebase;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using YummyZoom.SharedKernel.Constants;
-using FirebaseAdmin;
-using FirebaseAdmin.Messaging;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authorization;
-using YummyZoom.Application.Common.Authorization;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Infrastructure.Payments.Stripe;
-using YummyZoom.Domain.Services;
-using Stripe;
-using System.Text.Json;
-using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Infrastructure.Outbox;
-using YummyZoom.Infrastructure.Realtime;
+using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.ReadModels.Search;
+using YummyZoom.Infrastructure.Realtime;
+using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Infrastructure;
 
@@ -45,7 +46,7 @@ public static class DependencyInjection
         builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(connectionString, npgsql => npgsql.UseNetTopologySuite());
         });
 
         builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
@@ -75,13 +76,13 @@ public static class DependencyInjection
                 options.Password.RequireUppercase = false;
             })
             .AddDefaultTokenProviders()
-            .AddRoles<IdentityRole<Guid>>() 
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddApiEndpoints();
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, Identity.IdentityService>();
-        
+
         builder.Services.AddScoped<IUserAggregateRepository, UserAggregateRepository>();
         builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
         builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
@@ -94,8 +95,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<ICouponRepository, CouponRepository>();
         builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();
         builder.Services.AddScoped<IInboxStore, InboxStore>();
-    builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
-    builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
+        builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
+        builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
@@ -128,9 +129,9 @@ public static class DependencyInjection
         {
             StripeConfiguration.ApiKey = stripeOptions.SecretKey;
         }
-        
+
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
-        
+
         // Register Domain Services
         builder.Services.AddScoped<OrderFinancialService>();
         builder.Services.AddScoped<TeamCartConversionService>();
@@ -146,16 +147,20 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<IOutboxProcessor, OutboxProcessor>();
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
-    
+
         // Read model rebuild services
         builder.Services.AddScoped<IMenuReadModelRebuilder, FullMenuViewRebuilder>();
+
+        // Search read model maintainer
+        builder.Services.AddScoped<ISearchReadModelMaintainer, SearchIndexMaintainer>();
+
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
     {
         using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
         var logger = loggerFactory.CreateLogger("Firebase.Initialization");
-        
+
         try
         {
             var firebaseConfig = new FirebaseAdminSdkConfig();

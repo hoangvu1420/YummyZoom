@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -13,9 +14,11 @@ using YummyZoom.Infrastructure.Data;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901160952_AddSearchIndexItemsReadModel")]
+    partial class AddSearchIndexItemsReadModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1477,7 +1480,7 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<Point>("Geo")
-                        .HasColumnType("geography (point, 4326)");
+                        .HasColumnType("geography(Point,4326)");
 
                     b.Property<bool>("IsAcceptingOrders")
                         .ValueGeneratedOnAdd()
@@ -1522,15 +1525,21 @@ namespace YummyZoom.Infrastructure.Data.Migrations
 
                     b.Property<NpgsqlTsVector>("TsAll")
                         .IsRequired()
-                        .HasColumnType("tsvector");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tsvector")
+                        .HasComputedColumnSql("setweight(to_tsvector('simple', coalesce(\"Name\",'')), 'A') || setweight(to_tsvector('simple', coalesce(\"Cuisine\",'')), 'B') || setweight(to_tsvector('simple', coalesce(array_to_string(\"Tags\",' '),'')), 'B') || setweight(to_tsvector('simple', coalesce(\"Description\",'')), 'C') || setweight(to_tsvector('simple', coalesce(array_to_string(\"Keywords\",' '),'')), 'C')", true);
 
                     b.Property<NpgsqlTsVector>("TsDescr")
                         .IsRequired()
-                        .HasColumnType("tsvector");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tsvector")
+                        .HasComputedColumnSql("to_tsvector('simple', coalesce(\"Description\",''))", true);
 
                     b.Property<NpgsqlTsVector>("TsName")
                         .IsRequired()
-                        .HasColumnType("tsvector");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tsvector")
+                        .HasComputedColumnSql("to_tsvector('simple', coalesce(\"Name\",''))", true);
 
                     b.Property<string>("Type")
                         .IsRequired()

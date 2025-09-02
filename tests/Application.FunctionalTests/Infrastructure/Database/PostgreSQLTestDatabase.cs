@@ -33,7 +33,7 @@ public class PostgreSQLTestDatabase : ITestDatabase
         _connection = new NpgsqlConnection(_connectionString);
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(_connectionString)
+            .UseNpgsql(_connectionString, o => o.UseNetTopologySuite())
             .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
             .Options;
 

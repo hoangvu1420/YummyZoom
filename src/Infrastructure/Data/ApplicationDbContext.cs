@@ -36,11 +36,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<UserDeviceSession> UserDeviceSessions => Set<UserDeviceSession>();
     public DbSet<ProcessedWebhookEvent> ProcessedWebhookEvents => Set<ProcessedWebhookEvent>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+
+    // Read Models
     public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
     public DbSet<RestaurantReviewSummary> RestaurantReviewSummaries => Set<RestaurantReviewSummary>();
     public DbSet<FullMenuView> FullMenuViews => Set<FullMenuView>();
-    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-	public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+    public DbSet<SearchIndexItem> SearchIndexItems => Set<SearchIndexItem>();
 
     // Domain Entities
     public DbSet<User> DomainUsers => Set<User>();
@@ -63,9 +66,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
+        // Enable PostGIS and trigram extensions
+        builder.HasPostgresExtension("pg_trgm");
+        builder.HasPostgresExtension("postgis");
+
         builder.Entity<ProcessedWebhookEvent>().HasKey(e => e.Id);
-        
+
         // Apply global query filters for soft delete
         ApplySoftDeleteQueryFilters(builder);
     }
@@ -76,7 +83,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var clrType = entityType.ClrType;
-            
+
             if (typeof(ISoftDeletableEntity).IsAssignableFrom(clrType))
             {
                 var parameter = System.Linq.Expressions.Expression.Parameter(clrType, "e");
@@ -84,7 +91,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 var isDeletedProperty = System.Linq.Expressions.Expression.Call(propertyMethodInfo!, parameter, System.Linq.Expressions.Expression.Constant("IsDeleted"));
                 var compareExpression = System.Linq.Expressions.Expression.MakeBinary(System.Linq.Expressions.ExpressionType.Equal, isDeletedProperty, System.Linq.Expressions.Expression.Constant(false));
                 var lambda = System.Linq.Expressions.Expression.Lambda(compareExpression, parameter);
-                
+
                 modelBuilder.Entity(clrType).HasQueryFilter(lambda);
             }
         }

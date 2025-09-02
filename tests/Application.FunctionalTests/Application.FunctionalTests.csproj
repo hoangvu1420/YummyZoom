@@ -19,6 +19,9 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+      <!-- Ensure spatial plugin assemblies are present for test-time DbContext creation -->
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" />
+      <PackageReference Include="NetTopologySuite" />
       <PackageReference Include="Microsoft.Data.SqlClient" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" />
       <PackageReference Include="nunit" />

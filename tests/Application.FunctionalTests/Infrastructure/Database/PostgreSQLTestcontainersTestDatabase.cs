@@ -19,6 +19,8 @@ public class PostgreSQLTestcontainersTestDatabase : ITestDatabase
     public PostgreSQLTestcontainersTestDatabase()
     {
         _container = new PostgreSqlBuilder()
+            // Use a PostGIS-enabled Postgres image so 'geography' and spatial functions are available during tests
+            .WithImage("postgis/postgis:16-3.4")
             .WithAutoRemove(true)
             .Build();
     }
@@ -38,7 +40,7 @@ public class PostgreSQLTestcontainersTestDatabase : ITestDatabase
         _connection = new NpgsqlConnection(_connectionString);
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(_connectionString)
+            .UseNpgsql(_connectionString, o => o.UseNetTopologySuite())
             .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
             .Options;
 
@@ -50,7 +52,7 @@ public class PostgreSQLTestcontainersTestDatabase : ITestDatabase
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
-            TablesToIgnore = ["__EFMigrationsHistory"]
+            TablesToIgnore = ["__EFMigrationsHistory", "spatial_ref_sys", "geometry_columns", "geography_columns"]
         });
         await _connection.CloseAsync();
     }
@@ -77,4 +79,6 @@ public class PostgreSQLTestcontainersTestDatabase : ITestDatabase
         await _connection.DisposeAsync();
         await _container.DisposeAsync();
     }
+
+    
 }

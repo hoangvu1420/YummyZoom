@@ -40,5 +40,6 @@
                 }
             }
         ]
-    }
+    },
+    "chatgpt.openOnStartup": false
 }
