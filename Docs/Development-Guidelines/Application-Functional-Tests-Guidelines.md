@@ -202,4 +202,34 @@ Test names should follow the pattern:
 *   **Readability:** Use the static `Testing` class and the test data factories to keep your tests clean, concise, and easy to understand.
 *   **Focus:** Each test should verify a single, specific behavior. Avoid complex tests that try to do too much at once.
 
+**8. Debugging Event-Driven Tests**
+
+**Common Pitfall: JSON Deserialization Failures**
+
+**Problem**: Events reach outbox but handlers never execute.
+
+**Root Cause**: Value objects lack `[JsonConstructor]` attribute.
+
+**Symptoms**: 
+- `DrainOutboxAsync()` completes silently
+- Event handlers not called
+- Tests fail expecting handler side-effects
+
+**Solution**: Add `[JsonConstructor]` to value object constructors:
+
+```csharp
+public sealed class Rating : ValueObject
+{
+    public int Value { get; private set; }
+    
+    [JsonConstructor]  // Required for JSON deserialization
+    private Rating() { }
+    
+    private Rating(int value) => Value = value;
+    public static Result<Rating> Create(int value) => ...;
+}
+```
+
+**Debugging**: Add debug output to `OutboxProcessor.ProcessOnceAsync()` to catch deserialization exceptions.
+
 By following these guidelines, you can write effective and maintainable functional tests that ensure the quality and stability of the YummyZoom application.

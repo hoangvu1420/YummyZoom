@@ -57,6 +57,15 @@ public static class DefaultTestData
         }
         
         /// <summary>
+        /// Restaurant geographic coordinates.
+        /// </summary>
+        public static class GeoCoordinates
+        {
+            public const double Latitude = 47.6000;   // Seattle area coordinates for testing
+            public const double Longitude = -122.3300;
+        }
+        
+        /// <summary>
         /// Restaurant business hours.
         /// </summary>
         public static class Hours

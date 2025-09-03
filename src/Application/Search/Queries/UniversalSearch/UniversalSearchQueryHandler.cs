@@ -1,4 +1,5 @@
 using Dapper;
+using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Queries.Common;
@@ -44,7 +45,9 @@ public sealed record SearchResultDto(
     string? DescriptionSnippet,
     string? Cuisine,
     double Score,
-    double? DistanceKm
+    double? DistanceKm,
+    IReadOnlyList<SearchBadgeDto> Badges,
+    string? Reason
 );
 
 public sealed record UniversalSearchResponseDto(
@@ -61,29 +64,18 @@ public sealed record FacetBlock(
 
 public sealed record FacetCount<T>(T Value, int Count);
 
-// Validator
-public sealed class UniversalSearchQueryValidator : AbstractValidator<UniversalSearchQuery>
-{
-    public UniversalSearchQueryValidator()
-    {
-        RuleFor(x => x.PageNumber).GreaterThanOrEqualTo(1);
-        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
-        RuleFor(x => x.Term).MaximumLength(256);
-        RuleFor(x => x.Latitude).InclusiveBetween(-90, 90).When(x => x.Latitude.HasValue);
-        RuleFor(x => x.Longitude).InclusiveBetween(-180, 180).When(x => x.Longitude.HasValue);
-        RuleFor(x => x.Cuisines).Must(c => c!.All(s => s.Length <= 100)).When(x => x.Cuisines is { Length: > 0 });
-        RuleFor(x => x.Tags).Must(t => t!.All(s => s.Length <= 100)).When(x => x.Tags is { Length: > 0 });
-        RuleFor(x => x.PriceBands).Must(pb => pb!.All(b => b >= 0)).When(x => x.PriceBands is { Length: > 0 });
-    }
-}
-
 // Handler
 public sealed class UniversalSearchQueryHandler
     : IRequestHandler<UniversalSearchQuery, Result<UniversalSearchResponseDto>>
 {
     private readonly IDbConnectionFactory _db;
+    private readonly ResultExplanationOptions _options;
 
-    public UniversalSearchQueryHandler(IDbConnectionFactory db) => _db = db;
+    public UniversalSearchQueryHandler(IDbConnectionFactory db, IOptions<ResultExplanationOptions> options)
+    {
+        _db = db;
+        _options = options.Value ?? new ResultExplanationOptions();
+    }
 
     private sealed record SearchResultRow(
         Guid Id,
@@ -92,6 +84,10 @@ public sealed class UniversalSearchQueryHandler
         string Name,
         string? Description,
         string? Cuisine,
+        bool IsOpenNow,
+        bool IsAcceptingOrders,
+        double? AvgRating,
+        int ReviewCount,
         double Score,
         double? DistanceKm);
 
@@ -149,12 +145,16 @@ public sealed class UniversalSearchQueryHandler
         p.Add("pageSize", request.PageSize);
 
         const string selectCols = """
-            s."Id"          AS Id,
-            s."Type"        AS Type,
-            s."RestaurantId" AS RestaurantId,
-            s."Name"        AS Name,
-            s."Description" AS Description,
-            s."Cuisine"     AS Cuisine,
+            s."Id"                  AS Id,
+            s."Type"                AS Type,
+            s."RestaurantId"        AS RestaurantId,
+            s."Name"                AS Name,
+            s."Description"         AS Description,
+            s."Cuisine"             AS Cuisine,
+            s."IsOpenNow"           AS IsOpenNow,
+            s."IsAcceptingOrders"   AS IsAcceptingOrders,
+            s."AvgRating"           AS AvgRating,
+            s."ReviewCount"         AS ReviewCount,
             (
               0.6 * (CASE WHEN @q IS NOT NULL THEN ts_rank_cd(s."TsAll", websearch_to_tsquery('simple', @q)) ELSE 0 END)
               + 0.2 * (CASE WHEN @lat IS NOT NULL AND @lon IS NOT NULL AND s."Geo" IS NOT NULL
@@ -183,8 +183,27 @@ public sealed class UniversalSearchQueryHandler
             ct);
 
         var mapped = page.Items.Select(r =>
-            new SearchResultDto(r.Id, r.Type, r.RestaurantId, r.Name, r.Description, r.Cuisine, r.Score, r.DistanceKm)
-        ).ToList();
+        {
+            var (badges, reason) = SearchResultExplainer.Explain(
+                r.IsOpenNow,
+                r.IsAcceptingOrders,
+                r.AvgRating,
+                r.ReviewCount,
+                r.DistanceKm,
+                _options);
+
+            return new SearchResultDto(
+                r.Id,
+                r.Type,
+                r.RestaurantId,
+                r.Name,
+                r.Description,
+                r.Cuisine,
+                r.Score,
+                r.DistanceKm,
+                badges,
+                reason);
+        }).ToList();
 
         var pageList = new PaginatedList<SearchResultDto>(mapped, page.TotalCount, page.PageNumber, request.PageSize);
 

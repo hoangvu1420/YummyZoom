@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using YummyZoom.Domain.RestaurantAggregate.Errors;
 using YummyZoom.SharedKernel;
 
@@ -9,6 +10,7 @@ public sealed class BusinessHours : ValueObject
     // This could be expanded to a more complex type if needed.
     public string Hours { get; private set; }
 
+    [JsonConstructor]
     private BusinessHours(string hours)
     {
         Hours = hours;

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using YummyZoom.Domain.ReviewAggregate.Errors;
 using YummyZoom.SharedKernel;
 
@@ -7,6 +8,7 @@ public sealed class Rating : ValueObject
 {
     public int Value { get; private set; }
 
+    [JsonConstructor]
     private Rating(int value)
     {
         Value = value;

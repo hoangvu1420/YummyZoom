@@ -9,6 +9,7 @@ using Azure.Security.KeyVault.Secrets;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Web.Realtime;
+using YummyZoom.Application.Search.Queries.UniversalSearch;
 
 namespace YummyZoom.Web;
 
@@ -79,6 +80,10 @@ public static class DependencyInjection
 
         // Real-time notifier: override Infrastructure's NoOp with SignalR-backed adapter in Web host
         builder.Services.AddSingleton<IOrderRealtimeNotifier, SignalROrderRealtimeNotifier>();
+
+        // Result explanations & badges options (configurable thresholds)
+        builder.Services.Configure<ResultExplanationOptions>(
+            builder.Configuration.GetSection("Search:ResultExplanation"));
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

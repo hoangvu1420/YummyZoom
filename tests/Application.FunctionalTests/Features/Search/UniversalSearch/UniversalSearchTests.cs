@@ -1,14 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using static YummyZoom.Application.FunctionalTests.Testing;
 using YummyZoom.Infrastructure.Data;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
-namespace YummyZoom.Application.FunctionalTests.Features.Search;
+namespace YummyZoom.Application.FunctionalTests.Features.Search.UniversalSearch;
 
 [TestFixture]
 public class UniversalSearchTests : BaseTestFixture

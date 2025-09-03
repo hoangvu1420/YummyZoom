@@ -26,6 +26,7 @@ using YummyZoom.Infrastructure.Outbox;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.ReadModels.FullMenu;
 using YummyZoom.Infrastructure.ReadModels.Search;
+using YummyZoom.Infrastructure.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Realtime;
 using YummyZoom.SharedKernel.Constants;
 
@@ -153,6 +154,9 @@ public static class DependencyInjection
 
         // Search read model maintainer
         builder.Services.AddScoped<ISearchReadModelMaintainer, SearchIndexMaintainer>();
+
+        // Review summaries maintainer
+        builder.Services.AddScoped<IReviewSummaryMaintainer, ReviewSummaryMaintainer>();
 
     }
 

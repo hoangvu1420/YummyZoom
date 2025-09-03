@@ -224,6 +224,14 @@ public static class TestDataFactory
         if (businessHoursResult.IsFailure)
             throw new InvalidOperationException($"Failed to create restaurant business hours: {businessHoursResult.Error}");
 
+        // Create geographic coordinates
+        var geoCoordinatesResult = Domain.RestaurantAggregate.ValueObjects.GeoCoordinates.Create(
+            DefaultTestData.Restaurant.GeoCoordinates.Latitude,
+            DefaultTestData.Restaurant.GeoCoordinates.Longitude);
+
+        if (geoCoordinatesResult.IsFailure)
+            throw new InvalidOperationException($"Failed to create restaurant geographic coordinates: {geoCoordinatesResult.Error}");
+
         // Create the restaurant entity
         var restaurantResult = Restaurant.Create(
             DefaultTestData.Restaurant.Name,
@@ -233,7 +241,8 @@ public static class TestDataFactory
             DefaultTestData.Restaurant.CuisineType,
             addressResult.Value,
             contactInfoResult.Value,
-            businessHoursResult.Value);
+            businessHoursResult.Value,
+            geoCoordinatesResult.Value);
 
         if (restaurantResult.IsFailure)
             throw new InvalidOperationException($"Failed to create restaurant: {restaurantResult.Error}");
