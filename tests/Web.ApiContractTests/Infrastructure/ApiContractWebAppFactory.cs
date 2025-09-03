@@ -35,6 +35,27 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
                 o.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
                 o.DefaultChallengeScheme = TestAuthHandler.Scheme;
             }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, _ => { });
+
+            // Ensure ProblemDetails is properly configured for tests
+            services.AddProblemDetails();
+
+            // Configure HTTPS redirection to avoid 400 with empty body in TestServer
+            services.Configure<Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionOptions>(o =>
+            {
+                o.HttpsPort = 443;
+            });
         });
+        // Also set hosting setting used by HttpsRedirectionMiddleware
+        builder.UseSetting("https_port", "443");
+    }
+
+    // Ensure requests use HTTPS to bypass HttpsRedirectionMiddleware issues in TestServer
+    public new HttpClient CreateClient() => CreateClient(new WebApplicationFactoryClientOptions());
+
+    public new HttpClient CreateClient(WebApplicationFactoryClientOptions options)
+    {
+        options ??= new WebApplicationFactoryClientOptions();
+        options.BaseAddress ??= new Uri("https://localhost");
+        return base.CreateClient(options);
     }
 }

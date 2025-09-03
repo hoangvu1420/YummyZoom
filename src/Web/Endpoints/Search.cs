@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Search.Queries.Autocomplete;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
@@ -11,50 +12,63 @@ public class Search : EndpointGroupBase
         var publicGroup = app.MapGroup(this);
 
         // GET /api/v1/search
-        publicGroup.MapGet("/", async (
-            string? term,
-            double? lat,
-            double? lon,
-            bool? openNow,
-            string[]? cuisines,
-            string[]? tags,
-            short[]? priceBands,
-            bool? includeFacets,
-            int pageNumber,
-            int pageSize,
-            ISender sender) =>
+        publicGroup.MapGet("/", async ([AsParameters] UniversalSearchRequestDto req, ISender sender) =>
         {
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var pageNumber = req.PageNumber ?? 1;
+            var pageSize = req.PageSize ?? 10;
+            var includeFacets = req.IncludeFacets ?? false;
+
             var rq = new UniversalSearchQuery(
-                term,
-                lat,
-                lon,
-                openNow,
-                cuisines,
-                tags,
-                priceBands,
-                includeFacets ?? false,
+                req.Term,
+                req.Lat,
+                req.Lon,
+                req.OpenNow,
+                req.Cuisines,
+                req.Tags,
+                req.PriceBands,
+                includeFacets,
                 pageNumber,
                 pageSize);
-
+            
             var res = await sender.Send(rq);
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })
         .WithName("UniversalSearch")
         .WithSummary("Universal search")
-        .Produces<UniversalSearchResponseDto>(StatusCodes.Status200OK)
-        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status500InternalServerError);
+        .WithDescription("Search across restaurants, menu items, and tags with optional location, open-now, cuisine, tag, and price filters. Returns paginated results and optional facets.")
+        .WithStandardResults<UniversalSearchResponseDto>();
 
         // GET /api/v1/search/autocomplete
-        publicGroup.MapGet("/autocomplete", async (string q, ISender sender) =>
+        publicGroup.MapGet("/autocomplete", async ([AsParameters] AutocompleteRequestDto req, ISender sender) =>
         {
-            var res = await sender.Send(new AutocompleteQuery(q));
+            var term = req.Term ?? string.Empty; // avoid Minimal API 400 for missing non-nullable ref by coalescing here
+            var res = await sender.Send(new AutocompleteQuery(term));
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })
         .WithName("Autocomplete")
         .WithSummary("Autocomplete suggestions")
-        .Produces<IReadOnlyList<SuggestionDto>>(StatusCodes.Status200OK)
-        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status500InternalServerError);
+        .WithDescription("Returns up to 10 suggestions for the given query term across searchable entities.")
+        .WithStandardResults<IReadOnlyList<SuggestionDto>>();
     }
+}
+
+// Request DTOs (query-bound)
+public sealed record UniversalSearchRequestDto
+{
+    public string? Term { get; init; }
+    public double? Lat { get; init; }
+    public double? Lon { get; init; }
+    public bool? OpenNow { get; init; }
+    public string[]? Cuisines { get; init; }
+    public string[]? Tags { get; init; }
+    public short[]? PriceBands { get; init; }
+    public bool? IncludeFacets { get; init; }
+    public int? PageNumber { get; init; }
+    public int? PageSize { get; init; }
+}
+
+public sealed record AutocompleteRequestDto
+{
+    public string? Term { get; init; }
 }

@@ -1,114 +1,118 @@
-Based on the refactoring outline, here's the comprehensive plan of changes needed:
+Universal Search 400 Issue – Context Pack
 
-## Implementation Plan for Concurrent Coupon Usage Fix
+Environment
+- .NET SDK: 9.0.302; VSTest: 17.14.1 (x64); OS: Windows 10 (win-x64)
+- Test project: `tests/Web.ApiContractTests`
+- Web project: `src/Web`
+- Versioning: API routes are under `/api/v{version:apiVersion}`; default v1 configured
 
-### 1. **Update ICouponRepository Interface**
-**File**: `src/Application/Common/Interfaces/IRepositories/ICouponRepository.cs`
+Endpoint Definition (Search)
+- Group mapping: `src/Web/Infrastructure/WebApplicationExtensions.cs:21` builds versioned group, then iterates endpoint groups (subclasses of `EndpointGroupBase`) and invokes `Map(versionedGroup)`.
+- Search endpoints: `src/Web/Endpoints/Search.cs:1`
+  - Group base path resolved from class name via `MapGroup(this)` → `/search` inside `/api/v1`.
+  - Universal Search endpoint (root of group):
+    - Method: GET
+    - Path: `/api/v1/search` (handler mapped with empty pattern string)
+    - Signature: `async ([AsParameters] UniversalSearchRequestDto req, ISender sender)`
+    - Behavior: constructs `UniversalSearchQuery` and `await sender.Send(rq)`, returns `Results.Ok` on success, else `res.ToIResult()`.
+  - Autocomplete endpoint:
+    - Method: GET
+    - Path: `/api/v1/search/autocomplete`
+    - Signature: `async ([AsParameters] AutocompleteRequestDto req, ISender sender)`
+    - Behavior: `sender.Send(new AutocompleteQuery(req.Term))` then OK or `ToIResult()`.
 
-**Changes**:
-- Add new method: `Task<bool> TryIncrementUsageCountAsync(CouponId couponId, CancellationToken cancellationToken = default)`
-- This method will perform atomic increment and return success/failure
+Request DTOs
+- `UniversalSearchRequestDto` (query-bound):
+  - Properties: `string? Term`, `double? Lat`, `double? Lon`, `bool? OpenNow`, `string[]? Cuisines`, `string[]? Tags`, `short[]? PriceBands`, `bool IncludeFacets = false`, `int PageNumber = 1`, `int PageSize = 10`.
+- `AutocompleteRequestDto` (query-bound): `string Term { get; init; } = string.Empty;`
 
-### 2. **Implement Atomic Increment in CouponRepository**
-**File**: `src/Infrastructure/Data/Repositories/CouponRepository.cs`
+Application Query & Validation
+- Universal search MediatR request and handler: `src/Application/Search/Queries/UniversalSearch/UniversalSearchQueryHandler.cs:1`.
+  - Request record `UniversalSearchQuery` accepts the DTO fields (some renamed e.g., `Latitude/Longitude`).
+  - Handler runs Dapper SQL and returns `Result<UniversalSearchResponseDto>`.
+  - Facets optional via `IncludeFacets`.
+- Validation: `src/Application/Search/Queries/UniversalSearch/UniversalSearchQueryValidator.cs:1`.
+  - Rules: `PageNumber >= 1`, `PageSize in [1,100]`, `Term <= 256`, `Latitude ∈ [-90,90]` if set, `Longitude ∈ [-180,180]` if set, lengths for `Cuisines/Tags`, non-negative `PriceBands` when present.
 
-**Changes**:
-- Implement `TryIncrementUsageCountAsync` using raw SQL for atomicity:
-  ```sql
-  UPDATE Coupons 
-  SET CurrentTotalUsageCount = CurrentTotalUsageCount + 1 
-  WHERE Id = @couponId 
-    AND CurrentTotalUsageCount < TotalUsageLimit
-    AND TotalUsageLimit IS NOT NULL
-  ```
-- Return `true` if `ExecuteSqlRawAsync` affects 1 row, `false` if 0 rows (limit exceeded)
-- Include proper error handling and logging
+Result → HTTP Mapping
+- `src/Web/Infrastructure/ResultExtensions.cs:1`: `Result<T>.ToIResult()` routes to `CustomResults.Problem` for failures.
+- `src/Web/Infrastructure/CustomResults.cs:1`: Maps `ErrorType.Validation → 400`, `NotFound → 404`, `Conflict → 409`, `Failure → 400`, else `500`, returning `ProblemDetails` body.
+- Global API behavior: `src/Web/DependencyInjection.cs:1` sets `options.SuppressModelStateInvalidFilter = true` and registers `AddExceptionHandler<CustomExceptionHandler>()`.
 
-### 3. **Modify OrderFinancialService**
-**File**: `src/Domain/Services/OrderFinancialService.cs`
+Test Infrastructure (Contract Tests)
+- Factory: `tests/Web.ApiContractTests/Infrastructure/ApiContractWebAppFactory.cs:1`
+  - Replaces `ISender` with `CapturingSender` to stub MediatR results.
+  - Injects test auth scheme (public endpoints omit auth headers; results in anonymous access).
+  - Disables a hosted service (`OutboxPublisherHostedService`).
+  - Adds `AddProblemDetails()` for tests.
+  - Sets client `BaseAddress` to `https://localhost` to bypass HTTP→HTTPS redirection in TestServer.
+  - Configures `HttpsRedirectionOptions.HttpsPort = 443` and `builder.UseSetting("https_port","443")` to satisfy `HttpsRedirectionMiddleware` when present.
+- CapturingSender: `tests/Web.ApiContractTests/Infrastructure/CapturingSender.cs:1` captures last request and returns canned `Result<T>`.
+- Test auth: `tests/Web.ApiContractTests/Infrastructure/TestAuthHandler.cs:1` honors `x-test-user-id` (not required for public endpoints).
 
-**Changes**:
-- **Remove** the total usage limit check from `ValidateAndCalculateDiscount` method
-- Keep all other validations (date range, user limit, min amount, etc.)
-- Update method documentation to clarify that total usage limits are handled elsewhere
-- The method should focus only on business rule validation, not concurrency control
+The Failing Tests
+- File: `tests/Web.ApiContractTests/Search/UniversalSearchContractTests.cs:1`
+  - Test 1: `UniversalSearch_WithMinimalParams_Returns200_WithPageAndEmptyFacets`
+    - Request: `GET /api/v1/search`
+    - Stubbed sender returns `Result.Success(new UniversalSearchResponseDto(...))`.
+    - Expected: 200 OK with page info and empty facets.
+    - Actual: 400 BadRequest, empty body (Content-Length: 0), Content-Type empty.
+  - Test 2: `UniversalSearch_WhenValidationFails_Returns400Problem`
+    - Request: `GET /api/v1/search?pageNumber=0&pageSize=1000` (intentionally “invalid” but failure is produced by the stub)
+    - Stubbed sender returns `Result.Failure<UniversalSearchResponseDto>(Error.Validation("Search.Invalid", "Bad query"))`.
+    - Expected: 400 with ProblemDetails (title "Search").
+    - Actual: 400 with empty body (Content-Length: 0), Content-Type empty.
 
-### 4. **Refactor InitiateOrderCommandHandler**
-**File**: `src/Application/Orders/Commands/InitiateOrder/InitiateOrderCommandHandler.cs`
+Contrast: Passing Tests
+- Autocomplete: `tests/Web.ApiContractTests/Search/AutocompleteContractTests.cs:1`
+  - `GET /api/v1/search/autocomplete?term=piz` → 200 with JSON array body (works).
+- Restaurants public info: `tests/Web.ApiContractTests/Restaurants/InfoContractTests.cs:1`
+  - `GET /api/v1/restaurants/{id}/info` → 200 and 404 scenarios both work with expected JSON/ProblemDetails bodies.
 
-**Changes**:
-- Implement the new logic flow as outlined:
-  1. Pre-validate coupon (everything except total usage limit)
-  2. Attempt atomic increment via `TryIncrementUsageCountAsync`
-  3. If increment fails, return `CouponErrors.UsageLimitExceeded`
-  4. If increment succeeds, proceed with discount calculation
-- Remove the old post-order coupon usage increment logic
-- Update logging to reflect the new flow
-- Clean up debug traces
+Repro Commands (used during diagnosis)
+- Minimal failing test filter:
+  - `dotnet test tests/Web.ApiContractTests/Web.ApiContractTests.csproj -c Release --filter "FullyQualifiedName~UniversalSearch_WhenValidationFails_Returns400Problem" -v minimal`
+  - `dotnet test tests/Web.ApiContractTests/Web.ApiContractTests.csproj -c Release --filter "FullyQualifiedName~UniversalSearch_WithMinimalParams_Returns200_WithPageAndEmptyFacets" -v minimal`
+- Passing reference tests:
+  - `dotnet test ... --filter "FullyQualifiedName~Autocomplete_WithValidTerm_Returns200_WithSuggestions"`
+  - `dotnet test ... --filter "FullyQualifiedName~Restaurants.InfoContractTests.GetRestaurantInfo_WhenFound_Returns200WithDtoShape"`
 
-### 5. **Add CouponErrors for Consistency**
-**File**: `src/Domain/CouponAggregate/Errors/CouponErrors.cs`
+Observed Runtime Logs (from failing runs)
+- Prior to adjustments, saw: `Failed to determine the https port for redirect.` (HttpsRedirectionMiddleware). After setting BaseAddress to https and configuring https_port, the warning is no longer present for these specific runs.
+- Response details consistently show: `RESPONSE 400 BadRequest` with `Content Length: 0` and no content type for the universal search endpoint.
 
-**Changes**:
-- Ensure `UsageLimitExceeded` error exists and has appropriate message
-- Add any additional errors needed for the new flow
+Key Observations
+- The 400 response for `/api/v1/search` appears to be generated before the endpoint handler executes (empty body, no ProblemDetails mapping, despite stubbing `Result<T>`). CapturingSender likely not invoked for these requests.
+- `/api/v1/search/autocomplete` works with the same group, DI, and sender, so group routing and DI are generally correct.
+- Other unrelated endpoints (e.g., restaurants info) also work; versioning configuration seems fine.
+- The universal search handler uses `[AsParameters] UniversalSearchRequestDto` (record with many optional properties and defaults). Minimal API binding may be failing early and returning a bare 400.
+- Changing route pattern from `"/"` to `""` did not change behavior (still 400, empty body).
 
-### 6. **Update Domain Logic (Optional)**
-**File**: `src/Domain/CouponAggregate/Coupon.cs`
+Hypotheses (to validate with external sources)
+- Minimal API [AsParameters] binding edge-case: When binding a record/class with optional arrays and non-nullable primitives with defaults, binder might be failing for the empty query case, causing a 400 with no body.
+- A specific property in `UniversalSearchRequestDto` could be causing binder failure when omitted (e.g., `IncludeFacets` or numeric defaults), unlike `AutocompleteRequestDto` which only binds a single string.
+- Route mapping quirk for the group root handler (empty pattern) interacting with versioned groups. However, other groups/handlers at non-root paths behave correctly and versioning is working.
+- Some implicit model binding failure without ModelState details because `SuppressModelStateInvalidFilter = true` and this is minimal APIs (not MVC controllers), leading to 400 with no body before the handler.
 
-**Changes**:
-- Consider adding a method to validate business rules without usage increment
-- Or keep existing `Use()` method but document that total usage limits are handled at repository level
-- Ensure domain events are still raised appropriately
+Potential Next Experiments (non-exhaustive)
+- Replace `[AsParameters] UniversalSearchRequestDto` with explicit `[FromQuery]` parameters on the handler to see if binding succeeds and the stubbed sender is hit.
+- Alternatively, keep `[AsParameters]` but make all properties nullable (including `IncludeFacets`, `PageNumber`, `PageSize`) to observe if binder stops failing; then set defaults in code when constructing the query.
+- Add a simple "ping" MapGet at `/api/v1/search/__probe` within the same group to verify the group base path isn’t misbehaving.
+- Add test-time logging middleware to write when the handler is hit, or assert `factory.Sender.LastRequest` after call to confirm if the handler is reached.
+- Temporarily remove `[AsParameters]` and bind a single dummy `string? Term` parameter to see if `/api/v1/search` starts returning 200 with stubbed response.
 
-### 7. **Database Considerations**
-**Files**: Database migration (if needed)
+Relevant Code References
+- Endpoint: `src/Web/Endpoints/Search.cs:1`
+- Grouping/versioning: `src/Web/Infrastructure/WebApplicationExtensions.cs:21`
+- Request DTO: `src/Web/Endpoints/Search.cs:44`
+- UniversalSearch query/handler: `src/Application/Search/Queries/UniversalSearch/UniversalSearchQueryHandler.cs:1`
+- UniversalSearch validator: `src/Application/Search/Queries/UniversalSearch/UniversalSearchQueryValidator.cs:1`
+- Result mapping: `src/Web/Infrastructure/ResultExtensions.cs:1`, `src/Web/Infrastructure/CustomResults.cs:1`
+- Global API behavior: `src/Web/DependencyInjection.cs:1`
+- Test factory: `tests/Web.ApiContractTests/Infrastructure/ApiContractWebAppFactory.cs:1`
+- Failing tests: `tests/Web.ApiContractTests/Search/UniversalSearchContractTests.cs:1`
+- Passing search-autocomplete tests: `tests/Web.ApiContractTests/Search/AutocompleteContractTests.cs:1`
 
-**Changes**:
-- Ensure database supports concurrent updates properly
-- Consider adding database index on `CurrentTotalUsageCount` for performance
-- No schema changes needed for this approach
+Summary
+The universal search root endpoint (`GET /api/v1/search`) consistently returns 400 with an empty body under contract tests, while the autocomplete and other endpoints behave as expected. Evidence points to an early request binding failure (likely `[AsParameters]` with the complex DTO), occurring before the handler and before custom `Result`→`ProblemDetails` mapping. The next step is to narrow the binding surface (explicit `[FromQuery]` parameters or relaxed DTO nullability) to validate the binding hypothesis and guide a production-friendly fix.
 
-### 8. **Update Tests**
-**Files**: Multiple test files
-
-**Changes**:
-- **Functional Tests**: The existing test should pass once implemented
-- **Unit Tests**: Update `OrderFinancialService` tests to reflect removed usage limit check
-- **Repository Tests**: Add tests for `TryIncrementUsageCountAsync` behavior
-- **Integration Tests**: Add tests for concurrent scenarios
-
-### 9. **Error Handling Updates**
-**File**: `src/Application/Orders/Commands/InitiateOrder/InitiateOrderCommandHandler.cs`
-
-**Changes**:
-- Return appropriate domain errors when atomic increment fails
-- Ensure error messages are user-friendly
-- Maintain existing error handling for other coupon validation failures
-
-## Implementation Order
-
-1. **Start with Repository Layer** - Add interface and implementation
-2. **Update Domain Service** - Remove usage limit check
-3. **Refactor Command Handler** - Implement new flow
-4. **Run Tests** - Verify the concurrent test passes
-5. **Clean up** - Remove debug traces and old logic
-6. **Add Comprehensive Tests** - Cover edge cases
-
-## Key Benefits of This Approach
-
-- **Maintains Clean Architecture** - Business logic stays in domain layer
-- **Atomic Operations** - Database ensures consistency
-- **Minimal Schema Changes** - Uses existing table structure
-- **Clear Separation of Concerns** - Repository handles concurrency, domain handles business rules
-- **Graceful Failure** - Third request gets clear error message
-
-## Rollback Plan
-
-If issues arise:
-1. Revert command handler changes
-2. Restore original `OrderFinancialService` logic
-3. Remove new repository method
-4. System returns to previous (broken but functional) state
-
-This plan provides a surgical fix to the concurrency issue while maintaining architectural integrity and providing a clear path forward.
