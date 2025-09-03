@@ -14,8 +14,8 @@ using YummyZoom.Infrastructure.Data;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250903035703_AddSearchFacetsIndexes")]
-    partial class AddSearchFacetsIndexes
+    [Migration("20250903060356_AddSearchIndexAndFacets")]
+    partial class AddSearchIndexAndFacets
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

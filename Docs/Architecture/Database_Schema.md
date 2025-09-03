@@ -552,6 +552,31 @@ erDiagram
         int TotalReviews
     }    
 
+    %% Universal Search Read Model
+    SearchIndexItems {
+        UUID Id PK
+        string Type
+        UUID RestaurantId
+        string Name
+        string Description
+        string Cuisine
+        text[] Tags
+        text[] Keywords
+        boolean IsOpenNow
+        boolean IsAcceptingOrders
+        double AvgRating
+        int ReviewCount
+        smallint PriceBand
+        string Geo "geography(Point,4326)"
+        timestamp CreatedAt
+        timestamp UpdatedAt
+        bigint SourceVersion
+        boolean SoftDeleted
+        tsvector TsAll
+        tsvector TsName
+        tsvector TsDescr
+    }
+
     %% --- Relationships ---
     %% =============================================================
     %% RELATIONSHIPS GROUPED BY BOUNDED CONTEXT
@@ -648,6 +673,8 @@ erDiagram
     %% Read Models
     Restaurants ||..o| FullMenuViews : "is cached by"
     Restaurants ||..o| RestaurantReviewSummaries : "is summarized by"
+    Restaurants ||..o| SearchIndexItems : "is indexed by"
+    MenuItems   ||..o| SearchIndexItems : "is indexed by"
     
     %% ---------------- Styling (Bounded Context Colors) ----------------
     %% Identity & Access (Blue)
@@ -705,6 +732,7 @@ erDiagram
     %% Read Models (Indigo)
     style FullMenuViews fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
     style RestaurantReviewSummaries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style SearchIndexItems fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
 
     %% ------------------------------------------------------------------
     %% NOTE: Mermaid's erDiagram styling support may vary by renderer.
