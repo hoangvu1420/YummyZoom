@@ -8,15 +8,33 @@ using Result = YummyZoom.SharedKernel.Result;
 namespace YummyZoom.Application.Search.Queries.UniversalSearch;
 
 // Request + DTO
-public sealed record UniversalSearchQuery(
+public sealed partial record UniversalSearchQuery(
     string? Term,
     double? Latitude,
     double? Longitude,
     bool? OpenNow,
     string[]? Cuisines,
-    int PageNumber,
-    int PageSize
-) : IRequest<Result<PaginatedList<SearchResultDto>>>;
+    string[]? Tags = null,
+    short[]? PriceBands = null,
+    bool IncludeFacets = false,
+    int PageNumber = 1,
+    int PageSize = 10
+) : IRequest<Result<UniversalSearchResponseDto>>;
+
+// Backward-compatible constructor to support existing call sites (tests, endpoints)
+public sealed partial record UniversalSearchQuery
+{
+    public UniversalSearchQuery(
+        string? term,
+        double? latitude,
+        double? longitude,
+        bool? openNow,
+        string[]? cuisines,
+        int pageNumber,
+        int pageSize)
+        : this(term, latitude, longitude, openNow, cuisines, null, null, false, pageNumber, pageSize)
+    { }
+}
 
 public sealed record SearchResultDto(
     Guid Id,
@@ -29,6 +47,20 @@ public sealed record SearchResultDto(
     double? DistanceKm
 );
 
+public sealed record UniversalSearchResponseDto(
+    PaginatedList<SearchResultDto> Page,
+    FacetBlock Facets
+);
+
+public sealed record FacetBlock(
+    IReadOnlyList<FacetCount<string>> Cuisines,
+    IReadOnlyList<FacetCount<string>> Tags,
+    IReadOnlyList<FacetCount<short>> PriceBands,
+    int OpenNowCount
+);
+
+public sealed record FacetCount<T>(T Value, int Count);
+
 // Validator
 public sealed class UniversalSearchQueryValidator : AbstractValidator<UniversalSearchQuery>
 {
@@ -40,12 +72,14 @@ public sealed class UniversalSearchQueryValidator : AbstractValidator<UniversalS
         RuleFor(x => x.Latitude).InclusiveBetween(-90, 90).When(x => x.Latitude.HasValue);
         RuleFor(x => x.Longitude).InclusiveBetween(-180, 180).When(x => x.Longitude.HasValue);
         RuleFor(x => x.Cuisines).Must(c => c!.All(s => s.Length <= 100)).When(x => x.Cuisines is { Length: > 0 });
+        RuleFor(x => x.Tags).Must(t => t!.All(s => s.Length <= 100)).When(x => x.Tags is { Length: > 0 });
+        RuleFor(x => x.PriceBands).Must(pb => pb!.All(b => b >= 0)).When(x => x.PriceBands is { Length: > 0 });
     }
 }
 
 // Handler
 public sealed class UniversalSearchQueryHandler
-    : IRequestHandler<UniversalSearchQuery, Result<PaginatedList<SearchResultDto>>>
+    : IRequestHandler<UniversalSearchQuery, Result<UniversalSearchResponseDto>>
 {
     private readonly IDbConnectionFactory _db;
 
@@ -61,7 +95,7 @@ public sealed class UniversalSearchQueryHandler
         double Score,
         double? DistanceKm);
 
-    public async Task<Result<PaginatedList<SearchResultDto>>> Handle(UniversalSearchQuery request, CancellationToken ct)
+    public async Task<Result<UniversalSearchResponseDto>> Handle(UniversalSearchQuery request, CancellationToken ct)
     {
         using var conn = _db.CreateConnection();
 
@@ -97,6 +131,18 @@ public sealed class UniversalSearchQueryHandler
         {
             where.Add("s.\"Cuisine\" = ANY(@cuisines)");
             p.Add("cuisines", request.Cuisines);
+        }
+
+        if (request.Tags is { Length: > 0 })
+        {
+            where.Add("s.\"Tags\" && @tags");
+            p.Add("tags", request.Tags);
+        }
+
+        if (request.PriceBands is { Length: > 0 })
+        {
+            where.Add("s.\"PriceBand\" = ANY(@priceBands)");
+            p.Add("priceBands", request.PriceBands);
         }
 
         p.Add("pageNumber", request.PageNumber);
@@ -140,7 +186,76 @@ public sealed class UniversalSearchQueryHandler
             new SearchResultDto(r.Id, r.Type, r.RestaurantId, r.Name, r.Description, r.Cuisine, r.Score, r.DistanceKm)
         ).ToList();
 
-        return Result.Success(new PaginatedList<SearchResultDto>(mapped, page.TotalCount, page.PageNumber, request.PageSize));
+        var pageList = new PaginatedList<SearchResultDto>(mapped, page.TotalCount, page.PageNumber, request.PageSize);
+
+        // Facets: compute only when requested
+        FacetBlock facets;
+        if (request.IncludeFacets)
+        {
+            // Default top-N for buckets
+            p.Add("topN", 10);
+
+            // Build the shared WHERE clause for facets
+            var facetFromWhere = $"FROM \"SearchIndexItems\" s WHERE {string.Join(" AND ", where)}";
+
+            var facetsSql = $@"
+-- Cuisine facet
+WITH base AS (
+  SELECT s.* {facetFromWhere}
+)
+SELECT LOWER(c) AS Value, CAST(COUNT(*) AS int) AS Count
+FROM base b
+CROSS JOIN LATERAL NULLIF(b.""Cuisine"", '') c
+GROUP BY LOWER(c)
+ORDER BY COUNT(*) DESC, LOWER(c) ASC
+LIMIT @topN;
+
+-- Tags facet
+WITH base AS (
+  SELECT s.* {facetFromWhere}
+)
+SELECT LOWER(t) AS Value, CAST(COUNT(*) AS int) AS Count
+FROM base b, LATERAL unnest(b.""Tags"") t
+WHERE NULLIF(t, '') IS NOT NULL
+GROUP BY LOWER(t)
+ORDER BY COUNT(*) DESC, LOWER(t) ASC
+LIMIT @topN;
+
+-- Price bands facet
+WITH base AS (
+  SELECT s.* {facetFromWhere}
+)
+SELECT b.""PriceBand"" AS Value, CAST(COUNT(*) AS int) AS Count
+FROM base b
+WHERE b.""PriceBand"" IS NOT NULL
+GROUP BY b.""PriceBand""
+ORDER BY b.""PriceBand"" ASC;
+
+-- Open-now count
+WITH base AS (
+  SELECT s.* {facetFromWhere}
+)
+SELECT CAST(COUNT(*) AS int) AS Count
+FROM base b
+WHERE b.""IsOpenNow"" AND b.""IsAcceptingOrders"";";
+
+            using var grid = await conn.QueryMultipleAsync(new CommandDefinition(facetsSql, p, cancellationToken: ct));
+            var cuisineBuckets = grid.Read<FacetCount<string>>().ToList();
+            var tagBuckets = grid.Read<FacetCount<string>>().ToList();
+            var priceBandBuckets = grid.Read<FacetCount<short>>().ToList();
+            var openNowCount = grid.ReadSingle<int>();
+
+            facets = new FacetBlock(cuisineBuckets, tagBuckets, priceBandBuckets, openNowCount);
+        }
+        else
+        {
+            facets = new FacetBlock(
+                Array.Empty<FacetCount<string>>(),
+                Array.Empty<FacetCount<string>>(),
+                Array.Empty<FacetCount<short>>(),
+                0);
+        }
+
+        return Result.Success(new UniversalSearchResponseDto(pageList, facets));
     }
 }
-

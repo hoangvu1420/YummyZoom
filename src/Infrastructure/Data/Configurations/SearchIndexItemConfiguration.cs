@@ -48,6 +48,7 @@ public sealed class SearchIndexItemConfiguration : IEntityTypeConfiguration<Sear
 
         builder.HasIndex(e => e.Tags).HasDatabaseName("SIDX_Tags_Gin").HasMethod("GIN");
         builder.HasIndex(e => e.Geo).HasDatabaseName("SIDX_Geo").HasMethod("GIST");
+        builder.HasIndex(e => e.PriceBand).HasDatabaseName("SIDX_PriceBand");
 
         builder.HasIndex(e => new { e.Type, e.IsOpenNow, e.IsAcceptingOrders })
             .HasDatabaseName("SIDX_Type_Open");

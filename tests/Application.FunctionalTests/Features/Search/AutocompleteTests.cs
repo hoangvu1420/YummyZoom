@@ -1,4 +1,3 @@
-using FluentAssertions;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Search.Queries.Autocomplete;
@@ -14,7 +13,7 @@ namespace YummyZoom.Application.FunctionalTests.Features.Search;
 public class AutocompleteTests : BaseTestFixture
 {
     [Test]
-    public async Task PrefixMatch_ReturnsTopSuggestions()
+    public async Task PrefixMatch_ShouldReturnTopSuggestions()
     {
         await CreateRestaurantAsync("Alpha Cafe", "Cafe");
         await CreateRestaurantAsync("Alpine Diner", "Diner");
@@ -31,7 +30,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task Ranking_PrefixBeatsTrigram()
+    public async Task Ranking_ShouldPrioritizePrefixOverTrigram()
     {
         await CreateRestaurantAsync("Alpha Cafe", "Cafe");
         await CreateRestaurantAsync("Pha Bistro", "Bistro");
@@ -45,7 +44,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task TieBreak_ByUpdatedAtDesc()
+    public async Task Ordering_ShouldTieBreakByUpdatedAtDesc()
     {
         var a = await CreateRestaurantAsync("Tie Alpha", "Cafe");
         var b = await CreateRestaurantAsync("Tie Alpine", "Cafe");
@@ -66,7 +65,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task Limit_EnforcedTo10()
+    public async Task Limit_ShouldBeEnforcedTo10()
     {
         for (int i = 0; i < 20; i++)
         {
@@ -80,7 +79,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task Diversity_DedupeAndMixTypes()
+    public async Task Diversity_ShouldDedupeAndMixTypes()
     {
         // Restaurant and a similarly named MenuItem should both be allowed (when present)
         await CreateRestaurantAsync("Pizza Place", "Italian");
@@ -92,7 +91,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task SpecialChars_AndUnicode_DoNotBreak()
+    public async Task Input_ShouldHandleSpecialCharsAndUnicode()
     {
         await CreateRestaurantAsync("Café Déjà Vu", "Cafe");
         await CreateRestaurantAsync("Sushi (O'Clock)", "Japanese");
@@ -108,7 +107,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task TrigramMatch_HandlesMisspellings()
+    public async Task TrigramMatch_ShouldHandleMisspellings()
     {
         await CreateRestaurantAsync("Pizzeria Roma", "Italian");
         await DrainOutboxAsync();
@@ -119,7 +118,7 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
-    public async Task Validation_FailsOnEmptyOrTooLongTerm()
+    public async Task Validation_ShouldFail_OnEmptyOrTooLongTerm()
     {
         var empty = () => SendAsync(new AutocompleteQuery(""));
         await empty.Should().ThrowAsync<ValidationException>();

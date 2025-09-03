@@ -11,15 +11,37 @@ public class Search : EndpointGroupBase
         var publicGroup = app.MapGroup(this);
 
         // GET /api/v1/search
-        publicGroup.MapGet("/", async (string? term, double? lat, double? lon, bool? openNow, string[]? cuisines, int pageNumber, int pageSize, ISender sender) =>
+        publicGroup.MapGet("/", async (
+            string? term,
+            double? lat,
+            double? lon,
+            bool? openNow,
+            string[]? cuisines,
+            string[]? tags,
+            short[]? priceBands,
+            bool? includeFacets,
+            int pageNumber,
+            int pageSize,
+            ISender sender) =>
         {
-            var rq = new UniversalSearchQuery(term, lat, lon, openNow, cuisines, pageNumber, pageSize);
+            var rq = new UniversalSearchQuery(
+                term,
+                lat,
+                lon,
+                openNow,
+                cuisines,
+                tags,
+                priceBands,
+                includeFacets ?? false,
+                pageNumber,
+                pageSize);
+
             var res = await sender.Send(rq);
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })
         .WithName("UniversalSearch")
         .WithSummary("Universal search")
-        .Produces<PaginatedList<SearchResultDto>>(StatusCodes.Status200OK)
+        .Produces<UniversalSearchResponseDto>(StatusCodes.Status200OK)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
@@ -36,4 +58,3 @@ public class Search : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
-
