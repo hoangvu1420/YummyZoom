@@ -70,6 +70,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         // Enable PostGIS and trigram extensions
         builder.HasPostgresExtension("pg_trgm");
         builder.HasPostgresExtension("postgis");
+        builder.HasPostgresExtension("unaccent");
 
         builder.Entity<ProcessedWebhookEvent>().HasKey(e => e.Id);
 

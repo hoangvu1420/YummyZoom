@@ -109,12 +109,15 @@ public sealed class UniversalSearchQueryHandler
             if (termLength <= 2)
             {
                 // For very short queries, restrict to prefix match to avoid noisy substring matches
-                where.Add("s.\"Name\" ILIKE @prefix");
+                // Make prefix check accent-insensitive via unaccent
+                where.Add("unaccent(s.\"Name\") ILIKE unaccent(@prefix)");
                 p.Add("prefix", request.Term + "%");
             }
             else
             {
-                where.Add("(s.\"TsAll\" @@ websearch_to_tsquery('simple', @q) OR s.\"Name\" ILIKE '%' || @q || '%')");
+                // Accent-insensitive FTS using unaccent on the query side.
+                // Keep substring fallback unchanged to preserve trigram index usage.
+                where.Add("(s.\"TsAll\" @@ websearch_to_tsquery('simple', unaccent(@q)) OR s.\"Name\" ILIKE '%' || @q || '%')");
             }
         }
 
@@ -156,7 +159,7 @@ public sealed class UniversalSearchQueryHandler
             s."AvgRating"           AS AvgRating,
             s."ReviewCount"         AS ReviewCount,
             (
-              0.6 * (CASE WHEN @q IS NOT NULL THEN ts_rank_cd(s."TsAll", websearch_to_tsquery('simple', @q)) ELSE 0 END)
+              0.6 * (CASE WHEN @q IS NOT NULL THEN ts_rank_cd(s."TsAll", websearch_to_tsquery('simple', unaccent(@q))) ELSE 0 END)
               + 0.2 * (CASE WHEN @lat IS NOT NULL AND @lon IS NOT NULL AND s."Geo" IS NOT NULL
                      THEN 1.0 / (1.0 + (ST_Distance(s."Geo", ST_SetSRID(ST_MakePoint(@lon,@lat),4326)::geography) / 1000.0))
                      ELSE 0.5 END)

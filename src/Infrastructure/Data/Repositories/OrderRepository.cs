@@ -57,7 +57,7 @@ public class OrderRepository : IOrderRepository
             FROM "Orders" o
             WHERE o."CustomerId" = @CustomerId
               AND o."Status" = ANY(@ActiveStatuses)
-            ORDER BY o."PlacedAt" DESC
+            ORDER BY o."PlacementTimestamp" DESC
             """;
 
         var orderIds = await connection.QueryAsync<Guid>(

@@ -1,4 +1,5 @@
-﻿using YummyZoom.Domain.Common.Models;
+﻿using System.Text.Json.Serialization;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.TodoListAggregate.Enums;
 using YummyZoom.Domain.TodoListAggregate.Events;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
@@ -20,18 +21,20 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
     public string? LastModifiedBy { get; set; } 
 
     // Private constructor for creating new instances
+    [JsonConstructor]
     private TodoItem(
         TodoItemId id,
         string? title,
         string? note,
         PriorityLevel priority,
-        DateTime? reminder) : base(id) // Pass the ID to the base Entity constructor
+        DateTime? reminder,
+        bool isDone) : base(id) // Pass the ID to the base Entity constructor
     {
         Title = title;
         Note = note;
         Priority = priority;
         Reminder = reminder;
-        IsDone = false;
+        IsDone = isDone;
     }
 
     // Factory method for creating a new TodoItem with a generated ID
@@ -41,7 +44,7 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
         PriorityLevel priority,
         DateTime? reminder)
     {
-        var todoItem = new TodoItem(TodoItemId.CreateUnique(), title, note, priority, reminder);
+        var todoItem = new TodoItem(TodoItemId.CreateUnique(), title, note, priority, reminder, false);
         todoItem.AddDomainEvent(new TodoItemCreatedEvent(todoItem));
         return todoItem;
     }
@@ -54,7 +57,7 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
         PriorityLevel priority,
         DateTime? reminder)
     {
-        return new TodoItem(id, title, note, priority, reminder);
+        return new TodoItem(id, title, note, priority, reminder, false);
     }
 
     public void UpdateTitle(string title)
@@ -95,8 +98,8 @@ public class TodoItem : Entity<TodoItemId>, IAuditableEntity
     }
 
 #pragma warning disable CS8618
-    // For EF Core
-    private TodoItem()
+    // Internal parameterless constructor for EF Core and JSON deserialization
+    internal TodoItem()
     {
     }
 #pragma warning restore CS8618

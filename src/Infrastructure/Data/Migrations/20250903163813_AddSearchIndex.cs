@@ -8,14 +8,15 @@ using NpgsqlTypes;
 namespace YummyZoom.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSearchIndexAndFacets : Migration
+    public partial class AddSearchIndex : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:pg_trgm", ",,")
-                .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+                .Annotation("Npgsql:PostgresExtension:postgis", ",,")
+                .Annotation("Npgsql:PostgresExtension:unaccent", ",,");
 
             migrationBuilder.CreateTable(
                 name: "SearchIndexItems",
@@ -112,8 +113,11 @@ namespace YummyZoom.Infrastructure.Data.Migrations
                 table: "SearchIndexItems",
                 column: "UpdatedAt");
 
+
             // --- Manual SQL carried forward from consolidated migrations ---
-            // Ensure PostGIS extension is present before any spatial operations
+            // Ensure required extensions are present before any operations
+            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS unaccent;", suppressTransaction: false);
+            // PostGIS for spatial types and functions
             migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS postgis;", suppressTransaction: false);
 
             // Ensure SRID 4326 (WGS 84) exists in spatial_ref_sys for geography/geometry ops
@@ -125,17 +129,17 @@ SELECT 4326, 'EPSG', 4326,
 WHERE NOT EXISTS (SELECT 1 FROM spatial_ref_sys WHERE srid = 4326);
             ");
 
-            // Create or replace the trigger function to maintain tsvector columns
+            // Create or replace the trigger function to maintain tsvector columns (accent-insensitive via unaccent)
             migrationBuilder.Sql(@"CREATE OR REPLACE FUNCTION searchindexitems_tsv_update() RETURNS trigger AS $$
 BEGIN
-  NEW.""TsName"" := to_tsvector('simple', coalesce(NEW.""Name"",''));
-  NEW.""TsDescr"" := to_tsvector('simple', coalesce(NEW.""Description"",''));
+  NEW.""TsName"" := to_tsvector('simple', unaccent(coalesce(NEW.""Name"",'')));
+  NEW.""TsDescr"" := to_tsvector('simple', unaccent(coalesce(NEW.""Description"",'')));
   NEW.""TsAll"" :=
-      setweight(to_tsvector('simple', coalesce(NEW.""Name"",'')), 'A') ||
-      setweight(to_tsvector('simple', coalesce(NEW.""Cuisine"",'')), 'B') ||
-      setweight(to_tsvector('simple', coalesce(array_to_string(NEW.""Tags"", ' '),'')), 'B') ||
-      setweight(to_tsvector('simple', coalesce(NEW.""Description"",'')), 'C') ||
-      setweight(to_tsvector('simple', coalesce(array_to_string(NEW.""Keywords"", ' '),'')), 'C');
+      setweight(to_tsvector('simple', unaccent(coalesce(NEW.""Name"",''))), 'A') ||
+      setweight(to_tsvector('simple', unaccent(coalesce(NEW.""Cuisine"",''))), 'B') ||
+      setweight(to_tsvector('simple', unaccent(coalesce(array_to_string(NEW.""Tags"", ' '),''))), 'B') ||
+      setweight(to_tsvector('simple', unaccent(coalesce(NEW.""Description"",''))), 'C') ||
+      setweight(to_tsvector('simple', unaccent(coalesce(array_to_string(NEW.""Keywords"", ' '),''))), 'C');
   RETURN NEW;
 END
 $$ LANGUAGE plpgsql;",
@@ -188,9 +192,13 @@ $$;",
             migrationBuilder.DropTable(
                 name: "SearchIndexItems");
 
+            migrationBuilder.DropTable(
+                name: "SearchIndexItems");
+
             migrationBuilder.AlterDatabase()
                 .OldAnnotation("Npgsql:PostgresExtension:pg_trgm", ",,")
-                .OldAnnotation("Npgsql:PostgresExtension:postgis", ",,");
+                .OldAnnotation("Npgsql:PostgresExtension:postgis", ",,")
+                .OldAnnotation("Npgsql:PostgresExtension:unaccent", ",,");
         }
     }
 }
