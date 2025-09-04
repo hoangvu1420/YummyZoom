@@ -11,6 +11,9 @@ using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
 using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
 using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
 using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
+using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
+using YummyZoom.Application.MenuItems.Commands.RemoveCustomizationGroupFromMenuItem;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemPrice;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
 using YummyZoom.Application.Menus.Commands.UpdateMenuDetails;
 using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
@@ -112,6 +115,54 @@ public class Restaurants : EndpointGroupBase
         .WithName("UpdateMenuItemDietaryTags")
         .WithSummary("Update dietary tags for a menu item")
         .WithDescription("Updates the dietary tags (e.g., vegetarian, gluten-free) associated with a menu item. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // POST /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/customizations
+        group.MapPost("/{restaurantId:guid}/menu-items/{itemId:guid}/customizations", async (Guid restaurantId, Guid itemId, AssignCustomizationRequestDto body, ISender sender) =>
+        {
+            var cmd = new AssignCustomizationGroupToMenuItemCommand(
+                RestaurantId: restaurantId,
+                MenuItemId: itemId,
+                CustomizationGroupId: body.GroupId,
+                DisplayTitle: body.DisplayTitle,
+                DisplayOrder: body.DisplayOrder);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("AssignCustomizationGroupToMenuItem")
+        .WithSummary("Assign customization group to menu item")
+        .WithDescription("Assigns a customization group to a menu item with optional display order. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // DELETE /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/customizations/{groupId}
+        group.MapDelete("/{restaurantId:guid}/menu-items/{itemId:guid}/customizations/{groupId:guid}", async (Guid restaurantId, Guid itemId, Guid groupId, ISender sender) =>
+        {
+            var cmd = new RemoveCustomizationGroupFromMenuItemCommand(
+                RestaurantId: restaurantId,
+                MenuItemId: itemId,
+                CustomizationGroupId: groupId);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("RemoveCustomizationGroupFromMenuItem")
+        .WithSummary("Remove customization group from menu item")
+        .WithDescription("Removes a customization group assignment from a menu item. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // PUT /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/price
+        group.MapPut("/{restaurantId:guid}/menu-items/{itemId:guid}/price", async (Guid restaurantId, Guid itemId, UpdatePriceRequestDto body, ISender sender) =>
+        {
+            var cmd = new UpdateMenuItemPriceCommand(
+                RestaurantId: restaurantId,
+                MenuItemId: itemId,
+                Price: body.Price,
+                Currency: body.Currency);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("UpdateMenuItemPrice")
+        .WithSummary("Update menu item price")
+        .WithDescription("Updates the price and currency of a menu item. Requires restaurant staff authorization.")
         .WithStandardResults();
 
         // DELETE /api/v1/restaurants/{restaurantId}/menu-items/{itemId}
@@ -323,6 +374,8 @@ public class Restaurants : EndpointGroupBase
     public sealed record UpdateMenuItemRequestDto(string Name, string Description, decimal Price, string Currency, string? ImageUrl);
     public sealed record AssignMenuItemToCategoryRequestDto(Guid NewCategoryId);
     public sealed record UpdateDietaryTagsRequestDto(List<Guid>? DietaryTagIds);
+    public sealed record AssignCustomizationRequestDto(Guid GroupId, string DisplayTitle, int? DisplayOrder);
+    public sealed record UpdatePriceRequestDto(decimal Price, string Currency);
 
     #endregion
 

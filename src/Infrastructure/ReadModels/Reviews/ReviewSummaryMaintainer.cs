@@ -20,8 +20,8 @@ public sealed class ReviewSummaryMaintainer : IReviewSummaryMaintainer
         const string sql = """
 WITH s AS (
   SELECT
-    COALESCE(AVG(r."Rating")::double precision, 0.0) AS avg_rating,
-    COALESCE(COUNT(*)::int, 0)                         AS total_reviews
+    COALESCE(AVG(r."Rating")::double precision, 0.0)    AS avg_rating,
+    COALESCE(COUNT(*)::int, 0)                          AS total_reviews
   FROM "Reviews" r
   WHERE r."RestaurantId" = @RestaurantId
     AND r."IsDeleted" = FALSE
