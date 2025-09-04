@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.Extensions;
 
 namespace YummyZoom.Infrastructure.Data.Repositories;
 
@@ -28,5 +30,16 @@ public class CustomizationGroupRepository : ICustomizationGroupRepository
             .Include(g => g.Choices)
             .ToListAsync(cancellationToken);
         return groups;
+    }
+
+    public async Task<RestaurantId?> GetRestaurantIdByIdIncludingDeletedAsync(CustomizationGroupId id, CancellationToken cancellationToken = default)
+    {
+        var restaurantGuid = await _dbContext.CustomizationGroups
+            .IncludeSoftDeleted()
+            .Where(g => g.Id == id)
+            .Select(g => g.RestaurantId.Value)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return restaurantGuid == default ? null : RestaurantId.Create(restaurantGuid);
     }
 }

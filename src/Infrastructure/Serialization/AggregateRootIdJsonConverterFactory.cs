@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using YummyZoom.Domain.Common.Models;
+using System.Globalization;
 
 namespace YummyZoom.Infrastructure.Serialization;
 
@@ -58,5 +59,61 @@ public sealed class AggregateRootIdJsonConverter<TId, TValue> : JsonConverter<TI
 	{
 		var primitive = (TValue)_valueProperty.GetValue(value)!;
 		JsonSerializer.Serialize(writer, primitive, options);
+	}
+
+	public override void WriteAsPropertyName(Utf8JsonWriter writer, TId value, JsonSerializerOptions options)
+	{
+		var primitive = (TValue)_valueProperty.GetValue(value)!;
+		if (primitive is Guid g)
+		{
+			writer.WritePropertyName(g.ToString());
+			return;
+		}
+		if (primitive is string s)
+		{
+			writer.WritePropertyName(s);
+			return;
+		}
+		if (primitive is int i)
+		{
+			writer.WritePropertyName(i.ToString(CultureInfo.InvariantCulture));
+			return;
+		}
+		if (primitive is long l)
+		{
+			writer.WritePropertyName(l.ToString(CultureInfo.InvariantCulture));
+			return;
+		}
+		// Fallback to ToString for other primitive-like types
+		writer.WritePropertyName(primitive?.ToString() ?? string.Empty);
+	}
+
+	public override TId ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+	{
+		var s = reader.GetString()!;
+		object parsed;
+		if (typeof(TValue) == typeof(Guid))
+		{
+			parsed = Guid.Parse(s);
+		}
+		else if (typeof(TValue) == typeof(string))
+		{
+			parsed = s;
+		}
+		else if (typeof(TValue) == typeof(int))
+		{
+			parsed = int.Parse(s, CultureInfo.InvariantCulture);
+		}
+		else if (typeof(TValue) == typeof(long))
+		{
+			parsed = long.Parse(s, CultureInfo.InvariantCulture);
+		}
+		else
+		{
+			// As a last resort attempt to deserialize from quoted string into target type
+			parsed = (object)s;
+		}
+		var result = (TId)_createMethod.Invoke(null, new object[] { parsed })!;
+		return result;
 	}
 }

@@ -22,6 +22,92 @@ public static class FullMenuViewAssertions
         return doc.RootElement.Clone();
     }
 
+    // ----- Customization Groups (view.customizationGroups) -----
+
+    public static bool HasCustomizationGroup(FullMenuView view, Guid groupId)
+    {
+        var root = GetRoot(view);
+        var groupsById = root.GetProperty("customizationGroups").GetProperty("byId");
+        return groupsById.TryGetProperty(groupId.ToString(), out _);
+    }
+
+    public static JsonElement GetCustomizationGroup(FullMenuView view, Guid groupId)
+    {
+        var root = GetRoot(view);
+        var groupsById = root.GetProperty("customizationGroups").GetProperty("byId");
+        if (!groupsById.TryGetProperty(groupId.ToString(), out var group))
+            throw new InvalidOperationException($"CustomizationGroup {groupId} not found in menu view");
+        return group;
+    }
+
+    public static void ShouldHaveCustomizationGroup(this FullMenuView view, Guid groupId, string name, int min, int max, string because = "")
+    {
+        HasCustomizationGroup(view, groupId).Should().BeTrue(because.Length > 0 ? because : $"group {groupId} should exist in menu view");
+        var group = GetCustomizationGroup(view, groupId);
+        group.GetProperty("id").GetGuid().Should().Be(groupId);
+        group.GetProperty("name").GetString().Should().Be(name);
+        group.GetProperty("min").GetInt32().Should().Be(min);
+        group.GetProperty("max").GetInt32().Should().Be(max);
+    }
+
+    public static void ShouldNotHaveCustomizationGroup(this FullMenuView view, Guid groupId, string because = "")
+    {
+        HasCustomizationGroup(view, groupId).Should().BeFalse(because.Length > 0 ? because : $"group {groupId} should not exist in menu view");
+    }
+
+    // ----- Customization Group Options -----
+
+    public static IReadOnlyList<Guid> GetGroupOptionIds(FullMenuView view, Guid groupId)
+    {
+        var group = GetCustomizationGroup(view, groupId);
+        return group.GetProperty("options").EnumerateArray()
+            .OrderBy(e => e.GetProperty("displayOrder").GetInt32())
+            .ThenBy(e => e.GetProperty("name").GetString())
+            .Select(e => e.GetProperty("id").GetGuid())
+            .ToList();
+    }
+
+    public static IReadOnlyList<(Guid Id, string Name, decimal Amount, string Currency, bool IsDefault, int DisplayOrder)> GetGroupOptions(FullMenuView view, Guid groupId)
+    {
+        var group = GetCustomizationGroup(view, groupId);
+        return group.GetProperty("options").EnumerateArray()
+            .Select(e => (
+                Id: e.GetProperty("id").GetGuid(),
+                Name: e.GetProperty("name").GetString()!,
+                Amount: e.GetProperty("priceDelta").GetProperty("amount").GetDecimal(),
+                Currency: e.GetProperty("priceDelta").GetProperty("currency").GetString()!,
+                IsDefault: e.GetProperty("isDefault").GetBoolean(),
+                DisplayOrder: e.GetProperty("displayOrder").GetInt32()
+            ))
+            .OrderBy(x => x.DisplayOrder)
+            .ThenBy(x => x.Name)
+            .ToList();
+    }
+
+    public static void ShouldHaveGroupOption(this FullMenuView view, Guid groupId, Guid optionId, string name, decimal priceAmount, string currency, bool isDefault, int displayOrder, string because = "")
+    {
+        var options = GetGroupOptions(view, groupId);
+        options.Should().Contain(o => o.Id == optionId, because.Length > 0 ? because : $"group {groupId} should contain option {optionId}");
+        var opt = options.First(o => o.Id == optionId);
+        opt.Name.Should().Be(name);
+        opt.Amount.Should().Be(priceAmount);
+        opt.Currency.Should().Be(currency);
+        opt.IsDefault.Should().Be(isDefault);
+        opt.DisplayOrder.Should().Be(displayOrder);
+    }
+
+    public static void ShouldNotHaveGroupOption(this FullMenuView view, Guid groupId, Guid optionId, string because = "")
+    {
+        var ids = GetGroupOptionIds(view, groupId);
+        ids.Should().NotContain(optionId, because.Length > 0 ? because : $"group {groupId} should not contain option {optionId}");
+    }
+
+    public static void ShouldHaveGroupOptionsInOrder(this FullMenuView view, Guid groupId, params Guid[] optionIds)
+    {
+        var ids = GetGroupOptionIds(view, groupId);
+        ids.Should().Equal(optionIds);
+    }
+
     /// <summary>
     /// Checks if an item exists in the items.byId section of the menu view.
     /// </summary>
@@ -155,6 +241,21 @@ public static class FullMenuViewAssertions
                 DisplayOrder: e.GetProperty("displayOrder").GetInt32()
             ))
             .ToList();
+    }
+
+    public static void ShouldHaveItemCustomizationGroup(this FullMenuView view, Guid itemId, Guid groupId, string displayTitle, int displayOrder, string because = "")
+    {
+        var groups = GetItemCustomizationGroups(view, itemId);
+        groups.Should().Contain(g => g.GroupId == groupId, because.Length > 0 ? because : $"item {itemId} should contain customization group {groupId}");
+        var g1 = groups.First(g => g.GroupId == groupId);
+        g1.DisplayTitle.Should().Be(displayTitle);
+        g1.DisplayOrder.Should().Be(displayOrder);
+    }
+
+    public static void ShouldNotHaveItemCustomizationGroup(this FullMenuView view, Guid itemId, Guid groupId, string because = "")
+    {
+        var groups = GetItemCustomizationGroups(view, itemId).Select(g => g.GroupId).ToList();
+        groups.Should().NotContain(groupId, because.Length > 0 ? because : $"item {itemId} should not contain customization group {groupId}");
     }
 
     /// <summary>
