@@ -110,8 +110,8 @@ Geo filtering not yet implemented (currently text/cuisine stub as intended).
   Optional: dedicated UpdatePrice if you want separate semantics.
 - [x] Add projector handlers for:
   CustomizationGroupCreated/Deleted/ChoiceAdded/Removed/Updated, Tag changes.
-- [ ] Implement management read-side queries (DTOs + Dapper) for staff UI.
-- [ ] Add MenuRemovedEventHandler to delete FullMenuView.
+- [x] Implement management read-side queries (DTOs + Dapper) for staff UI.
+- [x] Add MenuRemovedEventHandler to delete FullMenuView.
 - [ ] Add one-shot backfill and periodic reconciliation hosted service using IMenuReadModelRebuilder.
 - [ ] Optionally expose an admin endpoint for RebuildFullMenu (protected by admin policy).
 - [ ] Extend SearchRestaurantsQueryHandler with geospatial filters (PostGIS ST_DWithin) when ready.
