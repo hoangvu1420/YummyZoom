@@ -1,4 +1,6 @@
-## Overall Status
+## Overall Status of Implementation
+
+Reference the outlined spec in Docs\Future-Plans\Phase2_Unified_Implementation_Outline.md . This document summarizes current implementation status and gaps.
 
 Broadly on track: read side, public endpoints, event-driven rebuilds, core write flows in place.
 Remaining gaps: some management queries, customization assignment commands/endpoints, menu removal handler, projector coverage for customization/tag aggregates, backfill/recon jobs.
@@ -103,13 +105,13 @@ Geo filtering not yet implemented (currently text/cuisine stub as intended).
 
 ## Quick Next Steps
 
-Implement missing commands + endpoints:
+- [x] Implement missing commands + endpoints:
   Assign/Remove customization group to menu item.
   Optional: dedicated UpdatePrice if you want separate semantics.
-Add projector handlers for:
+- [x] Add projector handlers for:
   CustomizationGroupCreated/Deleted/ChoiceAdded/Removed/Updated, Tag changes.
-Implement management read-side queries (DTOs + Dapper) for staff UI.
-Add MenuRemovedEventHandler to delete FullMenuView.
-Add one-shot backfill and periodic reconciliation hosted service using IMenuReadModelRebuilder.
-Optionally expose an admin endpoint for RebuildFullMenu (protected by admin policy).
-Extend SearchRestaurantsQueryHandler with geospatial filters (PostGIS ST_DWithin) when ready.
+- [ ] Implement management read-side queries (DTOs + Dapper) for staff UI.
+- [ ] Add MenuRemovedEventHandler to delete FullMenuView.
+- [ ] Add one-shot backfill and periodic reconciliation hosted service using IMenuReadModelRebuilder.
+- [ ] Optionally expose an admin endpoint for RebuildFullMenu (protected by admin policy).
+- [ ] Extend SearchRestaurantsQueryHandler with geospatial filters (PostGIS ST_DWithin) when ready.

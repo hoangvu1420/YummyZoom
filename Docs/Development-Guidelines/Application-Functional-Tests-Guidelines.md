@@ -222,11 +222,11 @@ public sealed class Rating : ValueObject
 {
     public int Value { get; private set; }
     
-    [JsonConstructor]  // Required for JSON deserialization
-    private Rating() { }
-    
+    [JsonConstructor]  // Required for JSON deserialization (deserialization only)
     private Rating(int value) => Value = value;
     public static Result<Rating> Create(int value) => ...;
+
+    internal Rating() { } // Make internal for JSON deserialization
 }
 ```
 

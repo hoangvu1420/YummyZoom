@@ -21,6 +21,10 @@ using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
 using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
 using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
 using YummyZoom.Web.Infrastructure.Http;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenusForManagement;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemDetails;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -38,6 +42,66 @@ public class Restaurants : EndpointGroupBase
             .RequireAuthorization();
 
         #region Menu Management Endpoints (Restaurant Staff)
+        
+        // GET /api/v1/restaurants/{restaurantId}/menus
+        group.MapGet("/{restaurantId:guid}/menus", async (Guid restaurantId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetMenusForManagementQuery(restaurantId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMenusForManagement")
+        .WithSummary("List menus for management")
+        .WithDescription("Returns all menus for a restaurant with counts of categories and items. Requires restaurant staff authorization.")
+        .Produces<IReadOnlyList<MenuSummaryDto>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/categories/{categoryId}
+        group.MapGet("/{restaurantId:guid}/categories/{categoryId:guid}", async (Guid restaurantId, Guid categoryId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetMenuCategoryDetailsQuery(restaurantId, categoryId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMenuCategoryDetails")
+        .WithSummary("Get menu category details")
+        .WithDescription("Returns details for a specific menu category and count of active items. Requires restaurant staff authorization.")
+        .Produces<MenuCategoryDetailsDto>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/categories/{categoryId}/items
+        group.MapGet("/{restaurantId:guid}/categories/{categoryId:guid}/items", async (
+            Guid restaurantId,
+            Guid categoryId,
+            string? q,
+            bool? isAvailable,
+            int pageNumber,
+            int pageSize,
+            ISender sender) =>
+        {
+            var query = new GetMenuItemsByCategoryQuery(restaurantId, categoryId, q, isAvailable, pageNumber, pageSize);
+            var result = await sender.Send(query);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMenuItemsByCategory")
+        .WithSummary("List menu items by category")
+        .WithDescription("Returns paginated menu items within a specific category for a restaurant. Supports name and availability filters.")
+        .Produces<PaginatedList<MenuItemSummaryDto>>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}
+        group.MapGet("/{restaurantId:guid}/menu-items/{itemId:guid}", async (Guid restaurantId, Guid itemId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetMenuItemDetailsQuery(restaurantId, itemId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMenuItemDetails")
+        .WithSummary("Get menu item details")
+        .WithDescription("Returns full details for a specific menu item including tags and applied customizations. Requires restaurant staff authorization.")
+        .Produces<MenuItemDetailsDto>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
         
         // POST /api/v1/restaurants/{restaurantId}/menu-items
         group.MapPost("/{restaurantId:guid}/menu-items", async (Guid restaurantId, CreateMenuItemRequestDto body, ISender sender) =>
@@ -336,6 +400,7 @@ public class Restaurants : EndpointGroupBase
         .Produces(StatusCodes.Status304NotModified)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
+
 
         // GET /api/v1/restaurants/{restaurantId}/info
         publicGroup.MapGet("/{restaurantId:guid}/info", async (Guid restaurantId, ISender sender) =>
