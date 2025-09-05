@@ -122,7 +122,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     /// <summary>
     /// Disables background hosted services that would introduce nondeterminism during tests.
-    /// Specifically removes the OutboxPublisherHostedService; tests drive outbox processing manually.
+    /// Removes the OutboxPublisherHostedService and MenuReadModelMaintenanceHostedService; tests drive flows manually.
     /// </summary>
     private static void DisableBackgroundOutboxPublisher(IServiceCollection services)
     {
@@ -134,6 +134,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         if (descriptor is not null)
         {
             services.Remove(descriptor);
+        }
+
+        // Remove the MenuReadModelMaintenanceHostedService if present
+        var descriptor2 = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(IHostedService) &&
+            d.ImplementationType?.FullName == "YummyZoom.Infrastructure.ReadModels.FullMenu.MenuReadModelMaintenanceHostedService");
+
+        if (descriptor2 is not null)
+        {
+            services.Remove(descriptor2);
         }
     }
     

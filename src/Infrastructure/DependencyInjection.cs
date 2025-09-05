@@ -152,11 +152,26 @@ public static class DependencyInjection
         // Read model rebuild services
         builder.Services.AddScoped<IMenuReadModelRebuilder, FullMenuViewRebuilder>();
 
+        // FullMenu read model maintenance (backfill + reconciliation)
+        builder.Services.Configure<MenuReadModelMaintenanceOptions>(
+            builder.Configuration.GetSection("ReadModelMaintenance"));
+        builder.Services.AddHostedService<MenuReadModelMaintenanceHostedService>();
+
         // Search read model maintainer
         builder.Services.AddScoped<ISearchReadModelMaintainer, SearchIndexMaintainer>();
 
+        // SearchIndex read model maintenance
+        builder.Services.Configure<SearchIndexMaintenanceOptions>(
+            builder.Configuration.GetSection("SearchIndexMaintenance"));
+        builder.Services.AddHostedService<SearchIndexMaintenanceHostedService>();
+
         // Review summaries maintainer
         builder.Services.AddScoped<IReviewSummaryMaintainer, ReviewSummaryMaintainer>();
+
+        // ReviewSummary read model maintenance
+        builder.Services.Configure<ReviewSummaryMaintenanceOptions>(
+            builder.Configuration.GetSection("ReviewSummaryMaintenance"));
+        builder.Services.AddHostedService<ReviewSummaryMaintenanceHostedService>();
 
     }
 

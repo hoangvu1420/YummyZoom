@@ -8,7 +8,6 @@ namespace YummyZoom.Infrastructure.Data;
 public class DbConnectionFactory : IDbConnectionFactory
 {
     private readonly IConfiguration _configuration;
-    private NpgsqlConnection? _connection;
 
     public DbConnectionFactory(IConfiguration configuration)
     {
@@ -17,21 +16,16 @@ public class DbConnectionFactory : IDbConnectionFactory
 
     public IDbConnection CreateConnection()
     {
-        if (_connection is null || _connection.State != ConnectionState.Open)
-        {
-            var connectionString = _configuration.GetConnectionString("YummyZoomDb");
-            _connection = new NpgsqlConnection(connectionString);
-            _connection.Open();
-        }
-        return _connection;
+        // Always create a new connection. Let ADO.NET connection pooling handle reuse.
+        var connectionString = _configuration.GetConnectionString("YummyZoomDb");
+        var connection = new NpgsqlConnection(connectionString);
+        connection.Open();
+        return connection;
     }
 
     public void Dispose()
     {
-        if (_connection is not null && _connection.State == ConnectionState.Open)
-        {
-            _connection.Dispose();
-        }
+        // No-op: callers are responsible for disposing the connections they create via using blocks.
         GC.SuppressFinalize(this);
     }
 }

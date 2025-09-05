@@ -29,6 +29,10 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
             var hosted = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "OutboxPublisherHostedService");
             if (hosted is not null) services.Remove(hosted);
 
+            // Disable Menu read model maintenance hosted service
+            var hosted2 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "MenuReadModelMaintenanceHostedService");
+            if (hosted2 is not null) services.Remove(hosted2);
+
             // Inject test auth
             services.AddAuthentication(o =>
             {
