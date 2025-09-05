@@ -1,8 +1,7 @@
-using System;
 using NetTopologySuite.Geometries;
 using NpgsqlTypes;
 
-namespace YummyZoom.Infrastructure.Data.Models;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Search;
 
 public sealed class SearchIndexItem
 {

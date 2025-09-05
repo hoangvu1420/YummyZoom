@@ -3,6 +3,7 @@ using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Restaurants.Queries;

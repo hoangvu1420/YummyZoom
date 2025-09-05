@@ -1,4 +1,4 @@
-namespace YummyZoom.Infrastructure.Data.Models;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Reviews;
 
 public class RestaurantReviewSummary
 {

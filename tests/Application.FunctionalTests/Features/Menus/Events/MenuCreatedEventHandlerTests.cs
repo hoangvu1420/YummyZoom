@@ -4,6 +4,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Menus.Events;
 

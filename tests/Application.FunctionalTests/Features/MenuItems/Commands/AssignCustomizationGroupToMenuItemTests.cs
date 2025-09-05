@@ -2,6 +2,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuItems.Commands;
 

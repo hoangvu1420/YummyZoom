@@ -3,6 +3,7 @@ using YummyZoom.Application.Admin.Commands.RebuildFullMenu;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Admin;

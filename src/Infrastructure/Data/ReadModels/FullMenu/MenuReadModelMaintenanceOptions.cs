@@ -1,6 +1,4 @@
-using System;
-
-namespace YummyZoom.Infrastructure.ReadModels.FullMenu;
+namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 public sealed class MenuReadModelMaintenanceOptions
 {

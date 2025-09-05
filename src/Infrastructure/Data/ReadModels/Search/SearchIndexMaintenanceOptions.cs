@@ -1,6 +1,4 @@
-using System;
-
-namespace YummyZoom.Infrastructure.ReadModels.Search;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Search;
 
 public sealed class SearchIndexMaintenanceOptions
 {

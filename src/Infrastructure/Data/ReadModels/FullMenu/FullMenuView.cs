@@ -1,4 +1,4 @@
-namespace YummyZoom.Infrastructure.Data.Models;
+namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 public class FullMenuView
 {

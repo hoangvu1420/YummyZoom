@@ -10,6 +10,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuItems.Events;
 

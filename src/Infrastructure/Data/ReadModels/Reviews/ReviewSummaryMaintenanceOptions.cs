@@ -1,6 +1,4 @@
-using System;
-
-namespace YummyZoom.Infrastructure.ReadModels.Reviews;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Reviews;
 
 public sealed class ReviewSummaryMaintenanceOptions
 {

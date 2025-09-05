@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.Reviews;
 
 namespace YummyZoom.Infrastructure.Data.Configurations;
 

@@ -1,13 +1,13 @@
-using Dapper;
 using System.Diagnostics;
+using Dapper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Restaurants.Queries.Common;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace YummyZoom.Infrastructure.ReadModels.FullMenu;
+namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 public sealed class MenuReadModelMaintenanceHostedService : BackgroundService
 {

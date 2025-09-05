@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Interfaces;
 
-namespace YummyZoom.Infrastructure.ReadModels.Reviews;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Reviews;
 
 public sealed class ReviewSummaryMaintenanceHostedService : BackgroundService
 {

@@ -19,14 +19,14 @@ using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Domain.Services;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Interceptors;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Data.ReadModels.Reviews;
+using YummyZoom.Infrastructure.Data.ReadModels.Search;
 using YummyZoom.Infrastructure.Data.Repositories;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Notifications.Firebase;
 using YummyZoom.Infrastructure.Outbox;
 using YummyZoom.Infrastructure.Payments.Stripe;
-using YummyZoom.Infrastructure.ReadModels.FullMenu;
-using YummyZoom.Infrastructure.ReadModels.Search;
-using YummyZoom.Infrastructure.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Realtime;
 using YummyZoom.SharedKernel.Constants;
 

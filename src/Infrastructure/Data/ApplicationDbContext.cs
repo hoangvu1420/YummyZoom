@@ -24,6 +24,9 @@ using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.SupportTicketAggregate;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Data.ReadModels.Reviews;
+using YummyZoom.Infrastructure.Data.ReadModels.Search;
 
 namespace YummyZoom.Infrastructure.Data;
 

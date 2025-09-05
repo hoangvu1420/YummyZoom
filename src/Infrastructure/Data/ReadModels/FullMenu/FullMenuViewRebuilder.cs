@@ -1,15 +1,12 @@
 using System.Text.Json;
 using Dapper;
-using Microsoft.EntityFrameworkCore;
-using YummyZoom.Application.Restaurants.Queries.Common;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TagEntity.ValueObjects;
+using YummyZoom.Infrastructure.Serialization;
 
-namespace YummyZoom.Infrastructure.ReadModels.FullMenu;
+namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
 {

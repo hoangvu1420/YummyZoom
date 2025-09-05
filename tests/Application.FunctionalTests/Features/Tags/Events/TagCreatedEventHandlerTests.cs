@@ -6,6 +6,7 @@ using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Infrastructure.Data;
 using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Tags.Events;
 

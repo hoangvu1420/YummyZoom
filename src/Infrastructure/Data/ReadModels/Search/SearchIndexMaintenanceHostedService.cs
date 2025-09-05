@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
 
-namespace YummyZoom.Infrastructure.ReadModels.Search;
+namespace YummyZoom.Infrastructure.Data.ReadModels.Search;
 
 public sealed class SearchIndexMaintenanceHostedService : BackgroundService
 {
