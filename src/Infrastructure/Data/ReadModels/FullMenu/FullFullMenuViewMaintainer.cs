@@ -8,11 +8,11 @@ using YummyZoom.Infrastructure.Serialization;
 
 namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
-public sealed class FullMenuViewRebuilder : IMenuReadModelRebuilder
+public sealed class FullFullMenuViewMaintainer : IFullMenuViewMaintainer
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public FullMenuViewRebuilder(IDbConnectionFactory dbConnectionFactory)
+    public FullFullMenuViewMaintainer(IDbConnectionFactory dbConnectionFactory)
     {
         _dbConnectionFactory = dbConnectionFactory;
     }

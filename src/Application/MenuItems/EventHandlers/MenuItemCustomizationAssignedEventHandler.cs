@@ -11,7 +11,7 @@ public sealed class MenuItemCustomizationAssignedEventHandler : MenuItemProjecto
     public MenuItemCustomizationAssignedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemCustomizationAssignedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

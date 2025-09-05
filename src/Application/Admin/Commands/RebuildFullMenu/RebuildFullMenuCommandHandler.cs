@@ -6,9 +6,9 @@ namespace YummyZoom.Application.Admin.Commands.RebuildFullMenu;
 
 public sealed class RebuildFullMenuCommandHandler : IRequestHandler<RebuildFullMenuCommand, Result>
 {
-    private readonly IMenuReadModelRebuilder _rebuilder;
+    private readonly IFullMenuViewMaintainer _rebuilder;
 
-    public RebuildFullMenuCommandHandler(IMenuReadModelRebuilder rebuilder)
+    public RebuildFullMenuCommandHandler(IFullMenuViewMaintainer rebuilder)
     {
         _rebuilder = rebuilder;
     }

@@ -19,14 +19,14 @@ namespace YummyZoom.Application.Tags.EventHandlers.Shared;
 public abstract class TagProjectorBase<TEvent> : IdempotentNotificationHandler<TEvent>
     where TEvent : IDomainEvent, IHasEventId
 {
-    protected readonly IMenuReadModelRebuilder _rebuilder;
+    protected readonly IFullMenuViewMaintainer _rebuilder;
     protected readonly IDbConnectionFactory _dbConnectionFactory;
     protected readonly ILogger _logger;
 
     protected TagProjectorBase(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IDbConnectionFactory dbConnectionFactory,
         ILogger logger) : base(uow, inbox)
     {

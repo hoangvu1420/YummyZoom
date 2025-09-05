@@ -16,7 +16,7 @@ using static Testing;
 
 /// <summary>
 /// Functional tests for CustomizationGroupCreatedEventHandler verifying:
-/// 1. Outbox -> handler execution rebuilds FullMenuView via IMenuReadModelRebuilder.
+/// 1. Outbox -> handler execution rebuilds FullMenuView via IFullMenuViewMaintainer.
 /// 2. Inbox idempotency prevents duplicate side-effects on repeated outbox draining.
 /// </summary>
 public class CustomizationGroupCreatedEventHandlerTests : BaseTestFixture

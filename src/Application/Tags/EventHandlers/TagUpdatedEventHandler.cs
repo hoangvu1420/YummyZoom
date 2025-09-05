@@ -12,7 +12,7 @@ public sealed class TagUpdatedEventHandler : TagProjectorBase<TagUpdated>
     public TagUpdatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IDbConnectionFactory dbConnectionFactory,
         ILogger<TagUpdatedEventHandler> logger)
         : base(uow, inbox, rebuilder, dbConnectionFactory, logger)

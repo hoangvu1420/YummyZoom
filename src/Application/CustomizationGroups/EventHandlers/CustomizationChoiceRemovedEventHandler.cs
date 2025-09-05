@@ -11,7 +11,7 @@ public sealed class CustomizationChoiceRemovedEventHandler : CustomizationGroupP
     public CustomizationChoiceRemovedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger<CustomizationChoiceRemovedEventHandler> logger)
         : base(uow, inbox, rebuilder, groupRepository, logger)

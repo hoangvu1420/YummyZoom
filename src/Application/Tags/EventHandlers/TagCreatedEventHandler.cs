@@ -12,7 +12,7 @@ public sealed class TagCreatedEventHandler : TagProjectorBase<TagCreated>
     public TagCreatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IDbConnectionFactory dbConnectionFactory,
         ILogger<TagCreatedEventHandler> logger)
         : base(uow, inbox, rebuilder, dbConnectionFactory, logger)

@@ -11,7 +11,7 @@ public sealed class MenuItemDietaryTagsUpdatedEventHandler : MenuItemProjectorBa
     public MenuItemDietaryTagsUpdatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemDietaryTagsUpdatedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

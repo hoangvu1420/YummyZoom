@@ -12,7 +12,7 @@
 **Catalog (Current)**
 - `FullMenuView` (restaurant-scoped menu JSON snapshot)
   - Model: `src/Infrastructure/Data/Models/FullMenuView.cs`
-  - Maintainer: `IMenuReadModelRebuilder` → `FullMenuViewRebuilder`
+  - Maintainer: `IFullMenuViewMaintainer` → `FullMenuViewMaintainer`
   - Job: `src/Infrastructure/ReadModels/FullMenu/MenuReadModelMaintenanceHostedService.cs`
   - Freshness: `LastRebuiltAt`; rebuilt on menu events + scheduled sweeps
   - Use: serve public menu, CDN/ETag friendly
@@ -98,7 +98,9 @@
 - Don’t: share or cache `NpgsqlConnection` instances across operations.
 
 **Key Files**
-- Full Menu Job: `src/Infrastructure/ReadModels/FullMenu/MenuReadModelMaintenanceHostedService.cs`
+- Full Menu Maintainer + Job:
+  - `src/Infrastructure/ReadModels/FullMenu/FullMenuViewMaintainer.cs`
+  - `src/Infrastructure/ReadModels/FullMenu/FullMenuViewMaintenanceHostedService.cs`
 - Search Index Maintainer + Job:
   - `src/Infrastructure/ReadModels/Search/SearchIndexMaintainer.cs`
   - `src/Infrastructure/ReadModels/Search/SearchIndexMaintenanceHostedService.cs`

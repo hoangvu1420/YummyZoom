@@ -15,14 +15,14 @@ namespace YummyZoom.Application.MenuItems.EventHandlers.Shared;
 public abstract class MenuItemProjectorBase<TEvent> : IdempotentNotificationHandler<TEvent>
     where TEvent : IDomainEvent, IHasEventId
 {
-    protected readonly IMenuReadModelRebuilder _rebuilder;
+    protected readonly IFullMenuViewMaintainer _rebuilder;
     protected readonly IMenuItemRepository _menuItemRepository;
     protected readonly ILogger _logger;
 
     protected MenuItemProjectorBase(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger logger) : base(uow, inbox)
     {

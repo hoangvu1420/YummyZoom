@@ -11,7 +11,7 @@ public sealed class CustomizationChoicesReorderedEventHandler : CustomizationGro
     public CustomizationChoicesReorderedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger<CustomizationChoicesReorderedEventHandler> logger)
         : base(uow, inbox, rebuilder, groupRepository, logger)

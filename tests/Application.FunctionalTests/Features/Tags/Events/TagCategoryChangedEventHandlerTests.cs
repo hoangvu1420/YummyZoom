@@ -34,7 +34,7 @@ public class TagCategoryChangedEventHandlerTests : BaseTestFixture
         await AddAsync(tag);
 
         var itemId = TestData.GetMenuItemId(Testing.TestData.MenuItems.BuffaloWings);
-        // Critical: assignment ensures the tag is picked up by FullMenuViewRebuilder.
+        // Critical: assignment ensures the tag is picked up by FullFullMenuViewMaintainer.
         await MenuTestDataFactory.AttachTagsToItemAsync(itemId, new List<Guid> { tag.Id.Value });
 
         await SendAsync(new YummyZoom.Application.Admin.Commands.RebuildFullMenu.RebuildFullMenuCommand(restaurantId));

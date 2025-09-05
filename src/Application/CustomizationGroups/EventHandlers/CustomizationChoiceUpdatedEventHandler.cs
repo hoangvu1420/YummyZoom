@@ -11,7 +11,7 @@ public sealed class CustomizationChoiceUpdatedEventHandler : CustomizationGroupP
     public CustomizationChoiceUpdatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger<CustomizationChoiceUpdatedEventHandler> logger)
         : base(uow, inbox, rebuilder, groupRepository, logger)

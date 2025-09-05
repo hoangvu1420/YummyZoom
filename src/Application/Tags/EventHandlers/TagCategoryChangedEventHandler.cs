@@ -12,7 +12,7 @@ public sealed class TagCategoryChangedEventHandler : TagProjectorBase<TagCategor
     public TagCategoryChangedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IDbConnectionFactory dbConnectionFactory,
         ILogger<TagCategoryChangedEventHandler> logger)
         : base(uow, inbox, rebuilder, dbConnectionFactory, logger)

@@ -16,7 +16,7 @@ public sealed class CustomizationGroupCreatedEventHandler : CustomizationGroupPr
     public CustomizationGroupCreatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger<CustomizationGroupCreatedEventHandler> logger)
         : base(uow, inbox, rebuilder, groupRepository, logger)

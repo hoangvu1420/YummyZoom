@@ -13,14 +13,14 @@ namespace YummyZoom.Application.MenuCategories.EventHandlers;
 /// </summary>
 public sealed class MenuCategoryNameUpdatedEventHandler : IdempotentNotificationHandler<MenuCategoryNameUpdated>
 {
-    private readonly IMenuReadModelRebuilder _rebuilder;
+    private readonly IFullMenuViewMaintainer _rebuilder;
     private readonly IMenuRepository _menuRepository;
     private readonly ILogger<MenuCategoryNameUpdatedEventHandler> _logger;
 
     public MenuCategoryNameUpdatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuRepository menuRepository,
         ILogger<MenuCategoryNameUpdatedEventHandler> logger)
         : base(uow, inbox)

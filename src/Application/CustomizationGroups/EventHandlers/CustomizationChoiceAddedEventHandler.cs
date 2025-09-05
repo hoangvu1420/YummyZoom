@@ -11,7 +11,7 @@ public sealed class CustomizationChoiceAddedEventHandler : CustomizationGroupPro
     public CustomizationChoiceAddedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger<CustomizationChoiceAddedEventHandler> logger)
         : base(uow, inbox, rebuilder, groupRepository, logger)

@@ -16,7 +16,7 @@ public sealed class MenuItemCreatedEventHandler : MenuItemProjectorBase<MenuItem
     public MenuItemCreatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemCreatedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

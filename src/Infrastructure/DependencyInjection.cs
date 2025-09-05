@@ -150,12 +150,12 @@ public static class DependencyInjection
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
 
         // Read model rebuild services
-        builder.Services.AddScoped<IMenuReadModelRebuilder, FullMenuViewRebuilder>();
+        builder.Services.AddScoped<IFullMenuViewMaintainer, FullFullMenuViewMaintainer>();
 
         // FullMenu read model maintenance (backfill + reconciliation)
-        builder.Services.Configure<MenuReadModelMaintenanceOptions>(
+        builder.Services.Configure<FullMenuViewMaintenanceOptions>(
             builder.Configuration.GetSection("ReadModelMaintenance"));
-        builder.Services.AddHostedService<MenuReadModelMaintenanceHostedService>();
+        builder.Services.AddHostedService<FullMenuViewMaintenanceHostedService>();
 
         // Search read model maintainer
         builder.Services.AddScoped<ISearchReadModelMaintainer, SearchIndexMaintainer>();

@@ -14,7 +14,7 @@ using static Testing;
 
 /// <summary>
 /// Verifies TagCreated handler is effectively a no-op for FullMenuView when no items reference the new tag.
-/// - Important: FullMenuViewRebuilder only includes tags that are referenced by items (via MenuItems.DietaryTagIds).
+/// - Important: FullFullMenuViewMaintainer only includes tags that are referenced by items (via MenuItems.DietaryTagIds).
 /// - Therefore, creating a tag alone must not change the FullMenuView for any restaurant.
 /// - We still expect inbox idempotency and processed outbox records for the TagCreated event.
 /// </summary>

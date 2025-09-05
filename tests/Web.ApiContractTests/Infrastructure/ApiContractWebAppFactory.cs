@@ -30,7 +30,7 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
             if (hosted is not null) services.Remove(hosted);
 
             // Disable Menu read model maintenance hosted service
-            var hosted2 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "MenuReadModelMaintenanceHostedService");
+            var hosted2 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "FullMenuViewMaintenanceHostedService");
             if (hosted2 is not null) services.Remove(hosted2);
 
             // Inject test auth

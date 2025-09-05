@@ -15,7 +15,7 @@ public sealed class MenuItemAvailabilityChangedEventHandler : MenuItemProjectorB
     public MenuItemAvailabilityChangedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemAvailabilityChangedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

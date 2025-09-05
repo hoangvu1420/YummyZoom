@@ -1,6 +1,6 @@
 namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
-public sealed class MenuReadModelMaintenanceOptions
+public sealed class FullMenuViewMaintenanceOptions
 {
     public bool Enabled { get; set; } = true;
     public TimeSpan InitialDelay { get; set; } = TimeSpan.Zero;

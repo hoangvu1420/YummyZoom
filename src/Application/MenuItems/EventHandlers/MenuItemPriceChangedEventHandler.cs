@@ -11,7 +11,7 @@ public sealed class MenuItemPriceChangedEventHandler : MenuItemProjectorBase<Men
     public MenuItemPriceChangedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemPriceChangedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

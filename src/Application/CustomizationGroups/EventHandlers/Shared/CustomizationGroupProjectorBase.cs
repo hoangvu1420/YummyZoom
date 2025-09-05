@@ -15,14 +15,14 @@ namespace YummyZoom.Application.CustomizationGroups.EventHandlers.Shared;
 public abstract class CustomizationGroupProjectorBase<TEvent> : IdempotentNotificationHandler<TEvent>
     where TEvent : IDomainEvent, IHasEventId
 {
-    protected readonly IMenuReadModelRebuilder _rebuilder;
+    protected readonly IFullMenuViewMaintainer _rebuilder;
     protected readonly ICustomizationGroupRepository _groupRepository;
     protected readonly ILogger _logger;
 
     protected CustomizationGroupProjectorBase(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         ICustomizationGroupRepository groupRepository,
         ILogger logger) : base(uow, inbox)
     {

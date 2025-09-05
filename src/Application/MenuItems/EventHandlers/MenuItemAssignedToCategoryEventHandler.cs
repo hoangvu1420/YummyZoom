@@ -11,7 +11,7 @@ public sealed class MenuItemAssignedToCategoryEventHandler : MenuItemProjectorBa
     public MenuItemAssignedToCategoryEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemAssignedToCategoryEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

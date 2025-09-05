@@ -9,16 +9,16 @@ using YummyZoom.Application.Restaurants.Queries.Common;
 
 namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 
-public sealed class MenuReadModelMaintenanceHostedService : BackgroundService
+public sealed class FullMenuViewMaintenanceHostedService : BackgroundService
 {
-    private readonly MenuReadModelMaintenanceOptions _options;
+    private readonly FullMenuViewMaintenanceOptions _options;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<MenuReadModelMaintenanceHostedService> _logger;
+    private readonly ILogger<FullMenuViewMaintenanceHostedService> _logger;
 
-    public MenuReadModelMaintenanceHostedService(
-        IOptions<MenuReadModelMaintenanceOptions> options,
+    public FullMenuViewMaintenanceHostedService(
+        IOptions<FullMenuViewMaintenanceOptions> options,
         IServiceScopeFactory scopeFactory,
-        ILogger<MenuReadModelMaintenanceHostedService> logger)
+        ILogger<FullMenuViewMaintenanceHostedService> logger)
     {
         _options = options.Value;
         _scopeFactory = scopeFactory;
@@ -149,7 +149,7 @@ LIMIT @Batch;
                 try
                 {
                     using var innerScope = _scopeFactory.CreateScope();
-                    var rebuilder = innerScope.ServiceProvider.GetRequiredService<IMenuReadModelRebuilder>();
+                    var rebuilder = innerScope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
                     var (menuJson, rebuiltAt) = await rebuilder.RebuildAsync(id, ct);
                     await rebuilder.UpsertAsync(id, menuJson, rebuiltAt, ct);
 
@@ -164,7 +164,7 @@ LIMIT @Batch;
                 {
                     // No enabled menu for restaurant → ensure view is removed
                     using var innerScope = _scopeFactory.CreateScope();
-                    var rebuilder = innerScope.ServiceProvider.GetRequiredService<IMenuReadModelRebuilder>();
+                    var rebuilder = innerScope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
                     await rebuilder.DeleteAsync(id, ct);
                 }
                 catch (Exception ex)
@@ -190,7 +190,7 @@ LIMIT @Batch;
             try
             {
                 using var scope = _scopeFactory.CreateScope();
-                var rebuilder = scope.ServiceProvider.GetRequiredService<IMenuReadModelRebuilder>();
+                var rebuilder = scope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
                 await rebuilder.DeleteAsync(id, ct);
                 Interlocked.Increment(ref deleted);
             }

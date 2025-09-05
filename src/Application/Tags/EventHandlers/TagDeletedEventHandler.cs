@@ -12,7 +12,7 @@ public sealed class TagDeletedEventHandler : TagProjectorBase<TagDeleted>
     public TagDeletedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IDbConnectionFactory dbConnectionFactory,
         ILogger<TagDeletedEventHandler> logger)
         : base(uow, inbox, rebuilder, dbConnectionFactory, logger)

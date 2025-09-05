@@ -14,7 +14,7 @@ public sealed class MenuItemDetailsUpdatedEventHandler : MenuItemProjectorBase<M
     public MenuItemDetailsUpdatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemDetailsUpdatedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

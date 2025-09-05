@@ -11,7 +11,7 @@ public sealed class MenuItemCustomizationRemovedEventHandler : MenuItemProjector
     public MenuItemCustomizationRemovedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemCustomizationRemovedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)

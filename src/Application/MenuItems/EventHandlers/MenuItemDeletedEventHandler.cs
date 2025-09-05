@@ -11,7 +11,7 @@ public sealed class MenuItemDeletedEventHandler : MenuItemProjectorBase<MenuItem
     public MenuItemDeletedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        IMenuReadModelRebuilder rebuilder,
+        IFullMenuViewMaintainer rebuilder,
         IMenuItemRepository menuItemRepository,
         ILogger<MenuItemDeletedEventHandler> logger)
         : base(uow, inbox, rebuilder, menuItemRepository, logger)
