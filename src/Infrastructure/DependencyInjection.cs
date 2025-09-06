@@ -32,6 +32,7 @@ using YummyZoom.SharedKernel.Constants;
 using Microsoft.Extensions.Caching.Memory;
 using YummyZoom.Infrastructure.Caching;
 using YummyZoom.Application.Common.Caching;
+using YummyZoom.Infrastructure.TeamCart;
 
 namespace YummyZoom.Infrastructure;
 
@@ -251,6 +252,11 @@ public static class DependencyInjection
             builder.Services.AddSingleton<ICacheService, DistributedCacheService>();
             builder.Services.AddSingleton<ICacheInvalidationPublisher, RedisInvalidationPublisher>();
             builder.Services.AddHostedService<CacheInvalidationSubscriber>();
+            
+            // TeamCart store (Redis-backed)
+            builder.Services.Configure<TeamCartStoreOptions>(
+                builder.Configuration.GetSection(TeamCartStoreOptions.SectionName));
+            builder.Services.AddSingleton<ITeamCartStore, RedisTeamCartStore>();
             logger.LogInformation("Redis cache configured successfully.");
         }
         else

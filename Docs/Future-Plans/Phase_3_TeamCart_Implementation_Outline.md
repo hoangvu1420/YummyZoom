@@ -317,7 +317,7 @@ Phase 3.1 — Contracts & DI Wiring
 - [x] Define `ITeamCartRealtimeNotifier` in Application.
 - [x] Add `TeamCartViewModel` DTO for real-time store and queries.
 - [x] Infrastructure: register EF `TeamCartRepository` and NoOp `TeamCartRealtimeNotifier`.
-- [ ] Web host: register SignalR-backed `TeamCartRealtimeNotifier` and hub routing (behind flag).
+- [x] Web host: register SignalR-backed `TeamCartRealtimeNotifier` and hub routing (behind flag).
 
 Phase 3.2 — Redis Store (Minimal Viable)
 
