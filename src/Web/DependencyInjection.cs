@@ -10,6 +10,8 @@ using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Web.Realtime;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
+using YummyZoom.Web.Configuration;
+using YummyZoom.Infrastructure.TeamCart;
 
 namespace YummyZoom.Web;
 
@@ -62,6 +64,42 @@ public static class DependencyInjection
 
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
+
+        // Bind feature flags and TeamCart store options
+        builder.Services.Configure<FeatureFlagsOptions>(
+            builder.Configuration.GetSection(FeatureFlagsOptions.SectionName));
+        builder.Services.Configure<TeamCartStoreOptions>(
+            builder.Configuration.GetSection(TeamCartStoreOptions.SectionName));
+
+        // Expose availability snapshot for endpoints and guards
+        builder.Services.AddSingleton<ITeamCartFeatureAvailability, TeamCartFeatureAvailability>();
+
+        // Log TeamCart feature readiness status on startup
+        builder.Services.AddOptions<FeatureFlagsOptions>()
+            .PostConfigure(options =>
+            {
+                using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
+                var logger = loggerFactory.CreateLogger("TeamCart.Feature");
+
+                var redis = builder.Configuration.GetConnectionString("redis")
+                            ?? builder.Configuration["Cache:Redis:ConnectionString"];
+
+                if (options.TeamCart)
+                {
+                    if (string.IsNullOrWhiteSpace(redis))
+                    {
+                        logger.LogWarning("Features:TeamCart is enabled but Redis is not configured. TeamCart endpoints must remain disabled.");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Features:TeamCart enabled and Redis configured. Real-time TeamCart is ready to wire.");
+                    }
+                }
+                else
+                {
+                    logger.LogInformation("Features:TeamCart is disabled.");
+                }
+            });
 
         // Ensure domain AggregateRootId<> value objects serialize as their underlying primitive (e.g. Guid) in API responses
         // so contract tests and clients see stable primitive values instead of { "value": "..." } objects.
