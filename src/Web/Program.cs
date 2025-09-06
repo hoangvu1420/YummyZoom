@@ -62,6 +62,13 @@ app.MapVersionedEndpoints();
 app.MapHub<YummyZoom.Web.Realtime.Hubs.RestaurantOrdersHub>("/hubs/restaurant-orders");
 app.MapHub<YummyZoom.Web.Realtime.Hubs.CustomerOrdersHub>("/hubs/customer-orders");
 
+// Conditionally map TeamCart hub behind feature flag and Redis readiness
+var teamCartAvailability = app.Services.GetRequiredService<YummyZoom.Web.Services.ITeamCartFeatureAvailability>();
+if (teamCartAvailability.Enabled && teamCartAvailability.RealTimeReady)
+{
+    app.MapHub<YummyZoom.Web.Realtime.Hubs.TeamCartHub>("/hubs/teamcart");
+}
+
 app.Run();
 
 public partial class Program { }

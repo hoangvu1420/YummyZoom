@@ -116,8 +116,15 @@ public static class DependencyInjection
         // Real-time (SignalR) services for hubs
         builder.Services.AddSignalR();
 
-        // Real-time notifier: override Infrastructure's NoOp with SignalR-backed adapter in Web host
+        // Real-time notifiers: override Infrastructure's NoOps with SignalR-backed adapters in Web host
         builder.Services.AddSingleton<IOrderRealtimeNotifier, SignalROrderRealtimeNotifier>();
+
+        // TeamCart notifier behind feature flag (falls back to NoOp from Infrastructure if disabled)
+        var teamCartEnabled = builder.Configuration.GetSection(FeatureFlagsOptions.SectionName).GetValue<bool>("TeamCart");
+        if (teamCartEnabled)
+        {
+            builder.Services.AddSingleton<ITeamCartRealtimeNotifier, SignalRTeamCartRealtimeNotifier>();
+        }
 
         // Result explanations & badges options (configurable thresholds)
         builder.Services.Configure<ResultExplanationOptions>(
