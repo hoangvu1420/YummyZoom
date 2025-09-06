@@ -15,13 +15,13 @@ public sealed class TeamCartRepository : ITeamCartRepository
         _db = db;
     }
 
-    public Task<TeamCart?> GetByIdAsync(TeamCartId id, CancellationToken cancellationToken = default)
+    public Task<Domain.TeamCartAggregate.TeamCart?> GetByIdAsync(TeamCartId id, CancellationToken cancellationToken = default)
     {
         return _db.TeamCarts
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task AddAsync(TeamCart cart, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Domain.TeamCartAggregate.TeamCart cart, CancellationToken cancellationToken = default)
     {
         await _db.TeamCarts.AddAsync(cart, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);

@@ -321,11 +321,13 @@ Phase 3.1 — Contracts & DI Wiring
 
 Phase 3.2 — Redis Store (Minimal Viable)
 
-- [ ] Implement `RedisTeamCartStore` with: `CreateVm`, `GetVm`, `DeleteVm`.
-- [ ] Add version/ETag field and sliding TTL refresh on read/write.
-- [ ] Implement update ops: `AddMember`, `AddItem`, `UpdateItemQty`, `RemoveItem`, `SetLocked`, `ApplyTip`, `ApplyCoupon`, `RemoveCoupon`, `CommitCod`, `RecordOnlinePayment`.
-- [ ] Publish `teamcart:updates` messages with `{cartId, type, version}`.
-- [ ] Add basic Lua or WATCH/MULTI scripts for atomicity where needed (items + totals, lock checks).
+- [x] Implement `RedisTeamCartStore` with: `CreateVm`, `GetVm`, `DeleteVm`.
+- [x] Add version/ETag field and sliding TTL refresh on read/write.
+- [x] Implement update ops: `AddMember`, `AddItem`, `UpdateItemQty`, `RemoveItem`, `SetLocked`, `ApplyTip`, `ApplyCoupon`, `RemoveCoupon`, `CommitCod`, `RecordOnlinePayment`.
+- [x] Publish `teamcart:updates` messages with `{cartId, type}` (MVP — can include `version` later).
+- [x] Add optimistic concurrency via conditional transaction (WATCH/MULTI/EXEC semantics) with retries and jittered backoff.
+  - Current: compare-and-set on the JSON value using StackExchange.Redis `Condition.StringEqual` + `StringSet` in a transaction.
+  - Next: move to Lua CAS and/or field-level Hash updates for hotspots.
 
 Phase 3.3 — Open Phase Commands
 

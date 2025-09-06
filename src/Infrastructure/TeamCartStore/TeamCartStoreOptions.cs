@@ -1,4 +1,4 @@
-namespace YummyZoom.Infrastructure.TeamCart;
+namespace YummyZoom.Infrastructure.TeamCartStore;
 
 public sealed class TeamCartStoreOptions
 {

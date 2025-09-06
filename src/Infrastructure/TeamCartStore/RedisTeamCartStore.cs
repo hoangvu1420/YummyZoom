@@ -7,7 +7,7 @@ using YummyZoom.Application.TeamCarts.Models;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 
-namespace YummyZoom.Infrastructure.TeamCart;
+namespace YummyZoom.Infrastructure.TeamCartStore;
 
 /// <summary>
 /// Minimal viable Redis-backed TeamCart store implementation.
@@ -80,15 +80,12 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         => await MutateAsync(cartId, vm =>
         {
             var existing = vm.Members.FirstOrDefault(m => m.UserId == member.UserId);
-            if (existing is null)
+            if (existing is not null)
             {
-                vm.Members.Add(member);
+                // Replace immutable/init-only member record with the new one
+                vm.Members.RemoveAll(m => m.UserId == member.UserId);
             }
-            else
-            {
-                existing.Name = member.Name;
-                existing.Role = member.Role;
-            }
+            vm.Members.Add(member);
         }, "member_added");
 
     public async Task AddItemAsync(TeamCartId cartId, TeamCartViewModel.Item item, CancellationToken ct = default)
@@ -163,34 +160,60 @@ public sealed class RedisTeamCartStore : ITeamCartStore
     private async Task MutateAsync(TeamCartId cartId, Action<TeamCartViewModel> mutate, string updateType)
     {
         var key = Key(cartId);
-        var val = await Db.StringGetAsync(key);
-        if (val.IsNullOrEmpty)
-        {
-            _logger.LogWarning("TeamCart VM not found in Redis for mutation (Key={Key}, Type={Type})", key, updateType);
-            return;
-        }
+        var db = Db;
+        const int maxRetries = 5;
+        var rand = new Random();
 
-        TeamCartViewModel vm;
-        try
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
-            var current = JsonSerializer.Deserialize<RedisVm>(val!, _jsonOptions);
-            if (current is null) return;
-            vm = MapFrom(current);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to deserialize VM for mutation (Key={Key}, Type={Type})", key, updateType);
-            return;
-        }
+            var val = await db.StringGetAsync(key);
+            if (val.IsNullOrEmpty)
+            {
+                _logger.LogWarning("TeamCart VM not found in Redis for mutation (Key={Key}, Type={Type})", key, updateType);
+                return;
+            }
 
-        mutate(vm);
-        vm.Version++;
-        var updated = MapTo(vm);
-        var json = JsonSerializer.Serialize(updated, _jsonOptions);
+            TeamCartViewModel vm;
+            try
+            {
+                var current = JsonSerializer.Deserialize<RedisVm>(val!, _jsonOptions);
+                if (current is null) return;
+                vm = MapFrom(current);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to deserialize VM for mutation (Key={Key}, Type={Type})", key, updateType);
+                return;
+            }
 
-        // MVP: non-atomic set with TTL. Future: use Lua CAS with version.
-        await Db.StringSetAsync(key, json, Ttl);
-        await PublishUpdateAsync(cartId, updateType);
+            mutate(vm);
+            vm.Version++;
+            var updated = MapTo(vm);
+            var json = JsonSerializer.Serialize(updated, _jsonOptions);
+
+            // Optimistic concurrency: conditional transaction that only succeeds if the stored value
+            // is unchanged. This emulates WATCH/MULTI/EXEC using StackExchange.Redis conditions.
+            var tran = db.CreateTransaction();
+            tran.AddCondition(Condition.StringEqual(key, val));
+            _ = tran.StringSetAsync(key, json, Ttl, When.Always, CommandFlags.None);
+
+            var committed = await tran.ExecuteAsync();
+            if (committed)
+            {
+                await PublishUpdateAsync(cartId, updateType);
+                return;
+            }
+
+            // Conflict: someone else modified the key. Retry with jittered backoff.
+            if (attempt < maxRetries)
+            {
+                await Task.Delay(rand.Next(5, 30));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to apply mutation due to concurrent updates after {Attempts} attempts (Key={Key}, Type={Type})", attempt, key, updateType);
+            }
+        }
     }
 
     private async Task PublishUpdateAsync(TeamCartId cartId, string updateType)

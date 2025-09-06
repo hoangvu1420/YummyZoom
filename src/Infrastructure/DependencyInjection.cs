@@ -32,7 +32,7 @@ using YummyZoom.SharedKernel.Constants;
 using Microsoft.Extensions.Caching.Memory;
 using YummyZoom.Infrastructure.Caching;
 using YummyZoom.Application.Common.Caching;
-using YummyZoom.Infrastructure.TeamCart;
+using YummyZoom.Infrastructure.TeamCartStore;
 
 namespace YummyZoom.Infrastructure;
 
