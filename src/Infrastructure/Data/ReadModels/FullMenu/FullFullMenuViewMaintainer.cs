@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Dapper;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TagEntity.ValueObjects;
@@ -11,10 +12,12 @@ namespace YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
 public sealed class FullFullMenuViewMaintainer : IFullMenuViewMaintainer
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ICacheInvalidationPublisher _invalidation;
 
-    public FullFullMenuViewMaintainer(IDbConnectionFactory dbConnectionFactory)
+    public FullFullMenuViewMaintainer(IDbConnectionFactory dbConnectionFactory, ICacheInvalidationPublisher invalidation)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _invalidation = invalidation;
     }
 
     public async Task<(string menuJson, DateTimeOffset lastRebuiltAt)> RebuildAsync(Guid restaurantId, CancellationToken ct = default)
@@ -260,6 +263,14 @@ public sealed class FullFullMenuViewMaintainer : IFullMenuViewMaintainer
             """;
 
         await connection.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId, MenuJson = menuJson, LastRebuiltAt = lastRebuiltAt }, cancellationToken: ct));
+
+        // Publish cache invalidation for menu-related caches
+        await _invalidation.PublishAsync(new CacheInvalidationMessage
+        {
+            Tags = new[] { $"restaurant:{restaurantId:N}:menu" },
+            Reason = "FullMenuViewUpsert",
+            SourceEvent = "FullMenuViewMaintainer"
+        }, ct);
     }
 
     public async Task DeleteAsync(Guid restaurantId, CancellationToken ct = default)
@@ -272,6 +283,13 @@ public sealed class FullFullMenuViewMaintainer : IFullMenuViewMaintainer
             """;
 
         await connection.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId }, cancellationToken: ct));
+
+        await _invalidation.PublishAsync(new CacheInvalidationMessage
+        {
+            Tags = new[] { $"restaurant:{restaurantId:N}:menu" },
+            Reason = "FullMenuViewDelete",
+            SourceEvent = "FullMenuViewMaintainer"
+        }, ct);
     }
 
     // Dapper row-shaping types (private to this rebuilder)

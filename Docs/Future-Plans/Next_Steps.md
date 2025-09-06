@@ -89,7 +89,7 @@
   - Restaurant public queries and search index stub.
 
 - Phase 3: TeamCart
-  - TeamCart commands, Redis view model, lock/settle/convert pipeline.
+  - TeamCart commands, cached real-time view model, lock/settle/convert pipeline.
   - Scheduler to expire carts.
   - Conversion service to `Order`.
 

@@ -1,9 +1,15 @@
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.SharedKernel;
+using YummyZoom.Application.Common.Caching;
 
 namespace YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
 
-public sealed record GetRestaurantPublicInfoQuery(Guid RestaurantId) : IRequest<Result<RestaurantPublicInfoDto>>;
+public sealed record GetRestaurantPublicInfoQuery(Guid RestaurantId)
+    : IRequest<Result<RestaurantPublicInfoDto>>, ICacheableQuery<Result<RestaurantPublicInfoDto>>
+{
+    public string CacheKey => $"restaurant:public-info:v1:{RestaurantId:N}";
+    public CachePolicy Policy => CachePolicy.WithTtl(TimeSpan.FromMinutes(2), $"restaurant:{RestaurantId:N}:public-info");
+}
 
 public static class GetRestaurantPublicInfoErrors
 {

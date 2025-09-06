@@ -90,4 +90,27 @@ public class GetRestaurantPublicInfoQueryTests : BaseTestFixture
         var act = async () => await SendAsync(new GetRestaurantPublicInfoQuery(Guid.Empty));
         await act.Should().ThrowAsync<ValidationException>();
     }
+
+    [Test]
+    public async Task Caching_ReturnsCachedValue_OnSecondCallEvenAfterDbChange()
+    {
+        await Testing.ResetState();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+
+        // First call (miss -> populate cache)
+        var first = await Testing.SendAndUnwrapAsync(new GetRestaurantPublicInfoQuery(restaurantId));
+
+        // Mutate DB directly to simulate a change after first read
+        var updatedName = first.Name + "_UPDATED";
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE \"Restaurants\" SET \"Name\" = {updatedName} WHERE \"Id\" = {restaurantId}");
+        }
+
+        // Second call should hit cache and not reflect update
+        var second = await Testing.SendAndUnwrapAsync(new GetRestaurantPublicInfoQuery(restaurantId));
+        second.Name.Should().Be(first.Name);
+        second.Name.Should().NotBe(updatedName);
+    }
 }

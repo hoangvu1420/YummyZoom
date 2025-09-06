@@ -13,8 +13,13 @@ var postgres = builder
 
 var database = postgres.AddDatabase(databaseName);
 
+// Add Redis cache resource
+var redis = builder.AddRedis("redis");
+
 builder.AddProject<Projects.Web>("web")
     .WithReference(database)
-    .WaitFor(database);
+    .WithReference(redis)
+    .WaitFor(database)
+    .WaitFor(redis);
 
 builder.Build().Run();

@@ -21,6 +21,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly DbConnection _connection;
     private readonly string _connectionString;
+    private readonly string? _redisConnectionString;
     private readonly Dictionary<Type, object>? _serviceReplacements;
     
     // Static singleton instance to ensure consistency across all scopes
@@ -30,6 +31,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         _connection = connection;
         _connectionString = connectionString;
+        _redisConnectionString = null;
         _serviceReplacements = null;
     }
 
@@ -37,12 +39,33 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         _connection = connection;
         _connectionString = connectionString;
+        _redisConnectionString = null;
+        _serviceReplacements = serviceReplacements;
+    }
+
+    public CustomWebApplicationFactory(DbConnection connection, string connectionString, string? redisConnectionString)
+    {
+        _connection = connection;
+        _connectionString = connectionString;
+        _redisConnectionString = redisConnectionString;
+        _serviceReplacements = null;
+    }
+
+    public CustomWebApplicationFactory(DbConnection connection, string connectionString, string? redisConnectionString, Dictionary<Type, object> serviceReplacements)
+    {
+        _connection = connection;
+        _connectionString = connectionString;
+        _redisConnectionString = redisConnectionString;
         _serviceReplacements = serviceReplacements;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:YummyZoomDb", _connectionString);
+        if (!string.IsNullOrWhiteSpace(_redisConnectionString))
+        {
+            builder.UseSetting("ConnectionStrings:Redis", _redisConnectionString);
+        }
         builder.ConfigureTestServices(services =>
         {
             ConfigureTestUserService(services);

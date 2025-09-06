@@ -1,16 +1,19 @@
 using Dapper;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Caching;
 
 namespace YummyZoom.Infrastructure.Data.ReadModels.Reviews;
 
 public sealed class ReviewSummaryMaintainer : IReviewSummaryMaintainer
 {
     private readonly IDbConnectionFactory _db;
+    private readonly ICacheInvalidationPublisher _invalidation;
 
-    public ReviewSummaryMaintainer(IDbConnectionFactory db)
+    public ReviewSummaryMaintainer(IDbConnectionFactory db, ICacheInvalidationPublisher invalidation)
     {
         _db = db;
+        _invalidation = invalidation;
     }
 
     public async Task RecomputeForRestaurantAsync(Guid restaurantId, long sourceVersion, CancellationToken ct = default)
@@ -35,6 +38,14 @@ SET "AverageRating" = EXCLUDED."AverageRating",
 """;
 
         await conn.ExecuteAsync(new CommandDefinition(sql, new { RestaurantId = restaurantId }, cancellationToken: ct));
+
+        // Publish cache invalidation for review summary caches
+        await _invalidation.PublishAsync(new CacheInvalidationMessage
+        {
+            Tags = new[] { $"restaurant:{restaurantId:N}:reviews" },
+            Reason = "ReviewSummaryUpsert",
+            SourceEvent = "ReviewSummaryMaintainer"
+        }, ct);
     }
 
     public async Task RecomputeForReviewAsync(Guid reviewId, long sourceVersion, CancellationToken ct = default)
@@ -57,4 +68,3 @@ LIMIT 1;
         await RecomputeForRestaurantAsync(restaurantId.Value, sourceVersion, ct);
     }
 }
-

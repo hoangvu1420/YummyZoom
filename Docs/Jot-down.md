@@ -1,117 +1,55 @@
-## Overall Status of Implementation
+What We Already Have
 
-Reference the outlined spec in Docs\Future-Plans\Phase2_Unified_Implementation_Outline.md . This document summarizes current implementation status and gaps.
+Redis runtime: Provisioned via Aspire; injected as ConnectionStrings:Redis.
+DI + clients:
+IDistributedCache (StackExchange.Redis) for key/value.
+IConnectionMultiplexer registered for advanced Redis ops (pub/sub, sets, scripts).
+App abstractions: ICacheService, CachePolicy, tags, and success-only CachingBehaviour.
+Invalidation: Redis pub/sub publisher + hosted subscriber; tag-based evictions (Redis sets).
+Tests: Redis Testcontainer for functional tests; subscriber active in tests.
 
-Broadly on track: read side, public endpoints, event-driven rebuilds, core write flows in place.
-Remaining gaps: some management queries, customization assignment commands/endpoints, menu removal handler, projector coverage for customization/tag aggregates, backfill/recon jobs.
+TeamCart Needs (Write‑Through)
 
-## Public Read Side
+Authoritative, low-latency read/write store in Redis (not a replica of SQL).
+Atomic updates for concurrent writes (no torn reads).
+Sliding TTL or explicit expiry on carts; refresh on access.
+Cross-instance coherence and eventing for real-time updates (SignalR).
+Fine-grained mutations (add/remove/update items), not just whole-object overwrites.
+Strong dev/testability with the suite.
 
-GetFullMenu: implemented via Dapper with canonical row mapping.
-src/Application/Restaurants/Queries/GetFullMenu/GetFullMenuQuery.cs:1
-src/Application/Restaurants/Queries/GetFullMenu/GetFullMenuQueryHandler.cs:1
-src/Application/Restaurants/Queries/Common/MenuDtos.cs:1
-GET endpoint with ETag + Last-Modified + Cache-Control: implemented.
-src/Web/Endpoints/Restaurants.cs:1 (public group, GET /{restaurantId}/menu)
-src/Web/Infrastructure/Http/HttpCaching.cs:1
-Restaurant public info and search: implemented (search currently stubbed for text/cuisine; geo TBD).
-src/Application/Restaurants/Queries/GetRestaurantPublicInfo/*
-src/Application/Restaurants/Queries/SearchRestaurants/*
+Fit Assessment
 
-## Event Projector (FullMenuView)
+Core readiness: Yes. We already have Redis, a shared IConnectionMultiplexer, and pub/sub. That’s enough to build a TeamCart Redis store.
+Abstraction usage: For TeamCart, prefer a dedicated repository over IDistributedCache:
+IDistributedCache is fine for whole-object set/get, but TeamCart benefits from Redis primitives (hashes, LUA scripts, transactions, expiry) that are better served via IConnectionMultiplexer.
+Invalidation/eventing: Existing pub/sub can be reused for cross-node notifications; SignalR can listen or be triggered by handlers after successful writes.
 
-Naive, correct-first rebuild + upsert/delete implemented.
-src/Infrastructure/ReadModels/FullMenu/FullMenuViewRebuilder.cs:1
-Event handlers cover many menu/menu-category/menu-item events with inbox idempotency:
-Menus: created/updated/enabled/disabled.
-src/Application/Menus/EventHandlers/*
-Categories: added/name-updated/display-order-updated/removed.
-src/Application/MenuCategories/EventHandlers/*
-Items: created/deleted/price/availability/tags/customizations assigned/removed/assigned to category.
-src/Application/MenuItems/EventHandlers/*
-Missing projector coverage: CustomizationGroup and Tag aggregate change events (group/choice updates won’t rebuild yet).
+Recommended Additions (Minimal Infra Changes)
 
-## Write Side (Commands/Repositories)
+New store abstraction:
+ITeamCartStore (in Application) and RedisTeamCartStore (in Infrastructure).
+Key scheme: teamcart:vm:{cartId}; optional per-user group keys if needed.
+Storage: Hash fields (e.g., items, totals, meta), or a JSON blob if simpler initially. Prefer hashes for partial updates.
+TTL: Set on cart key; extend on mutation/access (sliding).
+Concurrency: Use WATCH/MULTI or Lua scripts to enforce atomicity; include a version/ETag field to detect conflicts.
+Locking: If needed for multi-step ops, consider a short-lived Redis lock (e.g., a lightweight lock or RedLock) but favor atomic scripts first.
+Notifications:
+Publish cart-update messages on a teamcart:updates channel, or reuse existing publisher with a specific tag (e.g., teamcart:{id}).
+Optionally, have a subscriber translate updates into SignalR group broadcasts.
+Config knobs:
+Key prefix (env/service), TTL (e.g., 30–60 minutes), channel names, and size guards (max items per cart).
+Observability:
+Counters for cart ops (create/update/read), conflicts, lock timeouts, expirations.
+Optional tracing around cart mutations with key + version tags.
+Tests:
+Integration tests with Redis Testcontainer for atomic mutations, TTL extension, and cross-factory coherence (two app factories observing a shared cart).
 
-EF Core repositories wired in DI: menus, categories, items (and others).
-src/Infrastructure/DependencyInjection.cs:1
-src/Infrastructure/Data/Repositories/MenuRepository.cs:1
-src/Infrastructure/Data/Repositories/MenuCategoryRepository.cs:1
-src/Infrastructure/Data/Repositories/MenuItemRepository.cs:1
-Menu item commands: create, update details (incl. price), change availability, assign to category, update dietary tags, delete – all present with FluentValidation + authorization.
-src/Application/MenuItems/Commands/*
-Menu category commands: add, update (incl. display order), remove – present.
-src/Application/MenuCategories/Commands/*
-Menu commands: create, update details, change availability – present; remove menu command missing.
-src/Application/Menus/Commands/*
+Gaps Not Needed Now
 
-## Web Endpoints
+No changes required to ICacheService for TeamCart; the write-through path should go through a dedicated ITeamCartStore using IConnectionMultiplexer.
+Memory fallback: TeamCart should require Redis; if Redis is unavailable, disable TeamCart commands/reads with a clear error (do not silently fall back to memory).
 
-Management endpoints for menus/categories/items implemented on an authorized group.
-src/Web/Endpoints/Restaurants.cs:1 (POST/PUT/DELETE for create/update/assign/remove flows)
-Public endpoints: menu/info/search implemented and read-optimized (Dapper/ETag).
-src/Web/Endpoints/Restaurants.cs:1
+Conclusion
 
-## Security & Validation
-
-Policies, claims-based permissions, and validators are wired and used.
-src/SharedKernel/Constants/Policies.cs:1
-src/Infrastructure/DependencyInjection.cs:1 (policy registration)
-Command/query validators across features (e.g., *Validator.cs)
-
-## Read Model/DB Plumbing
-
-FullMenuView model + EF config + DbContext registration present.
-src/Infrastructure/Data/Models/FullMenuView.cs:1
-src/Infrastructure/Data/Configurations/FullMenuViewConfiguration.cs:1
-src/Infrastructure/Data/ApplicationDbContext.cs:1 (DbSet)
-Dapper connection factory registered and used consistently.
-src/Infrastructure/Data/DbConnectionFactory.cs:1
-src/Infrastructure/Infrastructure.csproj:1
-
-## Backfill & Maintenance Jobs
-
-Manual admin command to rebuild a restaurant’s view: present (no web endpoint).
-src/Application/Admin/Commands/RebuildFullMenu/*
-No one-time backfill job or periodic reconciliation hosted service yet.
-
-## Tests (Notable)
-
-Public endpoints contracts: menu/info/search behavior and parameter binding.
-tests/Web.ApiContractTests/Restaurants/*
-GetFullMenu functional tests and row shape/offset checks.
-tests/Application.FunctionalTests/Features/Restaurants/Queries/GetFullMenuQueryTests.cs:1
-Event handling idempotency and projector effects (outbox→inbox→view).
-tests/Application.FunctionalTests/Features/Menus/Events/*
-tests/Application.FunctionalTests/OutboxInbox/OutboxFlowTests.cs:1
-Admin rebuild command functional coverage.
-tests/Application.FunctionalTests/Features/Admin/RebuildFullMenuCommandTests.cs:1
-Domain unit tests for menu categories.
-tests/Domain.UnitTests/MenuEntity/MenuCategoryTests.cs:1
-
-## Gaps / TODOs
-
-Customizations:
-Missing commands/endpoints: assign/remove customization group on item (domain supports it).
-Missing projector handlers for CustomizationGroup/Choice/Tag aggregate events (to rebuild affected menus).
-Management queries: not implemented (e.g., GetMenusForManagement, GetMenuCategoryDetails, GetMenuItemsByCategory, GetMenuItemDetails).
-Menu removal: no handler for MenuRemoved; current disabled handler deletes the view, but removal should also delete.
-Backfill/reconciliation:
-No one-time job to build all FullMenuView rows; no periodic recon job.
-Admin trigger:
-Manual rebuild command exists but no API endpoint to invoke it (if desired).
-Search:
-Geo filtering not yet implemented (currently text/cuisine stub as intended).
-
-## Quick Next Steps
-
-- [x] Implement missing commands + endpoints:
-  Assign/Remove customization group to menu item.
-  Optional: dedicated UpdatePrice if you want separate semantics.
-- [x] Add projector handlers for:
-  CustomizationGroupCreated/Deleted/ChoiceAdded/Removed/Updated, Tag changes.
-- [x] Implement management read-side queries (DTOs + Dapper) for staff UI.
-- [x] Add MenuRemovedEventHandler to delete FullMenuView.
-- [ ] Add one-shot backfill and periodic reconciliation hosted service using IMenuReadModelRebuilder.
-- [ ] Optionally expose an admin endpoint for RebuildFullMenu (protected by admin policy).
-- [ ] Extend SearchRestaurantsQueryHandler with geospatial filters (PostGIS ST_DWithin) when ready.
+The current cache infrastructure (Redis via Aspire, multiplexer, pub/sub, testcontainer) fully supports a future TeamCart write-through design.
+Implement TeamCart as a dedicated Redis-backed store using the existing multiplexer, add atomic scripts, TTL management, and use pub/sub (and possibly SignalR) for real-time updates. No structural infra changes are needed—just the TeamCart-specific repository, config, and tests.

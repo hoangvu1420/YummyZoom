@@ -29,6 +29,9 @@ using YummyZoom.Infrastructure.Outbox;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.Realtime;
 using YummyZoom.SharedKernel.Constants;
+using Microsoft.Extensions.Caching.Memory;
+using YummyZoom.Infrastructure.Caching;
+using YummyZoom.Application.Common.Caching;
 
 namespace YummyZoom.Infrastructure;
 
@@ -56,6 +59,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
+
+        builder.AddFirebaseIfConfigured();
+        builder.AddCachingIfConfigured(); 
 
         builder.Services.AddAuthentication()
             .AddBearerToken(IdentityConstants.BearerScheme, options =>
@@ -215,6 +221,44 @@ public static class DependencyInjection
         catch (Exception ex)
         {
             logger.LogCritical(ex, "Failed to initialize Firebase Admin SDK. FCM will not be available.");
+        }
+    }
+
+    public static void AddCachingIfConfigured(this IHostApplicationBuilder builder)
+    {
+        using var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
+        var logger = loggerFactory.CreateLogger("Caching.Initialization");
+
+        // Caching: prefer Redis if configured via Aspire (ConnectionStrings:Redis) or explicit config, otherwise fall back to memory cache
+        var redisConnection = builder.Configuration.GetConnectionString("redis")
+            ?? builder.Configuration["Cache:Redis:ConnectionString"];
+
+        if (!string.IsNullOrWhiteSpace(redisConnection))
+        {
+            // Shared multiplexer for advanced Redis operations (pub/sub, sets)
+            builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp =>
+                StackExchange.Redis.ConnectionMultiplexer.Connect(redisConnection));
+
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnection;
+            });
+            // Cache service bindings (distributed)
+            builder.Services.AddSingleton<ICacheSerializer, JsonCacheSerializer>();
+            builder.Services.AddSingleton<ICacheKeyFactory, DefaultCacheKeyFactory>();
+            builder.Services.AddSingleton<ICacheService, DistributedCacheService>();
+            builder.Services.AddSingleton<ICacheInvalidationPublisher, RedisInvalidationPublisher>();
+            builder.Services.AddHostedService<CacheInvalidationSubscriber>();
+            logger.LogInformation("Redis cache configured successfully.");
+        }
+        else
+        {
+            builder.Services.AddMemoryCache();
+            // Cache service bindings (memory)
+            builder.Services.AddSingleton<ICacheKeyFactory, DefaultCacheKeyFactory>();
+            builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
+            builder.Services.AddSingleton<ICacheInvalidationPublisher, NoOpInvalidationPublisher>();
+            logger.LogInformation("Redis connection string not found. Falling back to in-memory cache.");
         }
     }
 }

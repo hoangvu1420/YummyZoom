@@ -66,7 +66,7 @@ public class GetSomethingQueryHandler : IRequestHandler<GetSomethingQuery, Resul
  - **Event Handlers (Outbox + Inbox Backed):** React to domain events via MediatR; publication is asynchronous through the Outbox publisher and handlers are idempotent via the Inbox store
 - **Common Directory:**
   - **Interfaces:** Abstractions for infrastructure dependencies
-  - **Behaviours:** Cross-cutting concerns (validation, logging, authorization)
+  - **Behaviours:** Cross-cutting concerns (validation, logging, authorization, caching)
   - **Models:** Shared data structures (`PaginatedList`)
 
 ## How to Implement a New Feature
@@ -116,6 +116,26 @@ public class GetSomethingQueryHandler : IRequestHandler<GetSomethingQuery, Resul
     // Use direct SQL with Dapper for optimal performance
 }
 ```
+
+### 🔧 Caching Queries (Cache-Aside)
+
+- Opt-in caching via `ICacheableQuery<TResponse>` implemented on the request type.
+- The `CachingBehaviour<TRequest,TResponse>` performs cache-aside using `ICacheService`.
+- Application layer depends only on cache abstractions; Infrastructure provides Redis/Memory implementations.
+
+Adoption steps:
+- Implement `ICacheableQuery<TResponse>` on the request record.
+- Define a deterministic, namespaced, versioned `CacheKey` (e.g., `restaurant:public-info:v1:{id}` with GUID `N` format).
+- Provide a `CachePolicy` with reasonable TTL and logical tags for invalidation (e.g., `restaurant:{id}:public-info`).
+- Avoid caching sensitive per-user data; the behaviour caches only successful `Result`s.
+
+Examples in code:
+- Public info: `GetRestaurantPublicInfoQuery` (2m TTL; tag `restaurant:{id}:public-info`).
+- Full menu: `GetFullMenuQuery` (5m TTL; tag `restaurant:{id}:menu`).
+
+Notes:
+- Keys are versioned; bump `vN` when response shape changes.
+- HTTP caching (ETag/Last-Modified) is applied in Web for large/public payloads and is complementary.
 
 ### 3. Define Interfaces
 

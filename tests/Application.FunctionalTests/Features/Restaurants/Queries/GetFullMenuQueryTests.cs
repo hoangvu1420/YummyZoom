@@ -2,15 +2,72 @@ using System.Text.Json;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
+using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Infrastructure.Data.Models;
 using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Application.Restaurants.Queries.Common;
 using static YummyZoom.Application.FunctionalTests.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Restaurants.Queries;
 
 [TestFixture]
 public class GetFullMenuQueryTests : BaseTestFixture
 {
+    [Test]
+    public async Task Caching_InvalidateOnMenuUpsert_ReturnsFreshData()
+    {
+        await ResetState();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+
+        // Ensure FullMenuView exists
+        using (var scope = CreateScope())
+        {
+            var maint = scope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
+            var rebuilt = await maint.RebuildAsync(restaurantId);
+            await maint.UpsertAsync(restaurantId, rebuilt.menuJson, rebuilt.lastRebuiltAt);
+        }
+
+        // Warm cache
+        var first = await SendAndUnwrapAsync(new GetFullMenuQuery(restaurantId));
+        var baseline = first.LastRebuiltAt;
+        var again = await SendAndUnwrapAsync(new GetFullMenuQuery(restaurantId));
+        again.LastRebuiltAt.Should().Be(baseline); // served from cache
+
+        // Create a new menu item to trigger rebuild + invalidation
+        await RunAsRestaurantStaffAsync("staff@restaurant.com", restaurantId);
+        var menuCategoryId = Testing.TestData.GetMenuCategoryId("Main Dishes");
+        var cmd = new CreateMenuItemCommand(
+            RestaurantId: restaurantId,
+            MenuCategoryId: menuCategoryId,
+            Name: $"CacheInvalidate-{Guid.NewGuid():N}",
+            Description: "Caching test item",
+            Price: 12.34m,
+            Currency: "USD",
+            ImageUrl: null,
+            IsAvailable: true,
+            DietaryTagIds: null);
+
+        var createResult = await SendAsync(cmd);
+        createResult.ShouldBeSuccessful();
+
+        // Process outbox to run handlers and publish invalidation
+        await DrainOutboxAsync();
+
+        // Poll a few times to allow subscriber to process pub/sub
+        GetFullMenuResponse updated = again;
+        var attempts = 0;
+        while (attempts++ < 20)
+        {
+            updated = await SendAndUnwrapAsync(new GetFullMenuQuery(restaurantId));
+            if (updated.LastRebuiltAt > baseline)
+                break;
+            await Task.Delay(100);
+        }
+
+        updated.LastRebuiltAt.Should().BeAfter(baseline, "cache should be invalidated and view rebuilt time should advance");
+    }
+    
     [Test]
     public async Task Success_ReturnsSeededValues_WithoutAlteringJsonOrOffset()
     {
@@ -101,5 +158,3 @@ public class GetFullMenuQueryTests : BaseTestFixture
         await act.Should().ThrowAsync<ValidationException>();
     }
 }
-
-

@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure.Database;
+using YummyZoom.Application.FunctionalTests.Infrastructure.Cache;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.SharedKernel;
 
@@ -15,6 +16,8 @@ public static class TestInfrastructure
     private static ITestDatabase _database = null!;
     private static CustomWebApplicationFactory _factory = null!;
     private static IServiceScopeFactory _scopeFactory = null!;
+    private static RedisTestcontainer _redis = null!;
+    private static string _redisConnectionString = string.Empty;
     
     // Service replacement tracking
     private static readonly Dictionary<Type, object> _serviceReplacements = new();
@@ -26,7 +29,12 @@ public static class TestInfrastructure
     public static async Task RunBeforeAnyTests()
     {
         _database = await TestDatabaseFactory.CreateAsync();
-        _factory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString());
+
+        _redis = new RedisTestcontainer();
+        await _redis.StartAsync();
+        _redisConnectionString = _redis.GetConnectionString();
+
+        _factory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _redisConnectionString);
         _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
         
         // Initialize the test data factory with default entities
@@ -43,6 +51,7 @@ public static class TestInfrastructure
         
         await _database.DisposeAsync();
         await _factory.DisposeAsync();
+        await _redis.DisposeAsync();
     }
 
     /// <summary>
@@ -187,7 +196,7 @@ public static class TestInfrastructure
         _customFactory?.Dispose();
 
         // Create new factory with replacements
-        _customFactory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _serviceReplacements);
+        _customFactory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _redisConnectionString, _serviceReplacements);
         
         // Update the scope factory to use the custom factory with service replacements
         _scopeFactory = _customFactory.Services.GetRequiredService<IServiceScopeFactory>();

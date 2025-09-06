@@ -39,6 +39,7 @@
       <PackageReference Include="Respawn" />
       <PackageReference Include="System.Configuration.ConfigurationManager" />
       <PackageReference Include="Testcontainers.PostgreSql" />
+      <PackageReference Include="Testcontainers.Redis" />
     </ItemGroup>
     
     <ItemGroup>
