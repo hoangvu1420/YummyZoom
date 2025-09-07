@@ -344,7 +344,7 @@ Phase 3.4 — Event Handlers (Open Phase)
 - [ ] TeamCartCreated handler → `ITeamCartStore.CreateVm`, broadcast `NotifyCartUpdated`.
 - [ ] MemberJoined handler → store `AddMember`, broadcast.
 - [ ] ItemAddedToTeamCart handler → store `AddItem`, broadcast.
-- [ ] Tests: inbox idempotency, duplicate events no-op, VM shape assertions.
+- [ ] Tests: inbox idempotency, duplicate events no-op, post-mutation VM shape and data assertions.
 
 Phase 3.5 — Lock & Financials
 
