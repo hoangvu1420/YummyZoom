@@ -3,6 +3,7 @@ using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.Services;
@@ -123,5 +124,53 @@ public class OrderFinancialService
             return Money.Zero(subtotal.Currency);
         }
         return finalAmount;
+    }
+
+    /// <summary>
+    /// Validates a coupon against TeamCart items and calculates the resulting discount amount.
+    /// Performs necessary mapping from TeamCartItem to OrderItem for consistent calculation.
+    /// This does not perform any usage limit increments; it is intended for pre-validation.
+    /// </summary>
+    /// <param name="coupon">The coupon to validate and apply.</param>
+    /// <param name="cartItems">The TeamCart items to which the coupon might apply.</param>
+    /// <param name="currentTime">Optional current time override for testing.</param>
+    /// <returns>A Result containing the calculated discount amount if successful.</returns>
+    public virtual Result<Money> ValidateAndCalculateDiscountForTeamCartItems(
+        Coupon coupon,
+        IReadOnlyList<TeamCartItem> cartItems,
+        DateTime? currentTime = null)
+    {
+        // Map TeamCartItems to temporary OrderItems to reuse calculation logic
+        var orderItems = MapToOrderItems(cartItems);
+
+        var subtotal = CalculateSubtotal(orderItems);
+        return ValidateAndCalculateDiscount(coupon, orderItems, subtotal, currentTime);
+    }
+
+    private static List<OrderItem> MapToOrderItems(IReadOnlyList<TeamCartItem> cartItems)
+    {
+        var orderItems = new List<OrderItem>();
+
+        foreach (var cartItem in cartItems)
+        {
+            var customizations = cartItem.SelectedCustomizations
+                .Select(c => c.ToOrderItemCustomization())
+                .ToList();
+
+            var orderItemResult = OrderItem.Create(
+                cartItem.Snapshot_MenuCategoryId,
+                cartItem.Snapshot_MenuItemId,
+                cartItem.Snapshot_ItemName,
+                cartItem.Snapshot_BasePriceAtOrder,
+                cartItem.Quantity,
+                customizations.Any() ? customizations : null);
+
+            if (orderItemResult.IsSuccess)
+            {
+                orderItems.Add(orderItemResult.Value);
+            }
+        }
+
+        return orderItems;
     }
 }

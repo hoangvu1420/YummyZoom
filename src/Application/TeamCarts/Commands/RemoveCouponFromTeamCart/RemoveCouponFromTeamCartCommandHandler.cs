@@ -1,0 +1,76 @@
+using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
+using YummyZoom.Domain.TeamCartAggregate.Errors;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
+
+namespace YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
+
+public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<RemoveCouponFromTeamCartCommand, Result<Unit>>
+{
+    private readonly ITeamCartRepository _teamCartRepository;
+    private readonly IUser _currentUser;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<RemoveCouponFromTeamCartCommandHandler> _logger;
+
+    public RemoveCouponFromTeamCartCommandHandler(
+        ITeamCartRepository teamCartRepository,
+        IUser currentUser,
+        IUnitOfWork unitOfWork,
+        ILogger<RemoveCouponFromTeamCartCommandHandler> logger)
+    {
+        _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<Result<Unit>> Handle(RemoveCouponFromTeamCartCommand request, CancellationToken cancellationToken)
+    {
+        return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            if (_currentUser.DomainUserId is null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            var userId = _currentUser.DomainUserId!;
+            var cartId = TeamCartId.Create(request.TeamCartId);
+
+            var cart = await _teamCartRepository.GetByIdAsync(cartId, cancellationToken);
+            if (cart is null)
+            {
+                _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
+                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+            }
+
+            // Enforce host-only and Locked state before attempting removal
+            if (userId != cart.HostUserId)
+            {
+                return Result.Failure<Unit>(TeamCartErrors.OnlyHostCanModifyFinancials);
+            }
+
+            if (cart.Status != TeamCartStatus.Locked)
+            {
+                return Result.Failure<Unit>(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+            }
+
+            var removeResult = cart.RemoveCoupon(userId);
+            if (removeResult.IsFailure)
+            {
+                _logger.LogWarning("Failed to remove coupon from TeamCart {TeamCartId}: {Reason}", request.TeamCartId, removeResult.Error.Code);
+                return Result.Failure<Unit>(removeResult.Error);
+            }
+
+            await _teamCartRepository.UpdateAsync(cart, cancellationToken);
+
+            _logger.LogInformation("Removed coupon from TeamCart. CartId={CartId} HostUserId={UserId}",
+                request.TeamCartId, userId.Value);
+
+            return Result.Success(Unit.Value);
+        }, cancellationToken);
+    }
+}
+

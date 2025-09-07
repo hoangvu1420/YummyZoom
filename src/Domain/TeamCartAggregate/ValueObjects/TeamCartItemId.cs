@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.SharedKernel;
@@ -18,6 +19,7 @@ public sealed class TeamCartItemId : ValueObject
     /// Initializes a new instance of the <see cref="TeamCartItemId"/> class.
     /// </summary>
     /// <param name="value">The unique identifier value.</param>
+    [JsonConstructor]
     private TeamCartItemId(Guid value)
     {
         Value = value;

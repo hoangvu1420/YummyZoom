@@ -2,7 +2,7 @@
 
 This document outlines how to write new functional tests for the YummyZoom application, leveraging the existing test infrastructure. Functional tests are crucial for verifying the end-to-end behavior of your application's features, including command/query handling, business logic, database interactions, and authorization.
 
-**1. Test Project Structure**
+### **1. Test Project Structure**
 
 The functional test project is organized into specialized layers for better maintainability:
 
@@ -31,7 +31,7 @@ tests/Application.FunctionalTests/
 └── Testing.cs               # Clean facade API for all test operations
 ```
 
-**2. Understanding the Test Environment**
+### **2. Understanding the Test Environment**
 
 Our functional test environment is designed for reliability and isolation:
 
@@ -41,7 +41,7 @@ Our functional test environment is designed for reliability and isolation:
 *   **Centralized Test Data:** A default set of test entities is created once per test suite run and automatically restored after each test, providing consistent baseline data.
 *   **Unified Test API (`Testing.cs`):** A static `Testing` class provides a single, clean entry point for all common test operations.
 
-**3. Key Infrastructure Components**
+### **3. Key Infrastructure Components**
 
 *   **`Testing.cs` (Unified Facade):** The single, minimal API for tests.
     *   **Commands/Queries:** `SendAsync(request)`, `SendAndUnwrapAsync(request)`
@@ -56,7 +56,7 @@ Our functional test environment is designed for reliability and isolation:
     *   **`CouponTestDataFactory.cs`:** Options-based factory for coupon scenarios.
     *   **`MenuTestDataFactory.cs`:** Options-based factory for menu scenarios (enabled/disabled menu, categories, items, tag links, customization links, soft-deletes) returning IDs for assertions.
 
-**4. Writing a New Functional Test**
+### **4. Writing a New Functional Test**
 
 1.  **Create a Test File:** In the `Features/` directory, create a new class file in the appropriate domain folder (e.g., `Features/Orders/CreateOrderTests.cs`).
 2.  **Inherit from `BaseTestFixture`:** This ensures per-test setup and teardown, including data reset.
@@ -70,7 +70,7 @@ Our functional test environment is designed for reliability and isolation:
     }
     ```
 
-**5. Leveraging Test Data Factories**
+### **5. Leveraging Test Data Factories**
 
 The test data factories are the cornerstone of efficient and readable tests.
 
@@ -163,7 +163,7 @@ The test data factories are the cornerstone of efficient and readable tests.
     }
     ```
 
-**6. Writing Test Methods**
+### **6. Writing Test Methods**
 
 Follow the Arrange-Act-Assert pattern, keeping tests focused on a single behavior. Comments should be used to explain the purpose of each section in a clear and concise manner.
 
@@ -194,7 +194,7 @@ Test names should follow the pattern:
 - `[Action]_[Condition]_Should[ExpectedResult]` (e.g., `CreateOrder_WithDefaultData_ShouldSucceed`)
 - `[Action]_Should[ExpectedResult]_When[Condition]` (e.g., `InitiateOrder_ShouldFail_WhenRestaurantIsInactive`)
 
-**7. Key Considerations**
+### **7. Key Considerations**
 
 *   **Authentication:** For protected endpoints, always call `RunAs...Async()` before `SendAsync()`.
 *   **Validation:** Test validation failures by sending invalid commands and asserting that a `ValidationException` is thrown.
@@ -202,7 +202,7 @@ Test names should follow the pattern:
 *   **Readability:** Use the static `Testing` class and the test data factories to keep your tests clean, concise, and easy to understand.
 *   **Focus:** Each test should verify a single, specific behavior. Avoid complex tests that try to do too much at once.
 
-**8. Debugging Event-Driven Tests**
+### **8. Debugging Event-Driven Tests**
 
 **Common Pitfall: JSON Deserialization Failures**
 
@@ -229,6 +229,8 @@ public sealed class Rating : ValueObject
     internal Rating() { } // Make internal for JSON deserialization
 }
 ```
+
+**Important Note**: `AggregateRootId<T>` types (like `UserId`, `RestaurantId`, `TeamCartId`, `MenuItemId`) are automatically handled by the `AggregateRootIdJsonConverterFactory` and **do NOT need** `[JsonConstructor]` attributes. Only regular `ValueObject` types (like `TeamCartItemId`, `Money`, custom value objects) need the `[JsonConstructor]` attribute for outbox deserialization.
 
 **Debugging**: Add debug output to `OutboxProcessor.ProcessOnceAsync()` to catch deserialization exceptions.
 

@@ -344,14 +344,36 @@ Phase 3.4 — Event Handlers (Open Phase)
 - [x] TeamCartCreated handler → `ITeamCartStore.CreateVm`, broadcast `NotifyCartUpdated`.
 - [x] MemberJoined handler → store `AddMember`, broadcast.
 - [x] ItemAddedToTeamCart handler → store `AddItem`, broadcast.
+- [x] ItemRemovedFromTeamCart handler → store `RemoveItem`, broadcast.
+- [x] ItemQuantityUpdatedInTeamCart handler → store `UpdateItemQty`, broadcast.
 - [x] Tests: inbox idempotency, duplicate events no-op, post-mutation VM shape and data assertions.
 
 Phase 3.5 — Lock & Financials
 
-- [ ] LockTeamCartForPaymentCommand (host-only). Persist aggregate only.
-- [ ] ApplyTipToTeamCartCommand / RemoveCouponFromTeamCartCommand / ApplyCouponToTeamCartCommand.
-- [ ] Handlers: Locked → `SetLocked`; Tip/Coupon events (or post-commit hook) → `ApplyTip/ApplyCoupon/RemoveCoupon` on store; broadcast.
-- [ ] Tests: cannot lock empty, only host can lock, financials only when Locked.
+- [x] Commands (persist aggregate only; add validators + auth):
+  - LockTeamCartForPaymentCommand (host-only).
+  - ApplyTipToTeamCartCommand (host-only, Locked; validate tip ≥ 0; use domain currency).
+  - ApplyCouponToTeamCartCommand (host-only, Locked; resolve `CouponCode` via `ICouponRepository`; perform early validations for enabled/valid window/scope; do not increment usage here).
+  - RemoveCouponFromTeamCartCommand (host-only, Locked).
+- [ ] Domain events (financials) to keep VM updates outbox-driven (consistent with earlier phases):
+  - TipAppliedToTeamCart(TeamCartId, Money)
+  - CouponAppliedToTeamCart(TeamCartId, CouponId)
+  - CouponRemovedFromTeamCart(TeamCartId)
+- [ ] Handlers (idempotent via inbox):
+  - TeamCartLockedForPayment → `ITeamCartStore.SetLockedAsync` then `NotifyLocked` + `NotifyCartUpdated`.
+  - TipAppliedToTeamCart → store `ApplyTipAsync` then broadcast.
+  - CouponAppliedToTeamCart → store `ApplyCouponAsync` (discount amount may be 0 or a lightweight estimate); broadcast.
+  - CouponRemovedFromTeamCart → store `RemoveCouponAsync`; broadcast.
+- [ ] Implementation notes:
+  - Do not mutate Redis from commands; rely on outbox-driven handlers after successful `SaveChanges`.
+  - Coupon discount in VM is informational; either set to 0 or compute a lightweight estimate. Final discount is computed during conversion (Phase 3.7).
+  - Keep currency consistency by sourcing from domain `Money` values.
+  - Add structured logs on commands/handlers with `cartId`, `actingUserId`, `eventId`.
+- [ ] Tests:
+  - Lock: cannot lock empty, only host can lock, VM status becomes Locked, notifier called once (idempotent on re-drain).
+  - Tip: only when Locked, negative rejected, VM tip updated.
+  - Coupon: only when Locked, apply-once enforcement, remove works and is idempotent, VM reflects coupon/discount.
+  - Handlers idempotency: re-drain outbox does not duplicate store mutations or notifications.
 
 Phase 3.6 — Member Payments
 
