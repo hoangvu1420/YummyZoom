@@ -39,7 +39,7 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
         _logger.LogInformation("Handling ItemAddedToTeamCart (EventId={EventId}, CartId={CartId}, ItemId={ItemId})", notification.EventId, cartId.Value, notification.TeamCartItemId.Value);
 
         // Load aggregate with items to map snapshot fields
-        var cart = await _teamCartRepository.GetByIdWithItemsAsync(cartId, ct);
+        var cart = await _teamCartRepository.GetByIdAsync(cartId, ct);
         if (cart is null)
         {
             _logger.LogWarning("ItemAddedToTeamCart handler could not find cart (CartId={CartId}, EventId={EventId})", cartId.Value, notification.EventId);

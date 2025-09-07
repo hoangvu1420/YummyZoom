@@ -25,9 +25,6 @@ public sealed class TeamCartRepository : ITeamCartRepository
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public Task<TeamCart?> GetByIdWithItemsAsync(TeamCartId id, CancellationToken cancellationToken = default)
-        => GetByIdAsync(id, cancellationToken);
-
     public async Task AddAsync(TeamCart cart, CancellationToken cancellationToken = default)
     {
         await _db.TeamCarts.AddAsync(cart, cancellationToken);
