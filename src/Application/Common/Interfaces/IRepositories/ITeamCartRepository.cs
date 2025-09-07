@@ -8,6 +8,11 @@ public interface ITeamCartRepository
 {
     Task<TeamCart?> GetByIdAsync(TeamCartId id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Loads TeamCart including Items collection for read-model/event-handler needs.
+    /// </summary>
+    Task<TeamCart?> GetByIdWithItemsAsync(TeamCartId id, CancellationToken cancellationToken = default);
+
     Task AddAsync(TeamCart cart, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(TeamCart cart, CancellationToken cancellationToken = default);
@@ -18,4 +23,3 @@ public interface ITeamCartRepository
     /// </summary>
     Task<IReadOnlyList<TeamCart>> GetExpiringCartsAsync(DateTime cutoffUtc, int take, CancellationToken cancellationToken = default);
 }
-
