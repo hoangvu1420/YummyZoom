@@ -18,6 +18,10 @@ public sealed class TeamCartRepository : ITeamCartRepository
     public Task<TeamCart?> GetByIdAsync(TeamCartId id, CancellationToken cancellationToken = default)
     {
         return _db.TeamCarts
+            .Include(c => c.Members)
+            .Include(c => c.Items)
+            .Include(c => c.MemberPayments)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
