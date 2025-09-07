@@ -49,7 +49,8 @@ Implement MediatR commands and validators. All commands use proper authorization
 
 - AddItemToTeamCartCommand
   - Params: `TeamCartId`, `UserId`, `MenuItemId`, `Quantity`, `Customizations[]`.
-  - Flow: load required MenuItem + CustomizationGroups; validate availability and assignments; call aggregate `AddItem`; persist; update Redis via store atomic op; raise ItemAdded event.
+  - Flow: load required MenuItem + CustomizationGroups; validate availability and assignments; enforce per-group cardinality (min/max, duplicates, required groups applied to the item); call aggregate `AddItem`; persist; raise ItemAdded event.
+  - Redis VM: Recommended to update the VM in an idempotent domain-event handler for `ItemAddedToTeamCart` (outbox-driven), not inside the command. Handlers upsert the item into Redis and broadcast. This keeps commands transactional on SQL and VM updates resilient and retryable.
   - Auth: member-only; cart must be Open.
 
 - UpdateTeamCartItemQuantityCommand
@@ -331,12 +332,12 @@ Phase 3.2 — Redis Store (Minimal Viable)
 
 Phase 3.3 — Open Phase Commands
 
-- [ ] CreateTeamCartCommand (+ validator, auth). Persist aggregate only.
-- [ ] JoinTeamCartCommand (+ validator, auth). Persist aggregate only.
-- [ ] AddItemToTeamCartCommand (+ validator, auth). Persist aggregate only.
-- [ ] UpdateTeamCartItemQuantityCommand (+ validator, auth). Persist aggregate only.
-- [ ] RemoveItemFromTeamCartCommand (+ validator, auth). Persist aggregate only.
-- [ ] Tests: happy paths, invalid token, non-member add, item validations (availability, customization groups).
+- [x] CreateTeamCartCommand (+ validator, auth). Persist aggregate only.
+- [x] JoinTeamCartCommand (+ validator, auth). Persist aggregate only.
+- [x] AddItemToTeamCartCommand (+ validator, auth). Persist aggregate only.
+- [x] UpdateTeamCartItemQuantityCommand (+ validator, auth). Persist aggregate only.
+- [x] RemoveItemFromTeamCartCommand (+ validator, auth). Persist aggregate only.
+- [x] Tests: happy paths, invalid token, non-member add, item validations (availability, customization groups).
 
 Phase 3.4 — Event Handlers (Open Phase)
 

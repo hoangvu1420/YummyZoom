@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
@@ -31,17 +32,18 @@ public sealed class TeamCartItemCustomization : ValueObject
     /// <summary>
     /// Initializes a new instance of the <see cref="TeamCartItemCustomization"/> class.
     /// </summary>
-    /// <param name="snapshotCustomizationGroupName">The snapshot of the customization group name.</param>
-    /// <param name="snapshotChoiceName">The snapshot of the choice name.</param>
-    /// <param name="snapshotChoicePriceAdjustmentAtOrder">The snapshot of the price adjustment.</param>
+    /// <param name="snapshot_CustomizationGroupName">The snapshot of the customization group name.</param>
+    /// <param name="snapshot_ChoiceName">The snapshot of the choice name.</param>
+    /// <param name="snapshot_ChoicePriceAdjustmentAtOrder">The snapshot of the price adjustment.</param>
+    [JsonConstructor]
     private TeamCartItemCustomization(
-        string snapshotCustomizationGroupName,
-        string snapshotChoiceName,
-        Money snapshotChoicePriceAdjustmentAtOrder)
+        string snapshot_CustomizationGroupName,
+        string snapshot_ChoiceName,
+        Money snapshot_ChoicePriceAdjustmentAtOrder)
     {
-        Snapshot_CustomizationGroupName = snapshotCustomizationGroupName;
-        Snapshot_ChoiceName = snapshotChoiceName;
-        Snapshot_ChoicePriceAdjustmentAtOrder = snapshotChoicePriceAdjustmentAtOrder;
+        Snapshot_CustomizationGroupName = snapshot_CustomizationGroupName;
+        Snapshot_ChoiceName = snapshot_ChoiceName;
+        Snapshot_ChoicePriceAdjustmentAtOrder = snapshot_ChoicePriceAdjustmentAtOrder;
     }
 
     /// <summary>
@@ -74,9 +76,9 @@ public sealed class TeamCartItemCustomization : ValueObject
         }
 
         return Result.Success(new TeamCartItemCustomization(
-            snapshotCustomizationGroupName,
-            snapshotChoiceName,
-            snapshotChoicePriceAdjustmentAtOrder));
+            snapshot_CustomizationGroupName: snapshotCustomizationGroupName,
+            snapshot_ChoiceName: snapshotChoiceName,
+            snapshot_ChoicePriceAdjustmentAtOrder: snapshotChoicePriceAdjustmentAtOrder));
     }
 
     /// <summary>

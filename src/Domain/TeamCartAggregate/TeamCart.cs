@@ -296,13 +296,6 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// <summary>
     /// Adds an item to the team cart with optional customizations.
     /// </summary>
-    /// <param name="userId">The ID of the user adding the item.</param>
-    /// <param name="menuItemId">The ID of the menu item being added.</param>
-    /// <param name="menuCategoryId">The ID of the menu category.</param>
-    /// <param name="itemName">The name of the menu item.</param>
-    /// <param name="basePrice">The base price of the menu item.</param>
-    /// <param name="quantity">The quantity of the item to add.</param>
-    /// <param name="customizations">Optional list of customizations for the item.</param>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result AddItem(
         UserId userId,
@@ -350,6 +343,70 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             userId,
             menuItemId,
             quantity));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Updates the quantity of an existing item in the team cart. Only the item owner can update while cart is Open.
+    /// </summary>
+    public Result UpdateItemQuantity(UserId requestingUserId, TeamCartItemId itemId, int newQuantity)
+    {
+        if (Status != TeamCartStatus.Open)
+        {
+            return Result.Failure(TeamCartErrors.CannotModifyCartOnceLocked);
+        }
+
+        var item = _items.FirstOrDefault(i => i.Id == itemId);
+        if (item is null)
+        {
+            return Result.Failure(TeamCartErrors.TeamCartNotFound);
+        }
+
+        if (item.AddedByUserId != requestingUserId)
+        {
+            return Result.Failure(TeamCartErrors.UserNotMember);
+        }
+
+        var oldQty = item.Quantity;
+        var updateResult = item.UpdateQuantity(newQuantity);
+        if (updateResult.IsFailure)
+        {
+            return updateResult;
+        }
+
+        AddDomainEvent(new ItemQuantityUpdatedInTeamCart(Id, item.Id, requestingUserId, oldQty, newQuantity));
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Removes an item from the team cart. Only the user who added the item can remove it while the cart is Open.
+    /// </summary>
+    /// <param name="requestingUserId">The user attempting to remove the item.</param>
+    /// <param name="itemId">The ID of the item to remove.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result RemoveItem(UserId requestingUserId, TeamCartItemId itemId)
+    {
+        if (Status != TeamCartStatus.Open)
+        {
+            return Result.Failure(TeamCartErrors.CannotModifyCartOnceLocked);
+        }
+
+        var item = _items.FirstOrDefault(i => i.Id == itemId);
+        if (item is null)
+        {
+            return Result.Failure(TeamCartErrors.TeamCartNotFound);
+        }
+
+        if (item.AddedByUserId != requestingUserId)
+        {
+            return Result.Failure(TeamCartErrors.UserNotMember);
+        }
+
+        _items.Remove(item);
+
+        // Raise domain event for read models / realtime
+        AddDomainEvent(new ItemRemovedFromTeamCart(Id, item.Id, requestingUserId));
 
         return Result.Success();
     }
