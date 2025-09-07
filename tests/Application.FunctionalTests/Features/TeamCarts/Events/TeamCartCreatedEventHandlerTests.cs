@@ -27,21 +27,11 @@ public class TeamCartCreatedEventHandlerTests : BaseTestFixture
         await RunAsDefaultUserAsync();
         var restaurantId = Testing.TestData.DefaultRestaurantId;
 
-        // Mock store and notifier
-        var storeMock = new Mock<ITeamCartStore>(MockBehavior.Strict);
-        TeamCartViewModel? createdVm = null;
-        storeMock
-            .Setup(s => s.CreateVmAsync(It.IsAny<TeamCartViewModel>(), It.IsAny<CancellationToken>()))
-            .Callback<TeamCartViewModel, CancellationToken>((vm, _) => createdVm = vm)
-            .Returns(Task.CompletedTask);
-        // Other methods are not called in this handler
-
+        // Use real Redis-backed store from test infrastructure; only notifier is mocked
         var notifierMock = new Mock<ITeamCartRealtimeNotifier>(MockBehavior.Strict);
         notifierMock
             .Setup(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-
-        ReplaceService<ITeamCartStore>(storeMock.Object);
         ReplaceService<ITeamCartRealtimeNotifier>(notifierMock.Object);
 
         // Act: Create team cart
@@ -51,20 +41,18 @@ public class TeamCartCreatedEventHandlerTests : BaseTestFixture
         // Drain outbox to process TeamCartCreated
         await DrainOutboxAsync();
 
-        // Assert: store create called with expected VM and notifier called once
-        storeMock.Verify(s => s.CreateVmAsync(It.IsAny<TeamCartViewModel>(), It.IsAny<CancellationToken>()), Times.Once);
+        // Assert: VM actually created in Redis store and notifier called once
+        var store = GetService<ITeamCartStore>();
+        var vm = await store.GetVmAsync(TeamCartId.Create(create.Value.TeamCartId));
+        vm.Should().NotBeNull();
+        vm!.CartId.Value.Should().Be(create.Value.TeamCartId);
+        vm.RestaurantId.Should().Be(restaurantId);
+        vm.Status.ToString().Should().Be("Open");
+        vm.Version.Should().BeGreaterThanOrEqualTo(1);
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        createdVm.Should().NotBeNull();
-        createdVm!.CartId.Value.Should().Be(create.Value.TeamCartId);
-        createdVm.RestaurantId.Should().Be(restaurantId);
-        createdVm.Status.ToString().Should().Be("Open");
-        createdVm.Version.Should().BeGreaterThanOrEqualTo(1);
 
         // Idempotency: re-drain should not duplicate
         await DrainOutboxAsync();
-        storeMock.Verify(s => s.CreateVmAsync(It.IsAny<TeamCartViewModel>(), It.IsAny<CancellationToken>()), Times.Once);
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
-
