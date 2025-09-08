@@ -50,6 +50,14 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
             var orderId = webhookEvent.Metadata?.TryGetValue("order_id", out var orderIdValue) == true
                 ? orderIdValue
                 : null;
+
+            // If no OrderId, mark processed and exit successfully (not for us)
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
+                return Result.Success();
+            }
+
             _logger.LogInformation("Webhook event verified. EventId: {EventId}, EventType: {EventType}, RelevantObjectId: {RelevantObjectId}, OrderId: {OrderId}", 
                 webhookEvent.EventId, webhookEvent.EventType, webhookEvent.RelevantObjectId, orderId);
 

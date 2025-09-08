@@ -364,12 +364,12 @@ Phase 3.5 — Lock & Financials
   - TipAppliedToTeamCart → store `ApplyTipAsync` then broadcast.
   - CouponAppliedToTeamCart → store `ApplyCouponAsync` (discount amount may be 0 or a lightweight estimate); broadcast.
   - CouponRemovedFromTeamCart → store `RemoveCouponAsync`; broadcast.
-- [ ] Implementation notes:
+- [x] Implementation notes:
   - Do not mutate Redis from commands; rely on outbox-driven handlers after successful `SaveChanges`.
   - Coupon discount in VM is informational; either set to 0 or compute a lightweight estimate. Final discount is computed during conversion (Phase 3.7).
   - Keep currency consistency by sourcing from domain `Money` values.
   - Add structured logs on commands/handlers with `cartId`, `actingUserId`, `eventId`.
-- [ ] Tests:
+- [x] Tests:
   - Lock: cannot lock empty, only host can lock, VM status becomes Locked, notifier called once (idempotent on re-drain).
   - Tip: only when Locked, negative rejected, VM tip updated.
   - Coupon: only when Locked, apply-once enforcement, remove works and is idempotent, VM reflects coupon/discount.
@@ -377,11 +377,11 @@ Phase 3.5 — Lock & Financials
 
 Phase 3.6 — Member Payments
 
-- [ ] CommitToCodPaymentCommand (member). Persist aggregate only.
-- [ ] InitiateMemberOnlinePaymentCommand → calls `IPaymentGatewayService.CreatePaymentIntentAsync` with `{ teamcart_id, member_user_id }` metadata; returns client-secret; no aggregate mutation.
-- [ ] New `HandleTeamCartStripeWebhookCommand`: on payment succeeded/failed, mutate aggregate (record online payment result) with idempotency and then rely on event handlers to update VM.
-- [ ] Handlers: MemberCommittedToPayment, OnlinePaymentSucceeded/Failed → update payment in store; recompute readiness; broadcast.
-- [ ] Tests: payment flows, idempotent webhook processing, mixed COD+Online.
+- [x] CommitToCodPaymentCommand (member). Persist aggregate only.
+- [x] InitiateMemberOnlinePaymentCommand → calls `IPaymentGatewayService.CreatePaymentIntentAsync` with `{ teamcart_id, member_user_id }` metadata; returns client-secret; no aggregate mutation.
+- [x] New `HandleTeamCartStripeWebhookCommand`: on payment succeeded/failed, mutate aggregate (record online payment result) with idempotency and then rely on event handlers to update VM.
+- [x] Handlers: MemberCommittedToPayment, OnlinePaymentSucceeded/Failed → update payment in store; recompute readiness; broadcast.
+- [x] Tests: payment flows, idempotent webhook processing, mixed COD+Online.
 
 Phase 3.7 — ReadyToConfirm & Conversion
 

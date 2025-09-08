@@ -321,6 +321,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                 // Create payment intent for online payments with order_id in metadata
                 var metadata = new Dictionary<string, string>
                 {
+                    ["source"] = "order",
                     ["user_id"] = customerId.Value.ToString(),
                     ["restaurant_id"] = restaurantId.Value.ToString(),
                     ["order_id"] = orderId.Value.ToString()
