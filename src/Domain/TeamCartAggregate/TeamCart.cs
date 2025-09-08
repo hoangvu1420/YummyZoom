@@ -643,6 +643,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         }
 
         TipAmount = tipAmount;
+
+        // Emit domain event for outbox-driven VM update and realtime broadcast
+        AddDomainEvent(new TipAppliedToTeamCart(Id, tipAmount));
         return Result.Success();
     }
 
@@ -671,6 +674,8 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         }
 
         AppliedCouponId = couponId;
+        // Emit domain event to update RT VM via outbox-driven handler
+        AddDomainEvent(new CouponAppliedToTeamCart(Id, couponId));
         return Result.Success();
     }
 
@@ -697,6 +702,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         }
 
         AppliedCouponId = null;
+        AddDomainEvent(new CouponRemovedFromTeamCart(Id));
         return Result.Success();
     }
 

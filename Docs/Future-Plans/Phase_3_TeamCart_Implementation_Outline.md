@@ -355,11 +355,11 @@ Phase 3.5 — Lock & Financials
   - ApplyTipToTeamCartCommand (host-only, Locked; validate tip ≥ 0; use domain currency).
   - ApplyCouponToTeamCartCommand (host-only, Locked; resolve `CouponCode` via `ICouponRepository`; perform early validations for enabled/valid window/scope; do not increment usage here).
   - RemoveCouponFromTeamCartCommand (host-only, Locked).
-- [ ] Domain events (financials) to keep VM updates outbox-driven (consistent with earlier phases):
+- [x] Domain events (financials) to keep VM updates outbox-driven (consistent with earlier phases):
   - TipAppliedToTeamCart(TeamCartId, Money)
   - CouponAppliedToTeamCart(TeamCartId, CouponId)
   - CouponRemovedFromTeamCart(TeamCartId)
-- [ ] Handlers (idempotent via inbox):
+- [x] Handlers (idempotent via inbox):
   - TeamCartLockedForPayment → `ITeamCartStore.SetLockedAsync` then `NotifyLocked` + `NotifyCartUpdated`.
   - TipAppliedToTeamCart → store `ApplyTipAsync` then broadcast.
   - CouponAppliedToTeamCart → store `ApplyCouponAsync` (discount amount may be 0 or a lightweight estimate); broadcast.
