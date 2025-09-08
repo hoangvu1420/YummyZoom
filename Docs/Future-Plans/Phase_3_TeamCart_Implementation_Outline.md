@@ -385,10 +385,10 @@ Phase 3.6 — Member Payments
 
 Phase 3.7 — ReadyToConfirm & Conversion
 
-- [ ] Handler: TeamCartReadyForConfirmation → `NotifyReadyToConfirm` + store update if separate flag used.
-- [ ] ConvertTeamCartToOrderCommand → validate host + ReadyToConfirm; compute delivery fee/tax/discount; call `TeamCartConversionService`; persist order + updated cart in single transaction.
-- [ ] Handler: TeamCartConverted → delete VM; broadcast `NotifyConverted`.
-- [ ] Tests: conversion success, mismatch validations, coupon reconciliation, order linkage (`SourceTeamCartId`).
+- [x] Handler: TeamCartReadyForConfirmation → `NotifyReadyToConfirm` + store update if separate flag used.
+- [x] ConvertTeamCartToOrderCommand → validate host + ReadyToConfirm; compute delivery fee/tax/discount; call `TeamCartConversionService`; persist order + updated cart in single transaction.
+- [x] Handler: TeamCartConverted → delete VM; broadcast `NotifyConverted`.
+- [x] Tests: conversion success, mismatch validations, coupon reconciliation, order linkage (`SourceTeamCartId`).
 
 Phase 3.8 — Expiration
 
