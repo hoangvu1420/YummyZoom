@@ -392,10 +392,10 @@ Phase 3.7 — ReadyToConfirm & Conversion
 
 Phase 3.8 — Expiration
 
-- [ ] Implement `TeamCartExpirationHostedService` with cadence, batch, and backoff settings.
-- [ ] ExpireTeamCartsCommand (internal) if a command abstraction is desired for testability.
-- [ ] Aggregate `MarkAsExpired` persisted; handler: TeamCartExpired → delete VM; broadcast `NotifyExpired`.
-- [ ] Tests: expiration service marks DB, deletes VM, idempotent re-runs.
+- [x] Implement `TeamCartExpirationHostedService` with cadence, batch, and backoff settings.
+- [x] ExpireTeamCartsCommand (internal) if a command abstraction is desired for testability.
+- [x] Aggregate `MarkAsExpired` persisted; handler: TeamCartExpired → delete VM; broadcast `NotifyExpired`.
+- [x] Tests: expiration service marks DB, deletes VM, idempotent re-runs.
 
 Phase 3.9 — Web Endpoints & SignalR
 

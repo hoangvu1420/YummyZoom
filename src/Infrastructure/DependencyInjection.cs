@@ -33,6 +33,7 @@ using Microsoft.Extensions.Caching.Memory;
 using YummyZoom.Infrastructure.Caching;
 using YummyZoom.Application.Common.Caching;
 using YummyZoom.Infrastructure.TeamCartStore;
+using YummyZoom.Infrastructure.BackgroundServices;
 
 namespace YummyZoom.Infrastructure;
 
@@ -182,6 +183,11 @@ public static class DependencyInjection
             builder.Configuration.GetSection("ReviewSummaryMaintenance"));
         builder.Services.AddHostedService<ReviewSummaryMaintenanceHostedService>();
 
+        // TeamCart expiration options (Phase 3.8)
+        builder.Services.Configure<TeamCartExpirationOptions>(
+            builder.Configuration.GetSection(TeamCartExpirationOptions.SectionName));
+        // Hosted service registration can be toggled at runtime by Enabled flag inside ExecuteAsync
+        builder.Services.AddHostedService<TeamCartExpirationHostedService>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
