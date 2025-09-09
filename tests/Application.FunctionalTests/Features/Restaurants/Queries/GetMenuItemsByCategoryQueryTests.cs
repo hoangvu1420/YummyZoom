@@ -1,5 +1,4 @@
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;

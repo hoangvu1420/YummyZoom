@@ -1,15 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
 using YummyZoom.Domain.CustomizationGroupAggregate;
-using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
@@ -22,28 +20,18 @@ public class AddItemToTeamCartTests : BaseTestFixture
     [Test]
     public async Task AddItem_HappyPath_AsGuest_WithCustomization_ShouldPersist()
     {
-        // Host creates the cart
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario with host and guest
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Alice Host")
+            .WithGuest("Bob Guest")
+            .BuildAsync();
 
-        var createCmd = new CreateTeamCartCommand(restaurantId, "Alice Host");
-        var createResult = await SendAsync(createCmd);
-        createResult.IsSuccess.Should().BeTrue();
-
-        var teamCartId = createResult.Value.TeamCartId;
-        var shareToken = createResult.Value.ShareToken;
-
-        // Guest joins
-        var guestUserId = await CreateUserAsync("guest-additem@example.com", "Password123!");
-        SetUserId(guestUserId);
-        var joinCmd = new JoinTeamCartCommand(teamCartId, shareToken, "Bob Guest");
-        var joinResult = await SendAsync(joinCmd);
-        joinResult.IsSuccess.Should().BeTrue();
-
-        // Add item with one customization
+        // Act: Add item with customization as guest
+        await scenario.ActAsGuest("Bob Guest");
         var burgerId = TestDataFactory.GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
         var addCmd = new AddItemToTeamCartCommand(
-            TeamCartId: teamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 2,
             SelectedCustomizations: new[]
@@ -57,32 +45,31 @@ public class AddItemToTeamCartTests : BaseTestFixture
         var addResult = await SendAsync(addCmd);
         addResult.IsSuccess.Should().BeTrue();
 
-        // Verify persisted
+        // Assert: Verify persisted
         using var scope = TestInfrastructure.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var cart = await db.TeamCarts
             .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(teamCartId));
+            .FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(scenario.TeamCartId));
 
         cart.Should().NotBeNull();
-        cart!.Items.Should().Contain(i => i.Quantity == 2 && i.AddedByUserId.Value == guestUserId);
+        cart!.Items.Should().Contain(i => i.Quantity == 2 && i.AddedByUserId.Value == scenario.GetGuestUserId("Bob Guest"));
     }
 
     [Test]
     public async Task AddItem_InvalidQuantity_ShouldFailValidation()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
-        var createCmd = new CreateTeamCartCommand(restaurantId, "Host");
-        var createResult = await SendAsync(createCmd);
-        createResult.IsSuccess.Should().BeTrue();
-
-        var teamCartId = createResult.Value.TeamCartId;
+        // Act & Assert: Add item with invalid quantity should fail validation
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var burgerId = TestDataFactory.GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
-
         var addCmd = new AddItemToTeamCartCommand(
-            TeamCartId: teamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 0
         );
@@ -94,32 +81,33 @@ public class AddItemToTeamCartTests : BaseTestFixture
     [Test]
     public async Task AddItem_MenuItemFromDifferentRestaurant_ShouldFail()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-
-        var createCmd = new CreateTeamCartCommand(restaurantId, "Host");
-        var createResult = await SendAsync(createCmd);
-        createResult.IsSuccess.Should().BeTrue();
-
-        var teamCartId = createResult.Value.TeamCartId;
+        // Arrange: Create team cart scenario
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
         // Create second restaurant + menu item
         var (otherRestaurantId, otherItemId) = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
 
+        // Act: Try to add item from different restaurant as host
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var addCmd = new AddItemToTeamCartCommand(
-            TeamCartId: teamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: otherItemId,
             Quantity: 1
         );
 
         var result = await SendAsync(addCmd);
+
+        // Assert: Should fail
         result.IsFailure.Should().BeTrue();
     }
 
     [Test]
     public async Task AddItem_RequiredCustomizationGroupMissing_ShouldFail()
     {
-        // Assign required group (min 1) to Classic Burger as restaurant staff
+        // Arrange: Assign required group (min 1) to Classic Burger as restaurant staff
         var restaurantId = Testing.TestData.DefaultRestaurantId;
         await RunAsRestaurantStaffAsync("staff@restaurant.com", restaurantId);
 
@@ -133,15 +121,20 @@ public class AddItemToTeamCartTests : BaseTestFixture
             DisplayOrder: null);
         (await SendAsync(assignCmd)).IsSuccess.Should().BeTrue();
 
-        // Switch to a customer, create cart and try to add without required selection
-        await RunAsDefaultUserAsync();
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
+        // Create team cart scenario as customer
+        var scenario = await TeamCartTestBuilder
+            .Create(restaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
+        // Act: Try to add without required selection as host
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var add = await SendAsync(new AddItemToTeamCartCommand(
-            TeamCartId: create.Value.TeamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 1));
+
+        // Assert: Should fail
         add.IsFailure.Should().BeTrue();
     }
 
@@ -170,16 +163,19 @@ public class AddItemToTeamCartTests : BaseTestFixture
             DisplayOrder: null));
         assign.IsSuccess.Should().BeTrue();
 
-        // Customer adds item selecting both choices (exceeds max)
-        await RunAsDefaultUserAsync();
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
+        // Create team cart scenario as customer
+        var scenario = await TeamCartTestBuilder
+            .Create(restaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
         var ketchupId = group.Choices.First(c => c.Name == "Ketchup").Id.Value;
         var mayoId = group.Choices.First(c => c.Name == "Mayo").Id.Value;
 
+        // Act: Customer adds item selecting both choices (exceeds max) as host
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var add = await SendAsync(new AddItemToTeamCartCommand(
-            TeamCartId: create.Value.TeamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 1,
             SelectedCustomizations: new[]
@@ -187,24 +183,28 @@ public class AddItemToTeamCartTests : BaseTestFixture
                 new AddItemToTeamCartCustomizationSelection(group.Id.Value, ketchupId),
                 new AddItemToTeamCartCustomizationSelection(group.Id.Value, mayoId)
             }));
+
+        // Assert: Should fail
         add.IsFailure.Should().BeTrue();
     }
 
     [Test]
     public async Task AddItem_CustomizationGroupNotApplied_ShouldFail()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
-
+        // Act: Try to add item with unassigned customization group as host
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var burgerId = TestDataFactory.GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
         var unassignedGroupId = TestDataFactory.CustomizationGroup_RequiredBunTypeId!.Value;
         var someChoiceId = TestDataFactory.CustomizationChoice_BriocheBunId!.Value;
 
         var add = await SendAsync(new AddItemToTeamCartCommand(
-            TeamCartId: create.Value.TeamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 1,
             SelectedCustomizations: new[]
@@ -212,6 +212,7 @@ public class AddItemToTeamCartTests : BaseTestFixture
                 new AddItemToTeamCartCustomizationSelection(unassignedGroupId, someChoiceId)
             }));
 
+        // Assert: Should fail
         add.IsFailure.Should().BeTrue();
     }
 
@@ -238,15 +239,18 @@ public class AddItemToTeamCartTests : BaseTestFixture
             DisplayTitle: "Toppings",
             DisplayOrder: null))).IsSuccess.Should().BeTrue();
 
-        // Customer attempts to add the same choice twice
-        await RunAsDefaultUserAsync();
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
+        // Create team cart scenario as customer
+        var scenario = await TeamCartTestBuilder
+            .Create(restaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
         var picklesId = group.Choices.First(c => c.Name == "Pickles").Id.Value;
 
+        // Act: Customer attempts to add the same choice twice as host
+        await scenario.ActAsHost(); // Ensure we're acting as a team cart member
         var add = await SendAsync(new AddItemToTeamCartCommand(
-            TeamCartId: create.Value.TeamCartId,
+            TeamCartId: scenario.TeamCartId,
             MenuItemId: burgerId,
             Quantity: 1,
             SelectedCustomizations: new[]
@@ -255,6 +259,7 @@ public class AddItemToTeamCartTests : BaseTestFixture
                 new AddItemToTeamCartCustomizationSelection(group.Id.Value, picklesId)
             }));
 
+        // Assert: Should fail
         add.IsFailure.Should().BeTrue();
     }
 }

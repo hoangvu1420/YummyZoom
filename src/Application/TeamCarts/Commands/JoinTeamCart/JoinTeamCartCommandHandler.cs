@@ -31,12 +31,6 @@ public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCom
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // Ensure authenticated user
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var guestUserId = _currentUser.DomainUserId!;
             var teamCartId = TeamCartId.Create(request.TeamCartId);
 

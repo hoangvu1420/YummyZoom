@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentAssertions;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Common;

@@ -39,11 +39,7 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
+            // Authorization handled by pipeline - user guaranteed to be authenticated and be TeamCart participant
             var userId = _currentUser.DomainUserId!;
             var cartId = TeamCartId.Create(request.TeamCartId);
 

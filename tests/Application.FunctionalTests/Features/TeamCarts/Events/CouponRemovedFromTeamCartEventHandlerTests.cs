@@ -1,11 +1,9 @@
-using FluentAssertions;
-using Moq;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyCouponToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
@@ -15,26 +13,34 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
 
 public class CouponRemovedFromTeamCartEventHandlerTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task RemoveCoupon_Should_UpdateStore_And_Notify()
     {
-        // Arrange: host creates cart and locks it
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario with host using builder
+        var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
         await DrainOutboxAsync(); // process TeamCartCreated -> create VM
 
+        // Add item to cart (as host)
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
 
-        (await SendAsync(new LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        // Lock cart for payment (as host)
+        (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
-        // Apply a coupon first
+        // Apply a coupon first (as host)
         var couponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions());
-        (await SendAsync(new ApplyCouponToTeamCartCommand(create.Value.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync(); // process CouponAppliedToTeamCart
 
         // Mock notifier to verify single notification on removal
@@ -44,14 +50,14 @@ public class CouponRemovedFromTeamCartEventHandlerTests : BaseTestFixture
             .Returns(Task.CompletedTask);
         ReplaceService<ITeamCartRealtimeNotifier>(notifierMock.Object);
 
-        // Act: remove coupon
-        (await SendAsync(new RemoveCouponFromTeamCartCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        // Act: remove coupon (as host)
+        (await SendAsync(new RemoveCouponFromTeamCartCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         await DrainOutboxAsync(); // process CouponRemovedFromTeamCart
 
         // Assert: VM reflects removal
         var store = GetService<ITeamCartStore>();
-        var vm = await store.GetVmAsync(TeamCartId.Create(create.Value.TeamCartId));
+        var vm = await store.GetVmAsync(TeamCartId.Create(scenario.TeamCartId));
         vm.Should().NotBeNull();
         vm!.CouponCode.Should().BeNull();
         vm.DiscountAmount.Should().Be(0m);

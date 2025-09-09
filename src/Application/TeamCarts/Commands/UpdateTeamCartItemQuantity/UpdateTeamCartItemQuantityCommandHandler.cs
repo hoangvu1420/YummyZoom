@@ -31,11 +31,6 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var userId = _currentUser.DomainUserId!;
             var cartId = TeamCartId.Create(request.TeamCartId);
             var itemId = TeamCartItemId.Create(request.TeamCartItemId);
@@ -47,26 +42,7 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
                 return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
             }
 
-            if (cart.Status != TeamCartStatus.Open)
-            {
-                _logger.LogWarning("Cannot modify item quantity when cart not open. CartId={CartId} Status={Status}", request.TeamCartId, cart.Status);
-                return Result.Failure<Unit>(TeamCartErrors.CannotModifyCartOnceLocked);
-            }
-
-            var item = cart.Items.FirstOrDefault(i => i.Id == itemId);
-            if (item is null)
-            {
-                _logger.LogWarning("TeamCart item not found. CartId={CartId} ItemId={ItemId}", request.TeamCartId, request.TeamCartItemId);
-                return Result.Failure<Unit>(UpdateTeamCartItemQuantityErrors.ItemNotFound(request.TeamCartItemId));
-            }
-
-            if (item.AddedByUserId != userId)
-            {
-                _logger.LogWarning("User is not the owner of TeamCart item. CartId={CartId} ItemId={ItemId} UserId={UserId}", request.TeamCartId, request.TeamCartItemId, userId.Value);
-                return Result.Failure<Unit>(UpdateTeamCartItemQuantityErrors.NotItemOwner(userId.Value, request.TeamCartItemId));
-            }
-
-            // Perform update via aggregate to raise domain event for realtime/read models
+            // Perform update via aggregate - domain handles all business rules (ownership, status, etc.)
             var updateResult = cart.UpdateItemQuantity(userId, itemId, request.NewQuantity);
             if (updateResult.IsFailure)
             {

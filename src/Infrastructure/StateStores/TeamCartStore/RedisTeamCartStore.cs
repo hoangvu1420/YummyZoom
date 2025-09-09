@@ -92,7 +92,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         => await MutateAsync(cartId, vm =>
         {
             vm.Items.Add(item);
-            // Future: recompute subtotal/total server-side here
+            RecalculateTotals(vm);
         }, "item_added");
 
     public async Task UpdateItemQuantityAsync(TeamCartId cartId, Guid itemId, int newQuantity, CancellationToken ct = default)
@@ -102,14 +102,14 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             if (it is null) return;
             it.Quantity = newQuantity;
             it.LineTotal = it.BasePrice * newQuantity;
-            // Future: recompute subtotal/total server-side here
+            RecalculateTotals(vm);
         }, "item_quantity_updated");
 
     public async Task RemoveItemAsync(TeamCartId cartId, Guid itemId, CancellationToken ct = default)
         => await MutateAsync(cartId, vm =>
         {
             vm.Items.RemoveAll(i => i.ItemId == itemId);
-            // Future: recompute subtotal/total server-side here
+            RecalculateTotals(vm);
         }, "item_removed");
 
     public async Task SetLockedAsync(TeamCartId cartId, CancellationToken ct = default)
@@ -120,6 +120,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             vm.TipAmount = amount;
             vm.TipCurrency = currency;
+            RecalculateTotals(vm);
         }, "tip_applied");
 
     public async Task ApplyCouponAsync(TeamCartId cartId, string couponCode, decimal discountAmount, string currency, CancellationToken ct = default)
@@ -128,6 +129,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             vm.CouponCode = couponCode;
             vm.DiscountAmount = discountAmount;
             vm.DiscountCurrency = currency;
+            RecalculateTotals(vm);
         }, "coupon_applied");
 
     public async Task RemoveCouponAsync(TeamCartId cartId, CancellationToken ct = default)
@@ -135,6 +137,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             vm.CouponCode = null;
             vm.DiscountAmount = 0;
+            RecalculateTotals(vm);
         }, "coupon_removed");
 
     public async Task CommitCodAsync(TeamCartId cartId, Guid userId, decimal amount, string currency, CancellationToken ct = default)
@@ -228,6 +231,19 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             _logger.LogDebug(ex, "Failed to publish TeamCart update (CartId={CartId}, Type={Type})", cartId.Value, updateType);
         }
+    }
+
+    private static void RecalculateTotals(TeamCartViewModel viewModel)
+    {
+        // Calculate subtotal from all items
+        viewModel.Subtotal = viewModel.Items.Sum(item => item.LineTotal);
+        
+        // Calculate total: subtotal + tip - discount
+        viewModel.Total = viewModel.Subtotal + viewModel.TipAmount - viewModel.DiscountAmount;
+        
+        // Ensure total is not negative
+        if (viewModel.Total < 0)
+            viewModel.Total = 0;
     }
 
     #region Mapping

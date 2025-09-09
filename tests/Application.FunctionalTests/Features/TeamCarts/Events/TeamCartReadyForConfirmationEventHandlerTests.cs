@@ -1,9 +1,8 @@
-
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
@@ -12,20 +11,29 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
 
 public class TeamCartReadyForConfirmationEventHandlerTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task ReadyForConfirmation_Should_Notify()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario with host using builder
+        var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
+        await DrainOutboxAsync(); // process TeamCartCreated -> create VM
 
+        // Add item and lock cart (as host)
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        var notifierMock = new Moq.Mock<ITeamCartRealtimeNotifier>(Moq.MockBehavior.Loose);
+        var notifierMock = new Mock<ITeamCartRealtimeNotifier>(MockBehavior.Loose);
         notifierMock
             .Setup(n => n.NotifyReadyToConfirm(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -37,12 +45,13 @@ public class TeamCartReadyForConfirmationEventHandlerTests : BaseTestFixture
             .Returns(Task.CompletedTask);
         ReplaceService<ITeamCartRealtimeNotifier>(notifierMock.Object);
 
-        // Commit COD to trigger ReadyToConfirm (single-member case)
-        (await SendAsync(new CommitToCodPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        // Act: Commit COD to trigger ReadyToConfirm (single-member case, as host)
+        (await SendAsync(new CommitToCodPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         await DrainOutboxAsync();
 
+        // Assert: Verify notifications
         notifierMock.Verify(n => n.NotifyReadyToConfirm(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Moq.Times.AtLeastOnce());
+        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce());
     }
 }

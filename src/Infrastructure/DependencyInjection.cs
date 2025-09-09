@@ -131,7 +131,14 @@ public static class DependencyInjection
             .AddPolicy(Policies.MustBeOrderOwner, policy =>
                 policy.AddRequirements(new HasPermissionRequirement(Roles.OrderOwner)))
             .AddPolicy(Policies.MustBeOrderManager, policy =>
-                policy.AddRequirements(new HasPermissionRequirement(Roles.OrderManager)));
+                policy.AddRequirements(new HasPermissionRequirement(Roles.OrderManager)))
+            // TeamCart policies
+            .AddPolicy(Policies.MustBeTeamCartHost, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.TeamCartHost)))
+            .AddPolicy(Policies.MustBeTeamCartMember, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.TeamCartMember)))
+            .AddPolicy(Policies.MustBeTeamCartParticipant, policy =>
+                policy.AddRequirements(new HasPermissionRequirement(Roles.TeamCartMember)));
 
         builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, YummyZoomClaimsPrincipalFactory>();
 

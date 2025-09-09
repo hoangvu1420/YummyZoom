@@ -1,14 +1,11 @@
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
 using YummyZoom.Application.Orders.Broadcasting;
 using YummyZoom.Application.Orders.EventHandlers;
-using YummyZoom.Domain.OrderAggregate.Events;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using static YummyZoom.Application.FunctionalTests.Testing;

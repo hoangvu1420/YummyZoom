@@ -1,7 +1,8 @@
+using FluentAssertions;
 using Microsoft.Extensions.Options;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using static YummyZoom.Application.FunctionalTests.Testing;
@@ -10,19 +11,30 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.Hand
 
 public class HandleTeamCartStripeWebhookCommandTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task Webhook_Succeeded_Should_Record_Payment_And_Succeed()
     {
-        var userId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host using builder
+        var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
+        await DrainOutboxAsync(); // process TeamCartCreated -> create VM
+
+        // Add item and lock cart (as host)
+        await scenario.ActAsHost();
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        var initiate = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(create.Value.TeamCartId));
+        // Initiate payment (as host)
+        var initiate = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
         initiate.IsSuccess.Should().BeTrue();
 
         // Build a fake webhook event payload through ConstructWebhookEvent by crafting raw json metadata
@@ -34,14 +46,17 @@ public class HandleTeamCartStripeWebhookCommandTests : BaseTestFixture
             metadata: new Dictionary<string, string>
             {
                 ["source"] = "teamcart",
-                ["teamcart_id"] = create.Value.TeamCartId.ToString(),
-                ["member_user_id"] = userId.ToString()
+                ["teamcart_id"] = scenario.TeamCartId.ToString(),
+                ["member_user_id"] = scenario.HostUserId.ToString()
             });
 
         var stripeOptions = GetService<IOptions<StripeOptions>>().Value;
         var signature = PaymentTestHelper.GenerateWebhookSignature(payload, stripeOptions.WebhookSecret);
 
+        // Act: Handle webhook
         var result = await SendAsync(new Application.TeamCarts.Commands.HandleTeamCartStripeWebhook.HandleTeamCartStripeWebhookCommand(payload, signature));
+        
+        // Assert: Webhook handling succeeded
         result.IsSuccess.Should().BeTrue();
     }
 

@@ -1,6 +1,4 @@
-using System;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;

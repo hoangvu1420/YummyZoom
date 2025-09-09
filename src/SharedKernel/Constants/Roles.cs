@@ -17,4 +17,10 @@ public abstract class Roles
     public const string OrderOwner = nameof(OrderOwner);
 
     public const string OrderManager = nameof(OrderManager);
+
+    public const string TeamCartHost = nameof(TeamCartHost);
+
+    public const string TeamCartMember = nameof(TeamCartMember);
+
+    public const string TeamCartGuest = nameof(TeamCartGuest);
 }

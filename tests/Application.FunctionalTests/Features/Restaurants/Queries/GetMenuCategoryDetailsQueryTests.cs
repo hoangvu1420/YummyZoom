@@ -2,9 +2,6 @@ using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
-using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Restaurants.Queries;

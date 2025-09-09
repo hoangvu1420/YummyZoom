@@ -34,6 +34,10 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
             case "Order":
                 HandleOrderAuthorization(context, requirement, resource);
                 break;
+
+            case "TeamCart":
+                HandleTeamCartAuthorization(context, requirement, resource);
+                break;
         }
         
         return Task.CompletedTask;
@@ -93,4 +97,20 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
             }
         }
     }
-} 
+
+    private void HandleTeamCartAuthorization(
+        AuthorizationHandlerContext context,
+        HasPermissionRequirement requirement,
+        IContextualCommand resource)
+    {
+        // Business rule: TeamCart hosts can perform member actions
+        if (requirement.Role == Roles.TeamCartMember)
+        {
+            var hostPermission = $"{Roles.TeamCartHost}:{resource.ResourceId}";
+            if (context.User.HasClaim("permission", hostPermission))
+            {
+                context.Succeed(requirement);
+            }
+        }
+    }
+}

@@ -9,4 +9,8 @@ public abstract class Policies
 
     public const string MustBeOrderOwner = nameof(MustBeOrderOwner);
     public const string MustBeOrderManager = nameof(MustBeOrderManager);
+
+    public const string MustBeTeamCartHost = nameof(MustBeTeamCartHost);
+    public const string MustBeTeamCartMember = nameof(MustBeTeamCartMember);
+    public const string MustBeTeamCartParticipant = nameof(MustBeTeamCartParticipant);
 }

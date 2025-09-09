@@ -1,5 +1,3 @@
-using System;
-
 namespace YummyZoom.Application.FunctionalTests.Common;
 
 public sealed class FixedTimeProvider : TimeProvider

@@ -1,28 +1,40 @@
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
-using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.InitiateMemberOnlinePaymentCommand;
 
 public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task Initiate_Should_Return_ClientSecret_ForMember_OnLockedCart()
     {
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
+        // Add item as host (who is a member)
+        await scenario.ActAsHost();
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
 
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        // Lock cart as host
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(create.Value.TeamCartId));
+        // Act: Initiate payment as host (who is a member)
+        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
 
+        // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.PaymentIntentId.Should().NotBeNullOrWhiteSpace();
         result.Value.ClientSecret.Should().NotBeNullOrWhiteSpace();
@@ -31,13 +43,17 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
     [Test]
     public async Task Initiate_Should_Fail_OnOpenCart()
     {
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
-        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(create.Value.TeamCartId));
+        // Act: Try to initiate payment as host on open cart (not locked)
+        await scenario.ActAsHost();
+        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
 
+        // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("TeamCart.CanOnlyPayOnLockedCart");
     }
@@ -45,22 +61,57 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
     [Test]
     public async Task Initiate_Should_Fail_ForNonMember()
     {
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
+        // Add item and lock cart as host
+        await scenario.ActAsHost();
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        var otherUserId = await CreateUserAsync("nonmember@example.com", "Password123!");
-        SetUserId(otherUserId);
+        // Act: Try to initiate payment as non-member (authorization should fail at pipeline level)
+        await scenario.ActAsNonMember();
+        
+        // Assert: Should throw ForbiddenAccessException due to authorization policy
+        await FluentActions.Invoking(() => 
+                SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId)))
+            .Should().ThrowAsync<ForbiddenAccessException>();
+    }
 
-        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(create.Value.TeamCartId));
+    [Test]
+    public async Task Initiate_Should_Return_ClientSecret_ForGuestMember_OnLockedCart()
+    {
+        // Arrange: Create team cart scenario with host and guest
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .WithGuest("Guest User")
+            .BuildAsync();
 
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("TeamCart.UserNotMember");
+        // Add items as both members
+        await scenario.ActAsHost();
+        var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
+
+        await scenario.ActAsGuest("Guest User");
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
+
+        // Lock cart as host
+        await scenario.ActAsHost();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+
+        // Act: Initiate payment as guest (who is a member)
+        await scenario.ActAsGuest("Guest User");
+        var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
+
+        // Assert: Guest member should successfully initiate payment
+        result.IsSuccess.Should().BeTrue();
+        result.Value.PaymentIntentId.Should().NotBeNullOrWhiteSpace();
+        result.Value.ClientSecret.Should().NotBeNullOrWhiteSpace();
     }
 }
 

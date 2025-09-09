@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Infrastructure.Persistence.EfCore;

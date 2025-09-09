@@ -39,11 +39,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
+            // Authorization handled by pipeline - user guaranteed to be authenticated and have TeamCart access
             var userId = _currentUser.DomainUserId!;
             var teamCartId = TeamCartId.Create(request.TeamCartId);
             var menuItemId = MenuItemId.Create(request.MenuItemId);

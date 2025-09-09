@@ -49,11 +49,6 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var teamCartId = TeamCartId.Create(request.TeamCartId);
             var cart = await _teamCartRepository.GetByIdAsync(teamCartId, cancellationToken);
             if (cart is null)
@@ -61,12 +56,7 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
                 return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.TeamCartNotFound);
             }
 
-            if (!_currentUser.DomainUserId.Equals(cart.HostUserId))
-            {
-                return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.OnlyHostCanModifyFinancials);
-            }
-
-            // Must be ReadyToConfirm
+            // Validate business rules - status must be ReadyToConfirm
             if (cart.Status != Domain.TeamCartAggregate.Enums.TeamCartStatus.ReadyToConfirm)
             {
                 return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.InvalidStatusForConversion);

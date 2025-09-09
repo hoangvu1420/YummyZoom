@@ -1,11 +1,11 @@
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
@@ -15,31 +15,39 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.Remo
 
 public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task RemoveCoupon_Should_Succeed_ForHost_WhenCartLocked_AndCouponApplied()
     {
-        // Arrange: host creates cart, adds item, locks, applies coupon
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
+        // Add item, lock cart, and apply coupon as host
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         var couponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions());
-        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(create.Value.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
 
-        // Act
-        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(create.Value.TeamCartId));
+        // Act: Remove coupon as host
+        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId));
 
         // Assert
         remove.IsSuccess.Should().BeTrue();
 
         using var scope = TestInfrastructure.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var cart = await db.TeamCarts.FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(create.Value.TeamCartId));
+        var cart = await db.TeamCarts.FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.AppliedCouponId.Should().BeNull();
     }
@@ -47,22 +55,24 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
     [Test]
     public async Task RemoveCoupon_Should_Succeed_NoCouponApplied()
     {
-        // Arrange: host creates locked cart without applying coupon
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host (no coupon applied)
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
+        // Add item and lock cart as host without applying coupon
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        // Act
-        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(create.Value.TeamCartId));
+        // Act: Remove coupon as host (should succeed even when no coupon is applied)
+        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId));
 
         // Assert
         remove.IsSuccess.Should().BeTrue();
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(create.Value.TeamCartId));
+        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.AppliedCouponId.Should().BeNull();
     }
@@ -70,14 +80,15 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
     [Test]
     public async Task RemoveCoupon_Should_Fail_WhenCartOpen()
     {
-        // Arrange: host creates cart (open)
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host (cart remains open)
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
-        // Act
-        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(create.Value.TeamCartId));
+        // Act: Try to remove coupon from open cart as host
+        await scenario.ActAsHost();
+        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId));
 
         // Assert
         remove.IsFailure.Should().BeTrue();
@@ -87,29 +98,56 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
     [Test]
     public async Task RemoveCoupon_Should_Fail_ForNonHost_WhenCartLocked()
     {
-        // Arrange: host creates locked cart with a coupon
-        var hostUserId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host and guest
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .WithGuest("Guest User")
+            .BuildAsync();
 
+        // Add item, lock cart, and apply coupon as host
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         var couponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions());
-        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(create.Value.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
 
-        // Switch to non-host
-        var otherUserId = await CreateUserAsync("not-host-removecoupon@example.com", "Password123!");
-        SetUserId(otherUserId);
+        // Act: Try to remove coupon as guest (non-host) - authorization should fail at pipeline level
+        await scenario.ActAsGuest("Guest User");
+        
+        // Assert: Should throw ForbiddenAccessException due to authorization policy
+        await FluentActions.Invoking(() => 
+                SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId)))
+            .Should().ThrowAsync<ForbiddenAccessException>();
+    }
 
-        // Act
-        var remove = await SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(create.Value.TeamCartId));
+    [Test]
+    public async Task RemoveCoupon_Should_Fail_ForNonMember()
+    {
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
 
-        // Assert
-        remove.IsFailure.Should().BeTrue();
-        remove.Error.Code.Should().Be("TeamCart.OnlyHostCanModifyFinancials");
+        // Add item, lock cart, and apply coupon as host
+        await scenario.ActAsHost();
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+
+        var couponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions());
+        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
+
+        // Act: Try to remove coupon as non-member - authorization should fail at pipeline level
+        await scenario.ActAsNonMember();
+        
+        // Assert: Should throw ForbiddenAccessException due to authorization policy
+        await FluentActions.Invoking(() => 
+                SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId)))
+            .Should().ThrowAsync<ForbiddenAccessException>();
     }
 }
 

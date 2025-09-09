@@ -1,7 +1,7 @@
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -9,16 +9,21 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
 
 public class ItemAddedToTeamCartEventHandlerTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task AddItem_Should_AddItem_ToStore_And_Notify()
     {
-        var userId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-
-        // Create cart and process TeamCartCreated
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host User"));
-        create.IsSuccess.Should().BeTrue();
-        await DrainOutboxAsync();
+        // Create team cart scenario with host using builder
+        var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .BuildAsync();
+        
+        await DrainOutboxAsync(); // process TeamCartCreated
 
         // Mock notifier for this test
         var notifierMock = new Mock<ITeamCartRealtimeNotifier>(MockBehavior.Strict);
@@ -27,9 +32,10 @@ public class ItemAddedToTeamCartEventHandlerTests : BaseTestFixture
             .Returns(Task.CompletedTask);
         ReplaceService<ITeamCartRealtimeNotifier>(notifierMock.Object);
 
-        // Add item (no customizations) — use Classic Burger
+        // Add item (no customizations) as host — use Classic Burger
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        var add = await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 1));
+        var add = await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1));
         add.IsSuccess.Should().BeTrue();
 
         // Process ItemAddedToTeamCart
@@ -37,11 +43,11 @@ public class ItemAddedToTeamCartEventHandlerTests : BaseTestFixture
 
         // Assert VM has the item
         var store = GetService<ITeamCartStore>();
-        var vm = await store.GetVmAsync(TeamCartId.Create(create.Value.TeamCartId));
+        var vm = await store.GetVmAsync(TeamCartId.Create(scenario.TeamCartId));
         vm.Should().NotBeNull();
         vm!.Items.Should().HaveCount(1);
         var item = vm.Items.Single();
-        item.AddedByUserId.Should().Be(userId);
+        item.AddedByUserId.Should().Be(scenario.HostUserId);
         item.Name.Should().Be(Testing.TestData.MenuItems.ClassicBurger);
         item.Quantity.Should().Be(1);
         item.BasePrice.Should().BeGreaterThan(0);

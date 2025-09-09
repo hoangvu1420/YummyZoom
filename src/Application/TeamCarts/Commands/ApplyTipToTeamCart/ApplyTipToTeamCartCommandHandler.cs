@@ -31,11 +31,6 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var userId = _currentUser.DomainUserId!;
             var cartId = TeamCartId.Create(request.TeamCartId);
 

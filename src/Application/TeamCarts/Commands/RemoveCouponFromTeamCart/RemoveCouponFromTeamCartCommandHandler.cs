@@ -31,11 +31,6 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var userId = _currentUser.DomainUserId!;
             var cartId = TeamCartId.Create(request.TeamCartId);
 
@@ -46,17 +41,7 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
                 return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
             }
 
-            // Enforce host-only and Locked state before attempting removal
-            if (userId != cart.HostUserId)
-            {
-                return Result.Failure<Unit>(TeamCartErrors.OnlyHostCanModifyFinancials);
-            }
-
-            if (cart.Status != TeamCartStatus.Locked)
-            {
-                return Result.Failure<Unit>(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
-            }
-
+            // Perform coupon removal via aggregate - domain handles all business rules (host-only, locked state, etc.)
             var removeResult = cart.RemoveCoupon(userId);
             if (removeResult.IsFailure)
             {

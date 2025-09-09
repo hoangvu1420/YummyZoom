@@ -12,7 +12,6 @@ using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TagEntity.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 

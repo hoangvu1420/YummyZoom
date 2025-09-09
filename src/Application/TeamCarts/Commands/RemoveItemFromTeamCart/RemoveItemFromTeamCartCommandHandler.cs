@@ -31,11 +31,6 @@ public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<Remov
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (_currentUser.DomainUserId is null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
             var userId = _currentUser.DomainUserId!;
             var cartId = TeamCartId.Create(request.TeamCartId);
             var itemId = TeamCartItemId.Create(request.TeamCartItemId);
@@ -47,25 +42,7 @@ public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<Remov
                 return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
             }
 
-            if (cart.Status != TeamCartStatus.Open)
-            {
-                _logger.LogWarning("Cannot remove item when cart not open. CartId={CartId} Status={Status}", request.TeamCartId, cart.Status);
-                return Result.Failure<Unit>(TeamCartErrors.CannotModifyCartOnceLocked);
-            }
-
-            var item = cart.Items.FirstOrDefault(i => i.Id == itemId);
-            if (item is null)
-            {
-                _logger.LogWarning("TeamCart item not found. CartId={CartId} ItemId={ItemId}", request.TeamCartId, request.TeamCartItemId);
-                return Result.Failure<Unit>(RemoveItemFromTeamCartErrors.ItemNotFound(request.TeamCartItemId));
-            }
-
-            if (item.AddedByUserId != userId)
-            {
-                _logger.LogWarning("User is not the owner of TeamCart item. CartId={CartId} ItemId={ItemId} UserId={UserId}", request.TeamCartId, request.TeamCartItemId, userId.Value);
-                return Result.Failure<Unit>(RemoveItemFromTeamCartErrors.NotItemOwner(userId.Value, request.TeamCartItemId));
-            }
-
+            // Perform removal via aggregate - domain handles all business rules (ownership, status, etc.)
             var removeResult = cart.RemoveItem(userId, itemId);
             if (removeResult.IsFailure)
             {

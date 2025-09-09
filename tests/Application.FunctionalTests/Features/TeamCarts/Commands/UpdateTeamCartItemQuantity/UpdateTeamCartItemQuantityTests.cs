@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
@@ -13,40 +14,47 @@ namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.Upda
 
 public class UpdateTeamCartItemQuantityTests : BaseTestFixture
 {
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
+    }
+
     [Test]
     public async Task UpdateQuantity_HappyPath_Owner_UpdatesSuccessfully()
     {
-        var userId = await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
-        // Create cart
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
-        var cartId = create.Value.TeamCartId;
-
-        // Add item
+        // Add item as host
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        var add = await SendAsync(new AddItemToTeamCartCommand(cartId, burgerId, 1));
+        var add = await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1));
         add.IsSuccess.Should().BeTrue();
 
         // Find the itemId
         using var scope = TestInfrastructure.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var itemId = await db.TeamCarts
-            .Where(c => c.Id == TeamCartId.Create(cartId))
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
             .SelectMany(c => c.Items.Select(i => i.Id.Value))
             .FirstAsync();
 
-        // Update quantity
+        // Act: Update quantity as host (owner of the item)
         var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(
-            TeamCartId: cartId,
+            TeamCartId: scenario.TeamCartId,
             TeamCartItemId: itemId,
             NewQuantity: 3));
+
+        // Assert
         update.IsSuccess.Should().BeTrue();
 
         // Verify persisted via projection
         var quantities = await db.TeamCarts
-            .Where(c => c.Id == TeamCartId.Create(cartId))
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
             .SelectMany(c => c.Items.Select(i => new { i.Id.Value, i.Quantity }))
             .ToListAsync();
         quantities.Should().Contain(x => x.Value == itemId && x.Quantity == 3);
@@ -55,94 +63,176 @@ public class UpdateTeamCartItemQuantityTests : BaseTestFixture
     [Test]
     public async Task UpdateQuantity_InvalidQuantity_ShouldFailValidation()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        var cartId = create.Value.TeamCartId;
+        // Add item as host
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        await SendAsync(new AddItemToTeamCartCommand(cartId, burgerId, 1));
+        await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1));
 
+        // Find the itemId
         using var scope = TestInfrastructure.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var itemId = await db.TeamCarts
-            .Where(c => c.Id == TeamCartId.Create(cartId))
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
             .SelectMany(c => c.Items.Select(i => i.Id.Value))
             .FirstAsync();
 
-        var cmd = new UpdateTeamCartItemQuantityCommand(cartId, itemId, 0);
+        // Act & Assert: Try to update with invalid quantity (0) should fail validation
+        var cmd = new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 0);
         await FluentActions.Invoking(() => SendAsync(cmd))
-            .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ValidationException>();
+            .Should().ThrowAsync<ValidationException>();
     }
 
     [Test]
-    public async Task UpdateQuantity_NotOwner_ShouldFail()
+    public async Task UpdateQuantity_NotOwner_ButMember_ShouldFail()
     {
-        // User A creates cart and adds item
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        var cartId = create.Value.TeamCartId;
-        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(cartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        // Arrange: Create team cart scenario with host and guest
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .WithGuest("Guest User")
+            .BuildAsync();
 
-        // Locate itemId
+        // Add item as host
+        await scenario.ActAsHost();
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+
+        // Find the itemId added by host
         using var scope = TestInfrastructure.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var itemId = await db.TeamCarts
-            .Where(c => c.Id == TeamCartId.Create(cartId))
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
             .SelectMany(c => c.Items.Select(i => i.Id.Value))
             .FirstAsync();
 
-        // Switch to another user (not owner)
-        var otherUserId = await CreateUserAsync("other-user@example.com", "Password123!");
-        SetUserId(otherUserId);
+        // Act: Try to update host's item as guest (member but not owner of the item)
+        await scenario.ActAsGuest("Guest User");
+        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 2));
 
-        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(cartId, itemId, 2));
+        // Assert: Should fail due to business logic (can only update own items)
         update.IsFailure.Should().BeTrue();
     }
 
     [Test]
     public async Task UpdateQuantity_CartLocked_ShouldFail()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        var cartId = create.Value.TeamCartId;
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
+
+        // Add item and lock cart as host
+        await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(cartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
-        // Lock the cart directly via EF and domain method
-        using (var scope = TestInfrastructure.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var cart = await db.TeamCarts.Include(c => c.Items).FirstAsync(c => c.Id == TeamCartId.Create(cartId));
-            cart.LockForPayment(cart.HostUserId);
-            await db.SaveChangesAsync();
-        }
-
-        // Get the item id again
-        using var scope2 = TestInfrastructure.CreateScope();
-        var db2 = scope2.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var itemId = await db2.TeamCarts
-            .Where(c => c.Id == TeamCartId.Create(cartId))
+        // Get the item id
+        using var scope = TestInfrastructure.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var itemId = await db.TeamCarts
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
             .SelectMany(c => c.Items.Select(i => i.Id.Value))
             .FirstAsync();
 
-        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(cartId, itemId, 2));
+        // Act: Try to update quantity in locked cart as host (even though owner)
+        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 2));
+
+        // Assert: Should fail due to business logic (cannot modify locked cart)
         update.IsFailure.Should().BeTrue();
     }
 
     [Test]
     public async Task UpdateQuantity_ItemNotFound_ShouldFail()
     {
-        await RunAsDefaultUserAsync();
-        var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        var cartId = create.Value.TeamCartId;
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
 
+        // Act: Try to update non-existent item as host
+        await scenario.ActAsHost();
         var missingItemId = Guid.NewGuid();
-        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(cartId, missingItemId, 2));
+        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, missingItemId, 2));
+
+        // Assert: Should fail due to business logic (item not found)
         update.IsFailure.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task UpdateQuantity_Guest_UpdatesOwnItem_ShouldSucceed()
+    {
+        // Arrange: Create team cart scenario with host and guest
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .WithGuest("Guest User")
+            .BuildAsync();
+
+        // Add item as guest
+        await scenario.ActAsGuest("Guest User");
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        var add = await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1));
+        add.IsSuccess.Should().BeTrue();
+
+        // Find the itemId added by guest
+        using var scope = TestInfrastructure.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var itemId = await db.TeamCarts
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
+            .SelectMany(c => c.Items.Select(i => i.Id.Value))
+            .FirstAsync();
+
+        // Act: Update own item quantity as guest
+        var update = await SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 5));
+
+        // Assert: Should succeed (guest can update their own items)
+        update.IsSuccess.Should().BeTrue();
+
+        // Verify persisted quantity
+        var quantities = await db.TeamCarts
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
+            .SelectMany(c => c.Items.Select(i => new { i.Id.Value, i.Quantity }))
+            .ToListAsync();
+        quantities.Should().Contain(x => x.Value == itemId && x.Quantity == 5);
+    }
+
+    [Test]
+    public async Task UpdateQuantity_NonMember_ShouldFail()
+    {
+        // Arrange: Create team cart scenario with host
+        var scenario = await TeamCartTestBuilder
+            .Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host")
+            .BuildAsync();
+
+        // Add item as host
+        await scenario.ActAsHost();
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+
+        // Find the itemId
+        using var scope = TestInfrastructure.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var itemId = await db.TeamCarts
+            .Where(c => c.Id == TeamCartId.Create(scenario.TeamCartId))
+            .SelectMany(c => c.Items.Select(i => i.Id.Value))
+            .FirstAsync();
+
+        // Act: Try to update item as non-member - authorization should fail at pipeline level
+        await scenario.ActAsNonMember();
+        
+        // Assert: Should throw ForbiddenAccessException due to authorization policy
+        await FluentActions.Invoking(() => 
+                SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 2)))
+            .Should().ThrowAsync<ForbiddenAccessException>();
     }
 }

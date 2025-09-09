@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Testcontainers.Redis;
 
 namespace YummyZoom.Application.FunctionalTests.Infrastructure.Cache;
