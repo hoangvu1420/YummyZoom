@@ -7,13 +7,12 @@ using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;
-
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.AddItemToTeamCart;

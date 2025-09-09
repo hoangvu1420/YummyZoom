@@ -4,9 +4,9 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Tags.Events;
 
@@ -14,7 +14,7 @@ using static Testing;
 
 /// <summary>
 /// Verifies TagCreated handler is effectively a no-op for FullMenuView when no items reference the new tag.
-/// - Important: FullFullMenuViewMaintainer only includes tags that are referenced by items (via MenuItems.DietaryTagIds).
+/// - Important: FullMenuViewMaintainer only includes tags that are referenced by items (via MenuItems.DietaryTagIds).
 /// - Therefore, creating a tag alone must not change the FullMenuView for any restaurant.
 /// - We still expect inbox idempotency and processed outbox records for the TagCreated event.
 /// </summary>

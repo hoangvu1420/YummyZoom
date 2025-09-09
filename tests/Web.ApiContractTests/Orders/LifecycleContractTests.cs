@@ -15,6 +15,7 @@ using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Domain.OrderAggregate.ValueObjects; 
 using System.Text.Json;
 using YummyZoom.Application.Orders.Commands.Common;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 
@@ -22,7 +23,7 @@ namespace YummyZoom.Web.ApiContractTests.Orders;
 // Follows guidelines in WebApi_Contract_Tests_Guidelines.md
 public class LifecycleContractTests
 {
-    private static readonly JsonSerializerOptions JsonOptions = YummyZoom.Infrastructure.Serialization.DomainJson.Options;
+    private static readonly JsonSerializerOptions JsonOptions = DomainJson.Options;
 
     private static OrderLifecycleResultDto CreateLifecycleDto(Guid orderId, string status, DateTime? est = null, DateTime? actual = null)
         => new(OrderId.Create(orderId), "ORD-ABC", status, DateTime.UtcNow.AddMinutes(-30), DateTime.UtcNow, est, actual);

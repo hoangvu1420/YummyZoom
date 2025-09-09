@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Respawn;
-using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 
 namespace YummyZoom.Application.FunctionalTests.Infrastructure.Database;
 

@@ -10,7 +10,8 @@ using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Web.Realtime;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
-using YummyZoom.Infrastructure.TeamCartStore;
+using YummyZoom.Infrastructure.Serialization.Converters;
+using YummyZoom.Infrastructure.StateStores.TeamCartStore;
 using YummyZoom.Web.Configuration;
 
 namespace YummyZoom.Web;

@@ -5,6 +5,7 @@ using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Search;
@@ -52,7 +53,7 @@ public class AutocompleteTests : BaseTestFixture
 
         using (var scope = CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<YummyZoom.Infrastructure.Data.ApplicationDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""SearchIndexItems"" SET ""UpdatedAt"" = now() - interval '10 minutes' WHERE ""Id"" = {a};
                 UPDATE ""SearchIndexItems"" SET ""UpdatedAt"" = now() WHERE ""Id"" = {b};

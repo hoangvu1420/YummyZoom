@@ -1,68 +1,150 @@
-I'll locate and read the Phase 3 outline and scan the codebase for TeamCart/cart-related components to assess Phase 3.8 against business needs. Then I'll synthesize findings and recommendations.
+I'll scan the `src\Infrastructure` folder to understand its current organization before proposing an improved structure aligned with Clean Architecture.
 
-[5 tools called]
+[1 tool called]
 
-I reviewed the Phase 3 outline (with focus on 3.8) and scanned the TeamCart domain, application event-handlers, repository, and tests to ground the assessment.
+I scanned the current `src\Infrastructure` layout and noted key areas: EF Core persistence, outbox/messaging, caching, identity, background hosted services, notifications (Firebase), payments (Stripe), realtime notifiers, serialization helpers, and a Redis-backed team cart store.
 
-### Assessment of Phase 3.8 design (Expiration)
-- **Overall sufficiency**: The design is sound and consistent with the project’s Clean Architecture and existing TeamCart patterns. It cleanly separates responsibilities:
-  - A background hosted service to select and expire eligible carts in batches.
-  - Aggregate-level `MarkAsExpired` mutation emitting `TeamCartExpired`.
-  - An idempotent event handler to delete the Redis VM and notify via real-time.
-  - Tests to ensure idempotency and cleanup.
-- **Alignment with business rules**: It respects lifecycle invariants (terminal state), preserves Redis as the authoritative real-time store while keeping SQL as the source of truth, and leverages the outbox/inbox pattern for durable consistency.
-- **Key risks to address**:
-  - **Race with conversion/payment** near the expiration boundary.
-  - **Clock skew** between DB time and scheduler time.
-  - **Redis TTL vs DB truth** drift if VM TTL expires early or keyspace notifications are enabled later.
-  - **Idempotency** across re-runs or process restarts.
+### Proposed Infrastructure structure (no code changes)
+- Infrastructure/
+  - DI/
+    - DependencyInjection.cs
+  - Persistence/
+    - EfCore/
+      - ApplicationDbContext.cs
+      - ApplicationDbContextInitialiser.cs
+      - DesignTime/
+        - DesignTimeApplicationDbContextFactory.cs
+      - Configurations/
+        - Common/
+          - AuditableEntityConfiguration.cs
+          - EfJsonbExtensions.cs
+        - AccountTransactionConfiguration.cs
+        - CouponConfiguration.cs
+        - CouponUserUsageConfiguration.cs
+        - CustomizationGroupConfiguration.cs
+        - DeviceConfiguration.cs
+        - FullMenuViewConfiguration.cs
+        - InboxMessageConfiguration.cs
+        - MenuCategoryConfiguration.cs
+        - MenuConfiguration.cs
+        - MenuItemConfiguration.cs
+        - OrderConfiguration.cs
+        - OutboxMessageConfiguration.cs
+        - RestaurantAccountConfiguration.cs
+        - RestaurantConfiguration.cs
+        - RestaurantReviewSummaryConfiguration.cs
+        - ReviewConfiguration.cs
+        - RoleAssignmentConfiguration.cs
+        - SearchIndexItemConfiguration.cs
+        - SupportTicketConfiguration.cs
+        - TagConfiguration.cs
+        - TeamCartConfiguration.cs
+        - TodoListConfiguration.cs
+        - UserConfiguration.cs
+        - UserDeviceSessionConfiguration.cs
+      - Interceptors/
+        - AuditableEntityInterceptor.cs
+        - ConvertDomainEventsToOutboxInterceptor.cs
+        - DispatchDomainEventsInterceptor.cs
+        - SoftDeleteInterceptor.cs
+      - Extensions/
+        - SoftDeleteExtensions.cs
+      - Migrations/
+        - (all migration files and snapshot)
+      - ReadModels/
+        - FullMenu/
+        - Reviews/
+        - Search/
+      - Models/
+        - InboxMessage.cs
+        - OutboxMessage.cs
+        - CouponUserUsage.cs
+      - Db/
+        - DbConnectionFactory.cs
+    - Repositories/
+      - (all repository implementations)
+  - Messaging/
+    - Outbox/
+      - IOutboxProcessor.cs
+      - OutboxProcessor.cs
+      - OutboxPublisherHostedService.cs
+    - Invalidation/
+      - NoOpInvalidationPublisher.cs
+      - RedisInvalidationPublisher.cs
+      - CacheInvalidationSubscriber.cs
+  - Caching/
+    - Abstractions/
+      - DefaultCacheKeyFactory.cs
+    - Distributed/
+      - DistributedCacheService.cs
+    - Memory/
+      - MemoryCacheService.cs
+    - Serialization/
+      - JsonCacheSerializer.cs
+  - Identity/
+    - ApplicationUser.cs
+    - IdentityResultExtensions.cs
+    - IdentityService.cs
+    - YummyZoomClaimsPrincipalFactory.cs
+  - BackgroundProcessing/
+    - HostedServices/
+      - TeamCartExpirationHostedService.cs
+    - Options/
+      - TeamCartExpirationOptions.cs
+  - Notifications/
+    - Push/
+      - Firebase/
+        - FirebaseAdminSdkConfig.cs
+        - FcmService.cs
+  - Payments/
+    - Stripe/
+      - StripeOptions.cs
+      - StripeService.cs
+  - Realtime/
+    - Notifiers/
+      - NoOpOrderRealtimeNotifier.cs
+      - NoOpTeamCartRealtimeNotifier.cs
+  - Serialization/
+    - Converters/
+      - AggregateRootIdJsonConverterFactory.cs
+    - Json/
+      - DomainJson.cs
+      - OutboxJson.cs
+  - StateStores/
+    - TeamCart/
+      - RedisTeamCartStore.cs
+      - TeamCartStoreOptions.cs
+  - GlobalUsings.cs
+  - Infrastructure.csproj
 
-### Implementation notes for Phase 3.8
-- **Hosted service behavior**
-  - Prefer a DB-driven scan: query carts with `Status in (Open, Locked, ReadyToConfirm)` and `ExpiresAt <= now - grace`.
-  - Use a modest batch (e.g., 200) with a short delay between batches; make cadence configurable.
-  - Wrap each cart expiration in a unit-of-work and update through `ITeamCartRepository`, not direct SQL.
-  - Do not mutate Redis in the service; rely on the event handler for `TeamCartExpired`.
-- **Aggregate and events**
-  - Ensure `TeamCart.MarkAsExpired()` is a guard-checked transition from non-terminal states, emits `TeamCartExpired`, and is idempotent.
-- **Event handler**
-  - Implement an inbox-guarded handler: delete `ITeamCartStore` VM, then `NotifyExpired`.
-  - Handler must be idempotent: VM delete should tolerate missing keys; notification should be deduped via inbox/outbox idempotency.
-- **Testing focus**
-  - Functional tests: a cart past `ExpiresAt` transitions to `Expired`; re-running the service makes no further changes.
-  - Integration tests: VM deleted; SignalR notifier invoked exactly once; inbox guarantees idempotency.
-  - Concurrency test: if a cart converts while the expiration job runs, only one terminal state wins; the loser should no-op safely.
+### Key improvements
+- Persistence/EfCore clearly encapsulates EF concerns: context, configurations, migrations, interceptors, design-time, and read models.
+- Messaging separates Outbox and Cache Invalidation concerns from generic Caching.
+- BackgroundProcessing groups all hosted services and related options.
+- StateStores isolates Redis-backed domain-specific stores (e.g., TeamCart) from generic caching.
+- Serialization is centralized for domain/outbox JSON and converters.
+- DI isolated under `DI` to signal composition root for this layer.
 
-### Patterns to follow (consistent with the codebase)
-- **DDD/CQRS**: Mutate via aggregate methods; commands/services orchestrate; do not mix read model updates in commands.
-- **Outbox/inbox**: Durable VM update and notifications should occur in idempotent handlers after DB commit.
-- **Atomic Redis ops**: Use the existing `ITeamCartStore` atomic methods; deletion should be simple and idempotent.
-- **Feature flags**: Respect `Features:TeamCart` for hosted service registration if required by ops policy.
-- **Validation**: Keep expiration strictly server-driven; clients should not be able to force expiry.
+### File-to-folder mapping highlights
+- `Data/*` → `Persistence/EfCore/*` (maintaining subfolders: Configurations, Interceptors, Migrations, ReadModels, Extensions; move `DbConnectionFactory.cs` under `Persistence/EfCore/Db/`).
+- `Data/Models/*` → `Persistence/EfCore/Models/*`.
+- `Repositories/*` → `Persistence/Repositories/*`.
+- `Outbox/*` → `Messaging/Outbox/*`.
+- `Caching/*` → split: `Caching/Abstractions/DefaultCacheKeyFactory.cs`, `Caching/Distributed/DistributedCacheService.cs`, `Caching/Memory/MemoryCacheService.cs`, `Caching/Serialization/JsonCacheSerializer.cs`, and move invalidation publishers/subscriber to `Messaging/Invalidation/`.
+- `BackgroundServices/*` → `BackgroundProcessing/HostedServices/*`; `TeamCartExpirationOptions.cs` → `BackgroundProcessing/Options/`.
+- `TeamCartStore/*` → `StateStores/TeamCart/*`.
+- `Serialization/*` → `Serialization/Converters/*` and `Serialization/Json/*`.
+- `Realtime/*` → `Realtime/Notifiers/*`.
+- `Notifications/Firebase/*` → `Notifications/Push/Firebase/*`.
+- `Identity/*` unchanged under `Identity/`.
+- `Payments/Stripe/*` unchanged under `Payments/Stripe/`.
+- `DependencyInjection.cs` → `DI/DependencyInjection.cs`.
 
-### Recommendations and clarifications
-- **Add a small grace window** (e.g., 30–120 seconds) when selecting expired carts to reduce races with in-flight conversion/payment. Make it configurable.
-- **Guard terminal state transitions**:
-  - If `Status` is already `Converted` or `Expired`, skip in the service.
-  - In `MarkAsExpired`, early-return if terminal; ensure no changes to items/payments post-expiration.
-- **Observability**
-  - Metrics: number of expired carts per run, per-restaurant distribution, VM deletions, handler idempotency hits, and “races prevented.”
-  - Logs: include `cartId`, `restaurantId`, `expiresAt`, `selectedAt`, and decision (expired/skip reason).
-- **Concurrency control**
-  - For each candidate, reload “for update” (or rely on EF concurrency tokens) before calling `MarkAsExpired` to avoid double-expiry with multiple nodes.
-- **Client semantics**
-  - Ensure API endpoints return appropriate errors after expiration (e.g., 410 Gone or domain-specific error) for any subsequent mutations (add item, lock, payment, convert).
-  - The real-time hub should broadcast `Expired` so UIs disable inputs immediately.
-- **Configuration**
-  - Make cadence, batch size, grace period, and retry/backoff configurable via `appsettings`.
-  - Consider back-pressure: if a run exceeds cadence window, log and adjust batch in next run.
-- **Redis reconciliation**
-  - Keep DB scan as source of truth. If keyspace notifications are optionally added later, treat them as hints only; do not rely solely on TTL expirations of the VM.
-- **Stripe webhook overlap**
-  - If a webhook lands after expiration, handler should no-op aggregate mutations and still log for auditing. Consider notifying the member that payment was ignored due to expiration.
-- **Operational safety**
-  - Provide an admin script/command to “force expire” a cart and a separate read-only diagnostic endpoint to inspect expiration candidates in production.
+### Notes on Clean Architecture alignment
+- Infrastructure-only responsibilities are clearly grouped; no domain logic introduced.
+- EF Core persistence is a single cohesive area, making testability and migrations cleaner.
+- Messaging concerns are decoupled from caching to reflect different use cases (outbox vs invalidation).
+- Hosted services are discoverable in one place with their options classes.
+- Domain-specific external state (team cart) is separated from generic caching to avoid conflation.
 
-If helpful, I can draft the `TeamCartExpirationHostedService`, the event handler for `TeamCartExpired`, and test scaffolding next.
-
-- I finished reading the Phase 3 outline and related TeamCart components. I’ll proceed to implement Phase 3.8 next if you want me to create the hosted service, handler, and tests.
+If you want, I can produce a step-by-step move plan (no code changes) or a PowerShell script to reorganize folders/files when you’re ready.

@@ -6,7 +6,7 @@ using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Infrastructure.Data.Extensions;
+using YummyZoom.Infrastructure.Persistence.EfCore.Extensions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuCategories.Commands;

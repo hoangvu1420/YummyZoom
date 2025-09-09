@@ -12,28 +12,33 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Stripe;
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Domain.Services;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Interceptors;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
-using YummyZoom.Infrastructure.Data.ReadModels.Reviews;
-using YummyZoom.Infrastructure.Data.ReadModels.Search;
-using YummyZoom.Infrastructure.Data.Repositories;
-using YummyZoom.Infrastructure.Identity;
-using YummyZoom.Infrastructure.Notifications.Firebase;
-using YummyZoom.Infrastructure.Outbox;
-using YummyZoom.Infrastructure.Payments.Stripe;
-using YummyZoom.Infrastructure.Realtime;
-using YummyZoom.SharedKernel.Constants;
-using Microsoft.Extensions.Caching.Memory;
-using YummyZoom.Infrastructure.Caching;
-using YummyZoom.Application.Common.Caching;
-using YummyZoom.Infrastructure.TeamCartStore;
 using YummyZoom.Infrastructure.BackgroundServices;
+using YummyZoom.Infrastructure.Caching;
+using YummyZoom.Infrastructure.Caching.Abstractions;
+using YummyZoom.Infrastructure.Caching.Distributed;
+using YummyZoom.Infrastructure.Caching.Memory;
+using YummyZoom.Infrastructure.Caching.Serialization;
+using YummyZoom.Infrastructure.Identity;
+using YummyZoom.Infrastructure.Messaging.Invalidation;
+using YummyZoom.Infrastructure.Messaging.Outbox;
+using YummyZoom.Infrastructure.Notifications.Firebase;
+using YummyZoom.Infrastructure.Payments.Stripe;
+using YummyZoom.Infrastructure.Persistence;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
+using YummyZoom.Infrastructure.Persistence.Repositories;
+using YummyZoom.Infrastructure.Realtime;
+using YummyZoom.Infrastructure.StateStores.TeamCartStore;
+using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Infrastructure;
 
@@ -160,7 +165,7 @@ public static class DependencyInjection
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
 
         // Read model rebuild services
-        builder.Services.AddScoped<IFullMenuViewMaintainer, FullFullMenuViewMaintainer>();
+        builder.Services.AddScoped<IFullMenuViewMaintainer, FullMenuViewMaintainer>();
 
         // FullMenu read model maintenance (backfill + reconciliation)
         builder.Services.Configure<FullMenuViewMaintenanceOptions>(

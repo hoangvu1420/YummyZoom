@@ -6,6 +6,7 @@ using YummyZoom.Application.Orders.Commands.InitiateOrder;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
@@ -54,7 +55,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
 
         // Verify coupon usage count
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<YummyZoom.Infrastructure.Data.ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var coupon = await context.Coupons.FirstOrDefaultAsync(c => c.Code == limitedCouponCode);
         coupon.Should().NotBeNull();
         coupon!.CurrentTotalUsageCount.Should().Be(2, "coupon should have been used exactly 2 times");
@@ -156,7 +157,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
 
         // Verify coupon final usage count
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<YummyZoom.Infrastructure.Data.ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var coupon = await context.Coupons.FirstOrDefaultAsync(c => c.Code == mixedLimitCouponCode);
         coupon.Should().NotBeNull();
         coupon!.CurrentTotalUsageCount.Should().Be(3, "coupon should have been used exactly 3 times");
@@ -198,7 +199,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         // Verify all orders were created for the same restaurant
         var orderIds = allResults.Select(r => r.Value.OrderId).ToList();
         using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<YummyZoom.Infrastructure.Data.ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var orders = await context.Orders.Where(o => orderIds.Contains(o.Id)).ToListAsync();
         
         orders.Should().HaveCount(5, "all orders should be persisted");

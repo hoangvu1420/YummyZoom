@@ -1,4 +1,5 @@
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Domain.TeamCartAggregate;
@@ -85,32 +86,60 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
     {
         await RunAsDefaultUserAsync();
         var restaurantId = Testing.TestData.DefaultRestaurantId;
-        var create = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
-        create.IsSuccess.Should().BeTrue();
+        
+        // Create a coupon with per-user usage limit of 1 to force failure on second use
+        var limitedCouponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions
+        {
+            Code = "LIMITEDUSER1",
+            UserUsageLimit = 1,
+            TotalUsageLimit = 100, // High total limit to focus on per-user limit
+            DiscountPercentage = 15
+        });
+
+        // First cart: successfully use the coupon once to exhaust the per-user limit
+        var firstCreate = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
+        firstCreate.IsSuccess.Should().BeTrue();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        (await SendAsync(new AddItemToTeamCartCommand(create.Value.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
-        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
-
-        // Apply coupon and artificially exhaust usage (simulate with two increments beyond limit if test data provides a low limit)
-        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(create.Value.TeamCartId, Testing.TestData.DefaultCouponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(firstCreate.Value.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(firstCreate.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(firstCreate.Value.TeamCartId, limitedCouponCode))).IsSuccess.Should().BeTrue();
+        await DrainOutboxAsync();
+        (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(firstCreate.Value.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
-        // Exhaust per-user or total usage via direct repo if helper exists; otherwise rely on repository enforcing limit at conversion time.
-
-        (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(create.Value.TeamCartId))).IsSuccess.Should().BeTrue();
-        await DrainOutboxAsync();
-
-        var convert = await SendAsync(new Application.TeamCarts.Commands.ConvertTeamCartToOrder.ConvertTeamCartToOrderCommand(
-            create.Value.TeamCartId,
+        // Convert first cart successfully (should exhaust the per-user limit)
+        var firstConvert = await SendAsync(new Application.TeamCarts.Commands.ConvertTeamCartToOrder.ConvertTeamCartToOrderCommand(
+            firstCreate.Value.TeamCartId,
             Street: "123 Main St",
             City: "City",
             State: "CA",
             ZipCode: "90210",
             Country: "US",
-            SpecialInstructions: null));
+            SpecialInstructions: "First order"));
+        firstConvert.IsSuccess.Should().BeTrue("first conversion should succeed");
 
-        convert.IsFailure.Should().BeTrue();
-        convert.Error.Code.Should().Match(x => x == "Coupon.UserUsageLimitExceeded" || x == "Coupon.UsageLimitExceeded");
+        // Second cart: try to use the same coupon again (should fail due to per-user limit)
+        var secondCreate = await SendAsync(new CreateTeamCartCommand(restaurantId, "Host"));
+        secondCreate.IsSuccess.Should().BeTrue();
+        (await SendAsync(new AddItemToTeamCartCommand(secondCreate.Value.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(secondCreate.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(secondCreate.Value.TeamCartId, limitedCouponCode))).IsSuccess.Should().BeTrue();
+        await DrainOutboxAsync();
+        (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(secondCreate.Value.TeamCartId))).IsSuccess.Should().BeTrue();
+        await DrainOutboxAsync();
+
+        // Convert second cart (should fail due to exceeded per-user usage limit)
+        var secondConvert = await SendAsync(new Application.TeamCarts.Commands.ConvertTeamCartToOrder.ConvertTeamCartToOrderCommand(
+            secondCreate.Value.TeamCartId,
+            Street: "123 Main St",
+            City: "City",
+            State: "CA",
+            ZipCode: "90210",
+            Country: "US",
+            SpecialInstructions: "Second order"));
+
+        secondConvert.IsFailure.Should().BeTrue("second conversion should fail due to per-user usage limit exceeded");
+        secondConvert.Error.Code.Should().Match(x => x == "Coupon.UserUsageLimitExceeded" || x == "Coupon.UsageLimitExceeded");
     }
 
     [Test]

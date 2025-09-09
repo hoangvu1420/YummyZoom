@@ -15,8 +15,8 @@ using YummyZoom.Domain.OrderAggregate.Events;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Events;

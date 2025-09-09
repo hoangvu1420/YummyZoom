@@ -8,7 +8,6 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Models;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;

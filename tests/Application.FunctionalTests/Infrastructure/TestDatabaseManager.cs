@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 
 namespace YummyZoom.Application.FunctionalTests.Infrastructure;
 

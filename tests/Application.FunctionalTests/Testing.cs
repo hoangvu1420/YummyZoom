@@ -6,7 +6,7 @@ using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.TestData;
-using YummyZoom.Infrastructure.Outbox;
+using YummyZoom.Infrastructure.Messaging.Outbox;
 
 namespace YummyZoom.Application.FunctionalTests;
 

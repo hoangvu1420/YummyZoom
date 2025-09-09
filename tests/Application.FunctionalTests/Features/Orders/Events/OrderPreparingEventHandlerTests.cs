@@ -6,8 +6,8 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
 using YummyZoom.Application.Orders.Broadcasting;
 using YummyZoom.Application.Orders.EventHandlers;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Events;

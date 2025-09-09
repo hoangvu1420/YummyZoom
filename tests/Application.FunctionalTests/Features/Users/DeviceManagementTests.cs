@@ -7,7 +7,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Users.Commands;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.Application.Users.Commands.UnregisterDevice;
-using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Users;

@@ -6,8 +6,7 @@ using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
-
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.UpdateTeamCartItemQuantity;

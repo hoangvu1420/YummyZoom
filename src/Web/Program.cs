@@ -1,6 +1,6 @@
 using YummyZoom.Application;
 using YummyZoom.Infrastructure;
-using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Web;
 
 var builder = WebApplication.CreateBuilder(args);

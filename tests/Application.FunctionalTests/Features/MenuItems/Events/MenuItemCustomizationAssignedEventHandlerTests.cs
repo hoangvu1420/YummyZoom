@@ -2,15 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuItems.Events;
 

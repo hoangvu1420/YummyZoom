@@ -150,23 +150,26 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     private static void DisableBackgroundOutboxPublisher(IServiceCollection services)
     {
         // Remove only the OutboxPublisherHostedService registration without affecting other hosted services
-        var descriptor = services.FirstOrDefault(d =>
-            d.ServiceType == typeof(IHostedService) &&
-            d.ImplementationType?.FullName == "YummyZoom.Infrastructure.Outbox.OutboxPublisherHostedService");
-
-        if (descriptor is not null)
+        var hostedServiceTypesToRemove = new[]
         {
-            services.Remove(descriptor);
-        }
+            typeof(YummyZoom.Infrastructure.Messaging.Outbox.OutboxPublisherHostedService),
+            typeof(YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu.FullMenuViewMaintenanceHostedService),
+            // typeof(YummyZoom.Infrastructure.Persistence.ReadModels.Search.SearchIndexMaintenanceHostedService),
+            // typeof(YummyZoom.Infrastructure.Persistence.ReadModels.Reviews.ReviewSummaryMaintenanceHostedService),
+            // typeof(YummyZoom.Infrastructure.BackgroundServices.TeamCartExpirationHostedService),
+            // typeof(YummyZoom.Infrastructure.Messaging.Invalidation.CacheInvalidationSubscriber),
+        };
 
-        // Remove the FullMenuViewMaintenanceHostedService if present
-        var descriptor2 = services.FirstOrDefault(d =>
-            d.ServiceType == typeof(IHostedService) &&
-            d.ImplementationType?.FullName == "YummyZoom.Infrastructure.ReadModels.FullMenu.FullMenuViewMaintenanceHostedService");
-
-        if (descriptor2 is not null)
+        foreach (var t in hostedServiceTypesToRemove)
         {
-            services.Remove(descriptor2);
+            var descriptors = services
+                .Where(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType == t)
+                .ToList();
+
+            foreach (var d in descriptors)
+            {
+                services.Remove(d);
+            }
         }
     }
     

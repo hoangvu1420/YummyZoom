@@ -1,7 +1,6 @@
 using System.Text.Json;
 using FluentAssertions;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Common;
 

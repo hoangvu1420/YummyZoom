@@ -5,9 +5,9 @@ using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Tags.Events;
 
@@ -34,7 +34,7 @@ public class TagCategoryChangedEventHandlerTests : BaseTestFixture
         await AddAsync(tag);
 
         var itemId = TestData.GetMenuItemId(Testing.TestData.MenuItems.BuffaloWings);
-        // Critical: assignment ensures the tag is picked up by FullFullMenuViewMaintainer.
+        // Critical: assignment ensures the tag is picked up by FullMenuViewMaintainer.
         await MenuTestDataFactory.AttachTagsToItemAsync(itemId, new List<Guid> { tag.Id.Value });
 
         await SendAsync(new YummyZoom.Application.Admin.Commands.RebuildFullMenu.RebuildFullMenuCommand(restaurantId));

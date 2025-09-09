@@ -9,6 +9,7 @@ using YummyZoom.SharedKernel;
 using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
 using YummyZoom.Application.MenuItems.Commands.RemoveCustomizationGroupFromMenuItem;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;

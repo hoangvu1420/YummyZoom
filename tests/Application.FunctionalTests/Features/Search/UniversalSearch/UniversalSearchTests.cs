@@ -5,7 +5,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Data;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Search.UniversalSearch;

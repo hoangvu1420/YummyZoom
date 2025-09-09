@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Menus.Events;
 

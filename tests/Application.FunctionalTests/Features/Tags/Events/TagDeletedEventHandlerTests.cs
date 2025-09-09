@@ -5,9 +5,9 @@ using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
-using YummyZoom.Infrastructure.Data;
-using YummyZoom.Infrastructure.Data.Models;
-using YummyZoom.Infrastructure.Data.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Tags.Events;
 

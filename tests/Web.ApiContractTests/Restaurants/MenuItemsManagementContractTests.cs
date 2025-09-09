@@ -13,6 +13,7 @@ using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
 using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
 using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
 using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;

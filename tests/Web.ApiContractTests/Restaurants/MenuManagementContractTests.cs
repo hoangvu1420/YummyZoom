@@ -10,6 +10,7 @@ using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
 using YummyZoom.Application.Menus.Commands.UpdateMenuDetails;
 using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;

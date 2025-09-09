@@ -1,9 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
-using YummyZoom.Infrastructure.Data;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
-
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.CreateTeamCart;
