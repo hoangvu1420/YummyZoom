@@ -11,7 +11,7 @@ public sealed record JoinTeamCartCommand(
     Guid TeamCartId,
     string ShareToken,
     string GuestName
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

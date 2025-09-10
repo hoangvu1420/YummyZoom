@@ -10,7 +10,7 @@ namespace YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 public sealed record ApplyTipToTeamCartCommand(
     Guid TeamCartId,
     decimal TipAmount
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

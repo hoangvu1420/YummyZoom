@@ -10,7 +10,7 @@ namespace YummyZoom.Application.TeamCarts.Commands.RemoveItemFromTeamCart;
 public sealed record RemoveItemFromTeamCartCommand(
     Guid TeamCartId,
     Guid TeamCartItemId
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

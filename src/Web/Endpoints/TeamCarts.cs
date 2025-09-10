@@ -25,7 +25,7 @@ public sealed class TeamCarts : EndpointGroupBase
     {
         var group = app.MapGroup(this);
 
-        // POST /api/v1/teamcarts
+        // POST /api/v1/team-carts
         group.MapPost("/", async (
             [FromBody] CreateTeamCartCommand command,
             ISender sender,
@@ -37,7 +37,7 @@ public sealed class TeamCarts : EndpointGroupBase
             }
             var result = await sender.Send(command);
             return result.IsSuccess
-                ? TypedResults.Created($"/api/v1/teamcarts/{result.Value.TeamCartId}", result.Value)
+                ? TypedResults.Created($"/api/v1/team-carts/{result.Value.TeamCartId}", result.Value)
                 : result.ToIResult();
         })
         .RequireAuthorization()
@@ -46,7 +46,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithDescription("Creates a collaborative TeamCart for a restaurant and returns identifiers and share token details.")
         .WithStandardCreationResults<CreateTeamCartResponse>();
 
-        // GET /api/v1/teamcarts/{id}
+        // GET /api/v1/team-carts/{id}
         group.MapGet("/{id}", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -63,7 +63,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithDescription("Returns detailed TeamCart state including members, items, and payment status.")
         .WithStandardResults<GetTeamCartDetailsResponse>();
 
-        // GET /api/v1/teamcarts/{id}/rt
+        // GET /api/v1/team-carts/{id}/rt
         group.MapGet("/{id}/rt", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -80,7 +80,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithDescription("Returns the TeamCart view model from Redis for real-time updates.")
         .WithStandardResults<GetTeamCartRealTimeViewModelResponse>();
 
-        // POST /api/v1/teamcarts/{id}/join
+        // POST /api/v1/team-carts/{id}/join
         group.MapPost("/{id}/join", async (Guid id, [FromBody] JoinTeamCartRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -97,7 +97,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithDescription("Joins a TeamCart and returns the updated view model.")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/items
+        // POST /api/v1/team-carts/{id}/items
         group.MapPost("/{id}/items", async (Guid id, [FromBody] AddItemRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -112,8 +112,8 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("AddItemToTeamCart")
         .WithStandardResults();
 
-        // PATCH /api/v1/teamcarts/{id}/items/{itemId}
-        group.MapPatch("/{id}/items/{itemId}", async (Guid id, Guid itemId, [FromBody] UpdateItemQuantityRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
+        // PUT /api/v1/team-carts/{id}/items/{itemId}
+        group.MapPut("/{id}/items/{itemId}", async (Guid id, Guid itemId, [FromBody] UpdateItemQuantityRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
@@ -127,7 +127,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("UpdateTeamCartItemQuantity")
         .WithStandardResults();
 
-        // DELETE /api/v1/teamcarts/{id}/items/{itemId}
+        // DELETE /api/v1/team-carts/{id}/items/{itemId}
         group.MapDelete("/{id}/items/{itemId}", async (Guid id, Guid itemId, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -142,7 +142,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("RemoveItemFromTeamCart")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/lock
+        // POST /api/v1/team-carts/{id}/lock
         group.MapPost("/{id}/lock", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -157,7 +157,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("LockTeamCartForPayment")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/tip
+        // POST /api/v1/team-carts/{id}/tip
         group.MapPost("/{id}/tip", async (Guid id, [FromBody] ApplyTipRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -172,7 +172,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("ApplyTipToTeamCart")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/coupon
+        // POST /api/v1/team-carts/{id}/coupon
         group.MapPost("/{id}/coupon", async (Guid id, [FromBody] ApplyCouponRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -187,7 +187,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("ApplyCouponToTeamCart")
         .WithStandardResults();
 
-        // DELETE /api/v1/teamcarts/{id}/coupon
+        // DELETE /api/v1/team-carts/{id}/coupon
         group.MapDelete("/{id}/coupon", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -202,7 +202,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("RemoveCouponFromTeamCart")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/payments/cod
+        // POST /api/v1/team-carts/{id}/payments/cod
         group.MapPost("/{id}/payments/cod", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -217,7 +217,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("CommitToCodPayment")
         .WithStandardResults();
 
-        // POST /api/v1/teamcarts/{id}/payments/online
+        // POST /api/v1/team-carts/{id}/payments/online
         group.MapPost("/{id}/payments/online", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
@@ -232,7 +232,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithName("InitiateMemberOnlinePayment")
         .WithStandardResults<InitiateMemberOnlinePaymentResponse>();
 
-        // POST /api/v1/teamcarts/{id}/convert
+        // POST /api/v1/team-carts/{id}/convert
         group.MapPost("/{id}/convert", async (Guid id, [FromBody] ConvertTeamCartRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)

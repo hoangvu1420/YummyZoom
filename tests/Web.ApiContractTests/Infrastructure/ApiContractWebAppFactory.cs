@@ -1,11 +1,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using Microsoft.Extensions.Hosting; // IHostedService
+using YummyZoom.Infrastructure;
+using YummyZoom.Application.Common.Authorization;
+
 
 namespace YummyZoom.Web.ApiContractTests.Infrastructure;
 
@@ -17,6 +21,15 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Test");
         builder.UseSetting("ConnectionStrings:YummyZoomDb", "Host=localhost;Database=dummy;Username=dummy;Password=dummy");
+        builder.UseSetting("ConnectionStrings:redis", "localhost:6379");
+
+        // Add authorization services like in Infrastructure
+        builder.ConfigureServices(services =>
+        {
+            services.AddAuthorizationBuilder()
+                .AddPolicy("HasPermission", policy => policy.Requirements.Add(new HasPermissionRequirement("TeamCartMember")));
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        });
 
         builder.ConfigureTestServices(services =>
         {
@@ -32,6 +45,33 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
             // Disable Menu read model maintenance hosted service
             var hosted2 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "FullMenuViewMaintenanceHostedService");
             if (hosted2 is not null) services.Remove(hosted2);
+
+            // Disable Cache invalidation subscriber hosted service (depends on Redis)
+            var hosted3 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "CacheInvalidationSubscriber");
+            if (hosted3 is not null) services.Remove(hosted3);
+
+            // Remove Redis-related services to avoid connection issues in tests
+            var redisServices = services.Where(d => 
+                d.ServiceType.Name.Contains("Redis") || 
+                d.ServiceType.Name.Contains("ConnectionMultiplexer") ||
+                d.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache))
+                .ToList();
+            foreach (var redisService in redisServices)
+            {
+                services.Remove(redisService);
+            }
+
+            // Add a mock distributed cache for tests
+            services.AddDistributedMemoryCache();
+
+            // Enable TeamCart feature for contract tests
+            services.Configure<YummyZoom.Web.Configuration.FeatureFlagsOptions>(options =>
+            {
+                options.TeamCart = true;
+            });
+
+            // Add the authorization handler for permission-based policies
+            services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, YummyZoom.Application.Common.Authorization.PermissionAuthorizationHandler>();
 
             // Inject test auth
             services.AddAuthentication(o =>

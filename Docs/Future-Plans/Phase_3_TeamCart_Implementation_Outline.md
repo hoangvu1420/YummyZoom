@@ -399,10 +399,10 @@ Phase 3.8 — Expiration
 
 Phase 3.9 — Web Endpoints & SignalR
 
-- [ ] Endpoint group `TeamCarts` mapping all listed routes; enforce policies.
-- [ ] Conditionally map the `TeamCarts` endpoint group based on `ITeamCartFeatureAvailability` (disabled when `Features:TeamCart` is false or Redis is not configured). Option: return a consistent 503/feature-disabled response if called.
-- [ ] `TeamCartHub` with `SubscribeToCart/UnsubscribeFromCart` (auth: member/host); group `teamcart:{id}`.
-- [ ] `SignalRTeamCartRealtimeNotifier` implementation; integrate with handlers.
+- [x] Endpoint group `TeamCarts` mapping all listed routes; enforce policies.
+- [x] Conditionally map the `TeamCarts` endpoint group based on `ITeamCartFeatureAvailability` (disabled when `Features:TeamCart` is false or Redis is not configured). Option: return a consistent 503/feature-disabled response if called.
+- [x] `TeamCartHub` with `SubscribeToCart/UnsubscribeFromCart` (auth: member/host); group `teamcart:{id}`.
+- [x] `SignalRTeamCartRealtimeNotifier` implementation; integrate with handlers.
 - [ ] Tests: endpoint authZ, hub subscription authZ, basic smoke for broadcasts.
 
 Phase 3.10 — Observability, Limits, Hardening

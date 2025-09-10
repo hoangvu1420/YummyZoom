@@ -12,6 +12,7 @@
     <PackageReference Include="NUnit.Analyzers" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Web\Web.csproj" />

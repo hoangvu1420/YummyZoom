@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
 
-public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<UpdateTeamCartItemQuantityCommand, Result<Unit>>
+public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<UpdateTeamCartItemQuantityCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(UpdateTeamCartItemQuantityCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateTeamCartItemQuantityCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -39,7 +39,7 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Perform update via aggregate - domain handles all business rules (ownership, status, etc.)
@@ -47,7 +47,7 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
             if (updateResult.IsFailure)
             {
                 _logger.LogWarning("Failed to update item quantity. CartId={CartId} ItemId={ItemId} Error={Error}", request.TeamCartId, request.TeamCartItemId, updateResult.Error.Code);
-                return Result.Failure<Unit>(updateResult.Error);
+                return Result.Failure(updateResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -55,7 +55,7 @@ public sealed class UpdateTeamCartItemQuantityCommandHandler : IRequestHandler<U
             _logger.LogInformation("Updated TeamCart item quantity. CartId={CartId} ItemId={ItemId} UserId={UserId} NewQty={Qty}", request.TeamCartId, request.TeamCartItemId, userId.Value, request.NewQuantity);
 
             // Redis VM update to be handled by domain event handler in a later phase.
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

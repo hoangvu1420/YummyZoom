@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 
-public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockTeamCartForPaymentCommand, Result<Unit>>
+public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockTeamCartForPaymentCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(LockTeamCartForPaymentCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LockTeamCartForPaymentCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -38,14 +38,14 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             var lockResult = cart.LockForPayment(userId);
             if (lockResult.IsFailure)
             {
                 _logger.LogWarning("Failed to lock TeamCart {TeamCartId}: {Reason}", request.TeamCartId, lockResult.Error.Code);
-                return Result.Failure<Unit>(lockResult.Error);
+                return Result.Failure(lockResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -54,7 +54,7 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
                 request.TeamCartId, userId.Value, cart.Status);
 
             // Redis VM update is handled by domain event handler for TeamCartLockedForPayment in a later step.
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

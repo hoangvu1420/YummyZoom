@@ -8,7 +8,7 @@ using YummyZoom.Domain.TeamCartAggregate.Errors;
 
 namespace YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 
-public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCommand, Result<Unit>>
+public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCom
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(JoinTeamCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(JoinTeamCartCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -38,7 +38,7 @@ public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCom
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Validate token
@@ -46,7 +46,7 @@ public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCom
             if (tokenResult.IsFailure)
             {
                 _logger.LogWarning("Invalid join token for TeamCart {TeamCartId}: {Reason}", request.TeamCartId, tokenResult.Error.Code);
-                return Result.Failure<Unit>(tokenResult.Error);
+                return Result.Failure(tokenResult.Error);
             }
 
             // Add member as guest
@@ -54,14 +54,14 @@ public sealed class JoinTeamCartCommandHandler : IRequestHandler<JoinTeamCartCom
             if (addMemberResult.IsFailure)
             {
                 _logger.LogWarning("Failed to add member to TeamCart {TeamCartId}: {Reason}", request.TeamCartId, addMemberResult.Error.Code);
-                return Result.Failure<Unit>(addMemberResult.Error);
+                return Result.Failure(addMemberResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
 
             _logger.LogInformation("User {UserId} joined TeamCart {TeamCartId}", guestUserId.Value, request.TeamCartId);
 
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

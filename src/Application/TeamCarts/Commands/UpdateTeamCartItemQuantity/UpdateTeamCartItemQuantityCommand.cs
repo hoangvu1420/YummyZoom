@@ -11,7 +11,7 @@ public sealed record UpdateTeamCartItemQuantityCommand(
     Guid TeamCartId,
     Guid TeamCartItemId,
     int NewQuantity
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

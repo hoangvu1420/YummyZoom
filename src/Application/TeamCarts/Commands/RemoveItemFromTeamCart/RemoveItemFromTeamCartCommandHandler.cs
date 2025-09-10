@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.RemoveItemFromTeamCart;
 
-public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<RemoveItemFromTeamCartCommand, Result<Unit>>
+public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<RemoveItemFromTeamCartCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<Remov
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(RemoveItemFromTeamCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveItemFromTeamCartCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -39,7 +39,7 @@ public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<Remov
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Perform removal via aggregate - domain handles all business rules (ownership, status, etc.)
@@ -47,14 +47,14 @@ public sealed class RemoveItemFromTeamCartCommandHandler : IRequestHandler<Remov
             if (removeResult.IsFailure)
             {
                 _logger.LogWarning("Failed to remove item. CartId={CartId} ItemId={ItemId} Error={Error}", request.TeamCartId, request.TeamCartItemId, removeResult.Error.Code);
-                return Result.Failure<Unit>(removeResult.Error);
+                return Result.Failure(removeResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
 
             _logger.LogInformation("Removed TeamCart item. CartId={CartId} ItemId={ItemId} UserId={UserId}", request.TeamCartId, request.TeamCartItemId, userId.Value);
 
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

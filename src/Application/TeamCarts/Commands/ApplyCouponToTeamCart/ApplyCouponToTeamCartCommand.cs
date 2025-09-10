@@ -10,7 +10,7 @@ namespace YummyZoom.Application.TeamCarts.Commands.ApplyCouponToTeamCart;
 public sealed record ApplyCouponToTeamCartCommand(
     Guid TeamCartId,
     string CouponCode
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

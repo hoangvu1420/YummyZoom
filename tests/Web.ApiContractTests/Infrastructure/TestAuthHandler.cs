@@ -23,9 +23,9 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
         var userId = Request.Headers["x-test-user-id"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(userId))
         {
-            // For public endpoints, allow anonymous access by returning NoResult
-            // This allows the endpoint to decide if authentication is required
-            return Task.FromResult(AuthenticateResult.NoResult());
+            // Return failure to trigger 401 Unauthorized when no auth header is present
+            // This allows testing of authorization properly
+            return Task.FromResult(AuthenticateResult.Fail("Missing x-test-user-id header"));
         }
 
         var permissionsRaw = Request.Headers["x-test-permissions"].FirstOrDefault();

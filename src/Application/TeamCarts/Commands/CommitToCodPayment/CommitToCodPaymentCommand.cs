@@ -9,7 +9,7 @@ namespace YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
 [Authorize(Policy = Policies.MustBeTeamCartMember)]
 public sealed record CommitToCodPaymentCommand(
     Guid TeamCartId
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

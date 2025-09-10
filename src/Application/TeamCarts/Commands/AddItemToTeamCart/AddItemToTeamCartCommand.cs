@@ -12,7 +12,7 @@ public sealed record AddItemToTeamCartCommand(
     Guid MenuItemId,
     int Quantity,
     IReadOnlyList<AddItemToTeamCartCustomizationSelection>? SelectedCustomizations = null
-) : IRequest<Result<Unit>>, ITeamCartCommand
+) : IRequest<Result>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 };

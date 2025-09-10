@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
 
-public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToCodPaymentCommand, Result<Unit>>
+public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToCodPaymentCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(CommitToCodPaymentCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CommitToCodPaymentCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -38,7 +38,7 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Compute the member's total using the cart's currency
@@ -50,7 +50,7 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
             if (commitResult.IsFailure)
             {
                 _logger.LogWarning("Failed to commit COD payment for TeamCart {TeamCartId}: {Reason}", request.TeamCartId, commitResult.Error.Code);
-                return Result.Failure<Unit>(commitResult.Error);
+                return Result.Failure(commitResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -59,7 +59,7 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
                 request.TeamCartId, userId.Value, memberTotal.Amount);
 
             // VM update will be handled by outbox-driven event handlers
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

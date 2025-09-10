@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 
-public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipToTeamCartCommand, Result<Unit>>
+public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipToTeamCartCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(ApplyTipToTeamCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ApplyTipToTeamCartCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -38,7 +38,7 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Use the cart's existing currency for consistency
@@ -47,7 +47,7 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
             if (applyResult.IsFailure)
             {
                 _logger.LogWarning("Failed to apply tip to TeamCart {TeamCartId}: {Reason}", request.TeamCartId, applyResult.Error.Code);
-                return Result.Failure<Unit>(applyResult.Error);
+                return Result.Failure(applyResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -56,7 +56,7 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
                 request.TeamCartId, userId.Value, request.TipAmount);
 
             // VM update will be handled by a domain event handler if/when we raise a TipApplied event.
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

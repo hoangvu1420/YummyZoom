@@ -8,7 +8,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
 
-public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<RemoveCouponFromTeamCartCommand, Result<Unit>>
+public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<RemoveCouponFromTeamCartCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -27,7 +27,7 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(RemoveCouponFromTeamCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveCouponFromTeamCartCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -38,7 +38,7 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Perform coupon removal via aggregate - domain handles all business rules (host-only, locked state, etc.)
@@ -46,7 +46,7 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
             if (removeResult.IsFailure)
             {
                 _logger.LogWarning("Failed to remove coupon from TeamCart {TeamCartId}: {Reason}", request.TeamCartId, removeResult.Error.Code);
-                return Result.Failure<Unit>(removeResult.Error);
+                return Result.Failure(removeResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -54,7 +54,7 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
             _logger.LogInformation("Removed coupon from TeamCart. CartId={CartId} HostUserId={UserId}",
                 request.TeamCartId, userId.Value);
 
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

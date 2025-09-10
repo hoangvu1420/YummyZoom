@@ -10,7 +10,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 
-public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToTeamCartCommand, Result<Unit>>
+public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToTeamCartCommand, Result>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IMenuItemRepository _menuItemRepository;
@@ -35,7 +35,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Unit>> Handle(AddItemToTeamCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddItemToTeamCartCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -49,28 +49,28 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure<Unit>(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
             // Load MenuItem
             var menuItem = await _menuItemRepository.GetByIdAsync(menuItemId, cancellationToken);
             if (menuItem is null)
             {
-                return Result.Failure<Unit>(AddItemToTeamCartErrors.MenuItemNotFound(request.MenuItemId));
+                return Result.Failure(AddItemToTeamCartErrors.MenuItemNotFound(request.MenuItemId));
             }
 
             // Validate MenuItem belongs to the same restaurant as TeamCart
             if (menuItem.RestaurantId != cart.RestaurantId)
             {
                 _logger.LogWarning("MenuItem from different restaurant. MenuItemRestaurant={MenuItemRestaurantId}, CartRestaurant={CartRestaurantId}. MenuItemId={MenuItemId}, CartId={TeamCartId}", menuItem.RestaurantId.Value, cart.RestaurantId.Value, request.MenuItemId, request.TeamCartId);
-                return Result.Failure<Unit>(AddItemToTeamCartErrors.MenuItemNotBelongsToRestaurant(request.MenuItemId, cart.RestaurantId.Value));
+                return Result.Failure(AddItemToTeamCartErrors.MenuItemNotBelongsToRestaurant(request.MenuItemId, cart.RestaurantId.Value));
             }
 
             // Validate availability
             if (!menuItem.IsAvailable)
             {
                 _logger.LogWarning("MenuItem unavailable: {MenuItemId} for TeamCart {TeamCartId}", request.MenuItemId, request.TeamCartId);
-                return Result.Failure<Unit>(AddItemToTeamCartErrors.MenuItemUnavailable(request.MenuItemId));
+                return Result.Failure(AddItemToTeamCartErrors.MenuItemUnavailable(request.MenuItemId));
             }
 
             // Build and validate snapshot customizations from request selections with cardinality rules
@@ -108,7 +108,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                     if (count < appliedGroup.MinSelections)
                     {
                         _logger.LogWarning("Customization group minimum not satisfied. GroupId={GroupId} Min={Min} Actual={Actual} MenuItemId={MenuItemId} CartId={CartId}", appliedGroupId, appliedGroup.MinSelections, count, request.MenuItemId, request.TeamCartId);
-                        return Result.Failure<Unit>(TeamCartErrors.InvalidCustomization);
+                        return Result.Failure(TeamCartErrors.InvalidCustomization);
                     }
                 }
             }
@@ -123,7 +123,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                     if (!groupsById.TryGetValue(groupId, out var group))
                     {
                         _logger.LogWarning("Requested customization group not found. GroupId={GroupId} MenuItemId={MenuItemId} CartId={CartId}", groupId, request.MenuItemId, request.TeamCartId);
-                        return Result.Failure<Unit>(AddItemToTeamCartErrors.CustomizationGroupNotFound(groupId));
+                        return Result.Failure(AddItemToTeamCartErrors.CustomizationGroupNotFound(groupId));
                     }
 
                     // Ensure the group is applied to menu item
@@ -131,7 +131,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                     if (!isAppliedToItem)
                     {
                         _logger.LogWarning("Customization group not applied to menu item. GroupId={GroupId} MenuItemId={MenuItemId}", groupId, request.MenuItemId);
-                        return Result.Failure<Unit>(AddItemToTeamCartErrors.CustomizationGroupNotAppliedToMenuItem(groupId, request.MenuItemId));
+                        return Result.Failure(AddItemToTeamCartErrors.CustomizationGroupNotAppliedToMenuItem(groupId, request.MenuItemId));
                     }
 
                     // Enforce MaxSelections and duplicates
@@ -139,12 +139,12 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                     if (distinctChoiceIds.Count != groupSelections.Count())
                     {
                         _logger.LogWarning("Duplicate customization choice detected. GroupId={GroupId} MenuItemId={MenuItemId}", groupId, request.MenuItemId);
-                        return Result.Failure<Unit>(TeamCartErrors.InvalidCustomization);
+                        return Result.Failure(TeamCartErrors.InvalidCustomization);
                     }
                     if (group.MaxSelections >= 0 && distinctChoiceIds.Count > group.MaxSelections)
                     {
                         _logger.LogWarning("Customization group maximum exceeded. GroupId={GroupId} Max={Max} Actual={Actual} MenuItemId={MenuItemId}", groupId, group.MaxSelections, distinctChoiceIds.Count, request.MenuItemId);
-                        return Result.Failure<Unit>(TeamCartErrors.InvalidCustomization);
+                        return Result.Failure(TeamCartErrors.InvalidCustomization);
                     }
 
                     foreach (var choiceId in distinctChoiceIds)
@@ -153,7 +153,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                         if (choice is null)
                         {
                             _logger.LogWarning("Customization choice not found in group. GroupId={GroupId} ChoiceId={ChoiceId} MenuItemId={MenuItemId}", groupId, choiceId, request.MenuItemId);
-                            return Result.Failure<Unit>(AddItemToTeamCartErrors.CustomizationChoiceNotFound(groupId, choiceId));
+                            return Result.Failure(AddItemToTeamCartErrors.CustomizationChoiceNotFound(groupId, choiceId));
                         }
 
                         var custResult = TeamCartItemCustomization.Create(
@@ -164,7 +164,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                         if (custResult.IsFailure)
                         {
                             _logger.LogWarning("Customization snapshot creation failed. GroupId={GroupId} ChoiceId={ChoiceId} Error={Error}", groupId, choiceId, custResult.Error.Code);
-                            return Result.Failure<Unit>(custResult.Error);
+                            return Result.Failure(custResult.Error);
                         }
 
                         selectedCustomizations.Add(custResult.Value);
@@ -185,7 +185,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
             if (addResult.IsFailure)
             {
                 _logger.LogWarning("Failed to add item to TeamCart {TeamCartId}: {Reason}", request.TeamCartId, addResult.Error.Code);
-                return Result.Failure<Unit>(addResult.Error);
+                return Result.Failure(addResult.Error);
             }
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
@@ -200,7 +200,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                 selectedCustomizations?.Count ?? 0);
 
             // Real-time store update occurs via domain event handlers (ItemAddedToTeamCart).
-            return Result.Success(Unit.Value);
+            return Result.Success();
         }, cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using System.Text.Json.Serialization;
+using Azure.Identity;
 using YummyZoom.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -107,10 +108,16 @@ public static class DependencyInjection
         builder.Services.ConfigureHttpJsonOptions(o =>
         {
             // Avoid duplicate converter registrations if called again (idempotent)
-            var already = o.SerializerOptions.Converters.OfType<AggregateRootIdJsonConverterFactory>().Any();
-            if (!already)
+            var alreadyId = o.SerializerOptions.Converters.OfType<AggregateRootIdJsonConverterFactory>().Any();
+            if (!alreadyId)
             {
                 o.SerializerOptions.Converters.Add(new AggregateRootIdJsonConverterFactory());
+            }
+            
+            var alreadyEnum = o.SerializerOptions.Converters.OfType<JsonStringEnumConverter>().Any();
+            if (!alreadyEnum)
+            {
+                o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             }
         });
 
