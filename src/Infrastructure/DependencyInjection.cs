@@ -46,6 +46,18 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
+        builder.AddPersistenceServices();
+        builder.AddAuthenticationServices(); 
+        builder.AddAuthorizationServices();
+        builder.AddRepositories();
+        builder.AddDomainServices();
+        builder.AddExternalServices();
+        builder.AddBackgroundServices();
+        builder.AddReadModelServices();
+    }
+
+    private static void AddPersistenceServices(this IHostApplicationBuilder builder)
+    {
         var connectionString = builder.Configuration.GetConnectionString("YummyZoomDb");
         Guard.Against.Null(connectionString, message: "Connection string 'YummyZoomDb' not found.");
 
@@ -67,9 +79,12 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
-        builder.AddFirebaseIfConfigured();
-        builder.AddCachingIfConfigured(); 
+        // Register the connection factory for Dapper queries
+        builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+    }
 
+    private static void AddAuthenticationServices(this IHostApplicationBuilder builder)
+    {
         builder.Services.AddAuthentication()
             .AddBearerToken(IdentityConstants.BearerScheme, options =>
             {
@@ -96,29 +111,10 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, Identity.IdentityService>();
+    }
 
-        builder.Services.AddScoped<IUserAggregateRepository, UserAggregateRepository>();
-        builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
-        builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
-        builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
-        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-        builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
-        builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-        builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
-        builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
-        builder.Services.AddScoped<ICouponRepository, CouponRepository>();
-        builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();
-        builder.Services.AddScoped<IInboxStore, InboxStore>();
-        builder.Services.AddScoped<ITeamCartRepository, TeamCartRepository>();
-        builder.Services.AddSingleton<ITeamCartRealtimeNotifier, NoOpTeamCartRealtimeNotifier>();
-        builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
-        builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
-
-        // Register the connection factory for Dapper queries
-        builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
-
-        builder.Services.AddSingleton<IFcmService, FcmService>();
-
+    private static void AddAuthorizationServices(this IHostApplicationBuilder builder)
+    {
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator))
             .AddPolicy(Policies.MustBeRestaurantOwner, policy =>
@@ -141,8 +137,43 @@ public static class DependencyInjection
                 policy.AddRequirements(new HasPermissionRequirement(Roles.TeamCartMember)));
 
         builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, YummyZoomClaimsPrincipalFactory>();
-
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+    }
+
+    private static void AddRepositories(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<IUserAggregateRepository, UserAggregateRepository>();
+        builder.Services.AddScoped<IRoleAssignmentRepository, RoleAssignmentRepository>();
+        builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+        builder.Services.AddScoped<IUserDeviceSessionRepository, UserDeviceSessionRepository>();
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+        builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+        builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+        builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
+        builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+        builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+        builder.Services.AddScoped<ICustomizationGroupRepository, CustomizationGroupRepository>();
+        builder.Services.AddScoped<IInboxStore, InboxStore>();
+        builder.Services.AddScoped<ITeamCartRepository, TeamCartRepository>();
+        builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
+        
+        // Realtime notifiers
+        builder.Services.AddSingleton<ITeamCartRealtimeNotifier, NoOpTeamCartRealtimeNotifier>();
+        builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
+    }
+
+    private static void AddDomainServices(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<OrderFinancialService>();
+        builder.Services.AddScoped<TeamCartConversionService>();
+        builder.Services.AddSingleton<IFcmService, FcmService>();
+    }
+
+    private static void AddExternalServices(this IHostApplicationBuilder builder)
+    {
+        // Firebase and Caching
+        builder.AddFirebaseIfConfigured();
+        builder.AddCachingIfConfigured();
 
         // Stripe configuration
         builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection(StripeOptions.SectionName));
@@ -154,11 +185,10 @@ public static class DependencyInjection
         }
 
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
+    }
 
-        // Register Domain Services
-        builder.Services.AddScoped<OrderFinancialService>();
-        builder.Services.AddScoped<TeamCartConversionService>();
-
+    private static void AddBackgroundServices(this IHostApplicationBuilder builder)
+    {
         // Outbox publisher options and hosted service (enabled here; can be toggled by env later)
         builder.Services.Configure<OutboxPublisherOptions>(opt =>
         {
@@ -171,12 +201,21 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IOutboxProcessor, OutboxProcessor>();
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
 
+        // TeamCart expiration options (Phase 3.8)
+        builder.Services.Configure<TeamCartExpirationOptions>(
+            builder.Configuration.GetSection(TeamCartExpirationOptions.SectionName));
+        // Hosted service registration can be toggled at runtime by Enabled flag inside ExecuteAsync
+        builder.Services.AddHostedService<TeamCartExpirationHostedService>();
+    }
+
+    private static void AddReadModelServices(this IHostApplicationBuilder builder)
+    {
         // Read model rebuild services
         builder.Services.AddScoped<IFullMenuViewMaintainer, FullMenuViewMaintainer>();
 
         // FullMenu read model maintenance (backfill + reconciliation)
         builder.Services.Configure<FullMenuViewMaintenanceOptions>(
-            builder.Configuration.GetSection("ReadModelMaintenance"));
+            builder.Configuration.GetSection("MenuReadModelMaintenance"));
         builder.Services.AddHostedService<FullMenuViewMaintenanceHostedService>();
 
         // Search read model maintainer
@@ -194,12 +233,6 @@ public static class DependencyInjection
         builder.Services.Configure<ReviewSummaryMaintenanceOptions>(
             builder.Configuration.GetSection("ReviewSummaryMaintenance"));
         builder.Services.AddHostedService<ReviewSummaryMaintenanceHostedService>();
-
-        // TeamCart expiration options (Phase 3.8)
-        builder.Services.Configure<TeamCartExpirationOptions>(
-            builder.Configuration.GetSection(TeamCartExpirationOptions.SectionName));
-        // Hosted service registration can be toggled at runtime by Enabled flag inside ExecuteAsync
-        builder.Services.AddHostedService<TeamCartExpirationHostedService>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
