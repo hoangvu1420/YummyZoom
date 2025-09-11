@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Stripe;
 using YummyZoom.Application.FunctionalTests.Authorization;

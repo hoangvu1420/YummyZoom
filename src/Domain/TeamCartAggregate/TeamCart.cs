@@ -614,6 +614,68 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         return Result.Success();
     }
 
+    /// <summary>
+    /// Records a failed online payment attempt for a member.
+    /// This does not complete the payment but captures failure state to inform UI/flow.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose payment failed.</param>
+    /// <param name="amount">The amount that was attempted.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result RecordFailedOnlinePayment(UserId userId, Money amount)
+    {
+        // Validate status
+        if (Status != TeamCartStatus.Locked)
+        {
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
+        }
+
+        // Validate user is a member
+        if (!_members.Any(m => m.UserId == userId))
+        {
+            return Result.Failure(TeamCartErrors.UserNotMember);
+        }
+
+        // Calculate member's expected total and compare
+        var memberTotal = CalculateMemberTotal(userId);
+        if (amount.Amount != memberTotal.Amount)
+        {
+            return Result.Failure(TeamCartErrors.InvalidPaymentAmount);
+        }
+
+        // If there's an existing payment record, and it's online but not paid, mark failed.
+        var existingPayment = _memberPayments.FirstOrDefault(p => p.UserId == userId);
+        if (existingPayment is null)
+        {
+            // Create a pending online payment record and mark it failed
+            var createResult = MemberPayment.Create(userId, amount, PaymentMethod.Online);
+            if (createResult.IsFailure)
+            {
+                return Result.Failure(createResult.Error);
+            }
+            existingPayment = createResult.Value;
+            _memberPayments.Add(existingPayment);
+        }
+
+        if (existingPayment.Method != PaymentMethod.Online)
+        {
+            // If user had committed COD earlier, keep COD; failure represents an online attempt, not final state change
+            // We still emit failure event for UI purposes.
+        }
+        else
+        {
+            var failResult = existingPayment.MarkAsFailed();
+            if (failResult.IsFailure)
+            {
+                return Result.Failure(failResult.Error);
+            }
+        }
+
+        AddDomainEvent(new OnlinePaymentFailed(Id, userId, amount));
+
+        // Do not call ReadyToConfirm here; failed payments should not advance state
+        return Result.Success();
+    }
+
     #endregion
 
     #region Public Methods - Financials

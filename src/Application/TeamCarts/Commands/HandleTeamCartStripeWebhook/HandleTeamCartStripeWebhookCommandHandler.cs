@@ -128,10 +128,12 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
 
     private Result HandleFailed(Domain.TeamCartAggregate.TeamCart cart, Domain.UserAggregate.ValueObjects.UserId memberUserId, string paymentGatewayReferenceId)
     {
-        // We do not have an explicit failure method; mark by replacing with COD or keeping unpaid is domain choice.
-        // Emit failure domain event via dedicated method if available; else, return success (no-op) for now.
-        // For completeness, we'll just return success to acknowledge the event.
-        return Result.Success();
+        // Recompute expected member amount to keep parity with success path
+        var currency = cart.TipAmount.Currency;
+        var amount = new Money(cart.Items.Where(i => i.AddedByUserId == memberUserId).Sum(i => i.LineItemTotal.Amount), currency);
+
+        var result = cart.RecordFailedOnlinePayment(memberUserId, amount);
+        return result.IsSuccess ? Result.Success() : Result.Failure(result.Error);
     }
 
     private async Task MarkEventAsProcessed(string eventId, CancellationToken cancellationToken)
@@ -146,5 +148,4 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
-
 

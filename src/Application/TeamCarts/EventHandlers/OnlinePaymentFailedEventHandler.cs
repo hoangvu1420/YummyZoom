@@ -35,7 +35,8 @@ public sealed class OnlinePaymentFailedEventHandler : IdempotentNotificationHand
 
         try
         {
-            // Failure does not alter committed payments in store; notify clients to refresh UI state
+            // Update RT VM to reflect failure and notify clients
+            await _store.RecordOnlinePaymentFailureAsync(cartId, userId.Value, ct);
             await _notifier.NotifyPaymentEvent(cartId, userId.Value, "OnlineFailed", ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
         }

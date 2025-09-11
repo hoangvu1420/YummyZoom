@@ -160,6 +160,17 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             m.OnlineTransactionId = transactionId;
         }, "payment_online_succeeded");
 
+    public async Task RecordOnlinePaymentFailureAsync(TeamCartId cartId, Guid userId, CancellationToken ct = default)
+        => await MutateAsync(cartId, vm =>
+        {
+            var m = vm.Members.FirstOrDefault(x => x.UserId == userId);
+            if (m is null) return;
+            m.PaymentStatus = "Failed";
+            m.OnlineTransactionId = null;
+            // Keep committed amount at 0 by default; do not accumulate failures
+            m.CommittedAmount = 0;
+        }, "payment_online_failed");
+
     private async Task MutateAsync(TeamCartId cartId, Action<TeamCartViewModel> mutate, string updateType)
     {
         var key = Key(cartId);
@@ -398,4 +409,3 @@ public sealed class RedisTeamCartStore : ITeamCartStore
     }
     #endregion
 }
-

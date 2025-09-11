@@ -24,5 +24,5 @@ public interface ITeamCartStore
     Task RemoveCouponAsync(TeamCartId cartId, CancellationToken ct = default);
     Task CommitCodAsync(TeamCartId cartId, Guid userId, decimal amount, string currency, CancellationToken ct = default);
     Task RecordOnlinePaymentAsync(TeamCartId cartId, Guid userId, decimal amount, string currency, string transactionId, CancellationToken ct = default);
+    Task RecordOnlinePaymentFailureAsync(TeamCartId cartId, Guid userId, CancellationToken ct = default);
 }
-
