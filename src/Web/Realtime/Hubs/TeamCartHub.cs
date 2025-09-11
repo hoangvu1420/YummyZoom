@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Web.Realtime.Hubs;
 
@@ -11,14 +14,23 @@ namespace YummyZoom.Web.Realtime.Hubs;
 [Authorize]
 public sealed class TeamCartHub : Hub
 {
+    private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<TeamCartHub> _logger;
 
-    public TeamCartHub(ILogger<TeamCartHub> logger)
+    public TeamCartHub(
+        IAuthorizationService authorizationService,
+        ILogger<TeamCartHub> logger)
     {
+        _authorizationService = authorizationService;
         _logger = logger;
     }
 
     private static string Group(Guid cartId) => $"teamcart:{cartId}";
+
+    private sealed record TeamCartResource(Guid Id) : ITeamCartQuery
+    {
+        public TeamCartId TeamCartId => TeamCartId.Create(Id);
+    }
 
     public async Task SubscribeToCart(Guid cartId)
     {
@@ -26,6 +38,16 @@ public sealed class TeamCartHub : Hub
         if (user is null)
         {
             throw new HubException("Unauthorized");
+        }
+
+        // Enforce membership via policy-based authorization (Application-layer patterns)
+        var resource = new TeamCartResource(cartId);
+        var authz = await _authorizationService.AuthorizeAsync(user, resource, Policies.MustBeTeamCartMember);
+        if (!authz.Succeeded)
+        {
+            _logger.LogWarning("Hub Subscribe forbidden: UserId={UserId}, TeamCartId={TeamCartId}",
+                user.Identity?.Name ?? "anonymous", cartId);
+            throw new HubException("Forbidden");
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, Group(cartId));
@@ -38,4 +60,3 @@ public sealed class TeamCartHub : Hub
         _logger.LogInformation("Unsubscribed connection {ConnectionId} from {Group}", Context.ConnectionId, Group(cartId));
     }
 }
-
