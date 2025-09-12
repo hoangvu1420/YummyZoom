@@ -28,6 +28,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     private readonly List<TeamCartMember> _members = [];
     private readonly List<TeamCartItem> _items = [];
     private readonly List<MemberPayment> _memberPayments = [];
+    private readonly Dictionary<UserId, Money> _memberTotals = new();
 
     #endregion
 
@@ -93,6 +94,41 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public IReadOnlyList<MemberPayment> MemberPayments => _memberPayments.AsReadOnly();
     
     /// <summary>
+    /// Latest quoted version for per-member totals. Increments on each re-quote.
+    /// </summary>
+    public long QuoteVersion { get; private set; }
+
+    /// <summary>
+    /// Latest quoted grand total for the cart.
+    /// </summary>
+    public Money GrandTotal { get; private set; } = Money.Zero(Currencies.Default);
+
+    /// <summary>
+    /// Latest quoted per-member totals.
+    /// </summary>
+    public IReadOnlyDictionary<UserId, Money> MemberTotals => _memberTotals.AsReadOnly();
+
+    /// <summary>
+    /// EF-only JSONB projection of MemberTotals for persistence. Not for domain usage.
+    /// </summary>
+    public IReadOnlyList<MemberTotalRow> MemberTotalsRows
+    {
+        get => _memberTotals
+            .Select(kv => new MemberTotalRow(kv.Key.Value, kv.Value.Amount, kv.Value.Currency))
+            .ToList();
+        private set
+        {
+            _memberTotals.Clear();
+            foreach (var row in value)
+            {
+                var uid = UserId.Create(row.UserId);
+                var money = new Money(row.Amount, row.Currency);
+                _memberTotals[uid] = money;
+            }
+        }
+    }
+    
+    /// <summary>
     /// Gets the tip amount for the order, set by the Host.
     /// </summary>
     public Money TipAmount { get; private set; }
@@ -133,6 +169,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         var defaultCurrency = Currencies.Default;
         TipAmount = Money.Zero(defaultCurrency);
         AppliedCouponId = null;
+        QuoteVersion = 0;
     }
 
     /// <summary>
@@ -510,7 +547,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// <param name="amount">The amount the member is committing to pay.</param>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result CommitToCashOnDelivery(UserId userId, Money amount)
-    {
+      {
         // Validate status
         if (Status != TeamCartStatus.Locked)
         {
@@ -523,9 +560,18 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return Result.Failure(TeamCartErrors.UserNotMember);
         }
 
-        // Calculate member's total (items they added)
-        var memberTotal = CalculateMemberTotal(userId);
-        if (amount.Amount != memberTotal.Amount)
+        // Expected amount: use quoted per-member total when available (Quote Lite), otherwise items subtotal
+        Money expected;
+        if (QuoteVersion > 0 && _memberTotals.TryGetValue(userId, out var quoted))
+        {
+            expected = quoted;
+        }
+        else
+        {
+            expected = CalculateMemberTotal(userId);
+        }
+
+        if (amount.Amount != expected.Amount)
         {
             return Result.Failure(TeamCartErrors.InvalidPaymentAmount);
         }
@@ -563,8 +609,8 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// <param name="amount">The amount that was paid.</param>
     /// <param name="transactionId">The transaction ID from the payment processor.</param>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
-    public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
-    {
+      public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
+      {
         // Validate status
         if (Status != TeamCartStatus.Locked)
         {
@@ -582,9 +628,17 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return Result.Failure(TeamCartErrors.InvalidTransactionId);
         }
 
-        // Calculate member's total (items they added)
-        var memberTotal = CalculateMemberTotal(userId);
-        if (amount.Amount != memberTotal.Amount)
+        // Expected amount: use quoted per-member total when available (Quote Lite), otherwise items subtotal
+        Money expected;
+        if (QuoteVersion > 0 && _memberTotals.TryGetValue(userId, out var quoted))
+        {
+            expected = quoted;
+        }
+        else
+        {
+            expected = CalculateMemberTotal(userId);
+        }
+        if (amount.Amount != expected.Amount)
         {
             return Result.Failure(TeamCartErrors.InvalidPaymentAmount);
         }
@@ -782,6 +836,111 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         var memberItems = _items.Where(item => item.AddedByUserId == userId);
         var total = memberItems.Sum(item => item.LineItemTotal.Amount);
         return new Money(total, Currencies.Default);
+    }
+
+    /// <summary>
+    /// Computes a minimal, authoritative per-member quote using an even-split algorithm for
+    /// (Fees + Tip + Tax - Discount), added to each member's item subtotal. Sum is preserved by
+    /// deterministic rounding. Updates QuoteVersion, GrandTotal, and MemberTotals.
+    /// </summary>
+    public Result ComputeQuoteLite(
+        IReadOnlyDictionary<UserId, Money> memberItemSubtotals,
+        Money feesTotal,
+        Money tipAmount,
+        Money taxAmount,
+        Money discountCart)
+    {
+        if (Status != TeamCartStatus.Locked)
+        {
+            return Result.Failure(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
+        }
+
+        // Currency consistency (use tip currency as cart currency baseline)
+        var currency = tipAmount.Currency;
+
+        decimal itemsSum = memberItemSubtotals.Values.Sum(m => m.Amount);
+        var subtotalAfterItemDiscounts = new Money(itemsSum, currency);
+
+        // Compute grand total at cart level
+        // Cap discount at base
+        var cappedDiscount = Math.Clamp(discountCart.Amount, 0m, subtotalAfterItemDiscounts.Amount);
+        var grand = subtotalAfterItemDiscounts.Amount + feesTotal.Amount + tipAmount.Amount + taxAmount.Amount - cappedDiscount;
+        if (grand < 0m) grand = 0m;
+        var grandTotal = new Money(grand, currency);
+
+        // Participants: members with positive item subtotal
+        var participants = memberItemSubtotals
+            .Where(kv => kv.Value.Amount > 0m)
+            .Select(kv => kv.Key)
+            .OrderBy(u => u.Value)
+            .ToList();
+
+        // Split the shared pot evenly: pot = fees + tip + tax - discount
+        var sharedPotAmount = feesTotal.Amount + tipAmount.Amount + taxAmount.Amount - cappedDiscount;
+        var sign = Math.Sign(sharedPotAmount); // -1, 0, 1
+        var sharedMagnitude = Math.Abs(sharedPotAmount);
+        var sharedPot = new Money(sharedMagnitude, currency);
+
+        // Split shared pot magnitude in cents across participants
+        var split = SplitEvenly(sharedPot, participants);
+
+        // Build per-member totals
+        _memberTotals.Clear();
+        foreach (var p in participants)
+        {
+            var itemSub = memberItemSubtotals[p].Amount;
+            var shareMag = split.TryGetValue(p, out var s) ? s.Amount : 0m;
+            var delta = shareMag * sign; // add for positive pot; subtract for negative (discount heavy)
+            var total = new Money(itemSub + delta, currency);
+            _memberTotals[p] = total;
+        }
+
+        // If there are non-participating members, they are not included; they have no quoted amount.
+
+        QuoteVersion = (QuoteVersion <= 0 ? 1 : QuoteVersion + 1);
+        GrandTotal = grandTotal;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Gets the quoted amount for a member from the latest quote.
+    /// </summary>
+    public Result<Money> GetMemberQuote(UserId userId)
+    {
+        if (QuoteVersion <= 0)
+        {
+            return Result.Failure<Money>(TeamCartErrors.InvalidStatusForConversion); // No quote available
+        }
+        if (_memberTotals.TryGetValue(userId, out var total))
+        {
+            return Result.Success(total);
+        }
+        return Result.Failure<Money>(TeamCartErrors.UserNotMember);
+    }
+
+    private static Dictionary<UserId, Money> SplitEvenly(Money total, IList<UserId> order)
+    {
+        var result = new Dictionary<UserId, Money>(order.Count);
+        var currency = total.Currency;
+        if (order.Count == 0)
+        {
+            return result;
+        }
+
+        // Convert to cents for deterministic distribution
+        var cents = (long)Math.Round(total.Amount * 100m, 0, MidpointRounding.AwayFromZero);
+        var n = order.Count;
+        var q = cents / n;
+        var r = (int)(cents % n);
+
+        for (int i = 0; i < n; i++)
+        {
+            var shareCents = q + (i < r ? 1 : 0);
+            result[order[i]] = new Money(shareCents / 100m, currency);
+        }
+
+        return result;
     }
 
     /// <summary>

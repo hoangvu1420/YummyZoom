@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
@@ -17,6 +18,7 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
     private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ApplyCouponToTeamCartCommandHandler> _logger;
+    private readonly ITeamCartStore _teamCartStore;
     private readonly OrderFinancialService _orderFinancialService;
 
     public ApplyCouponToTeamCartCommandHandler(
@@ -25,6 +27,7 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
         IUser currentUser,
         IUnitOfWork unitOfWork,
         OrderFinancialService orderFinancialService,
+        ITeamCartStore teamCartStore,
         ILogger<ApplyCouponToTeamCartCommandHandler> logger)
     {
         _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
@@ -32,6 +35,7 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
+        _teamCartStore = teamCartStore ?? throw new ArgumentNullException(nameof(teamCartStore));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -106,7 +110,22 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
                 return Result.Failure(applyResult.Error);
             }
 
+            // Recompute Quote Lite with known discount
+            var currency = cart.TipAmount.Currency;
+            var memberSubtotals = cart.Items
+                .GroupBy(i => i.AddedByUserId)
+                .ToDictionary(g => g.Key, g => new Money(g.Sum(x => x.LineItemTotal.Amount), currency));
+
+            var feesTotal = new Money(2.99m, currency); // MVP placeholder
+            var tipAmount = cart.TipAmount;
+            var taxAmount = new Money(0m, currency); // MVP placeholder
+            var discount = discountCheck.Value; // already computed for these items
+
+            cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
+
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
+            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
+                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Applied coupon to TeamCart. CartId={CartId} HostUserId={UserId} CouponCode={CouponCode}",
                 request.TeamCartId, userId.Value, request.CouponCode);

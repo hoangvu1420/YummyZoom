@@ -127,6 +127,16 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
                 return Result.Failure<ConvertTeamCartToOrderResponse>(conversion.Error);
             }
 
+            // MVP Quote Lite: ensure sum of member payments equals quoted grand total when quote is present
+            if (cart.QuoteVersion > 0)
+            {
+                var paidSum = new Money(cart.MemberPayments.Sum(p => p.Amount.Amount), currency);
+                if (Math.Round(paidSum.Amount, 2) != Math.Round(cart.GrandTotal.Amount, 2))
+                {
+                    return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.InvalidPaymentAmount);
+                }
+            }
+
             var (order, updatedCart) = conversion.Value;
 
             // Persist updated cart and new order

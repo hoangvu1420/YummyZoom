@@ -41,10 +41,24 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
                 return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
-            // Compute the member's total using the cart's currency
-            var memberTotal = new Money(
-                cart.Items.Where(i => i.AddedByUserId == userId).Sum(i => i.LineItemTotal.Amount),
-                cart.TipAmount.Currency);
+            // Use quoted per-member total when available (Quote Lite); fallback to items subtotal
+            Money memberTotal;
+            if (cart.QuoteVersion > 0)
+            {
+                var quoted = cart.GetMemberQuote(userId);
+                if (quoted.IsFailure)
+                {
+                    _logger.LogWarning("No quote available for COD commit. TeamCartId={TeamCartId} UserId={UserId}", request.TeamCartId, userId.Value);
+                    return Result.Failure(quoted.Error);
+                }
+                memberTotal = quoted.Value;
+            }
+            else
+            {
+                memberTotal = new Money(
+                    cart.Items.Where(i => i.AddedByUserId == userId).Sum(i => i.LineItemTotal.Amount),
+                    cart.TipAmount.Currency);
+            }
 
             var commitResult = cart.CommitToCashOnDelivery(userId, memberTotal);
             if (commitResult.IsFailure)
@@ -63,5 +77,4 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
         }, cancellationToken);
     }
 }
-
 

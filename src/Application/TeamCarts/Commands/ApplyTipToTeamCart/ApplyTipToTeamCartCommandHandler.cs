@@ -4,6 +4,7 @@ using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Domain.Services;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
@@ -14,16 +15,25 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
     private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ApplyTipToTeamCartCommandHandler> _logger;
+    private readonly ITeamCartStore _teamCartStore;
+    private readonly ICouponRepository _couponRepository;
+    private readonly OrderFinancialService _financialService;
 
     public ApplyTipToTeamCartCommandHandler(
         ITeamCartRepository teamCartRepository,
         IUser currentUser,
         IUnitOfWork unitOfWork,
+        ICouponRepository couponRepository,
+        OrderFinancialService financialService,
+        ITeamCartStore teamCartStore,
         ILogger<ApplyTipToTeamCartCommandHandler> logger)
     {
         _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _couponRepository = couponRepository ?? throw new ArgumentNullException(nameof(couponRepository));
+        _financialService = financialService ?? throw new ArgumentNullException(nameof(financialService));
+        _teamCartStore = teamCartStore ?? throw new ArgumentNullException(nameof(teamCartStore));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -50,7 +60,35 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
                 return Result.Failure(applyResult.Error);
             }
 
+            // Recompute Quote Lite
+            var currency = cart.TipAmount.Currency;
+            var memberSubtotals = cart.Items
+                .GroupBy(i => i.AddedByUserId)
+                .ToDictionary(g => g.Key, g => new Money(g.Sum(x => x.LineItemTotal.Amount), currency));
+
+            var feesTotal = new Money(2.99m, currency); // MVP placeholder
+            var tipAmount = cart.TipAmount;
+            var taxAmount = new Money(0m, currency); // MVP placeholder
+
+            var discount = new Money(0m, currency);
+            if (cart.AppliedCouponId is not null)
+            {
+                var coupon = await _couponRepository.GetByIdAsync(cart.AppliedCouponId, cancellationToken);
+                if (coupon is not null)
+                {
+                    var d = _financialService.ValidateAndCalculateDiscountForTeamCartItems(coupon, cart.Items);
+                    if (d.IsSuccess)
+                    {
+                        discount = d.Value;
+                    }
+                }
+            }
+
+            cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
+
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
+            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
+                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Applied tip to TeamCart. CartId={CartId} HostUserId={UserId} Tip={Tip}",
                 request.TeamCartId, userId.Value, request.TipAmount);
@@ -60,4 +98,3 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
         }, cancellationToken);
     }
 }
-

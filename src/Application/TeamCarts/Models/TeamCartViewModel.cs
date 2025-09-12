@@ -22,6 +22,7 @@ public sealed class TeamCartViewModel
     public decimal TaxAmount { get; set; }
     public decimal Total { get; set; }
     public decimal CashOnDeliveryPortion { get; set; }
+    public long QuoteVersion { get; set; }
     public long Version { get; set; }
 
     public List<Member> Members { get; init; } = new();
@@ -35,6 +36,7 @@ public sealed class TeamCartViewModel
         public string PaymentStatus { get; set; } = "Pending";
         public decimal CommittedAmount { get; set; }
         public string? OnlineTransactionId { get; set; }
+        public decimal QuotedAmount { get; set; }
     }
 
     public sealed class Item
@@ -55,4 +57,3 @@ public sealed class TeamCartViewModel
         public required decimal PriceAdjustment { get; init; }
     }
 }
-

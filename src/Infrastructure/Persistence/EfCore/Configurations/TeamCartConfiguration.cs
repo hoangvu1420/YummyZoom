@@ -80,6 +80,24 @@ public class TeamCartConfiguration : IEntityTypeConfiguration<TeamCart>
         // Creation audit
         builder.ConfigureCreationAuditProperties();
 
+        // Quote Lite persistence
+        builder.Property(tc => tc.QuoteVersion)
+            .IsRequired();
+
+        builder.OwnsOne(tc => tc.GrandTotal, moneyBuilder =>
+        {
+            moneyBuilder.Property(m => m.Amount)
+                .HasColumnName("GrandTotal_Amount")
+                .HasColumnType("decimal(18,2)");
+            moneyBuilder.Property(m => m.Currency)
+                .HasColumnName("GrandTotal_Currency")
+                .HasMaxLength(3);
+        });
+
+        builder.Property(tc => tc.MemberTotalsRows)
+            .HasColumnName("MemberTotals")
+            .HasJsonbListConversion();
+
         // Field access for collections to respect encapsulation
         builder.Metadata.FindNavigation(nameof(TeamCart.Members))!
             .SetPropertyAccessMode(PropertyAccessMode.Field);
@@ -219,5 +237,4 @@ public class TeamCartConfiguration : IEntityTypeConfiguration<TeamCart>
         });
     }
 }
-
 

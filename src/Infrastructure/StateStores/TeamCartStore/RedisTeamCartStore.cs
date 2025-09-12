@@ -171,6 +171,23 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             m.CommittedAmount = 0;
         }, "payment_online_failed");
 
+    public async Task UpdateQuoteAsync(TeamCartId cartId, long quoteVersion, IReadOnlyDictionary<Guid, decimal> memberQuotedAmounts, string currency, CancellationToken ct = default)
+        => await MutateAsync(cartId, vm =>
+        {
+            vm.QuoteVersion = quoteVersion;
+            foreach (var m in vm.Members)
+            {
+                if (memberQuotedAmounts.TryGetValue(m.UserId, out var q))
+                {
+                    m.QuotedAmount = q;
+                }
+                else
+                {
+                    m.QuotedAmount = 0m;
+                }
+            }
+        }, "quote_updated");
+
     private async Task MutateAsync(TeamCartId cartId, Action<TeamCartViewModel> mutate, string updateType)
     {
         var key = Key(cartId);
@@ -279,6 +296,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             TaxAmount = s.TaxAmount,
             Total = s.Total,
             CashOnDeliveryPortion = s.CashOnDeliveryPortion,
+            QuoteVersion = s.QuoteVersion,
             Version = s.Version,
             Members = s.Members.Select(m => new TeamCartViewModel.Member
             {
@@ -287,7 +305,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 Role = m.Role,
                 PaymentStatus = m.PaymentStatus,
                 CommittedAmount = m.CommittedAmount,
-                OnlineTransactionId = m.OnlineTransactionId
+                OnlineTransactionId = m.OnlineTransactionId,
+                QuotedAmount = m.QuotedAmount
             }).ToList(),
             Items = s.Items.Select(i => new TeamCartViewModel.Item
             {
@@ -328,6 +347,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             TaxAmount = v.TaxAmount,
             Total = v.Total,
             CashOnDeliveryPortion = v.CashOnDeliveryPortion,
+            QuoteVersion = v.QuoteVersion,
             Version = v.Version,
             Members = v.Members.Select(m => new RedisVm.Member
             {
@@ -336,7 +356,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 Role = m.Role,
                 PaymentStatus = m.PaymentStatus,
                 CommittedAmount = m.CommittedAmount,
-                OnlineTransactionId = m.OnlineTransactionId
+                OnlineTransactionId = m.OnlineTransactionId,
+                QuotedAmount = m.QuotedAmount
             }).ToList(),
             Items = v.Items.Select(i => new RedisVm.Item
             {
@@ -376,6 +397,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         public decimal Total { get; set; }
         public decimal CashOnDeliveryPortion { get; set; }
         public long Version { get; set; }
+        public long QuoteVersion { get; set; }
         public List<Member> Members { get; set; } = new();
         public List<Item> Items { get; set; } = new();
 
@@ -387,6 +409,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             public string PaymentStatus { get; set; } = "Pending";
             public decimal CommittedAmount { get; set; }
             public string? OnlineTransactionId { get; set; }
+            public decimal QuotedAmount { get; set; }
         }
 
         public sealed class Item

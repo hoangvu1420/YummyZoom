@@ -59,17 +59,23 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
                 return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.UserNotMember);
             }
 
-            // Compute the member's total using the cart's currency
-            var memberTotal = new Money(
-                cart.Items.Where(i => i.AddedByUserId == userId).Sum(i => i.LineItemTotal.Amount),
-                cart.TipAmount.Currency);
+            // Use quoted per-member total (Quote Lite)
+            var quoted = cart.GetMemberQuote(userId);
+            if (quoted.IsFailure)
+            {
+                _logger.LogWarning("No quote available for user {UserId} on TeamCart {TeamCartId}", userId.Value, request.TeamCartId);
+                return Result.Failure<InitiateMemberOnlinePaymentResponse>(quoted.Error);
+            }
+            var memberTotal = quoted.Value;
 
             // Create payment intent with teamcart metadata; do not mutate aggregate
             var metadata = new Dictionary<string, string>
             {
                 ["source"] = "teamcart",
                 ["teamcart_id"] = cart.Id.Value.ToString(),
-                ["member_user_id"] = userId.Value.ToString()
+                ["member_user_id"] = userId.Value.ToString(),
+                ["quote_version"] = cart.QuoteVersion.ToString(),
+                ["quoted_cents"] = ((long)Math.Round(memberTotal.Amount * 100m, 0, System.MidpointRounding.AwayFromZero)).ToString()
             };
 
             var intentResult = await _paymentGatewayService.CreatePaymentIntentAsync(
@@ -92,5 +98,4 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
         }, cancellationToken);
     }
 }
-
 

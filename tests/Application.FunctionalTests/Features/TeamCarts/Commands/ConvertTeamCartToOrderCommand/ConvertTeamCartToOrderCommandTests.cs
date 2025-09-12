@@ -45,6 +45,35 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
     }
 
     [Test]
+    public async Task Convert_Should_Fail_WhenPaidSumNotEqualToGrandTotal()
+    {
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        var scenario = await TeamCartTestBuilder
+            .Create(restaurantId)
+            .WithHost("Host")
+            .WithGuest("Guest")
+            .BuildAsync();
+
+        await scenario.ActAsHost();
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        await DrainOutboxAsync();
+
+        // Do not pay/commit for guest so sum != GrandTotal
+        var convert = await SendAsync(new Application.TeamCarts.Commands.ConvertTeamCartToOrder.ConvertTeamCartToOrderCommand(
+            scenario.TeamCartId,
+            Street: "123 Main St",
+            City: "City",
+            State: "CA",
+            ZipCode: "90210",
+            Country: "US",
+            SpecialInstructions: "Leave at door"));
+
+        convert.IsFailure.Should().BeTrue();
+    }
+
+    [Test]
     public async Task Convert_WithCoupon_Should_ApplyDiscount_AndSucceed()
     {
         var restaurantId = Testing.TestData.DefaultRestaurantId;
@@ -191,5 +220,4 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
             .Should().ThrowAsync<ForbiddenAccessException>();
     }
 }
-
 

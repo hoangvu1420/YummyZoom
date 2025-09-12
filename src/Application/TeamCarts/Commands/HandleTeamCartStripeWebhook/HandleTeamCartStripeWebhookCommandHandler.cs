@@ -51,6 +51,8 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
 
             metadata.TryGetValue("teamcart_id", out var teamCartIdStr);
             metadata.TryGetValue("member_user_id", out var memberUserIdStr);
+            metadata.TryGetValue("quote_version", out var quoteVersionStr);
+            metadata.TryGetValue("quoted_cents", out var quotedCentsStr);
 
             _logger.LogInformation("Webhook verified. EventId={EventId} Type={EventType} ObjectId={ObjectId} TeamCartId={TeamCartId} MemberUserId={MemberUserId}",
                 webhookEvent.EventId, webhookEvent.EventType, webhookEvent.RelevantObjectId, teamCartIdStr, memberUserIdStr);
@@ -90,10 +92,21 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
                 return Result.Success();
             }
 
+            // Quote version validation (MVP policy): if mismatch, ack and no-op
+            if (!string.IsNullOrWhiteSpace(quoteVersionStr) && long.TryParse(quoteVersionStr, out var quotedVersion))
+            {
+                if (cart.QuoteVersion != quotedVersion)
+                {
+                    _logger.LogInformation("Stale webhook for TeamCart {CartId}: intent version {IntentVersion} != cart version {CartVersion}", cart.Id.Value, quotedVersion, cart.QuoteVersion);
+                    await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
+                    return Result.Success();
+                }
+            }
+
             // 4) Process event types
             Result processingResult = webhookEvent.EventType switch
             {
-                "payment_intent.succeeded" => HandleSucceeded(cart, memberUserId, webhookEvent.RelevantObjectId),
+                "payment_intent.succeeded" => HandleSucceeded(cart, memberUserId, webhookEvent.RelevantObjectId, quotedCentsStr),
                 "payment_intent.payment_failed" => HandleFailed(cart, memberUserId, webhookEvent.RelevantObjectId),
                 _ => Result.Success()
             };
@@ -116,13 +129,26 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
         }, cancellationToken);
     }
 
-    private Result HandleSucceeded(Domain.TeamCartAggregate.TeamCart cart, Domain.UserAggregate.ValueObjects.UserId memberUserId, string paymentGatewayReferenceId)
+    private Result HandleSucceeded(Domain.TeamCartAggregate.TeamCart cart, Domain.UserAggregate.ValueObjects.UserId memberUserId, string paymentGatewayReferenceId, string? quotedCentsStr)
     {
-        // Amount cross-check: recompute from items
-        var currency = cart.TipAmount.Currency;
-        var amount = new Money(cart.Items.Where(i => i.AddedByUserId == memberUserId).Sum(i => i.LineItemTotal.Amount), currency);
+        // Amount cross-check against quoted per-member total
+        var quoted = cart.GetMemberQuote(memberUserId);
+        if (quoted.IsFailure)
+        {
+            return Result.Failure(quoted.Error);
+        }
+        var expected = quoted.Value;
 
-        var result = cart.RecordSuccessfulOnlinePayment(memberUserId, amount, paymentGatewayReferenceId);
+        if (!string.IsNullOrWhiteSpace(quotedCentsStr) && long.TryParse(quotedCentsStr, out var cents))
+        {
+            var expectedCents = (long)Math.Round(expected.Amount * 100m, 0, System.MidpointRounding.AwayFromZero);
+            if (cents != expectedCents)
+            {
+                return Result.Failure(TeamCartErrors.InvalidPaymentAmount);
+            }
+        }
+
+        var result = cart.RecordSuccessfulOnlinePayment(memberUserId, expected, paymentGatewayReferenceId);
         return result.IsSuccess ? Result.Success() : Result.Failure(result.Error);
     }
 
@@ -148,4 +174,3 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
-

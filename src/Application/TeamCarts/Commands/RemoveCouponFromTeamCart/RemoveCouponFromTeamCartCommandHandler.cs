@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
@@ -14,16 +15,19 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
     private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RemoveCouponFromTeamCartCommandHandler> _logger;
+    private readonly ITeamCartStore _teamCartStore;
 
     public RemoveCouponFromTeamCartCommandHandler(
         ITeamCartRepository teamCartRepository,
         IUser currentUser,
         IUnitOfWork unitOfWork,
+        ITeamCartStore teamCartStore,
         ILogger<RemoveCouponFromTeamCartCommandHandler> logger)
     {
         _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _teamCartStore = teamCartStore ?? throw new ArgumentNullException(nameof(teamCartStore));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -49,7 +53,22 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
                 return Result.Failure(removeResult.Error);
             }
 
+            // Recompute Quote Lite with zero discount
+            var currency = cart.TipAmount.Currency;
+            var memberSubtotals = cart.Items
+                .GroupBy(i => i.AddedByUserId)
+                .ToDictionary(g => g.Key, g => new Money(g.Sum(x => x.LineItemTotal.Amount), currency));
+
+            var feesTotal = new Money(2.99m, currency); // MVP placeholder
+            var tipAmount = cart.TipAmount;
+            var taxAmount = new Money(0m, currency); // MVP placeholder
+            var discount = new Money(0m, currency);
+
+            cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
+
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
+            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
+                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Removed coupon from TeamCart. CartId={CartId} HostUserId={UserId}",
                 request.TeamCartId, userId.Value);
@@ -58,4 +77,3 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
         }, cancellationToken);
     }
 }
-

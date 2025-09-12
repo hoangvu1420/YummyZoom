@@ -43,6 +43,53 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
     }
 
     [Test]
+    public async Task Lock_SetsQuote_InVm_AndInitiate_UsesQuotedAmount_AndMetadata()
+    {
+        var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
+            .WithHost("Host User")
+            .WithMultipleGuests("Guest A")
+            .BuildAsync();
+
+        await DrainOutboxAsync();
+
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+
+        await scenario.ActAsHost();
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).ShouldBeSuccessful();
+        await DrainOutboxAsync();
+
+        await scenario.ActAsGuest("Guest A");
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).ShouldBeSuccessful();
+        await DrainOutboxAsync();
+
+        await scenario.ActAsHost();
+        (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
+        await DrainOutboxAsync();
+
+        // Inspect VM for quote fields
+        var vm = await GetTeamCartVmAsync(scenario.TeamCartId);
+        vm.TeamCart.QuoteVersion.Should().BeGreaterThan(0);
+        vm.TeamCart.Members.Should().OnlyContain(m => m.QuotedAmount >= 0);
+
+        // Initiate as host and verify Stripe metadata/amount
+        await scenario.ActAsHost();
+        var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
+        initiate.ShouldBeSuccessful();
+        var intent = await new PaymentIntentService().GetAsync(initiate.Value.PaymentIntentId);
+        intent.Metadata.Should().ContainKey("teamcart_id");
+        intent.Metadata.Should().ContainKey("member_user_id");
+        intent.Metadata.Should().ContainKey("quote_version");
+        intent.Metadata.Should().ContainKey("quoted_cents");
+    }
+
+    private static async Task<YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel.GetTeamCartRealTimeViewModelResponse> GetTeamCartVmAsync(Guid teamCartId)
+    {
+        var resp = await SendAsync(new YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel.GetTeamCartRealTimeViewModelQuery(teamCartId));
+        resp.ShouldBeSuccessful();
+        return resp.Value;
+    }
+    
+    [Test]
     public async Task CreateAndPayAllMembers_WithStripe_SucceedsAndConverts()
     {
         // Arrange: 1 host + 2 guests
@@ -101,16 +148,21 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         // Process Stripe webhooks for each member intent
         async Task ProcessSucceededAsync(string paymentIntentId, Guid memberUserId)
         {
+            var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+            var quoted = cart!.MemberTotals.First(kv => kv.Key.Value == memberUserId).Value.Amount;
+            var quotedCents = (long)Math.Round(quoted * 100m, 0, MidpointRounding.AwayFromZero);
             var payload = PaymentTestHelper.GenerateWebhookPayload(
                 TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
                 paymentIntentId,
-                amount: 1000,
+                amount: quotedCents,
                 currency: "usd",
                 metadata: new Dictionary<string, string>
                 {
                     ["source"] = "teamcart",
                     ["teamcart_id"] = scenario.TeamCartId.ToString(),
-                    ["member_user_id"] = memberUserId.ToString()
+                    ["member_user_id"] = memberUserId.ToString(),
+                    ["quote_version"] = cart.QuoteVersion.ToString(),
+                    ["quoted_cents"] = quotedCents.ToString()
                 });
 
             var signature = PaymentTestHelper.GenerateWebhookSignature(payload, _stripeOptions.WebhookSecret);
