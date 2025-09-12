@@ -32,6 +32,7 @@ This document describes the TeamCart functionality as implemented today: lifecyc
 ## 4) Status transitions & domain events (selected)
 
 - LockForPayment (Host, Open → Locked) → TeamCartLockedForPayment domain event.
+- Quote recomputation (Lock/Tip/Coupon add/remove) → TeamCartQuoteUpdated domain event used to project QuoteVersion and per-member quoted amounts to the VM.
 - MemberCommittedToPayment (COD) or OnlinePaymentSucceeded (Online) recorded; when all members have completed their payment path, aggregate transitions to ReadyToConfirm and raises TeamCartReadyForConfirmation.
 - Conversion marks cart Converted; expiration marks cart Expired.
 
@@ -44,11 +45,11 @@ This document describes the TeamCart functionality as implemented today: lifecyc
   - Updates SQL aggregate; realtime VM updated via outbox handlers for items.
 - LockTeamCartForPayment (Host)
   - Requires non-empty cart, Open status; sets status Locked.
-  - Computes Quote Lite (see section 6) and persists; updates Redis VM (QuoteVersion, QuotedAmount).
+  - Computes Quote Lite (see section 6) and persists; emits TeamCartQuoteUpdated; VM updated by outbox handler (sets QuoteVersion, member QuotedAmount).
 - ApplyTipToTeamCart (Host)
-  - Locked only; persists tip; recomputes Quote Lite; updates Redis VM.
+  - Locked only; persists tip; recomputes Quote Lite; emits TeamCartQuoteUpdated; VM updated by outbox handler.
 - ApplyCouponToTeamCart / RemoveCouponFromTeamCart (Host)
-  - Locked only; validates coupon existence, window, limits (final limits also enforced on conversion); recomputes Quote Lite; updates Redis VM.
+  - Locked only; validates coupon existence, window, limits (final limits also enforced on conversion); recomputes Quote Lite; emits TeamCartQuoteUpdated; VM updated by outbox handler.
 - InitiateMemberOnlinePayment (Member)
   - Locked only; amount = quoted per-member total (GetMemberQuote current user); creates PaymentIntent with metadata: source=teamcart, teamcart_id, member_user_id, quote_version, quoted_cents.
 - CommitToCodPayment (Member)
@@ -56,7 +57,7 @@ This document describes the TeamCart functionality as implemented today: lifecyc
 
 ## 6) Quote Lite (Even Split, Versioned)
 
-- When: computed at Lock, and on tip/coupon add/remove.
+- When: computed at Lock, and on tip/coupon add/remove; raises TeamCartQuoteUpdated.
 - Participants: members with item subtotal > 0.
 - Components (MVP):
   - SubtotalAfterItemDiscounts = sum of members’ item subtotals (line-level discounts already applied).
@@ -95,7 +96,7 @@ This document describes the TeamCart functionality as implemented today: lifecyc
 
 - View model fields (selected): Status, Members (PaymentStatus, CommittedAmount, OnlineTransactionId, QuotedAmount), Subtotal/Tip/Discount/Total, QuoteVersion.
 - Store operations: create on TeamCartCreated, SetLocked/ApplyTip/Apply/RemoveCoupon/Item mutations, RecordOnlinePayment/Failure, CommitCod, UpdateQuote.
-- UpdateQuoteAsync(cartId, quoteVersion, memberQuotedAmounts): sets QuoteVersion and members’ QuotedAmount.
+- UpdateQuoteAsync(cartId, quoteVersion, memberQuotedAmounts): sets QuoteVersion and members’ QuotedAmount; invoked by TeamCartQuoteUpdated handler, with version guard to skip stale updates.
 
 ## 10) Web (Endpoints & Hub)
 
@@ -122,7 +123,7 @@ This document describes the TeamCart functionality as implemented today: lifecyc
 
 - Unit tests: validate aggregate invariants and Quote Lite splitting + versioning.
 - Functional tests (Application.FunctionalTests): end-to-end flows, Stripe-backed online payments, webhook validation, conversion success/failure conditions.
-- Use `Testing.DrainOutboxAsync()` between steps involving domain events and VM updates.
+- Use `Testing.DrainOutboxAsync()` between steps involving domain events and VM updates (including quote updates via TeamCartQuoteUpdated).
 - Stripe tests guarded with `[Category("StripeIntegration")]` and skipped if secrets missing.
 
 ## 14) Operational & Observability
@@ -134,10 +135,9 @@ This document describes the TeamCart functionality as implemented today: lifecyc
 ## 15) Known MVP Simplifications
 
 - FeesTotal and TaxAmount are placeholder values in handlers (2.99 and 0.00); can be replaced by service/policy-based calculators.
-- VM quote updates executed directly from command handlers (could move to idempotent outbox event handlers).
+- VM quote updates now flow via idempotent outbox event handlers (TeamCartQuoteUpdated) rather than direct command handler updates.
 - Quote snapshot persisted as aggregate columns + jsonb list, not a separate normalized table.
 
 ---
 
 This spec reflects the current, working TeamCart with Quote Lite financials, suitable for client integration and continued iteration (e.g., richer fee/tax calculators, event-driven VM updates, and expanded test coverage).
-

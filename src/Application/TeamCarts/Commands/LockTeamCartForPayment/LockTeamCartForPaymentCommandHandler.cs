@@ -86,13 +86,11 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
-            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
-                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("TeamCart locked for payment. CartId={CartId} HostUserId={UserId} Status={Status}",
                 request.TeamCartId, userId.Value, cart.Status);
 
-            // Redis VM update is handled by domain event handler for TeamCartLockedForPayment in a later step.
+            // VM quote update will be handled by TeamCartQuoteUpdated outbox event handler.
             return Result.Success();
         }, cancellationToken);
     }

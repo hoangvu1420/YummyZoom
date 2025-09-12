@@ -76,6 +76,33 @@
 
 ---
 
+### 👥 **TeamCart (Group Order) — Customer**
+
+#### 1. Create & Share (New)
+
+* Host creates a shared cart with optional deadline and note.
+* Share join link/token with friends to collaborate.
+
+#### 2. Join & Contribute
+
+* Members join via link, add items with normal customizations.
+* See per-member and cart totals update in real time.
+
+#### 3. Lock & Pay
+
+* Host locks the cart to freeze items before payment.
+* Members pay their share online or commit Cash on Delivery (COD).
+* Host can apply tip and a cart-level coupon.
+
+#### 4. Convert to Order
+
+* When everyone has paid/committed, host converts TeamCart into a single order.
+* Payments are reconciled; restaurant receives a normal order.
+
+#### 5. Real-time Updates
+
+* Live updates via realtime hub for joins, item changes, lock, and payment status.
+
 ### 🛠️ **Admin / Support Features**
 
 #### 1. Admin Dashboard
@@ -110,6 +137,7 @@
 | Profile & Auth | ✔️                                | ✔️                    | ✔️                                 |
 | Menu           | View                              | Create & Edit         | Moderate                           |
 | Order          | Place, track, review              | Accept, update status | Monitor & override                 |
+| TeamCart       | Create/join, add items, pay       | Receives order after conversion | Monitor & override                 |
 | Coupon         | Apply promo code                  | Create/manage coupons | Monitor usage                      |
 | Reviews        | Submit/view reviews               | View feedback         | Moderate content                   |
 | Payment        | Mock/real payments, apply coupons | View revenue          | Monitor, trigger refunds           |

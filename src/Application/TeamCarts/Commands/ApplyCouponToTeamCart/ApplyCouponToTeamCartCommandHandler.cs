@@ -124,13 +124,11 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
-            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
-                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Applied coupon to TeamCart. CartId={CartId} HostUserId={UserId} CouponCode={CouponCode}",
                 request.TeamCartId, userId.Value, request.CouponCode);
 
-            // VM update will be handled by dedicated event handler if/when we add CouponApplied events.
+            // VM quote update will be handled by TeamCartQuoteUpdated outbox event handler.
             return Result.Success();
         }, cancellationToken);
     }

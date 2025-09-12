@@ -67,8 +67,6 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
-            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
-                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Removed coupon from TeamCart. CartId={CartId} HostUserId={UserId}",
                 request.TeamCartId, userId.Value);

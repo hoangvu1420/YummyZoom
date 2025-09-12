@@ -87,13 +87,11 @@ public sealed class ApplyTipToTeamCartCommandHandler : IRequestHandler<ApplyTipT
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
-            await _teamCartStore.UpdateQuoteAsync(cart.Id, cart.QuoteVersion,
-                cart.MemberTotals.ToDictionary(k => k.Key.Value, v => v.Value.Amount), currency, cancellationToken);
 
             _logger.LogInformation("Applied tip to TeamCart. CartId={CartId} HostUserId={UserId} Tip={Tip}",
                 request.TeamCartId, userId.Value, request.TipAmount);
 
-            // VM update will be handled by a domain event handler if/when we raise a TipApplied event.
+            // VM quote update will be handled by TeamCartQuoteUpdated outbox event handler.
             return Result.Success();
         }, cancellationToken);
     }

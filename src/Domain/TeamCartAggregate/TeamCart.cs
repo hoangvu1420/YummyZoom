@@ -900,6 +900,10 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         QuoteVersion = (QuoteVersion <= 0 ? 1 : QuoteVersion + 1);
         GrandTotal = grandTotal;
 
+        // Emit domain event with computed quote for outbox-driven VM update
+        var memberQuoted = _memberTotals.ToDictionary(kv => kv.Key.Value, kv => kv.Value.Amount);
+        AddDomainEvent(new TeamCartQuoteUpdated(Id, QuoteVersion, memberQuoted, currency));
+
         return Result.Success();
     }
 
