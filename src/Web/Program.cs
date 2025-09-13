@@ -2,6 +2,7 @@ using YummyZoom.Application;
 using YummyZoom.Infrastructure;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Web;
+using YummyZoom.Web.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,7 @@ app.MapDefaultEndpoints();
 
 // Map versioned endpoints.
 app.MapVersionedEndpoints();
+
 
 // Map SignalR hubs
 app.MapHub<YummyZoom.Web.Realtime.Hubs.RestaurantOrdersHub>("/hubs/restaurant-orders");

@@ -250,7 +250,8 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             CouponId? appliedCouponId = null;
             if (!string.IsNullOrEmpty(request.CouponCode))
             {
-                var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode, restaurantId, cancellationToken);
+                var normalizedCouponCode = request.CouponCode.Trim().ToUpperInvariant();
+                var coupon = await _couponRepository.GetByCodeAsync(normalizedCouponCode, restaurantId, cancellationToken);
                 
                 if (coupon is not null)
                 {
@@ -264,30 +265,18 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
                         return Result.Failure<InitiateOrderResponse>(validationResult.Error);
                     }
 
-                    // 2) Atomically enforce per-user usage limit
-                    var perUserIncOk = await _couponRepository.TryIncrementUserUsageCountAsync(
-                        coupon.Id, customerId, coupon.UsageLimitPerUser, cancellationToken);
+                    // 2-3) Finalize usage (per-user + total) and enqueue outbox event in the same transaction
+                    var finalizeOk = await _couponRepository.FinalizeUsageAsync(
+                        coupon.Id,
+                        customerId,
+                        coupon.UsageLimitPerUser,
+                        cancellationToken);
 
-                    if (!perUserIncOk)
+                    if (!finalizeOk)
                     {
-                        _logger.LogWarning("Per-user usage limit reached for coupon {CouponCode} by user {UserId}", request.CouponCode, customerId.Value);
-                        return Result.Failure<InitiateOrderResponse>(CouponErrors.UserUsageLimitExceeded);
-                    }
-
-                    // 3) Atomically enforce total usage limit
-                    var totalIncOk = await _couponRepository.TryIncrementUsageCountAsync(coupon.Id, cancellationToken);
-
-                    if (!totalIncOk)
-                    {
-                        _logger.LogWarning("Failed to apply coupon {CouponCode}: usage limit reached during atomic increment.", request.CouponCode);
+                        _logger.LogWarning("Failed to finalize coupon usage for {CouponCode}; limits exhausted or concurrency conflict.", request.CouponCode);
                         return Result.Failure<InitiateOrderResponse>(CouponErrors.UsageLimitExceeded);
                     }
-
-                    // 4) Publish coupon used domain event // TODO: Enhance later to avoid race conditions with the Outbox
-                    var previousCount = coupon.CurrentTotalUsageCount;
-                    var newCount = previousCount + 1;
-                    var couponUsedEvent = new CouponUsed(coupon.Id, previousCount, newCount, DateTime.UtcNow);
-                    await _mediator.Publish(couponUsedEvent, cancellationToken);
 
                     discountAmount = validationResult.Value;
                     appliedCouponId = coupon.Id;

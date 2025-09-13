@@ -5,6 +5,8 @@ using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Persistence.Repositories;
 
@@ -27,6 +29,20 @@ public class CouponRepository : ICouponRepository
     {
         return await _dbContext.Coupons
             .FirstOrDefaultAsync(c => c.Id == couponId, cancellationToken);
+    }
+
+    public async Task<List<Coupon>> GetActiveByRestaurantAsync(
+        RestaurantId restaurantId,
+        DateTime nowUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Coupons
+            .Where(c => c.RestaurantId == restaurantId
+                        && !c.IsDeleted
+                        && c.IsEnabled
+                        && c.ValidityStartDate <= nowUtc
+                        && c.ValidityEndDate >= nowUtc)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<int> GetUserUsageCountAsync(CouponId couponId, UserId userId, CancellationToken cancellationToken = default)
@@ -97,6 +113,60 @@ public class CouponRepository : ICouponRepository
                 cancellationToken);
             return rows == 1;
         }
+    }
+
+    public async Task<bool> FinalizeUsageAsync(
+        CouponId couponId,
+        UserId userId,
+        int? perUserLimit,
+        CancellationToken cancellationToken = default)
+    {
+        // 1) Per-user increment with optional cap
+        var perUserOk = await TryIncrementUserUsageCountAsync(couponId, userId, perUserLimit, cancellationToken);
+        if (!perUserOk)
+        {
+            return false;
+        }
+
+        // 2) Total usage increment with cap
+        var totalOk = await TryIncrementUsageCountAsync(couponId, cancellationToken);
+        if (!totalOk)
+        {
+            return false;
+        }
+
+        // 3) Load new total count for event payload
+        var newCount = await _dbContext.Coupons
+            .Where(c => c.Id == couponId)
+            .Select(c => c.CurrentTotalUsageCount)
+            .FirstAsync(cancellationToken);
+
+        var previousCount = Math.Max(0, newCount - 1);
+
+        // 4) Enqueue outbox message for CouponUsed domain event
+        var evt = new Domain.CouponAggregate.Events.CouponUsed(
+            couponId,
+            previousCount,
+            newCount,
+            DateTime.UtcNow);
+
+        var content = System.Text.Json.JsonSerializer.Serialize(
+            evt,
+            evt.GetType(),
+            OutboxJson.Options);
+
+        var outbox = OutboxMessage.FromDomainEvent(
+            evt.GetType().AssemblyQualifiedName!,
+            content,
+            DateTime.UtcNow,
+            correlationId: null,
+            causationId: null,
+            aggregateId: couponId.Value.ToString(),
+            aggregateType: nameof(Coupon));
+
+        await _dbContext.Set<OutboxMessage>().AddAsync(outbox, cancellationToken);
+
+        return true;
     }
 
     public async Task AddAsync(Coupon coupon, CancellationToken cancellationToken = default)

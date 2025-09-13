@@ -95,19 +95,13 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
                 }
                 discount = discountResult.Value;
 
-                // Atomically enforce usage limits prior to conversion
-                var perUserIncOk = await _couponRepository.TryIncrementUserUsageCountAsync(
+                // Atomically finalize usage limits and enqueue outbox event
+                var finalized = await _couponRepository.FinalizeUsageAsync(
                     coupon.Id,
                     cart.HostUserId,
                     coupon.UsageLimitPerUser,
                     cancellationToken);
-                if (!perUserIncOk)
-                {
-                    return Result.Failure<ConvertTeamCartToOrderResponse>(Domain.CouponAggregate.Errors.CouponErrors.UserUsageLimitExceeded);
-                }
-
-                var totalIncOk = await _couponRepository.TryIncrementUsageCountAsync(coupon.Id, cancellationToken);
-                if (!totalIncOk)
+                if (!finalized)
                 {
                     return Result.Failure<ConvertTeamCartToOrderResponse>(Domain.CouponAggregate.Errors.CouponErrors.UsageLimitExceeded);
                 }

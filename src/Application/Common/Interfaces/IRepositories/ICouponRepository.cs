@@ -12,6 +12,8 @@ public interface ICouponRepository
     Task<int> GetUserUsageCountAsync(CouponId couponId, UserId userId, CancellationToken cancellationToken = default);
     Task<bool> TryIncrementUsageCountAsync(CouponId couponId, CancellationToken cancellationToken = default);
     Task<bool> TryIncrementUserUsageCountAsync(CouponId couponId, UserId userId, int? perUserLimit, CancellationToken cancellationToken = default);
+    Task<List<Coupon>> GetActiveByRestaurantAsync(RestaurantId restaurantId, DateTime nowUtc, CancellationToken cancellationToken = default);
+    Task<bool> FinalizeUsageAsync(CouponId couponId, UserId userId, int? perUserLimit, CancellationToken cancellationToken = default);
     Task AddAsync(Coupon coupon, CancellationToken cancellationToken = default);
     void Update(Coupon coupon);
 }

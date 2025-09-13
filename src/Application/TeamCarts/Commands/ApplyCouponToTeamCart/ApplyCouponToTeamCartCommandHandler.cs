@@ -55,7 +55,8 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
             }
 
             // Resolve coupon by code within the same restaurant as the cart
-            var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode, cart.RestaurantId, cancellationToken);
+            var normalizedCouponCode = request.CouponCode.Trim().ToUpperInvariant();
+            var coupon = await _couponRepository.GetByCodeAsync(normalizedCouponCode, cart.RestaurantId, cancellationToken);
             if (coupon is null)
             {
                 _logger.LogWarning("Coupon {CouponCode} not found for restaurant {RestaurantId}", request.CouponCode, cart.RestaurantId.Value);
