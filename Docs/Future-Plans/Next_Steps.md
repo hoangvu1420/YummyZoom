@@ -109,15 +109,9 @@
   - Tests (unit + functional, and integration if infra touched).
   - Observability hooks and docs update.
 
-- Quick wins to start this week
-  - Implement `InitiateOrderCommand`, `HandleStripeWebhookCommand`, and restaurant SignalR notifications.
-  - Implement `CouponUsage` read model handler and `RestaurantAccount.RecordRevenue` handler.
-  - Expose minimal endpoints for order placement and status tracking.
-
 Status update:
 - Read core design docs in `Docs/Architecture/Domain_Design.md`, `Docs/Architecture/Database_Schema.md`, and feature discovery for `User`, `Order`, `TeamCart`, plus `Restaurant` aggregate doc to align scope.
 - Outlined a phased, testable roadmap focusing first on the customer ordering journey, then menu and TeamCart, then user/admin, then reviews/support.
 - Ready to start Phase 1 with incremental edits and brief checkpoints, aligning with your step-by-step preference.
 
 - We will keep EF configs using field access for collections to respect encapsulation.
-- I’ll proceed stepwise and review between steps; say the word and I’ll begin with Orders Phase 1 implementation.

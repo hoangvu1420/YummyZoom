@@ -5,6 +5,11 @@ using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
 using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.Application.Users.Commands.UnregisterDevice;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using MediatR;
+using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
+using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -79,5 +84,36 @@ public class Users : EndpointGroupBase
         .WithName("UnregisterDevice")
         .WithStandardResults()
         .RequireAuthorization();
+
+        // Phone OTP authentication endpoints
+        group.MapPost("/auth/otp/request", async ([FromBody] RequestPhoneOtpCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess ? Results.Accepted() : result.ToIResult();
+        })
+        .WithName("Auth_Otp_Request")
+        .WithStandardResults()
+        .AllowAnonymous();
+
+        group.MapPost("/auth/otp/verify", async (
+            [FromBody] VerifyPhoneOtpCommand command,
+            ISender sender,
+            UserManager<ApplicationUser> users,
+            IUserClaimsPrincipalFactory<ApplicationUser> claimsFactory,
+            HttpContext http) =>
+        {
+            var result = await sender.Send(command);
+            if (!result.IsSuccess) return result.ToIResult();
+
+            var user = await users.FindByIdAsync(result.Value.IdentityUserId.ToString());
+            if (user is null) return Results.Unauthorized();
+
+            var principal = await claimsFactory.CreateAsync(user);
+            await http.SignInAsync(IdentityConstants.BearerScheme, principal);
+            return Results.Ok();
+        })
+        .WithName("Auth_Otp_Verify")
+        .WithStandardResults()
+        .AllowAnonymous();
     }
 }

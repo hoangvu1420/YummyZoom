@@ -77,6 +77,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
         builder.Entity<ProcessedWebhookEvent>().HasKey(e => e.Id);
 
+        // Unique phone number index for Identity users (nullable unique)
+        builder.Entity<ApplicationUser>()
+            .HasIndex(u => u.PhoneNumber)
+            .IsUnique()
+            .HasFilter("\"PhoneNumber\" IS NOT NULL");
+
         // Apply global query filters for soft delete
         ApplySoftDeleteQueryFilters(builder);
     }

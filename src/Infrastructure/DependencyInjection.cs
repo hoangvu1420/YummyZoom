@@ -111,6 +111,11 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, Identity.IdentityService>();
+
+        // Phone OTP + SMS + phone normalization
+        builder.Services.AddSingleton<IPhoneNumberNormalizer, Phone.DefaultPhoneNumberNormalizer>();
+        builder.Services.AddTransient<ISmsSender, Notifications.Sms.LoggingSmsSender>();
+        builder.Services.AddScoped<IPhoneOtpService, Identity.PhoneOtp.IdentityPhoneOtpService>();
     }
 
     private static void AddAuthorizationServices(this IHostApplicationBuilder builder)
@@ -321,4 +326,3 @@ public static class DependencyInjection
         }
     }
 }
-
