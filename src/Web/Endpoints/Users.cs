@@ -15,6 +15,9 @@ using MediatR;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
 using YummyZoom.Application.Auth.Commands.CompleteSignup;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -177,11 +180,8 @@ public class Users : EndpointGroupBase
             if (user is null) return Results.Unauthorized();
 
             var principal = await claimsFactory.CreateAsync(user);
-            await http.SignInAsync(IdentityConstants.BearerScheme, principal);
-            return Results.Ok(new {
-                isNewUser = result.Value.IsNewUser,
-                requiresOnboarding = result.Value.RequiresOnboarding
-            });
+            // Return a SignIn result so the BearerToken handler emits access/refresh tokens
+            return Results.SignIn(principal, authenticationScheme: IdentityConstants.BearerScheme);
         })
         .WithName("Auth_Otp_Verify")
         .WithSummary("Verify phone OTP code")
@@ -207,10 +207,46 @@ public class Users : EndpointGroupBase
 
         #endregion
 
+        #region Authentication – Status (Authenticated)
+
+        // GET /api/v1/users/auth/status
+        protectedGroup.MapGet("/auth/status", async (
+            IUser currentUser,
+            IUserAggregateRepository usersRepo,
+            CancellationToken ct) =>
+        {
+            if (currentUser.Id is null)
+            {
+                return Results.Unauthorized();
+            }
+
+            if (!Guid.TryParse(currentUser.Id, out var identityId))
+            {
+                return Results.BadRequest(new { code = "Auth.InvalidUserId", message = "Authenticated user id is invalid." });
+            }
+
+            var domainUserId = UserId.Create(identityId);
+            var existing = await usersRepo.GetByIdAsync(domainUserId, ct);
+            var isNew = existing is null;
+
+            return Results.Ok(new { isNewUser = isNew, requiresOnboarding = isNew });
+        })
+        .WithName("Auth_Status")
+        .WithSummary("Get authentication/onboarding status")
+        .WithDescription("Returns flags indicating whether the authenticated user has completed signup (i.e., domain user exists).")
+        .WithStandardResults()
+        .RequireAuthorization();
+
+        #endregion
+
         #region Legacy/Custom Registration (Public)
 
         // POST /api/v1/users/register-custom (legacy/custom entry)
         var customRegGroup = app.MapGroup(this);
+
+        // Keep other identity API endpoints
+        customRegGroup.MapIdentityApi<ApplicationUser>();
+
         customRegGroup.MapPost("/register-custom", async ([FromBody] RegisterUserCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
@@ -226,8 +262,6 @@ public class Users : EndpointGroupBase
         #endregion
     }
 }
-
-
 
 
 

@@ -72,9 +72,8 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
 - Request: `{ phoneNumber: string, code: string }`
 - Behavior:
   - Find Identity user by phone; verify token; confirm phone.
-  - Sign in using Identity Bearer scheme (issues session tokens).
-  - Compute onboarding flags by checking if Domain User exists.
-- Response: `{ isNewUser: boolean, requiresOnboarding: boolean }`
+  - Returns a SignIn result for the Identity Bearer scheme which emits token JSON.
+- Response (Bearer token JSON): `{ access_token, refresh_token, token_type, expires_in, ... }`
 
 - Errors:
   - `Otp.Invalid` for bad/expired code.
@@ -94,9 +93,19 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
   - `Auth.Unauthorized` when unauthenticated.
   - Validation errors on name/email.
 
-### 4.4 Returning Login
+### 4.4 Auth Status
 
-- The same OTP verify step for existing users returns `{ isNewUser:false, requiresOnboarding:false }`.
+- Endpoint: `GET /users/auth/status` (Requires Authentication)
+- Behavior:
+  - Determines onboarding state by checking whether a Domain User exists for the current Identity user id.
+  - Response: `{ isNewUser: boolean, requiresOnboarding: boolean }` where `requiresOnboarding == isNewUser`.
+
+- Errors:
+  - `401 Unauthorized` when not authenticated.
+
+### 4.5 Returning Login
+
+- For existing users, after OTP verify returns tokens, calling `/users/auth/status` yields `{ isNewUser:false, requiresOnboarding:false }`.
 - Client can route directly to main experience.
 
 ## 5. Client Integration
@@ -104,14 +113,14 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
 ### 5.1 New User (First‑Time)
 
 1) `POST /users/auth/otp/request` → display SMS code input (or dev code).
-2) `POST /users/auth/otp/verify` → store bearer token/session; inspect flags.
-3) If `isNewUser`, call `POST /users/auth/complete-signup` with profile name/email.
+2) `POST /users/auth/otp/verify` → receive token JSON; store access/refresh tokens.
+3) `GET /users/auth/status` → if `isNewUser`, call `POST /users/auth/complete-signup` with profile name/email.
 4) Optionally prompt for address; navigate to home.
 
 ### 5.2 Returning User
 
-1) Request OTP → Verify OTP.
-2) Skip signup; navigate to home.
+1) Request OTP → Verify OTP (receive tokens).
+2) Call `GET /users/auth/status` → if `isNewUser:false`, navigate to home.
 
 ## 6. Authorization Model
 
@@ -196,6 +205,9 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
 
 - `POST /users/auth/otp/verify`
   - Body: `{ phoneNumber, code }`
+  - Response: `200 Bearer token JSON { access_token, refresh_token, ... }`
+
+- `GET /users/auth/status` (auth)
   - Response: `200 { isNewUser, requiresOnboarding }`
 
 - `POST /users/auth/complete-signup` (auth)
@@ -218,15 +230,15 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
 ### 16.1 New User
 1) Client → Request OTP (phone)
 2) Server → Ensure Identity user; send/generate code
-3) Client → Verify OTP (phone + code)
-4) Server → Confirm phone; sign in; check domain user → flags {new:true,onboard:true}
+3) Client → Verify OTP (phone + code) → receive tokens
+4) Client → Auth Status → {new:true,onboard:true}
 5) Client → Complete Signup (name, email?) with bearer auth
 6) Server → Create Domain User; OK
 7) Client → Optional profile/address → Home
 
 ### 16.2 Returning User
-1) Request OTP → Verify OTP
-2) Server → flags {new:false,onboard:false}; signed in
+1) Request OTP → Verify OTP → receive tokens
+2) Client → Auth Status → {new:false,onboard:false}
 3) Client → Home
 
 ## 17. Edge Cases
@@ -238,9 +250,9 @@ Out of scope: Restaurant staff/owner admin flows, payments account linking, soci
 
 ## 18. Testing Strategy
 
-- Functional tests (implemented):
-  - Signup Flow: onboarding flags, completing signup creates Domain User.
-  - Returning User: no onboarding required, profile endpoints work.
+-- Functional tests (implemented):
+  - Signup Flow: token issuance from OTP verify; status flags; completing signup creates Domain User.
+  - Returning User: verify + tokens; status indicates no onboarding; profile endpoints work.
   - Validation/Auth: invalid OTP, unauthorized signup, pre‑signup profile failure.
   - Integration: signup → address → profile aggregate matches.
 
@@ -259,4 +271,3 @@ Appendix A: Implementation Pointers
 - Key Commands: `RequestPhoneOtpCommand`, `VerifyPhoneOtpCommand`, `CompleteSignupCommand`, `CompleteProfileCommand`, `UpsertPrimaryAddressCommand`, `GetMyProfileQuery`.
 - Services: `IPhoneOtpService` (Identity/Static implementations), `IIdentityService`, `IUserAggregateRepository`, `IUnitOfWork`.
 - Policies: configured in `DependencyInjection.AddAuthenticationServices()`.
-
