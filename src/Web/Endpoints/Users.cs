@@ -18,14 +18,24 @@ using YummyZoom.Application.Auth.Commands.CompleteSignup;
 
 namespace YummyZoom.Web.Endpoints;
 
+/// <summary>
+/// User-focused endpoints for authentication, onboarding, self-service profile,
+/// addresses, devices, and role assignments. Base route resolves to /api/v1/users
+/// via versioned endpoint grouping.
+/// </summary>
 public class Users : EndpointGroupBase
 {
     public override void Map(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup(this);
+        // Authenticated user endpoints (default protected group)
+        var protectedGroup = app
+            .MapGroup(this)
+            .RequireAuthorization();
 
-        // Self-service profile endpoints
-        group.MapGet("/me", async (ISender sender) =>
+        #region Self-service Profile Endpoints (Authenticated)
+
+        // GET /api/v1/users/me
+        protectedGroup.MapGet("/me", async (ISender sender) =>
         {
             var result = await sender.Send(new GetMyProfileQuery());
             return result.IsSuccess
@@ -33,10 +43,13 @@ public class Users : EndpointGroupBase
                 : result.ToIResult();
         })
         .WithName("GetMyProfile")
+        .WithSummary("Get my profile")
+        .WithDescription("Returns the authenticated user's profile including name, email, phone, and primary address if available.")
         .WithStandardResults<GetMyProfileResponse>()
         .RequireAuthorization();
 
-        group.MapPut("/me/profile", async ([FromBody] CompleteProfileCommand command, ISender sender) =>
+        // PUT /api/v1/users/me/profile
+        protectedGroup.MapPut("/me/profile", async ([FromBody] CompleteProfileCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
             return result.IsSuccess
@@ -44,10 +57,13 @@ public class Users : EndpointGroupBase
                 : result.ToIResult();
         })
         .WithName("CompleteProfile")
+        .WithSummary("Update my profile")
+        .WithDescription("Updates the authenticated user's display name and optionally email. Requires that signup is completed (domain user exists).")
         .WithStandardResults()
         .RequireAuthorization();
 
-        group.MapPut("/me/address", async ([FromBody] UpsertPrimaryAddressCommand command, ISender sender) =>
+        // PUT /api/v1/users/me/address
+        protectedGroup.MapPut("/me/address", async ([FromBody] UpsertPrimaryAddressCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
             return result.IsSuccess
@@ -55,74 +71,77 @@ public class Users : EndpointGroupBase
                 : result.ToIResult();
         })
         .WithName("UpsertPrimaryAddress")
+        .WithSummary("Create or update my primary address")
+        .WithDescription("Creates or updates the authenticated user's primary address and returns its identifier.")
         .WithStandardResults()
         .RequireAuthorization();
 
-        // Add custom registration endpoint
-        group.MapPost("/register-custom", async ([FromBody] RegisterUserCommand command, ISender sender) =>
+        #endregion
+
+        #region Device Management (Authenticated)
+
+        // POST /api/v1/users/devices/register
+        protectedGroup.MapPost("/devices/register", async ([FromBody] RegisterDeviceCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
-            
-            return result.IsSuccess
-                ? Results.Ok(new RegisterUserResponse { UserId = result.Value })
-                : result.ToIResult();
+            return result.IsSuccess ? Results.NoContent() : result.ToIResult();
         })
-        .WithName("RegisterUserCustom")
-        .WithStandardResults<RegisterUserResponse>();
+        .WithName("RegisterDevice")
+        .WithSummary("Register my device for notifications")
+        .WithDescription("Registers a device token for push notifications for the authenticated user.")
+        .WithStandardResults()
+        .RequireAuthorization();
 
-        // Add endpoint for creating role assignments
-        group.MapPost("/role-assignments", async ([FromBody] CreateRoleAssignmentCommand command, ISender sender) =>
+        // POST /api/v1/users/devices/unregister
+        protectedGroup.MapPost("/devices/unregister", async ([FromBody] UnregisterDeviceCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
+            return result.IsSuccess ? Results.NoContent() : result.ToIResult();
+        })
+        .WithName("UnregisterDevice")
+        .WithSummary("Unregister my device")
+        .WithDescription("Removes a previously registered device token for the authenticated user.")
+        .WithStandardResults()
+        .RequireAuthorization();
 
-            return result.IsSuccess
-                ? Results.Ok(result.Value)
-                : result.ToIResult();
+        #endregion
+
+        #region Role Assignments (Management)
+
+        // POST /api/v1/users/role-assignments
+        var roleGroup = app.MapGroup(this); // Adjust authorization in future as needed
+        roleGroup.MapPost("/role-assignments", async ([FromBody] CreateRoleAssignmentCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("CreateRoleAssignment")
+        .WithSummary("Create a role assignment")
+        .WithDescription("Assigns a role to a user. Typically used by administrative flows.")
         .WithStandardResults<CreateRoleAssignmentResponse>();
 
-        // Add endpoint for removing role assignments
-        group.MapDelete("/role-assignments/{roleAssignmentId:guid}", async (Guid roleAssignmentId, ISender sender) =>
+        // DELETE /api/v1/users/role-assignments/{roleAssignmentId}
+        roleGroup.MapDelete("/role-assignments/{roleAssignmentId:guid}", async (Guid roleAssignmentId, ISender sender) =>
         {
             var command = new DeleteRoleAssignmentCommand(roleAssignmentId);
             var result = await sender.Send(command);
 
-            return result.IsSuccess
-                ? Results.NoContent()
-                : result.ToIResult();
+            return result.IsSuccess ? Results.NoContent() : result.ToIResult();
         })
         .WithName("DeleteRoleAssignment")
+        .WithSummary("Delete a role assignment")
+        .WithDescription("Removes a role assignment from a user. Typically used by administrative flows.")
         .WithStandardResults();
 
-        // Add endpoint for registering devices
-        group.MapPost("/devices/register", async ([FromBody] RegisterDeviceCommand command, ISender sender) =>
-        {
-            var result = await sender.Send(command);
+        #endregion
 
-            return result.IsSuccess
-                ? Results.NoContent()
-                : result.ToIResult();
-        })
-        .WithName("RegisterDevice")
-        .WithStandardResults()
-        .RequireAuthorization();
+        #region Authentication – Phone OTP (Public)
 
-        // Add endpoint for unregistering devices
-        group.MapPost("/devices/unregister", async ([FromBody] UnregisterDeviceCommand command, ISender sender) =>
-        {
-            var result = await sender.Send(command);
+        // Public endpoints (no authentication required)
+        var publicGroup = app.MapGroup(this);
 
-            return result.IsSuccess
-                ? Results.NoContent()
-                : result.ToIResult();
-        })
-        .WithName("UnregisterDevice")
-        .WithStandardResults()
-        .RequireAuthorization();
-
-        // Phone OTP authentication endpoints
-        group.MapPost("/auth/otp/request", async (
+        // POST /api/v1/users/auth/otp/request
+        publicGroup.MapPost("/auth/otp/request", async (
             [FromBody] RequestPhoneOtpCommand command,
             ISender sender,
             IHostEnvironment environment) =>
@@ -138,10 +157,13 @@ public class Users : EndpointGroupBase
             return Results.Accepted();
         })
         .WithName("Auth_Otp_Request")
+        .WithSummary("Request phone OTP code")
+        .WithDescription("Requests a one-time code for the provided phone number. In development, the code is returned in the response; in production a 202 Accepted is returned and the code is sent via SMS.")
         .WithStandardResults()
         .AllowAnonymous();
 
-        group.MapPost("/auth/otp/verify", async (
+        // POST /api/v1/users/auth/otp/verify
+        publicGroup.MapPost("/auth/otp/verify", async (
             [FromBody] VerifyPhoneOtpCommand command,
             ISender sender,
             UserManager<ApplicationUser> users,
@@ -162,18 +184,46 @@ public class Users : EndpointGroupBase
             });
         })
         .WithName("Auth_Otp_Verify")
+        .WithSummary("Verify phone OTP code")
+        .WithDescription("Verifies the one-time code and signs in the user. Returns onboarding flags indicating whether the client should complete signup.")
         .WithStandardResults()
         .AllowAnonymous();
 
-        // Complete signup after OTP for newly created identity users
-        group.MapPost("/auth/complete-signup", async ([FromBody] CompleteSignupCommand command, ISender sender) =>
+        #endregion
+
+        #region Authentication – Complete Signup (Authenticated)
+
+        // POST /api/v1/users/auth/complete-signup
+        protectedGroup.MapPost("/auth/complete-signup", async ([FromBody] CompleteSignupCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
             return result.IsSuccess ? Results.Ok() : result.ToIResult();
         })
         .WithName("CompleteSignup")
+        .WithSummary("Complete signup after OTP")
+        .WithDescription("Creates the Domain User record for the authenticated Identity user after a successful OTP verification. Idempotent if already completed.")
         .WithStandardResults()
         .RequireAuthorization();
+
+        #endregion
+
+        #region Legacy/Custom Registration (Public)
+
+        // POST /api/v1/users/register-custom (legacy/custom entry)
+        var customRegGroup = app.MapGroup(this);
+        customRegGroup.MapPost("/register-custom", async ([FromBody] RegisterUserCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess
+                ? Results.Ok(new RegisterUserResponse { UserId = result.Value })
+                : result.ToIResult();
+        })
+        .WithName("RegisterUserCustom")
+        .WithSummary("Register user (custom)")
+        .WithDescription("Legacy/custom registration endpoint retained for compatibility. Not used in the standard phone OTP flow.")
+        .WithStandardResults<RegisterUserResponse>();
+
+        #endregion
     }
 }
 
