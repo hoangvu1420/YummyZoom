@@ -1,4 +1,7 @@
-﻿using YummyZoom.Application.Users.Commands.RegisterUser;
+using YummyZoom.Application.Users.Commands.RegisterUser;
+using YummyZoom.Application.Users.Commands.CompleteProfile;
+using YummyZoom.Application.Users.Commands.UpsertPrimaryAddress;
+using YummyZoom.Application.Users.Queries.GetMyProfile;
 using YummyZoom.Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
@@ -6,10 +9,12 @@ using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
 using YummyZoom.Application.Users.Commands.RegisterDevice;
 using YummyZoom.Application.Users.Commands.UnregisterDevice;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication;
 using MediatR;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
+using YummyZoom.Application.Auth.Commands.CompleteSignup;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -19,8 +24,39 @@ public class Users : EndpointGroupBase
     {
         var group = app.MapGroup(this);
 
-        // Keep other identity API endpoints
-        group.MapIdentityApi<ApplicationUser>();
+        // Self-service profile endpoints
+        group.MapGet("/me", async (ISender sender) =>
+        {
+            var result = await sender.Send(new GetMyProfileQuery());
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : result.ToIResult();
+        })
+        .WithName("GetMyProfile")
+        .WithStandardResults<GetMyProfileResponse>()
+        .RequireAuthorization();
+
+        group.MapPut("/me/profile", async ([FromBody] CompleteProfileCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess
+                ? Results.NoContent()
+                : result.ToIResult();
+        })
+        .WithName("CompleteProfile")
+        .WithStandardResults()
+        .RequireAuthorization();
+
+        group.MapPut("/me/address", async ([FromBody] UpsertPrimaryAddressCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess
+                ? Results.Ok(new { addressId = result.Value })
+                : result.ToIResult();
+        })
+        .WithName("UpsertPrimaryAddress")
+        .WithStandardResults()
+        .RequireAuthorization();
 
         // Add custom registration endpoint
         group.MapPost("/register-custom", async ([FromBody] RegisterUserCommand command, ISender sender) =>
@@ -86,10 +122,20 @@ public class Users : EndpointGroupBase
         .RequireAuthorization();
 
         // Phone OTP authentication endpoints
-        group.MapPost("/auth/otp/request", async ([FromBody] RequestPhoneOtpCommand command, ISender sender) =>
+        group.MapPost("/auth/otp/request", async (
+            [FromBody] RequestPhoneOtpCommand command,
+            ISender sender,
+            IHostEnvironment environment) =>
         {
             var result = await sender.Send(command);
-            return result.IsSuccess ? Results.Accepted() : result.ToIResult();
+            if (!result.IsSuccess) return result.ToIResult();
+
+            if (environment.IsDevelopment())
+            {
+                return Results.Ok(new { code = result.Value.Code });
+            }
+
+            return Results.Accepted();
         })
         .WithName("Auth_Otp_Request")
         .WithStandardResults()
@@ -110,10 +156,28 @@ public class Users : EndpointGroupBase
 
             var principal = await claimsFactory.CreateAsync(user);
             await http.SignInAsync(IdentityConstants.BearerScheme, principal);
-            return Results.Ok();
+            return Results.Ok(new {
+                isNewUser = result.Value.IsNewUser,
+                requiresOnboarding = result.Value.RequiresOnboarding
+            });
         })
         .WithName("Auth_Otp_Verify")
         .WithStandardResults()
         .AllowAnonymous();
+
+        // Complete signup after OTP for newly created identity users
+        group.MapPost("/auth/complete-signup", async ([FromBody] CompleteSignupCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess ? Results.Ok() : result.ToIResult();
+        })
+        .WithName("CompleteSignup")
+        .WithStandardResults()
+        .RequireAuthorization();
     }
 }
+
+
+
+
+

@@ -25,6 +25,7 @@ using YummyZoom.Infrastructure.Caching.Distributed;
 using YummyZoom.Infrastructure.Caching.Memory;
 using YummyZoom.Infrastructure.Caching.Serialization;
 using YummyZoom.Infrastructure.Identity;
+using YummyZoom.Infrastructure.Identity.PhoneOtp;
 using YummyZoom.Infrastructure.Messaging.Invalidation;
 using YummyZoom.Infrastructure.Messaging.Outbox;
 using YummyZoom.Infrastructure.Notifications.Firebase;
@@ -91,7 +92,9 @@ public static class DependencyInjection
                 options.RefreshTokenExpiration = TimeSpan.FromDays(7);
             });
 
-        builder.Services.AddAuthorizationBuilder();
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("CompletedOTP", policy => policy.RequireAuthenticatedUser())
+            .AddPolicy("CompletedSignup", policy => policy.RequireRole(Roles.User));
 
         builder.Services
             .AddIdentityCore<ApplicationUser>(options =>
@@ -113,9 +116,10 @@ public static class DependencyInjection
         builder.Services.AddTransient<IIdentityService, Identity.IdentityService>();
 
         // Phone OTP + SMS + phone normalization
+        builder.Services.Configure<StaticPhoneOtpOptions>(builder.Configuration.GetSection("Otp"));
         builder.Services.AddSingleton<IPhoneNumberNormalizer, Phone.DefaultPhoneNumberNormalizer>();
         builder.Services.AddTransient<ISmsSender, Notifications.Sms.LoggingSmsSender>();
-        builder.Services.AddScoped<IPhoneOtpService, Identity.PhoneOtp.IdentityPhoneOtpService>();
+        builder.Services.AddScoped<IPhoneOtpService, StaticPhoneOtpService>();
     }
 
     private static void AddAuthorizationServices(this IHostApplicationBuilder builder)
@@ -326,3 +330,6 @@ public static class DependencyInjection
         }
     }
 }
+
+
+

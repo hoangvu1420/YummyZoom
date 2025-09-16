@@ -1,17 +1,20 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Infrastructure.Identity.PhoneOtp;
 
-public class IdentityPhoneOtpService : IPhoneOtpService
+public class StaticPhoneOtpService : IPhoneOtpService
 {
     private readonly UserManager<ApplicationUser> _users;
+    private readonly StaticPhoneOtpOptions _options;
 
-    public IdentityPhoneOtpService(UserManager<ApplicationUser> users)
+    public StaticPhoneOtpService(UserManager<ApplicationUser> users, IOptions<StaticPhoneOtpOptions> options)
     {
-        _users = users;
+        _users = users ?? throw new ArgumentNullException(nameof(users));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
     public async Task<Result<(Guid IdentityUserId, bool IsNew)>> EnsureUserExistsAsync(string phoneE164, CancellationToken ct = default)
@@ -34,8 +37,14 @@ public class IdentityPhoneOtpService : IPhoneOtpService
                 return Result.Failure<(Guid, bool)>(Error.Problem("Otp.UserCreateFailed", errors));
             }
 
-            // Add baseline role if it exists in your system (optional)
-            try { await _users.AddToRoleAsync(user, YummyZoom.SharedKernel.Constants.Roles.User); } catch { /* ignore if roles not configured */ }
+            try
+            {
+                await _users.AddToRoleAsync(user, YummyZoom.SharedKernel.Constants.Roles.User);
+            }
+            catch
+            {
+                // Ignore role assignment failures in MVP mode
+            }
 
             return Result.Success((user.Id, true));
         }
@@ -49,23 +58,20 @@ public class IdentityPhoneOtpService : IPhoneOtpService
         return Result.Success(user?.Id);
     }
 
-    public async Task<Result<string>> GenerateLoginCodeAsync(Guid identityUserId, CancellationToken ct = default)
+    public Task<Result<string>> GenerateLoginCodeAsync(Guid identityUserId, CancellationToken ct = default)
     {
-        var user = await _users.FindByIdAsync(identityUserId.ToString());
-        if (user is null)
-            return Result.Failure<string>(Error.NotFound("Otp.UserNotFound", "User not found."));
-
-        var code = await _users.GenerateUserTokenAsync(user, TokenOptions.DefaultPhoneProvider, "PhoneLogin");
-        return Result.Success(code);
+        return Task.FromResult(Result.Success(_options.StaticCode));
     }
 
     public async Task<Result<bool>> VerifyLoginCodeAsync(Guid identityUserId, string code, CancellationToken ct = default)
     {
         var user = await _users.FindByIdAsync(identityUserId.ToString());
         if (user is null)
+        {
             return Result.Failure<bool>(Error.NotFound("Otp.UserNotFound", "User not found."));
+        }
 
-        var valid = await _users.VerifyUserTokenAsync(user, TokenOptions.DefaultPhoneProvider, "PhoneLogin", code);
+        var valid = string.Equals(code, _options.StaticCode, StringComparison.Ordinal);
         return Result.Success(valid);
     }
 
@@ -73,7 +79,9 @@ public class IdentityPhoneOtpService : IPhoneOtpService
     {
         var user = await _users.FindByIdAsync(identityUserId.ToString());
         if (user is null)
+        {
             return Result.Failure(Error.NotFound("Otp.UserNotFound", "User not found."));
+        }
 
         if (!user.PhoneNumberConfirmed)
         {
@@ -85,8 +93,8 @@ public class IdentityPhoneOtpService : IPhoneOtpService
                 return Result.Failure(Error.Problem("Otp.ConfirmPhoneFailed", errors));
             }
         }
+
         return Result.Success();
     }
 }
-
 

@@ -298,3 +298,31 @@ K) Rollout
 - [ ] Smoke tests in staging with contract test suite; verify dashboards.
 - [ ] Enable in production incrementally; monitor and iterate.
 
+### MVP Cut: Minimal User Lifecycle Checklist (Sept 16, 2025)
+
+**Current Baseline (implemented as of Sept 16, 2025)**
+- `src/Web/Endpoints/Users.cs` exposes `/auth/otp/request` and `/auth/otp/verify` alongside Identity API endpoints; handlers delegate to `RequestPhoneOtpCommand` and `VerifyPhoneOtpCommand`.
+- `src/Application/Auth/Commands/RequestPhoneOtp` and `VerifyPhoneOtp` normalize phones, rely on `IPhoneOtpService`, and emit SMS via the `LoggingSmsSender` stub. `VerifyPhoneOtp` now ensures a domain `User` is created/updated for the matching identity GUID.
+- `src/Infrastructure/Identity/PhoneOtp/IdentityPhoneOtpService.cs` provisions `ApplicationUser` records and issues Identity phone tokens; `StaticPhoneOtpService` override provides static code behaviour for MVP while keeping role seeding.
+- Self-service MVP endpoints (/api/users/me, /api/users/me/profile, /api/users/me/address) now map to GetMyProfileQuery, CompleteProfileCommand, and UpsertPrimaryAddressCommand to support name/email capture and single-address updates.
+- Domain support for addresses/payment methods already exists in `src/Domain/UserAggregate/User.cs` with EF mapping in `src/Infrastructure/Persistence/EfCore/Configurations/UserConfiguration.cs`; addresses are now wired through the new MVP commands while payment methods remain future work.
+- Email/password registration via `RegisterUserCommand` remains available for legacy clients.
+
+**Phase 4 MVP Checklist**
+
+_Phone-first sign-up/login_
+- [x] Swap in a static-code `IPhoneOtpService` adapter (reads `Otp:StaticCode` from config, default `111111`) so `RequestPhoneOtp` returns a predictable code without Identity token providers.
+- [x] Surface the static code in `/auth/otp/request` responses when `IHostEnvironment.IsDevelopment()` while keeping production behaviour limited to logging.
+- [x] On OTP verification, create or update the domain `User` aggregate if missing (fill name placeholder, persist phone, mark active) and ensure the identity user receives the `Roles.User` assignment.
+
+_Profile and identity bridges_
+- [x] Implement `CompleteProfileCommand` (name, optional email capture) for phone-first users and expose `/api/users/me/profile` PUT guarded by `MustBeUserOwner`.
+- [x] Introduce `GetMyProfileQuery` and `/api/users/me` GET returning profile basics plus the single stored address.
+
+_Address management_
+- [x] Add `UpsertPrimaryAddressCommand` that replaces the lone address entry on the `User` aggregate using existing `User.Addresses` helpers.
+- [x] Surface `/api/users/me/address` PUT endpoint (auth required) that executes the command and returns the new address identifier.
+
+_Persistence and verification_
+- [x] Confirm EF mappings cover the single-address scenario (reuse `UserAddresses` table); no additional migrations required for MVP.
+- [x] Add a functional test covering OTP login + address upsert happy path in `tests/Application.FunctionalTests` to lock the MVP flow.
