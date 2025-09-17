@@ -35,7 +35,7 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
 
         // TODO: add CuisineTagsJson, AvgRating, RatingCount from ratings table in the future.
 
-        var where = new List<string> { "r.\"IsDeleted\" = false" };
+        var where = new List<string> { "r.\"IsDeleted\" = false", "r.\"IsVerified\" = true" };
         var parameters = new DynamicParameters();
 
         if (!string.IsNullOrWhiteSpace(request.Q))

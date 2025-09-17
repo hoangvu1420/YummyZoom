@@ -13,4 +13,7 @@ public abstract class Policies
     public const string MustBeTeamCartHost = nameof(MustBeTeamCartHost);
     public const string MustBeTeamCartMember = nameof(MustBeTeamCartMember);
     public const string MustBeTeamCartParticipant = nameof(MustBeTeamCartParticipant);
+
+    public const string CompletedSignup = nameof(CompletedSignup);
+    public const string CompletedOTP = nameof(CompletedOTP);
 }

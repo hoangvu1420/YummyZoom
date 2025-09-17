@@ -76,25 +76,39 @@ public static class TestUserManager
     public static async Task<Guid> RunAsUserAsync(string email, string password, params string[] roles)
     {
         var userId = await CreateUserAsync(email, password, roles);
-        
+
         SetCurrentUserId(userId);
-        
+
+        var testUserService = CustomWebApplicationFactory.GetTestUserService();
+
         // Add administrator claims if user has Administrator role
         if (roles.Contains(Roles.Administrator))
         {
-            var testUserService = CustomWebApplicationFactory.GetTestUserService();
             testUserService.AddAdminClaim();
         }
-        
+
+        // Add role claims for provided roles to satisfy role-based checks in policies
+        if (roles is { Length: > 0 })
+        {
+            foreach (var role in roles)
+            {
+                if (!string.IsNullOrWhiteSpace(role))
+                {
+                    testUserService.AddRoleClaim(role);
+                }
+            }
+        }
+
         return userId;
     }
 
     /// <summary>
     /// Runs tests as the default test user.
     /// </summary>
-    public static async Task<Guid> RunAsDefaultUserAsync()
+    public static async Task<Guid> RunAsDefaultUserAsync() 
     {
-        return await RunAsUserAsync(TestConfiguration.DefaultUsers.TestUser.Email, TestConfiguration.DefaultUsers.TestUser.Password, Array.Empty<string>());
+        // Default user models a fully onboarded customer; grant baseline 'User' role for CompletedSignup policy.
+        return await RunAsUserAsync(TestConfiguration.DefaultUsers.TestUser.Email, TestConfiguration.DefaultUsers.TestUser.Password, new[] { Roles.User });
     }
 
     /// <summary>

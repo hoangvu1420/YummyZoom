@@ -20,4 +20,15 @@ public class RestaurantRepository : IRestaurantRepository
         return await _dbContext.Restaurants
             .FirstOrDefaultAsync(r => r.Id == restaurantId, cancellationToken);
     }
+
+    public async Task AddAsync(Restaurant restaurant, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Restaurants.AddAsync(restaurant, cancellationToken);
+    }
+
+    public Task UpdateAsync(Restaurant restaurant, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Restaurants.Update(restaurant);
+        return Task.CompletedTask;
+    }
 }

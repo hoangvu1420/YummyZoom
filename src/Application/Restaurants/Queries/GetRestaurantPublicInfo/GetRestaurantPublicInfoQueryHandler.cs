@@ -28,7 +28,7 @@ public sealed class GetRestaurantPublicInfoQueryHandler : IRequestHandler<GetRes
                 r."IsAcceptingOrders"   AS IsAcceptingOrders,
                 r."Location_City"       AS City
             FROM "Restaurants" r
-            WHERE r."Id" = @RestaurantId AND r."IsDeleted" = false
+            WHERE r."Id" = @RestaurantId AND r."IsDeleted" = false AND r."IsVerified" = true
             """;
 
         // TODO: retrieve CuisineTags from a model in the future.

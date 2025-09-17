@@ -64,6 +64,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<TeamCart> TeamCarts => Set<TeamCart>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
+    public DbSet<YummyZoom.Domain.RestaurantRegistrationAggregate.RestaurantRegistration> RestaurantRegistrations => Set<YummyZoom.Domain.RestaurantRegistrationAggregate.RestaurantRegistration>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

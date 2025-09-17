@@ -93,8 +93,8 @@ public static class DependencyInjection
             });
 
         builder.Services.AddAuthorizationBuilder()
-            .AddPolicy("CompletedOTP", policy => policy.RequireAuthenticatedUser())
-            .AddPolicy("CompletedSignup", policy => policy.RequireRole(Roles.User));
+            .AddPolicy(Policies.CompletedOTP, policy => policy.RequireAuthenticatedUser())
+            .AddPolicy(Policies.CompletedSignup, policy => policy.RequireRole(Roles.User));
 
         builder.Services
             .AddIdentityCore<ApplicationUser>(options =>
@@ -165,6 +165,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IInboxStore, InboxStore>();
         builder.Services.AddScoped<ITeamCartRepository, TeamCartRepository>();
         builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
+        builder.Services.AddScoped<IRestaurantRegistrationRepository, RestaurantRegistrationRepository>();
         
         // Realtime notifiers
         builder.Services.AddSingleton<ITeamCartRealtimeNotifier, NoOpTeamCartRealtimeNotifier>();
@@ -176,6 +177,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<OrderFinancialService>();
         builder.Services.AddScoped<TeamCartConversionService>();
         builder.Services.AddSingleton<IFcmService, FcmService>();
+        builder.Services.AddScoped<IRestaurantProvisioningService, Services.RestaurantProvisioningService>();
     }
 
     private static void AddExternalServices(this IHostApplicationBuilder builder)
