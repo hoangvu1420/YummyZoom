@@ -36,6 +36,7 @@ using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
+using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -148,6 +149,38 @@ public class Restaurants : EndpointGroupBase
         .WithSummary("Change menu item availability")
         .WithDescription("Updates the availability status of a menu item. Requires restaurant staff authorization.")
         .WithStandardResults();
+
+        // POST /api/v1/restaurants/{restaurantId}/coupons
+        group.MapPost("/{restaurantId:guid}/coupons", async (Guid restaurantId, CreateCouponRequestDto body, ISender sender) =>
+        {
+            var cmd = new CreateCouponCommand(
+                RestaurantId: restaurantId,
+                Code: body.Code,
+                Description: body.Description,
+                ValueType: body.ValueType,
+                Percentage: body.Percentage,
+                FixedAmount: body.FixedAmount,
+                FixedCurrency: body.FixedCurrency,
+                FreeItemId: body.FreeItemId,
+                Scope: body.Scope,
+                ItemIds: body.ItemIds,
+                CategoryIds: body.CategoryIds,
+                ValidityStartDate: body.ValidityStartDate,
+                ValidityEndDate: body.ValidityEndDate,
+                MinOrderAmount: body.MinOrderAmount,
+                MinOrderCurrency: body.MinOrderCurrency,
+                TotalUsageLimit: body.TotalUsageLimit,
+                UsageLimitPerUser: body.UsageLimitPerUser,
+                IsEnabled: body.IsEnabled ?? true);
+            var result = await sender.Send(cmd);
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/restaurants/{restaurantId}/coupons/{result.Value.CouponId}", result.Value)
+                : result.ToIResult();
+        })
+        .WithName("CreateCoupon")
+        .WithSummary("Create a new coupon")
+        .WithDescription("Creates a new coupon for the restaurant. Requires restaurant staff authorization.")
+        .WithStandardCreationResults<CreateCouponResponse>();
 
         // PUT /api/v1/restaurants/{restaurantId}/profile
         group.MapPut("/{restaurantId:guid}/profile", async (Guid restaurantId, UpdateProfileRequestDto body, ISender sender) =>
@@ -621,5 +654,23 @@ public class Restaurants : EndpointGroupBase
         string? LogoUrl,
         string? Phone,
         string? Email);
+    public sealed record CreateCouponRequestDto(
+        string Code,
+        string Description,
+        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponType ValueType,
+        decimal? Percentage,
+        decimal? FixedAmount,
+        string? FixedCurrency,
+        Guid? FreeItemId,
+        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponScope Scope,
+        List<Guid>? ItemIds,
+        List<Guid>? CategoryIds,
+        DateTime ValidityStartDate,
+        DateTime ValidityEndDate,
+        decimal? MinOrderAmount,
+        string? MinOrderCurrency,
+        int? TotalUsageLimit,
+        int? UsageLimitPerUser,
+        bool? IsEnabled);
     #endregion
 }

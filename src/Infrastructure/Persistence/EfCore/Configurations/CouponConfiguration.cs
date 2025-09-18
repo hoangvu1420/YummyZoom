@@ -46,8 +46,7 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.Property(c => c.UsageLimitPerUser)
-            .IsRequired();
+        builder.Property(c => c.UsageLimitPerUser);
 
         builder.Property(c => c.IsEnabled)
             .IsRequired()

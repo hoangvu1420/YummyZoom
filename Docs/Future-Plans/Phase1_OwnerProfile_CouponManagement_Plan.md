@@ -167,12 +167,12 @@
   - [x] Tests: functional tests (success/address-only, success+geo, not-found, forbidden, validation); API contract tests (204 with auth, 401 without).
   - [x] Notes: `/info` caching headers unchanged (handled later with broader caching story). Search radius behavior will reflect geo via existing search read model handlers.
 
-- [ ] Slice D — Profile Basics (name/description/logo/contact) (Owner)
-  - [ ] App: `UpdateRestaurantProfileCommand` (+ validator for lengths, phone/email).
-  - [ ] Handler: raises `RestaurantProfileUpdated`, `RestaurantLogoChanged` when applicable.
-  - [ ] Web: `PUT /api/v1/restaurants/{restaurantId}/profile` → 204.
-  - [ ] Tests: unit + API contract tests (204/401/403/404).
-  - [ ] Notes: ETag bump; no search ranking change except text fields for future facets.
+- [x] Slice D — Profile Basics (name/description/logo/contact) (Owner)
+  - [x] App: `UpdateRestaurantProfileCommand` (+ validator for lengths, phone/email).
+  - [x] Handler: raises `RestaurantProfileUpdated`, `RestaurantLogoChanged` when applicable.
+  - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/profile` → 204.
+  - [x] Tests: unit + API contract tests (204/401/403/404).
+  - [x] Notes: ETag bump; no search ranking change except text fields for future facets.
 
 - [ ] Slice E — Coupon Create (Owner)
   - [ ] App: `CreateCouponCommand` (+ validator: date window, value, min order, applies‑to; normalize `Code` to UPPER).
