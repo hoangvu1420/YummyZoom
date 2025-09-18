@@ -29,9 +29,11 @@ using YummyZoom.Application.Reviews.Commands.CreateReview;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Application.Reviews.Commands.DeleteReview;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Restaurants.Commands.SetRestaurantAcceptingOrders;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
 using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
+using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -346,6 +348,34 @@ public class Restaurants : EndpointGroupBase
         .WithDescription("Permanently removes a menu category. Cannot be deleted if it contains menu items. Requires restaurant staff authorization.")
         .WithStandardResults();
 
+        // PUT /api/v1/restaurants/{restaurantId}/accepting-orders
+        group.MapPut("/{restaurantId:guid}/accepting-orders", async (Guid restaurantId, SetAcceptingOrdersRequestDto body, ISender sender) =>
+        {
+            var cmd = new SetRestaurantAcceptingOrdersCommand(
+                RestaurantId: restaurantId,
+                IsAccepting: body.IsAccepting);
+            var result = await sender.Send(cmd);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("SetRestaurantAcceptingOrders")
+        .WithSummary("Set restaurant accepting orders switch")
+        .WithDescription("Toggles whether the restaurant is currently accepting orders. Requires restaurant staff authorization.")
+        .WithStandardResults<SetRestaurantAcceptingOrdersResponse>();
+
+        // PUT /api/v1/restaurants/{restaurantId}/business-hours
+        group.MapPut("/{restaurantId:guid}/business-hours", async (Guid restaurantId, UpdateBusinessHoursRequestDto body, ISender sender) =>
+        {
+            var cmd = new UpdateRestaurantBusinessHoursCommand(
+                RestaurantId: restaurantId,
+                BusinessHours: body.BusinessHours);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("UpdateRestaurantBusinessHours")
+        .WithSummary("Update restaurant business hours")
+        .WithDescription("Updates the restaurant business hours string. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
         #endregion
 
         #region Order Management Endpoints (Restaurant Staff)
@@ -532,5 +562,10 @@ public class Restaurants : EndpointGroupBase
 
     #region DTOs for Reviews
     public sealed record CreateReviewRequest(Guid OrderId, int Rating, string? Title, string? Comment);
+    #endregion
+
+    #region DTOs for Restaurant Settings
+    public sealed record SetAcceptingOrdersRequestDto(bool IsAccepting);
+    public sealed record UpdateBusinessHoursRequestDto(string BusinessHours);
     #endregion
 }
