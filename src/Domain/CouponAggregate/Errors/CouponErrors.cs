@@ -121,4 +121,12 @@ public static class CouponErrors
     public static Error InvalidType => Error.Validation(
         "Coupon.InvalidType",
         "The coupon type is not valid or not supported.");
+
+    public static Error InvalidCouponValue => Error.Validation(
+        "Coupon.InvalidCouponValue",
+        "The coupon value is invalid.");
+
+    public static Error InvalidAppliesTo => Error.Validation(
+        "Coupon.InvalidAppliesTo",
+        "The applies-to scope is invalid.");
 }

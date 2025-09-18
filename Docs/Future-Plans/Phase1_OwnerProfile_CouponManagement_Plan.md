@@ -174,17 +174,17 @@
   - [x] Tests: unit + API contract tests (204/401/403/404).
   - [x] Notes: ETag bump; no search ranking change except text fields for future facets.
 
-- [ ] Slice E — Coupon Create (Owner)
-  - [ ] App: `CreateCouponCommand` (+ validator: date window, value, min order, applies‑to; normalize `Code` to UPPER).
-  - [ ] Infra: reuse `ICouponRepository.AddAsync`; ensure `GetByCodeAsync` compares UPPER (read side).
-  - [ ] Web: `POST /api/v1/restaurants/{restaurantId}/coupons` → 201 `{ couponId }`.
-  - [ ] Tests: unit handler; repo read/write for normalization; API contract tests (201/400/401/403/409).
-  - [ ] Notes: Case‑insensitive strategy; optional partial unique index on `LOWER(Code), RestaurantId WHERE IsDeleted = FALSE` if stricter DB guarantee required.
+- [x] Slice E — Coupon Create (Owner)
+  - [x] App: `CreateCouponCommand` (+ validator: date window, value, min order, applies‑to; normalize `Code` to UPPER).
+  - [x] Infra: reuse `ICouponRepository.AddAsync`; ensure `GetByCodeAsync` compares UPPER (read side).
+  - [x] Web: `POST /api/v1/restaurants/{restaurantId}/coupons` → 201 `{ couponId }`.
+  - [x] Tests: unit handler; repo read/write for normalization; API contract tests (201/400/401/403/409).
+  - [x] Notes: Case‑insensitive strategy; optional partial unique index on `LOWER(Code), RestaurantId WHERE IsDeleted = FALSE` if stricter DB guarantee required.
 
-- [ ] Slice F — Coupon Update (Owner)
-  - [ ] App: `UpdateCouponCommand` (+ validator); normalize `Code` if allowed to change (or keep immutable — decide and document).
+- [x] Slice F — Coupon Update (Owner)
+  - [ ] App: `UpdateCouponCommand` (+ validator); keep `Code` immutable.
   - [ ] Web: `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 204.
-  - [ ] Tests: unit + API contract tests (204/400/401/403/404/409 on duplicates).
+  - [ ] Tests: functional tests + API contract tests (204/400/401/403/404/409 on duplicates).
   - [ ] Notes: Validate applies‑to IDs belong to restaurant.
 
 - [ ] Slice G — Coupon Enable/Disable (Owner)

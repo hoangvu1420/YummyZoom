@@ -297,6 +297,49 @@ public sealed class Coupon : AggregateRoot<CouponId, Guid>, IAuditableEntity, IS
     }
 
     /// <summary>
+    /// Updates the validity window. End must be strictly after start.
+    /// </summary>
+    public Result SetValidityPeriod(DateTime start, DateTime end)
+    {
+        if (end <= start)
+        {
+            return Result.Failure(CouponErrors.InvalidValidityPeriod);
+        }
+
+        ValidityStartDate = start;
+        ValidityEndDate = end;
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Replaces the coupon value (percentage, fixed amount, or free item).
+    /// </summary>
+    public Result SetValue(CouponValue value)
+    {
+        if (value is null)
+        {
+            return Result.Failure(CouponErrors.InvalidCouponValue);
+        }
+
+        Value = value;
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Replaces the "applies to" scope for this coupon (whole order, specific items, or categories).
+    /// </summary>
+    public Result SetAppliesTo(AppliesTo appliesTo)
+    {
+        if (appliesTo is null)
+        {
+            return Result.Failure(CouponErrors.InvalidAppliesTo);
+        }
+
+        AppliesTo = appliesTo;
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Sets or updates the minimum order amount required for the coupon
     /// </summary>
     public Result SetMinimumOrderAmount(Money? minOrderAmount)
