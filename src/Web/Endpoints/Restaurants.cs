@@ -38,6 +38,8 @@ using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
 using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
+using YummyZoom.Application.Coupons.Commands.EnableCoupon;
+using YummyZoom.Application.Coupons.Commands.DisableCoupon;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -182,6 +184,30 @@ public class Restaurants : EndpointGroupBase
         .WithSummary("Create a new coupon")
         .WithDescription("Creates a new coupon for the restaurant. Requires restaurant staff authorization.")
         .WithStandardCreationResults<CreateCouponResponse>();
+
+        // PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable
+        group.MapPut("/{restaurantId:guid}/coupons/{couponId:guid}/enable", async (Guid restaurantId, Guid couponId, ISender sender) =>
+        {
+            var cmd = new EnableCouponCommand(restaurantId, couponId);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("EnableCoupon")
+        .WithSummary("Enable a coupon")
+        .WithDescription("Enables a coupon so it can be used. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}/disable
+        group.MapPut("/{restaurantId:guid}/coupons/{couponId:guid}/disable", async (Guid restaurantId, Guid couponId, ISender sender) =>
+        {
+            var cmd = new DisableCouponCommand(restaurantId, couponId);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("DisableCoupon")
+        .WithSummary("Disable a coupon")
+        .WithDescription("Disables a coupon immediately. Requires restaurant staff authorization.")
+        .WithStandardResults();
 
         // PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}
         group.MapPut("/{restaurantId:guid}/coupons/{couponId:guid}", async (Guid restaurantId, Guid couponId, UpdateCouponRequestDto body, ISender sender) =>

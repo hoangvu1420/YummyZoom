@@ -7,6 +7,8 @@ using YummyZoom.SharedKernel;
 using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
+using YummyZoom.Application.Coupons.Commands.EnableCoupon;
+using YummyZoom.Application.Coupons.Commands.DisableCoupon;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
@@ -122,6 +124,66 @@ public class CouponManagementContractTests
             TotalUsageLimit: null,
             UsageLimitPerUser: null);
         var resp = await client.PutAsJsonAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}", body);
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task EnableCoupon_WithAuth_Returns204()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<EnableCouponCommand>();
+            return Result.Success();
+        });
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.PutAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable", null);
+        resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Test]
+    public async Task EnableCoupon_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.PutAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable", null);
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task DisableCoupon_WithAuth_Returns204()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<DisableCouponCommand>();
+            return Result.Success();
+        });
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.PutAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}/disable", null);
+        resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Test]
+    public async Task DisableCoupon_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.PutAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}/disable", null);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
     [Test]

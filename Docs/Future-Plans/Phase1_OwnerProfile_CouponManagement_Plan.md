@@ -182,10 +182,10 @@
   - [x] Notes: Case‑insensitive strategy; optional partial unique index on `LOWER(Code), RestaurantId WHERE IsDeleted = FALSE` if stricter DB guarantee required.
 
 - [x] Slice F — Coupon Update (Owner)
-  - [ ] App: `UpdateCouponCommand` (+ validator); keep `Code` immutable.
-  - [ ] Web: `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 204.
-  - [ ] Tests: functional tests + API contract tests (204/400/401/403/404/409 on duplicates).
-  - [ ] Notes: Validate applies‑to IDs belong to restaurant.
+  - [x] App: `UpdateCouponCommand` (+ validator); keep `Code` immutable.
+  - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 204.
+  - [x] Tests: functional tests + API contract tests (204/400/401/403/404/409 on duplicates).
+  - [x] Notes: Validate applies‑to IDs belong to restaurant.
 
 - [ ] Slice G — Coupon Enable/Disable (Owner)
   - [ ] App: `EnableCouponCommand` / `DisableCouponCommand`.
