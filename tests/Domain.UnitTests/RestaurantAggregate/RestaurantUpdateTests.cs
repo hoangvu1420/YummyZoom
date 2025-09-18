@@ -22,7 +22,7 @@ public class RestaurantUpdateTests
     private const string DefaultCountry = "Test Country";
     private const string DefaultPhoneNumber = "123-456-7890";
     private const string DefaultEmail = "test@example.com";
-    private const string DefaultBusinessHours = "Mon-Fri: 9am-5pm";
+    private const string DefaultBusinessHours = "09:00-17:00";
 
     private static Address CreateValidAddress() => Address.Create(DefaultStreet, DefaultCity, DefaultState, DefaultZipCode, DefaultCountry).Value;
     private static ContactInfo CreateValidContactInfo() => ContactInfo.Create(DefaultPhoneNumber, DefaultEmail).Value;
@@ -401,7 +401,7 @@ public class RestaurantUpdateTests
     {
         // Arrange
         var restaurant = CreateTestRestaurant();
-        var newBusinessHours = BusinessHours.Create("Sat-Sun: 10am-4pm").Value;
+        var newBusinessHours = BusinessHours.Create("10:00-16:00").Value;
 
         // Act
         var result = restaurant.UpdateBusinessHours(newBusinessHours);
@@ -421,7 +421,7 @@ public class RestaurantUpdateTests
     {
         // Arrange
         var restaurant = CreateTestRestaurant();
-        const string newHours = "Sat-Sun: 10am-4pm";
+        const string newHours = "10:00-16:00";
 
         // Act
         var result = restaurant.UpdateBusinessHours(newHours);

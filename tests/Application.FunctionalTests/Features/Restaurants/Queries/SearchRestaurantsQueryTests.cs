@@ -92,7 +92,7 @@ public class SearchRestaurantsQueryTests : BaseTestFixture
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;
         var contact = ContactInfo.Create("+1-555-0123", "t@test.local").Value;
-        var hours = BusinessHours.Create("9-5").Value;
+        var hours = BusinessHours.Create("09:00-17:00").Value;
         var create = Restaurant.Create(name, null, null, "desc", "Cuisine", address, contact, hours);
         create.ShouldBeSuccessful();
         var entity = create.Value;

@@ -22,7 +22,7 @@ public class RestaurantCoreTests
     private const string DefaultCountry = "Test Country";
     private const string DefaultPhoneNumber = "123-456-7890";
     private const string DefaultEmail = "test@example.com";
-    private const string DefaultBusinessHours = "Mon-Fri: 9am-5pm";
+    private const string DefaultBusinessHours = "09:00-17:00";
 
     private static Address CreateValidAddress() => Address.Create(DefaultStreet, DefaultCity, DefaultState, DefaultZipCode, DefaultCountry).Value;
     private static ContactInfo CreateValidContactInfo() => ContactInfo.Create(DefaultPhoneNumber, DefaultEmail).Value;

@@ -132,7 +132,7 @@ public class UniversalSearchBadgesAndReasonTests : BaseTestFixture
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;
         var contact = ContactInfo.Create("+1-555-0123", "t@test.local").Value;
-        var hours = BusinessHours.Create("9-5").Value;
+        var hours = BusinessHours.Create("09:00-17:00").Value;
         var created = Restaurant.Create(name, null, null, "desc", cuisine, address, contact, hours);
         var entity = created.Value;
 

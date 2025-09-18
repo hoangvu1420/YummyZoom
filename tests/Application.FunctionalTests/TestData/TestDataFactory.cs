@@ -602,7 +602,7 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create restaurant contact info: {contactInfoResult.Error}");
 
         // Create business hours
-        var businessHoursResult = BusinessHours.Create("Mon-Sun: 9:00 AM - 10:00 PM");
+        var businessHoursResult = BusinessHours.Create("09:00-22:00");
 
         if (businessHoursResult.IsFailure)
             throw new InvalidOperationException($"Failed to create restaurant business hours: {businessHoursResult.Error}");
@@ -662,7 +662,7 @@ public static class TestDataFactory
             throw new InvalidOperationException($"Failed to create second restaurant contact info: {contactInfoResult.Error}");
 
         // Create business hours
-        var businessHoursResult = BusinessHours.Create("Mon-Sun: 8:00 AM - 11:00 PM");
+        var businessHoursResult = BusinessHours.Create("08:00-23:00");
 
         if (businessHoursResult.IsFailure)
             throw new InvalidOperationException($"Failed to create second restaurant business hours: {businessHoursResult.Error}");

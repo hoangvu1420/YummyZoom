@@ -137,7 +137,7 @@
 | Profile & Auth | ✔️                                | ✔️                    | ✔️                                 |
 | Menu           | View                              | Create & Edit         | Moderate                           |
 | Order          | Place, track, review              | Accept, update status | Monitor & override                 |
-| TeamCart       | Create/join, add items, pay       | Receives order after conversion | Monitor & override                 |
+| TeamCart       | Create/join, add items, pay       | Receives order after conversion | Monitor & override       |
 | Coupon         | Apply promo code                  | Create/manage coupons | Monitor usage                      |
 | Reviews        | Submit/view reviews               | View feedback         | Moderate content                   |
 | Payment        | Mock/real payments, apply coupons | View revenue          | Monitor, trigger refunds           |

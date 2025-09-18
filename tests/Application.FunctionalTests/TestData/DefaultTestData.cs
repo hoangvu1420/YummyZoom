@@ -70,7 +70,7 @@ public static class DefaultTestData
         /// </summary>
         public static class Hours
         {
-            public const string BusinessHours = "Monday-Sunday: 9:00 AM - 10:00 PM";
+            public const string BusinessHours = "09:00-22:00";
         }
     }
 

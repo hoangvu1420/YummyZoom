@@ -101,6 +101,10 @@ public static class RestaurantErrors
         "Restaurant.BusinessHours.FormatTooLong",
         $"Business hours format cannot exceed {maxLength} characters.");
 
+    public static Error BusinessHoursInvalidFormat(string value) => Error.Validation(
+        "Restaurant.BusinessHours.InvalidFormat",
+        $"Business hours format '{value}' is invalid. Expected format: hh:mm-hh:mm (e.g., '09:00-17:30').");
+
     // Deletion validation errors
     public static Error CannotDeleteWithActiveOrders() => Error.Validation(
         "Restaurant.CannotDeleteWithActiveOrders",

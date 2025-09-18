@@ -18,7 +18,7 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
         var fixedTime = new FixedTimeProvider(new DateTimeOffset(2025, 1, 1, 12, 0, 0, TimeSpan.Zero));
         ReplaceService<TimeProvider>(fixedTime);
 
-        // Create a restaurant with simple hours "9-5" and accept orders
+        // Create a restaurant with simple hours "09:00-17:00" and accept orders
         var restaurantId = await CreateRestaurantAsync("Open Test", "Cafe", null, null);
         await DrainOutboxAsync();
 
@@ -42,7 +42,7 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
         {
             var repo = scope.ServiceProvider.GetRequiredService<IRestaurantRepository>();
             var agg = await repo.GetByIdAsync(RestaurantId.Create(restaurantId));
-            agg!.UpdateBusinessHours("9-5");
+            agg!.UpdateBusinessHours("09:00-17:00");
             await UpdateAsync(agg);
         }
 
@@ -65,7 +65,7 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;
         var contact = ContactInfo.Create("+1-555-0123", "t@test.local").Value;
-        var hours = BusinessHours.Create("9-5").Value;
+        var hours = BusinessHours.Create("09:00-17:00").Value;
         var created = Restaurant.Create(name, null, null, "desc", cuisine, address, contact, hours);
         var entity = created.Value;
 

@@ -9,7 +9,7 @@ namespace YummyZoom.Domain.UnitTests.RestaurantAggregate.ValueObjects;
 [TestFixture]
 public class BusinessHoursTests
 {
-    private const string ValidBusinessHours = "Monday-Friday: 9:00 AM - 10:00 PM, Saturday-Sunday: 10:00 AM - 11:00 PM";
+    private const string ValidBusinessHours = "09:00-22:00";
 
     #region Create() Method Tests
 
@@ -105,11 +105,11 @@ public class BusinessHoursTests
     }
 
     [Test]
-    [TestCase("9:00 AM - 5:00 PM")]
-    [TestCase("Monday to Friday: 8:00 - 17:00")]
-    [TestCase("24/7")]
-    [TestCase("Closed on Sundays")]
-    [TestCase("Mon-Fri: 9-5, Sat: 10-3, Sun: Closed")]
+    [TestCase("00:00-23:59")]
+    [TestCase("09:30-17:45")]
+    [TestCase("06:15-14:30")]
+    [TestCase("18:00-23:00")]
+    [TestCase("12:00-13:00")]
     public void Create_WithVariousValidFormats_ShouldSucceed(string hours)
     {
         // Arrange & Act
@@ -118,6 +118,26 @@ public class BusinessHoursTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Hours.Should().Be(hours);
+    }
+
+    [Test]
+    [TestCase("9-5")]
+    [TestCase("Monday to Friday: 8:00 - 17:00")]
+    [TestCase("24/7")]
+    [TestCase("Closed on Sundays")]
+    [TestCase("Mon-Fri: 9-5, Sat: 10-3, Sun: Closed")]
+    [TestCase("25:00-17:00")]
+    [TestCase("09:60-17:00")]
+    [TestCase("17:00-09:00")]
+    [TestCase("9:00 AM - 5:00 PM")]
+    public void Create_WithInvalidFormats_ShouldFail(string hours)
+    {
+        // Arrange & Act
+        var result = BusinessHours.Create(hours);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Restaurant.BusinessHours.InvalidFormat");
     }
 
     #endregion
@@ -143,7 +163,7 @@ public class BusinessHoursTests
     {
         // Arrange
         var businessHours1 = BusinessHours.Create(ValidBusinessHours).Value;
-        var businessHours2 = BusinessHours.Create("Different hours: 10:00 AM - 9:00 PM").Value;
+        var businessHours2 = BusinessHours.Create("10:00-21:00").Value;
 
         // Act & Assert
         businessHours1.Should().NotBe(businessHours2);
@@ -178,7 +198,7 @@ public class BusinessHoursTests
     {
         // Arrange
         var businessHours1 = BusinessHours.Create(ValidBusinessHours).Value;
-        var businessHours2 = BusinessHours.Create("Different hours: 10:00 AM - 9:00 PM").Value;
+        var businessHours2 = BusinessHours.Create("10:00-21:00").Value;
 
         // Act & Assert
         businessHours1.GetHashCode().Should().NotBe(businessHours2.GetHashCode());
