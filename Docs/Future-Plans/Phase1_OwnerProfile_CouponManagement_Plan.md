@@ -160,7 +160,7 @@
   - [x] Tests: functional tests for handler; API contract tests (204 with auth, 401 without). Open-now propagation already covered by existing `UniversalSearchOpenNowTests`.
   - [x] Notes: Timezone-aware ‘open now’ remains a future enhancement; current MVP uses UTC-based evaluator in SearchIndexMaintainer.
 
- - [x] Slice C — Location/Geo Update (Owner)
+- [x] Slice C — Location/Geo Update (Owner)
   - [x] App: `UpdateRestaurantLocationCommand` (+ validator: address fields, optional lat/lon bounds).
   - [x] Handler: changes address and, if provided, geo; raises `RestaurantLocationChanged` and `RestaurantGeoCoordinatesChanged`.
   - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/location` → 204.

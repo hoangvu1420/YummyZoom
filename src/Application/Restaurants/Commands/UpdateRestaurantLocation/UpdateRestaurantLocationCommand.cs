@@ -79,7 +79,6 @@ public sealed class UpdateRestaurantLocationCommandHandler : IRequestHandler<Upd
             }
 
             await _restaurants.UpdateAsync(restaurant, cancellationToken);
-            await _uow.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }, cancellationToken);

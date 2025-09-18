@@ -35,6 +35,7 @@ using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
+using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -146,6 +147,24 @@ public class Restaurants : EndpointGroupBase
         .WithName("ChangeMenuItemAvailability")
         .WithSummary("Change menu item availability")
         .WithDescription("Updates the availability status of a menu item. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // PUT /api/v1/restaurants/{restaurantId}/profile
+        group.MapPut("/{restaurantId:guid}/profile", async (Guid restaurantId, UpdateProfileRequestDto body, ISender sender) =>
+        {
+            var cmd = new UpdateRestaurantProfileCommand(
+                RestaurantId: restaurantId,
+                Name: body.Name,
+                Description: body.Description,
+                LogoUrl: body.LogoUrl,
+                Phone: body.Phone,
+                Email: body.Email);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("UpdateRestaurantProfile")
+        .WithSummary("Update restaurant profile basics")
+        .WithDescription("Updates name, description, logo URL, and/or contact info. Fields are optional; only provided fields are updated. Requires restaurant staff authorization.")
         .WithStandardResults();
 
         // PUT /api/v1/restaurants/{restaurantId}/menu-items/{itemId}
@@ -596,5 +615,11 @@ public class Restaurants : EndpointGroupBase
         string Country,
         double? Latitude,
         double? Longitude);
+    public sealed record UpdateProfileRequestDto(
+        string? Name,
+        string? Description,
+        string? LogoUrl,
+        string? Phone,
+        string? Email);
     #endregion
 }

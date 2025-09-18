@@ -60,7 +60,6 @@ public sealed class SetRestaurantAcceptingOrdersCommandHandler : IRequestHandler
             }
 
             await _restaurants.UpdateAsync(restaurant, cancellationToken);
-            await _uow.SaveChangesAsync(cancellationToken);
 
             return Result.Success(new SetRestaurantAcceptingOrdersResponse(restaurant.IsAcceptingOrders));
         }, cancellationToken);
@@ -73,4 +72,3 @@ public static class SetRestaurantAcceptingOrdersErrors
         "Restaurant.SetAcceptingOrders.NotFound",
         $"Restaurant '{restaurantId}' was not found.");
 }
-

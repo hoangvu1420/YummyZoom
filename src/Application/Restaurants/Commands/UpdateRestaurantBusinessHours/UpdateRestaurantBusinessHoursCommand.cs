@@ -69,7 +69,6 @@ public sealed class UpdateRestaurantBusinessHoursCommandHandler : IRequestHandle
             }
 
             await _restaurants.UpdateAsync(restaurant, cancellationToken);
-            await _uow.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }, cancellationToken);
@@ -82,4 +81,3 @@ public static class RestaurantErrors
         "Restaurant.NotFound",
         $"Restaurant '{id}' was not found.");
 }
-
