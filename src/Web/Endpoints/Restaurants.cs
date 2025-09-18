@@ -34,6 +34,7 @@ using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
 using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
+using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -376,6 +377,26 @@ public class Restaurants : EndpointGroupBase
         .WithDescription("Updates the restaurant business hours string. Requires restaurant staff authorization.")
         .WithStandardResults();
 
+        // PUT /api/v1/restaurants/{restaurantId}/location
+        group.MapPut("/{restaurantId:guid}/location", async (Guid restaurantId, UpdateLocationRequestDto body, ISender sender) =>
+        {
+            var cmd = new UpdateRestaurantLocationCommand(
+                RestaurantId: restaurantId,
+                Street: body.Street,
+                City: body.City,
+                State: body.State,
+                ZipCode: body.ZipCode,
+                Country: body.Country,
+                Latitude: body.Latitude,
+                Longitude: body.Longitude);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("UpdateRestaurantLocation")
+        .WithSummary("Update restaurant address and optional geo coordinates")
+        .WithDescription("Updates address fields and, if provided, updates geo coordinates. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
         #endregion
 
         #region Order Management Endpoints (Restaurant Staff)
@@ -567,5 +588,13 @@ public class Restaurants : EndpointGroupBase
     #region DTOs for Restaurant Settings
     public sealed record SetAcceptingOrdersRequestDto(bool IsAccepting);
     public sealed record UpdateBusinessHoursRequestDto(string BusinessHours);
+    public sealed record UpdateLocationRequestDto(
+        string Street,
+        string City,
+        string State,
+        string ZipCode,
+        string Country,
+        double? Latitude,
+        double? Longitude);
     #endregion
 }

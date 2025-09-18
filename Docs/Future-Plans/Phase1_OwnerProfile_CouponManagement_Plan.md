@@ -153,19 +153,19 @@
   - [x] Tests: unit/functional tests for handler; API contract tests (200/401); (authorization policy behaviors covered by functional tests pattern).
   - [x] Notes: `/menu` already emits ETag/Last-Modified; `/info` does not currently emit caching headers. We will address `/info` caching in the cross‑cutting caching task (no behavior change needed for this toggle).
 
-- [ ] Slice B — Business Hours Update (Owner)
+- [x] Slice B — Business Hours Update (Owner)
   - [x] App: `UpdateRestaurantBusinessHoursCommand` (+ validator for non-empty/max length).
   - [x] Handler: calls `Restaurant.UpdateBusinessHours` and raises `RestaurantBusinessHoursChanged` via domain event.
   - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/business-hours` → 204.
   - [x] Tests: functional tests for handler; API contract tests (204 with auth, 401 without). Open-now propagation already covered by existing `UniversalSearchOpenNowTests`.
   - [x] Notes: Timezone-aware ‘open now’ remains a future enhancement; current MVP uses UTC-based evaluator in SearchIndexMaintainer.
 
-- [ ] Slice C — Location/Geo Update (Owner)
-  - [ ] App: `UpdateRestaurantLocationCommand` (+ validator: address fields, lat/lon bounds optional).
-  - [ ] Handler: raises `RestaurantLocationChanged` and `RestaurantGeoCoordinatesChanged` when geo present.
-  - [ ] Web: `PUT /api/v1/restaurants/{restaurantId}/location` → 204.
-  - [ ] Tests: unit + API contract tests (204/401/403/404); search radius queries reflect new geo.
-  - [ ] Notes: return new ETag for `/info`.
+ - [x] Slice C — Location/Geo Update (Owner)
+  - [x] App: `UpdateRestaurantLocationCommand` (+ validator: address fields, optional lat/lon bounds).
+  - [x] Handler: changes address and, if provided, geo; raises `RestaurantLocationChanged` and `RestaurantGeoCoordinatesChanged`.
+  - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/location` → 204.
+  - [x] Tests: functional tests (success/address-only, success+geo, not-found, forbidden, validation); API contract tests (204 with auth, 401 without).
+  - [x] Notes: `/info` caching headers unchanged (handled later with broader caching story). Search radius behavior will reflect geo via existing search read model handlers.
 
 - [ ] Slice D — Profile Basics (name/description/logo/contact) (Owner)
   - [ ] App: `UpdateRestaurantProfileCommand` (+ validator for lengths, phone/email).
