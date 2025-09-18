@@ -58,10 +58,11 @@ public class UpdateRestaurantLocationTests : BaseTestFixture
     [Test]
     public async Task UpdateLocation_NotFound_ReturnsError()
     {
-        await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
+        var unknownRestaurantId = Guid.NewGuid();
+        await RunAsRestaurantStaffAsync("staff@restaurant.com", unknownRestaurantId);
 
         var cmd = new UpdateRestaurantLocationCommand(
-            RestaurantId: Guid.NewGuid(),
+            RestaurantId: unknownRestaurantId,
             Street: "X",
             City: "Y",
             State: "S",
@@ -112,4 +113,3 @@ public class UpdateRestaurantLocationTests : BaseTestFixture
             .Should().ThrowAsync<ValidationException>();
     }
 }
-
