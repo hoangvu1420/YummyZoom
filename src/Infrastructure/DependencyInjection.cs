@@ -166,6 +166,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITeamCartRepository, TeamCartRepository>();
         builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
         builder.Services.AddScoped<IRestaurantRegistrationRepository, RestaurantRegistrationRepository>();
+        builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
         
         // Realtime notifiers
         builder.Services.AddSingleton<ITeamCartRealtimeNotifier, NoOpTeamCartRealtimeNotifier>();
@@ -332,6 +333,5 @@ public static class DependencyInjection
         }
     }
 }
-
 
 

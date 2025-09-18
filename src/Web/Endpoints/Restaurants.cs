@@ -25,6 +25,13 @@ using YummyZoom.Application.Restaurants.Queries.Management.GetMenusForManagement
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemDetails;
+using YummyZoom.Application.Reviews.Commands.CreateReview;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Application.Reviews.Commands.DeleteReview;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
+using YummyZoom.Application.Reviews.Queries.Common;
+using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -365,6 +372,46 @@ public class Restaurants : EndpointGroupBase
 
         #endregion
 
+        #region Customer Reviews
+
+        // POST /api/v1/restaurants/{restaurantId}/reviews
+        group.MapPost("/{restaurantId:guid}/reviews", async (Guid restaurantId, CreateReviewRequest body, ISender sender, IUser user) =>
+        {
+            var uid = user.DomainUserId ?? (user.Id is string sid && Guid.TryParse(sid, out var gid) ? UserId.Create(gid) : throw new UnauthorizedAccessException());
+            var cmd = new CreateReviewCommand(
+                OrderId: body.OrderId,
+                RestaurantId: restaurantId,
+                Rating: body.Rating,
+                Title: body.Title,
+                Comment: body.Comment)
+            { UserId = uid };
+            var result = await sender.Send(cmd);
+            return result.IsSuccess 
+                ? Results.Created($"/api/v1/restaurants/{restaurantId}/reviews/{result.Value.ReviewId}", new { reviewId = result.Value.ReviewId })
+                : result.ToIResult();
+        })
+        .WithName("CreateReview")
+        .WithSummary("Create a review for a delivered order at this restaurant")
+        .WithDescription("Requires CompletedSignup; user must own the order and the order must be Delivered.")
+        .WithStandardCreationResults<CreateReviewResponse>();
+
+        // DELETE /api/v1/restaurants/{restaurantId}/reviews/{reviewId}
+        group.MapDelete("/{restaurantId:guid}/reviews/{reviewId:guid}", async (Guid restaurantId, Guid reviewId, ISender sender, IUser user) =>
+        {
+            var uid = user.DomainUserId ?? (user.Id is string sid && Guid.TryParse(sid, out var gid) ? UserId.Create(gid) : throw new UnauthorizedAccessException());
+            var cmd = new DeleteReviewCommand(reviewId) { UserId = uid };
+            var result = await sender.Send(cmd);
+            return result.IsSuccess
+                ? Results.Ok()
+                : result.ToIResult();
+        })
+        .WithName("DeleteReview")
+        .WithSummary("Delete my review")
+        .WithDescription("Requires CompletedSignup; user must own the review.")
+        .WithStandardResults();
+
+        #endregion
+
         #region Public Endpoints (No Authentication Required)
 
         // Public endpoints (no auth)
@@ -402,6 +449,28 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
 
+        // GET /api/v1/restaurants/{restaurantId}/reviews
+        publicGroup.MapGet("/{restaurantId:guid}/reviews", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
+        {
+            var result = await sender.Send(new GetRestaurantReviewsQuery(restaurantId, pageNumber, pageSize));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetRestaurantReviews")
+        .WithSummary("List public reviews for this restaurant")
+        .Produces<PaginatedList<ReviewDto>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/reviews/summary
+        publicGroup.MapGet("/{restaurantId:guid}/reviews/summary", async (Guid restaurantId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetRestaurantReviewSummaryQuery(restaurantId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetRestaurantReviewSummary")
+        .WithSummary("Get review summary for this restaurant")
+        .Produces<RestaurantReviewSummaryDto>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         // GET /api/v1/restaurants/{restaurantId}/info
         publicGroup.MapGet("/{restaurantId:guid}/info", async (Guid restaurantId, ISender sender) =>
         {
@@ -416,9 +485,9 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/search
-        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int pageNumber, int pageSize, ISender sender) =>
+        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int pageNumber, int pageSize, double? minRating, ISender sender) =>
         {
-            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, pageNumber, pageSize);
+            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, pageNumber, pageSize, minRating);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
@@ -459,5 +528,9 @@ public class Restaurants : EndpointGroupBase
     public sealed record AddMenuCategoryResponseDto(Guid MenuCategoryId);
     public sealed record UpdateMenuCategoryDetailsRequestDto(string Name, int DisplayOrder);
 
+    #endregion
+
+    #region DTOs for Reviews
+    public sealed record CreateReviewRequest(Guid OrderId, int Rating, string? Title, string? Comment);
     #endregion
 }

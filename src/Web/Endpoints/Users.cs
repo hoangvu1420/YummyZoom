@@ -106,6 +106,24 @@ public class Users : EndpointGroupBase
 
         #endregion
 
+        #region My Reviews (Authenticated)
+
+        // GET /api/v1/users/me/reviews
+        protectedGroup.MapGet("/me/reviews", async (int pageNumber, int pageSize, ISender sender) =>
+        {
+            var result = await sender.Send(new YummyZoom.Application.Reviews.Queries.GetMyReviews.GetMyReviewsQuery(pageNumber, pageSize));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMyReviews")
+        .WithSummary("List my reviews")
+        .WithDescription("Returns the authenticated user's reviews, newest first.")
+        .Produces<YummyZoom.Application.Common.Models.PaginatedList<YummyZoom.Application.Reviews.Queries.Common.ReviewDto>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status500InternalServerError)
+        .RequireAuthorization();
+
+        #endregion
+
         #region Role Assignments (Management)
 
         // POST /api/v1/users/role-assignments
@@ -259,6 +277,5 @@ public class Users : EndpointGroupBase
         #endregion
     }
 }
-
 
 

@@ -20,6 +20,34 @@ public class RestaurantReviewSummaryConfiguration : IEntityTypeConfiguration<Res
             .IsRequired()
             .HasDefaultValue(0);
 
+        // Rating distribution defaults
+        builder.Property(x => x.Ratings1)
+            .IsRequired()
+            .HasDefaultValue(0);
+        builder.Property(x => x.Ratings2)
+            .IsRequired()
+            .HasDefaultValue(0);
+        builder.Property(x => x.Ratings3)
+            .IsRequired()
+            .HasDefaultValue(0);
+        builder.Property(x => x.Ratings4)
+            .IsRequired()
+            .HasDefaultValue(0);
+        builder.Property(x => x.Ratings5)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(x => x.TotalWithText)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(x => x.LastReviewAtUtc)
+            .IsRequired(false);
+
+        builder.Property(x => x.UpdatedAtUtc)
+            .IsRequired()
+            .HasDefaultValueSql("NOW()");
+
         builder.HasIndex(x => x.AverageRating)
             .HasDatabaseName("IX_RestaurantReviewSummaries_AverageRating");
     }

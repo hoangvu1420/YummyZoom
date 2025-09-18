@@ -28,12 +28,10 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             r."Name"                AS Name,
             r."LogoUrl"             AS LogoUrl,
             to_jsonb(array_remove(ARRAY[r."CuisineType"], NULL))::text AS CuisineTagsJson,
-            NULL::numeric           AS AvgRating,
-            NULL::int               AS RatingCount,
+            COALESCE(rr."AverageRating", 0)::numeric AS AvgRating,
+            COALESCE(rr."TotalReviews", 0)          AS RatingCount,
             r."Location_City"       AS City
             """;
-
-        // TODO: add CuisineTagsJson, AvgRating, RatingCount from ratings table in the future.
 
         var where = new List<string> { "r.\"IsDeleted\" = false", "r.\"IsVerified\" = true" };
         var parameters = new DynamicParameters();
@@ -50,7 +48,13 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             parameters.Add("Cuisine", request.Cuisine);
         }
 
-        var fromAndWhere = $"FROM \"Restaurants\" r WHERE {string.Join(" AND ", where)}";
+        if (request.MinRating.HasValue)
+        {
+            where.Add("COALESCE(rr.\"AverageRating\",0) >= @MinRating");
+            parameters.Add("MinRating", request.MinRating.Value);
+        }
+
+        var fromAndWhere = $"FROM \"Restaurants\" r LEFT JOIN \"RestaurantReviewSummaries\" rr ON rr.\"RestaurantId\" = r.\"Id\" WHERE {string.Join(" AND ", where)}";
         var orderBy = "r.\"Name\" ASC, r.\"Id\" ASC";
 
         var (countSql, pageSql) = DapperPagination.BuildPagedSql(selectColumns, fromAndWhere, orderBy, request.PageNumber, request.PageSize);
