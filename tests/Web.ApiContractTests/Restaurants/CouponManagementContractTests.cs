@@ -9,6 +9,7 @@ using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
 using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
+using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
@@ -186,6 +187,38 @@ public class CouponManagementContractTests
         var resp = await client.PutAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}/disable", null);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    [Test]
+    public async Task DeleteCoupon_WithAuth_Returns204()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<DeleteCouponCommand>();
+            return Result.Success();
+        });
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.DeleteAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}");
+        resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Test]
+    public async Task DeleteCoupon_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var resp = await client.DeleteAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}");
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     [Test]
     public async Task CreateCoupon_WithoutAuth_Returns401()
     {

@@ -40,6 +40,7 @@ using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
 using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
+using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -207,6 +208,18 @@ public class Restaurants : EndpointGroupBase
         .WithName("DisableCoupon")
         .WithSummary("Disable a coupon")
         .WithDescription("Disables a coupon immediately. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}
+        group.MapDelete("/{restaurantId:guid}/coupons/{couponId:guid}", async (Guid restaurantId, Guid couponId, ISender sender) =>
+        {
+            var cmd = new DeleteCouponCommand(restaurantId, couponId);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("DeleteCoupon")
+        .WithSummary("Delete a coupon")
+        .WithDescription("Soft-deletes a coupon so it can no longer be used. Requires restaurant staff authorization.")
         .WithStandardResults();
 
         // PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}

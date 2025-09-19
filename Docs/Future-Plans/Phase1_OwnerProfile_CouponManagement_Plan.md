@@ -46,7 +46,7 @@
   - `CreateCouponCommand` → returns coupon id; normalizes `Code` (upper) on create.
   - `UpdateCouponCommand` → description, value (percentage/fixed/free), min order amount, applies‑to scope.
   - `EnableCouponCommand` / `DisableCouponCommand`.
-  - `DeleteCouponCommand` (soft delete).
+  - [x] App: `DeleteCouponCommand` (soft delete).
 - Queries (new in `src/Application/Coupons/Queries/*`):
   - `ListCouponsByRestaurantQuery` (filters: active/enabled, date window, paging).
   - `GetCouponDetailsQuery`.
@@ -55,7 +55,7 @@
   - `POST /api/v1/restaurants/{restaurantId}/coupons` → create.
   - `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → update.
   - `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable|disable`.
-  - `DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}`.
+  - [x] Web: `DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}` -> 204.
   - `GET /api/v1/restaurants/{restaurantId}/coupons?pageNumber=&pageSize=&q=&enabled=&from=&to=`.
   - `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}`.
   - `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}/stats`.
@@ -187,15 +187,15 @@
   - [x] Tests: functional tests + API contract tests (204/400/401/403/404/409 on duplicates).
   - [x] Notes: Validate applies‑to IDs belong to restaurant.
 
-- [ ] Slice G — Coupon Enable/Disable (Owner)
-  - [ ] App: `EnableCouponCommand` / `DisableCouponCommand`.
-  - [ ] Web: `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable|disable` → 204.
-  - [ ] Tests: unit + API contract; functional test verifies fast‑check/apply respects enabled flag immediately.
+- [x] Slice G — Coupon Enable/Disable (Owner)
+  - [x] App: `EnableCouponCommand` / `DisableCouponCommand`.
+  - [x] Web: `PUT /api/v1/restaurants/{restaurantId}/coupons/{couponId}/enable|disable` → 204.
+  - [x] Tests: unit + API contract; functional test verifies fast‑check/apply respects enabled flag immediately.
 
-- [ ] Slice H — Coupon Delete (Owner)
-  - [ ] App: `DeleteCouponCommand` (soft delete).
-  - [ ] Web: `DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 204.
-  - [ ] Tests: unit + API contract; list should exclude deleted; duplicate code reuse behavior per chosen index strategy.
+- [x] Slice H — Coupon Delete (Owner)
+  - [x] App: `DeleteCouponCommand` (soft delete).
+  - [x] Web: `DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}` -> 204.
+  - [x] Tests: functional tests + API contract; list should exclude deleted; duplicate code reuse behavior per chosen index strategy.
 
 - [ ] Slice I — Coupon List (Owner)
   - [ ] App: `ListCouponsByRestaurantQuery` (filters: enabled, active window, q; paging).
