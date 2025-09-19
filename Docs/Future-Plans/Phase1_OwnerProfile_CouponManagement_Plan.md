@@ -207,11 +207,11 @@
   - [x] Web: `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 200.
   - [x] Tests: API contract + not found.
 
-- [ ] Slice K — Coupon Stats (Owner)
-  - [ ] Infra: Dapper query for totals/unique users/last used (`IDbConnectionFactory`).
-  - [ ] App: `GetCouponStatsQuery`.
-  - [ ] Web: `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}/stats` → 200.
-  - [ ] Tests: functional correctness of stats; API contract.
+- [x] Slice K — Coupon Stats (Owner)
+  - [x] Infra: Dapper query for totals/unique users/last used (`IDbConnectionFactory`).
+  - [x] App: `GetCouponStatsQuery`.
+  - [x] Web: `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}/stats` → 200.
+  - [x] Tests: functional correctness of stats; API contract.
 
 - [ ] Cross‑Cutting — Tests, Observability, Docs
   - [ ] Extend Swagger contract test to assert new schemas/paths present.
