@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
+using YummyZoom.Application.Common.Models;
+using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
 using YummyZoom.SharedKernel;
 using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -10,6 +13,7 @@ using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
 using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
 using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
@@ -216,6 +220,71 @@ public class CouponManagementContractTests
         var restaurantId = Guid.NewGuid();
         var couponId = Guid.NewGuid();
         var resp = await client.DeleteAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}");
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task ListCoupons_WithAuth_Returns200()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var from = DateTime.SpecifyKind(DateTime.UtcNow.AddDays(-1), DateTimeKind.Utc);
+        var to = from.AddDays(7);
+
+        var summary = new CouponSummaryDto(
+            CouponId: Guid.NewGuid(),
+            Code: "SAVE10",
+            Description: "Ten off",
+            ValueType: CouponType.Percentage,
+            Percentage: 10,
+            FixedAmount: null,
+            FixedCurrency: null,
+            FreeItemId: null,
+            Scope: CouponScope.WholeOrder,
+            ValidityStartDate: from.Date,
+            ValidityEndDate: to.Date,
+            MinOrderAmount: null,
+            MinOrderCurrency: null,
+            TotalUsageLimit: null,
+            CurrentTotalUsageCount: 0,
+            UsageLimitPerUser: null,
+            IsEnabled: true,
+            Created: DateTimeOffset.UtcNow,
+            LastModified: DateTimeOffset.UtcNow);
+
+        var page = new PaginatedList<CouponSummaryDto>(new[] { summary }, 1, 2, 5);
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<ListCouponsByRestaurantQuery>();
+            var query = (ListCouponsByRestaurantQuery)req;
+            query.PageNumber.Should().Be(2);
+            query.PageSize.Should().Be(5);
+            query.Q.Should().Be("promo");
+            query.IsEnabled.Should().BeTrue();
+            query.ActiveFrom.Should().Be(from);
+            query.ActiveTo.Should().Be(to);
+            return Result.Success(page);
+        });
+
+        var restaurantId = Guid.NewGuid();
+        var path = $"/api/v1/restaurants/{restaurantId}/coupons?pageNumber=2&pageSize=5&q=promo&enabled=true&from={Uri.EscapeDataString(from.ToString("O"))}&to={Uri.EscapeDataString(to.ToString("O"))}";
+        var resp = await client.GetAsync(path);
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var json = await resp.Content.ReadAsStringAsync();
+        TestContext.WriteLine(json);
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("items").GetArrayLength().Should().Be(1);
+    }
+
+    [Test]
+    public async Task ListCoupons_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        var resp = await client.GetAsync($"/api/v1/restaurants/{Guid.NewGuid()}/coupons");
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 

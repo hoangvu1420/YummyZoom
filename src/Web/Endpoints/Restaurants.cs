@@ -1,3 +1,4 @@
+using System.Threading;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Orders.Queries.GetRestaurantNewOrders;
@@ -40,6 +41,7 @@ using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
 using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
+using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
 using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
 
 namespace YummyZoom.Web.Endpoints;
@@ -154,6 +156,24 @@ public class Restaurants : EndpointGroupBase
         .WithDescription("Updates the availability status of a menu item. Requires restaurant staff authorization.")
         .WithStandardResults();
 
+        // GET /api/v1/restaurants/{restaurantId}/coupons
+        group.MapGet("/{restaurantId:guid}/coupons", async (Guid restaurantId, [AsParameters] ListCouponsRequestDto queryParams, ISender sender, CancellationToken ct) =>
+        {
+            var query = new ListCouponsByRestaurantQuery(
+                RestaurantId: restaurantId,
+                PageNumber: queryParams.PageNumber ?? 1,
+                PageSize: queryParams.PageSize ?? 20,
+                Q: queryParams.Q,
+                IsEnabled: queryParams.Enabled,
+                ActiveFrom: queryParams.From,
+                ActiveTo: queryParams.To);
+            var result = await sender.Send(query, ct);
+            return result.ToIResult();
+        })
+        .WithName("ListCoupons")
+        .WithSummary("List coupons for a restaurant")
+        .WithDescription("Returns paginated coupons with optional filters for code, description, enabled status, and validity window. Requires restaurant staff authorization.")
+        .WithStandardResults();
         // POST /api/v1/restaurants/{restaurantId}/coupons
         group.MapPost("/{restaurantId:guid}/coupons", async (Guid restaurantId, CreateCouponRequestDto body, ISender sender) =>
         {
@@ -723,6 +743,14 @@ public class Restaurants : EndpointGroupBase
         string? LogoUrl,
         string? Phone,
         string? Email);
+    public sealed record ListCouponsRequestDto(
+        int? PageNumber,
+        int? PageSize,
+        string? Q,
+        bool? Enabled,
+        DateTime? From,
+        DateTime? To);
+
     public sealed record CreateCouponRequestDto(
         string Code,
         string Description,
