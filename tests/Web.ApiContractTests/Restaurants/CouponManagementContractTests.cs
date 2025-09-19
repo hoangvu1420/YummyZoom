@@ -6,7 +6,7 @@ using NUnit.Framework;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
-using YummyZoom.SharedKernel;
+using YummyZoom.Application.Coupons.Queries.GetCouponDetails;
 using YummyZoom.Application.Coupons.Commands.CreateCoupon;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
@@ -289,6 +289,83 @@ public class CouponManagementContractTests
     }
 
     [Test]
+    public async Task GetCouponDetails_WithAuth_Returns200()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+        var dto = new CouponDetailsDto(
+            CouponId: couponId,
+            Code: "DETAIL10",
+            Description: "Detail coupon",
+            ValueType: CouponType.Percentage,
+            Percentage: 10,
+            FixedAmount: null,
+            FixedCurrency: null,
+            FreeItemId: null,
+            Scope: CouponScope.SpecificItems,
+            ItemIds: new List<Guid> { Guid.NewGuid() },
+            CategoryIds: Array.Empty<Guid>(),
+            ValidityStartDate: DateTime.UtcNow.AddDays(-1),
+            ValidityEndDate: DateTime.UtcNow.AddDays(5),
+            MinOrderAmount: 25,
+            MinOrderCurrency: "USD",
+            TotalUsageLimit: 100,
+            CurrentTotalUsageCount: 3,
+            UsageLimitPerUser: 2,
+            IsEnabled: true,
+            Created: DateTimeOffset.UtcNow.AddDays(-2),
+            LastModified: DateTimeOffset.UtcNow);
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetCouponDetailsQuery>();
+            var query = (GetCouponDetailsQuery)req;
+            query.RestaurantId.Should().Be(restaurantId);
+            query.CouponId.Should().Be(couponId);
+            return Result.Success(dto);
+        });
+
+        var resp = await client.GetAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}");
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var json = await resp.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("code").GetString().Should().Be("DETAIL10");
+        doc.RootElement.GetProperty("scope").GetString().Should().Be("SpecificItems");
+    }
+
+    [Test]
+    public async Task GetCouponDetails_NotFound_Returns404()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var restaurantId = Guid.NewGuid();
+        var couponId = Guid.NewGuid();
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetCouponDetailsQuery>();
+            return Result.Failure<CouponDetailsDto>(GetCouponDetailsErrors.NotFound(couponId));
+        });
+
+        var resp = await client.GetAsync($"/api/v1/restaurants/{restaurantId}/coupons/{couponId}");
+        resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Test]
+    public async Task GetCouponDetails_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        var resp = await client.GetAsync($"/api/v1/restaurants/{Guid.NewGuid()}/coupons/{Guid.NewGuid()}");
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     public async Task CreateCoupon_WithoutAuth_Returns401()
     {
         var factory = new ApiContractWebAppFactory();
@@ -316,3 +393,5 @@ public class CouponManagementContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }
+
+

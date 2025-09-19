@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using YummyZoom.Application.Common.Exceptions;
+using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
 using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
@@ -73,9 +75,8 @@ public class ListCouponsByRestaurantTests : BaseTestFixture
             isEnabled: true).Value;
         deletedCoupon.ClearDomainEvents();
         await AddAsync(deletedCoupon);
-        deletedCoupon.MarkAsDeleted(DateTimeOffset.UtcNow);
-        deletedCoupon.ClearDomainEvents();
-        await UpdateAsync(deletedCoupon);
+        var deleteResult = await SendAsync(new DeleteCouponCommand(restaurantGuid, deletedCoupon.Id.Value));
+        deleteResult.ShouldBeSuccessful();
 
         var result = await SendAsync(new ListCouponsByRestaurantQuery(
             RestaurantId: restaurantGuid,
@@ -84,7 +85,7 @@ public class ListCouponsByRestaurantTests : BaseTestFixture
 
         result.ShouldBeSuccessful();
         var page = result.Value;
-        page.TotalCount.Should().BeGreaterOrEqualTo(2);
+        page.TotalCount.Should().Be(2);
         page.Items.Should().OnlyContain(c => c.Code != "LIST_DELETED10");
         page.Items.Select(c => c.Code).Should().BeEquivalentTo(new[] { "LIST_ACTIVE10", "LIST_DISABLE10" });
     }

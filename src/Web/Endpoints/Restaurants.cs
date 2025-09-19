@@ -42,6 +42,7 @@ using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
 using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
 using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
+using YummyZoom.Application.Coupons.Queries.GetCouponDetails;
 using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
 
 namespace YummyZoom.Web.Endpoints;
@@ -173,6 +174,17 @@ public class Restaurants : EndpointGroupBase
         .WithName("ListCoupons")
         .WithSummary("List coupons for a restaurant")
         .WithDescription("Returns paginated coupons with optional filters for code, description, enabled status, and validity window. Requires restaurant staff authorization.")
+        .WithStandardResults();
+        // GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}
+        group.MapGet("/{restaurantId:guid}/coupons/{couponId:guid}", async (Guid restaurantId, Guid couponId, ISender sender, CancellationToken ct) =>
+        {
+            var query = new GetCouponDetailsQuery(restaurantId, couponId);
+            var result = await sender.Send(query, ct);
+            return result.ToIResult();
+        })
+        .WithName("GetCouponDetails")
+        .WithSummary("Get coupon details")
+        .WithDescription("Returns full coupon details including applies-to scope and usage settings. Requires restaurant staff authorization.")
         .WithStandardResults();
         // POST /api/v1/restaurants/{restaurantId}/coupons
         group.MapPost("/{restaurantId:guid}/coupons", async (Guid restaurantId, CreateCouponRequestDto body, ISender sender) =>

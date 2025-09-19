@@ -197,15 +197,15 @@
   - [x] Web: `DELETE /api/v1/restaurants/{restaurantId}/coupons/{couponId}` -> 204.
   - [x] Tests: functional tests + API contract; list should exclude deleted; duplicate code reuse behavior per chosen index strategy.
 
-- [x] Slice I ? Coupon List (Owner)
+- [x] Slice I — Coupon List (Owner)
   - [x] App: `ListCouponsByRestaurantQuery` (filters: enabled, active window, q; paging).
   - [x] Web: `GET /api/v1/restaurants/{restaurantId}/coupons` -> 200 paged summaries.
   - [x] Tests: query paging/filtering + API contract tests.
 
-- [ ] Slice J — Coupon Details (Owner)
-  - [ ] App: `GetCouponDetailsQuery`.
-  - [ ] Web: `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 200.
-  - [ ] Tests: API contract + not found.
+- [x] Slice J — Coupon Details (Owner)
+  - [x] App: `GetCouponDetailsQuery`.
+  - [x] Web: `GET /api/v1/restaurants/{restaurantId}/coupons/{couponId}` → 200.
+  - [x] Tests: API contract + not found.
 
 - [ ] Slice K — Coupon Stats (Owner)
   - [ ] Infra: Dapper query for totals/unique users/last used (`IDbConnectionFactory`).
