@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +23,7 @@ using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.SharedKernel;
@@ -45,6 +46,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     // Read Models
     public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
     public DbSet<RestaurantReviewSummary> RestaurantReviewSummaries => Set<RestaurantReviewSummary>();
+    public DbSet<AdminPlatformMetricsSnapshot> AdminPlatformMetricsSnapshots => Set<AdminPlatformMetricsSnapshot>();
+    public DbSet<AdminDailyPerformanceSeries> AdminDailyPerformanceSeries => Set<AdminDailyPerformanceSeries>();
+    public DbSet<AdminRestaurantHealthSummary> AdminRestaurantHealthSummaries => Set<AdminRestaurantHealthSummary>();
     public DbSet<FullMenuView> FullMenuViews => Set<FullMenuView>();
     public DbSet<SearchIndexItem> SearchIndexItems => Set<SearchIndexItem>();
 

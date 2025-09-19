@@ -34,6 +34,7 @@ using YummyZoom.Infrastructure.Persistence;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.Infrastructure.Persistence.Repositories;
@@ -245,6 +246,11 @@ public static class DependencyInjection
         builder.Services.Configure<ReviewSummaryMaintenanceOptions>(
             builder.Configuration.GetSection("ReviewSummaryMaintenance"));
         builder.Services.AddHostedService<ReviewSummaryMaintenanceHostedService>();
+
+        builder.Services.AddScoped<IAdminMetricsMaintainer, AdminMetricsMaintainer>();
+        builder.Services.Configure<AdminMetricsMaintenanceOptions>(
+            builder.Configuration.GetSection(AdminMetricsMaintenanceOptions.SectionName));
+        builder.Services.AddHostedService<AdminMetricsMaintenanceHostedService>();
     }
 
     public static void AddFirebaseIfConfigured(this IHostApplicationBuilder builder)
