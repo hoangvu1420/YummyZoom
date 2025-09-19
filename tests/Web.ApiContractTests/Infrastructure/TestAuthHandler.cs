@@ -28,15 +28,26 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
             return Task.FromResult(AuthenticateResult.Fail("Missing x-test-user-id header"));
         }
 
-        var permissionsRaw = Request.Headers["x-test-permissions"].FirstOrDefault();
         var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
+
+        var permissionsRaw = Request.Headers["x-test-permissions"].FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(permissionsRaw))
         {
-            foreach (var p in permissionsRaw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            foreach (var permission in permissionsRaw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
-                claims.Add(new Claim("permission", p));
+                claims.Add(new Claim("permission", permission));
             }
         }
+
+        var rolesRaw = Request.Headers["x-test-roles"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(rolesRaw))
+        {
+            foreach (var role in rolesRaw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+        }
+
         var identity = new ClaimsIdentity(claims, Scheme);
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, Scheme);
