@@ -19,6 +19,11 @@ These principles should guide every piece of documentation you write.
     *   **Be Direct:** Use active voice (e.g., "The endpoint returns a user object") instead of passive voice (e.g., "A user object is returned by the endpoint").
     *   **Be Scannable:** Use bullet points, tables, and bold text to structure information so it can be understood at a glance.
 
+### API Versioning Note
+
+- The API implements URL segment versioning.
+- Use the versioned base path `/api/v1/` for all endpoints in documentation examples and links.
+
 ### **Part 2: Documentation Structure (The Series)**
 
 To create a linkable series, structure your documentation into a hierarchy of Markdown files. This structure is ideal for platforms like GitBook, Docusaurus, MkDocs, or even a well-organized folder in a Git repository.
@@ -53,6 +58,8 @@ To create a linkable series, structure your documentation into a hierarchy of Ma
     ├── 02-Rate-Limiting.md
     └── 03-Changelog.md
 ```
+
+Note: The structure above is just an example, the actual structure should be based on the features and layers existing in the project.
 
 ### **Part 3: Content Templates & Style Guide**
 
