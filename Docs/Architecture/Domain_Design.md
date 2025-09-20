@@ -402,6 +402,55 @@ This document outlines the domain design for the YummyZoom platform, focusing on
 
 ---
 
+#### 15. `RestaurantRegistration` Aggregate
+
+* **Aggregate Root:** `RestaurantRegistration`
+* **Description:** Manages the end-to-end onboarding workflow for a restaurant applying to join the platform. Captures the applicant, submitted business details and documents, and drives the review lifecycle until approval or rejection. Optimized for workflow correctness and auditability rather than high-frequency updates.
+* **Entities/Value Objects (VOs) within:**
+  * `RestaurantRegistration` (Entity - Root):
+    * `RegistrationID` (Identifier)
+    * `ApplicantUserID` (Identifier - the user initiating the registration)
+    * `ProposedRestaurantName` (String)
+    * `Location` (`Address` VO)
+    * `ContactInfo` (VO: `PhoneNumber`, `Email`)
+    * `TaxIdentificationNumber` (String, optional)
+    * `BankingInfoToken` (String, optional - tokenized reference, never raw details)
+    * `Status` (Enum: `Draft`, `Submitted`, `UnderReview`, `ChangesRequested`, `Approved`, `Rejected`)
+    * `SubmittedAt` (DateTime, optional)
+    * `ReviewedAt` (DateTime, optional)
+    * `ApprovedAt` (DateTime, optional)
+    * `ReviewerAdminID` (Identifier, optional)
+    * `RejectionReasons` (List of Strings)
+    * `Notes` (String, optional - internal review notes)
+  * `RegistrationDocument` (List of Child Entities):
+    * `DocumentID` (Identifier)
+    * `Type` (Enum: `BusinessLicense`, `IdentityProof`, `FoodSafetyCertificate`, `BankVerification`, `Other`)
+    * `StorageUrl` (String - link to storage)
+    * `UploadedAt` (DateTime)
+    * `IsVerified` (Boolean)
+  * `VerificationChecklistItem` (List of Value Objects):
+    * `ItemName` (String, e.g., "KYC Verified")
+    * `IsCompleted` (Boolean)
+    * `CompletedAt` (DateTime, optional)
+* **Invariants:**
+  * `Submitted` requires: `ProposedRestaurantName`, `Location`, at least one `RegistrationDocument` of type `BusinessLicense`.
+  * Only allowed transitions:
+    * `Draft -> Submitted`
+    * `Submitted -> UnderReview`
+    * `UnderReview -> ChangesRequested | Approved | Rejected`
+    * `ChangesRequested -> Submitted`
+  * `Approved` requires all mandatory `VerificationChecklistItem`s to be `IsCompleted = true`.
+  * Once `Approved`, the registration becomes immutable except for idempotent marking and correlation fields.
+  * An `ApplicantUserID` may have at most one active (non-terminal) registration for the same proposed restaurant identity.
+* **Behavior and Events:**
+  * `Submit()`, `StartReview(adminId)`, `RequestChanges(reasons)`, `Approve(adminId)`, `Reject(adminId, reasons)`.
+  * Raises domain events such as `RegistrationSubmitted`, `RegistrationApproved`, `RegistrationRejected`, `RegistrationChangesRequested` for downstream provisioning and notifications.
+* **References to other aggregates (by ID):**
+  * `ApplicantUserID` (references `User`)
+  * On approval, an application service will create a `Restaurant` aggregate and a `RoleAssignment` linking the applicant as `Owner` (outside this aggregate's boundary).
+
+---
+
 ### System-Wide Domain Object Relationship Diagram
 
 This diagram illustrates all major domain objects, grouped into their logical Bounded Contexts. It shows how they are decoupled and relate to one another primarily through ID references. (AG = Aggregate, EN = Entity).
@@ -436,6 +485,10 @@ graph TD
     
     subgraph Support & Governance Context
         ST[12. SupportTicket AG]
+    end
+
+    subgraph Onboarding Context
+        RR[15. RestaurantRegistration AG]
     end
 
     %% Legend
@@ -485,6 +538,10 @@ graph TD
     TC -- Has members --> U
     TC -- For --> R
     TC -- Contains --> MenuItem
+
+    RR -- Initiated by --> U
+    RR -- On approval, provisions --> R
+    RR -- Results in role --> RA
     
     %% Styling
     style U fill:#cde4ff,stroke:#0052cc
@@ -502,6 +559,7 @@ graph TD
     style AccTrans fill:#d4edda,stroke:#155724
     style ST fill:#cde4ff,stroke:#0052cc
     style TC fill:#cde4ff,stroke:#0052cc
+    style RR fill:#cde4ff,stroke:#0052cc
 ```
 
 ---

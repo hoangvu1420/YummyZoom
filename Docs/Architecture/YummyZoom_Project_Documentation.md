@@ -9,15 +9,44 @@ YummyZoom/
 ├── src/
 │   ├── AppHost/             - Service hosting and configuration
 │   ├── Application/         - Application-specific business logic, commands, queries, DTOs, validators
+│   │   ├── Abstractions/
+│   │   ├── Commands/
+│   │   ├── Queries/
+│   │   ├── DTOs/
+│   │   ├── Validators/
+│   │   └── Behaviors/       - Pipeline behaviors (logging, validation, transactions)
 │   ├── Domain/              - Core business logic, entities, value objects, aggregates, domain events, errors
+│   │   ├── Aggregates/
+│   │   ├── Entities/
+│   │   ├── ValueObjects/
+│   │   ├── Events/
+│   │   ├── Errors/
+│   │   ├── Services/
+│   │   └── Specifications/
 │   ├── Infrastructure/      - Implementation details for infrastructure concerns (data access, identity, etc.)
-│   ├── ServiceDefaults/     - Default service configurations
+│   │   ├── Persistence/
+│   │   │   ├── EfCore/      - Entity Framework Core implementation
+│   │   │   │   ├── Configurations/
+│   │   │   │   ├── Migrations/
+│   │   │   │   └── Interceptors/
+│   │   │   └── Dapper/
+│   │   ├── Identity/
+│   │   ├── ReadModels/
+│   │   ├── Repositories/
+│   │   └── Services/
+│   ├── ServiceDefaults/     - Default service configurations using .NET Aspire
 │   ├── SharedKernel/        - Common components used across layers (Result pattern, etc.)
 │   └── Web/                 - API endpoints and presentation logic
+│       ├── Endpoints/
+│       ├── Contracts/
+│       ├── Filters/
+│       ├── Middlewares/
+│       └── Configuration/
 └── tests/
     ├── Application.FunctionalTests/
     ├── Application.UnitTests/
     ├── Domain.UnitTests/
+    ├── Web.ApiContractTests/
     └── Infrastructure.IntegrationTests/
 ```
 
@@ -35,7 +64,11 @@ YummyZoom/
 
 - **AppHost and ServiceDefaults:** These projects are responsible for hosting the application services and providing default configurations using .NET Aspire, similar to a docker-compose file.
 
-- **tests:** This directory contains automated tests for different layers of the application, ensuring the quality and correctness of the codebase.
+## Test Projects
+
+- **Application.FunctionalTests**: End-to-end tests of application use cases via handlers, using real infrastructure where needed and test doubles where appropriate. See `Docs/Development-Guidelines/Application-Functional-Tests-Guidelines.md`.
+- **Domain.UnitTests**: Pure unit tests for aggregates, entities, value objects, and domain services. Validate behaviors, invariants, `Result` outcomes, and domain events without external dependencies. See `Docs/Development-Guidelines/Domain_Layer_Test_Guidelines.md`.
+- **Web.ApiContractTests**: Contract tests for web endpoints to ensure request/response schemas, status codes, and error shapes remain stable. Treat the API as a contract with strict assertions. See `Docs/Development-Guidelines/WebApi_Contract_Tests_Guidelines.md`.
 
 ## Rules for Working with a New Feature
 
