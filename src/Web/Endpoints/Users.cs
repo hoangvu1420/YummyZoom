@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
 using YummyZoom.Application.Auth.Commands.CompleteSignup;
+using YummyZoom.Application.Auth.Commands.SetPassword;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
@@ -217,6 +218,22 @@ public class Users : EndpointGroupBase
         .WithName("CompleteSignup")
         .WithSummary("Complete signup after OTP")
         .WithDescription("Creates the Domain User record for the authenticated Identity user after a successful OTP verification. Idempotent if already completed.")
+        .WithStandardResults()
+        .RequireAuthorization();
+
+        #endregion
+
+        #region Authentication – Set Password (Authenticated)
+
+        // POST /api/v1/users/auth/set-password
+        protectedGroup.MapPost("/auth/set-password", async ([FromBody] SetPasswordCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess ? Results.NoContent() : result.ToIResult();
+        })
+        .WithName("Auth_SetPassword")
+        .WithSummary("Set password for OTP-created accounts")
+        .WithDescription("Sets an initial password for the authenticated user if none exists yet. Username remains the E.164 phone number.")
         .WithStandardResults()
         .RequireAuthorization();
 

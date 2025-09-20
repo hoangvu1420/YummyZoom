@@ -322,4 +322,29 @@ public class IdentityService : IIdentityService
         var user = await _userManager.FindByIdAsync(userId.ToString());
         return user != null;
     }
+
+    public async Task<Result> SetPasswordAsync(string userId, string newPassword)
+    {
+        var identityUser = await _userManager.FindByIdAsync(userId);
+        if (identityUser is null)
+        {
+            return Result.Failure(UserErrors.InvalidUserId(userId));
+        }
+
+        // If the user already has a password, return a failure to prevent misuse of this endpoint
+        var hasPassword = await _userManager.HasPasswordAsync(identityUser);
+        if (hasPassword)
+        {
+            return Result.Failure(Error.Problem("Auth.PasswordAlreadySet", "Password is already set. Use change-password instead."));
+        }
+
+        var addResult = await _userManager.AddPasswordAsync(identityUser, newPassword);
+        if (addResult.Succeeded)
+        {
+            return Result.Success();
+        }
+
+        var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));
+        return Result.Failure(UserErrors.RegistrationFailed($"Failed to set password: {errors}"));
+    }
 }

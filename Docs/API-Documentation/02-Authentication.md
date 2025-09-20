@@ -115,6 +115,21 @@ You can check whether onboarding is required:
 { "isNewUser": true, "requiresOnboarding": true }
 ```
 
+### Set Password (OTP Users)
+
+After signing in with OTP, users can optionally set a password to enable username/password login.
+
+- **Method/Path**: `POST /api/v1/users/auth/set-password`
+- **Authorization**: Authenticated (Bearer)
+- **Body**
+```json
+{ "newPassword": "S3cret!" }
+```
+- **Success**: `204 No Content`
+- **Notes**:
+  - Only works if no password exists yet for the account. If a password is already set, the server returns a problem response indicating to use change-password instead.
+  - Username remains the E.164 phone number (e.g., `+15551234567`) unless you update email/username.
+
 ### Identity Endpoints (Email/Password)
 
 The API also exposes the standard Identity endpoints for email/password flows via the Identity API mapping. The typical endpoints include:

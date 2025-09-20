@@ -288,7 +288,7 @@ public class ApplicationDbContextInitialiser
                         "USA",
                         "+1 (555) 123-4567",
                         "contact@yummyzoom.com",
-                        "Mon-Fri: 9AM-9PM, Sat-Sun: 10AM-10PM");
+                        "10:00-22:00");
 
                     if (restaurantResult.IsFailure)
                     {

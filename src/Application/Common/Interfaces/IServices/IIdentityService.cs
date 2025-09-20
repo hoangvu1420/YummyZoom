@@ -23,4 +23,6 @@ public interface IIdentityService
     Task<Result> RemoveUserFromRoleAsync(Guid userId, string role);
 
     Task<bool> UserExistsAsync(Guid userId);
+
+    Task<Result> SetPasswordAsync(string userId, string newPassword);
 }
