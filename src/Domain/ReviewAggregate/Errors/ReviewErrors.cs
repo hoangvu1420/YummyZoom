@@ -9,7 +9,7 @@ public static class ReviewErrors
         "Rating must be between 1 and 5");
 
     public static Error InvalidOrderId => Error.Validation(
-        "Review.InvalidOrderId", 
+        "Review.InvalidOrderId",
         "Order ID cannot be null");
 
     public static Error InvalidCustomerId => Error.Validation(

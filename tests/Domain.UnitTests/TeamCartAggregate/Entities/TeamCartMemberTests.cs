@@ -10,7 +10,7 @@ public class TeamCartMemberTests
 {
     private readonly UserId _userId = UserId.CreateUnique();
     private const string _validName = "Test User";
-    
+
     [Test]
     public void Create_WithValidInputs_ShouldCreateMemberWithCorrectProperties()
     {
@@ -20,7 +20,7 @@ public class TeamCartMemberTests
         // Assert
         result.ShouldBeSuccessful();
         var member = result.Value;
-        
+
         member.Id.Value.Should().NotBe(Guid.Empty);
         member.UserId.Should().Be(_userId);
         member.Name.Should().Be(_validName);

@@ -1,5 +1,5 @@
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.Errors;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAggregate.ValueObjects;
 
@@ -23,7 +23,7 @@ public class ContactInfoTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var contactInfo = result.Value;
-        
+
         contactInfo.Should().NotBeNull();
         contactInfo.PhoneNumber.Should().Be(ValidPhoneNumber);
         contactInfo.Email.Should().Be(ValidEmail);
@@ -101,7 +101,7 @@ public class ContactInfoTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var contactInfo = result.Value;
-        
+
         contactInfo.PhoneNumber.Should().Be(ValidPhoneNumber);
         contactInfo.Email.Should().Be(ValidEmail);
     }

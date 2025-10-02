@@ -14,7 +14,7 @@ public class UpdateMenuDetailsTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new UpdateMenuDetailsCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuId: Testing.TestData.DefaultMenuId,
@@ -28,7 +28,7 @@ public class UpdateMenuDetailsTests : BaseTestFixture
         result.ShouldBeSuccessful();
 
         var menu = await FindAsync<Menu>(MenuId.Create(Testing.TestData.DefaultMenuId));
-        
+
         menu.Should().NotBeNull();
         menu!.Name.Should().Be("Updated Menu Name");
         menu.Description.Should().Be("Updated menu description");
@@ -39,7 +39,7 @@ public class UpdateMenuDetailsTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new UpdateMenuDetailsCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuId: Guid.NewGuid(), // Non-existent menu
@@ -75,7 +75,7 @@ public class UpdateMenuDetailsTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new UpdateMenuDetailsCommand(
             RestaurantId: Guid.Empty,
             MenuId: Guid.Empty,

@@ -81,4 +81,4 @@ public static class TagCategoryExtensions
     {
         return Enum.Parse<TagCategory>(value, ignoreCase: true);
     }
-} 
+}

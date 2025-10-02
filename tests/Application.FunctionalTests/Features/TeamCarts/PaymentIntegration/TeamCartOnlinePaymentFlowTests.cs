@@ -2,13 +2,13 @@ using Microsoft.Extensions.Options;
 using Stripe;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
+using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
-using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
@@ -88,7 +88,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         resp.ShouldBeSuccessful();
         return resp.Value;
     }
-    
+
     [Test]
     public async Task CreateAndPayAllMembers_WithStripe_SucceedsAndConverts()
     {

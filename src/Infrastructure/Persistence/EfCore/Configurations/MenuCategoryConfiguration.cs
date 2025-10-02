@@ -22,7 +22,7 @@ public class MenuCategoryConfiguration : IEntityTypeConfiguration<MenuCategory>
         builder.Property(mc => mc.Name)
             .HasMaxLength(200)
             .IsRequired();
-        
+
         builder.Property(mc => mc.DisplayOrder)
             .IsRequired();
 
@@ -38,7 +38,7 @@ public class MenuCategoryConfiguration : IEntityTypeConfiguration<MenuCategory>
         // --- 5. Indexes ---
         builder.HasIndex(mc => mc.MenuId)
             .HasDatabaseName("IX_MenuCategories_MenuId");
-        
+
         // Add index on DisplayOrder for ordered retrieval
         builder.HasIndex(mc => new { mc.MenuId, mc.DisplayOrder })
             .HasDatabaseName("IX_MenuCategories_MenuId_DisplayOrder");

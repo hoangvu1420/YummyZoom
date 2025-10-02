@@ -22,7 +22,7 @@ public static class ResultAssertions
         result.ShouldBeSuccessful();
         return result.Value;
     }
-    
+
     public static ObjectAssertions ShouldHaveValue<T>(this Result<T> result)
     {
         result.ShouldBeSuccessful();

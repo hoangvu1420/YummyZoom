@@ -4,12 +4,12 @@ using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
-using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
-using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
+using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 

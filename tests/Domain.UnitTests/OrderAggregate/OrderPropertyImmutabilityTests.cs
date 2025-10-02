@@ -22,9 +22,9 @@ public class OrderPropertyImmutabilityTests
             "Test Item",
             new Money(10.00m, Currencies.Default),
             2).Value;
-        
+
         var orderItems = new List<OrderItem> { orderItem };
-        
+
         var subtotal = new Money(orderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         var totalAmount = subtotal;
 
@@ -33,7 +33,7 @@ public class OrderPropertyImmutabilityTests
             DefaultCustomerId,
             DefaultRestaurantId,
             DefaultDeliveryAddress,
-            orderItems, 
+            orderItems,
             DefaultSpecialInstructions,
             subtotal,
             Money.Zero(Currencies.Default),
@@ -43,7 +43,7 @@ public class OrderPropertyImmutabilityTests
             totalAmount,
             PaymentMethodType.CashOnDelivery,
             null);
-            
+
         result.ShouldBeSuccessful();
         var order = result.Value;
 
@@ -57,7 +57,7 @@ public class OrderPropertyImmutabilityTests
 
         orderItems.Add(CreateDefaultOrderItems().First());
         order.OrderItems.Should().HaveCount(1);
-        
+
         order.OrderItems.First().Id.Should().Be(orderItem.Id);
     }
 

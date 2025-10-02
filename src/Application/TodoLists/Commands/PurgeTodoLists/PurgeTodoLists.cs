@@ -23,7 +23,7 @@ public class PurgeTodoListsCommandHandler : IRequestHandler<PurgeTodoListsComman
         _context.TodoLists.RemoveRange(_context.TodoLists);
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Success(Unit.Value);
     }
 }

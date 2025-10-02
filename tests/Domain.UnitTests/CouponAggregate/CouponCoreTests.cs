@@ -41,7 +41,7 @@ public class CouponCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var coupon = result.Value;
-        
+
         coupon.Id.Value.Should().NotBe(Guid.Empty);
         coupon.RestaurantId.Should().Be(DefaultRestaurantId);
         coupon.Code.Should().Be(DefaultCode);
@@ -87,7 +87,7 @@ public class CouponCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var coupon = result.Value;
-        
+
         coupon.MinOrderAmount.Should().Be(DefaultMinOrderAmount);
         coupon.TotalUsageLimit.Should().Be(100);
         coupon.UsageLimitPerUser.Should().Be(5);
@@ -329,7 +329,7 @@ public class CouponCoreTests
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        
+
         // Act
         var result = Coupon.Create(
             couponId,
@@ -345,7 +345,7 @@ public class CouponCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var coupon = result.Value;
-        
+
         coupon.Id.Should().Be(couponId);
         coupon.CurrentTotalUsageCount.Should().Be(5);
         coupon.DomainEvents.Should().BeEmpty(); // No events for persistence recreation
@@ -356,7 +356,7 @@ public class CouponCoreTests
     {
         // Arrange
         var couponId = CouponId.CreateUnique();
-        
+
         // Act
         var result = Coupon.Create(
             couponId,
@@ -392,7 +392,7 @@ public class CouponCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         coupon.IsEnabled.Should().BeTrue();
-        
+
         // Verify domain event
         coupon.DomainEvents.Should().Contain(e => e.GetType() == typeof(CouponEnabled));
         var enabledEvent = coupon.DomainEvents.OfType<CouponEnabled>().Single();
@@ -433,7 +433,7 @@ public class CouponCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         coupon.IsEnabled.Should().BeFalse();
-        
+
         // Verify domain event
         coupon.DomainEvents.Should().Contain(e => e.GetType() == typeof(CouponDisabled));
         var disabledEvent = coupon.DomainEvents.OfType<CouponDisabled>().Single();

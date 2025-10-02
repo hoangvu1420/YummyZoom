@@ -129,19 +129,19 @@ public class ApplicationDbContextInitialiser
         if (!_context.TodoLists.Any())
         {
             var todoList = TodoList.Create("Todo List", Color.White);
-            
+
             var item1 = TodoItem.Create("Make a todo list 📃", null, PriorityLevel.None, null);
             item1.ClearDomainEvents();
             todoList.AddItem(item1);
-            
+
             var item2 = TodoItem.Create("Check off the first item ✅", null, PriorityLevel.None, null);
             item2.ClearDomainEvents();
             todoList.AddItem(item2);
-            
+
             var item3 = TodoItem.Create("Realise you've already done two things on the list! 🤯", null, PriorityLevel.None, null);
             item3.ClearDomainEvents();
             todoList.AddItem(item3);
-            
+
             var item4 = TodoItem.Create("Reward yourself with a nice, long nap 🏆", null, PriorityLevel.None, null);
             item4.ClearDomainEvents();
             todoList.AddItem(item4);
@@ -253,7 +253,7 @@ public class ApplicationDbContextInitialiser
             _logger.LogInformation("Restaurants already exist, skipping seeding");
             return;
         }
-       
+
         await SeedRestaurantWithMenuAsync(
             "YummyZoom Italian",
             "Authentic Italian cuisine with a modern twist",
@@ -271,7 +271,7 @@ public class ApplicationDbContextInitialiser
             await strategy.ExecuteAsync(async () =>
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();
-               
+
                 try
                 {
                     // 1. Create Restaurant
@@ -296,7 +296,7 @@ public class ApplicationDbContextInitialiser
                         await transaction.RollbackAsync();
                         return;
                     }
-                   
+
                     // Verify and accept orders for this restaurant
                     restaurantResult.Value.Verify();
                     restaurantResult.Value.AcceptOrders();
@@ -306,16 +306,16 @@ public class ApplicationDbContextInitialiser
 
                     // Add restaurant to context
                     _context.Restaurants.Add(restaurantResult.Value);
-                    
+
                     await _context.SaveChangesAsync();
-                   
+
                     // 2. Create Menu
                     var menuResult = Menu.Create(
                         restaurantResult.Value.Id,
                         "Main Menu",
                         "Our delicious offerings",
                         isEnabled: true);
-                       
+
                     if (menuResult.IsFailure)
                     {
                         _logger.LogWarning("Failed to create menu: {Error}", menuResult.Error);
@@ -325,16 +325,16 @@ public class ApplicationDbContextInitialiser
 
                     // Clear domain events to avoid producing events during seeding
                     menuResult.Value.ClearDomainEvents();
-                   
+
                     _context.Menus.Add(menuResult.Value);
                     await _context.SaveChangesAsync();
-                   
+
                     // 3. Create MenuCategory
                     var categoryResult = MenuCategory.Create(
                         menuResult.Value.Id,
                         "Popular Items",
                         1);
-                       
+
                     if (categoryResult.IsFailure)
                     {
                         _logger.LogWarning("Failed to create menu category: {Error}", categoryResult.Error);
@@ -344,55 +344,55 @@ public class ApplicationDbContextInitialiser
 
                     // Clear domain events to avoid producing events during seeding
                     categoryResult.Value.ClearDomainEvents();
-                   
+
                     _context.MenuCategories.Add(categoryResult.Value);
                     await _context.SaveChangesAsync();
-                   
+
                     // 4. Create MenuItems
                     var item1 = await CreateMenuItem(
                         restaurantResult.Value.Id,
-                        categoryResult.Value.Id, 
-                        "Pizza Margherita", 
+                        categoryResult.Value.Id,
+                        "Pizza Margherita",
                         "Classic pizza with tomato, mozzarella, and basil",
                         12.99m,
                         "https://example.com/pizza.jpg");
-                       
+
                     var item2 = await CreateMenuItem(
                         restaurantResult.Value.Id,
-                        categoryResult.Value.Id, 
-                        "Spaghetti Carbonara", 
+                        categoryResult.Value.Id,
+                        "Spaghetti Carbonara",
                         "Creamy pasta with pancetta and parmesan",
                         14.99m,
                         "https://example.com/pasta.jpg");
-                       
+
                     var item3 = await CreateMenuItem(
                         restaurantResult.Value.Id,
-                        categoryResult.Value.Id, 
-                        "Tiramisu", 
+                        categoryResult.Value.Id,
+                        "Tiramisu",
                         "Classic Italian coffee-flavored dessert",
                         7.99m,
                         "https://example.com/dessert.jpg");
-                   
+
                     await transaction.CommitAsync();
-                   
+
                     _logger.LogInformation("Restaurant data seeding completed successfully");
                     _logger.LogInformation("Seeded entities hierarchy:");
-                    _logger.LogInformation("- Restaurant: {RestaurantName} (ID: {RestaurantId}, Verified: {IsVerified}, Accepting Orders: {IsAccepting})", 
-                        restaurantResult.Value.Name, restaurantResult.Value.Id.Value, 
+                    _logger.LogInformation("- Restaurant: {RestaurantName} (ID: {RestaurantId}, Verified: {IsVerified}, Accepting Orders: {IsAccepting})",
+                        restaurantResult.Value.Name, restaurantResult.Value.Id.Value,
                         restaurantResult.Value.IsVerified, restaurantResult.Value.IsAcceptingOrders);
-                    _logger.LogInformation("  └─ Menu: {MenuName} (ID: {MenuId})", 
+                    _logger.LogInformation("  └─ Menu: {MenuName} (ID: {MenuId})",
                         menuResult.Value.Name, menuResult.Value.Id.Value);
-                    _logger.LogInformation("     └─ Category: {CategoryName} (ID: {CategoryId})", 
+                    _logger.LogInformation("     └─ Category: {CategoryName} (ID: {CategoryId})",
                         categoryResult.Value.Name, categoryResult.Value.Id.Value);
-                    
+
                     if (item1 is not null)
-                        _logger.LogInformation("        ├─ MenuItem: {Item1Name} (ID: {Item1Id})", 
+                        _logger.LogInformation("        ├─ MenuItem: {Item1Name} (ID: {Item1Id})",
                             item1.Name, item1.Id.Value);
                     if (item2 is not null)
-                        _logger.LogInformation("        ├─ MenuItem: {Item2Name} (ID: {Item2Id})", 
+                        _logger.LogInformation("        ├─ MenuItem: {Item2Name} (ID: {Item2Id})",
                             item2.Name, item2.Id.Value);
                     if (item3 is not null)
-                        _logger.LogInformation("        └─ MenuItem: {Item3Name} (ID: {Item3Id})", 
+                        _logger.LogInformation("        └─ MenuItem: {Item3Name} (ID: {Item3Id})",
                             item3.Name, item3.Id.Value);
                 }
                 catch (Exception ex)
@@ -409,15 +409,15 @@ public class ApplicationDbContextInitialiser
     }
 
     private async Task<MenuItem?> CreateMenuItem(
-        RestaurantId restaurantId, 
-        MenuCategoryId categoryId, 
-        string name, 
-        string description, 
-        decimal price, 
+        RestaurantId restaurantId,
+        MenuCategoryId categoryId,
+        string name,
+        string description,
+        decimal price,
         string? imageUrl = null)
     {
         var priceObj = new Money(price, "USD");
-       
+
         var menuItemResult = MenuItem.Create(
             restaurantId,
             categoryId,
@@ -425,7 +425,7 @@ public class ApplicationDbContextInitialiser
             description,
             priceObj,
             imageUrl);
-           
+
         if (menuItemResult.IsFailure)
         {
             _logger.LogWarning("Failed to create menu item '{Name}': {Error}", name, menuItemResult.Error);
@@ -434,10 +434,10 @@ public class ApplicationDbContextInitialiser
 
         // Clear domain events to avoid producing events during seeding
         menuItemResult.Value.ClearDomainEvents();
-       
+
         _context.MenuItems.Add(menuItemResult.Value);
         await _context.SaveChangesAsync();
-            
+
         return menuItemResult.Value;
     }
 }

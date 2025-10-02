@@ -25,9 +25,9 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Arrange
         var expectedPaymentIntentId = "pi_test_1234567890";
         var expectedClientSecret = "pi_test_1234567890_secret_abcdefgh";
-        
+
         await ConfigureCustomPaymentGatewayAsync(expectedPaymentIntentId, expectedClientSecret);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
 
@@ -38,14 +38,14 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().Be(expectedPaymentIntentId);
         result.Value.ClientSecret.Should().Be(expectedClientSecret);
-        
+
         // Verify payment gateway was called with correct parameters
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
             "USD",
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
-        
+
         // Verify order was created with payment intent reference
         var order = await FindOrderAsync(result.Value.OrderId);
         order.Should().NotBeNull();
@@ -68,10 +68,10 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().NotBeNullOrEmpty();
         result.Value.ClientSecret.Should().NotBeNullOrEmpty();
-        
+
         // Verify payment gateway was called
         InitiateOrderTestHelper.ValidatePaymentIntentCreation(PaymentGatewayMock, shouldBeCalled: true);
-        
+
         // Verify order was created with correct payment method
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.PaymentTransactions.Should().HaveCount(1);
@@ -92,7 +92,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().NotBeNullOrEmpty();
         result.Value.ClientSecret.Should().NotBeNullOrEmpty();
-        
+
         // Verify order was created with correct payment method
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.PaymentTransactions.Should().HaveCount(1);
@@ -113,7 +113,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().NotBeNullOrEmpty();
         result.Value.ClientSecret.Should().NotBeNullOrEmpty();
-        
+
         // Verify order was created with correct payment method
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.PaymentTransactions.Should().HaveCount(1);
@@ -130,7 +130,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Arrange
         var paymentErrorMessage = "Payment gateway service unavailable";
         await ConfigureFailingPaymentGatewayAsync(paymentErrorMessage);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
 
@@ -141,11 +141,11 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeFailure();
         result.Error.Code.Should().Be("PaymentGateway.Error");
         result.Error.Description.Should().Be(paymentErrorMessage);
-        
+
         // Verify order was not created in database
         var orderCount = await CountAsync<Order>();
         orderCount.Should().Be(0);
-        
+
         // Verify payment gateway was called
         InitiateOrderTestHelper.ValidatePaymentIntentCreation(PaymentGatewayMock, shouldBeCalled: true);
     }
@@ -162,9 +162,9 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(SharedKernel.Result.Failure<PaymentIntentResult>(
                 Error.Failure("PaymentGateway.InvalidResponse", "Invalid response from payment gateway"))));
-        
+
         ReplaceService(mock.Object);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
 
@@ -174,7 +174,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeFailure();
         result.Error.Code.Should().Be("PaymentGateway.InvalidResponse");
-        
+
         // Verify transaction was rolled back
         var orderCount = await CountAsync<Order>();
         orderCount.Should().Be(0);
@@ -196,7 +196,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with correct metadata
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
@@ -222,7 +222,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with correct total amount
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount == result.Value.TotalAmount.Amount),
@@ -244,14 +244,14 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with amount including tip
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount > 0), // Total should include tip
             "USD",
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
-        
+
         // Verify order includes tip amount
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.TipAmount.Amount.Should().Be(tipAmount);
@@ -270,14 +270,14 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with discounted amount
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount == result.Value.TotalAmount.Amount),
             "USD",
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
-        
+
         // Verify order has discount applied
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.DiscountAmount.Amount.Should().BeGreaterThan(0);
@@ -301,10 +301,10 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().BeNull();
         result.Value.ClientSecret.Should().BeNull();
-        
+
         // Verify payment gateway service was not called
         InitiateOrderTestHelper.ValidatePaymentIntentCreation(PaymentGatewayMock, shouldBeCalled: false);
-        
+
         // Verify order was created with correct payment method
         var order = await FindOrderAsync(result.Value.OrderId);
         order.Should().NotBeNull();
@@ -328,7 +328,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().BeNull();
         result.Value.ClientSecret.Should().BeNull();
-        
+
         // Verify order was created with tip and COD
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.PaymentTransactions.Should().HaveCount(1);
@@ -351,7 +351,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         result.ShouldBeSuccessful();
         result.Value.PaymentIntentId.Should().BeNull();
         result.Value.ClientSecret.Should().BeNull();
-        
+
         // Verify order was created with discount and COD
         var order = await FindOrderAsync(result.Value.OrderId);
         order!.PaymentTransactions.Should().HaveCount(1);
@@ -375,7 +375,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with USD currency
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
@@ -396,7 +396,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify payment gateway was called with cancellation token
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
@@ -415,7 +415,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Arrange
         var initialOrderCount = await CountAsync<Order>();
         await ConfigureFailingPaymentGatewayAsync("Payment processor timeout");
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
 
@@ -424,11 +424,11 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeFailure();
-        
+
         // Verify no order was persisted in database
         var finalOrderCount = await CountAsync<Order>();
         finalOrderCount.Should().Be(initialOrderCount);
-        
+
         // Verify transaction was properly rolled back
         var orders = await FindAllOrdersAsync();
         orders.Should().BeEmpty();
@@ -446,13 +446,13 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify order and payment intent created atomically
         var order = await FindOrderAsync(result.Value.OrderId);
         order.Should().NotBeNull();
         order!.PaymentTransactions.Should().HaveCount(1);
         order.PaymentTransactions.First().PaymentGatewayReferenceId.Should().NotBeNullOrEmpty();
-        
+
         // Verify response matches persisted data
         result.Value.OrderId.Should().Be(order.Id);
         result.Value.TotalAmount.Amount.Should().Be(order.TotalAmount.Amount);

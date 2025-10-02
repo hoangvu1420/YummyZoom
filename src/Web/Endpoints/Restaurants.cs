@@ -62,7 +62,7 @@ public class Restaurants : EndpointGroupBase
             .RequireAuthorization();
 
         #region Menu Management Endpoints (Restaurant Staff)
-        
+
         // GET /api/v1/restaurants/{restaurantId}/menus
         group.MapGet("/{restaurantId:guid}/menus", async (Guid restaurantId, ISender sender) =>
         {
@@ -122,7 +122,7 @@ public class Restaurants : EndpointGroupBase
         .Produces<MenuItemDetailsDto>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
-        
+
         // POST /api/v1/restaurants/{restaurantId}/menu-items
         group.MapPost("/{restaurantId:guid}/menu-items", async (Guid restaurantId, CreateMenuItemRequestDto body, ISender sender) =>
         {
@@ -573,7 +573,7 @@ public class Restaurants : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var query = new GetRestaurantNewOrdersQuery(restaurantId, page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
@@ -587,7 +587,7 @@ public class Restaurants : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var query = new GetRestaurantActiveOrdersQuery(restaurantId, page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
@@ -611,7 +611,7 @@ public class Restaurants : EndpointGroupBase
                 Comment: body.Comment)
             { UserId = uid };
             var result = await sender.Send(cmd);
-            return result.IsSuccess 
+            return result.IsSuccess
                 ? Results.Created($"/api/v1/restaurants/{restaurantId}/reviews/{result.Value.ReviewId}", new { reviewId = result.Value.ReviewId })
                 : result.ToIResult();
         })
@@ -680,7 +680,7 @@ public class Restaurants : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var result = await sender.Send(new GetRestaurantReviewsQuery(restaurantId, page, size));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
@@ -719,7 +719,7 @@ public class Restaurants : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();

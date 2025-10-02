@@ -4,7 +4,7 @@ public sealed class GetOrderByIdQueryValidator : AbstractValidator<GetOrderByIdQ
 {
     public GetOrderByIdQueryValidator()
     {
-    RuleFor(x => x.OrderIdGuid)
-            .NotEmpty().WithMessage("OrderId is required.");
+        RuleFor(x => x.OrderIdGuid)
+                .NotEmpty().WithMessage("OrderId is required.");
     }
 }

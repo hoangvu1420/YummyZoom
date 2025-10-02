@@ -106,11 +106,11 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
     {
         if (IsModerated)
         {
-            return Result.Success(); 
+            return Result.Success();
         }
 
         IsModerated = true;
-        
+
         AddDomainEvent(new ReviewModerated(
             Id,
             DateTime.UtcNow));
@@ -126,7 +126,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         }
 
         IsHidden = true;
-        
+
         AddDomainEvent(new ReviewHidden(
             Id,
             DateTime.UtcNow));
@@ -142,7 +142,7 @@ public sealed class Review : AggregateRoot<ReviewId, Guid>, IAuditableEntity, IS
         }
 
         IsHidden = false;
-        
+
         AddDomainEvent(new ReviewShown(
             Id,
             DateTime.UtcNow));

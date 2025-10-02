@@ -1,11 +1,11 @@
 using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.Events;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAccountAggregate;
@@ -13,7 +13,7 @@ namespace YummyZoom.Domain.RestaurantAccountAggregate;
 public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>, ICreationAuditable
 {
     public RestaurantId RestaurantId { get; private set; }
-    public Money CurrentBalance { get; private set; } 
+    public Money CurrentBalance { get; private set; }
     public PayoutMethodDetails? PayoutMethodDetails { get; private set; }
 
     // Creation audit properties (immutable aggregate)
@@ -35,7 +35,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
     public static Result<RestaurantAccount> Create(RestaurantId restaurantId)
     {
         var zeroBalance = new Money(0, Currencies.Default);
-        
+
         var account = new RestaurantAccount(
             RestaurantAccountId.CreateUnique(),
             restaurantId,
@@ -43,7 +43,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             payoutMethodDetails: null);
 
         account.AddDomainEvent(new RestaurantAccountCreated(
-            account.Id, 
+            account.Id,
             restaurantId));
 
         return Result.Success(account);
@@ -70,7 +70,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         AddDomainEvent(new PlatformFeeRecorded(Id, orderId, feeAmount));
         return Result.Success();
     }
-    
+
     public Result RecordRefundDeduction(Money refundAmount, OrderId orderId)
     {
         if (refundAmount.Amount >= 0)
@@ -81,14 +81,14 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         AddDomainEvent(new RefundDeducted(Id, orderId, refundAmount));
         return Result.Success();
     }
-    
+
     public Result SettlePayout(Money payoutAmount)
     {
         if (payoutAmount.Amount <= 0)
         {
-             return Result.Failure(RestaurantAccountErrors.PayoutAmountMustBePositive(payoutAmount));
+            return Result.Failure(RestaurantAccountErrors.PayoutAmountMustBePositive(payoutAmount));
         }
-        
+
         if (payoutAmount.Amount > CurrentBalance.Amount)
         {
             return Result.Failure(RestaurantAccountErrors.InsufficientBalance(CurrentBalance, payoutAmount));

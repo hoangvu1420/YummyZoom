@@ -8,19 +8,19 @@ public static class MenuItemErrors
         "MenuItem.NegativePrice", "Menu item price must be positive.");
 
     public static Error InvalidName(string? name) => Error.Validation(
-        "MenuItem.InvalidName", 
+        "MenuItem.InvalidName",
         $"Item name '{name ?? "null"}' is invalid. Item name cannot be null or empty.");
 
     public static Error InvalidDescription(string? description) => Error.Validation(
-        "MenuItem.InvalidDescription", 
+        "MenuItem.InvalidDescription",
         $"Item description '{description ?? "null"}' is invalid. Item description cannot be null or empty.");
 
     public static Error DuplicateItemName(string itemName, string categoryName) => Error.Conflict(
-        "MenuItem.DuplicateItemName", 
+        "MenuItem.DuplicateItemName",
         $"An item with the name '{itemName}' already exists in category '{categoryName}'.");
 
     public static Error NotFound(string itemId, string categoryName) => Error.NotFound(
-        "MenuItem.NotFound", 
+        "MenuItem.NotFound",
         $"The item with ID '{itemId}' was not found in category '{categoryName}'.");
 
     public static Error CustomizationAlreadyAssigned(string groupId) => Error.Conflict(

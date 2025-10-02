@@ -201,20 +201,20 @@ public static class TeamCartErrors
     public static readonly Error CannotConvertWithoutPayments = Error.Validation(
         "TeamCart.CannotConvertWithoutPayments",
         "Cannot convert team cart to order without payment commitments");
-        
+
     // Financial management errors
     public static readonly Error OnlyHostCanModifyFinancials = Error.Validation(
         "TeamCart.OnlyHostCanModifyFinancials",
         "Only the host can modify financial details");
-        
+
     public static readonly Error CannotModifyFinancialsInCurrentStatus = Error.Validation(
         "TeamCart.CannotModifyFinancialsInCurrentStatus",
         "Cannot modify financial details in the current team cart status");
-        
+
     public static readonly Error CouponAlreadyApplied = Error.Validation(
         "TeamCart.CouponAlreadyApplied",
         "A coupon has already been applied to this team cart");
-        
+
     public static readonly Error CouponNotApplicable = Error.Validation(
         "TeamCart.CouponNotApplicable",
         "This coupon is not applicable to the items in the team cart");

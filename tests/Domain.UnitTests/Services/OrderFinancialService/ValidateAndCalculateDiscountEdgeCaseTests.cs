@@ -1,8 +1,8 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 
 namespace YummyZoom.Domain.UnitTests.Services.OrderFinancialService;
@@ -114,7 +114,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
         // Assert
         result.ShouldBeSuccessful();
         // Allow for small rounding differences
-        result.ValueOrFail().Amount.Should().BeApproximately(expectedDiscount.Amount, 0.01m, 
+        result.ValueOrFail().Amount.Should().BeApproximately(expectedDiscount.Amount, 0.01m,
             "should maintain reasonable precision in decimal calculations");
     }
 
@@ -176,7 +176,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
             CreateOrderItem(15.00m, 1, menuItemId: nonApplicableItemId),  // 15.00 not applicable
             CreateOrderItem(5.00m, 1, menuItemId: applicableItemId)       // 5.00 applicable
         };
-        var coupon = CreatePercentageCoupon(20m, CouponScope.SpecificItems, 
+        var coupon = CreatePercentageCoupon(20m, CouponScope.SpecificItems,
             new List<MenuItemId> { applicableItemId });
         var subtotal = new Money(40.00m, "USD");
         var expectedDiscount = new Money(5.00m, "USD"); // 20% of (20.00 + 5.00)
@@ -187,7 +187,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
 
         // Assert
         result.ShouldBeSuccessful();
-        AssertMoneyEquals(expectedDiscount, result.ValueOrFail(), 
+        AssertMoneyEquals(expectedDiscount, result.ValueOrFail(),
             "should only apply discount to applicable items");
     }
 
@@ -311,7 +311,7 @@ public class ValidateAndCalculateDiscountEdgeCaseTests : OrderFinancialServiceTe
             CreateOrderItem(10.00m, 1, menuItemId: applicableItemId), // Only 10.00 applicable
             CreateOrderItem(50.00m, 1) // Not applicable
         };
-        var coupon = CreatePercentageCoupon(100m, CouponScope.SpecificItems, 
+        var coupon = CreatePercentageCoupon(100m, CouponScope.SpecificItems,
             new List<MenuItemId> { applicableItemId }); // 100% discount
         var subtotal = new Money(60.00m, "USD");
         var expectedDiscount = new Money(10.00m, "USD"); // Capped at applicable amount

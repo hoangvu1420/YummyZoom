@@ -85,8 +85,8 @@ public class ApplyCouponToTeamCartCommandTests : BaseTestFixture
         // Act & Assert: Switch to non-host and try to apply coupon should throw ForbiddenAccessException
         var otherUserId = await CreateUserAsync("not-host-applycoupon@example.com", "Password123!");
         SetUserId(otherUserId);
-        
-        await FluentActions.Invoking(() => 
+
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode)))
             .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
     }

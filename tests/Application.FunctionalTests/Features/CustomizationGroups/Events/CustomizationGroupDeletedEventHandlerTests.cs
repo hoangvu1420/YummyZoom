@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Admin.Commands.RebuildFullMenu;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Application.Admin.Commands.RebuildFullMenu;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;

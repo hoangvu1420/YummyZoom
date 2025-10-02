@@ -10,7 +10,7 @@ namespace YummyZoom.Domain.OrderAggregate.Entities;
 public sealed class OrderItem : Entity<OrderItemId>
 {
     private readonly List<OrderItemCustomization> _selectedCustomizations = [];
-    
+
     public MenuCategoryId Snapshot_MenuCategoryId { get; private set; }
     public MenuItemId Snapshot_MenuItemId { get; private set; }
     public string Snapshot_ItemName { get; private set; }
@@ -71,7 +71,7 @@ public sealed class OrderItem : Entity<OrderItemId>
     {
         var currency = Snapshot_BasePriceAtOrder.Currency;
         var customizationTotal = new Money(_selectedCustomizations.Sum(c => c.Snapshot_ChoicePriceAdjustmentAtOrder.Amount), currency);
-        
+
         return (Snapshot_BasePriceAtOrder + customizationTotal) * Quantity;
     }
 

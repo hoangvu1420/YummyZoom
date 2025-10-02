@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
@@ -229,9 +229,9 @@ public class UpdateTeamCartItemQuantityTests : BaseTestFixture
 
         // Act: Try to update item as non-member - authorization should fail at pipeline level
         await scenario.ActAsNonMember();
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 2)))
             .Should().ThrowAsync<ForbiddenAccessException>();
     }

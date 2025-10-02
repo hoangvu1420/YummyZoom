@@ -35,7 +35,7 @@ public class OrderCreationTests
 
         result.ShouldBeSuccessful();
         var order = result.Value;
-        
+
         order.Status.Should().Be(OrderStatus.Placed);
         order.PaymentTransactions.Should().HaveCount(1);
         order.PaymentTransactions.First().Status.Should().Be(PaymentStatus.Succeeded);
@@ -66,7 +66,7 @@ public class OrderCreationTests
 
         result.ShouldBeSuccessful();
         var order = result.Value;
-        
+
         order.Status.Should().Be(OrderStatus.AwaitingPayment);
         order.PaymentTransactions.Should().HaveCount(1);
         var transaction = order.PaymentTransactions.First();
@@ -172,7 +172,7 @@ public class OrderCreationTests
 
         result.ShouldBeFailure(OrderErrors.NegativeTotalAmount.Code);
     }
-    
+
     [Test]
     public void Create_WithFinancialMismatch_ShouldFailWithFinancialMismatchError()
     {

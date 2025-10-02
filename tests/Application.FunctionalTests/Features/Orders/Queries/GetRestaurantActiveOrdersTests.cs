@@ -1,9 +1,9 @@
-using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
-using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
-using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
+using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
+using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Queries;
 
@@ -42,7 +42,7 @@ public class GetRestaurantActiveOrdersTests : BaseTestFixture
 
         var statuses = result.Value.Items.Select(i => i.Status).ToList();
         // Active statuses only
-        statuses.All(s => new[]{"Placed","Accepted","Preparing","ReadyForDelivery"}.Contains(s)).Should().BeTrue();
+        statuses.All(s => new[] { "Placed", "Accepted", "Preparing", "ReadyForDelivery" }.Contains(s)).Should().BeTrue();
 
         // Ensure priority ordering (first occurrence order)
         var firstIndex = (string status) => statuses.FindIndex(s => s == status);

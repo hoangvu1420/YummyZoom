@@ -16,6 +16,6 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
         RuleFor(v => v.Password)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(6).WithMessage("Password must be at least 6 characters long.");
-            // Add more complex password rules (uppercase, lowercase, number, symbol) if required by identity settings
+        // Add more complex password rules (uppercase, lowercase, number, symbol) if required by identity settings
     }
 }

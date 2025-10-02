@@ -109,10 +109,10 @@ public class MenuItemPropertyUpdateTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         item.BasePrice.Should().Be(newPrice);
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemPriceChanged>()
-            .Which.Should().Match<MenuItemPriceChanged>(e => 
+            .Which.Should().Match<MenuItemPriceChanged>(e =>
                 e.MenuItemId == item.Id && e.NewPrice == newPrice);
     }
 
@@ -153,7 +153,7 @@ public class MenuItemPropertyUpdateTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         item.BasePrice.Should().Be(currentPrice);
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemPriceChanged>();
     }

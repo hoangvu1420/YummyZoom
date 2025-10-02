@@ -1,10 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.ReviewAggregate.ValueObjects;
-using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;

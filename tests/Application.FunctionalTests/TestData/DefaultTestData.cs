@@ -34,7 +34,7 @@ public static class DefaultTestData
         public const string LogoUrl = "https://test.yummyzoom.com/logo.png";
         public const string Description = "A test restaurant for functional testing with authentic flavors and fresh ingredients.";
         public const string CuisineType = "International Fusion";
-        
+
         /// <summary>
         /// Restaurant address information.
         /// </summary>
@@ -46,7 +46,7 @@ public static class DefaultTestData
             public const string ZipCode = "12345";
             public const string Country = "Test Country";
         }
-        
+
         /// <summary>
         /// Restaurant contact information.
         /// </summary>
@@ -55,7 +55,7 @@ public static class DefaultTestData
             public const string Phone = "+1-555-123-4567";
             public const string Email = "contact@yummyzoom-test.com";
         }
-        
+
         /// <summary>
         /// Restaurant geographic coordinates.
         /// </summary>
@@ -64,7 +64,7 @@ public static class DefaultTestData
             public const double Latitude = 47.6000;   // Seattle area coordinates for testing
             public const double Longitude = -122.3300;
         }
-        
+
         /// <summary>
         /// Restaurant business hours.
         /// </summary>
@@ -81,7 +81,7 @@ public static class DefaultTestData
     {
         public const string Name = "Test Menu";
         public const string Description = "A comprehensive test menu with various food categories and items.";
-        
+
         /// <summary>
         /// Menu categories configuration.
         /// </summary>
@@ -104,13 +104,13 @@ public static class DefaultTestData
         /// </summary>
         public static class MainDishes
         {
-            public static readonly (string Name, string Description, decimal Price) ClassicBurger = 
+            public static readonly (string Name, string Description, decimal Price) ClassicBurger =
                 ("Classic Beef Burger", "Juicy beef patty with lettuce, tomato, pickles, and our special sauce on a brioche bun", 15.99m);
-            
-            public static readonly (string Name, string Description, decimal Price) MargheritaPizza = 
+
+            public static readonly (string Name, string Description, decimal Price) MargheritaPizza =
                 ("Margherita Pizza", "Traditional pizza with fresh mozzarella, tomatoes, and basil on hand-tossed dough", 18.50m);
-            
-            public static readonly (string Name, string Description, decimal Price) GrilledSalmon = 
+
+            public static readonly (string Name, string Description, decimal Price) GrilledSalmon =
                 ("Grilled Atlantic Salmon", "Fresh salmon fillet grilled to perfection with lemon herb seasoning and seasonal vegetables", 24.99m);
         }
 
@@ -119,10 +119,10 @@ public static class DefaultTestData
         /// </summary>
         public static class Appetizers
         {
-            public static readonly (string Name, string Description, decimal Price) BuffaloWings = 
+            public static readonly (string Name, string Description, decimal Price) BuffaloWings =
                 ("Buffalo Chicken Wings", "Crispy chicken wings tossed in our signature buffalo sauce, served with celery and ranch", 12.99m);
-            
-            public static readonly (string Name, string Description, decimal Price) CaesarSalad = 
+
+            public static readonly (string Name, string Description, decimal Price) CaesarSalad =
                 ("Caesar Salad", "Crisp romaine lettuce with parmesan cheese, croutons, and our house-made Caesar dressing", 9.99m);
         }
 
@@ -131,7 +131,7 @@ public static class DefaultTestData
         /// </summary>
         public static class Desserts
         {
-            public static readonly (string Name, string Description, decimal Price) ChocolateCake = 
+            public static readonly (string Name, string Description, decimal Price) ChocolateCake =
                 ("Chocolate Fudge Cake", "Rich chocolate cake with layers of chocolate fudge and fresh berries", 8.99m);
         }
 
@@ -140,10 +140,10 @@ public static class DefaultTestData
         /// </summary>
         public static class Beverages
         {
-            public static readonly (string Name, string Description, decimal Price) CraftBeer = 
+            public static readonly (string Name, string Description, decimal Price) CraftBeer =
                 ("Local Craft Beer", "Rotating selection of local craft beers on tap", 6.99m);
-            
-            public static readonly (string Name, string Description, decimal Price) FreshJuice = 
+
+            public static readonly (string Name, string Description, decimal Price) FreshJuice =
                 ("Fresh Orange Juice", "Freshly squeezed orange juice made to order", 4.99m);
         }
     }

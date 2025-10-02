@@ -30,4 +30,4 @@ public class SendNotificationToUserCommandValidator : AbstractValidator<SendNoti
             .WithMessage("Data payload values cannot be empty.")
             .When(x => x.DataPayload != null && x.DataPayload.Any());
     }
-} 
+}

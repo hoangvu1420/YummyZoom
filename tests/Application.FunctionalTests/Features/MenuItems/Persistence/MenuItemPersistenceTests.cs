@@ -43,7 +43,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         retrieved.Should().NotBeNull();
         retrieved!.DietaryTagIds.Should().BeEmpty();
         retrieved.AppliedCustomizations.Should().BeEmpty();
-        
+
         // Verify all basic properties are preserved
         VerifyBasicProperties(menuItem, retrieved);
     }
@@ -64,7 +64,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         retrieved!.DietaryTagIds.Should().HaveCount(dietaryTags.Count);
         retrieved.DietaryTagIds.Should().BeEquivalentTo(dietaryTags);
         retrieved.AppliedCustomizations.Should().BeEmpty();
-        
+
         VerifyBasicProperties(menuItem, retrieved);
     }
 
@@ -84,7 +84,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         retrieved!.AppliedCustomizations.Should().HaveCount(customizations.Count);
         retrieved.AppliedCustomizations.Should().BeEquivalentTo(customizations);
         retrieved.DietaryTagIds.Should().BeEmpty();
-        
+
         VerifyBasicProperties(menuItem, retrieved);
     }
 
@@ -106,7 +106,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         retrieved.DietaryTagIds.Should().BeEquivalentTo(dietaryTags);
         retrieved.AppliedCustomizations.Should().HaveCount(customizations.Count);
         retrieved.AppliedCustomizations.Should().BeEquivalentTo(customizations);
-        
+
         VerifyBasicProperties(menuItem, retrieved);
     }
 
@@ -230,7 +230,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         // Assert
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
         retrieved.Should().NotBeNull();
-        
+
         // Verify dietary tags changes
         retrieved!.DietaryTagIds.Should().HaveCount(2); // Started with 2, removed 1, added 1
         retrieved.DietaryTagIds.Should().Contain(newTag);
@@ -262,7 +262,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
         retrieved.Should().NotBeNull();
         retrieved!.AppliedCustomizations.Should().HaveCount(3);
-        
+
         // Verify order is preserved based on DisplayOrder
         var retrievedList = retrieved.AppliedCustomizations.ToList();
         retrievedList[0].DisplayOrder.Should().Be(1);
@@ -276,7 +276,7 @@ public class MenuItemPersistenceTests : BaseTestFixture
         // Arrange
         var menuItem = CreateBasicMenuItem();
         await AddAsync(menuItem);
-        
+
         var tag = TagId.CreateUnique();
 
         // Act - Try to add the same tag twice by setting tags with duplicates
@@ -285,10 +285,10 @@ public class MenuItemPersistenceTests : BaseTestFixture
 
         // Assert
         result.ShouldBeSuccessful(); // SetDietaryTags should succeed
-        
+
         await UpdateAsync(menuItem);
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
-        
+
         // The domain should handle duplicates appropriately
         // Since we're using a List, duplicates might be preserved, but let's verify behavior
         retrieved!.DietaryTagIds.Should().Contain(tag);

@@ -1,12 +1,12 @@
 using System.Net;
-using FluentAssertions;
-using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.SharedKernel;
-using Microsoft.AspNetCore.Mvc;
-using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
-using YummyZoom.Application.Restaurants.Queries.Common;
 using System.Text.Json;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using NUnit.Framework;
+using YummyZoom.Application.Restaurants.Queries.Common;
+using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 

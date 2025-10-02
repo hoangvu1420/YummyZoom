@@ -6,8 +6,8 @@ using NUnit.Framework;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
-using Result = YummyZoom.SharedKernel.Result;
 using Error = YummyZoom.SharedKernel.Error;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Web.ApiContractTests.Search;
 
@@ -152,13 +152,13 @@ public class UniversalSearchContractTests
         var client = factory.CreateClient();
 
         bool senderCalled = false;
-        
+
         // Test with a successful case 
         factory.Sender.RespondWith(req =>
         {
             senderCalled = true;
             TestContext.WriteLine($"Sender called with request: {req?.GetType()?.Name}");
-            
+
             var items = new List<SearchResultDto> { CreateResult(Guid.NewGuid()) };
             var page = new PaginatedList<SearchResultDto>(items, count: 1, pageNumber: 1, pageSize: 10);
             var response = new UniversalSearchResponseDto(page, new FacetBlock(
@@ -166,7 +166,7 @@ public class UniversalSearchContractTests
                 Array.Empty<FacetCount<string>>(),
                 Array.Empty<FacetCount<short>>(),
                 0));
-            
+
             return Result.Success(response);
         });
 
@@ -189,7 +189,7 @@ public class UniversalSearchContractTests
         var client = factory.CreateClient();
 
         bool senderCalled = false;
-        
+
         // Test with a simple failure case that should definitely work
         factory.Sender.RespondWith(req =>
         {
@@ -231,13 +231,13 @@ public class UniversalSearchContractTests
         TestContext.WriteLine($"Content Type: {resp.Content.Headers.ContentType}");
 
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        
+
         // Debug: Check if response is empty before trying to deserialize
         if (string.IsNullOrEmpty(raw))
         {
             Assert.Fail("Response body is empty - expected ProblemDetails JSON");
         }
-        
+
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
         prob.Title.Should().Be("Search");

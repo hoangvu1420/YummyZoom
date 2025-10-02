@@ -1,5 +1,6 @@
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Utilities;
 using YummyZoom.Application.RestaurantRegistrations.Commands.RejectRestaurantRegistration;
 using YummyZoom.Application.RestaurantRegistrations.Commands.SubmitRestaurantRegistration;
 using YummyZoom.Domain.RestaurantAggregate;
@@ -7,7 +8,6 @@ using YummyZoom.Domain.RestaurantRegistrationAggregate;
 using YummyZoom.Domain.RestaurantRegistrationAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Utilities;
 
 namespace YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Commands;
 

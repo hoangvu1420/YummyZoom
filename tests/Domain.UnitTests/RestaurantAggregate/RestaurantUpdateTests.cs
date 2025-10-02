@@ -1,7 +1,7 @@
 using YummyZoom.Domain.RestaurantAggregate;
+using YummyZoom.Domain.RestaurantAggregate.Errors;
 using YummyZoom.Domain.RestaurantAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.Errors;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAggregate;
 
@@ -44,7 +44,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.Name.Should().Be(newName);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantNameChanged));
-        
+
         var nameChangedEvent = restaurant.DomainEvents.OfType<RestaurantNameChanged>().Single();
         nameChangedEvent.OldName.Should().Be(DefaultName);
         nameChangedEvent.NewName.Should().Be(newName);
@@ -99,7 +99,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.Description.Should().Be(newDescription);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantDescriptionChanged));
-        
+
         var descriptionChangedEvent = restaurant.DomainEvents.OfType<RestaurantDescriptionChanged>().Single();
         descriptionChangedEvent.OldDescription.Should().Be(DefaultDescription);
         descriptionChangedEvent.NewDescription.Should().Be(newDescription);
@@ -154,7 +154,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.CuisineType.Should().Be(newCuisineType);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantCuisineTypeChanged));
-        
+
         var cuisineTypeChangedEvent = restaurant.DomainEvents.OfType<RestaurantCuisineTypeChanged>().Single();
         cuisineTypeChangedEvent.OldCuisineType.Should().Be(DefaultCuisineType);
         cuisineTypeChangedEvent.NewCuisineType.Should().Be(newCuisineType);
@@ -209,7 +209,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.LogoUrl.Should().Be(newLogoUrl);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantLogoChanged));
-        
+
         var logoChangedEvent = restaurant.DomainEvents.OfType<RestaurantLogoChanged>().Single();
         logoChangedEvent.OldLogoUrl.Should().Be(DefaultLogoUrl);
         logoChangedEvent.NewLogoUrl.Should().Be(newLogoUrl);
@@ -264,7 +264,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.Location.Should().Be(newAddress);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantLocationChanged));
-        
+
         var locationChangedEvent = restaurant.DomainEvents.OfType<RestaurantLocationChanged>().Single();
         locationChangedEvent.OldLocation.Should().Be(CreateValidAddress());
         locationChangedEvent.NewLocation.Should().Be(newAddress);
@@ -340,7 +340,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.ContactInfo.Should().Be(newContactInfo);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantContactInfoChanged));
-        
+
         var contactInfoChangedEvent = restaurant.DomainEvents.OfType<RestaurantContactInfoChanged>().Single();
         contactInfoChangedEvent.OldContactInfo.Should().Be(CreateValidContactInfo());
         contactInfoChangedEvent.NewContactInfo.Should().Be(newContactInfo);
@@ -410,7 +410,7 @@ public class RestaurantUpdateTests
         result.IsSuccess.Should().BeTrue();
         restaurant.BusinessHours.Should().Be(newBusinessHours);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantBusinessHoursChanged));
-        
+
         var businessHoursChangedEvent = restaurant.DomainEvents.OfType<RestaurantBusinessHoursChanged>().Single();
         businessHoursChangedEvent.OldBusinessHours.Should().Be(CreateValidBusinessHours());
         businessHoursChangedEvent.NewBusinessHours.Should().Be(newBusinessHours);
@@ -482,7 +482,7 @@ public class RestaurantUpdateTests
         restaurant.LogoUrl.Should().Be(newLogoUrl);
         restaurant.Description.Should().Be(newDescription);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantBrandingUpdated));
-        
+
         var brandingUpdatedEvent = restaurant.DomainEvents.OfType<RestaurantBrandingUpdated>().Single();
         brandingUpdatedEvent.OldName.Should().Be(DefaultName);
         brandingUpdatedEvent.NewName.Should().Be(newName);
@@ -576,7 +576,7 @@ public class RestaurantUpdateTests
         restaurant.ContactInfo.Email.Should().Be(newEmail);
         restaurant.BusinessHours.Hours.Should().Be(newBusinessHours);
         restaurant.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RestaurantProfileUpdated));
-        
+
         var profileUpdatedEvent = restaurant.DomainEvents.OfType<RestaurantProfileUpdated>().Single();
         profileUpdatedEvent.OldName.Should().Be(DefaultName);
         profileUpdatedEvent.NewName.Should().Be(newName);
@@ -637,7 +637,7 @@ public class RestaurantUpdateTests
             CreateValidAddress(),
             CreateValidContactInfo(),
             CreateValidBusinessHours());
-        
+
         return result.Value;
     }
 

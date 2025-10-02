@@ -13,8 +13,8 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
     private readonly List<PaymentMethod> _paymentMethods = [];
 
     public string Name { get; private set; }
-    public string Email { get; private set; } 
-    public string? PhoneNumber { get; private set; } 
+    public string Email { get; private set; }
+    public string? PhoneNumber { get; private set; }
     public bool IsActive { get; private set; }
     public IReadOnlyList<Address> Addresses => _addresses.AsReadOnly();
     public IReadOnlyList<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
@@ -51,7 +51,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
     public static Result<User> Create(
         string name,
         string email,
-        string? phoneNumber = null) 
+        string? phoneNumber = null)
     {
         var user = new User(
             UserId.CreateUnique(),
@@ -67,7 +67,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
 
         return Result.Success(user);
     }
-    
+
     public static Result<User> Create(
         UserId id,
         string name,
@@ -75,7 +75,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         string? phoneNumber,
         bool isActive,
         List<Address>? addresses = null,
-        List<PaymentMethod>? paymentMethods = null) 
+        List<PaymentMethod>? paymentMethods = null)
     {
         var user = new User(
             id,
@@ -95,10 +95,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
     public Result AddAddress(Address address)
     {
         _addresses.Add(address);
-        
+
         // Raise domain event
         AddDomainEvent(new UserAddressAdded(Id, address));
-        
+
         return Result.Success();
     }
 
@@ -112,10 +112,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         }
 
         _addresses.Remove(addressToRemove);
-        
+
         // Raise domain event
         AddDomainEvent(new UserAddressRemoved(Id, addressId));
-        
+
         return Result.Success();
     }
 
@@ -131,10 +131,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         }
 
         _paymentMethods.Add(paymentMethod);
-        
+
         // Raise domain event
         AddDomainEvent(new UserPaymentMethodAdded(Id, paymentMethod));
-        
+
         return Result.Success();
     }
 
@@ -148,10 +148,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         }
 
         _paymentMethods.Remove(paymentMethodToRemove);
-        
+
         // Raise domain event
         AddDomainEvent(new UserPaymentMethodRemoved(Id, paymentMethodId));
-        
+
         return Result.Success();
     }
 
@@ -172,10 +172,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
 
         // Set the specified one as default
         paymentMethod.SetAsDefault();
-        
+
         // Raise domain event
         AddDomainEvent(new UserDefaultPaymentMethodChanged(Id, paymentMethodId));
-        
+
         return Result.Success();
     }
 
@@ -183,10 +183,10 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
     {
         Name = name;
         PhoneNumber = phoneNumber;
-        
+
         // Raise domain event
         AddDomainEvent(new UserProfileUpdated(Id, name, phoneNumber));
-        
+
         return Result.Success();
     }
 
@@ -194,33 +194,33 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
     {
         // Store the old email for the event
         var oldEmail = Email;
-        
+
         // Email is an identifier, so it's handled separately from regular profile updates
         Email = email;
-        
+
         // Raise domain event
         AddDomainEvent(new UserEmailChanged(Id, oldEmail, email));
-        
+
         return Result.Success();
     }
 
     public Result Activate()
     {
         IsActive = true;
-        
+
         // Raise domain event
         AddDomainEvent(new UserActivated(Id));
-        
+
         return Result.Success();
     }
 
     public Result Deactivate()
     {
         IsActive = false;
-        
+
         // Raise domain event
         AddDomainEvent(new UserDeactivated(Id));
-        
+
         return Result.Success();
     }
 
@@ -229,13 +229,13 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         if (IsDeleted)
         {
             // Optionally, handle re-deleting an already deleted entity.
-            return Result.Success(); 
+            return Result.Success();
         }
 
         IsDeleted = true;
         DeletedOn = deletedOn; // Explicitly set the timestamp here.
         DeletedBy = deletedBy;
-        
+
         AddDomainEvent(new UserDeleted(Id));
         return Result.Success();
     }
@@ -251,7 +251,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity, ISoftD
         IsDeleted = false;
         DeletedOn = null;
         DeletedBy = null;
-        
+
         AddDomainEvent(new UserRestored(Id));
         return Result.Success();
     }

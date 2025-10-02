@@ -6,11 +6,11 @@ using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.OrderAggregate.Entities;
-using YummyZoom.Domain.Services;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Services;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Coupons.Queries.FastCheck;

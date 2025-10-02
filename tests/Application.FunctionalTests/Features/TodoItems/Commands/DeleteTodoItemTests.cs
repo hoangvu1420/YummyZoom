@@ -17,7 +17,7 @@ public class DeleteTodoItemTests : BaseTestFixture
         var command = new DeleteTodoItemCommand(Guid.NewGuid(), Guid.NewGuid());
 
         var result = await SendAsync(command);
-        
+
         result.ShouldBeFailure("TodoLists.NotFound");
     }
 
@@ -28,7 +28,7 @@ public class DeleteTodoItemTests : BaseTestFixture
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
         var listId = listResult.Value;
 
@@ -37,7 +37,7 @@ public class DeleteTodoItemTests : BaseTestFixture
             ListId = listId,
             Title = "New Item"
         });
-        
+
         itemResult.ShouldBeSuccessful();
         var itemId = itemResult.Value;
 

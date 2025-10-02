@@ -17,7 +17,7 @@ public class Notifications : EndpointGroupBase
         group.MapPost("/send-to-user", async ([FromBody] SendNotificationToUserCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
-            
+
             return result.IsSuccess
                 ? Results.NoContent()
                 : result.ToIResult();
@@ -43,4 +43,4 @@ public class Notifications : EndpointGroupBase
         .WithStandardResults()
         .RequireAuthorization();
     }
-} 
+}

@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NUnit.Framework;
+using YummyZoom.Application.Auth.Commands.CompleteSignup;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
-using YummyZoom.Application.Auth.Commands.CompleteSignup;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
@@ -51,20 +51,20 @@ public class UsersAuthContractTests
     //     // Do NOT assert token JSON here; the Identity Bearer handler processes SignIn in higher-fidelity tests.
     //     var factory = new ApiContractWebAppFactory();
     //     var client = factory.CreateClient();
-    
+
     //     var identityId = Guid.NewGuid();
     //     factory.Sender.RespondWith(_ => Result.Success(new VerifyPhoneOtpResponse(identityId, true, true)));
-    
+
     //     var path = "/api/v1/users/auth/otp/verify";
     //     var body = new { phoneNumber = "+15550123456", code = "111111" };
     //     TestContext.WriteLine($"REQUEST POST {path}\n{System.Text.Json.JsonSerializer.Serialize(body)}");
     //     var resp = await client.PostAsJsonAsync(path, body);
     //     var raw = await resp.Content.ReadAsStringAsync();
     //     TestContext.WriteLine($"RESPONSE " + (int)resp.StatusCode + " " + resp.StatusCode + "\n" + raw);
-    
+
     //     // Expect success status only; token emission is covered by integration tests.
     //     resp.StatusCode.Should().Be(HttpStatusCode.OK);
-    
+
     //     // Mapping assertion
     //     factory.Sender.LastRequest.Should().BeOfType<VerifyPhoneOtpCommand>();
     //     var last = (VerifyPhoneOtpCommand)factory.Sender.LastRequest!;

@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Common.Caching;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Restaurants.Queries.GetFullMenu;
 

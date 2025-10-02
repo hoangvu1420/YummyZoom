@@ -23,14 +23,14 @@ public static class DomainJson
             WriteIndented = false,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
-        
+
         // Add the existing converter factory that handles all AggregateRootId types
         // This automatically covers TagId, CustomizationGroupId, and other strongly-typed IDs
         options.Converters.Add(new AggregateRootIdJsonConverterFactory());
-        
+
         // Configure enums to serialize as strings for better API descriptiveness
         options.Converters.Add(new JsonStringEnumConverter());
-        
+
         return options;
     }
 }

@@ -28,20 +28,20 @@ public abstract class NotificationTestsBase : BaseTestFixture
     {
         // Remember the current user context
         var currentUser = GetCurrentUserId();
-        
+
         // Create user and register device
         var userId = await RunAsUserAsync(email, TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
-        
+
         var registerCommand = new RegisterDeviceCommand(fcmToken, platform);
         var result = await SendAsync(registerCommand);
         result.ShouldBeSuccessful();
-        
+
         // Restore the previous user context if one existed
         if (currentUser.HasValue)
         {
             await RestoreUserContextAsync(currentUser.Value);
         }
-        
+
         return userId;
     }
 
@@ -52,23 +52,23 @@ public abstract class NotificationTestsBase : BaseTestFixture
     {
         // Remember the current user context
         var currentUser = GetCurrentUserId();
-        
+
         // Create user and register multiple devices
         var userId = await RunAsUserAsync(email, "Password123!", new[] { Roles.User });
-        
+
         foreach (var token in fcmTokens)
         {
             var registerCommand = new RegisterDeviceCommand(token, platform);
             var result = await SendAsync(registerCommand);
             result.ShouldBeSuccessful();
         }
-        
+
         // Restore the previous user context if one existed
         if (currentUser.HasValue)
         {
             await RestoreUserContextAsync(currentUser.Value);
         }
-        
+
         return userId;
     }
 
@@ -114,7 +114,7 @@ public abstract class NotificationTestsBase : BaseTestFixture
         // Setup some active devices
         await SetupUserWithDeviceAsync("active1@test.com", "active-token-1");
         await SetupUserWithDeviceAsync("active2@test.com", "active-token-2");
-        
+
         // Setup inactive device
         await SetupUserWithInactiveDeviceAsync("inactive@test.com", "inactive-token");
     }
@@ -154,20 +154,20 @@ public abstract class NotificationTestsBase : BaseTestFixture
     {
         // Remember the current user context
         var currentUser = GetCurrentUserId();
-        
+
         // User 1 with multiple devices
         var user1Id = await RunAsUserAsync("workflow1@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-1a", "iOS", "iPhone-1"));
         await SendAsync(new RegisterDeviceCommand("workflow-token-1b", "Android", "Samsung-1"));
-        
+
         // User 2 with single device
         var user2Id = await RunAsUserAsync("workflow2@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-2", "iOS", "iPhone-2"));
-        
+
         // User 3 with single device
         var user3Id = await RunAsUserAsync("workflow3@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         await SendAsync(new RegisterDeviceCommand("workflow-token-3", "Android", "Pixel-3"));
-        
+
         // Restore the previous user context if one existed
         if (currentUser.HasValue)
         {
@@ -222,11 +222,11 @@ public abstract class NotificationTestsBase : BaseTestFixture
     {
         using var scope = CreateScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUser>();
-        
+
         // IUser.Id is a string, so we need to parse it to Guid
         if (string.IsNullOrEmpty(userService.Id))
             return null;
-            
+
         return Guid.TryParse(userService.Id, out var userId) ? userId : null;
     }
 
@@ -239,12 +239,12 @@ public abstract class NotificationTestsBase : BaseTestFixture
         using var scope = CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await userManager.FindByIdAsync(userId.ToString());
-        
+
         if (user != null)
         {
             // Get user roles to restore context properly
             var roles = await userManager.GetRolesAsync(user);
-            
+
             // Restore the user context
             await RunAsUserAsync(user.Email!, TestConfiguration.DefaultUsers.CommonTestPassword, roles.ToArray());
         }

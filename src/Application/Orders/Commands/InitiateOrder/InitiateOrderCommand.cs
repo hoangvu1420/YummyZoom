@@ -1,7 +1,7 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Orders.Commands.InitiateOrder;
 

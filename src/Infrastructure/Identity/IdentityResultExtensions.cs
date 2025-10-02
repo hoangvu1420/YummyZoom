@@ -1,5 +1,5 @@
-﻿using YummyZoom.Application.Common.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using YummyZoom.Application.Common.Models;
 
 namespace YummyZoom.Infrastructure.Identity;
 

@@ -1,7 +1,7 @@
-﻿using YummyZoom.Domain.TodoListAggregate.Events;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Notifications;
+using YummyZoom.Domain.TodoListAggregate.Events;
 
 namespace YummyZoom.Application.TodoItems.EventHandlers;
 

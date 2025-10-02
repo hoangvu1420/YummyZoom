@@ -318,7 +318,7 @@ public class TeamCartFinancialTests
         var couponId = CouponId.CreateUnique();
         // Note: ApplyCoupon in open status will fail, but this setup is for testing RemoveCoupon's behavior in that state.
         // The actual ApplyCoupon test for Open status already asserts failure.
-        teamCart.ApplyCoupon(DefaultHostUserId, couponId); 
+        teamCart.ApplyCoupon(DefaultHostUserId, couponId);
 
         // Act
         var result = teamCart.RemoveCoupon(DefaultHostUserId);
@@ -334,7 +334,7 @@ public class TeamCartFinancialTests
         // Arrange
         var teamCart = CreateTeamCartReadyForConversion();
         var couponId = CouponId.CreateUnique();
-        
+
         // We need to set the AppliedCouponId directly since we can't apply a coupon in ReadyToConfirm status
         typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
 
@@ -352,7 +352,7 @@ public class TeamCartFinancialTests
         // Arrange
         var teamCart = CreateConvertedTeamCart();
         var couponId = CouponId.CreateUnique();
-        
+
         // We need to set the AppliedCouponId directly since we can't apply a coupon in Converted status
         typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
 
@@ -370,7 +370,7 @@ public class TeamCartFinancialTests
         // Arrange
         var teamCart = CreateExpiredTeamCart();
         var couponId = CouponId.CreateUnique();
-        
+
         // We need to set the AppliedCouponId directly since we can't apply a coupon in Expired status
         typeof(TeamCart).GetProperty("AppliedCouponId")?.SetValue(teamCart, couponId);
 

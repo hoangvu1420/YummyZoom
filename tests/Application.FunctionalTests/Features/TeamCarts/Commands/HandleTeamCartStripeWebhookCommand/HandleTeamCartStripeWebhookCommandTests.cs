@@ -2,8 +2,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Options;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
+using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -55,7 +55,7 @@ public class HandleTeamCartStripeWebhookCommandTests : BaseTestFixture
 
         // Act: Handle webhook
         var result = await SendAsync(new Application.TeamCarts.Commands.HandleTeamCartStripeWebhook.HandleTeamCartStripeWebhookCommand(payload, signature));
-        
+
         // Assert: Webhook handling succeeded
         result.IsSuccess.Should().BeTrue();
     }

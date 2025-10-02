@@ -1,12 +1,12 @@
-﻿using YummyZoom.SharedKernel;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
-using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.FunctionalTests.Authorization;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
+using YummyZoom.Application.FunctionalTests.UserManagement;
+using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Infrastructure.Messaging.Outbox;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.FunctionalTests;
 
@@ -111,7 +111,7 @@ public partial class Testing
     /// Gets the current user ID from the test context.
     /// </summary>
     /// <returns>The current user ID, or null if no user is set.</returns>
-    public static Guid? GetUserId() 
+    public static Guid? GetUserId()
     {
         return TestUserManager.GetCurrentUserId();
     }
@@ -184,7 +184,7 @@ public partial class Testing
     /// Creates and runs as the default test user.
     /// </summary>
     /// <returns>The ID of the created user.</returns>
-    public static async Task<Guid> RunAsDefaultUserAsync() 
+    public static async Task<Guid> RunAsDefaultUserAsync()
     {
         return await TestUserManager.RunAsDefaultUserAsync();
     }
@@ -193,7 +193,7 @@ public partial class Testing
     /// Creates and runs as an administrator user.
     /// </summary>
     /// <returns>The ID of the created administrator user.</returns>
-    public static async Task<Guid> RunAsAdministratorAsync() 
+    public static async Task<Guid> RunAsAdministratorAsync()
     {
         return await TestUserManager.RunAsAdministratorAsync();
     }
@@ -205,7 +205,7 @@ public partial class Testing
     /// <param name="password">The password for the user.</param>
     /// <param name="roles">The roles to assign to the user.</param>
     /// <returns>The ID of the created user.</returns>
-    public static async Task<Guid> RunAsUserAsync(string userName, string password, string[] roles) 
+    public static async Task<Guid> RunAsUserAsync(string userName, string password, string[] roles)
     {
         return await TestUserManager.RunAsUserAsync(userName, password, roles);
     }

@@ -1,8 +1,8 @@
+using YummyZoom.Application.Auth.Commands.CompleteSignup;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Users.Commands.CompleteProfile;
-using YummyZoom.Application.Auth.Commands.CompleteSignup;
 using YummyZoom.Application.Users.Commands.UpsertPrimaryAddress;
 using YummyZoom.Application.Users.Queries.GetMyProfile;
 using YummyZoom.SharedKernel.Constants;

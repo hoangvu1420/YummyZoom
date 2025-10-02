@@ -78,7 +78,7 @@ public class FullLifecycleSmokeTests : OrderLifecycleTestBase
         // Verify that attempting to continue lifecycle fails
         var readyResult = await OrderLifecycleTestHelper.MarkReadyAsync(orderId);
         readyResult.IsFailure.Should().BeTrue();
-        
+
         // Status should remain cancelled
         var stillCancelledOrder = await FindOrderAsync(orderId);
         stillCancelledOrder!.Status.Should().Be(OrderStatus.Cancelled);

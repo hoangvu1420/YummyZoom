@@ -29,35 +29,35 @@ public sealed class Address : ValueObject
         // Validate street
         if (string.IsNullOrWhiteSpace(street))
             return Result.Failure<Address>(RestaurantErrors.AddressStreetIsRequired());
-        
+
         if (street.Length > maxFieldLength)
             return Result.Failure<Address>(RestaurantErrors.AddressFieldTooLong("Street", maxFieldLength));
 
         // Validate city
         if (string.IsNullOrWhiteSpace(city))
             return Result.Failure<Address>(RestaurantErrors.AddressCityIsRequired());
-        
+
         if (city.Length > maxFieldLength)
             return Result.Failure<Address>(RestaurantErrors.AddressFieldTooLong("City", maxFieldLength));
 
         // Validate state
         if (string.IsNullOrWhiteSpace(state))
             return Result.Failure<Address>(RestaurantErrors.AddressStateIsRequired());
-        
+
         if (state.Length > maxFieldLength)
             return Result.Failure<Address>(RestaurantErrors.AddressFieldTooLong("State", maxFieldLength));
 
         // Validate zipCode
         if (string.IsNullOrWhiteSpace(zipCode))
             return Result.Failure<Address>(RestaurantErrors.AddressZipCodeIsRequired());
-        
+
         if (zipCode.Length > maxZipCodeLength)
             return Result.Failure<Address>(RestaurantErrors.AddressFieldTooLong("ZipCode", maxZipCodeLength));
 
         // Validate country
         if (string.IsNullOrWhiteSpace(country))
             return Result.Failure<Address>(RestaurantErrors.AddressCountryIsRequired());
-        
+
         if (country.Length > maxFieldLength)
             return Result.Failure<Address>(RestaurantErrors.AddressFieldTooLong("Country", maxFieldLength));
 

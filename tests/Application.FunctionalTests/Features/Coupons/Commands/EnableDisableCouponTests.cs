@@ -1,6 +1,6 @@
-using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Coupons.Commands.EnableCoupon;
 using YummyZoom.Application.Coupons.Commands.DisableCoupon;
+using YummyZoom.Application.Coupons.Commands.EnableCoupon;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;

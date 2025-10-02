@@ -32,7 +32,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.Id.Value.Should().NotBe(Guid.Empty);
         payment.PaymentMethodType.Should().Be(DefaultPaymentMethodType);
         payment.Type.Should().Be(DefaultTransactionType);
@@ -58,7 +58,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaymentMethodDisplay.Should().Be(DefaultPaymentMethodDisplay);
         payment.PaymentGatewayReferenceId.Should().Be(DefaultGatewayReferenceId);
     }
@@ -146,7 +146,7 @@ public class PaymentTransactionTests
             DefaultTransactionType,
             DefaultAmount,
             DefaultTimestamp).Value;
-        
+
         payment.MarkAsFailed();
 
         // Act
@@ -165,7 +165,7 @@ public class PaymentTransactionTests
             DefaultTransactionType,
             DefaultAmount,
             DefaultTimestamp).Value;
-        
+
         payment.MarkAsSucceeded();
 
         // Act
@@ -219,7 +219,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaidByUserId.Should().Be(paidByUserId);
     }
 
@@ -237,7 +237,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaidByUserId.Should().BeNull();
     }
 
@@ -260,7 +260,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaymentMethodType.Should().Be(DefaultPaymentMethodType);
         payment.Type.Should().Be(DefaultTransactionType);
         payment.Amount.Should().Be(DefaultAmount);
@@ -294,7 +294,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaidByUserId.Should().Be(memberId);
         payment.PaymentMethodType.Should().Be(PaymentMethodType.CreditCard);
         payment.Amount.Should().Be(memberPaymentAmount);
@@ -322,7 +322,7 @@ public class PaymentTransactionTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var payment = result.Value;
-        
+
         payment.PaidByUserId.Should().Be(hostId);
         payment.PaymentMethodType.Should().Be(PaymentMethodType.CashOnDelivery);
         payment.Amount.Should().Be(codAmount);

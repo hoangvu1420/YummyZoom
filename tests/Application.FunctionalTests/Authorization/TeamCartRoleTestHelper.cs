@@ -1,8 +1,8 @@
+using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
+using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.FunctionalTests.UserManagement;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
-using YummyZoom.Application.FunctionalTests.Common;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -155,17 +155,17 @@ public static class TeamCartRoleTestHelper
     /// Sets up a complete team cart scenario with the specified members.
     /// </summary>
     public static async Task<TeamCartTestScenario> SetupTeamCartScenarioAsync(
-        Guid restaurantId, 
-        string hostName, 
+        Guid restaurantId,
+        string hostName,
         params string[] guestNames)
     {
         var builder = TeamCartTestBuilder.Create(restaurantId).WithHost(hostName);
-        
+
         foreach (var guestName in guestNames)
         {
             builder.WithGuest(guestName);
         }
-        
+
         return await builder.BuildAsync();
     }
 

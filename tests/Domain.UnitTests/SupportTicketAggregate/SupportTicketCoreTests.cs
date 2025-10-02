@@ -509,9 +509,9 @@ public class SupportTicketCoreTests
     public void Messages_ShouldBeReadOnly()
     {
         // Arrange
-        var messages = new List<TicketMessage> 
-        { 
-            TicketMessage.Create(DefaultAuthorId, DefaultAuthorType, DefaultInitialMessage).Value 
+        var messages = new List<TicketMessage>
+        {
+            TicketMessage.Create(DefaultAuthorId, DefaultAuthorType, DefaultInitialMessage).Value
         };
 
         // Act

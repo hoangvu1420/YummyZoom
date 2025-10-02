@@ -10,13 +10,13 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
 {
     public new const string Scheme = "Test";
 
-    #pragma warning disable CS0618 // ISystemClock obsolete
+#pragma warning disable CS0618 // ISystemClock obsolete
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         ISystemClock clock) : base(options, logger, encoder, clock) { }
-    #pragma warning restore CS0618
+#pragma warning restore CS0618
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {

@@ -1,21 +1,21 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Orders.Commands.AcceptOrder;
-using YummyZoom.Application.Orders.Commands.RejectOrder;
 using YummyZoom.Application.Orders.Commands.CancelOrder;
+using YummyZoom.Application.Orders.Commands.Common;
+using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
 using YummyZoom.Application.Orders.Commands.MarkOrderPreparing;
 using YummyZoom.Application.Orders.Commands.MarkOrderReadyForDelivery;
-using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
+using YummyZoom.Application.Orders.Commands.RejectOrder;
+using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Orders.Queries.GetOrderStatus;
-using YummyZoom.Application.Orders.Queries.Common; 
-using YummyZoom.Domain.OrderAggregate.ValueObjects; 
-using System.Text.Json;
-using YummyZoom.Application.Orders.Commands.Common;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 

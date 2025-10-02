@@ -1,8 +1,8 @@
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
-using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
+using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Queries;
 
@@ -170,8 +170,8 @@ public class GetCustomerRecentOrdersTests : BaseTestFixture
     [Test]
     public async Task Validation_InvalidPageSize_ShouldFail()
     {
-    // Act + Assert (expect validation exception thrown by pipeline)
-    var act = async () => await SendAsync(BuildQuery(1, 0));
-    await act.Should().ThrowAsync<ValidationException>();
+        // Act + Assert (expect validation exception thrown by pipeline)
+        var act = async () => await SendAsync(BuildQuery(1, 0));
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

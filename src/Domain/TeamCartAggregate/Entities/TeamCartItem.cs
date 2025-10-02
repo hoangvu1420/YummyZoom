@@ -90,7 +90,7 @@ public sealed class TeamCartItem : Entity<TeamCartItemId>
         // Calculate line item total
         var customizationTotal = selectedCustomizations
             .Sum(c => c.Snapshot_ChoicePriceAdjustmentAtOrder.Amount);
-        
+
         var itemTotal = snapshotBasePriceAtOrder.Amount + customizationTotal;
         LineItemTotal = new Money(itemTotal * quantity, snapshotBasePriceAtOrder.Currency);
     }
@@ -174,7 +174,7 @@ public sealed class TeamCartItem : Entity<TeamCartItemId>
         // Recalculate line item total
         var customizationTotal = _selectedCustomizations
             .Sum(c => c.Snapshot_ChoicePriceAdjustmentAtOrder.Amount);
-        
+
         var itemTotal = Snapshot_BasePriceAtOrder.Amount + customizationTotal;
         LineItemTotal = new Money(itemTotal * newQuantity, Snapshot_BasePriceAtOrder.Currency);
 

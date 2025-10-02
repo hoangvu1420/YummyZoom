@@ -1,5 +1,5 @@
+using YummyZoom.Domain.UserAggregate.Errors;
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.UserAggregate.Errors; 
 
 namespace YummyZoom.Domain.UserAggregate.ValueObjects;
 

@@ -13,50 +13,50 @@ namespace YummyZoom.Infrastructure.Messaging.Outbox;
 
 public sealed class OutboxProcessor : IOutboxProcessor
 {
-	private readonly IServiceProvider _serviceProvider;
-	private readonly OutboxPublisherOptions _options;
-	private readonly ILogger<OutboxProcessor> _logger;
-	private static readonly JsonSerializerOptions JsonOptions = OutboxJson.Options;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly OutboxPublisherOptions _options;
+    private readonly ILogger<OutboxProcessor> _logger;
+    private static readonly JsonSerializerOptions JsonOptions = OutboxJson.Options;
 
-	public OutboxProcessor(
-		IServiceProvider serviceProvider,
-		IOptions<OutboxPublisherOptions> options,
-		ILogger<OutboxProcessor> logger)
-	{
-		_serviceProvider = serviceProvider;
-		_options = options.Value;
-		_logger = logger;
-	}
+    public OutboxProcessor(
+        IServiceProvider serviceProvider,
+        IOptions<OutboxPublisherOptions> options,
+        ILogger<OutboxProcessor> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _options = options.Value;
+        _logger = logger;
+    }
 
-	public async Task<int> ProcessOnceAsync(CancellationToken ct = default)
-	{
-		using var scope = _serviceProvider.CreateScope();
-		var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-		var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-		var now = DateTime.UtcNow;
+    public async Task<int> ProcessOnceAsync(CancellationToken ct = default)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var now = DateTime.UtcNow;
 
-		var strategy = dbContext.Database.CreateExecutionStrategy();
-		return await strategy.ExecuteAsync(async () =>
-		{
-			var toPublish = await dbContext.OutboxMessages
-				.FromSqlRaw(@"
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            var toPublish = await dbContext.OutboxMessages
+                .FromSqlRaw(@"
 					SELECT * FROM ""OutboxMessages""
 					WHERE ""ProcessedOnUtc"" IS NULL
 					  AND (""NextAttemptOnUtc"" IS NULL OR ""NextAttemptOnUtc"" <= NOW())
 					ORDER BY ""OccurredOnUtc""
 					FOR UPDATE SKIP LOCKED
 					LIMIT {0}", _options.BatchSize)
-				.ToListAsync(ct);
+                .ToListAsync(ct);
 
-			if (toPublish.Count == 0)
-			{
-				return 0;
-			}
+            if (toPublish.Count == 0)
+            {
+                return 0;
+            }
 
-			var processedCount = 0;
+            var processedCount = 0;
 
-			foreach (var msg in toPublish)
-			{
+            foreach (var msg in toPublish)
+            {
                 try
                 {
                     var type = Type.GetType(msg.Type, throwOnError: true)!;
@@ -92,33 +92,33 @@ public sealed class OutboxProcessor : IOutboxProcessor
                     await db2.SaveChangesAsync(ct);
 
                     _logger.LogError(ex, "Outbox: failed to publish event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
-				}
-			}
+                }
+            }
 
-			return processedCount;
-		});
-	}
+            return processedCount;
+        });
+    }
 
-	public async Task<int> DrainAsync(TimeSpan? timeout = null, CancellationToken ct = default)
-	{
-		var until = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(5));
-		var total = 0;
-		while (DateTime.UtcNow < until)
-		{
-			var n = await ProcessOnceAsync(ct);
-			total += n;
-			if (n == 0) break;
-		}
-		return total;
-	}
+    public async Task<int> DrainAsync(TimeSpan? timeout = null, CancellationToken ct = default)
+    {
+        var until = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(5));
+        var total = 0;
+        while (DateTime.UtcNow < until)
+        {
+            var n = await ProcessOnceAsync(ct);
+            total += n;
+            if (n == 0) break;
+        }
+        return total;
+    }
 
-	private static TimeSpan ComputeBackoff(int attempt, TimeSpan cap)
-	{
-		var baseMs = Math.Pow(2, Math.Min(attempt, 10)) * 100;
-		var jitter = Random.Shared.Next(0, 100);
-		var ms = Math.Min(baseMs + jitter, cap.TotalMilliseconds);
-		return TimeSpan.FromMilliseconds(ms);
-	}
+    private static TimeSpan ComputeBackoff(int attempt, TimeSpan cap)
+    {
+        var baseMs = Math.Pow(2, Math.Min(attempt, 10)) * 100;
+        var jitter = Random.Shared.Next(0, 100);
+        var ms = Math.Min(baseMs + jitter, cap.TotalMilliseconds);
+        return TimeSpan.FromMilliseconds(ms);
+    }
 }
 
 

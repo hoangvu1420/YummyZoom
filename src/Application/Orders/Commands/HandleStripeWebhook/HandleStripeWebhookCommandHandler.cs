@@ -37,7 +37,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
             // 1. Webhook Event Construction & Verification
             var webhookEventResult = _paymentGatewayService.ConstructWebhookEvent(
-                request.RawJson, 
+                request.RawJson,
                 request.StripeSignatureHeader);
 
             if (webhookEventResult.IsFailure)
@@ -58,7 +58,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
                 return Result.Success();
             }
 
-            _logger.LogInformation("Webhook event verified. EventId: {EventId}, EventType: {EventType}, RelevantObjectId: {RelevantObjectId}, OrderId: {OrderId}", 
+            _logger.LogInformation("Webhook event verified. EventId: {EventId}, EventType: {EventType}, RelevantObjectId: {RelevantObjectId}, OrderId: {OrderId}",
                 webhookEvent.EventId, webhookEvent.EventType, webhookEvent.RelevantObjectId, orderId);
 
             // 2. Idempotency Check
@@ -67,7 +67,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
             if (existingEvent is not null)
             {
-                _logger.LogInformation("Webhook event {EventId} already processed at {ProcessedAt}. Returning success.", 
+                _logger.LogInformation("Webhook event {EventId} already processed at {ProcessedAt}. Returning success.",
                     webhookEvent.EventId, existingEvent.ProcessedAt);
                 return Result.Success();
             }
@@ -78,15 +78,15 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
             if (order is null)
             {
-                _logger.LogWarning("Order not found for payment gateway reference ID: {PaymentGatewayReferenceId}. Event might not be order-related.", 
+                _logger.LogWarning("Order not found for payment gateway reference ID: {PaymentGatewayReferenceId}. Event might not be order-related.",
                     webhookEvent.RelevantObjectId);
-                
+
                 // Still mark as processed to avoid reprocessing
                 await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
                 return Result.Success();
             }
 
-            _logger.LogInformation("Found order {OrderId} for payment gateway reference ID: {PaymentGatewayReferenceId}", 
+            _logger.LogInformation("Found order {OrderId} for payment gateway reference ID: {PaymentGatewayReferenceId}",
                 order.Id.Value, webhookEvent.RelevantObjectId);
 
             // 4. Event Processing
@@ -99,7 +99,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
             if (processingResult.IsFailure)
             {
-                _logger.LogError("Failed to process webhook event {EventId} of type {EventType}: {Error}", 
+                _logger.LogError("Failed to process webhook event {EventId} of type {EventType}: {Error}",
                     webhookEvent.EventId, webhookEvent.EventType, processingResult.Error.Description);
                 return processingResult;
             }
@@ -112,7 +112,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
             }
 
             await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
-            
+
             _logger.LogInformation("Webhook event {EventId} processed successfully", webhookEvent.EventId);
             return Result.Success();
         }, cancellationToken);
@@ -121,12 +121,12 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
     private Result ProcessPaymentSuccess(Domain.OrderAggregate.Order order, string paymentGatewayReferenceId)
     {
         _logger.LogInformation("Processing payment success for order {OrderId}", order.Id.Value);
-        
+
         var result = order.RecordPaymentSuccess(paymentGatewayReferenceId);
-        
+
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to record payment success for order {OrderId}: {Error}", 
+            _logger.LogError("Failed to record payment success for order {OrderId}: {Error}",
                 order.Id.Value, result.Error.Description);
             return Result.Failure(HandleStripeWebhookErrors.EventProcessingFailed("payment_intent.succeeded"));
         }
@@ -138,12 +138,12 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
     private Result ProcessPaymentFailure(Domain.OrderAggregate.Order order, string paymentGatewayReferenceId)
     {
         _logger.LogInformation("Processing payment failure for order {OrderId}", order.Id.Value);
-        
+
         var result = order.RecordPaymentFailure(paymentGatewayReferenceId);
-        
+
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to record payment failure for order {OrderId}: {Error}", 
+            _logger.LogError("Failed to record payment failure for order {OrderId}: {Error}",
                 order.Id.Value, result.Error.Description);
             return Result.Failure(HandleStripeWebhookErrors.EventProcessingFailed("payment_intent.payment_failed"));
         }
@@ -168,16 +168,16 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
         _dbContext.ProcessedWebhookEvents.Add(processedEvent);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        
+
         _logger.LogInformation("Marked webhook event {EventId} as processed", eventId);
     }
 }
 
 public static class HandleStripeWebhookErrors
 {
-    public static Error WebhookVerificationFailed() => 
+    public static Error WebhookVerificationFailed() =>
         Error.Validation("HandleStripeWebhook.VerificationFailed", "Webhook signature verification failed.");
-    
-    public static Error EventProcessingFailed(string eventType) => 
+
+    public static Error EventProcessingFailed(string eventType) =>
         Error.Validation("HandleStripeWebhook.ProcessingFailed", $"Failed to process event type: {eventType}");
 }

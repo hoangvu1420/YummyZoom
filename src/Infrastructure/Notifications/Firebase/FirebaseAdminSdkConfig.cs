@@ -3,7 +3,7 @@ namespace YummyZoom.Infrastructure.Notifications.Firebase;
 public class FirebaseAdminSdkConfig
 {
     public const string SectionName = "Firebase:AdminSdk";
-    
+
     public string Type { get; set; } = string.Empty;
     public string ProjectId { get; set; } = string.Empty;
     public string PrivateKeyId { get; set; } = string.Empty;

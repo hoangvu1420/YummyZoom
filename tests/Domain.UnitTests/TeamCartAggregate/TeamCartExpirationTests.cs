@@ -44,7 +44,7 @@ public class TeamCartExpirationTests
         // Assert
         result.ShouldBeSuccessful();
         teamCart.Status.Should().Be(TeamCartStatus.Expired);
-        
+
         // Verify domain event
         teamCart.DomainEvents.Should().Contain(e => e.GetType() == typeof(TeamCartExpired));
         var expiredEvent = teamCart.DomainEvents.OfType<TeamCartExpired>().Single();
@@ -103,19 +103,19 @@ public class TeamCartExpirationTests
     {
         // Arrange
         var teamCart = CreateTeamCartWithGuest();
-        
+
         // First add an item to the cart so we can lock it
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         teamCart.AddItem(
-            DefaultHostUserId, 
-            menuItemId, 
-            menuCategoryId, 
-            "Test Item", 
-            new Money(10.99m, "USD"), 
+            DefaultHostUserId,
+            menuItemId,
+            menuCategoryId,
+            "Test Item",
+            new Money(10.99m, "USD"),
             1).ShouldBeSuccessful();
         teamCart.ClearDomainEvents(); // Clear events from adding item
-        
+
         teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful(); // Transition to Locked status
         teamCart.ClearDomainEvents(); // Clear events from locking
 

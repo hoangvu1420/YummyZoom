@@ -1,10 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
 using YummyZoom.Domain.RoleAssignmentAggregate;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Infrastructure.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Application.FunctionalTests.Common;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -25,7 +25,7 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
     public async Task SetUp()
     {
         await SetupForAuthorizationTestsAsync();
-        
+
         // Create test restaurants
         _restaurantId1 = Guid.NewGuid();
         _restaurantId2 = Guid.NewGuid();
@@ -49,30 +49,30 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         // Restaurant 1 - Owner permissions
         var ownerCommand1 = new TestRestaurantOwnerCommand(_restaurantId1);
         var staffCommand1 = new TestRestaurantStaffCommand(_restaurantId1);
-        
+
         var result1 = await SendAsync(ownerCommand1);
         result1.ShouldBeSuccessful();
-        
+
         var result2 = await SendAsync(staffCommand1);
         result2.ShouldBeSuccessful();
 
         // Restaurant 2 - Staff permissions only
         var ownerCommand2 = new TestRestaurantOwnerCommand(_restaurantId2);
         var staffCommand2 = new TestRestaurantStaffCommand(_restaurantId2);
-        
+
         Func<Task> act1 = () => SendAsync(ownerCommand2);
         await act1.Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
-        
+
         var result3 = await SendAsync(staffCommand2);
         result3.ShouldBeSuccessful();
 
         // Restaurant 3 - Owner permissions
         var ownerCommand3 = new TestRestaurantOwnerCommand(_restaurantId3);
         var staffCommand3 = new TestRestaurantStaffCommand(_restaurantId3);
-        
+
         var result4 = await SendAsync(ownerCommand3);
         result4.ShouldBeSuccessful();
-        
+
         var result5 = await SendAsync(staffCommand3);
         result5.ShouldBeSuccessful();
     }
@@ -82,7 +82,7 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Act & Assert - Should fail for all restaurant operations
         var ownerCommand = new TestRestaurantOwnerCommand(_restaurantId1);
         var staffCommand = new TestRestaurantStaffCommand(_restaurantId1);
@@ -149,7 +149,7 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         // Act - Generate claims principal
         var user = await userManager.FindByIdAsync(userId.ToString());
         user.Should().NotBeNull();
-        
+
         var principal = await claimsFactory.CreateAsync(user!);
 
         // Assert - Verify permission claims are present
@@ -186,7 +186,7 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         roleAssignments.Should().HaveCount(2);
 
         // Act & Assert - Test authorization through complete pipeline
-        
+
         // Test 1: Owner command on restaurant 1 (should succeed)
         var ownerCommand1 = new TestRestaurantOwnerCommand(_restaurantId1);
         var result1 = await SendAsync(ownerCommand1);
@@ -222,9 +222,9 @@ public class ClaimsBasedAuthorizationIntegrationTests : BaseTestFixture
         using var scope = CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IRoleAssignmentRepository>();
         var domainUserId = YummyZoom.Domain.UserAggregate.ValueObjects.UserId.Create(userId);
-        
+
         return await repository.GetByUserIdAsync(domainUserId);
     }
 
     #endregion
-} 
+}

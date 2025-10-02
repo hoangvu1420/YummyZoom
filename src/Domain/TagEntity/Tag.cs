@@ -1,8 +1,8 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Domain.TagEntity.Errors;
 using YummyZoom.Domain.TagEntity.Events;
 using YummyZoom.Domain.TagEntity.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.TagEntity;

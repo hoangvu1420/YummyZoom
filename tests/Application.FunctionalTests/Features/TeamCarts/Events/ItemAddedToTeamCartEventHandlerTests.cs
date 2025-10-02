@@ -22,7 +22,7 @@ public class ItemAddedToTeamCartEventHandlerTests : BaseTestFixture
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
             .BuildAsync();
-        
+
         await DrainOutboxAsync(); // process TeamCartCreated
 
         // Mock notifier for this test

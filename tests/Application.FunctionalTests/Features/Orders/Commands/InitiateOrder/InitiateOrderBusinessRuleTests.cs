@@ -72,7 +72,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
     {
         // Arrange - Create a second restaurant with its own menu items
         var secondRestaurantData = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
-        
+
         // Try to order items from second restaurant but specify first restaurant as target
         var command = InitiateOrderTestHelper.BuildValidCommand(
             restaurantId: Testing.TestData.DefaultRestaurantId, // First restaurant
@@ -92,7 +92,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
         // Arrange - Mark a menu item as unavailable
         var unavailableItemName = await TestDataFactory.MarkMenuItemAsUnavailableAsync(Testing.TestData.MenuItems.FreshJuice);
         var unavailableItemId = Testing.TestData.GetMenuItemId(unavailableItemName);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             menuItemIds: new List<Guid> { unavailableItemId });
 
@@ -161,11 +161,11 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
     {
         // Arrange - Create a coupon with limited usage and exhaust its limit
         var limitedCouponCode = await CouponTestDataFactory.CreateCouponWithUsageLimitAsync(totalLimit: 2);
-        
+
         // Use the coupon twice to reach its limit
         await UseCouponAsync(limitedCouponCode);
         await UseCouponAsync(limitedCouponCode);
-        
+
         // Try to use it a third time
         var command = InitiateOrderTestHelper.BuildValidCommand(
             couponCode: limitedCouponCode);
@@ -183,10 +183,10 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
     {
         // Arrange - Create a coupon with per-user usage limit
         var userLimitedCouponCode = await CouponTestDataFactory.CreateCouponWithUserUsageLimitAsync(userLimit: 1);
-        
+
         // Use the coupon once for the current user
         await UseCouponAsync(userLimitedCouponCode);
-        
+
         // Try to use it again by the same user
         var command = InitiateOrderTestHelper.BuildValidCommand(
             couponCode: userLimitedCouponCode);
@@ -204,7 +204,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
     {
         // Arrange - Create a coupon with high minimum order amount
         var minOrderCouponCode = await CouponTestDataFactory.CreateCouponWithMinimumOrderAmountAsync(minimumAmount: 100.00m);
-        
+
         // Create order with low value (default items are around $15-16)
         var command = InitiateOrderTestHelper.BuildValidCommand(
             menuItemIds: new List<Guid> { Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger) },
@@ -224,7 +224,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
         // Arrange - Create a coupon that applies only to specific items not in the order
         var specificItemCouponCode = await CouponTestDataFactory.CreateCouponForSpecificItemAsync(
             Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.MargheritaPizza));
-        
+
         // Order different items that the coupon doesn't apply to
         var command = InitiateOrderTestHelper.BuildValidCommand(
             menuItemIds: new List<Guid> { Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger) },
@@ -264,7 +264,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
         // Arrange - Create second restaurant and get items from both restaurants
         var secondRestaurantData = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
         var firstRestaurantItemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             restaurantId: Testing.TestData.DefaultRestaurantId,
             menuItemIds: new List<Guid> { firstRestaurantItemId, secondRestaurantData.MenuItemId });
@@ -283,7 +283,7 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
         // Arrange - Create a coupon for a different restaurant
         var secondRestaurantData = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
         var differentRestaurantCouponCode = await CouponTestDataFactory.CreateCouponForRestaurantAsync(secondRestaurantData.RestaurantId);
-        
+
         // Try to use it for the default restaurant
         var command = InitiateOrderTestHelper.BuildValidCommand(
             restaurantId: Testing.TestData.DefaultRestaurantId,

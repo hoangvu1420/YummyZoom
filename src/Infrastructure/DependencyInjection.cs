@@ -33,8 +33,8 @@ using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.Persistence;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
-using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
+using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.Infrastructure.Persistence.Repositories;
@@ -49,7 +49,7 @@ public static class DependencyInjection
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
         builder.AddPersistenceServices();
-        builder.AddAuthenticationServices(); 
+        builder.AddAuthenticationServices();
         builder.AddAuthorizationServices();
         builder.AddRepositories();
         builder.AddDomainServices();
@@ -168,7 +168,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
         builder.Services.AddScoped<IRestaurantRegistrationRepository, RestaurantRegistrationRepository>();
         builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-        
+
         // Realtime notifiers
         builder.Services.AddSingleton<ITeamCartRealtimeNotifier, NoOpTeamCartRealtimeNotifier>();
         builder.Services.AddSingleton<IOrderRealtimeNotifier, NoOpOrderRealtimeNotifier>();
@@ -321,7 +321,7 @@ public static class DependencyInjection
             builder.Services.AddSingleton<ICacheService, DistributedCacheService>();
             builder.Services.AddSingleton<ICacheInvalidationPublisher, RedisInvalidationPublisher>();
             builder.Services.AddHostedService<CacheInvalidationSubscriber>();
-            
+
             // TeamCart store (Redis-backed)
             builder.Services.Configure<TeamCartStoreOptions>(
                 builder.Configuration.GetSection(TeamCartStoreOptions.SectionName));

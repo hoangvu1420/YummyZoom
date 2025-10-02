@@ -28,7 +28,7 @@ public class DeliveryAddressTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var address = result.Value;
-        
+
         address.Street.Should().Be(DefaultStreet);
         address.City.Should().Be(DefaultCity);
         address.State.Should().Be(DefaultState);

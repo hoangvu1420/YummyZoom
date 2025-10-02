@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
+using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;

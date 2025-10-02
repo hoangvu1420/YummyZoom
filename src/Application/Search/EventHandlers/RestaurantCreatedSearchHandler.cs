@@ -16,7 +16,7 @@ public sealed class RestaurantCreatedSearchHandler : IdempotentNotificationHandl
         _maintainer = maintainer;
     }
 
-    protected override async Task HandleCore(RestaurantCreated e, CancellationToken ct) 
+    protected override async Task HandleCore(RestaurantCreated e, CancellationToken ct)
     {
         await _maintainer.UpsertRestaurantByIdAsync(e.RestaurantId.Value, e.OccurredOnUtc.Ticks, ct);
     }

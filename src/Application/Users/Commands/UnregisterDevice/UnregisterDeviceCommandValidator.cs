@@ -8,4 +8,4 @@ public class UnregisterDeviceCommandValidator : AbstractValidator<UnregisterDevi
             .NotEmpty().WithMessage("FCM token is required.")
             .MaximumLength(512).WithMessage("FCM token must not exceed 512 characters.");
     }
-} 
+}

@@ -1,10 +1,10 @@
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
-using YummyZoom.Application.Common.Interfaces.IServices;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Common;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
 

@@ -92,7 +92,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// Gets a read-only list of member payments in this team cart.
     /// </summary>
     public IReadOnlyList<MemberPayment> MemberPayments => _memberPayments.AsReadOnly();
-    
+
     /// <summary>
     /// Latest quoted version for per-member totals. Increments on each re-quote.
     /// </summary>
@@ -127,7 +127,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             }
         }
     }
-    
+
     /// <summary>
     /// Gets the tip amount for the order, set by the Host.
     /// </summary>
@@ -164,7 +164,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         CreatedAt = createdAt;
         ExpiresAt = expiresAt;
         Status = TeamCartStatus.Open;
-        
+
         // Initialize financial properties
         var defaultCurrency = Currencies.Default;
         TipAmount = Money.Zero(defaultCurrency);
@@ -203,10 +203,10 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         }
 
         var now = DateTime.UtcNow;
-        
+
         // Set default deadline to 24 hours from now if not provided
         var actualDeadline = deadline ?? now.AddHours(24);
-        
+
         // Validate deadline
         if (actualDeadline <= now)
         {
@@ -215,7 +215,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
 
         // Create shareable token valid for 24 hours by default
         var shareToken = ShareableLinkToken.CreateUnique(TimeSpan.FromHours(24));
-        
+
         // Team cart expires at the deadline
         var expiresAt = actualDeadline;
 
@@ -547,7 +547,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// <param name="amount">The amount the member is committing to pay.</param>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
     public Result CommitToCashOnDelivery(UserId userId, Money amount)
-      {
+    {
         // Validate status
         if (Status != TeamCartStatus.Locked)
         {
@@ -591,13 +591,13 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         {
             return Result.Failure(paymentResult.Error);
         }
-        
+
         _memberPayments.Add(paymentResult.Value);
-        
+
         AddDomainEvent(new MemberCommittedToPayment(Id, userId, PaymentMethod.CashOnDelivery, amount));
-        
+
         CheckAndTransitionToReadyToConfirm(); // This might complete the cart if all others have paid
-        
+
         return Result.Success();
     }
 
@@ -609,8 +609,8 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// <param name="amount">The amount that was paid.</param>
     /// <param name="transactionId">The transaction ID from the payment processor.</param>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
-      public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
-      {
+    public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
+    {
         // Validate status
         if (Status != TeamCartStatus.Locked)
         {
@@ -656,15 +656,15 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         {
             return Result.Failure(paymentResult.Error);
         }
-        
+
         var payment = paymentResult.Value;
         payment.MarkAsPaidOnline(transactionId); // Mark as paid immediately
         _memberPayments.Add(payment);
-        
+
         AddDomainEvent(new OnlinePaymentSucceeded(Id, userId, transactionId, amount));
-        
+
         CheckAndTransitionToReadyToConfirm();
-        
+
         return Result.Success();
     }
 
@@ -958,7 +958,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         }
 
         // Check if all members have payment commitments
-        var allMembersCommitted = _members.All(member => 
+        var allMembersCommitted = _members.All(member =>
             _memberPayments.Any(payment => payment.UserId == member.UserId));
 
         if (!allMembersCommitted)
@@ -1003,7 +1003,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         Status = TeamCartStatus.Converted;
         return Result.Success();
     }
-    
+
     /// <summary>
     /// Calculates the subtotal of all items in the team cart.
     /// </summary>
@@ -1014,7 +1014,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
         {
             return Money.Zero(Currencies.Default);
         }
-        
+
         var currency = _items.First().Snapshot_BasePriceAtOrder.Currency;
         var totalAmount = _items.Sum(item => item.LineItemTotal.Amount);
         return new Money(totalAmount, currency);

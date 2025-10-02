@@ -28,16 +28,16 @@ public class MenuTests
         // Assert
         result.ShouldBeSuccessful();
         var menu = result.Value;
-        
+
         menu.Id.Value.Should().NotBe(Guid.Empty);
         menu.RestaurantId.Should().Be(DefaultRestaurantId);
         menu.Name.Should().Be(DefaultName);
         menu.Description.Should().Be(DefaultDescription);
         menu.IsEnabled.Should().BeTrue();
-        
+
         menu.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuCreated>()
-            .Which.Should().Match<MenuCreated>(e => 
+            .Which.Should().Match<MenuCreated>(e =>
                 e.MenuId == menu.Id && e.RestaurantId == DefaultRestaurantId);
     }
 
@@ -54,7 +54,7 @@ public class MenuTests
         // Assert
         result.ShouldBeSuccessful();
         var menu = result.Value;
-        
+
         menu.IsEnabled.Should().BeFalse();
         menu.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuCreated>();

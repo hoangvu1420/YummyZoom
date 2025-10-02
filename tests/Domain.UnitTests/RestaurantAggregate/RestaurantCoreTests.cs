@@ -1,7 +1,7 @@
 using YummyZoom.Domain.RestaurantAggregate;
+using YummyZoom.Domain.RestaurantAggregate.Errors;
 using YummyZoom.Domain.RestaurantAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.Errors;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAggregate;
 
@@ -35,19 +35,19 @@ public class RestaurantCoreTests
     {
         // Arrange & Act
         var result = Restaurant.Create(
-            DefaultName, 
-            DefaultLogoUrl, 
+            DefaultName,
+            DefaultLogoUrl,
             backgroundImageUrl: null,
-            DefaultDescription, 
-            DefaultCuisineType, 
-            CreateValidAddress(), 
-            CreateValidContactInfo(), 
+            DefaultDescription,
+            DefaultCuisineType,
+            CreateValidAddress(),
+            CreateValidContactInfo(),
             CreateValidBusinessHours());
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         var restaurant = result.Value;
-        
+
         restaurant.Should().NotBeNull();
         restaurant.Id.Value.Should().NotBe(Guid.Empty);
         restaurant.Name.Should().Be(DefaultName);
@@ -84,7 +84,7 @@ public class RestaurantCoreTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var restaurant = result.Value;
-        
+
         restaurant.Should().NotBeNull();
         restaurant.Id.Value.Should().NotBe(Guid.Empty);
         restaurant.Name.Should().Be(DefaultName);
@@ -304,7 +304,7 @@ public class RestaurantCoreTests
             CreateValidAddress(),
             CreateValidContactInfo(),
             CreateValidBusinessHours());
-        
+
         return result.Value;
     }
 

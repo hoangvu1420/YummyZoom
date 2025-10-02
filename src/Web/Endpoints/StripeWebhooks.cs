@@ -16,10 +16,10 @@ public class StripeWebhooks : EndpointGroupBase
             // Read the raw request body
             using var reader = new StreamReader(request.Body);
             var rawJson = await reader.ReadToEndAsync();
-            
+
             // Get the Stripe signature header
             var stripeSignatureHeader = request.Headers["Stripe-Signature"].FirstOrDefault();
-            
+
             if (string.IsNullOrEmpty(stripeSignatureHeader))
             {
                 return Results.BadRequest("Missing Stripe signature header");
@@ -45,7 +45,7 @@ public class StripeWebhooks : EndpointGroupBase
             var result = isTeamCart
                 ? await sender.Send(new HandleTeamCartStripeWebhookCommand(rawJson, stripeSignatureHeader))
                 : await sender.Send(new HandleStripeWebhookCommand(rawJson, stripeSignatureHeader));
-            
+
             return result.IsSuccess
                 ? Results.Ok()
                 : result.ToIResult();

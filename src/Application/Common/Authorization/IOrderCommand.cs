@@ -9,7 +9,7 @@ namespace YummyZoom.Application.Common.Authorization;
 public interface IOrderCommand : IContextualCommand
 {
     OrderId OrderId { get; }
-    
+
     string IContextualCommand.ResourceType => "Order";
     string IContextualCommand.ResourceId => OrderId.Value.ToString();
 }

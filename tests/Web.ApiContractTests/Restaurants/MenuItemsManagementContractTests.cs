@@ -3,17 +3,17 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
+using YummyZoom.Application.MenuItems.Commands.ChangeMenuItemAvailability;
+using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
+using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
+using YummyZoom.Infrastructure.Serialization;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
+using YummyZoom.SharedKernel;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.Web.Endpoints;
-using YummyZoom.SharedKernel;
-using YummyZoom.Infrastructure.Serialization;
-using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
-using YummyZoom.Application.MenuItems.Commands.ChangeMenuItemAvailability;
-using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
-using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
-using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
-using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
-using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
@@ -297,7 +297,7 @@ public class MenuItemsManagementContractTests
         var resp = await client.DeleteAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     #endregion
 }
 

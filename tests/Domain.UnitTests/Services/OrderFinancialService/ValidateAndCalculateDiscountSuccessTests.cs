@@ -64,7 +64,7 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
             CreateOrderItem(15.00m, 2, categoryId: targetCategoryId), // 30.00 qualifies
             CreateOrderItem(10.00m, 1) // 10.00 doesn't qualify
         };
-        var coupon = CreatePercentageCoupon(25m, CouponScope.SpecificCategories, 
+        var coupon = CreatePercentageCoupon(25m, CouponScope.SpecificCategories,
             categoryIds: new List<MenuCategoryId> { targetCategoryId });
         var subtotal = new Money(40.00m, "USD");
         var expectedDiscount = new Money(7.50m, "USD"); // 25% of 30.00
@@ -248,16 +248,16 @@ public class ValidateAndCalculateDiscountSuccessTests : OrderFinancialServiceTes
         // Arrange - This test assumes 0% is somehow valid (edge case)
         var orderItems = CreateOrderItems((100.00m, 1, null, null));
         var subtotal = new Money(100.00m, "USD");
-        
+
         // Create coupon with reflection to bypass validation
         var coupon = CreateValidCoupon();
         var couponValue = CouponValue.CreatePercentage(0.01m).ValueOrFail();
-        
+
         // Use reflection to set the CouponValue on the Coupon
         var couponValueField = typeof(YummyZoom.Domain.CouponAggregate.Coupon)
             .GetField("<Value>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         couponValueField?.SetValue(coupon, couponValue); // Minimum valid percentage
-        
+
         var expectedDiscount = new Money(0.01m, "USD"); // 0.01% of 100.00
 
         // Act

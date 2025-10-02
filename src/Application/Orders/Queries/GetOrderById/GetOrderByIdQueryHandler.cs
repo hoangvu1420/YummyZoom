@@ -1,11 +1,11 @@
+using System.Security.Claims;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.SharedKernel;
-using Microsoft.Extensions.Logging;
 using YummyZoom.SharedKernel.Constants;
-using System.Security.Claims;
 
 namespace YummyZoom.Application.Orders.Queries.GetOrderById;
 
@@ -84,7 +84,7 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                   ?? principal?.FindFirst("uid")?.Value
                   ?? principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value; // fallback for tests / generic
         var isCustomer = userIdClaim != null && Guid.TryParse(userIdClaim, out var userGuid) && userGuid == orderRow.CustomerId;
-        
+
         // Check for restaurant staff/owner permission using permission claims
         var restaurantIdString = orderRow.RestaurantId.ToString();
         var isRestaurantStaff = principal?.HasClaim("permission", $"{Roles.RestaurantStaff}:{restaurantIdString}") == true

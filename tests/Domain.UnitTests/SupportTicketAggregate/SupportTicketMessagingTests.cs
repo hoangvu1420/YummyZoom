@@ -52,7 +52,7 @@ public class SupportTicketMessagingTests
                 var inProgressResult = ticket.UpdateStatus(SupportTicketStatus.InProgress, DefaultAdminId);
                 inProgressResult.IsSuccess.Should().BeTrue();
                 ticket.ClearDomainEvents();
-                
+
                 var pendingResult = ticket.UpdateStatus(SupportTicketStatus.PendingCustomerResponse, DefaultAdminId);
                 pendingResult.IsSuccess.Should().BeTrue();
                 ticket.ClearDomainEvents();
@@ -63,7 +63,7 @@ public class SupportTicketMessagingTests
                 var inProgressResult = ticket.UpdateStatus(SupportTicketStatus.InProgress, DefaultAdminId);
                 inProgressResult.IsSuccess.Should().BeTrue();
                 ticket.ClearDomainEvents();
-                
+
                 var resolvedResult = ticket.UpdateStatus(SupportTicketStatus.Resolved, DefaultAdminId);
                 resolvedResult.IsSuccess.Should().BeTrue();
                 ticket.ClearDomainEvents();
@@ -342,7 +342,7 @@ public class SupportTicketMessagingTests
     {
         // Arrange
         var ticket = CreateDefaultTicket();
-        
+
         // Add messages with slight delays to ensure different timestamps
         ticket.AddMessage(DefaultAuthorId, AuthorType.Customer, "First message");
         Thread.Sleep(1); // Ensure different timestamp

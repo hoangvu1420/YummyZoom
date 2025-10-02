@@ -9,7 +9,7 @@ public static class RoleAssignmentErrors
         $"The role assignment ID '{value}' is not a valid GUID.");
 
     public static Error InvalidRestaurantId(string value) => Error.Validation(
-        "RoleAssignment.InvalidRestaurantId", 
+        "RoleAssignment.InvalidRestaurantId",
         $"The restaurant ID '{value}' is not a valid GUID.");
 
     public static Error InvalidUserId(string value) => Error.Validation(

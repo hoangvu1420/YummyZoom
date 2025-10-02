@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Notifications;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.TeamCartAggregate.Events;
 
 namespace YummyZoom.Application.TeamCarts.EventHandlers;

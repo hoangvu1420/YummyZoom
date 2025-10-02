@@ -1,6 +1,6 @@
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.SharedKernel;
-using YummyZoom.Application.Common.Caching;
 
 namespace YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
 

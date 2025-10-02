@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Security;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 
@@ -24,7 +24,7 @@ public class SetPasswordCommandHandler : IRequestHandler<SetPasswordCommand, Res
     private readonly IUser _currentUser;
     private readonly IIdentityService _identityService;
     private readonly ILogger<SetPasswordCommandHandler> _logger;
-    
+
     public SetPasswordCommandHandler(
         IUser currentUser,
         IIdentityService identityService,

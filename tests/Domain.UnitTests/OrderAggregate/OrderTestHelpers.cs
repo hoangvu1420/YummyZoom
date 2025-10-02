@@ -32,7 +32,7 @@ public static class OrderTestHelpers
     {
         var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
-        
+
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
@@ -59,7 +59,7 @@ public static class OrderTestHelpers
     {
         var subtotal = new Money(DefaultOrderItems.Sum(item => item.LineItemTotal.Amount), Currencies.Default);
         var totalAmount = subtotal - DefaultDiscountAmount + DefaultDeliveryFee + DefaultTipAmount + DefaultTaxAmount;
-        
+
         var result = Order.Create(
             DefaultCustomerId,
             DefaultRestaurantId,
@@ -75,7 +75,7 @@ public static class OrderTestHelpers
             PaymentMethodType.CreditCard, // Online payment method
             null,
             paymentGatewayReferenceId: paymentGatewayReferenceId ?? DefaultPaymentGatewayReferenceId);
-        
+
         result.ShouldBeSuccessful();
         return result.Value;
     }

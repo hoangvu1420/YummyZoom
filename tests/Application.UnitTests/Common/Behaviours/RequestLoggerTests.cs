@@ -1,10 +1,10 @@
-﻿using YummyZoom.Application.Common.Behaviours;
-using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;
+﻿using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
+using YummyZoom.Application.Common.Behaviours;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.TodoItems.Commands.CreateTodoItem;
 
 namespace YummyZoom.Application.UnitTests.Common.Behaviours;
 
@@ -27,13 +27,13 @@ public class RequestLoggerTests
         // Arrange
         var userId = Guid.NewGuid().ToString();
         var username = "test@example.com";
-        
+
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.NameIdentifier, userId)
         }));
-        
+
         _user.Setup(x => x.Id).Returns(userId);
         _user.Setup(x => x.Principal).Returns(claimsPrincipal);
         _next = new Mock<MediatR.RequestHandlerDelegate<MediatR.Unit>>();
@@ -63,7 +63,7 @@ public class RequestLoggerTests
         _user.Setup(x => x.Id).Returns((string?)null);
         _user.Setup(x => x.Principal).Returns((ClaimsPrincipal?)null);
         _next = new Mock<MediatR.RequestHandlerDelegate<MediatR.Unit>>();
-        
+
         var requestLogger = new LoggingBehaviour<CreateTodoItemCommand, MediatR.Unit>(_logger.Object, _user.Object);
 
         // Act

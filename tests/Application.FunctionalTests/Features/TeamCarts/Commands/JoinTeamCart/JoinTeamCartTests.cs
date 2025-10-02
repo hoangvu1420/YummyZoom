@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 

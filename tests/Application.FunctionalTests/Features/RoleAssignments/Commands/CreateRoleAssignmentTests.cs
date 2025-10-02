@@ -21,12 +21,12 @@ public class CreateRoleAssignmentTests : BaseTestFixture
     {
         // Ensure required roles exist in the database
         await EnsureRolesExistAsync(Roles.RestaurantOwner, Roles.Administrator);
-        
+
         // Create a regular user and administrator for testing
         _userId = await RunAsUserAsync("user@example.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         _adminUserId = await RunAsAdministratorAsync();
         _restaurantId = Guid.NewGuid();
-        
+
         // Note: Restaurant entity might be required by domain in the future
         // Uncomment and adjust the following if you have a Restaurant aggregate/entity:
         // await AddAsync(new Restaurant(RestaurantId.Create(_restaurantId), ...));
@@ -38,7 +38,7 @@ public class CreateRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login (required for CreateRoleAssignmentCommand authorization)
         await RunAsAdministratorAsync();
-        
+
         // 2. Create command with valid data
         var command = new CreateRoleAssignmentCommand(_userId, _restaurantId, RestaurantRole.Owner);
 
@@ -67,7 +67,7 @@ public class CreateRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login
         await RunAsAdministratorAsync();
-        
+
         // 2. Create the first role assignment
         var command = new CreateRoleAssignmentCommand(_userId, _restaurantId, RestaurantRole.Owner);
         await SendAsync(command);
@@ -87,7 +87,7 @@ public class CreateRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login
         await RunAsAdministratorAsync();
-        
+
         // 2. Create command with invalid role value
         var command = new CreateRoleAssignmentCommand(_userId, _restaurantId, (RestaurantRole)999);
 
@@ -106,7 +106,7 @@ public class CreateRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login
         await RunAsAdministratorAsync();
-        
+
         // 2. Create command with a non-existent user ID
         var nonExistentUserId = Guid.NewGuid();
         var command = new CreateRoleAssignmentCommand(nonExistentUserId, _restaurantId, RestaurantRole.Owner);

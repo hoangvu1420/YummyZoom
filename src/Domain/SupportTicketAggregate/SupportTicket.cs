@@ -552,24 +552,24 @@ public sealed class SupportTicket : AggregateRoot<SupportTicketId, Guid>, ICreat
     // Business rule: Determine if a ticket should be auto-escalated based on age and priority
     public bool ShouldAutoEscalate(TimeSpan maxAgeForPriority)
     {
-        return GetAge() > maxAgeForPriority && 
-               !IsHighPriority() && 
-               !IsClosed() && 
+        return GetAge() > maxAgeForPriority &&
+               !IsHighPriority() &&
+               !IsClosed() &&
                !IsResolved();
     }
 
     // Business rule: Determine if a ticket is stale (no recent activity)
     public bool IsStale(TimeSpan maxTimeSinceLastUpdate)
     {
-        return GetTimeSinceLastUpdate() > maxTimeSinceLastUpdate && 
-               !IsClosed() && 
+        return GetTimeSinceLastUpdate() > maxTimeSinceLastUpdate &&
+               !IsClosed() &&
                !IsResolved();
     }
 
     // Business rule: Check if ticket needs admin attention
     public bool NeedsAdminAttention()
     {
-        return (IsOpen() || Status == SupportTicketStatus.PendingCustomerResponse) && 
+        return (IsOpen() || Status == SupportTicketStatus.PendingCustomerResponse) &&
                AssignedToAdminId == null;
     }
 

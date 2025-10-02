@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IServices;
 
 namespace YummyZoom.Application.Common.Behaviours;
@@ -35,10 +35,10 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
         {
             var requestName = typeof(TRequest).Name;
             var userId = _user.Id ?? string.Empty;
-            
+
             // Extract username from claims instead of making a database query
-            var userName = _user.Principal?.FindFirst(ClaimTypes.Name)?.Value ?? 
-                          _user.Principal?.FindFirst(ClaimTypes.Email)?.Value ?? 
+            var userName = _user.Principal?.FindFirst(ClaimTypes.Name)?.Value ??
+                          _user.Principal?.FindFirst(ClaimTypes.Email)?.Value ??
                           "Unknown";
 
             _logger.LogWarning("YummyZoom Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",

@@ -11,7 +11,7 @@ namespace YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
 public sealed record MarkOrderDeliveredCommand(
     Guid OrderId,
     Guid RestaurantGuid,
-    DateTime? DeliveredAtUtc 
+    DateTime? DeliveredAtUtc
 ) : IRequest<Result<OrderLifecycleResultDto>>, IRestaurantCommand
 {
     RestaurantId IRestaurantCommand.RestaurantId => RestaurantId.Create(RestaurantGuid);

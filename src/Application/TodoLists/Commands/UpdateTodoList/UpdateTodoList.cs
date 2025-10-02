@@ -1,6 +1,6 @@
 ﻿using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.Domain.TodoListAggregate.Errors;
+using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TodoLists.Commands.UpdateTodoList;
@@ -32,7 +32,7 @@ public class UpdateTodoListCommandHandler : IRequestHandler<UpdateTodoListComman
         entity.UpdateTitle(request.Title ?? string.Empty);
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Success(Unit.Value);
     }
 }

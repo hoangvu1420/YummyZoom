@@ -27,7 +27,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var targetUserId = await SetupUserWithDeviceAsync("target@test.com", "test-fcm-token-123");
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Order Update",
@@ -47,14 +47,14 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var targetUserId = await SetupUserWithDeviceAsync("user@test.com", "token-with-data");
-        
+
         var dataPayload = new Dictionary<string, string>
         {
             { "action", "view_order" },
             { "orderId", "123" },
             { "category", "food" }
         };
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Special Offer",
@@ -73,9 +73,9 @@ public class SendNotificationToUserTests : NotificationTestsBase
     {
         // Arrange
         await RunAsAdministratorAsync();
-        var targetUserId = await SetupUserWithMultipleDevicesAsync("multidevice@test.com", 
+        var targetUserId = await SetupUserWithMultipleDevicesAsync("multidevice@test.com",
             new[] { "token1", "token2", "token3" });
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Multi-Device Test",
@@ -86,7 +86,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify user has multiple active sessions
         var sessionCount = await CountActiveSessionsForUserAsync(targetUserId);
         sessionCount.Should().Be(3);
@@ -98,7 +98,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var targetUserId = await SetupUserWithDeviceAsync("simple@test.com", "simple-token");
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Simple Message",
@@ -121,7 +121,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         var customerId = await RunAsUserAsync("customer@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         var targetUserId = await SetupUserWithDeviceAsync("target@test.com", "target-token");
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Unauthorized Test",
@@ -252,10 +252,10 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var userWithoutDevices = await RunAsUserAsync("nodevices@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
-        
+
         // Restore administrator context
         await RunAsAdministratorAsync();
-        
+
         var command = new SendNotificationToUserCommand(
             userWithoutDevices,
             "No Devices Test",
@@ -274,7 +274,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var nonExistentUserId = Guid.NewGuid();
-        
+
         var command = new SendNotificationToUserCommand(
             nonExistentUserId,
             "Non-existent User Test",
@@ -293,7 +293,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         var targetUserId = await SetupUserWithInactiveDeviceAsync("inactive@test.com", "inactive-token");
-        
+
         var command = new SendNotificationToUserCommand(
             targetUserId,
             "Inactive Device Test",
@@ -315,16 +315,16 @@ public class SendNotificationToUserTests : NotificationTestsBase
     {
         // Arrange - Setup complete scenario
         await RunAsAdministratorAsync();
-        
+
         // Create target user and register device
         var targetUserId = await RunAsUserAsync("workflow@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
         var registerCommand = new RegisterDeviceCommand("workflow-token", "iOS", "iPhone-123");
         var registerResult = await SendAsync(registerCommand);
         registerResult.ShouldBeSuccessful();
-        
+
         // Switch back to admin for notification
         await RunAsAdministratorAsync();
-        
+
         var notificationCommand = new SendNotificationToUserCommand(
             targetUserId,
             "Workflow Test",
@@ -336,7 +336,7 @@ public class SendNotificationToUserTests : NotificationTestsBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify session still exists and is active
         var sessionExists = await FindActiveSessionByTokenAsync("workflow-token");
         sessionExists.Should().NotBeNull();

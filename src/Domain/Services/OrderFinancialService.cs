@@ -1,8 +1,8 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
-using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.SharedKernel;
 
@@ -44,13 +44,13 @@ public class OrderFinancialService
         DateTime? currentTime = null)
     {
         var now = currentTime ?? DateTime.UtcNow;
-        
+
         // 1. Basic Validity Checks
-        if (!coupon.IsEnabled) 
+        if (!coupon.IsEnabled)
             return Result.Failure<Money>(CouponErrors.CouponDisabled);
-        if (now < coupon.ValidityStartDate) 
+        if (now < coupon.ValidityStartDate)
             return Result.Failure<Money>(CouponErrors.CouponNotYetValid);
-        if (now > coupon.ValidityEndDate) 
+        if (now > coupon.ValidityEndDate)
             return Result.Failure<Money>(CouponErrors.CouponExpired);
 
         // 2. Usage Limit Checks
@@ -99,7 +99,7 @@ public class OrderFinancialService
             default:
                 return Result.Failure<Money>(CouponErrors.InvalidType);
         }
-        
+
         // Ensure discount doesn't exceed the subtotal it applies to
         return new Money(Math.Min(calculatedDiscount.Amount, discountBaseAmount), subtotal.Currency);
     }
@@ -115,9 +115,9 @@ public class OrderFinancialService
         var deliveryFeeInSubtotalCurrency = new Money(deliveryFee.Amount, subtotal.Currency);
         var tipInSubtotalCurrency = new Money(tip.Amount, subtotal.Currency);
         var taxInSubtotalCurrency = new Money(tax.Amount, subtotal.Currency);
-        
+
         var finalAmount = subtotal - discountInSubtotalCurrency + deliveryFeeInSubtotalCurrency + tipInSubtotalCurrency + taxInSubtotalCurrency;
-        
+
         // Ensure total is not negative
         if (finalAmount.Amount < 0)
         {

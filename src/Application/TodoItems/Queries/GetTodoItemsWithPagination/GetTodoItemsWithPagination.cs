@@ -1,7 +1,7 @@
 ﻿using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Models;
-using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.Domain.TodoListAggregate.Errors;
+using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using Result = YummyZoom.SharedKernel.Result;
 
@@ -28,7 +28,7 @@ public class GetTodoItemsWithPaginationQueryHandler : IRequestHandler<GetTodoIte
     public async Task<Result<PaginatedList<TodoItemBriefDto>>> Handle(GetTodoItemsWithPaginationQuery request, CancellationToken cancellationToken)
     {
         var listId = TodoListId.Create(request.ListId);
-        
+
         // Check if the list exists
         var listExists = await _context.TodoLists
             .AsNoTracking()
@@ -46,10 +46,10 @@ public class GetTodoItemsWithPaginationQueryHandler : IRequestHandler<GetTodoIte
             .ProjectTo<TodoItemBriefDto>(_mapper.ConfigurationProvider);
 
         var paginatedList = await PaginatedList<TodoItemBriefDto>.CreateAsync(
-            itemsQuery, 
-            request.PageNumber, 
+            itemsQuery,
+            request.PageNumber,
             request.PageSize);
-        
+
         return Result.Success(paginatedList);
     }
 }

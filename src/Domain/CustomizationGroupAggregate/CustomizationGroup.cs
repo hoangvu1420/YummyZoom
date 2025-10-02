@@ -1,10 +1,10 @@
+using YummyZoom.Domain.Common.Models;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.Entities;
 using YummyZoom.Domain.CustomizationGroupAggregate.Errors;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.Common.ValueObjects;
 
 namespace YummyZoom.Domain.CustomizationGroupAggregate;
 
@@ -118,10 +118,10 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             return Result.Failure(CustomizationGroupErrors.InvalidChoiceId);
         }
         _choices.Remove(choice);
-        
+
         var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceRemoved(groupId, choice.Id, choice.Name));
-        
+
         return Result.Success();
     }
 
@@ -138,9 +138,9 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         }
 
         var newDisplayOrder = displayOrder ?? choice.DisplayOrder;
-        
+
         // Note: We allow duplicate display orders - items with same order will be sorted by name
-        
+
         // Re-create the choice entity to ensure immutability of value objects
         var updated = CustomizationChoice.Create(choiceId, newName, newPriceAdjustment, isDefault, newDisplayOrder);
         if (updated.IsFailure)
@@ -148,10 +148,10 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
             return Result.Failure(updated.Error);
         }
         _choices[_choices.IndexOf(choice)] = updated.Value;
-        
+
         var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceUpdated(groupId, choiceId, newName, newPriceAdjustment, isDefault, newDisplayOrder));
-        
+
         return Result.Success();
     }
 

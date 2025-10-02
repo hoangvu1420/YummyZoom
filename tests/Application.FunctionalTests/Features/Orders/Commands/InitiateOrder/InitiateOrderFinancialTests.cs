@@ -21,7 +21,7 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         {
             new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 1)
         };
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             menuItemIds: new List<Guid> { classicBurgerItems[0].MenuItemId });
 
@@ -31,16 +31,16 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was persisted with correct subtotal
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Classic Burger price: $15.99 * 1 = $15.99
         const decimal expectedSubtotal = 15.99m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
         orderInDb.Subtotal.Currency.Should().Be("USD");
-        
+
         // Verify individual order item calculation
         orderInDb.OrderItems.Should().HaveCount(1);
         var orderItem = orderInDb.OrderItems.First();
@@ -56,13 +56,13 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.ClassicBurger,   // $15.99
             Testing.TestData.MenuItems.BuffaloWings     // $12.99
         );
-        
+
         var items = new List<OrderItemDto>
         {
             new(menuItemIds[0], 2),  // Classic Burger x2 = $31.98
             new(menuItemIds[1], 1)   // Buffalo Wings x1 = $12.99
         };
-        
+
         var command = new InitiateOrderCommand(
             CustomerId: Testing.TestData.DefaultCustomerId,
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -81,20 +81,20 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was persisted with correct subtotal
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Total: (15.99 * 2) + (12.99 * 1) = 31.98 + 12.99 = $44.97
         const decimal expectedSubtotal = 44.97m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Verify individual line items are calculated correctly
         orderInDb.OrderItems.Should().HaveCount(2);
         var burgerItem = orderInDb.OrderItems.First(oi => oi.Quantity == 2);
         var wingsItem = orderInDb.OrderItems.First(oi => oi.Quantity == 1);
-        
+
         burgerItem.LineItemTotal.Amount.Should().Be(31.98m);
         wingsItem.LineItemTotal.Amount.Should().Be(12.99m);
     }
@@ -108,14 +108,14 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.CaesarSalad,      // $9.99
             Testing.TestData.MenuItems.CraftBeer         // $6.99
         );
-        
+
         var items = new List<OrderItemDto>
         {
             new(menuItemIds[0], 1),  // Margherita Pizza x1 = $18.50
             new(menuItemIds[1], 2),  // Caesar Salad x2 = $19.98
             new(menuItemIds[2], 3)   // Craft Beer x3 = $20.97
         };
-        
+
         var command = new InitiateOrderCommand(
             CustomerId: Testing.TestData.DefaultCustomerId,
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -134,15 +134,15 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was persisted with correct subtotal
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Total: (18.50 * 1) + (9.99 * 2) + (6.99 * 3) = 18.50 + 19.98 + 20.97 = $59.45
         const decimal expectedSubtotal = 59.45m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Verify each line item calculation
         orderInDb.OrderItems.Should().HaveCount(3);
         foreach (var orderItem in orderInDb.OrderItems)
@@ -172,20 +172,20 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was persisted with correct tax and delivery fee
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify delivery fee is applied correctly (should be $2.99 as per TestAmounts)
         orderInDb!.DeliveryFee.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee);
         orderInDb.DeliveryFee.Currency.Should().Be("USD");
-        
+
         // Verify tax amount is calculated at correct rate (8% of subtotal)
         var expectedTaxAmount = orderInDb.Subtotal.Amount * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
         orderInDb.TaxAmount.Currency.Should().Be("USD");
-        
+
         // Verify total includes all components
         var expectedTotal = orderInDb.Subtotal.Amount + orderInDb.DeliveryFee.Amount + orderInDb.TaxAmount.Amount;
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
@@ -200,14 +200,14 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.MargheritaPizza,  // $18.50
             Testing.TestData.MenuItems.BuffaloWings      // $12.99
         );
-        
+
         var items = new List<OrderItemDto>
         {
             new(menuItemIds[0], 2),  // Grilled Salmon x2 = $49.98
             new(menuItemIds[1], 1),  // Margherita Pizza x1 = $18.50
             new(menuItemIds[2], 2)   // Buffalo Wings x2 = $25.98
         };
-        
+
         var command = new InitiateOrderCommand(
             CustomerId: Testing.TestData.DefaultCustomerId,
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -226,18 +226,18 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Subtotal: 49.98 + 18.50 + 25.98 = $94.46
         const decimal expectedSubtotal = 94.46m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Tax: $94.46 * 8% = $7.5568 ≈ $7.56
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
-        
+
         // Total: $94.46 + $2.99 + $7.56 = $105.01
         var expectedTotal = expectedSubtotal + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee + expectedTaxAmount;
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
@@ -259,22 +259,22 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was created with discount applied
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
         orderInDb!.AppliedCouponId.Should().NotBeNull();
         orderInDb.DiscountAmount.Amount.Should().BeGreaterThan(0);
-        
+
         // Verify discount calculation (15% of subtotal as per DefaultTestData.Coupon.DiscountPercentage)
         var expectedDiscountAmount = orderInDb.Subtotal.Amount * 0.15m;
         orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 0.01m);
-        
+
         // Verify final total reflects discount
-        var expectedTotal = orderInDb.Subtotal.Amount 
-                          - orderInDb.DiscountAmount.Amount 
-                          + orderInDb.DeliveryFee.Amount 
-                          + orderInDb.TaxAmount.Amount 
+        var expectedTotal = orderInDb.Subtotal.Amount
+                          - orderInDb.DiscountAmount.Amount
+                          + orderInDb.DeliveryFee.Amount
+                          + orderInDb.TaxAmount.Amount
                           + orderInDb.TipAmount.Amount;
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
     }
@@ -287,13 +287,13 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.GrilledSalmon,    // $24.99
             Testing.TestData.MenuItems.MargheritaPizza   // $18.50
         );
-        
+
         var items = new List<OrderItemDto>
         {
             new(menuItemIds[0], 3),  // Grilled Salmon x3 = $74.97
             new(menuItemIds[1], 2)   // Margherita Pizza x2 = $37.00
         };
-        
+
         var command = new InitiateOrderCommand(
             CustomerId: Testing.TestData.DefaultCustomerId,
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -312,18 +312,18 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Subtotal: 74.97 + 37.00 = $111.97
         const decimal expectedSubtotal = 111.97m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Discount: $111.97 * 15% = $16.7955 ≈ $16.80
         var expectedDiscountAmount = expectedSubtotal * 0.15m;
         orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 0.01m);
-        
+
         // Verify coupon was applied
         orderInDb.AppliedCouponId.Should().NotBeNull();
     }
@@ -345,21 +345,21 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify tip was applied
         orderInDb!.TipAmount.Amount.Should().Be(tipAmount);
-        
+
         // Calculate expected total: subtotal + delivery fee + tip + tax
-        var expectedTotal = orderInDb.Subtotal.Amount 
-                          + orderInDb.DeliveryFee.Amount 
-                          + orderInDb.TipAmount.Amount 
+        var expectedTotal = orderInDb.Subtotal.Amount
+                          + orderInDb.DeliveryFee.Amount
+                          + orderInDb.TipAmount.Amount
                           + orderInDb.TaxAmount.Amount;
-        
+
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
-        
+
         // Verify all components are properly included
         orderInDb.DeliveryFee.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee);
         orderInDb.TaxAmount.Amount.Should().BeGreaterThan(0);
@@ -392,30 +392,30 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify all financial components
         const decimal expectedSubtotal = 49.98m; // $24.99 x 2
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         var expectedDiscountAmount = expectedSubtotal * 0.15m; // 15% coupon
         orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 0.01m);
-        
+
         orderInDb.DeliveryFee.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee);
         orderInDb.TipAmount.Amount.Should().Be(tipAmount);
-        
+
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
-        
+
         // Calculate expected total: subtotal - discount + delivery fee + tip + tax
-        var expectedTotal = expectedSubtotal 
-                          - expectedDiscountAmount 
-                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee 
-                          + tipAmount 
+        var expectedTotal = expectedSubtotal
+                          - expectedDiscountAmount
+                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee
+                          + tipAmount
                           + expectedTaxAmount;
-        
+
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
         response.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
     }
@@ -432,18 +432,18 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify no tip was applied
         orderInDb!.TipAmount.Amount.Should().Be(0);
-        
+
         // Calculate expected total without tip: subtotal + delivery fee + tax
-        var expectedTotal = orderInDb.Subtotal.Amount 
-                          + orderInDb.DeliveryFee.Amount 
+        var expectedTotal = orderInDb.Subtotal.Amount
+                          + orderInDb.DeliveryFee.Amount
                           + orderInDb.TaxAmount.Amount;
-        
+
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
     }
 
@@ -459,13 +459,13 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.CaesarSalad,  // $9.99
             Testing.TestData.MenuItems.FreshJuice    // $4.99
         );
-        
+
         var items = new List<OrderItemDto>
         {
             new(menuItemIds[0], 3),  // Caesar Salad x3 = $29.97
             new(menuItemIds[1], 2)   // Fresh Juice x2 = $9.98
         };
-        
+
         var command = new InitiateOrderCommand(
             CustomerId: Testing.TestData.DefaultCustomerId,
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -484,25 +484,25 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify precise subtotal: 29.97 + 9.98 = $39.95
         const decimal expectedSubtotal = 39.95m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Verify tip precision
         orderInDb.TipAmount.Amount.Should().Be(2.33m);
-        
+
         // Verify tax calculation maintains precision
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
-        
+
         // Verify final total precision
-        var expectedTotal = expectedSubtotal 
-                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee 
-                          + 2.33m 
+        var expectedTotal = expectedSubtotal
+                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee
+                          + 2.33m
                           + expectedTaxAmount;
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
     }
@@ -532,21 +532,21 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify minimum order calculations
         const decimal expectedSubtotal = 4.99m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        
+
         // Tax should still be calculated correctly on small amounts
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
-        
+
         // Total should include all components even for small orders
-        var expectedTotal = expectedSubtotal 
-                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee 
+        var expectedTotal = expectedSubtotal
+                          + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee
                           + expectedTaxAmount;
         orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
     }

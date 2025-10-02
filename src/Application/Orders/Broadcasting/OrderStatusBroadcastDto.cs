@@ -1,5 +1,5 @@
-using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.Common.Models;
+using YummyZoom.Domain.OrderAggregate;
 
 namespace YummyZoom.Application.Orders.Broadcasting;
 

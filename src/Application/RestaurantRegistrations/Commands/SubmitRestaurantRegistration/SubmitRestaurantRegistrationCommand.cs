@@ -1,8 +1,8 @@
 using FluentValidation;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.RestaurantRegistrationAggregate;
 using YummyZoom.Domain.UserAggregate.Errors;
 using YummyZoom.SharedKernel;

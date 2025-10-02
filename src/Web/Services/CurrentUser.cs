@@ -28,7 +28,7 @@ public class CurrentUser : IUser
                 {
                     return UserId.Create(guidValue);
                 }
-                catch (ArgumentException) 
+                catch (ArgumentException)
                 {
                     // Log this occurrence if necessary
                     return null;

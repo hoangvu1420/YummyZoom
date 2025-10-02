@@ -62,8 +62,8 @@ public class UserAggregateRepository : IUserAggregateRepository
     /// <param name="cancellationToken">Cancellation token</param>
     public Task UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
-        _dbContext.DomainUsers.Update(user); 
-        return Task.CompletedTask; 
+        _dbContext.DomainUsers.Update(user);
+        return Task.CompletedTask;
     }
 
     /// <summary>

@@ -38,7 +38,7 @@ public class TeamCartConversionContractTests
             return Result.Success(new ConvertTeamCartToOrderResponse(expectedOrderId));
         });
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",
@@ -75,7 +75,7 @@ public class TeamCartConversionContractTests
         factory.Sender.RespondWith(_ => Result.Failure<ConvertTeamCartToOrderResponse>(
             Error.Validation("TeamCart.NotReadyToConfirm", "Not all members have committed to payment")));
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",
@@ -113,7 +113,7 @@ public class TeamCartConversionContractTests
         factory.Sender.RespondWith(_ => Result.Failure<ConvertTeamCartToOrderResponse>(
             Error.Validation("ConvertTeamCartToOrder.InvalidAddress", "Street address is required")));
 
-        var body = new 
+        var body = new
         {
             Street = "",
             City = "New York",
@@ -151,10 +151,10 @@ public class TeamCartConversionContractTests
         factory.Sender.RespondWith(_ => Result.Failure<ConvertTeamCartToOrderResponse>(
             Error.NotFound("TeamCart.NotFound", "TeamCart not found")));
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
-            City = "New York", 
+            City = "New York",
             State = "NY",
             ZipCode = "10001",
             Country = "USA",
@@ -189,11 +189,11 @@ public class TeamCartConversionContractTests
         factory.Sender.RespondWith(_ => Result.Failure<ConvertTeamCartToOrderResponse>(
             Error.Failure("TeamCart.NotHost", "Only the host can convert the cart to order")));
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",
-            State = "NY", 
+            State = "NY",
             ZipCode = "10001",
             Country = "USA",
             SpecialInstructions = (string?)null
@@ -238,12 +238,12 @@ public class TeamCartConversionContractTests
             return Result.Success(new ConvertTeamCartToOrderResponse(expectedOrderId));
         });
 
-        var body = new 
+        var body = new
         {
             Street = "456 Oak Avenue, Apt 2B",
             City = "Los Angeles",
             State = "California",
-            ZipCode = "90210", 
+            ZipCode = "90210",
             Country = "United States",
             SpecialInstructions = "Leave at front desk"
         };
@@ -260,7 +260,7 @@ public class TeamCartConversionContractTests
         TestContext.WriteLine(rawResponse);
 
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         // Verify the last request was captured with correct mapping
         var lastRequest = factory.Sender.LastRequest;
         lastRequest.Should().NotBeNull();
@@ -276,7 +276,7 @@ public class TeamCartConversionContractTests
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",

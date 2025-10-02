@@ -1,11 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.SharedKernel;
 using Microsoft.AspNetCore.Mvc;
+using NUnit.Framework;
 using YummyZoom.Application.Orders.Queries.GetOrderById;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 

@@ -16,7 +16,7 @@ public static class FullMenuViewAssertions
     {
         view.Should().NotBeNull();
         view.MenuJson.Should().NotBeNullOrWhiteSpace();
-        
+
         using var doc = JsonDocument.Parse(view.MenuJson);
         return doc.RootElement.Clone();
     }
@@ -124,14 +124,14 @@ public static class FullMenuViewAssertions
     {
         var root = GetRoot(view);
         var categoriesById = root.GetProperty("categories").GetProperty("byId");
-        
+
         if (!categoriesById.TryGetProperty(categoryId.ToString(), out var category))
             return false;
-            
+
         var itemOrder = category.GetProperty("itemOrder").EnumerateArray()
             .Select(e => e.GetGuid())
             .ToList();
-            
+
         return itemOrder.Contains(itemId);
     }
 
@@ -143,10 +143,10 @@ public static class FullMenuViewAssertions
     {
         var root = GetRoot(view);
         var itemsById = root.GetProperty("items").GetProperty("byId");
-        
+
         if (!itemsById.TryGetProperty(itemId.ToString(), out var item))
             throw new InvalidOperationException($"Item {itemId} not found in menu view");
-            
+
         return item;
     }
 
@@ -264,10 +264,10 @@ public static class FullMenuViewAssertions
     {
         var root = GetRoot(view);
         var categoriesById = root.GetProperty("categories").GetProperty("byId");
-        
+
         if (!categoriesById.TryGetProperty(categoryId.ToString(), out var category))
             throw new InvalidOperationException($"Category {categoryId} not found in menu view");
-            
+
         return category.GetProperty("itemOrder").EnumerateArray()
             .Select(e => e.GetGuid())
             .ToList();
@@ -294,9 +294,9 @@ public static class FullMenuViewAssertions
     /// <summary>
     /// Asserts that an item has the expected field values.
     /// </summary>
-    public static void ShouldHaveItemWithValues(this FullMenuView view, Guid itemId, 
-        string? expectedName = null, 
-        string? expectedDescription = null, 
+    public static void ShouldHaveItemWithValues(this FullMenuView view, Guid itemId,
+        string? expectedName = null,
+        string? expectedDescription = null,
         decimal? expectedPriceAmount = null,
         string? expectedCurrency = null,
         bool? expectedAvailability = null,
@@ -304,22 +304,22 @@ public static class FullMenuViewAssertions
         string because = "")
     {
         var item = GetItem(view, itemId);
-        
+
         if (expectedName != null)
             GetItemName(view, itemId).Should().Be(expectedName, because.Length > 0 ? because : $"item {itemId} should have expected name");
-            
+
         if (expectedDescription != null)
             GetItemDescription(view, itemId).Should().Be(expectedDescription, because.Length > 0 ? because : $"item {itemId} should have expected description");
-            
+
         if (expectedPriceAmount.HasValue)
             GetItemPriceAmount(view, itemId).Should().Be(expectedPriceAmount.Value, because.Length > 0 ? because : $"item {itemId} should have expected price amount");
-            
+
         if (expectedCurrency != null)
             GetItemPriceCurrency(view, itemId).Should().Be(expectedCurrency, because.Length > 0 ? because : $"item {itemId} should have expected currency");
-            
+
         if (expectedAvailability.HasValue)
             GetItemAvailability(view, itemId).Should().Be(expectedAvailability.Value, because.Length > 0 ? because : $"item {itemId} should have expected availability");
-            
+
         if (expectedImageUrl != null)
             GetItemImageUrl(view, itemId).Should().Be(expectedImageUrl, because.Length > 0 ? because : $"item {itemId} should have expected image URL");
     }

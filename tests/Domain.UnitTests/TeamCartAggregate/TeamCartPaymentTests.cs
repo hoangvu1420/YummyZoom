@@ -53,7 +53,7 @@ public class TeamCartPaymentTests
             "Guest 1 Item",
             _guest1ItemAmount,
             1).ShouldBeSuccessful();
-            
+
         _teamCart.AddItem(
             DefaultGuestUserId2,
             _menuItemId1,
@@ -513,10 +513,10 @@ public class TeamCartPaymentTests
     {
         var cart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
         cart.AddMember(DefaultGuestUserId1, "Guest User 1").ShouldBeSuccessful();
-        
+
         AddItemToCart(cart, DefaultHostUserId, 20.00m);
         AddItemToCart(cart, DefaultGuestUserId1, 15.50m);
-        
+
         return cart;
     }
 

@@ -33,7 +33,7 @@ public class TeamCartItemTests
         // Assert
         result.ShouldBeSuccessful();
         var item = result.Value;
-        
+
         item.Id.Should().NotBeNull();
         item.AddedByUserId.Should().Be(DefaultUserId);
         item.Snapshot_MenuItemId.Should().Be(DefaultMenuItemId);
@@ -42,7 +42,7 @@ public class TeamCartItemTests
         item.Snapshot_BasePriceAtOrder.Should().Be(DefaultBasePrice);
         item.Quantity.Should().Be(DefaultQuantity);
         item.SelectedCustomizations.Should().BeEmpty();
-        
+
         // Line item total should be base price * quantity
         var expectedTotal = new Money(DefaultBasePrice.Amount * DefaultQuantity, DefaultBasePrice.Currency);
         item.LineItemTotal.Should().Be(expectedTotal);
@@ -71,14 +71,14 @@ public class TeamCartItemTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var item = result.Value;
-        
+
         item.SelectedCustomizations.Should().HaveCount(2);
-        
+
         // Line item total should be (base price + customization total) * quantity
         var customizationTotal = 2.00m + 1.50m; // 3.50
         var itemTotal = DefaultBasePrice.Amount + customizationTotal; // 12.99 + 3.50 = 16.49
         var expectedTotal = new Money(itemTotal * DefaultQuantity, DefaultBasePrice.Currency); // 16.49 * 2 = 32.98
-        
+
         item.LineItemTotal.Should().Be(expectedTotal);
     }
 
@@ -203,7 +203,7 @@ public class TeamCartItemTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         item.Quantity.Should().Be(newQuantity);
-        
+
         var expectedTotal = new Money(DefaultBasePrice.Amount * newQuantity, DefaultBasePrice.Currency);
         item.LineItemTotal.Should().Be(expectedTotal);
     }
@@ -234,7 +234,7 @@ public class TeamCartItemTests
         // Assert
         result.ShouldBeSuccessful();
         item.Quantity.Should().Be(newQuantity);
-        
+
         // (12.99 + 2.00) * 3 = 44.97
         var itemTotal = DefaultBasePrice.Amount + 2.00m;
         var expectedTotal = new Money(itemTotal * newQuantity, DefaultBasePrice.Currency);

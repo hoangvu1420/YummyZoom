@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.CustomizationGroupAggregate.Errors;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 

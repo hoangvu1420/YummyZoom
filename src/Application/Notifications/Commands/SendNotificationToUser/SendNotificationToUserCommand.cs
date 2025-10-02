@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Common.Security;
+using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Application.Notifications.Commands.SendNotificationToUser;

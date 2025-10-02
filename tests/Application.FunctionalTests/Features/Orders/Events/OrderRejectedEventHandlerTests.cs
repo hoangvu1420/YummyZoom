@@ -66,7 +66,7 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
-        
+
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
 
@@ -75,13 +75,13 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         {
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after creation");
-            
+
             var rejectResult = order!.Reject();
             rejectResult.ShouldBeSuccessful();
-            
+
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
         }
@@ -166,21 +166,21 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Create placed order
         var initResponse = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
         await DrainOutboxAsync(); // Process OrderPlaced
-        
+
         // Reject the order
         using (var scope = CreateScope())
         {
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             var rejectResult = order!.Reject();
             rejectResult.ShouldBeSuccessful();
-            
+
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await dbContext.SaveChangesAsync(CancellationToken.None);
         }
-        
+
         await DrainOutboxAsync();
         await DrainOutboxAsync(); // second drain should be idempotent
 

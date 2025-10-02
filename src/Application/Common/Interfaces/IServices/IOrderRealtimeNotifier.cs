@@ -12,12 +12,12 @@ public enum NotificationTarget
     /// Send notification to restaurant hub groups only.
     /// </summary>
     Restaurant = 1,
-    
+
     /// <summary>
     /// Send notification to customer hub groups only.
     /// </summary>
     Customer = 2,
-    
+
     /// <summary>
     /// Send notification to both restaurant and customer hub groups.
     /// </summary>

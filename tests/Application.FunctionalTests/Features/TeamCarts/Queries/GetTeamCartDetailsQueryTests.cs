@@ -1,6 +1,6 @@
 using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Authorization;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
@@ -49,7 +49,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
         var teamCart = result.Value.TeamCart;
-        
+
         teamCart.TeamCartId.Should().Be(scenario.TeamCartId);
         teamCart.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
         teamCart.HostUserId.Should().Be(scenario.HostUserId);
@@ -69,7 +69,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         teamCart.Items.Should().HaveCount(2);
         teamCart.Items.Should().Contain(i => i.AddedByUserId == scenario.HostUserId && i.Quantity == 2);
         teamCart.Items.Should().Contain(i => i.AddedByUserId == scenario.GetGuestUserId("Bob Guest") && i.Quantity == 1);
-        
+
         // Verify financial calculations
         var expectedSubtotal = teamCart.Items.Sum(i => i.BasePriceAmount * i.Quantity);
         teamCart.Subtotal.Should().Be(expectedSubtotal);
@@ -98,10 +98,10 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
         var teamCart = result.Value.TeamCart;
-        
+
         teamCart.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
         teamCart.MemberPayments.Should().ContainSingle();
-        
+
         var payment = teamCart.MemberPayments.First();
         payment.UserId.Should().Be(scenario.HostUserId);
         payment.PaymentMethod.Should().Be("CashOnDelivery");
@@ -129,7 +129,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         result.Value.TeamCart.Members.Should().Contain(m => m.UserId == scenario.GetGuestUserId("Guest User"));
     }
 
-        [Test]
+    [Test]
     public async Task GetTeamCartDetails_WithNonExistentCart_ShouldReturnNotFound()
     {
         // Arrange: Use a non-existent TeamCart ID with authenticated user
@@ -144,7 +144,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         result.Error.Code.Should().Be("GetTeamCartDetails.NotFound");
     }
 
-        [Test]
+    [Test]
     public async Task GetTeamCartDetails_AsNonMember_ShouldReturnNotMember()
     {
         // Arrange: Create team cart with host
@@ -169,9 +169,9 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
     public async Task GetTeamCartDetails_WithEmptyGuid_ShouldThrowValidationException()
     {
         await RunAsDefaultUserAsync();
-        
+
         var act = async () => await SendAsync(new GetTeamCartDetailsQuery(Guid.Empty));
-        
+
         await act.Should().ThrowAsync<ValidationException>();
     }
 
@@ -179,9 +179,9 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
     public async Task GetTeamCartDetails_WithoutAuthentication_ShouldThrowUnauthorizedException()
     {
         var teamCartId = Guid.NewGuid();
-        
+
         var act = async () => await SendAsync(new GetTeamCartDetailsQuery(teamCartId));
-        
+
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
 
@@ -199,7 +199,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         // Add various items using the actual member users
         var burger = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         var pizza = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.MargheritaPizza);
-        
+
         await scenario.ActAsHost();
         await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burger, 2)); // Host adds burgers
 
@@ -220,23 +220,23 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         // Assert detailed validation
         result.ShouldBeSuccessful();
         var teamCart = result.Value.TeamCart;
-        
+
         // Verify structure
         teamCart.Members.Should().HaveCount(3);
         teamCart.Items.Should().HaveCount(3);
         teamCart.TipAmount.Should().Be(10.00m);
-        
+
         // Verify host role
         teamCart.Members.Should().ContainSingle(m => m.Role == "Host" && m.UserId == scenario.HostUserId);
-        
+
         // Verify guests
         teamCart.Members.Count(m => m.Role == "Guest").Should().Be(2);
-        
+
         // Verify items belong to correct users
         teamCart.Items.Count(i => i.AddedByUserId == scenario.HostUserId).Should().Be(1);
         teamCart.Items.Count(i => i.AddedByUserId == scenario.GetGuestUserId("Bob Guest1")).Should().Be(1);
         teamCart.Items.Count(i => i.AddedByUserId == scenario.GetGuestUserId("Charlie Guest2")).Should().Be(1);
-        
+
         // Verify total calculation includes tip
         var subtotal = teamCart.Items.Sum(i => i.BasePriceAmount * i.Quantity);
         teamCart.Subtotal.Should().Be(subtotal);

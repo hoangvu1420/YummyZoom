@@ -65,7 +65,7 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
-        
+
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
 
@@ -74,15 +74,15 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         {
             var orderRepository = acceptScope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = acceptScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after creation");
-            
+
             // Accept the order with estimated delivery time
             var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
             var acceptResult = order!.Accept(estimatedDeliveryTime);
             acceptResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -96,14 +96,14 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         {
             var orderRepository = preparingScope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = preparingScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after acceptance");
-            
+
             // Mark as preparing
             var preparingResult = order!.MarkAsPreparing();
             preparingResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -189,7 +189,7 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
-        
+
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
 
@@ -198,15 +198,15 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         {
             var orderRepository = acceptScope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = acceptScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after creation");
-            
+
             // Accept the order with estimated delivery time
             var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
             var acceptResult = order!.Accept(estimatedDeliveryTime);
             acceptResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -220,14 +220,14 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         {
             var orderRepository = preparingScope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = preparingScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after acceptance");
-            
+
             // Mark as preparing
             var preparingResult = order!.MarkAsPreparing();
             preparingResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -244,11 +244,11 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Exactly(2));
         capturedDtos.Should().HaveCount(2);
-        
+
         // Verify both status changes are captured (Accepted and Preparing)
         var acceptedDto = capturedDtos.Single(dto => dto.Status == "Accepted");
         var preparingDto = capturedDtos.Single(dto => dto.Status == "Preparing");
-        
+
         // Verify the preparing broadcast (the focus of this test)
         preparingDto.OrderId.Should().Be(initResponse.OrderId.Value);
         preparingDto.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);

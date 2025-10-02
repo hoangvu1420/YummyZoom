@@ -18,10 +18,10 @@ public class MenuItemAvailabilityTests : MenuItemTestHelpers
 
         // Assert
         item.IsAvailable.Should().BeFalse();
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemAvailabilityChanged>()
-            .Which.Should().Match<MenuItemAvailabilityChanged>(e => 
+            .Which.Should().Match<MenuItemAvailabilityChanged>(e =>
                 e.MenuItemId == item.Id && e.IsAvailable == false);
     }
 
@@ -52,10 +52,10 @@ public class MenuItemAvailabilityTests : MenuItemTestHelpers
 
         // Assert
         item.IsAvailable.Should().BeTrue();
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemAvailabilityChanged>()
-            .Which.Should().Match<MenuItemAvailabilityChanged>(e => 
+            .Which.Should().Match<MenuItemAvailabilityChanged>(e =>
                 e.MenuItemId == item.Id && e.IsAvailable == true);
     }
 
@@ -93,12 +93,12 @@ public class MenuItemCategoryAssignmentTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         item.MenuCategoryId.Should().Be(newCategoryId);
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemAssignedToCategory>()
-            .Which.Should().Match<MenuItemAssignedToCategory>(e => 
-                e.MenuItemId == item.Id && 
-                e.OldCategoryId == oldCategoryId && 
+            .Which.Should().Match<MenuItemAssignedToCategory>(e =>
+                e.MenuItemId == item.Id &&
+                e.OldCategoryId == oldCategoryId &&
                 e.NewCategoryId == newCategoryId);
     }
 
@@ -116,7 +116,7 @@ public class MenuItemCategoryAssignmentTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         item.MenuCategoryId.Should().Be(currentCategoryId);
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemAssignedToCategory>();
     }

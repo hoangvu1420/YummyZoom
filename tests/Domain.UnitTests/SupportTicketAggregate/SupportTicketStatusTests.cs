@@ -57,22 +57,22 @@ public class SupportTicketStatusTests
             case SupportTicketStatus.InProgress:
                 ticket.UpdateStatus(SupportTicketStatus.InProgress, DefaultAdminId);
                 break;
-            
+
             case SupportTicketStatus.PendingCustomerResponse:
                 ticket.UpdateStatus(SupportTicketStatus.InProgress, DefaultAdminId);
                 ticket.UpdateStatus(SupportTicketStatus.PendingCustomerResponse, DefaultAdminId);
                 break;
-            
+
             case SupportTicketStatus.Resolved:
                 ticket.UpdateStatus(SupportTicketStatus.InProgress, DefaultAdminId);
                 ticket.UpdateStatus(SupportTicketStatus.Resolved, DefaultAdminId);
                 break;
-            
+
             case SupportTicketStatus.Closed:
                 ticket.UpdateStatus(SupportTicketStatus.Closed, DefaultAdminId);
                 break;
         }
-        
+
         ticket.ClearDomainEvents();
     }
 

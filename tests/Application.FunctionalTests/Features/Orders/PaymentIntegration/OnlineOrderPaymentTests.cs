@@ -1,11 +1,11 @@
+using Microsoft.Extensions.Options;
+using Stripe;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.Orders.Commands.HandleStripeWebhook;
 using YummyZoom.Domain.OrderAggregate.Enums;
-using Stripe;
 using YummyZoom.Infrastructure.Payments.Stripe;
-using Microsoft.Extensions.Options;
-using YummyZoom.Application.Common.Exceptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;

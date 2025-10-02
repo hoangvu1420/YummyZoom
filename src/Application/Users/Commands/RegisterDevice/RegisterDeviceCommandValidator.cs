@@ -16,4 +16,4 @@ public class RegisterDeviceCommandValidator : AbstractValidator<RegisterDeviceCo
             .MaximumLength(100).WithMessage("Device ID must not exceed 100 characters.")
             .When(v => !string.IsNullOrWhiteSpace(v.DeviceId));
     }
-} 
+}

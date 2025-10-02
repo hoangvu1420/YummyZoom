@@ -115,7 +115,7 @@ public class Users : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var result = await sender.Send(new YummyZoom.Application.Reviews.Queries.GetMyReviews.GetMyReviewsQuery(page, size));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })

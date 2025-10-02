@@ -27,7 +27,7 @@ public class MarkOrderDeliveredTests : OrderLifecycleTestBase
         result.ShouldBeSuccessful();
         var order = await FindOrderAsync(orderId);
         order!.Status.Should().Be(OrderStatus.Delivered);
-    order.ActualDeliveryTime.Should().NotBeNull();
+        order.ActualDeliveryTime.Should().NotBeNull();
     }
 
     [Test]
@@ -58,7 +58,7 @@ public class MarkOrderDeliveredTests : OrderLifecycleTestBase
         var first = await FindOrderAsync(orderId);
         first!.Status.Should().Be(OrderStatus.Delivered);
         var firstTimestamp = first.LastUpdateTimestamp;
-    var firstDeliveredAt = first.ActualDeliveryTime;
+        var firstDeliveredAt = first.ActualDeliveryTime;
 
         // Act second (idempotent) call with different timestamp attempt
         var second = await SendAsync(new MarkOrderDeliveredCommand(orderId.Value, Testing.TestData.DefaultRestaurantId, DateTime.UtcNow.AddMinutes(5)));
@@ -68,7 +68,7 @@ public class MarkOrderDeliveredTests : OrderLifecycleTestBase
         var after = await FindOrderAsync(orderId);
         after!.Status.Should().Be(OrderStatus.Delivered);
         after.LastUpdateTimestamp.Should().Be(firstTimestamp);
-    after.ActualDeliveryTime.Should().Be(firstDeliveredAt);
+        after.ActualDeliveryTime.Should().Be(firstDeliveredAt);
     }
 
     [Test]
@@ -76,13 +76,13 @@ public class MarkOrderDeliveredTests : OrderLifecycleTestBase
     {
         // Arrange ready order but stay as customer
         var orderId = await OrderLifecycleTestHelper.CreateReadyOrderAsync();
-        
+
         // Switch back to customer context to test authorization failure
         SetUserId(Testing.TestData.DefaultCustomerId);
-        
+
         // Act
         var act = async () => await SendAsync(new MarkOrderDeliveredCommand(orderId.Value, Testing.TestData.DefaultRestaurantId, DateTime.UtcNow));
-        
+
         // Assert
         await act.Should().ThrowAsync<ForbiddenAccessException>();
         var order = await FindOrderAsync(orderId);

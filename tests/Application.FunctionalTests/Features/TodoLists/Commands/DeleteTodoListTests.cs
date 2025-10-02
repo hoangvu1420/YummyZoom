@@ -25,7 +25,7 @@ public class DeleteTodoListTests : BaseTestFixture
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
         var listId = listResult.Value;
 

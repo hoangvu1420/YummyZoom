@@ -26,9 +26,9 @@ public class UpdateTodoListTests : BaseTestFixture
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
-        
+
         await SendAsync(new CreateTodoListCommand
         {
             Title = "Other List"
@@ -55,7 +55,7 @@ public class UpdateTodoListTests : BaseTestFixture
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
         var listId = listResult.Value;
 
@@ -73,7 +73,7 @@ public class UpdateTodoListTests : BaseTestFixture
         list.Should().NotBeNull();
         list!.Title.Should().Be(command.Title);
         list.LastModifiedBy.Should().NotBeNull();
-        list.LastModifiedBy.Should().Be(userId.ToString()); 
+        list.LastModifiedBy.Should().Be(userId.ToString());
         list.LastModified.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMilliseconds(10000));
     }
 }

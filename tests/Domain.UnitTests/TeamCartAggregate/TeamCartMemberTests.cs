@@ -25,18 +25,18 @@ public class TeamCartMemberTests
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify member was added
         var members = teamCart.Members;
-        
+
         members.Should().NotBeNull();
         members.Should().HaveCount(2); // Host + new guest
-        
+
         var guestMember = members.FirstOrDefault(m => m.UserId == guestUserId);
         guestMember.Should().NotBeNull();
         guestMember!.Name.Should().Be(guestName);
         guestMember.Role.Should().Be(MemberRole.Guest);
-        
+
         // Verify domain event
         teamCart.DomainEvents.Should().Contain(e => e.GetType() == typeof(MemberJoined));
         var memberJoinedEvent = teamCart.DomainEvents.OfType<MemberJoined>().Single(e => e.UserId == guestUserId);
@@ -50,7 +50,7 @@ public class TeamCartMemberTests
     {
         // Arrange
         var teamCart = CreateValidTeamCart();
-        
+
         // Act - Try to add the host user again
         var result = teamCart.AddMember(DefaultHostUserId, "Another Name");
 
@@ -84,19 +84,19 @@ public class TeamCartMemberTests
 
         // Test when cart is Locked
         var teamCartLocked = CreateValidTeamCart();
-        
+
         // First add an item to the cart so we can lock it
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         teamCartLocked.AddItem(
-            DefaultHostUserId, 
-            menuItemId, 
-            menuCategoryId, 
-            "Test Item", 
-            new Money(10.99m, "USD"), 
+            DefaultHostUserId,
+            menuItemId,
+            menuCategoryId,
+            "Test Item",
+            new Money(10.99m, "USD"),
             1).ShouldBeSuccessful();
         teamCartLocked.ClearDomainEvents(); // Clear events from adding item
-        
+
         teamCartLocked.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
         teamCartLocked.ClearDomainEvents();
         var resultLocked = teamCartLocked.AddMember(guestUserId, guestName);

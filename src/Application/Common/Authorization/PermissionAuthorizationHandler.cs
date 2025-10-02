@@ -12,21 +12,21 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
         IContextualCommand resource)
     {
         var requiredPermission = $"{requirement.Role}:{resource.ResourceId}";
-        
+
         // Check if user has the exact required permission
         if (context.User.HasClaim("permission", requiredPermission))
         {
             context.Succeed(requirement);
             return Task.CompletedTask;
         }
-        
+
         // Apply resource-type-specific business rules
         switch (resource.ResourceType)
         {
             case "Restaurant":
                 HandleRestaurantAuthorization(context, requirement, resource);
                 break;
-                
+
             case "User":
                 HandleUserAuthorization(context, requirement, resource);
                 break;
@@ -39,13 +39,13 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
                 HandleTeamCartAuthorization(context, requirement, resource);
                 break;
         }
-        
+
         return Task.CompletedTask;
     }
-    
+
     private void HandleRestaurantAuthorization(
-        AuthorizationHandlerContext context, 
-        HasPermissionRequirement requirement, 
+        AuthorizationHandlerContext context,
+        HasPermissionRequirement requirement,
         IContextualCommand resource)
     {
         // Business rule: Restaurant owners can perform staff actions
@@ -58,10 +58,10 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
             }
         }
     }
-    
+
     private void HandleUserAuthorization(
-        AuthorizationHandlerContext context, 
-        HasPermissionRequirement requirement, 
+        AuthorizationHandlerContext context,
+        HasPermissionRequirement requirement,
         IContextualCommand resource)
     {
         // Business rule: Users can access their own data
@@ -73,9 +73,9 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<HasPermission
                 context.Succeed(requirement);
             }
         }
-        
+
         // Business rule: Admins can access any user data
-        if (requirement.Role == Roles.UserOwner && 
+        if (requirement.Role == Roles.UserOwner &&
             context.User.HasClaim("permission", $"{Roles.UserAdmin}:*"))
         {
             context.Succeed(requirement);

@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 

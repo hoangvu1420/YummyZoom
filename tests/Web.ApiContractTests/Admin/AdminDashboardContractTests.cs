@@ -6,8 +6,8 @@ using YummyZoom.Application.Admin.Queries.GetPlatformMetricsSummary;
 using YummyZoom.Application.Admin.Queries.GetPlatformTrends;
 using YummyZoom.Application.Admin.Queries.ListRestaurantsForAdmin;
 using YummyZoom.Application.Common.Models;
-using SharedResult = YummyZoom.SharedKernel.Result;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
+using SharedResult = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Web.ApiContractTests.Admin;
 

@@ -10,7 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("DomainUsers"); 
+        builder.ToTable("DomainUsers");
 
         builder.HasKey(u => u.Id);
 
@@ -31,7 +31,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Email).IsUnique();
 
         builder.Property(u => u.PhoneNumber)
-            .HasMaxLength(50) 
+            .HasMaxLength(50)
             .IsRequired(false);
 
         // Configure audit and soft delete properties
@@ -68,7 +68,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.OwnsMany(u => u.PaymentMethods, paymentBuilder =>
         {
             paymentBuilder.ToTable("UserPaymentMethods");
-            paymentBuilder.WithOwner().HasForeignKey("UserId"); 
+            paymentBuilder.WithOwner().HasForeignKey("UserId");
 
             paymentBuilder.HasKey("UserId", "Id");
 
@@ -84,7 +84,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .IsRequired();
 
             paymentBuilder.Property(pm => pm.TokenizedDetails)
-                .HasMaxLength(500) 
+                .HasMaxLength(500)
                 .IsRequired();
 
             paymentBuilder.Property(pm => pm.IsDefault)

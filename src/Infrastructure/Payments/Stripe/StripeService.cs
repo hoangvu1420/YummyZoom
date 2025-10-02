@@ -102,7 +102,7 @@ public class StripeService : IPaymentGatewayService
                 EventId: stripeEvent.Id,
                 EventType: stripeEvent.Type,
                 RelevantObjectId: relevantObject.Id,
-                Metadata: metadata 
+                Metadata: metadata
             );
 
             _logger.LogInformation("Successfully constructed WebhookEventResult for Event ID: {EventId}, Type: {EventType}", result.EventId, result.EventType);

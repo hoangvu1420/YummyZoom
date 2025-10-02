@@ -1,13 +1,13 @@
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.OrderAggregate.Enums;
-using YummyZoom.Domain.TeamCartAggregate.Enums;
-using YummyZoom.Domain.UnitTests.CouponAggregate;
-using YummyZoom.Domain.UnitTests.TeamCartAggregate;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.Enums;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
+using YummyZoom.Domain.UnitTests.CouponAggregate;
+using YummyZoom.Domain.UnitTests.TeamCartAggregate;
 
 namespace YummyZoom.Domain.UnitTests.Services.TeamCartConversionServiceTests;
 
@@ -164,7 +164,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Lock the cart for payment
         teamCart.LockForPayment(teamCart.HostUserId);
-        
+
         // Apply coupon while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
 
@@ -229,7 +229,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Lock the cart for payment
         teamCart.LockForPayment(teamCart.HostUserId);
-        
+
         // Apply tip while cart is in Locked status
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);
 
@@ -289,7 +289,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Lock the cart for payment
         teamCart.LockForPayment(teamCart.HostUserId); // Status: Locked
-        
+
         // Apply coupon and tip while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);

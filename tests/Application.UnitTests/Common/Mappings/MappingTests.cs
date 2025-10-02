@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using AutoMapper;
+using NUnit.Framework;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 using YummyZoom.Application.TodoLists.Queries.GetTodos;
-using NUnit.Framework;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.TodoListAggregate;
 using YummyZoom.Domain.TodoListAggregate.Entities;
 
@@ -18,7 +18,7 @@ public class MappingTests
 
     public MappingTests()
     {
-        _configuration = new MapperConfiguration(config => 
+        _configuration = new MapperConfiguration(config =>
             config.AddMaps(Assembly.GetAssembly(typeof(IApplicationDbContext))));
 
         _mapper = _configuration.CreateMapper();

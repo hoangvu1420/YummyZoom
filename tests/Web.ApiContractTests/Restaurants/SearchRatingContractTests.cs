@@ -5,8 +5,8 @@ using NUnit.Framework;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Application.Restaurants.Queries.SearchRestaurants;
-using Result = YummyZoom.SharedKernel.Result;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 

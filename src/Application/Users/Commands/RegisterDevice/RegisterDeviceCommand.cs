@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Common.Security;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Users.Commands.RegisterDevice;
 

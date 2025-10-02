@@ -8,9 +8,9 @@ using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.ReviewAggregate.ValueObjects;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Application.Reviews.Commands.CreateReview;
 

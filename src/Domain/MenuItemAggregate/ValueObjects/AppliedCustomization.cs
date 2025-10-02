@@ -22,14 +22,14 @@ public sealed class AppliedCustomization : ValueObject
     {
         return new AppliedCustomization(customizationGroupId, displayTitle, displayOrder);
     }
-    
+
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return CustomizationGroupId;
         yield return DisplayTitle;
         yield return DisplayOrder;
     }
-    
+
 #pragma warning disable CS8618
     // Internal parameterless constructor for EF Core and JSON deserialization
     internal AppliedCustomization() { }

@@ -9,12 +9,12 @@ public enum CouponScope
     /// Coupon applies to the entire order
     /// </summary>
     WholeOrder = 1,
-    
+
     /// <summary>
     /// Coupon applies only to specific menu items
     /// </summary>
     SpecificItems = 2,
-    
+
     /// <summary>
     /// Coupon applies only to specific menu categories
     /// </summary>

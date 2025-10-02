@@ -29,22 +29,22 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         {
             // 1) Create identity user + assign Customer role (baseline role)
             var idResult = await _identityService.CreateIdentityUserAsync(
-                request.Email!, 
-                request.Password!, 
+                request.Email!,
+                request.Password!,
                 Roles.User);
-            
-            if (idResult.IsFailure) 
+
+            if (idResult.IsFailure)
                 return Result.Failure<Guid>(idResult.Error);
 
             // 2) Create domain User aggregate (no roles - just customer identity)
             var userResult = User.Create(
                 UserId.Create(idResult.Value),
-                request.Name!, 
-                request.Email!, 
+                request.Name!,
+                request.Email!,
                 null,
                 isActive: true);
-                
-            if (userResult.IsFailure) 
+
+            if (userResult.IsFailure)
                 return Result.Failure<Guid>(userResult.Error);
 
             // 3) Persist the domain user

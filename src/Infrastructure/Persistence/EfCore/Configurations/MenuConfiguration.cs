@@ -23,11 +23,11 @@ public class MenuConfiguration : IEntityTypeConfiguration<Menu>
         builder.Property(m => m.Name)
             .HasMaxLength(200)
             .IsRequired();
-        
+
         builder.Property(m => m.Description)
             .HasMaxLength(500)
             .IsRequired();
-        
+
         builder.Property(m => m.IsEnabled)
             .IsRequired();
 

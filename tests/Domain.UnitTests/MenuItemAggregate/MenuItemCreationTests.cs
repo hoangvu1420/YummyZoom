@@ -25,7 +25,7 @@ public class MenuItemCreationTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         var item = result.Value;
-        
+
         item.Id.Value.Should().NotBe(Guid.Empty);
         item.RestaurantId.Should().Be(DefaultRestaurantId);
         item.MenuCategoryId.Should().Be(DefaultMenuCategoryId);
@@ -36,12 +36,12 @@ public class MenuItemCreationTests : MenuItemTestHelpers
         item.IsAvailable.Should().BeTrue();
         item.DietaryTagIds.Should().BeEmpty();
         item.AppliedCustomizations.Should().BeEmpty();
-        
+
         item.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<MenuItemCreated>()
-            .Which.Should().Match<MenuItemCreated>(e => 
-                e.MenuItemId == item.Id && 
-                e.RestaurantId == DefaultRestaurantId && 
+            .Which.Should().Match<MenuItemCreated>(e =>
+                e.MenuItemId == item.Id &&
+                e.RestaurantId == DefaultRestaurantId &&
                 e.MenuCategoryId == DefaultMenuCategoryId);
     }
 
@@ -50,8 +50,8 @@ public class MenuItemCreationTests : MenuItemTestHelpers
     {
         // Arrange
         var dietaryTags = new List<TagId> { TagId.CreateUnique(), TagId.CreateUnique() };
-        var customizations = new List<AppliedCustomization> 
-        { 
+        var customizations = new List<AppliedCustomization>
+        {
             AppliedCustomization.Create(CustomizationGroupId.CreateUnique(), "Extra Cheese", 1)
         };
 
@@ -70,7 +70,7 @@ public class MenuItemCreationTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         var item = result.Value;
-        
+
         item.ImageUrl.Should().Be(DefaultImageUrl);
         item.IsAvailable.Should().BeFalse();
         item.DietaryTagIds.Should().HaveCount(2);

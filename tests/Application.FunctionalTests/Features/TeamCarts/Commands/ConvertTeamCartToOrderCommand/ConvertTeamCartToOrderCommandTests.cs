@@ -1,11 +1,11 @@
-using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Application.Common.Exceptions;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Commands.ConvertTeamCartToOrderCommand;

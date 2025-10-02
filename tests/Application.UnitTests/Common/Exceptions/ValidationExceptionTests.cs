@@ -1,7 +1,7 @@
-﻿using YummyZoom.Application.Common.Exceptions;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentValidation.Results;
 using NUnit.Framework;
+using YummyZoom.Application.Common.Exceptions;
 
 namespace YummyZoom.Application.UnitTests.Common.Exceptions;
 

@@ -20,7 +20,7 @@ public class PaymentMethodTests
         // Assert
         paymentMethod.Should().NotBeNull();
         paymentMethod.Id.Should().NotBeNull();
-        paymentMethod.Id.Value.Should().NotBe(Guid.Empty); 
+        paymentMethod.Id.Value.Should().NotBe(Guid.Empty);
         paymentMethod.Type.Should().Be(type);
         paymentMethod.TokenizedDetails.Should().Be(tokenizedDetails);
         paymentMethod.IsDefault.Should().Be(isDefault);
@@ -31,8 +31,8 @@ public class PaymentMethodTests
     {
         // Arrange
         var paymentMethodId = PaymentMethodId.CreateUnique();
-        var paymentMethod1 = PaymentMethod.Create(paymentMethodId, "Card", "tok_test", false); 
-        var paymentMethod2 = PaymentMethod.Create(paymentMethodId, "PayPal", "tok_other", true); 
+        var paymentMethod1 = PaymentMethod.Create(paymentMethodId, "Card", "tok_test", false);
+        var paymentMethod2 = PaymentMethod.Create(paymentMethodId, "PayPal", "tok_other", true);
 
         // Assert
         paymentMethod1.Should().Be(paymentMethod2);

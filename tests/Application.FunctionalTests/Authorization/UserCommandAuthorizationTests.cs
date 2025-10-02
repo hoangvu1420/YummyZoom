@@ -1,7 +1,7 @@
-using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Infrastructure.Identity;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -18,7 +18,7 @@ public class UserCommandAuthorizationTests : BaseTestFixture
     {
         await ResetState();
         await SetupForAuthorizationTestsAsync();
-        
+
         // Create test user IDs for testing
         _testUserId1 = Guid.NewGuid();
         _testUserId2 = Guid.NewGuid();
@@ -121,7 +121,7 @@ public class UserCommandAuthorizationTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         using var scope = CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<ApplicationUser>>();
         var claimsFactory = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<ApplicationUser>>();
@@ -129,12 +129,12 @@ public class UserCommandAuthorizationTests : BaseTestFixture
         // Act - Generate claims principal
         var user = await userManager.FindByIdAsync(userId.ToString());
         user.Should().NotBeNull();
-        
+
         var principal = await claimsFactory.CreateAsync(user!);
 
         // Assert - Verify user permission claims are present
         var permissionClaims = principal.Claims.Where(c => c.Type == "permission").ToList();
-        
+
         // Should have at least the user's own permission
         permissionClaims.Should().Contain(c => c.Value == $"UserOwner:{userId}",
             "Every user should have UserOwner permission for their own ID");
@@ -145,7 +145,7 @@ public class UserCommandAuthorizationTests : BaseTestFixture
     {
         // Arrange
         var adminUserId = await RunAsAdministratorAsync();
-        
+
         using var scope = CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<ApplicationUser>>();
         var claimsFactory = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<ApplicationUser>>();
@@ -153,12 +153,12 @@ public class UserCommandAuthorizationTests : BaseTestFixture
         // Act - Generate claims principal for admin
         var adminUser = await userManager.FindByIdAsync(adminUserId.ToString());
         adminUser.Should().NotBeNull();
-        
+
         var principal = await claimsFactory.CreateAsync(adminUser!);
 
         // Assert - Verify admin permission claims are present
         var permissionClaims = principal.Claims.Where(c => c.Type == "permission").ToList();
-        
+
         // Should have both user self-permission and admin permission
         permissionClaims.Should().Contain(c => c.Value == $"UserOwner:{adminUserId}",
             "Admin should have UserOwner permission for their own ID");
@@ -167,4 +167,4 @@ public class UserCommandAuthorizationTests : BaseTestFixture
     }
 
     #endregion
-} 
+}

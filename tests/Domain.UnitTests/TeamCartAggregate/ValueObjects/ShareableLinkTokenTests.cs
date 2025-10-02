@@ -53,13 +53,13 @@ public class ShareableLinkTokenTests
         // Arrange - Use reflection to create a token with past expiration
         var pastExpiration = DateTime.UtcNow.AddHours(-1);
         var tokenValue = "test-token-value";
-        
+
         var constructor = typeof(ShareableLinkToken).GetConstructor(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
             null,
             new[] { typeof(string), typeof(DateTime) },
             null);
-            
+
         var token = constructor?.Invoke(new object[] { tokenValue, pastExpiration }) as ShareableLinkToken;
 
         // Act & Assert
@@ -73,13 +73,13 @@ public class ShareableLinkTokenTests
         // Arrange
         var tokenValue = "same-token-value";
         var expiresAt = DateTime.UtcNow.AddHours(24);
-        
+
         var constructor = typeof(ShareableLinkToken).GetConstructor(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
             null,
             new[] { typeof(string), typeof(DateTime) },
             null);
-            
+
         var token1 = constructor?.Invoke(new object[] { tokenValue, expiresAt }) as ShareableLinkToken;
         var token2 = constructor?.Invoke(new object[] { tokenValue, expiresAt }) as ShareableLinkToken;
 
@@ -93,13 +93,13 @@ public class ShareableLinkTokenTests
     {
         // Arrange
         var expiresAt = DateTime.UtcNow.AddHours(24);
-        
+
         var constructor = typeof(ShareableLinkToken).GetConstructor(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
             null,
             new[] { typeof(string), typeof(DateTime) },
             null);
-            
+
         var token1 = constructor?.Invoke(new object[] { "token-value-1", expiresAt }) as ShareableLinkToken;
         var token2 = constructor?.Invoke(new object[] { "token-value-2", expiresAt }) as ShareableLinkToken;
 

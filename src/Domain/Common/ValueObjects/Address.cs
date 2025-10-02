@@ -57,8 +57,8 @@ public sealed class Address : ValueObject
         yield return State;
         yield return ZipCode;
         yield return Country;
-        yield return Label ?? NullPlaceholder; 
-        yield return DeliveryInstructions ?? NullPlaceholder; 
+        yield return Label ?? NullPlaceholder;
+        yield return DeliveryInstructions ?? NullPlaceholder;
     }
 
     private static readonly object NullPlaceholder = new object();

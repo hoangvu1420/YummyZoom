@@ -20,13 +20,13 @@ public class MenuItemPropertyImmutabilityTests : MenuItemTestHelpers
 
         // Act & Assert - RestaurantId should not be changeable
         item.RestaurantId.Should().Be(originalRestaurantId);
-        
+
         // Verify through updates that RestaurantId remains the same
         item.UpdateDetails("New Name", "New Description");
         item.UpdatePrice(new Money(20.00m, Currencies.Default));
         item.MarkAsUnavailable();
         item.AssignToCategory(MenuCategoryId.CreateUnique());
-        
+
         item.RestaurantId.Should().Be(originalRestaurantId);
     }
 
@@ -39,13 +39,13 @@ public class MenuItemPropertyImmutabilityTests : MenuItemTestHelpers
 
         // Act & Assert - Id should not be changeable
         item.Id.Should().Be(originalId);
-        
+
         // Verify through updates that Id remains the same
         item.UpdateDetails("New Name", "New Description");
         item.UpdatePrice(new Money(20.00m, Currencies.Default));
         item.MarkAsUnavailable();
         item.AssignToCategory(MenuCategoryId.CreateUnique());
-        
+
         item.Id.Should().Be(originalId);
     }
 
@@ -83,8 +83,8 @@ public class MenuItemPropertyImmutabilityTests : MenuItemTestHelpers
     public void AppliedCustomizations_ShouldBeReadOnly()
     {
         // Arrange
-        var customizations = new List<AppliedCustomization> 
-        { 
+        var customizations = new List<AppliedCustomization>
+        {
             AppliedCustomization.Create(CustomizationGroupId.CreateUnique(), "Extra Cheese", 1)
         };
 

@@ -18,7 +18,7 @@ public class DeviceRepository : IDeviceRepository
     {
         if (string.IsNullOrWhiteSpace(deviceId))
             return null;
-            
+
         return await _context.Devices
             .FirstOrDefaultAsync(d => d.DeviceId == deviceId, cancellationToken);
     }

@@ -77,7 +77,7 @@ public class ApplyTipToTeamCartCommandTests : BaseTestFixture
         var otherUserId = await CreateUserAsync("not-host-applytip@example.com", "Password123!");
         SetUserId(otherUserId);
 
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.ApplyTipToTeamCart.ApplyTipToTeamCartCommand(scenario.TeamCartId, 3m)))
             .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
     }

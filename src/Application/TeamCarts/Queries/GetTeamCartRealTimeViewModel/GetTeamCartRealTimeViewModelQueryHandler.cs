@@ -35,10 +35,10 @@ public sealed class GetTeamCartRealTimeViewModelQueryHandler : IRequestHandler<G
         }
 
         var teamCartId = TeamCartId.Create(request.TeamCartIdGuid);
-        
+
         // Retrieve the real-time view model from Redis
         var viewModel = await _teamCartStore.GetVmAsync(teamCartId, cancellationToken);
-        
+
         if (viewModel is null)
         {
             _logger.LogWarning("TeamCart real-time view model not found: {TeamCartId}", request.TeamCartIdGuid);

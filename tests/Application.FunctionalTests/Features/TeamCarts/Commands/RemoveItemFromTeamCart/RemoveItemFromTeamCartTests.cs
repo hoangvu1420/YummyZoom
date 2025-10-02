@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.RemoveItemFromTeamCart;
@@ -200,9 +200,9 @@ public class RemoveItemFromTeamCartTests : BaseTestFixture
 
         // Act: Try to remove item as non-member - authorization should fail at pipeline level
         await scenario.ActAsNonMember();
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new RemoveItemFromTeamCartCommand(scenario.TeamCartId, itemId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
     }

@@ -20,7 +20,7 @@ public class PolicyBasedAuthorizationTests : BaseTestFixture
     public async Task SetUp()
     {
         await SetupForAuthorizationTestsAsync();
-        
+
         // Create test restaurants
         _restaurantId1 = Guid.NewGuid();
         _restaurantId2 = Guid.NewGuid();
@@ -271,4 +271,4 @@ public class PolicyBasedAuthorizationTests : BaseTestFixture
     }
 
     #endregion
-} 
+}

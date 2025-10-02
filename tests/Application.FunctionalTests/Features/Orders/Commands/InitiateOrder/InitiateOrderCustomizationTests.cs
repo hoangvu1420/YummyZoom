@@ -1,14 +1,14 @@
-using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.Orders.Commands.InitiateOrder;
-using YummyZoom.Domain.OrderAggregate;
-using YummyZoom.Application.FunctionalTests.TestData;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.CustomizationGroupAggregate;
-using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.TestData;
+using YummyZoom.Application.Orders.Commands.InitiateOrder;
+using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CustomizationGroupAggregate;
+using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
 
@@ -101,7 +101,7 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
         // Sanity: ensure burger has assigned add-ons group
         var burgerEntity = await FindAsync<MenuItem>(MenuItemId.Create(ClassicBurgerId));
         burgerEntity!.AppliedCustomizations.Should().NotBeEmpty("seed should assign Burger Add-ons group");
-        
+
         var item = new OrderItemDto(ClassicBurgerId, 1, new List<OrderItemCustomizationRequestDto>{
             new(TestDataFactory.CustomizationGroup_BurgerAddOnsId, new List<Guid>{ invalidChoiceId })
         });
@@ -120,22 +120,22 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
     {
         // Arrange: create a temporary required group that requires 2+ selections and assign it for this test
         var restaurantId = RestaurantId.Create(Testing.TestData.DefaultRestaurantId);
-        
+
         // Create a new customization group that requires at least 2 selections
         var requiredGroupResult = CustomizationGroup.Create(
-            restaurantId, 
-            "Required Toppings", 
-            minSelections: 2, 
+            restaurantId,
+            "Required Toppings",
+            minSelections: 2,
             maxSelections: 3);
         requiredGroupResult.IsSuccess.Should().BeTrue();
         var requiredGroup = requiredGroupResult.Value;
-        
+
         // Add some choices to this group
         requiredGroup.AddChoice("Choice 1", new Money(1.00m, Currencies.USD), false, 1);
         requiredGroup.AddChoice("Choice 2", new Money(1.50m, Currencies.USD), false, 2);
         requiredGroup.AddChoice("Choice 3", new Money(2.00m, Currencies.USD), false, 3);
         await AddAsync(requiredGroup);
-        
+
         // Assign this group to the burger so selection count validation triggers
         var burger = await FindAsync<MenuItem>(MenuItemId.Create(ClassicBurgerId));
         var applied = AppliedCustomization.Create(requiredGroup.Id, "Required Toppings", 1);
@@ -144,17 +144,17 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
         {
             await UpdateAsync(burger);
         }
-        
+
         // Provide only 1 choice when min required is 2 - this should fail domain validation
         var singleChoiceId = requiredGroup.Choices.First().Id.Value;
-        var item = new OrderItemDto(ClassicBurgerId, 1, new List<OrderItemCustomizationRequestDto> { 
-            new(requiredGroup.Id.Value, new List<Guid> { singleChoiceId }) 
+        var item = new OrderItemDto(ClassicBurgerId, 1, new List<OrderItemCustomizationRequestDto> {
+            new(requiredGroup.Id.Value, new List<Guid> { singleChoiceId })
         });
         var command = InitiateOrderTestHelper.BuildValidCommand(menuItemIds: new List<Guid> { ClassicBurgerId }) with { Items = new List<OrderItemDto> { item } };
-        
+
         // Act
         var result = await SendAsync(command);
-        
+
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(InitiateOrderErrors.CustomizationGroupSelectionCountInvalid(requiredGroup.Id.Value, 2, 3));

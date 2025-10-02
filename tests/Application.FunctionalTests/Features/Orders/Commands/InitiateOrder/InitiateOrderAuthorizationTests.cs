@@ -52,7 +52,7 @@ public class InitiateOrderAuthorizationTests : InitiateOrderTestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        
+
         // Verify the order was created with the correct customer
         var order = await FindOrderAsync(result.Value.OrderId);
         order.Should().NotBeNull();

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Application.Tags.EventHandlers.Shared;
 using YummyZoom.Domain.TagEntity.Events;

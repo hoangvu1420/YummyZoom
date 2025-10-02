@@ -16,7 +16,7 @@ public sealed class Money : ValueObject
         Amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
         Currency = currency;
     }
-    
+
     public Money Copy() => new Money(Amount, Currency);
 
     public static Money Zero(string currency) => new Money(0, currency);
@@ -61,7 +61,7 @@ public static class MoneyExtensions
 {
     public static Money Sum<T>(this IEnumerable<T> source, Func<T, Money> selector, string currency)
     {
-        return source.Select(selector).Aggregate(Money.Zero(currency), (current, next) => 
+        return source.Select(selector).Aggregate(Money.Zero(currency), (current, next) =>
         {
             // Convert next to the target currency before adding
             var nextInTargetCurrency = new Money(next.Amount, currency);

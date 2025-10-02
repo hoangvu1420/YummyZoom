@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Notifications;
 
@@ -36,4 +36,4 @@ public static class NotificationErrors
     public static Error UnauthorizedOperation() => Error.Failure(
         "Notification.UnauthorizedOperation",
         "You are not authorized to perform this notification operation.");
-} 
+}

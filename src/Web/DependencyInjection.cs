@@ -112,7 +112,7 @@ public static class DependencyInjection
             {
                 o.SerializerOptions.Converters.Add(new AggregateRootIdJsonConverterFactory());
             }
-            
+
             var alreadyEnum = o.SerializerOptions.Converters.OfType<JsonStringEnumConverter>().Any();
             if (!alreadyEnum)
             {

@@ -34,14 +34,14 @@ public class OrderItemTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var orderItem = result.Value;
-        
+
         orderItem.Id.Value.Should().NotBe(Guid.Empty);
         orderItem.Snapshot_MenuItemId.Should().Be(DefaultMenuItemId);
         orderItem.Snapshot_ItemName.Should().Be(DefaultItemName);
         orderItem.Snapshot_BasePriceAtOrder.Should().Be(DefaultBasePrice);
         orderItem.Quantity.Should().Be(DefaultQuantity);
         orderItem.SelectedCustomizations.Should().BeEmpty();
-        
+
         // Verify calculated line item total
         var expectedLineTotal = new Money(DefaultBasePrice.Amount * DefaultQuantity, Currencies.Default);
         orderItem.LineItemTotal.Should().Be(expectedLineTotal);
@@ -65,10 +65,10 @@ public class OrderItemTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var orderItem = result.Value;
-        
+
         orderItem.SelectedCustomizations.Should().HaveCount(1);
         orderItem.SelectedCustomizations.Should().Contain(DefaultCustomization);
-        
+
         // Verify calculated line item total includes customization price
         var customizationTotal = DefaultCustomization.Snapshot_ChoicePriceAdjustmentAtOrder.Amount;
         var expectedLineTotal = new Money((DefaultBasePrice.Amount + customizationTotal) * DefaultQuantity, Currencies.Default);
@@ -95,9 +95,9 @@ public class OrderItemTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var orderItem = result.Value;
-        
+
         orderItem.SelectedCustomizations.Should().HaveCount(2);
-        
+
         // Verify calculated line item total includes all customizations
         var totalCustomizationCost = 2.00m + 3.50m; // Sum of customization prices
         var expectedLineTotal = new Money((DefaultBasePrice.Amount + totalCustomizationCost) * DefaultQuantity, Currencies.Default);

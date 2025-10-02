@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.Services;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
-using YummyZoom.Domain.Services;
-using YummyZoom.Domain.TeamCartAggregate.Enums;
 
 namespace YummyZoom.Application.TeamCarts.Commands.ApplyCouponToTeamCart;
 

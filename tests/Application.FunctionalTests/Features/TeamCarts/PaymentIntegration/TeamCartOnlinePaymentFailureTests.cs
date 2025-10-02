@@ -11,12 +11,12 @@ using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel;
 using YummyZoom.Domain.TeamCartAggregate;
-using TeamCartStatus = YummyZoom.Domain.TeamCartAggregate.Enums.TeamCartStatus;
-using TeamCartPaymentMethod = YummyZoom.Domain.TeamCartAggregate.Enums.PaymentMethod;
-using TeamCartPaymentStatus = YummyZoom.Domain.TeamCartAggregate.Enums.PaymentStatus;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using static YummyZoom.Application.FunctionalTests.Testing;
+using TeamCartPaymentMethod = YummyZoom.Domain.TeamCartAggregate.Enums.PaymentMethod;
+using TeamCartPaymentStatus = YummyZoom.Domain.TeamCartAggregate.Enums.PaymentStatus;
+using TeamCartStatus = YummyZoom.Domain.TeamCartAggregate.Enums.TeamCartStatus;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.PaymentIntegration;
 

@@ -1,7 +1,7 @@
 using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.CouponAggregate.ValueObjects;
@@ -23,7 +23,7 @@ public class CouponValueTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var couponValue = result.Value;
-        
+
         couponValue.Type.Should().Be(CouponType.Percentage);
         couponValue.PercentageValue.Should().Be(percentage);
         couponValue.FixedAmountValue.Should().BeNull();
@@ -88,7 +88,7 @@ public class CouponValueTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var couponValue = result.Value;
-        
+
         couponValue.Type.Should().Be(CouponType.FixedAmount);
         couponValue.PercentageValue.Should().BeNull();
         couponValue.FixedAmountValue.Should().Be(amount);
@@ -157,7 +157,7 @@ public class CouponValueTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var couponValue = result.Value;
-        
+
         couponValue.Type.Should().Be(CouponType.FreeItem);
         couponValue.PercentageValue.Should().BeNull();
         couponValue.FixedAmountValue.Should().BeNull();
@@ -181,7 +181,7 @@ public class CouponValueTests
         result1.IsSuccess.Should().BeTrue();
         result2.IsSuccess.Should().BeTrue();
         result3.IsSuccess.Should().BeTrue();
-        
+
         result1.Value.FreeItemValue.Should().Be(menuItemId1);
         result2.Value.FreeItemValue.Should().Be(menuItemId2);
         result3.Value.FreeItemValue.Should().Be(menuItemId3);

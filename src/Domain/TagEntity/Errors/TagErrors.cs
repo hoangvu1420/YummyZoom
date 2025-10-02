@@ -31,4 +31,4 @@ public static class TagErrors
         "Tag.DuplicateTagName",
         "A tag with this name already exists.",
         ErrorType.Conflict);
-} 
+}

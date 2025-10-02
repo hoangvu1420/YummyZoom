@@ -7,4 +7,4 @@ public record CustomizationGroupCreated(
     CustomizationGroupId CustomizationGroupId,
     RestaurantId RestaurantId,
     string GroupName
-) : DomainEventBase; 
+) : DomainEventBase;

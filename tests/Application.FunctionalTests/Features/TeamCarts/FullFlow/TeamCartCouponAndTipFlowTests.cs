@@ -1,4 +1,5 @@
 using FluentAssertions;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
@@ -12,7 +13,6 @@ using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.Common.Exceptions;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.FullFlow;
 

@@ -265,10 +265,10 @@ public sealed class RedisTeamCartStore : ITeamCartStore
     {
         // Calculate subtotal from all items
         viewModel.Subtotal = viewModel.Items.Sum(item => item.LineTotal);
-        
+
         // Calculate total: subtotal + tip - discount
         viewModel.Total = viewModel.Subtotal + viewModel.TipAmount - viewModel.DiscountAmount;
-        
+
         // Ensure total is not negative
         if (viewModel.Total < 0)
             viewModel.Total = 0;

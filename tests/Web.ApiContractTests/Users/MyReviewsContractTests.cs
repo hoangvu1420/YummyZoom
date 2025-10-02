@@ -1,12 +1,12 @@
 using System.Net;
+using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.Application.Reviews.Queries.GetMyReviews;
-using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.Application.Common.Models;
+using YummyZoom.Application.Reviews.Queries.Common;
+using YummyZoom.Application.Reviews.Queries.GetMyReviews;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 using Result = YummyZoom.SharedKernel.Result;
-using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Users;
 

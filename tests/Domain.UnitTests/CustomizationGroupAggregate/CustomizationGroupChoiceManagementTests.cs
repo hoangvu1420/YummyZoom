@@ -40,7 +40,7 @@ public class CustomizationGroupChoiceManagementTests
         addedChoice.PriceAdjustment.Should().Be(PriceAdjustment);
         addedChoice.IsDefault.Should().BeFalse();
         addedChoice.DisplayOrder.Should().Be(1);
-        
+
         group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceAdded));
 
         var choiceAddedEvent = group.DomainEvents.OfType<CustomizationChoiceAdded>().Single();
@@ -104,7 +104,7 @@ public class CustomizationGroupChoiceManagementTests
         group.Choices.Should().HaveCount(2);
         group.Choices.Should().Contain(c => c.Name == "Small");
         group.Choices.Should().Contain(c => c.Name == "Large");
-        
+
         // Verify ordering: both have same display order, so sorted by name
         var orderedChoices = group.Choices.ToList();
         orderedChoices[0].Name.Should().Be("Large"); // "Large" comes before "Small" alphabetically
@@ -199,7 +199,7 @@ public class CustomizationGroupChoiceManagementTests
         updatedChoice.PriceAdjustment.Should().Be(newPriceAdjustment);
         updatedChoice.IsDefault.Should().Be(newIsDefault);
         // Note: The choice will have a new ID due to re-creation for immutability
-        
+
         group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceUpdated));
         var choiceUpdatedEvent = group.DomainEvents.OfType<CustomizationChoiceUpdated>().Single();
         choiceUpdatedEvent.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
@@ -283,7 +283,7 @@ public class CustomizationGroupChoiceManagementTests
         result.IsSuccess.Should().BeTrue();
         var updatedChoice = group.Choices.Single();
         updatedChoice.DisplayOrder.Should().Be(newDisplayOrder);
-        
+
         var choiceUpdatedEvent = group.DomainEvents.OfType<CustomizationChoiceUpdated>().Single();
         choiceUpdatedEvent.DisplayOrder.Should().Be(newDisplayOrder);
     }
@@ -323,14 +323,14 @@ public class CustomizationGroupChoiceManagementTests
 
         // Assert
         result.IsSuccess.Should().BeTrue(); // Ties are allowed
-        
+
         // Verify both choices have the same display order
         var updatedChoice1 = group.Choices.First(c => c.Name == "Small");
         var updatedChoice2 = group.Choices.First(c => c.Name == "Large");
-        
+
         updatedChoice1.DisplayOrder.Should().Be(1);
         updatedChoice2.DisplayOrder.Should().Be(1);
-        
+
         // Verify ordering: both have same display order, so sorted by name
         var orderedChoices = group.Choices.ToList();
         orderedChoices[0].Name.Should().Be("Large"); // "Large" comes before "Small" alphabetically
@@ -359,7 +359,7 @@ public class CustomizationGroupChoiceManagementTests
         addedChoice.DisplayOrder.Should().Be(1);
         addedChoice.PriceAdjustment.Should().Be(PriceAdjustment);
         addedChoice.IsDefault.Should().BeFalse();
-        
+
         group.DomainEvents.Should().Contain(e => e.GetType() == typeof(CustomizationChoiceAdded));
     }
 
@@ -378,7 +378,7 @@ public class CustomizationGroupChoiceManagementTests
         result1.IsSuccess.Should().BeTrue();
         result2.IsSuccess.Should().BeTrue();
         result3.IsSuccess.Should().BeTrue();
-        
+
         group.Choices.Should().HaveCount(3);
         group.Choices[0].Name.Should().Be("Small");
         group.Choices[0].DisplayOrder.Should().Be(1);

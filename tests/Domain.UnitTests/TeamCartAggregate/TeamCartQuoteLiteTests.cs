@@ -5,8 +5,8 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.UnitTests.TeamCartAggregate;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.TeamCartAggregate;
 

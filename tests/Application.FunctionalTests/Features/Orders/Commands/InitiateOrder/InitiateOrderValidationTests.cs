@@ -121,7 +121,8 @@ public class InitiateOrderValidationTests : InitiateOrderTestBase
             .ToList();
 
         var command = InitiateOrderTestHelper.BuildValidCommand()
-            with { Items = items };
+            with
+        { Items = items };
 
         // Act
         var action = async () => await SendAsync(command);
@@ -160,7 +161,8 @@ public class InitiateOrderValidationTests : InitiateOrderTestBase
         );
 
         var command = InitiateOrderTestHelper.BuildValidCommand()
-            with { DeliveryAddress = invalidAddress };
+            with
+        { DeliveryAddress = invalidAddress };
 
         // Act
         var action = async () => await SendAsync(command);
@@ -204,7 +206,8 @@ public class InitiateOrderValidationTests : InitiateOrderTestBase
     {
         // Arrange
         var command = InitiateOrderTestHelper.BuildValidCommand()
-            with { CouponCode = new string('X', 51) }; // Exceeds 50 char limit
+            with
+        { CouponCode = new string('X', 51) }; // Exceeds 50 char limit
 
         // Act
         var action = async () => await SendAsync(command);
@@ -281,12 +284,12 @@ public class InitiateOrderValidationTests : InitiateOrderTestBase
 
         var command = InitiateOrderTestHelper.BuildValidCommand()
             with
-            {
-                Items = maxItems,
-                DeliveryAddress = maxAddress,
-                CouponCode = null, // Use no coupon to focus on field length validation
-                SpecialInstructions = new string('Y', 500) // Max special instructions length
-            };
+        {
+            Items = maxItems,
+            DeliveryAddress = maxAddress,
+            CouponCode = null, // Use no coupon to focus on field length validation
+            SpecialInstructions = new string('Y', 500) // Max special instructions length
+        };
 
         // Act
         var result = await SendAsync(command);

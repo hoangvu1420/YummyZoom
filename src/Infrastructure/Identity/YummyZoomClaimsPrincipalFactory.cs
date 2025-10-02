@@ -1,9 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System.Security.Claims;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Infrastructure.Identity;
@@ -41,14 +41,14 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
                 RestaurantRole.Staff => Roles.RestaurantStaff,
                 _ => assignment.Role.ToString()
             };
-            
+
             var claimValue = $"{roleConstant}:{assignment.RestaurantId.Value}";
             identity.AddClaim(new Claim("permission", claimValue));
         }
 
         // Add user self-ownership permission
         identity.AddClaim(new Claim("permission", $"{Roles.UserOwner}:{user.Id}"));
-        
+
         // Add admin permissions if user is administrator
         if (await UserManager.IsInRoleAsync(user, Roles.Administrator))
         {
@@ -64,4 +64,4 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
 
         return identity;
     }
-} 
+}

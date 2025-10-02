@@ -1,8 +1,8 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.MenuEntity.Errors;
 using YummyZoom.Domain.MenuEntity.Events;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuEntity;
@@ -57,12 +57,12 @@ public sealed class Menu : Entity<MenuId>, IAuditableEntity, ISoftDeletableEntit
             name,
             description,
             isEnabled);
-        
+
         menu.AddDomainEvent(new MenuCreated(menu.Id, menu.RestaurantId));
-        
+
         return Result.Success(menu);
     }
-    
+
     public Result UpdateDetails(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -81,14 +81,14 @@ public sealed class Menu : Entity<MenuId>, IAuditableEntity, ISoftDeletableEntit
 
     public void Enable()
     {
-        if (IsEnabled) return; 
+        if (IsEnabled) return;
         IsEnabled = true;
         AddDomainEvent(new MenuEnabled(Id));
     }
 
     public void Disable()
     {
-        if (!IsEnabled) return; 
+        if (!IsEnabled) return;
         IsEnabled = false;
         AddDomainEvent(new MenuDisabled(Id));
     }

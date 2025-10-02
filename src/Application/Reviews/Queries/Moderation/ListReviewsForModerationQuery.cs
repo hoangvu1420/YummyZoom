@@ -1,8 +1,8 @@
 using System.Data;
 using Dapper;
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Models;
-using YummyZoom.Application.Common.Caching;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Reviews.Queries.Moderation;

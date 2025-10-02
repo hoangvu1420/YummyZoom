@@ -39,13 +39,13 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
 
     protected override async Task HandleCore(OrderDelivered notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderDelivered (EventId={EventId}, OrderId={OrderId})", 
+        _logger.LogInformation("Handling OrderDelivered (EventId={EventId}, OrderId={OrderId})",
             notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
         {
-            _logger.LogWarning("OrderDelivered handler could not find order (OrderId={OrderId}, EventId={EventId})", 
+            _logger.LogWarning("OrderDelivered handler could not find order (OrderId={OrderId}, EventId={EventId})",
                 notification.OrderId.Value, notification.EventId);
             return; // Still idempotent record
         }
@@ -63,12 +63,12 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed broadcasting OrderDelivered (OrderId={OrderId}, EventId={EventId})", 
+            _logger.LogError(ex, "Failed broadcasting OrderDelivered (OrderId={OrderId}, EventId={EventId})",
                 notification.OrderId.Value, notification.EventId);
             throw; // allow retry
         }
 
-        _logger.LogInformation("Handled OrderDelivered (EventId={EventId}, OrderId={OrderId})", 
+        _logger.LogInformation("Handled OrderDelivered (EventId={EventId}, OrderId={OrderId})",
             notification.EventId, notification.OrderId.Value);
     }
 
@@ -83,14 +83,14 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
             var revenueResult = restaurantAccount.RecordRevenue(order.TotalAmount, order.Id);
             if (revenueResult.IsFailure)
             {
-                _logger.LogError("Failed to record revenue for order {OrderId}: {Error}", 
+                _logger.LogError("Failed to record revenue for order {OrderId}: {Error}",
                     order.Id.Value, revenueResult.Error);
                 throw new InvalidOperationException($"Failed to record revenue: {revenueResult.Error}");
             }
 
             await _restaurantAccountRepository.UpdateAsync(restaurantAccount, ct);
-            
-            _logger.LogInformation("Recorded revenue {Amount} for order {OrderId} to restaurant account {RestaurantId}", 
+
+            _logger.LogInformation("Recorded revenue {Amount} for order {OrderId} to restaurant account {RestaurantId}",
                 order.TotalAmount.Amount, order.Id.Value, order.RestaurantId.Value);
         }
         catch (Exception ex)

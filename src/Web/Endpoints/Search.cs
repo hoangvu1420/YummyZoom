@@ -30,7 +30,7 @@ public class Search : EndpointGroupBase
                 includeFacets,
                 pageNumber,
                 pageSize);
-            
+
             var res = await sender.Send(rq);
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })

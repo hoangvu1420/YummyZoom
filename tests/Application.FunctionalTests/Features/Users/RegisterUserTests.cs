@@ -16,12 +16,12 @@ using static Testing;
 
 public class RegisterUserTests : BaseTestFixture
 {
-    [SetUp] 
+    [SetUp]
     public async Task TestSetup()
     {
         await SetupForUserRegistrationTestsAsync();
     }
-    
+
     [Test]
     public async Task RegisterUser_WithValidData_ShouldSucceedAndCreateBothUsers()
     {
@@ -39,7 +39,7 @@ public class RegisterUserTests : BaseTestFixture
         // Assert
         result.ShouldBeSuccessful();
         var returnedUserId = result.Value;
-        returnedUserId.Should().NotBeEmpty(); 
+        returnedUserId.Should().NotBeEmpty();
 
         // Verify ApplicationUser created
         var appUser = await FindAsync<ApplicationUser>(returnedUserId);
@@ -50,7 +50,7 @@ public class RegisterUserTests : BaseTestFixture
 
         // Verify Domain UserAggregate created
         var domainUserId = UserId.Create(returnedUserId);
-        var domainUser = await FindAsync<User>(domainUserId); 
+        var domainUser = await FindAsync<User>(domainUserId);
         domainUser.Should().NotBeNull();
         domainUser!.Id.Should().Be(domainUserId);
         // Assert the Name property
@@ -93,7 +93,7 @@ public class RegisterUserTests : BaseTestFixture
     public async Task RegisterUser_WithDuplicateEmail_ShouldReturnFailureResult()
     {
         // Arrange
-        var command1 = new RegisterUserCommand 
+        var command1 = new RegisterUserCommand
         {
             Name = "Dupe Email",
             Email = "dupe.email@example.com", // Duplicate Email
@@ -102,7 +102,7 @@ public class RegisterUserTests : BaseTestFixture
         var result1 = await SendAsync(command1);
         result1.ShouldBeSuccessful();
 
-        var command2 = new RegisterUserCommand 
+        var command2 = new RegisterUserCommand
         {
             Name = "Another Person",
             Email = "dupe.email@example.com", // Duplicate Email
@@ -136,7 +136,7 @@ public class RegisterUserTests : BaseTestFixture
         // The ValidationBehaviour should catch this before the handler
         await act.Should().ThrowAsync<ValidationException>();
     }
-    
+
     [Test]
     public async Task RegisterUser_WithInvalidEmail_ShouldFailValidation()
     {
@@ -154,15 +154,15 @@ public class RegisterUserTests : BaseTestFixture
         // Assert
         await act.Should().ThrowAsync<ValidationException>();
     }
-    
-     [Test]
+
+    [Test]
     public async Task RegisterUser_WithShortPassword_ShouldFailValidation()
     {
         // Arrange
         var command = new RegisterUserCommand
         {
             Name = "Short Password",
-            Email = "short.pw@example.com", 
+            Email = "short.pw@example.com",
             Password = "123" // Too short
         };
 

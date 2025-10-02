@@ -43,7 +43,7 @@ public class TeamCartItemsContractTests
             new(Guid.NewGuid(), Guid.NewGuid())
         };
 
-        var body = new 
+        var body = new
         {
             MenuItemId = menuItemId,
             Quantity = 2,
@@ -75,7 +75,7 @@ public class TeamCartItemsContractTests
         factory.Sender.RespondWith(_ => Result.Failure(
             Error.NotFound("MenuItem.NotFound", "Menu item not found")));
 
-        var body = new 
+        var body = new
         {
             MenuItemId = Guid.NewGuid(),
             Quantity = 1,
@@ -110,7 +110,7 @@ public class TeamCartItemsContractTests
         factory.Sender.RespondWith(_ => Result.Failure(
             Error.Validation("AddItemToTeamCart.InvalidQuantity", "Quantity must be positive")));
 
-        var body = new 
+        var body = new
         {
             MenuItemId = Guid.NewGuid(),
             Quantity = 0,
@@ -140,7 +140,7 @@ public class TeamCartItemsContractTests
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
 
-        var body = new 
+        var body = new
         {
             MenuItemId = Guid.NewGuid(),
             Quantity = 1,
@@ -240,9 +240,10 @@ public class TeamCartItemsContractTests
 
         var cartId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        
+
         // Add a simple responder to see if we even reach MediatR
-        factory.Sender.RespondWith(req => {
+        factory.Sender.RespondWith(req =>
+        {
             req.Should().BeOfType<UpdateTeamCartItemQuantityCommand>();
             var cmd = (UpdateTeamCartItemQuantityCommand)req;
             cmd.TeamCartId.Should().Be(cartId);

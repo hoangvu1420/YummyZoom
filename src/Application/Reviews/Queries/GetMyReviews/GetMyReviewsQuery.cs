@@ -1,8 +1,8 @@
 using Dapper;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Models;
+using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.SharedKernel;

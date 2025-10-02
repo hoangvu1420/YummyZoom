@@ -29,7 +29,7 @@ public sealed class BusinessHours : ValueObject
             return Result.Failure<BusinessHours>(RestaurantErrors.BusinessHoursFormatTooLong(maxLength));
 
         var trimmedHours = hours.Trim();
-        
+
         // Validate the format: hh:mm-hh:mm
         if (!IsValidHourFormat(trimmedHours))
             return Result.Failure<BusinessHours>(RestaurantErrors.BusinessHoursInvalidFormat(trimmedHours));
@@ -42,7 +42,7 @@ public sealed class BusinessHours : ValueObject
         // Pattern: hh:mm-hh:mm (24-hour format)
         // Examples: 09:00-17:30, 08:30-22:15, 00:00-23:59
         var pattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-        
+
         if (!Regex.IsMatch(hours, pattern))
             return false;
 

@@ -3,14 +3,14 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
+using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
+using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
+using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
+using YummyZoom.Infrastructure.Serialization;
+using YummyZoom.Infrastructure.Serialization.JsonOptions;
+using YummyZoom.SharedKernel;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.Web.Endpoints;
-using YummyZoom.SharedKernel;
-using YummyZoom.Infrastructure.Serialization;
-using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
-using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
-using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
-using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
@@ -18,7 +18,7 @@ namespace YummyZoom.Web.ApiContractTests.Restaurants;
 public class MenuCategoryManagementContractTests
 {
     #region POST menu categories
-    
+
     [Test]
     public async Task AddMenuCategory_WhenValid_Returns201_AndMapsCommand()
     {
@@ -112,7 +112,7 @@ public class MenuCategoryManagementContractTests
     #endregion
 
     #region PUT category details
-    
+
     [Test]
     public async Task UpdateMenuCategoryDetails_WhenValid_Returns204_AndMapsCommand()
     {
@@ -190,7 +190,7 @@ public class MenuCategoryManagementContractTests
     #endregion
 
     #region DELETE category
-    
+
     [Test]
     public async Task RemoveMenuCategory_WhenValid_Returns204_AndMapsCommand()
     {

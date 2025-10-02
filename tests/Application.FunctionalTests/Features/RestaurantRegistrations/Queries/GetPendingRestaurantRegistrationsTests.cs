@@ -1,10 +1,10 @@
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrations;
+using YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Utilities;
 using YummyZoom.Application.RestaurantRegistrations.Commands.SubmitRestaurantRegistration;
+using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrations;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Utilities;
 
 namespace YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Queries;
 

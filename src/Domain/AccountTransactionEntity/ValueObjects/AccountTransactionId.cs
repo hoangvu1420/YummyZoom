@@ -1,4 +1,4 @@
-namespace YummyZoom.Domain.AccountTransactionEntity.ValueObjects; 
+namespace YummyZoom.Domain.AccountTransactionEntity.ValueObjects;
 
 public sealed class AccountTransactionId : ValueObject
 {

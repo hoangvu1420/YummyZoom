@@ -272,7 +272,7 @@ public class TicketMessageTests
         // Exclude audit properties as they are set by infrastructure
         var properties = typeof(TicketMessage).GetProperties();
         var auditProperties = new[] { "Created", "CreatedBy", "LastModified", "LastModifiedBy" };
-        
+
         foreach (var property in properties.Where(p => !auditProperties.Contains(p.Name)))
         {
             // Properties should have either no setter or private setter (externally read-only)

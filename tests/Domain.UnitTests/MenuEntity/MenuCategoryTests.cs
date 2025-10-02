@@ -28,12 +28,12 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         var category = result.Value;
-        
+
         category.Id.Value.Should().NotBe(Guid.Empty);
         category.MenuId.Should().Be(DefaultMenuId);
         category.Name.Should().Be(DefaultCategoryName);
         category.DisplayOrder.Should().Be(DefaultDisplayOrder);
-        
+
         // Assert domain event
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryAdded));
         var categoryAddedEvent = category.DomainEvents.OfType<MenuCategoryAdded>().Single();
@@ -53,7 +53,7 @@ public class MenuCategoryTests
         result1.ShouldBeSuccessful();
         result2.ShouldBeSuccessful();
         result3.ShouldBeSuccessful();
-        
+
         result1.Value.DisplayOrder.Should().Be(1);
         result2.Value.DisplayOrder.Should().Be(5);
         result3.Value.DisplayOrder.Should().Be(10);
@@ -108,7 +108,7 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.Name.Should().Be(newName);
-        
+
         // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryNameUpdated)
         category.DomainEvents.Should().HaveCount(2);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
@@ -159,7 +159,7 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.Name.Should().Be(originalName);
-        
+
         // Assert that a new event is still raised even with the same name
         category.DomainEvents.Should().HaveCount(originalEventCount + 1);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
@@ -179,7 +179,7 @@ public class MenuCategoryTests
         result.ShouldBeSuccessful();
         category.Name.Should().Be(newName);
         category.Name.Should().NotBe(DefaultCategoryName);
-        
+
         // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryNameUpdated)
         category.DomainEvents.Should().HaveCount(2);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryNameUpdated));
@@ -206,7 +206,7 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(newDisplayOrder);
-        
+
         // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryDisplayOrderUpdated)
         category.DomainEvents.Should().HaveCount(2);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
@@ -257,7 +257,7 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(originalOrder);
-        
+
         // Assert that a new event is still raised even with the same order
         category.DomainEvents.Should().HaveCount(originalEventCount + 1);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
@@ -276,7 +276,7 @@ public class MenuCategoryTests
         // Assert
         result.ShouldBeSuccessful();
         category.DisplayOrder.Should().Be(largeOrder);
-        
+
         // Assert domain event (should have 2 events: MenuCategoryAdded from creation + MenuCategoryDisplayOrderUpdated)
         category.DomainEvents.Should().HaveCount(2);
         category.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(MenuCategoryDisplayOrderUpdated));
@@ -299,7 +299,7 @@ public class MenuCategoryTests
 
         // Act & Assert - MenuId should not be changeable
         category.MenuId.Should().Be(originalMenuId);
-        
+
         // Verify through updates that MenuId remains the same
         category.UpdateName("New Name");
         category.UpdateDisplayOrder(10);
@@ -315,7 +315,7 @@ public class MenuCategoryTests
 
         // Act & Assert - Id should not be changeable
         category.Id.Should().Be(originalId);
-        
+
         // Verify through updates that Id remains the same
         category.UpdateName("New Name");
         category.UpdateDisplayOrder(10);
@@ -337,4 +337,4 @@ public class MenuCategoryTests
     }
 
     #endregion
-} 
+}

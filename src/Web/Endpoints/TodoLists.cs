@@ -40,15 +40,15 @@ public class TodoLists : EndpointGroupBase
     {
         var result = await sender.Send(command);
 
-        return result.IsSuccess 
-            ? TypedResults.Created($"/{nameof(TodoLists)}/{result.Value}", result.Value) 
+        return result.IsSuccess
+            ? TypedResults.Created($"/{nameof(TodoLists)}/{result.Value}", result.Value)
             : result.ToIResult();
     }
 
     private async Task<IResult> UpdateTodoList(ISender sender, Guid id, UpdateTodoListCommand command)
     {
         if (id != command.Id) return TypedResults.BadRequest();
-        
+
         var result = await sender.Send(command);
 
         return result.IsSuccess

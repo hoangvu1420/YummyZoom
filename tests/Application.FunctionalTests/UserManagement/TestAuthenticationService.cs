@@ -15,7 +15,7 @@ public static class TestAuthenticationService
     {
         var testUserService = CustomWebApplicationFactory.GetTestUserService();
         var factory = TestInfrastructure.GetFactory();
-        
+
         if (factory?.Services != null)
         {
             await testUserService.RefreshClaimsFromDatabase(factory.Services);

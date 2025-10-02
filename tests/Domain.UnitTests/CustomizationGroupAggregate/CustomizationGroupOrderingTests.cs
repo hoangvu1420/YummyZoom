@@ -31,7 +31,7 @@ public class CustomizationGroupOrderingTests
         var group = CreateValidGroup();
         group.AddChoice("Large", DefaultPrice, false, 1);
         var choice = group.Choices.Single();
-        
+
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
             (choice.Id, 5)
@@ -43,7 +43,7 @@ public class CustomizationGroupOrderingTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         choice.DisplayOrder.Should().Be(5);
-        
+
         var reorderEvent = group.DomainEvents.OfType<CustomizationChoicesReordered>().SingleOrDefault();
         reorderEvent.Should().NotBeNull();
         reorderEvent!.CustomizationGroupId.Should().Be((CustomizationGroupId)group.Id);
@@ -59,11 +59,11 @@ public class CustomizationGroupOrderingTests
         group.AddChoice("Small", DefaultPrice, false, 1);
         group.AddChoice("Medium", PriceAdjustment, false, 2);
         group.AddChoice("Large", HighPriceAdjustment, false, 3);
-        
+
         var choice1 = group.Choices.First(c => c.Name == "Small");
         var choice2 = group.Choices.First(c => c.Name == "Medium");
         var choice3 = group.Choices.First(c => c.Name == "Large");
-        
+
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
             (choice1.Id, 10),
@@ -78,7 +78,7 @@ public class CustomizationGroupOrderingTests
         choice1.DisplayOrder.Should().Be(10);
         choice2.DisplayOrder.Should().Be(2); // Unchanged
         choice3.DisplayOrder.Should().Be(5);
-        
+
         var reorderEvent = group.DomainEvents.OfType<CustomizationChoicesReordered>().SingleOrDefault();
         reorderEvent.Should().NotBeNull();
         reorderEvent!.ReorderedChoices.Should().HaveCount(2);
@@ -94,11 +94,11 @@ public class CustomizationGroupOrderingTests
         group.AddChoice("Small", DefaultPrice, false, 1);
         group.AddChoice("Medium", PriceAdjustment, false, 2);
         group.AddChoice("Large", HighPriceAdjustment, false, 3);
-        
+
         var choice1 = group.Choices.First(c => c.Name == "Small");
         var choice2 = group.Choices.First(c => c.Name == "Medium");
         var choice3 = group.Choices.First(c => c.Name == "Large");
-        
+
         // Test sparse ordering: 1, 5, 10
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
@@ -124,7 +124,7 @@ public class CustomizationGroupOrderingTests
         var group = CreateValidGroup();
         group.AddChoice("Large", DefaultPrice, false, 1);
         var choice = group.Choices.Single();
-        
+
         var invalidChoiceId = ChoiceId.CreateUnique(); // Not in the group
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
@@ -147,7 +147,7 @@ public class CustomizationGroupOrderingTests
         var group = CreateValidGroup();
         group.AddChoice("Large", DefaultPrice, false, 1);
         var choice = group.Choices.Single();
-        
+
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
             (choice.Id, -1)
@@ -170,11 +170,11 @@ public class CustomizationGroupOrderingTests
         group.AddChoice("Small", DefaultPrice, false, 1);
         group.AddChoice("Medium", PriceAdjustment, false, 2);
         group.AddChoice("Large", HighPriceAdjustment, false, 3);
-        
+
         var choice1 = group.Choices.First(c => c.Name == "Small");
         var choice2 = group.Choices.First(c => c.Name == "Medium");
         var choice3 = group.Choices.First(c => c.Name == "Large");
-        
+
         // Try to set both choice1 and choice2 to order 5
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
@@ -199,10 +199,10 @@ public class CustomizationGroupOrderingTests
         var group = CreateValidGroup();
         group.AddChoice("Small", DefaultPrice, false, 1);
         group.AddChoice("Medium", PriceAdjustment, false, 2);
-        
+
         var choice1 = group.Choices.First(c => c.Name == "Small");
         var choice2 = group.Choices.First(c => c.Name == "Medium");
-        
+
         // Set choice1 to order 2 (which choice2 already has) - this should be allowed as ties are permitted
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>
         {
@@ -216,7 +216,7 @@ public class CustomizationGroupOrderingTests
         result.IsSuccess.Should().BeTrue(); // Ties are allowed
         choice1.DisplayOrder.Should().Be(2); // Should be updated
         choice2.DisplayOrder.Should().Be(2); // Should remain the same
-        
+
         // Verify ordering: both have same display order, so sorted by name
         var orderedChoices = group.Choices.ToList();
         orderedChoices[0].Name.Should().Be("Medium"); // "Medium" comes before "Small" alphabetically
@@ -230,7 +230,7 @@ public class CustomizationGroupOrderingTests
         var group = CreateValidGroup();
         group.AddChoice("Large", DefaultPrice, false, 1);
         var choice = group.Choices.Single();
-        
+
         var orderChanges = new List<(ChoiceId choiceId, int newDisplayOrder)>();
 
         // Act
@@ -268,12 +268,12 @@ public class CustomizationGroupOrderingTests
     {
         // Arrange
         var group = CreateValidGroup();
-        
+
         // Add choices in non-order sequence
         group.AddChoice("Large", HighPriceAdjustment, false, 3);
         group.AddChoice("Small", DefaultPrice, false, 1);
         group.AddChoice("Medium", PriceAdjustment, false, 2);
-        
+
         var choice1 = group.Choices.First(c => c.Name == "Large");
         var choice2 = group.Choices.First(c => c.Name == "Small");
         var choice3 = group.Choices.First(c => c.Name == "Medium");
@@ -293,11 +293,11 @@ public class CustomizationGroupOrderingTests
     {
         // Arrange
         var group = CreateValidGroup();
-        
+
         // Both choices have the same display order, should be ordered by name
         group.AddChoice("Beta", DefaultPrice, false, 1);
         group.AddChoice("Alpha", PriceAdjustment, false, 1);
-        
+
         var choiceB = group.Choices.First(c => c.Name == "Beta");
         var choiceA = group.Choices.First(c => c.Name == "Alpha");
 

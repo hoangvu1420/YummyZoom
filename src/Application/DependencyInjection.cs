@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using YummyZoom.Application.Common.Behaviours;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using YummyZoom.Application.Common.Behaviours;
 
 namespace YummyZoom.Application;
 
@@ -13,7 +13,8 @@ public static class DependencyInjection
 
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        builder.Services.AddMediatR(cfg => {
+        builder.Services.AddMediatR(cfg =>
+        {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             // Order matters: we want validation to run before authorization so that malformed/empty IDs
             // are rejected as validation errors rather than leaking as authorization failures.

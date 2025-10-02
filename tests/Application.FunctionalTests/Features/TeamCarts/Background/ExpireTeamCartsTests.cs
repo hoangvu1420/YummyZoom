@@ -1,12 +1,12 @@
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ExpireTeamCarts;
-using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Domain.TeamCartAggregate.Events;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Domain.TeamCartAggregate.Events;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Background;
 

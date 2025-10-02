@@ -48,7 +48,7 @@ public sealed class PaymentMethod : Entity<PaymentMethodId>, IAuditableEntity
         string tokenizedDetails,
         bool isDefault)
     {
-         // Basic validation (more complex validation handled in User aggregate)
+        // Basic validation (more complex validation handled in User aggregate)
         // Assuming type and tokenizedDetails are not null/empty is handled in Application layer
         return new PaymentMethod(
             id,

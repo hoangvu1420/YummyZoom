@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
@@ -116,9 +116,9 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
 
         // Act: Try to remove coupon as guest (non-host) - authorization should fail at pipeline level
         await scenario.ActAsGuest("Guest User");
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
     }
@@ -143,9 +143,9 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
 
         // Act: Try to remove coupon as non-member - authorization should fail at pipeline level
         await scenario.ActAsNonMember();
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.RemoveCouponFromTeamCart.RemoveCouponFromTeamCartCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
     }

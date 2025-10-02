@@ -34,11 +34,11 @@ public class RestaurantAccountRepository : IRestaurantAccountRepository
 
         var newId = Guid.NewGuid();
         var createdAt = DateTimeOffset.UtcNow;
-        
+
         await _dbContext.Database.ExecuteSqlRawAsync(sql, [newId, restaurantId.Value, createdAt], cancellationToken);
-        
+
         // Return the account (whether we just created it or it already existed)
-        return await GetByRestaurantIdAsync(restaurantId, cancellationToken) 
+        return await GetByRestaurantIdAsync(restaurantId, cancellationToken)
             ?? throw new InvalidOperationException($"Failed to get or create RestaurantAccount for {restaurantId}");
     }
 

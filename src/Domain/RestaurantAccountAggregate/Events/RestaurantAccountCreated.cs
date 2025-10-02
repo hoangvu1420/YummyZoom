@@ -4,5 +4,5 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 namespace YummyZoom.Domain.RestaurantAccountAggregate.Events;
 
 public record RestaurantAccountCreated(
-    RestaurantAccountId RestaurantAccountId, 
+    RestaurantAccountId RestaurantAccountId,
     RestaurantId RestaurantId) : DomainEventBase;

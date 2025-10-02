@@ -15,7 +15,7 @@ namespace YummyZoom.Domain.UnitTests.Services.TeamCartConversionServiceTests;
 public abstract class TeamCartConversionServiceTestsBase
 {
     protected TeamCartConversionService TeamCartConversionService { get; private set; } = null!;
-    
+
     [SetUp]
     public virtual void SetUp()
     {
@@ -23,7 +23,7 @@ public abstract class TeamCartConversionServiceTestsBase
         var financialService = new Domain.Services.OrderFinancialService();
         TeamCartConversionService = new TeamCartConversionService(financialService);
     }
-    
+
     /// <summary>
     /// Verifies the created Order has correct properties
     /// </summary>
@@ -36,7 +36,7 @@ public abstract class TeamCartConversionServiceTestsBase
         order.TotalAmount.Amount.Should().BeApproximately(expectedTotal.Amount, 0.01m);
         order.Status.Should().Be(OrderStatus.Placed);
     }
-    
+
     /// <summary>
     /// Verifies payment transactions were created correctly after adjustment
     /// </summary>
@@ -44,7 +44,7 @@ public abstract class TeamCartConversionServiceTestsBase
     {
         var expectedTransactionCount = teamCart.MemberPayments.Count;
         order.PaymentTransactions.Should().HaveCount(expectedTransactionCount);
-        
+
         // The sum of the created transactions must equal the order's final total.
         var transactionSum = order.PaymentTransactions.Sum(t => t.Amount.Amount);
         transactionSum.Should().BeApproximately(order.TotalAmount.Amount, 0.01m);
@@ -53,12 +53,12 @@ public abstract class TeamCartConversionServiceTestsBase
         {
             var orderTransaction = order.PaymentTransactions
                 .FirstOrDefault(t => t.PaidByUserId == memberPayment.UserId);
-                
+
             orderTransaction.Should().NotBeNull();
             orderTransaction!.Status.Should().Be(YummyZoom.Domain.OrderAggregate.Enums.PaymentStatus.Succeeded);
         }
     }
-    
+
     /// <summary>
     /// Verifies TeamCart state after conversion
     /// </summary>

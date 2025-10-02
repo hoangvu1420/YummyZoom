@@ -1,10 +1,10 @@
-using YummyZoom.Domain.UserAggregate;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Domain.UserAggregate;
+using YummyZoom.Domain.UserAggregate.Errors;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
 
@@ -53,7 +53,7 @@ public class IdentityService : IIdentityService
         {
             // Step 1: Create the identity user
             var identityResult = await _userManager.CreateAsync(identityUser, password);
-            
+
             if (!identityResult.Succeeded)
             {
                 return HandleIdentityErrors(identityResult, email);
@@ -61,10 +61,10 @@ public class IdentityService : IIdentityService
 
             // Step 2: Create the domain user
             Result<UserId> domainUserIdResult = UserId.Create(identityUser.Id);
-            if (domainUserIdResult.IsFailure) 
+            if (domainUserIdResult.IsFailure)
             {
                 // Handle error if Identity user ID is not a valid GUID string
-                return Result.Failure<Guid>(domainUserIdResult.Error); 
+                return Result.Failure<Guid>(domainUserIdResult.Error);
             }
             var domainUserId = domainUserIdResult.Value;
 
@@ -79,10 +79,10 @@ public class IdentityService : IIdentityService
             // Create the domain user aggregate (no role assignments - just user identity)
             var userAggregateResult = User.Create(
                 domainUserId,
-                name, 
+                name,
                 email,
                 null,
-                isActive: true); 
+                isActive: true);
 
             if (userAggregateResult.IsFailure)
             {
@@ -91,8 +91,8 @@ public class IdentityService : IIdentityService
             var userAggregate = userAggregateResult.Value;
 
             await _userAggregateRepository.AddAsync(userAggregate);
-            
-            return Result.Success(userAggregate.Id.Value); 
+
+            return Result.Success(userAggregate.Id.Value);
         });
     }
 
@@ -109,7 +109,7 @@ public class IdentityService : IIdentityService
         {
             // Step 1: Create the identity user
             var identityResult = await _userManager.CreateAsync(identityUser, password);
-            
+
             if (!identityResult.Succeeded)
             {
                 return HandleIdentityErrors(identityResult, email);
@@ -121,7 +121,7 @@ public class IdentityService : IIdentityService
             {
                 // If role assignment fails, delete the user to maintain consistency
                 await _userManager.DeleteAsync(identityUser);
-                
+
                 var errors = string.Join(", ", roleAssignResult.Errors.Select(e => e.Description));
                 return Result.Failure<Guid>(UserErrors.RegistrationFailed($"Failed to assign role: {errors}"));
             }
@@ -136,7 +136,7 @@ public class IdentityService : IIdentityService
             {
                 await _userManager.DeleteAsync(identityUser);
             }
-            
+
             return Result.Failure<Guid>(UserErrors.RegistrationFailed(ex.Message));
         }
     }
@@ -246,7 +246,7 @@ public class IdentityService : IIdentityService
             // Step 2: Find and update the domain user
             var domainUserId = UserId.Create(Guid.Parse(userId));
             var domainUser = await _userAggregateRepository.GetByIdAsync(domainUserId);
-            
+
             if (domainUser is null)
             {
                 return Result.Failure(UserErrors.InvalidUserId(userId));
@@ -254,7 +254,7 @@ public class IdentityService : IIdentityService
 
             // Update email in domain model
             domainUser.UpdateEmail(newEmail);
-            
+
             // Save changes to domain user
             await _userAggregateRepository.UpdateAsync(domainUser);
 
@@ -288,7 +288,7 @@ public class IdentityService : IIdentityService
             // Step 2: Find and update the domain user
             var domainUserId = UserId.Create(Guid.Parse(userId));
             var domainUser = await _userAggregateRepository.GetByIdAsync(domainUserId);
-            
+
             if (domainUser is null)
             {
                 return Result.Failure(UserErrors.InvalidUserId(userId));
@@ -296,7 +296,7 @@ public class IdentityService : IIdentityService
 
             // Update name and phone in domain model
             domainUser.UpdateProfile(name, phoneNumber);
-            
+
             // Save changes to domain user
             await _userAggregateRepository.UpdateAsync(domainUser);
 
@@ -312,7 +312,7 @@ public class IdentityService : IIdentityService
         {
             return Result.Success();
         }
-        
+
         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
         return Result.Failure(UserErrors.DeletionFailed(errors));
     }

@@ -29,7 +29,7 @@ public class TagTests
         tag.TagCategory.Should().Be(DefaultTagCategory);
         tag.TagDescription.Should().Be(DefaultTagDescription);
         tag.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TagCreated));
-        
+
         var tagCreatedEvent = tag.DomainEvents.OfType<TagCreated>().Single();
         tagCreatedEvent.TagId.Should().Be(tag.Id);
         tagCreatedEvent.TagName.Should().Be(DefaultTagName);
@@ -123,7 +123,7 @@ public class TagTests
         tag.TagName.Should().Be(newName);
         tag.TagDescription.Should().Be(newDescription);
         tag.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TagUpdated));
-        
+
         var tagUpdatedEvent = tag.DomainEvents.OfType<TagUpdated>().Single();
         tagUpdatedEvent.TagId.Should().Be(tag.Id);
         tagUpdatedEvent.TagName.Should().Be(newName);
@@ -245,11 +245,11 @@ public class TagTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         tag.TagCategory.Should().Be(newCategory);
-        
+
         // Should raise only TagCategoryChanged event (plus the initial TagCreated)
         tag.DomainEvents.Should().HaveCount(2);
         tag.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TagCategoryChanged));
-        
+
         var tagCategoryChangedEvent = tag.DomainEvents.OfType<TagCategoryChanged>().Single();
         tagCategoryChangedEvent.TagId.Should().Be(tag.Id);
         tagCategoryChangedEvent.OldCategory.Should().Be(DefaultTagCategory.ToStringValue());
@@ -282,10 +282,10 @@ public class TagTests
             name ?? DefaultTagName,
             category ?? DefaultTagCategory,
             description ?? DefaultTagDescription);
-        
+
         result.IsSuccess.Should().BeTrue();
         return result.Value;
     }
 
     #endregion
-} 
+}

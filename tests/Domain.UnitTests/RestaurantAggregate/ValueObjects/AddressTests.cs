@@ -1,5 +1,5 @@
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.Errors;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAggregate.ValueObjects;
 
@@ -26,7 +26,7 @@ public class AddressTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var address = result.Value;
-        
+
         address.Street.Should().Be(ValidStreet);
         address.City.Should().Be(ValidCity);
         address.State.Should().Be(ValidState);
@@ -43,7 +43,7 @@ public class AddressTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var address = result.Value;
-        
+
         address.Street.Should().Be(ValidStreet);
         address.City.Should().Be(ValidCity);
         address.State.Should().Be(ValidState);

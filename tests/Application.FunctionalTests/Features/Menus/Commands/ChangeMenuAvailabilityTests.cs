@@ -14,7 +14,7 @@ public class ChangeMenuAvailabilityTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         // Ensure menu is disabled first
         var menu = await FindAsync<Menu>(MenuId.Create(Testing.TestData.DefaultMenuId));
         menu!.Disable();
@@ -66,7 +66,7 @@ public class ChangeMenuAvailabilityTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new ChangeMenuAvailabilityCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuId: Guid.NewGuid(), // Non-existent menu
@@ -100,7 +100,7 @@ public class ChangeMenuAvailabilityTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new ChangeMenuAvailabilityCommand(
             RestaurantId: Guid.Empty,
             MenuId: Guid.Empty,

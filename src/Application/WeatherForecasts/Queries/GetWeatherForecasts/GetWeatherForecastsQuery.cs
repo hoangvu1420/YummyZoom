@@ -23,7 +23,7 @@ public class GetWeatherForecastsQueryHandler : IRequestHandler<GetWeatherForecas
             TemperatureC = rng.Next(-20, 55),
             Summary = Summaries[rng.Next(Summaries.Length)]
         });
-        
+
         return Result.Success(forecasts);
     }
 }

@@ -15,11 +15,11 @@ public class TeamCartTestScenario
     public Guid HostUserId { get; private set; }
     public string HostName { get; private set; }
     public Dictionary<string, Guid> GuestUserIds { get; private set; }
-    
+
     public TeamCartTestScenario(
-        Guid teamCartId, 
-        string shareToken, 
-        Guid hostUserId, 
+        Guid teamCartId,
+        string shareToken,
+        Guid hostUserId,
         string hostName,
         Dictionary<string, Guid> guestUserIds)
     {

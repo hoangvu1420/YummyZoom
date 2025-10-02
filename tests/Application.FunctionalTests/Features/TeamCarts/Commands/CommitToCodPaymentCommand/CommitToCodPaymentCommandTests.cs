@@ -74,7 +74,7 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
         var otherUserId = await CreateUserAsync("nonmember@example.com", "Password123!");
         SetUserId(otherUserId);
 
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
     }

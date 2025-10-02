@@ -77,7 +77,7 @@ public class RestaurantAccountTests
         result.IsSuccess.Should().BeTrue();
         account.CurrentBalance.Should().Be(TenDollars);
         account.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(RevenueRecorded));
-        
+
         var revenueRecordedEvent = account.DomainEvents.OfType<RevenueRecorded>().Single();
         revenueRecordedEvent.RestaurantAccountId.Should().Be((RestaurantAccountId)account.Id);
         revenueRecordedEvent.Amount.Should().Be(TenDollars);

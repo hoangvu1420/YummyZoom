@@ -26,10 +26,10 @@ public class TeamCartItemManagementTests
 
         // Add a guest member
         teamCart.AddMember(DefaultGuestUserId, DefaultGuestName).ShouldBeSuccessful();
-        
+
         // Clear domain events from setup
         teamCart.ClearDomainEvents();
-        
+
         return teamCart;
     }
 
@@ -51,7 +51,7 @@ public class TeamCartItemManagementTests
         // Assert
         result.ShouldBeSuccessful();
         teamCart.Items.Should().HaveCount(1);
-        
+
         var addedItem = teamCart.Items.First();
         addedItem.AddedByUserId.Should().Be(DefaultHostUserId);
         addedItem.Snapshot_MenuItemId.Should().Be(DefaultMenuItemId);
@@ -86,7 +86,7 @@ public class TeamCartItemManagementTests
         // Assert
         result.ShouldBeSuccessful();
         teamCart.Items.Should().HaveCount(1);
-        
+
         var addedItem = teamCart.Items.First();
         addedItem.AddedByUserId.Should().Be(DefaultGuestUserId);
 
@@ -120,7 +120,7 @@ public class TeamCartItemManagementTests
         // Assert
         result.ShouldBeSuccessful();
         teamCart.Items.Should().HaveCount(1);
-        
+
         var addedItem = teamCart.Items.First();
         addedItem.SelectedCustomizations.Should().HaveCount(2);
         addedItem.SelectedCustomizations.Should().Contain(customizations);
@@ -153,7 +153,7 @@ public class TeamCartItemManagementTests
         result1.ShouldBeSuccessful();
         result2.ShouldBeSuccessful();
         teamCart.Items.Should().HaveCount(2);
-        
+
         teamCart.Items.Should().Contain(item => item.Snapshot_ItemName == "Pizza");
         teamCart.Items.Should().Contain(item => item.Snapshot_ItemName == "Burger");
     }
@@ -163,13 +163,13 @@ public class TeamCartItemManagementTests
     {
         // Arrange
         var teamCart = CreateTeamCartWithMembers();
-        
+
         // First add an item to the cart so we can lock it
         var addResult = teamCart.AddItem(
             DefaultHostUserId, DefaultMenuItemId, DefaultMenuCategoryId, DefaultItemName, DefaultBasePrice, DefaultQuantity);
         addResult.ShouldBeSuccessful();
         teamCart.ClearDomainEvents(); // Clear events from adding item
-        
+
         // Test when cart is Locked
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         Console.WriteLine($"LockForPayment result: IsSuccess={lockResult.IsSuccess}, Error={(lockResult.IsFailure ? lockResult.Error.ToString() : "None")}");
@@ -177,10 +177,10 @@ public class TeamCartItemManagementTests
         Console.WriteLine($"TeamCart Items Count: {teamCart.Items.Count}");
         Console.WriteLine($"TeamCart Host: {teamCart.HostUserId}");
         Console.WriteLine($"DefaultHostUserId: {DefaultHostUserId}");
-        
+
         lockResult.ShouldBeSuccessful();
         teamCart.ClearDomainEvents(); // Clear events from locking
-        
+
         // Try to add another item after locking
         var menuItemId2 = MenuItemId.CreateUnique();
         var resultLocked = teamCart.AddItem(

@@ -14,17 +14,17 @@ public class UpdateNonExistentItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsDefaultUserAsync();
-        
+
         var listResult = await SendAsync(new CreateTodoListCommand
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
         var listId = listResult.Value;
-        
+
         var nonExistentItemId = Guid.NewGuid();
-        
+
         // Act
         var command = new UpdateTodoItemCommand
         {
@@ -33,9 +33,9 @@ public class UpdateNonExistentItemTests : BaseTestFixture
             Title = "Updated Title",
             IsDone = true
         };
-        
+
         var result = await SendAsync(command);
-        
+
         // Assert
         result.ShouldBeFailure("TodoItems.NotFound");
         result.Error.Type.Should().Be(ErrorType.NotFound);

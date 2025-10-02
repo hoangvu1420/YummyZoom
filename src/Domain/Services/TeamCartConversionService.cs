@@ -55,7 +55,7 @@ public sealed class TeamCartConversionService
         {
             return Result.Failure<(Order, TeamCart)>(TeamCartErrors.InvalidStatusForConversion);
         }
-        
+
         // 2. Map TeamCartItems to OrderItems
         var orderItems = MapToOrderItems(teamCart.Items);
 
@@ -71,10 +71,10 @@ public sealed class TeamCartConversionService
         }
 
         var totalAmount = _financialService.CalculateFinalTotal(
-            subtotal, 
-            discountAmount, 
-            deliveryFee, 
-            teamCart.TipAmount, 
+            subtotal,
+            discountAmount,
+            deliveryFee,
+            teamCart.TipAmount,
             taxAmount);
 
         // 4. Create Succeeded PaymentTransactions for the Order
@@ -97,7 +97,7 @@ public sealed class TeamCartConversionService
             teamCart.TipAmount,
             taxAmount,
             totalAmount,
-            paymentTransactionsResult.Value, 
+            paymentTransactionsResult.Value,
             teamCart.AppliedCouponId,
             OrderStatus.Placed,
             sourceTeamCartId: teamCart.Id);
@@ -124,25 +124,25 @@ public sealed class TeamCartConversionService
     /// Creates PaymentTransaction entities from TeamCart MemberPayments.
     /// </summary>
     private Result<List<PaymentTransaction>> CreateSucceededPaymentTransactions(
-        TeamCart teamCart, 
+        TeamCart teamCart,
         Money totalAmount)
     {
         var transactions = new List<PaymentTransaction>();
-        
+
         // Check if MemberPayments is null or empty
         if (teamCart.MemberPayments is null || !teamCart.MemberPayments.Any())
         {
             return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.CannotConvertWithoutPayments);
         }
-        
+
         // Check if totalAmount is null
         if (totalAmount is null)
         {
             return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
         }
-        
+
         var totalPaidByMembers = teamCart.MemberPayments.Sum(p => p.Amount.Amount);
-        
+
         var adjustmentFactor = totalPaidByMembers > 0 ? totalAmount.Amount / totalPaidByMembers : 1;
 
         foreach (var memberPayment in teamCart.MemberPayments)
@@ -152,10 +152,10 @@ public sealed class TeamCartConversionService
             {
                 return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
             }
-            
+
             var adjustedAmount = new Money(memberPayment.Amount.Amount * adjustmentFactor, memberPayment.Amount.Currency);
-            
-            var paymentMethodType = memberPayment.Method == PaymentMethod.Online 
+
+            var paymentMethodType = memberPayment.Method == PaymentMethod.Online
                 ? PaymentMethodType.CreditCard
                 : PaymentMethodType.CashOnDelivery;
 
@@ -166,8 +166,8 @@ public sealed class TeamCartConversionService
                 DateTime.UtcNow,
                 paymentGatewayReferenceId: memberPayment.OnlineTransactionId,
                 paidByUserId: memberPayment.UserId);
-                
-            if(transactionResult.IsFailure) 
+
+            if (transactionResult.IsFailure)
             {
                 return Result.Failure<List<PaymentTransaction>>(transactionResult.Error);
             }
@@ -176,10 +176,10 @@ public sealed class TeamCartConversionService
             transaction.MarkAsSucceeded();
             transactions.Add(transaction);
         }
-        
+
         var finalTransactionSum = transactions.Sum(t => t.Amount.Amount);
         var difference = Math.Abs(finalTransactionSum - totalAmount.Amount);
-        
+
         if (difference > 0.01m)
         {
             return Result.Failure<List<PaymentTransaction>>(TeamCartErrors.FinalPaymentMismatch);
@@ -194,11 +194,11 @@ public sealed class TeamCartConversionService
     private List<OrderItem> MapToOrderItems(IReadOnlyList<TeamCartItem> cartItems)
     {
         var orderItems = new List<OrderItem>();
-        
+
         foreach (var cartItem in cartItems)
         {
             var customizations = new List<OrderItemCustomization>();
-            
+
             foreach (var customization in cartItem.SelectedCustomizations)
             {
                 var customizationResult = OrderItemCustomization.Create(

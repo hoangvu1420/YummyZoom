@@ -319,14 +319,14 @@ WHERE i."RestaurantId" = @RestaurantId AND i."IsDeleted" = FALSE;
     // Very simple evaluator: supports formats like "9-5" or "09:00-17:00" (interpreted in UTC)
     private static bool ComputeIsOpenNow(string? businessHours, DateTimeOffset nowUtc)
     {
-        if (string.IsNullOrWhiteSpace(businessHours)) 
+        if (string.IsNullOrWhiteSpace(businessHours))
         {
             return false;
         }
 
         var s = businessHours.Trim();
         var m = Regex.Match(s, @"^(\d{1,2})(?::(\d{2}))?\s*-\s*(\d{1,2})(?::(\d{2}))?$");
-        if (!m.Success) 
+        if (!m.Success)
         {
             return false;
         }
@@ -336,11 +336,11 @@ WHERE i."RestaurantId" = @RestaurantId AND i."IsDeleted" = FALSE;
         int eh = int.Parse(m.Groups[3].Value);
         int em = m.Groups[4].Success ? int.Parse(m.Groups[4].Value) : 0;
 
-        if (sh < 0 || sh > 23 || eh < 0 || eh > 23) 
+        if (sh < 0 || sh > 23 || eh < 0 || eh > 23)
         {
             return false;
         }
-        if (sm < 0 || sm > 59 || em < 0 || em > 59) 
+        if (sm < 0 || sm > 59 || em < 0 || em > 59)
         {
             return false;
         }
@@ -354,7 +354,7 @@ WHERE i."RestaurantId" = @RestaurantId AND i."IsDeleted" = FALSE;
 
         var start = new TimeSpan(sh, sm, 0);
         var end = new TimeSpan(eh, em, 0);
-        if (end <= start) 
+        if (end <= start)
         {
             return false; // ignore overnight for MVP
         }

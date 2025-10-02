@@ -26,7 +26,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify response contains required fields
         response.OrderId.Value.Should().NotBeEmpty();
         response.OrderNumber.Should().NotBeNullOrEmpty();
@@ -61,7 +61,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify response for COD payment - no payment intent required
         response.OrderId.Value.Should().NotBeEmpty();
         response.OrderNumber.Should().NotBeNullOrEmpty();
@@ -72,7 +72,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Verify order was persisted with correct payment method
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
-        
+
         // Verify COD creates a payment transaction that's immediately marked as succeeded
         orderInDb!.PaymentTransactions.Should().HaveCount(1);
         var paymentTransaction = orderInDb.PaymentTransactions.First();
@@ -100,7 +100,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was created with discount applied
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
@@ -124,7 +124,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was created with tip
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
@@ -149,7 +149,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was created with special instructions
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
@@ -164,7 +164,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
             Testing.TestData.MenuItems.ClassicBurger,
             Testing.TestData.MenuItems.MargheritaPizza,
             Testing.TestData.MenuItems.GrilledSalmon);
-        
+
         // Build command with multiple items using existing pattern
         var items = menuItemIds.Select(id => new OrderItemDto(id, 1)).ToList();
         var command = InitiateOrderTestHelper.BuildValidCommand(menuItemIds: menuItemIds);
@@ -175,7 +175,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
         // Assert
         result.ShouldBeSuccessful();
         var response = result.Value;
-        
+
         // Verify order was created with all items
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
@@ -194,7 +194,7 @@ public class InitiateOrderHappyPathTests : InitiateOrderTestBase
 
         // Verify order subtotal exists and contains pricing snapshots
         orderInDb.Subtotal.Amount.Should().BeGreaterThan(0);
-        
+
         // Verify order items contain pricing snapshots
         foreach (var orderItem in orderInDb.OrderItems)
         {

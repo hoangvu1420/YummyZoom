@@ -19,14 +19,14 @@ public abstract class ValueObject : IEquatable<ValueObject>
         var valueObject = (ValueObject)obj;
         return GetEqualityComponents().SequenceEqual(valueObject.GetEqualityComponents());
     }
-    
+
     public override int GetHashCode()
     {
         return GetEqualityComponents()
             .Select(x => x?.GetHashCode() ?? 0)
             .Aggregate((x, y) => x ^ y);
     }
-    
+
     public static bool operator ==(ValueObject? a, ValueObject? b)
     {
         return Equals(a, b);

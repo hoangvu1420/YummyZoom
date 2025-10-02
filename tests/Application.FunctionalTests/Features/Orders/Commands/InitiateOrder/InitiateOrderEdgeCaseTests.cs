@@ -101,14 +101,14 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         failedResult.Error.Description.Should().Contain("maximum number of times allowed", "failure should be about per-user limit");
     }
 
-    [Test] 
+    [Test]
     public async Task InitiateOrder_WithConcurrentMixedUsageLimits_ShouldHandleCorrectly()
     {
         // Arrange - Create a coupon with both total and per-user limits
         var mixedLimitCouponCode = await CouponTestDataFactory.CreateTestCouponAsync(
             new CouponTestOptions
             {
-                Code = "MIXED32", 
+                Code = "MIXED32",
                 TotalUsageLimit = 3,
                 UserUsageLimit = 2,
                 DiscountPercentage = 20
@@ -123,7 +123,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         // Act - Execute user1 commands (current context is already set to DefaultCustomerId)
         var user1Command1 = InitiateOrderTestHelper.BuildValidCommandWithCoupon(mixedLimitCouponCode);
         var user1Command2 = InitiateOrderTestHelper.BuildValidCommandWithCoupon(mixedLimitCouponCode);
-        
+
         // Execute user1 commands concurrently
         var user1Tasks = new[]
         {
@@ -137,7 +137,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         SetUserId(user2Id);
         var user2Command1 = InitiateOrderTestHelper.BuildValidCommand(customerId: user2Id, couponCode: mixedLimitCouponCode);
         var user2Command2 = InitiateOrderTestHelper.BuildValidCommand(customerId: user2Id, couponCode: mixedLimitCouponCode);
-        
+
         // Execute user2 commands concurrently  
         var user2Tasks = new[]
         {
@@ -169,12 +169,12 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         // Arrange - Multiple different users ordering from the same restaurant
         // This tests restaurant-level concurrency and transaction isolation
         var restaurantId = Testing.TestData.DefaultRestaurantId; // Use default restaurant ID for consistency
-        
+
         // Create unique customer IDs for each order
         var customerIds = new[]
         {
             Guid.NewGuid(),
-            Guid.NewGuid(), 
+            Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid()
@@ -201,10 +201,10 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         using var scope = CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var orders = await context.Orders.Where(o => orderIds.Contains(o.Id)).ToListAsync();
-        
+
         orders.Should().HaveCount(5, "all orders should be persisted");
         orders.Should().AllSatisfy(order => order.RestaurantId.Value.Should().Be(restaurantId, "all orders should be for the same restaurant"));
-        
+
         // Verify each order has unique customer
         var actualCustomerIds = orders.Select(o => o.CustomerId.Value).ToList();
         actualCustomerIds.Should().OnlyHaveUniqueItems("each order should be from a different customer");
@@ -254,7 +254,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
     {
         // Arrange - Configure payment gateway to fail
         await ConfigureFailingPaymentGatewayAsync("Payment gateway temporarily unavailable");
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
 
@@ -341,7 +341,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         }
 
         orderNumbers.Should().OnlyHaveUniqueItems("all order numbers should be unique");
-        orderNumbers.Should().AllSatisfy(number => 
+        orderNumbers.Should().AllSatisfy(number =>
         {
             number.Should().NotBeNullOrEmpty("order number should not be empty");
             number.Length.Should().BeGreaterThan(5, "order number should have reasonable length");
@@ -358,7 +358,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         // Arrange
         var testUserId = Testing.TestData.DefaultCustomerId;
         SetUserId(testUserId);
-        
+
         var command = InitiateOrderTestHelper.BuildValidCommand(customerId: testUserId);
 
         // Act
@@ -373,7 +373,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         order.Should().NotBeNull();
         order!.Created.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(1), "created timestamp should be recent");
         order.CreatedBy.Should().Be(testUserId.ToString(), "created by should match current user");
-        
+
         // Verify placement timestamp is set
         order.PlacementTimestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1), "placement timestamp should be recent");
     }
@@ -402,7 +402,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         order.CustomerId.Value.Should().Be(command.CustomerId, "order should have correct customer ID");
         order.RestaurantId.Value.Should().Be(command.RestaurantId, "order should have correct restaurant ID");
         order.TotalAmount.Should().NotBeNull("order should have calculated total amount");
-        
+
         // Verify domain events were processed and cleared
         order.DomainEvents.Should().BeEmpty("domain events should be cleared after being dispatched during save");
     }
@@ -423,7 +423,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
 
         // Assert - Verify atomic operation
         result.ShouldBeSuccessful();
-        
+
         // Verify exactly one order was created
         var finalOrderCount = await CountAsync<Order>();
         finalOrderCount.Should().Be(initialOrderCount + 1, "exactly one order should be created");
@@ -431,11 +431,11 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         // Verify order and all related data exist consistently
         var orderId = result.Value.OrderId;
         var order = await InitiateOrderTestHelper.ValidateOrderPersistence(orderId, shouldExist: true);
-        
+
         order.Should().NotBeNull();
         order!.OrderItems.Should().NotBeEmpty("order should have items");
         order.TotalAmount.Amount.Should().BeGreaterThan(0, "order should have valid total amount");
-        
+
         // Verify all financial components are properly calculated and persisted
         order.Subtotal.Amount.Should().BeGreaterThan(0);
         order.TaxAmount.Amount.Should().BeGreaterThanOrEqualTo(0);
@@ -475,19 +475,19 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
         var order = await InitiateOrderTestHelper.ValidateOrderPersistence(orderId, shouldExist: true);
 
         order.Should().NotBeNull();
-        
+
         // Verify all order items are present
         order!.OrderItems.Should().HaveCount(3, "order should contain all requested items");
-        
+
         // Verify coupon was applied
         order.DiscountAmount.Amount.Should().BeGreaterThan(0, "discount should be applied from coupon");
-        
+
         // Verify tip was included
         order.TipAmount.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.MediumTip, "tip amount should match");
-        
+
         // Verify special instructions
         order.SpecialInstructions.Should().Be("Extra sauce on the side", "special instructions should be preserved");
-        
+
         // Verify payment intent was created for online payment
         InitiateOrderTestHelper.ValidatePaymentIntentCreation(PaymentGatewayMock, shouldBeCalled: true);
         result.Value.PaymentIntentId.Should().NotBeNullOrEmpty("payment intent ID should be returned for online payment");

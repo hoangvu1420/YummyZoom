@@ -43,7 +43,7 @@ public static class MenuTestDataFactory
         var categoryCount = options.CategoryCount;
         for (var i = 0; i < categoryCount; i++)
         {
-            var (name, order) = options.CategoryGenerator?.Invoke(i) ?? ($"Category-{i+1}", i + 1);
+            var (name, order) = options.CategoryGenerator?.Invoke(i) ?? ($"Category-{i + 1}", i + 1);
             var categoryResult = MenuCategory.Create(menu.Id, name, order);
             if (categoryResult.IsFailure)
                 throw new InvalidOperationException($"Failed to create category '{name}': {categoryResult.Error}");
@@ -61,7 +61,7 @@ public static class MenuTestDataFactory
                     var itemResult = MenuItem.Create(
                         restaurantId,
                         category.Id,
-                        itemOpt.Name ?? $"Item-{i+1}-{Guid.NewGuid():N}",
+                        itemOpt.Name ?? $"Item-{i + 1}-{Guid.NewGuid():N}",
                         itemOpt.Description ?? "Desc",
                         new Money(itemOpt.PriceAmount ?? 10m, itemOpt.PriceCurrency ?? "USD"),
                         itemOpt.ImageUrl,

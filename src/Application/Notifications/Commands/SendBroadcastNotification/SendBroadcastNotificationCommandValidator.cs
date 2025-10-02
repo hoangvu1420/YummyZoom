@@ -26,4 +26,4 @@ public class SendBroadcastNotificationCommandValidator : AbstractValidator<SendB
             .WithMessage("Data payload values cannot be empty.")
             .When(x => x.DataPayload != null && x.DataPayload.Any());
     }
-} 
+}

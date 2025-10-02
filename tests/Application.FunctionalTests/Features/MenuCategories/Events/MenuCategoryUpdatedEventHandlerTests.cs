@@ -59,7 +59,7 @@ public class MenuCategoryUpdatedEventHandlerTests : BaseTestFixture
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             // Check for both possible event handlers
             var nameHandlerName = typeof(YummyZoom.Application.MenuCategories.EventHandlers.MenuCategoryNameUpdatedEventHandler).FullName!;
             var displayOrderHandlerName = typeof(YummyZoom.Application.MenuCategories.EventHandlers.MenuCategoryDisplayOrderUpdatedEventHandler).FullName!;
@@ -100,7 +100,7 @@ public class MenuCategoryUpdatedEventHandlerTests : BaseTestFixture
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var nameHandlerName = typeof(YummyZoom.Application.MenuCategories.EventHandlers.MenuCategoryNameUpdatedEventHandler).FullName!;
             var displayOrderHandlerName = typeof(YummyZoom.Application.MenuCategories.EventHandlers.MenuCategoryDisplayOrderUpdatedEventHandler).FullName!;
-            
+
             var inboxEntries = await db.Set<InboxMessage>()
                 .Where(x => x.Handler == nameHandlerName || x.Handler == displayOrderHandlerName)
                 .ToListAsync();

@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.TodoListAggregate.Errors;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
@@ -24,7 +24,7 @@ public sealed class TodoItemId : AggregateRootId<Guid>
 
     public static Result<TodoItemId> Create(string value)
     {
-        return Guid.TryParse(value, out var guid) ? 
+        return Guid.TryParse(value, out var guid) ?
             Result.Success(new TodoItemId(guid)) :
             Result.Failure<TodoItemId>(TodoItemErrors.InvalidTodoItemId(value));
     }

@@ -1,5 +1,3 @@
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.Domain.OrderAggregate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +10,8 @@ using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrd
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Coupons.Queries;

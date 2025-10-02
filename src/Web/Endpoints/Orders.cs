@@ -141,7 +141,7 @@ public class Orders : EndpointGroupBase
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
-            
+
             var query = new GetCustomerRecentOrdersQuery(page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();

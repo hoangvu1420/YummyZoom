@@ -1,5 +1,5 @@
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.Errors;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.RestaurantAggregate.ValueObjects;
 
@@ -22,7 +22,7 @@ public class BusinessHoursTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var businessHours = result.Value;
-        
+
         businessHours.Should().NotBeNull();
         businessHours.Hours.Should().Be(ValidBusinessHours);
     }
@@ -100,7 +100,7 @@ public class BusinessHoursTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var businessHours = result.Value;
-        
+
         businessHours.Hours.Should().Be(ValidBusinessHours);
     }
 

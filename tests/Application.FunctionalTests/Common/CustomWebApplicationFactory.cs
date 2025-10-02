@@ -23,7 +23,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     private readonly string _connectionString;
     private readonly string? _redisConnectionString;
     private readonly Dictionary<Type, object>? _serviceReplacements;
-    
+
     // Static singleton instance to ensure consistency across all scopes
     private static readonly TestUserService _testUserService = new();
 
@@ -104,29 +104,29 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             .AddTransient(provider =>
             {
                 var mock = new Mock<IFcmService>();
-                
+
                 // Mock successful multicast notification sending
                 mock.Setup(s => s.SendMulticastNotificationAsync(
-                        It.IsAny<IEnumerable<string>>(), 
-                        It.IsAny<string>(), 
-                        It.IsAny<string>(), 
+                        It.IsAny<IEnumerable<string>>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<Dictionary<string, string>>()))
                     .ReturnsAsync(Result.Success<List<string>>(new List<string>()));
-                
+
                 // Mock successful single notification sending
                 mock.Setup(s => s.SendNotificationAsync(
-                        It.IsAny<string>(), 
-                        It.IsAny<string>(), 
-                        It.IsAny<string>(), 
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<Dictionary<string, string>>()))
                     .ReturnsAsync(Result.Success());
-                    
+
                 // Mock successful data message sending
                 mock.Setup(s => s.SendDataMessageAsync(
-                        It.IsAny<string>(), 
+                        It.IsAny<string>(),
                         It.IsAny<Dictionary<string, string>>()))
                     .ReturnsAsync(Result.Success());
-                        
+
                 return mock.Object;
             });
     }
@@ -172,7 +172,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             }
         }
     }
-    
+
     // Static method to access the test user service from test methods
     public static TestUserService GetTestUserService() => _testUserService;
 }
@@ -183,7 +183,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 public class TestUserService : IUser
 {
     private Guid? _userId;
-    
+
     private readonly List<Claim> _additionalClaims = new();
 
     public string? Id => _userId?.ToString();
@@ -217,7 +217,7 @@ public class TestUserService : IUser
     {
         _userId = userId;
         _additionalClaims.Clear(); // Clear previous claims when switching users
-        
+
         // Automatically add UserOwner claim for the user (this simulates what happens in real authentication)
         if (userId.HasValue)
         {
@@ -235,7 +235,7 @@ public class TestUserService : IUser
     {
         // Add both permission claim for policy-based authorization
         _additionalClaims.Add(new Claim("permission", $"{Roles.UserAdmin}:*"));
-        
+
         // Add role claim for role-based authorization
         _additionalClaims.Add(new Claim(ClaimTypes.Role, Roles.Administrator));
     }
@@ -270,7 +270,7 @@ public class TestUserService : IUser
             {
                 var domainUserId = UserId.Create(_userId.Value);
                 var roleAssignments = await repository.GetByUserIdAsync(domainUserId);
-                
+
                 foreach (var assignment in roleAssignments)
                 {
                     var roleConstant = assignment.Role switch
@@ -279,7 +279,7 @@ public class TestUserService : IUser
                         RestaurantRole.Staff => Roles.RestaurantStaff,
                         _ => assignment.Role.ToString()
                     };
-                    
+
                     var claimValue = $"{roleConstant}:{assignment.RestaurantId.Value}";
                     _additionalClaims.Add(new Claim("permission", claimValue));
                 }

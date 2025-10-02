@@ -1,10 +1,10 @@
-using YummyZoom.Application.Common.Security;
+using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Models;
+using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Orders.Queries.Common;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.Common.Authorization;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
 namespace YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
 

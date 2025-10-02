@@ -1,6 +1,6 @@
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
@@ -84,9 +84,9 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
 
         // Act: Try to lock cart as guest (non-host) - authorization should fail at pipeline level
         await scenario.ActAsGuest("Guest User");
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
 
@@ -113,9 +113,9 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
 
         // Act: Try to lock cart as non-member - authorization should fail at pipeline level
         await scenario.ActAsNonMember();
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
 

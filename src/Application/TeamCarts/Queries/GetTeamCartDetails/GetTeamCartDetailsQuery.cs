@@ -24,7 +24,7 @@ public static class GetTeamCartDetailsErrors
 {
     public static Error NotFound => Error.NotFound(
         "GetTeamCartDetails.NotFound", "The requested team cart was not found.");
-        
+
     public static Error NotMember => Error.Validation(
         "GetTeamCartDetails.NotMember", "You are not a member of this team cart.");
 }

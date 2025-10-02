@@ -1,9 +1,9 @@
-using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
 using YummyZoom.Application.Common.Exceptions;
+using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.TestData;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Application.FunctionalTests.TestData;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuItems.Commands;
 

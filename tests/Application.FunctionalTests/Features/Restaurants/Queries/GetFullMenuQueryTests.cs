@@ -1,12 +1,12 @@
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
 using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Application.Restaurants.Queries.Common;
-using static YummyZoom.Application.FunctionalTests.Testing;
-using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Restaurants.Queries;
 
@@ -66,7 +66,7 @@ public class GetFullMenuQueryTests : BaseTestFixture
 
         updated.LastRebuiltAt.Should().BeAfter(baseline, "cache should be invalidated and view rebuilt time should advance");
     }
-    
+
     [Test]
     public async Task Success_ReturnsSeededValues_WithoutAlteringJsonOrOffset()
     {

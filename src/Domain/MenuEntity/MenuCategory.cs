@@ -1,7 +1,7 @@
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.MenuEntity.Errors;
 using YummyZoom.Domain.MenuEntity.Events;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.MenuEntity;

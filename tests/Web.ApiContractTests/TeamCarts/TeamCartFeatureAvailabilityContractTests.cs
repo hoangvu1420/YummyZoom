@@ -30,7 +30,7 @@ public class TeamCartFeatureAvailabilityWebAppFactory : ApiContractWebAppFactory
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
-        
+
         if (_mockAvailability != null)
         {
             builder.ConfigureTestServices(services =>
@@ -38,7 +38,7 @@ public class TeamCartFeatureAvailabilityWebAppFactory : ApiContractWebAppFactory
                 // Remove existing ITeamCartFeatureAvailability registration
                 var existing = services.FirstOrDefault(d => d.ServiceType == typeof(ITeamCartFeatureAvailability));
                 if (existing != null) services.Remove(existing);
-                
+
                 // Add mock implementation
                 services.AddSingleton(_mockAvailability);
             });
@@ -58,7 +58,7 @@ public static class FeatureAvailabilityMocks
         mock.Setup(x => x.RealTimeReady).Returns(false);
         return mock.Object;
     }
-    
+
     public static ITeamCartFeatureAvailability CreateRealTimeNotReady()
     {
         var mock = new Mock<ITeamCartFeatureAvailability>();
@@ -66,7 +66,7 @@ public static class FeatureAvailabilityMocks
         mock.Setup(x => x.RealTimeReady).Returns(false);
         return mock.Object;
     }
-    
+
     public static ITeamCartFeatureAvailability CreateAvailable()
     {
         var mock = new Mock<ITeamCartFeatureAvailability>();
@@ -86,7 +86,7 @@ public class TeamCartFeatureAvailabilityContractTests
         // Mock ITeamCartFeatureAvailability to return disabled
         var mockAvailability = FeatureAvailabilityMocks.CreateDisabled();
         var factory = new TeamCartFeatureAvailabilityWebAppFactory(mockAvailability);
-        
+
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
@@ -112,7 +112,7 @@ public class TeamCartFeatureAvailabilityContractTests
         // Mock ITeamCartFeatureAvailability to return disabled
         var mockAvailability = FeatureAvailabilityMocks.CreateDisabled();
         var factory = new TeamCartFeatureAvailabilityWebAppFactory(mockAvailability);
-        
+
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
@@ -184,7 +184,7 @@ public class TeamCartFeatureAvailabilityContractTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "host-user");
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",
@@ -272,7 +272,7 @@ public class TeamCartFeatureAvailabilityContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
         // Mock a successful response 
-        factory.Sender.RespondWith(_ => 
+        factory.Sender.RespondWith(_ =>
             YummyZoom.SharedKernel.Result.Success(new YummyZoom.Application.TeamCarts.Commands.CreateTeamCart.CreateTeamCartResponse(
                 Guid.NewGuid(), "TOKEN", DateTime.UtcNow.AddHours(1))));
 
@@ -303,7 +303,7 @@ public class TeamCartFeatureAvailabilityContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
         // Mock a not found response to verify request processing
-        factory.Sender.RespondWith(_ => 
+        factory.Sender.RespondWith(_ =>
             YummyZoom.SharedKernel.Result.Failure<YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel.GetTeamCartRealTimeViewModelResponse>(
                 YummyZoom.SharedKernel.Error.NotFound("TeamCart.NotFound", "Not found")));
 
@@ -334,7 +334,7 @@ public class TeamCartFeatureAvailabilityContractTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
-        var body = new 
+        var body = new
         {
             MenuItemId = Guid.NewGuid(),
             Quantity = 1,

@@ -1,9 +1,9 @@
 using YummyZoom.Domain.SupportTicketAggregate;
+using YummyZoom.Domain.SupportTicketAggregate.Entities;
 using YummyZoom.Domain.SupportTicketAggregate.Enums;
 using YummyZoom.Domain.SupportTicketAggregate.Errors;
 using YummyZoom.Domain.SupportTicketAggregate.Events;
 using YummyZoom.Domain.SupportTicketAggregate.ValueObjects;
-using YummyZoom.Domain.SupportTicketAggregate.Entities;
 
 namespace YummyZoom.Domain.UnitTests.SupportTicketAggregate;
 

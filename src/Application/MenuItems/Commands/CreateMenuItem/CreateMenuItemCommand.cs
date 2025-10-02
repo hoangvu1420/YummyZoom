@@ -53,7 +53,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             // 1) Validate that the menu category exists and belongs to the restaurant
             var categoryId = MenuCategoryId.Create(request.MenuCategoryId);
             var category = await _menuCategoryRepository.GetByIdAsync(categoryId, cancellationToken);
-            
+
             if (category is null)
             {
                 return Result.Failure<CreateMenuItemResponse>(
@@ -63,7 +63,7 @@ public class CreateMenuItemCommandHandler : IRequestHandler<CreateMenuItemComman
             // 2) Validate restaurant ownership through category's menu
             var restaurantId = RestaurantId.Create(request.RestaurantId);
             var categoriesForRestaurant = await _menuCategoryRepository.GetByRestaurantIdAsync(restaurantId, cancellationToken);
-            
+
             if (!categoriesForRestaurant.Any(c => c.Id == categoryId))
             {
                 return Result.Failure<CreateMenuItemResponse>(

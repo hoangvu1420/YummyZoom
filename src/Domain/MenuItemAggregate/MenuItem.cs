@@ -95,7 +95,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
             appliedCustomizations ?? []);
 
         menuItem.AddDomainEvent(new MenuItemCreated(menuItem.Id, menuItem.RestaurantId, menuItem.MenuCategoryId));
-        
+
         return Result.Success(menuItem);
     }
 
@@ -207,8 +207,8 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
 
         _appliedCustomizations.Add(customization);
         AddDomainEvent(new MenuItemCustomizationAssigned(
-            Id, 
-            customization.CustomizationGroupId, 
+            Id,
+            customization.CustomizationGroupId,
             customization.DisplayTitle));
 
         return Result.Success();
@@ -239,7 +239,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
     public Result SetDietaryTags(List<TagId>? tagIds)
     {
         _dietaryTagIds.Clear();
-        
+
         if (tagIds != null && tagIds.Count > 0)
         {
             _dietaryTagIds.AddRange(tagIds);
@@ -269,7 +269,7 @@ public sealed class MenuItem : AggregateRoot<MenuItemId, Guid>, IAuditableEntity
         DeletedBy = deletedBy;
 
         AddDomainEvent(new MenuItemDeleted(Id));
-        
+
         return Result.Success();
     }
 

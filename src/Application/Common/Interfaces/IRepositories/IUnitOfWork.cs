@@ -11,7 +11,7 @@ public interface IUnitOfWork
     Task<Result<T>> ExecuteInTransactionAsync<T>(
         Func<Task<Result<T>>> work,
         CancellationToken ct = default);
-        
+
     /// <summary>
     /// Runs all work in one EF retry‐strategy + transaction that returns a simple Result,
     /// rolling back automatically on failure.

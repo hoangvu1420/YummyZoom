@@ -74,7 +74,7 @@ public class TeamCartTestBuilder
         // Step 1: Create host user and team cart
         var hostUserId = await RunAsDefaultUserAsync();
         var createResult = await SendAsync(new CreateTeamCartCommand(_restaurantId, _hostName));
-        
+
         if (createResult.IsFailure)
         {
             throw new InvalidOperationException($"Failed to create team cart: {createResult.Error.Description}");
@@ -85,21 +85,21 @@ public class TeamCartTestBuilder
 
         // Step 2: Create and add guest users
         var guestUserIds = new Dictionary<string, Guid>();
-        
+
         foreach (var (guestName, guestEmail) in _guests)
         {
             var email = guestEmail ?? $"{guestName.Replace(" ", "").ToLower()}@example.com";
             var guestUserId = await CreateUserAsync(email, "Password123!");
-            
+
             // Switch to guest user and join the team cart
             SetUserId(guestUserId);
             var joinResult = await SendAsync(new JoinTeamCartCommand(teamCartId, shareToken, guestName));
-            
+
             if (joinResult.IsFailure)
             {
                 throw new InvalidOperationException($"Failed to join team cart as guest '{guestName}': {joinResult.Error.Description}");
             }
-            
+
             guestUserIds[guestName] = guestUserId;
         }
 

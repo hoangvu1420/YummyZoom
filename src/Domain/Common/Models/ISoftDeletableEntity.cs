@@ -13,12 +13,12 @@ public interface ISoftDeletableEntity
     /// Indicates whether the entity has been soft-deleted
     /// </summary>
     bool IsDeleted { get; set; }
-    
+
     /// <summary>
     /// The timestamp when the entity was soft-deleted
     /// </summary>
     DateTimeOffset? DeletedOn { get; set; }
-    
+
     /// <summary>
     /// The identifier of who soft-deleted the entity
     /// </summary>

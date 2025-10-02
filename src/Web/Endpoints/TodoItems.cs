@@ -65,9 +65,9 @@ public class TodoItems : EndpointGroupBase
     private async Task<IResult> UpdateTodoItemDetail(ISender sender, Guid listId, Guid id, UpdateTodoItemDetailCommand command)
     {
         if (id != command.Id || listId != command.ListId) return TypedResults.BadRequest();
-        
+
         var result = await sender.Send(command);
-        
+
         return result.IsSuccess
             ? TypedResults.NoContent()
             : result.ToIResult();

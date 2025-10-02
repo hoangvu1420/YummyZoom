@@ -19,7 +19,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
     {
         await ResetState();
         await SetupForAuthorizationTestsAsync();
-        
+
         // Create test restaurant and user IDs
         _restaurantId1 = Guid.NewGuid();
         _restaurantId2 = Guid.NewGuid();
@@ -34,7 +34,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
     {
         // Arrange - User has restaurant role but accessing both restaurant and user resources
         var userId = await RunAsRestaurantOwnerAsync("mixed@test.com", _restaurantId1);
-        
+
         // Create commands for different resource types
         var restaurantCommand = new TestRestaurantOwnerCommand(_restaurantId1);     // Should succeed
         var wrongRestaurantCommand = new TestRestaurantOwnerCommand(_restaurantId2); // Should fail
@@ -63,7 +63,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
     {
         // Arrange - Admin should have access to all resources
         var adminUserId = await RunAsAdministratorAsync();
-        
+
         // Create commands for different resource types
         var userCommand1 = new TestUserOwnerCommand(_testUserId1);
         var userCommand2 = new TestUserOwnerCommand(_testUserId2);
@@ -85,7 +85,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
     {
         // Arrange - Regular user with no special roles
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Create commands
         var ownUserCommand = new TestUserOwnerCommand(userId);        // Should succeed
         var otherUserCommand = new TestUserOwnerCommand(_testUserId1); // Should fail
@@ -119,7 +119,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
         });
 
         // Act & Assert - Restaurant permissions
-        
+
         // Should succeed - owner of restaurant 1
         var ownerCommand1 = new TestRestaurantOwnerCommand(_restaurantId1);
         var result1 = await SendAsync(ownerCommand1);
@@ -141,7 +141,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
         result3.ShouldBeSuccessful();
 
         // Act & Assert - User permissions
-        
+
         // Should succeed - own user data
         var ownUserCommand = new TestUserOwnerCommand(userId);
         var result4 = await SendAsync(ownUserCommand);
@@ -161,7 +161,7 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
     public async Task MixedCommands_LargeNumberOfClaims_ShouldPerformWell()
     {
         // This test ensures the generic handler performs well with many different claim types
-        
+
         // Arrange - User with both restaurant roles and user permissions
         var userId = await RunAsUserWithMultipleRestaurantRolesAsync("performance@test.com", new[]
         {
@@ -186,9 +186,9 @@ public class MixedResourceAuthorizationTests : BaseTestFixture
         stopwatch.Stop();
 
         // Assert - Should complete in reasonable time (less than 5 seconds for all commands)
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(5000, 
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(5000,
             "Mixed authorization commands should execute efficiently");
     }
 
     #endregion
-} 
+}

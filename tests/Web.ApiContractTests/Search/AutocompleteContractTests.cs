@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework;
 using YummyZoom.Application.Search.Queries.Autocomplete;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
-using Result = YummyZoom.SharedKernel.Result;
 using Error = YummyZoom.SharedKernel.Error;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Web.ApiContractTests.Search;
 

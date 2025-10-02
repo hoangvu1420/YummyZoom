@@ -30,7 +30,7 @@ public class CreateTodoItemTests : BaseTestFixture
         {
             Title = "New List"
         });
-        
+
         listResult.ShouldBeSuccessful();
         var listId = listResult.Value;
 
@@ -44,7 +44,7 @@ public class CreateTodoItemTests : BaseTestFixture
         };
 
         var itemResult = await SendAsync(command);
-        
+
         itemResult.ShouldBeSuccessful();
         var itemId = itemResult.Value;
 
@@ -53,9 +53,9 @@ public class CreateTodoItemTests : BaseTestFixture
 
         item.Should().NotBeNull();
         item!.Title.Should().Be(command.Title);
-        item.CreatedBy.Should().Be(userId.ToString()); 
+        item.CreatedBy.Should().Be(userId.ToString());
         item.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMilliseconds(10000));
-        item.LastModifiedBy.Should().Be(userId.ToString()); 
+        item.LastModifiedBy.Should().Be(userId.ToString());
         item.LastModified.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMilliseconds(10000));
     }
 }

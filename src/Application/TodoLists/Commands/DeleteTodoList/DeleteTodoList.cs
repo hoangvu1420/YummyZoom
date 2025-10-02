@@ -1,6 +1,6 @@
 ﻿using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.Domain.TodoListAggregate.Errors;
+using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TodoLists.Commands.DeleteTodoList;
@@ -29,7 +29,7 @@ public class DeleteTodoListCommandHandler : IRequestHandler<DeleteTodoListComman
         _context.TodoLists.Remove(entity);
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Success(Unit.Value);
     }
 }

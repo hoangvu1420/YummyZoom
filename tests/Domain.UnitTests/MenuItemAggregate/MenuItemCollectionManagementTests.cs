@@ -25,7 +25,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         result.ShouldBeSuccessful();
         menuItem.AppliedCustomizations.Should().HaveCount(1);
         menuItem.AppliedCustomizations.Should().Contain(customization);
-        
+
         // Verify domain event was raised
         menuItem.DomainEvents.Should().HaveCount(2); // MenuItemCreated + MenuItemCustomizationAssigned
         var assignedEvent = menuItem.DomainEvents.OfType<MenuItemCustomizationAssigned>().FirstOrDefault();
@@ -43,7 +43,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         var customizationId = CustomizationGroupId.CreateUnique();
         var customization1 = AppliedCustomization.Create(customizationId, "Test Customization 1", 1);
         var customization2 = AppliedCustomization.Create(customizationId, "Test Customization 2", 2);
-        
+
         menuItem.AssignCustomizationGroup(customization1);
 
         // Act
@@ -88,7 +88,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         menuItem.AppliedCustomizations.Should().BeEmpty();
-        
+
         // Verify domain event was raised
         var removedEvent = menuItem.DomainEvents.OfType<MenuItemCustomizationRemoved>().FirstOrDefault();
         removedEvent.Should().NotBeNull();
@@ -119,7 +119,7 @@ public class MenuItemCustomizationManagementTests : MenuItemTestHelpers
         var menuItem = CreateValidMenuItem();
         var customization1 = AppliedCustomization.Create(CustomizationGroupId.CreateUnique(), "Customization 1", 1);
         var customization2 = AppliedCustomization.Create(CustomizationGroupId.CreateUnique(), "Customization 2", 2);
-        
+
         menuItem.AssignCustomizationGroup(customization1);
         menuItem.AssignCustomizationGroup(customization2);
 
@@ -156,7 +156,7 @@ public class MenuItemDietaryTagManagementTests : MenuItemTestHelpers
         menuItem.DietaryTagIds.Should().HaveCount(3);
         menuItem.DietaryTagIds.Should().BeEquivalentTo(newTags);
         menuItem.DietaryTagIds.Should().NotContain(initialTags);
-        
+
         // Verify domain event was raised
         var updatedEvent = menuItem.DomainEvents.OfType<MenuItemDietaryTagsUpdated>().LastOrDefault();
         updatedEvent.Should().NotBeNull();
@@ -178,7 +178,7 @@ public class MenuItemDietaryTagManagementTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         menuItem.DietaryTagIds.Should().BeEmpty();
-        
+
         // Verify domain event was raised
         var updatedEvent = menuItem.DomainEvents.OfType<MenuItemDietaryTagsUpdated>().LastOrDefault();
         updatedEvent.Should().NotBeNull();
@@ -199,7 +199,7 @@ public class MenuItemDietaryTagManagementTests : MenuItemTestHelpers
         // Assert
         result.ShouldBeSuccessful();
         menuItem.DietaryTagIds.Should().BeEmpty();
-        
+
         // Verify domain event was raised
         var updatedEvent = menuItem.DomainEvents.OfType<MenuItemDietaryTagsUpdated>().LastOrDefault();
         updatedEvent.Should().NotBeNull();

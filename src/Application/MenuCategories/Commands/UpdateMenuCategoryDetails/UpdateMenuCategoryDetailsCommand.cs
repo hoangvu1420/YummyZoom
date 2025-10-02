@@ -49,7 +49,7 @@ public class UpdateMenuCategoryDetailsCommandHandler : IRequestHandler<UpdateMen
             // Verify restaurant ownership by checking categories for the restaurant
             var restaurantId = RestaurantId.Create(request.RestaurantId);
             var categoriesForRestaurant = await _menuCategoryRepository.GetByRestaurantIdAsync(restaurantId, cancellationToken);
-            
+
             if (!categoriesForRestaurant.Any(c => c.Id == categoryId))
             {
                 return Result.Failure(MenuErrors.CategoryNotFound(request.MenuCategoryId.ToString()));

@@ -18,7 +18,7 @@ public class WeatherForecasts : EndpointGroupBase
     public async Task<IResult> GetWeatherForecasts(ISender sender)
     {
         var result = await sender.Send(new GetWeatherForecastsQuery());
-        
+
         return result.ToIResult();
     }
 }

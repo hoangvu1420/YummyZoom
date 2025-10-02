@@ -21,11 +21,11 @@ public sealed class MenuId : AggregateRootId<Guid>
     {
         return new MenuId(value);
     }
-    
+
     public static Result<MenuId> Create(string value)
     {
-        return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<MenuId>(MenuErrors.InvalidMenuId) 
+        return !Guid.TryParse(value, out var guid)
+            ? Result.Failure<MenuId>(MenuErrors.InvalidMenuId)
             : Result.Success(new MenuId(guid));
     }
 
@@ -33,7 +33,7 @@ public sealed class MenuId : AggregateRootId<Guid>
     {
         yield return Value;
     }
-    
+
 #pragma warning disable CS8618
     private MenuId() { }
 #pragma warning restore CS8618

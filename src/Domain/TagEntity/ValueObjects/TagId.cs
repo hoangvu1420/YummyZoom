@@ -21,11 +21,11 @@ public sealed class TagId : AggregateRootId<Guid>
     {
         return new TagId(value);
     }
-    
+
     public static Result<TagId> Create(string value)
     {
-        return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<TagId>(TagErrors.InvalidTagId) 
+        return !Guid.TryParse(value, out var guid)
+            ? Result.Failure<TagId>(TagErrors.InvalidTagId)
             : Result.Success(new TagId(guid));
     }
 

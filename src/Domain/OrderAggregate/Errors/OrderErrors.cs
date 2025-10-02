@@ -60,13 +60,13 @@ public static class OrderErrors
 
     public static readonly Error InvalidOrderStatusForDelivered =
         Error.Validation("Order.InvalidOrderStatusForDelivered", "Order cannot be marked as delivered from its current status.");
-        
+
     public static readonly Error InvalidStatusForPaymentConfirmation =
         Error.Validation("Order.InvalidStatusForPaymentConfirmation", "Payment can only be confirmed for orders in 'AwaitingPayment' status.");
-        
+
     public static readonly Error FinancialMismatch =
         Error.Validation("Order.FinancialMismatch", "The calculated total amount does not match the provided total amount.");
-        
+
     public static readonly Error PaymentGatewayReferenceIdRequired =
         Error.Validation("Order.PaymentGatewayReferenceIdRequired", "A gateway reference is required for online payments at creation.");
 }

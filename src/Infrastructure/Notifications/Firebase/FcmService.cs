@@ -28,7 +28,7 @@ public class FcmService : IFcmService
     {
         using var scope = _serviceProvider.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        
+
         return await unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
@@ -38,16 +38,16 @@ public class FcmService : IFcmService
             {
                 session.IsActive = false;
                 session.LoggedOutAt = DateTime.UtcNow;
-                
-                _logger.LogInformation("Marked FCM token {FcmTokenPrefix} as invalid", 
+
+                _logger.LogInformation("Marked FCM token {FcmTokenPrefix} as invalid",
                     fcmToken[..Math.Min(8, fcmToken.Length)]);
-                
+
                 return Result.Success();
             }
-            
-            _logger.LogWarning("No active session found for FCM token {FcmTokenPrefix} to mark as invalid", 
+
+            _logger.LogWarning("No active session found for FCM token {FcmTokenPrefix} to mark as invalid",
                 fcmToken[..Math.Min(8, fcmToken.Length)]);
-            
+
             return Result.Success(); // Not finding a session to invalidate is not an error
         });
     }

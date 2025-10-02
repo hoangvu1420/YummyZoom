@@ -1,5 +1,5 @@
-using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 
@@ -19,7 +19,7 @@ public class AppliesToTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var appliesTo = result.Value;
-        
+
         appliesTo.Scope.Should().Be(CouponScope.WholeOrder);
         appliesTo.ItemIds.Should().BeEmpty();
         appliesTo.CategoryIds.Should().BeEmpty();
@@ -59,7 +59,7 @@ public class AppliesToTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var appliesTo = result.Value;
-        
+
         appliesTo.Scope.Should().Be(CouponScope.SpecificItems);
         appliesTo.ItemIds.Should().HaveCount(3);
         appliesTo.ItemIds.Should().BeEquivalentTo(itemIds);
@@ -162,7 +162,7 @@ public class AppliesToTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var appliesTo = result.Value;
-        
+
         appliesTo.Scope.Should().Be(CouponScope.SpecificCategories);
         appliesTo.CategoryIds.Should().HaveCount(3);
         appliesTo.CategoryIds.Should().BeEquivalentTo(categoryIds);

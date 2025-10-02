@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TestDataFactory = YummyZoom.Application.FunctionalTests.TestData.TestDataFactory;
 using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
@@ -11,15 +10,16 @@ using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAccountAggregate;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.SupportTicketAggregate;
 using YummyZoom.Domain.SupportTicketAggregate.Enums;
 using YummyZoom.Domain.SupportTicketAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAccountAggregate;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using static YummyZoom.Application.FunctionalTests.Testing;
+using TestDataFactory = YummyZoom.Application.FunctionalTests.TestData.TestDataFactory;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Admin;
 
@@ -390,10 +390,10 @@ public class AdminMetricsMaintainerTests : BaseTestFixture
     {
         var orderId = await OrderLifecycleTestHelper.CreateReadyOrderAsync();
         // Ensure delivery time is in the past to pass validation (DeliveredAtUtc <= DateTime.UtcNow.AddMinutes(5))
-        var deliveredAt = placementTimestamp > DateTime.UtcNow.AddMinutes(-5) 
+        var deliveredAt = placementTimestamp > DateTime.UtcNow.AddMinutes(-5)
             ? DateTime.UtcNow.AddMinutes(-1) // If placement is recent, deliver 1 minute ago
             : DateTime.UtcNow.AddMinutes(-2); // If placement is old, still deliver in the past
-        
+
         (await OrderLifecycleTestHelper.MarkDeliveredAsync(orderId, deliveredAt)).IsSuccess.Should().BeTrue();
 
         await TestDatabaseManager.ExecuteInScopeAsync(async db =>

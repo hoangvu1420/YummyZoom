@@ -62,7 +62,7 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
-        
+
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
 
@@ -71,15 +71,15 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
         {
             var orderRepository = acceptScope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var db = acceptScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after creation");
-            
+
             // Accept the order with estimated delivery time
             var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
             var acceptResult = order!.Accept(estimatedDeliveryTime);
             acceptResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -160,22 +160,22 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
         // Create and accept order
         var initResponse = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
         await DrainOutboxAsync(); // Process OrderPlaced
-        
+
         // Accept the order
         using (var acceptScope2 = CreateScope())
         {
             var orderRepository = acceptScope2.ServiceProvider.GetRequiredService<IOrderRepository>();
             var dbContext = acceptScope2.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var order = await orderRepository.GetByIdAsync(initResponse.OrderId, CancellationToken.None);
             var estimatedDeliveryTime = DateTime.UtcNow.AddHours(1);
             var acceptResult = order!.Accept(estimatedDeliveryTime);
             acceptResult.ShouldBeSuccessful();
-            
+
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await dbContext.SaveChangesAsync(CancellationToken.None);
         }
-        
+
         await DrainOutboxAsync();
         await DrainOutboxAsync(); // second drain should be idempotent
 

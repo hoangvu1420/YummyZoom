@@ -1,7 +1,7 @@
 using YummyZoom.Domain.UserAggregate;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.Entities;
 using YummyZoom.Domain.UserAggregate.Errors;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.UserAggregate;
 
@@ -18,7 +18,7 @@ public class UserAggregateTests
         return Address.Create("123 Main St", "Anytown", "CA", "91234", "USA", label);
     }
 
-     // Helper method to create a valid PaymentMethod for testing
+    // Helper method to create a valid PaymentMethod for testing
     private static PaymentMethod CreateValidPaymentMethod(string type = "Card", string tokenizedDetails = "tok_test", bool isDefault = false)
     {
         return PaymentMethod.Create(type, tokenizedDetails, isDefault);

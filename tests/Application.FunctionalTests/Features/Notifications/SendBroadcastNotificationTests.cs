@@ -29,7 +29,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
             ("user2@test.com", "token2"),
             ("user3@test.com", "token3")
         );
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Special Announcement",
             "New feature available for all users!",
@@ -52,7 +52,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
             ("user2@test.com", "token2"),
             ("user3@test.com", "token3")
         );
-        
+
         var dataPayload = new Dictionary<string, string>
         {
             { "action", "view_promotion" },
@@ -60,7 +60,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
             { "category", "all" },
             { "urgency", "high" }
         };
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Flash Sale",
             "50% off everything! Limited time only.",
@@ -83,7 +83,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
             ("user2@test.com", "token2"),
             ("user3@test.com", "token3")
         );
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Simple Broadcast",
             "This is a simple message to all users");
@@ -101,7 +101,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         await SetupUsersWithMixedDeviceStatesAsync();
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Mixed States Test",
             "Should only reach active devices");
@@ -111,7 +111,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify that only active sessions exist in system
         var activeSessionCount = await CountAllActiveSessionsAsync();
         activeSessionCount.Should().BeGreaterThan(0);
@@ -123,7 +123,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         await SetupUserWithDeviceAsync("singleuser@test.com", "single-token");
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Solo User Test",
             "Testing broadcast to single user");
@@ -144,7 +144,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
     {
         // Arrange
         var customerId = await RunAsUserAsync("customer@test.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.User });
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Unauthorized Broadcast",
             "This should fail");
@@ -291,10 +291,10 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
     {
         // Arrange - Setup complete scenario with multiple users
         await RunAsAdministratorAsync();
-        
+
         // Create multiple users and register devices
         await SetupCompleteWorkflowUsersAsync();
-        
+
         var broadcastCommand = new SendBroadcastNotificationCommand(
             "Workflow Test Broadcast",
             "Testing complete broadcast workflow",
@@ -305,7 +305,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify multiple sessions exist and are active
         var activeSessionCount = await CountAllActiveSessionsAsync();
         activeSessionCount.Should().BeGreaterThan(2);
@@ -317,7 +317,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
         // Arrange
         await RunAsAdministratorAsync();
         await SetupLargeUserBaseAsync();
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Large Scale Test",
             "Testing broadcast to many users");
@@ -327,7 +327,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         // Verify large number of sessions
         var activeSessionCount = await CountAllActiveSessionsAsync();
         activeSessionCount.Should().BeGreaterThan(5);
@@ -347,7 +347,7 @@ public class SendBroadcastNotificationTests : NotificationTestsBase
             ("user2@test.com", "token2"),
             ("user3@test.com", "token3")
         );
-        
+
         var command = new SendBroadcastNotificationCommand(
             "Repeated Test",
             "Testing repeated broadcast calls");

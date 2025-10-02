@@ -6,6 +6,7 @@ using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.Events;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Entities;
@@ -15,7 +16,6 @@ using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.Services;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using Result = YummyZoom.SharedKernel.Result;
 
@@ -52,7 +52,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         _restaurantRepository = restaurantRepository ?? throw new ArgumentNullException(nameof(restaurantRepository));
         _menuItemRepository = menuItemRepository ?? throw new ArgumentNullException(nameof(menuItemRepository));
         _couponRepository = couponRepository ?? throw new ArgumentNullException(nameof(couponRepository));
-    _customizationGroupRepository = customizationGroupRepository ?? throw new ArgumentNullException(nameof(customizationGroupRepository));
+        _customizationGroupRepository = customizationGroupRepository ?? throw new ArgumentNullException(nameof(customizationGroupRepository));
         _paymentGatewayService = paymentGatewayService ?? throw new ArgumentNullException(nameof(paymentGatewayService));
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -252,7 +252,7 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             {
                 var normalizedCouponCode = request.CouponCode.Trim().ToUpperInvariant();
                 var coupon = await _couponRepository.GetByCodeAsync(normalizedCouponCode, restaurantId, cancellationToken);
-                
+
                 if (coupon is not null)
                 {
                     // 1) Validate & compute discount (no usage checks here)
@@ -292,8 +292,8 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             }
 
             var tipAmount = new Money(request.TipAmount ?? 0m, currency);
-            var deliveryFee = new Money(2.99m, currency); 
-            var taxAmount = new Money(subtotal.Amount * 0.08m, currency); 
+            var deliveryFee = new Money(2.99m, currency);
+            var taxAmount = new Money(subtotal.Amount * 0.08m, currency);
 
             var totalAmount = _orderFinancialService.CalculateFinalTotal(
                 subtotal, discountAmount, deliveryFee, tipAmount, taxAmount);

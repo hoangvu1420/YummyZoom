@@ -4,4 +4,4 @@ public interface IContextualCommand
 {
     string ResourceType { get; }
     string ResourceId { get; }
-} 
+}

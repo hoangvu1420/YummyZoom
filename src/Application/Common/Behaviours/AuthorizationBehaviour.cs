@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using YummyZoom.Application.Common.Exceptions;
-using YummyZoom.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using AuthorizeAttribute = YummyZoom.Application.Common.Security.AuthorizeAttribute;
 
@@ -29,7 +29,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
         {
             // Get the current user's claims principal
             var principal = _user.Principal;
-            
+
             // Must be authenticated user
             if (principal == null || !principal.Identity?.IsAuthenticated == true)
             {
@@ -72,8 +72,8 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                 {
                     // Pass the request as a resource for policy-based authorization if it implements IContextualCommand
                     object? resource = request is IContextualCommand ? request : null;
-                    
-                    var result = resource != null 
+
+                    var result = resource != null
                         ? await _authorizationService.AuthorizeAsync(principal, resource, policy)
                         : await _authorizationService.AuthorizeAsync(principal, policy);
 

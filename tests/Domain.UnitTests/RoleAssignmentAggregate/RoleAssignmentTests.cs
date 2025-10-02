@@ -1,9 +1,9 @@
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate;
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Domain.RoleAssignmentAggregate.Errors;
 using YummyZoom.Domain.RoleAssignmentAggregate.Events;
+using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.RoleAssignmentAggregate;
@@ -25,7 +25,7 @@ public class RoleAssignmentTests
             userId ?? DefaultUserId,
             restaurantId ?? DefaultRestaurantId,
             role);
-        
+
         result.IsSuccess.Should().BeTrue();
         return result.Value;
     }
@@ -313,7 +313,7 @@ public class RoleAssignmentTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var roleAssignment = result.Value;
-        
+
         roleAssignment.DomainEvents.Should().ContainSingle();
         var createdEvent = roleAssignment.DomainEvents.First() as RoleAssignmentCreated;
         createdEvent.Should().NotBeNull();
@@ -337,9 +337,9 @@ public class RoleAssignmentTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         roleAssignment.DomainEvents.Should().HaveCount(initialEventCount + 1);
-        
+
         var updatedEvent = roleAssignment.DomainEvents.Last() as RoleAssignmentUpdated;
-        
+
         updatedEvent.Should().NotBeNull();
         updatedEvent!.RoleAssignmentId.Should().Be((RoleAssignmentId)roleAssignment.Id);
         updatedEvent.UserId.Should().Be(roleAssignment.UserId);

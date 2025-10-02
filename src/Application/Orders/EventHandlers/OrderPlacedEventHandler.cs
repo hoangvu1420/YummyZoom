@@ -35,7 +35,7 @@ public sealed class OrderPlacedEventHandler : IdempotentNotificationHandler<Orde
         {
             return;
         }
-        
+
         _logger.LogInformation("Handling OrderPlaced (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);

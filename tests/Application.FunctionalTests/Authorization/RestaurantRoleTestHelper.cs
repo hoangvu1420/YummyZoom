@@ -1,8 +1,8 @@
+using YummyZoom.Application.FunctionalTests.Infrastructure;
+using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
-using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -19,12 +19,12 @@ public static class RestaurantRoleTestHelper
     {
         var command = new CreateRoleAssignmentCommand(userId, restaurantId, role);
         var result = await Testing.SendAsync(command);
-        
+
         if (result.IsFailure)
         {
             throw new Exception($"Failed to create role assignment: {result.Error.Description}");
         }
-        
+
         return result.Value.RoleAssignmentId;
     }
 
@@ -37,22 +37,22 @@ public static class RestaurantRoleTestHelper
         // First ensure we have admin access to create role assignments
         await TestUserManager.EnsureRolesExistAsync(Roles.Administrator);
         var adminUserId = await TestUserManager.RunAsAdministratorAsync();
-        
+
         // Create the target user
         var userId = await TestUserManager.RunAsUserAsync(email, TestConfiguration.DefaultUsers.CommonTestPassword, Array.Empty<string>());
-        
+
         // Switch back to admin to create role assignment
         await TestUserManager.RunAsUserAsync(TestConfiguration.DefaultUsers.Administrator.Email, TestConfiguration.DefaultUsers.Administrator.Password, new[] { Roles.Administrator });
-        
+
         // Create the restaurant owner role assignment
         await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Owner);
-        
+
         // Switch back to the target user and add the restaurant owner claim
         TestUserManager.SetCurrentUserId(userId);
-        
+
         // Add the restaurant owner permission claim
         TestAuthenticationService.AddPermissionClaim(Roles.RestaurantOwner, restaurantId.ToString());
-        
+
         return userId;
     }
 
@@ -65,22 +65,22 @@ public static class RestaurantRoleTestHelper
         // First ensure we have admin access to create role assignments
         await TestUserManager.EnsureRolesExistAsync(Roles.Administrator);
         var adminUserId = await TestUserManager.RunAsAdministratorAsync();
-        
+
         // Create the target user
         var userId = await TestUserManager.RunAsUserAsync(email, TestConfiguration.DefaultUsers.CommonTestPassword, Array.Empty<string>());
-        
+
         // Switch back to admin to create role assignment
         await TestUserManager.RunAsUserAsync(TestConfiguration.DefaultUsers.Administrator.Email, TestConfiguration.DefaultUsers.Administrator.Password, new[] { Roles.Administrator });
-        
+
         // Create the restaurant staff role assignment
         await CreateRoleAssignmentAsync(userId, restaurantId, RestaurantRole.Staff);
-        
+
         // Switch back to the target user and add the restaurant staff claim
         TestUserManager.SetCurrentUserId(userId);
-        
+
         // Add the restaurant staff permission claim
         TestAuthenticationService.AddPermissionClaim(Roles.RestaurantStaff, restaurantId.ToString());
-        
+
         return userId;
     }
 
@@ -92,22 +92,22 @@ public static class RestaurantRoleTestHelper
         // First ensure we have admin access to create role assignments
         await TestUserManager.EnsureRolesExistAsync(Roles.Administrator);
         var adminUserId = await TestUserManager.RunAsAdministratorAsync();
-        
+
         // Create the target user
         var userId = await TestUserManager.RunAsUserAsync(email, TestConfiguration.DefaultUsers.CommonTestPassword, Array.Empty<string>());
-        
+
         // Switch back to admin to create role assignments
         await TestUserManager.RunAsUserAsync(TestConfiguration.DefaultUsers.Administrator.Email, TestConfiguration.DefaultUsers.Administrator.Password, new[] { Roles.Administrator });
-        
+
         // Create all role assignments
         foreach (var (restaurantId, role) in roleAssignments)
         {
             await CreateRoleAssignmentAsync(userId, restaurantId, role);
         }
-        
+
         // Switch back to the target user and add all permission claims
         TestUserManager.SetCurrentUserId(userId);
-        
+
         // Add all permission claims
         foreach (var (restaurantId, role) in roleAssignments)
         {
@@ -119,7 +119,7 @@ public static class RestaurantRoleTestHelper
             };
             TestAuthenticationService.AddPermissionClaim(roleConstant, restaurantId.ToString());
         }
-        
+
         return userId;
     }
 

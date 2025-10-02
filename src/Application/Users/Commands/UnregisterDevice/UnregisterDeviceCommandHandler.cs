@@ -1,7 +1,7 @@
-using YummyZoom.SharedKernel;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.Users.Commands.UnregisterDevice;
 
@@ -10,18 +10,18 @@ public class UnregisterDeviceCommandHandler : IRequestHandler<UnregisterDeviceCo
     private readonly IUserDeviceSessionRepository _userDeviceSessionRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUser _currentUser;
-    private readonly ILogger<UnregisterDeviceCommandHandler> _logger; 
+    private readonly ILogger<UnregisterDeviceCommandHandler> _logger;
 
     public UnregisterDeviceCommandHandler(
         IUserDeviceSessionRepository userDeviceSessionRepository,
         IUnitOfWork unitOfWork,
         IUser currentUser,
-        ILogger<UnregisterDeviceCommandHandler> logger) 
+        ILogger<UnregisterDeviceCommandHandler> logger)
     {
         _userDeviceSessionRepository = userDeviceSessionRepository ?? throw new ArgumentNullException(nameof(userDeviceSessionRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger)); 
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public Task<Result> Handle(UnregisterDeviceCommand request, CancellationToken cancellationToken)

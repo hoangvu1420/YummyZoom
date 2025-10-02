@@ -21,11 +21,11 @@ public class DeleteRoleAssignmentTests : BaseTestFixture
     {
         // Ensure required roles exist in the database
         await EnsureRolesExistAsync(Roles.RestaurantOwner, Roles.Administrator);
-        
+
         // Create administrator user for testing (required for both create and delete operations)
         _userId = await RunAsUserAsync("user3@example.com", TestConfiguration.DefaultUsers.CommonTestPassword, new[] { Roles.Administrator });
         _restaurantId = Guid.NewGuid();
-        
+
         // Create a role assignment to use in delete tests
         var createCommand = new CreateRoleAssignmentCommand(_userId, _restaurantId, RestaurantRole.Owner);
         var createResult = await SendAsync(createCommand);
@@ -38,7 +38,7 @@ public class DeleteRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login (required for DeleteRoleAssignmentCommand authorization)
         await RunAsAdministratorAsync();
-        
+
         // 2. Create delete command with existing role assignment ID
         var command = new DeleteRoleAssignmentCommand(_roleAssignmentId);
 
@@ -62,7 +62,7 @@ public class DeleteRoleAssignmentTests : BaseTestFixture
         // Arrange
         // 1. Simulate administrator login
         await RunAsAdministratorAsync();
-        
+
         // 2. Create command with a non-existent role assignment ID
         var nonExistentRoleAssignmentId = Guid.NewGuid();
         var command = new DeleteRoleAssignmentCommand(nonExistentRoleAssignmentId);

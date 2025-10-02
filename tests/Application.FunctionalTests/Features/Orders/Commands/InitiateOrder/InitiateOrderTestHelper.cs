@@ -16,7 +16,7 @@ namespace YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Initiat
 public static class InitiateOrderTestHelper
 {
     #region Command Builders
-    
+
     /// <summary>
     /// Builds a valid InitiateOrder command with default test data.
     /// </summary>
@@ -86,26 +86,26 @@ public static class InitiateOrderTestHelper
             InvalidField.EmptyItems => validCommand with { Items = new List<OrderItemDto>() },
             InvalidField.NullDeliveryAddress => validCommand with { DeliveryAddress = null! },
             InvalidField.InvalidPaymentMethod => validCommand with { PaymentMethod = "InvalidMethod" },
-            InvalidField.ZeroQuantity => validCommand with 
-            { 
+            InvalidField.ZeroQuantity => validCommand with
+            {
                 Items = new List<OrderItemDto> { new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 0) }
             },
-            InvalidField.NegativeQuantity => validCommand with 
-            { 
+            InvalidField.NegativeQuantity => validCommand with
+            {
                 Items = new List<OrderItemDto> { new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), -1) }
             },
-            InvalidField.ExcessiveQuantity => validCommand with 
-            { 
+            InvalidField.ExcessiveQuantity => validCommand with
+            {
                 Items = new List<OrderItemDto> { new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 11) }
             },
             InvalidField.NegativeTip => validCommand with { TipAmount = -5.00m },
-            InvalidField.TooLongSpecialInstructions => validCommand with 
-            { 
-                SpecialInstructions = new string('A', 501) 
+            InvalidField.TooLongSpecialInstructions => validCommand with
+            {
+                SpecialInstructions = new string('A', 501)
             },
-            InvalidField.InvalidAddress => validCommand with 
-            { 
-                DeliveryAddress = new DeliveryAddressDto("", "", "", "", "") 
+            InvalidField.InvalidAddress => validCommand with
+            {
+                DeliveryAddress = new DeliveryAddressDto("", "", "", "", "")
             },
             _ => throw new ArgumentException($"Invalid field type not supported: {invalidField}")
         };
@@ -114,14 +114,14 @@ public static class InitiateOrderTestHelper
     #endregion
 
     #region Mock Setup Helpers
-    
+
     /// <summary>
     /// Configures IPaymentGatewayService mock for successful payment intent creation.
     /// </summary>
     public static Mock<IPaymentGatewayService> SetupSuccessfulPaymentGatewayMock()
     {
         var mock = new Mock<IPaymentGatewayService>();
-        
+
         mock.Setup(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
                 It.IsAny<string>(),
@@ -141,7 +141,7 @@ public static class InitiateOrderTestHelper
     public static Mock<IPaymentGatewayService> SetupFailingPaymentGatewayMock(string errorMessage = "Payment gateway error")
     {
         var mock = new Mock<IPaymentGatewayService>();
-        
+
         mock.Setup(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
                 It.IsAny<string>(),
@@ -158,7 +158,7 @@ public static class InitiateOrderTestHelper
     public static Mock<IPaymentGatewayService> SetupPaymentGatewayMockWithCustomResponse(string paymentIntentId, string clientSecret)
     {
         var mock = new Mock<IPaymentGatewayService>();
-        
+
         mock.Setup(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
                 It.IsAny<string>(),
@@ -168,11 +168,11 @@ public static class InitiateOrderTestHelper
 
         return mock;
     }
-    
+
     #endregion
-    
+
     #region Assertion Helpers
-    
+
     /// <summary>
     /// Validates that an order was created with expected financial calculations.
     /// </summary>
@@ -187,19 +187,19 @@ public static class InitiateOrderTestHelper
     {
         if (expectedSubtotal.HasValue)
             order.Subtotal.Amount.Should().Be(expectedSubtotal.Value);
-        
+
         if (expectedTax.HasValue)
             order.TaxAmount.Amount.Should().Be(expectedTax.Value);
-        
+
         if (expectedDeliveryFee.HasValue)
             order.DeliveryFee.Amount.Should().Be(expectedDeliveryFee.Value);
-        
+
         if (expectedDiscount.HasValue)
             order.DiscountAmount.Amount.Should().Be(expectedDiscount.Value);
-        
+
         if (expectedTip.HasValue)
             order.TipAmount.Amount.Should().Be(expectedTip.Value);
-        
+
         if (expectedTotal.HasValue)
             order.TotalAmount.Amount.Should().Be(expectedTotal.Value);
     }
@@ -215,7 +215,7 @@ public static class InitiateOrderTestHelper
         bool shouldBeCalled = true)
     {
         var times = shouldBeCalled ? Times.Once() : Times.Never();
-        
+
         // For simplicity and reliability, use straightforward verification
         // Specific parameter validation can be done separately if needed
         mock.Verify(x => x.CreatePaymentIntentAsync(
@@ -223,7 +223,7 @@ public static class InitiateOrderTestHelper
             It.IsAny<string>(),
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), times);
-            
+
         // If specific validations are needed, perform them separately
         if (shouldBeCalled && expectedAmount.HasValue)
         {
@@ -233,7 +233,7 @@ public static class InitiateOrderTestHelper
                 It.IsAny<IDictionary<string, string>>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         }
-        
+
         if (shouldBeCalled && expectedCurrency != null)
         {
             mock.Verify(x => x.CreatePaymentIntentAsync(
@@ -242,7 +242,7 @@ public static class InitiateOrderTestHelper
                 It.IsAny<IDictionary<string, string>>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         }
-        
+
         if (shouldBeCalled && expectedMetadata != null)
         {
             mock.Verify(x => x.CreatePaymentIntentAsync(
@@ -259,7 +259,7 @@ public static class InitiateOrderTestHelper
     public static async Task<Order?> ValidateOrderPersistence(OrderId orderId, bool shouldExist = true)
     {
         var order = await FindOrderAsync(orderId);
-        
+
         if (shouldExist)
         {
             order.Should().NotBeNull();
@@ -268,14 +268,14 @@ public static class InitiateOrderTestHelper
         {
             order.Should().BeNull();
         }
-        
+
         return order;
     }
-    
+
     #endregion
-    
+
     #region Test Data
-    
+
     /// <summary>
     /// Default delivery address for testing.
     /// </summary>

@@ -48,7 +48,7 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             .HasDefaultValue(true);
 
         // --- 4. Owned Value Objects ---
-        
+
         // Map the BasePrice (Money) Value Object using OwnsOne
         builder.OwnsOne(m => m.BasePrice, priceBuilder =>
         {
@@ -72,7 +72,7 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         // Configure collection of Value Objects as a JSONB column using shared converter and comparer
         builder.Property(m => m.AppliedCustomizations)
             .HasJsonbListConversion<AppliedCustomization>();
-            
+
         // --- 6. Indexes ---
         builder.HasIndex(m => m.RestaurantId)
             .HasDatabaseName("IX_MenuItems_RestaurantId");

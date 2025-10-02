@@ -19,7 +19,7 @@ public sealed class Rating : ValueObject
     {
         yield return Value;
     }
-    
+
 #pragma warning disable CS8618
     private Rating()
     {

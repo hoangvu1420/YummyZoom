@@ -1,10 +1,10 @@
 using YummyZoom.Domain.AccountTransactionEntity.Enums;
 using YummyZoom.Domain.AccountTransactionEntity.ValueObjects;
+using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
 using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.AccountTransactionEntity;
@@ -62,15 +62,15 @@ public sealed class AccountTransaction : Entity<AccountTransactionId>, ICreation
             relatedOrderId,
             notes));
     }
-    
+
     private static Result ValidateTransaction(TransactionType type, Money amount)
-    { 
+    {
         // Using the same errors from RestaurantAccountErrors for consistency.
         return type switch
         {
-            TransactionType.OrderRevenue when amount.Amount <= 0 => 
+            TransactionType.OrderRevenue when amount.Amount <= 0 =>
                 Result.Failure(RestaurantAccountErrors.OrderRevenueMustBePositive(amount)),
-            TransactionType.PlatformFee when amount.Amount >= 0 => 
+            TransactionType.PlatformFee when amount.Amount >= 0 =>
                 Result.Failure(RestaurantAccountErrors.PlatformFeeMustBeNegative(amount)),
             TransactionType.RefundDeduction when amount.Amount >= 0 =>
                 Result.Failure(RestaurantAccountErrors.RefundDeductionMustBeNegative(amount)),

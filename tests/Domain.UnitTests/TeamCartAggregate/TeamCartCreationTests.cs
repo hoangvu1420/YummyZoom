@@ -22,7 +22,7 @@ public class TeamCartCreationTests
         // Assert
         result.ShouldBeSuccessful();
         var teamCart = result.Value;
-        
+
         teamCart.Id.Value.Should().NotBe(Guid.Empty);
         teamCart.HostUserId.Should().Be(DefaultHostUserId);
         teamCart.RestaurantId.Should().Be(DefaultRestaurantId);
@@ -33,7 +33,7 @@ public class TeamCartCreationTests
         teamCart.Deadline.Should().Be(DefaultDeadline);
         teamCart.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         teamCart.ExpiresAt.Should().BeCloseTo(DefaultDeadline, TimeSpan.FromSeconds(1));
-        
+
         // Verify domain event
         teamCart.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(TeamCartCreated));
         var teamCartCreatedEvent = teamCart.DomainEvents.OfType<TeamCartCreated>().Single();
@@ -54,7 +54,7 @@ public class TeamCartCreationTests
         // Assert
         result.ShouldBeSuccessful();
         var teamCart = result.Value;
-        
+
         // Default deadline should be set to 24 hours from creation
         teamCart.Deadline.Should().BeCloseTo(DateTime.UtcNow.AddHours(24), TimeSpan.FromMinutes(1));
         teamCart.Deadline.Should().NotBeNull("Deadline should not be null");

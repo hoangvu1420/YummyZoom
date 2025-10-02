@@ -9,12 +9,12 @@ public enum CouponType
     /// Percentage discount (e.g., 10% off)
     /// </summary>
     Percentage = 1,
-    
+
     /// <summary>
     /// Fixed amount discount (e.g., $5 off)
     /// </summary>
     FixedAmount = 2,
-    
+
     /// <summary>
     /// Free menu item (e.g., free appetizer)
     /// </summary>

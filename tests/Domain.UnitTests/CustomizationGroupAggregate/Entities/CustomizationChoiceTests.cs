@@ -178,10 +178,10 @@ public class CustomizationChoiceTests
         // Arrange
         var choice1 = CustomizationChoice.Create("Large", DefaultPriceAdjustment).Value;
         var choice2 = CustomizationChoice.Create("Medium", ZeroPriceAdjustment).Value;
-        
+
         // Manually set the same ID for testing purposes (using reflection or constructor if available)
         // Note: This is a conceptual test - in practice, entities with same ID should be the same instance
-        
+
         // Act & Assert
         choice1.Should().NotBe(choice2); // Different instances with different IDs
         choice1.Id.Should().NotBe(choice2.Id);
@@ -230,7 +230,7 @@ public class CustomizationChoiceTests
     {
         // Arrange
         const int displayOrder = 5;
-        
+
         // Act
         var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, displayOrder);
 
@@ -260,7 +260,7 @@ public class CustomizationChoiceTests
     {
         // Arrange
         const int invalidDisplayOrder = -1;
-        
+
         // Act
         var result = CustomizationChoice.Create(DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, invalidDisplayOrder);
 
@@ -275,7 +275,7 @@ public class CustomizationChoiceTests
         // Arrange
         var choiceId = ChoiceId.CreateUnique();
         const int displayOrder = 10;
-        
+
         // Act
         var result = CustomizationChoice.Create(choiceId, DefaultChoiceName, DefaultPriceAdjustment, DefaultIsDefault, displayOrder);
 

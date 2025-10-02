@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.FunctionalTests.Infrastructure;
 
 namespace YummyZoom.Application.FunctionalTests.UserManagement;
 
@@ -28,7 +28,7 @@ public static class TestUserManager
     public static void SetCurrentUserId(Guid? userId)
     {
         _currentUserId = userId;
-        
+
         // Update the TestUserService with the new user context
         var testUserService = CustomWebApplicationFactory.GetTestUserService();
         testUserService.SetUserId(userId);
@@ -41,7 +41,7 @@ public static class TestUserManager
     public static async Task<Guid> CreateUserAsync(string email, string password, params string[] roles)
     {
         await EnsureRolesExistAsync(roles);
-        
+
         using var scope = TestInfrastructure.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -105,7 +105,7 @@ public static class TestUserManager
     /// <summary>
     /// Runs tests as the default test user.
     /// </summary>
-    public static async Task<Guid> RunAsDefaultUserAsync() 
+    public static async Task<Guid> RunAsDefaultUserAsync()
     {
         // Default user models a fully onboarded customer; grant baseline 'User' role for CompletedSignup policy.
         return await RunAsUserAsync(TestConfiguration.DefaultUsers.TestUser.Email, TestConfiguration.DefaultUsers.TestUser.Password, new[] { Roles.User });
@@ -131,7 +131,7 @@ public static class TestUserManager
 
         using var scope = TestInfrastructure.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-        
+
         foreach (var roleName in roleNames)
         {
             if (string.IsNullOrWhiteSpace(roleName)) continue;
@@ -162,7 +162,7 @@ public static class TestUserManager
     public static void ClearUserContext()
     {
         _currentUserId = null;
-        
+
         var testUserService = CustomWebApplicationFactory.GetTestUserService();
         testUserService.SetUserId(null);
     }

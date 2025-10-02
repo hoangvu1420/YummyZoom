@@ -1,9 +1,9 @@
+using System.Text.RegularExpressions;
+using YummyZoom.Domain.Common.Models;
+using YummyZoom.Domain.RestaurantAggregate.Errors;
 using YummyZoom.Domain.RestaurantAggregate.Events;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.Errors;
-using YummyZoom.Domain.Common.Models;
 using YummyZoom.SharedKernel;
-using System.Text.RegularExpressions;
 
 namespace YummyZoom.Domain.RestaurantAggregate;
 
@@ -155,10 +155,10 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         // Validate required objects
         if (location is null)
             return Result.Failure<Restaurant>(RestaurantErrors.LocationIsRequired());
-        
+
         if (contactInfo is null)
             return Result.Failure<Restaurant>(RestaurantErrors.ContactInfoIsRequired());
-        
+
         if (businessHours is null)
             return Result.Failure<Restaurant>(RestaurantErrors.BusinessHoursIsRequired());
 
@@ -249,15 +249,15 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure(RestaurantErrors.NameIsRequired());
-        
+
         if (name.Length > maxNameLength)
             return Result.Failure(RestaurantErrors.NameTooLong(maxNameLength));
 
         var oldName = Name;
         Name = name.Trim();
-        
+
         AddDomainEvent(new RestaurantNameChanged(Id, oldName, Name));
-        
+
         return Result.Success();
     }
 
@@ -267,15 +267,15 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         if (string.IsNullOrWhiteSpace(description))
             return Result.Failure(RestaurantErrors.DescriptionIsRequired());
-        
+
         if (description.Length > maxDescriptionLength)
             return Result.Failure(RestaurantErrors.DescriptionTooLong(maxDescriptionLength));
 
         var oldDescription = Description;
         Description = description.Trim();
-        
+
         AddDomainEvent(new RestaurantDescriptionChanged(Id, oldDescription, Description));
-        
+
         return Result.Success();
     }
 
@@ -285,15 +285,15 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         if (string.IsNullOrWhiteSpace(cuisineType))
             return Result.Failure(RestaurantErrors.CuisineTypeIsRequired());
-        
+
         if (cuisineType.Length > maxCuisineTypeLength)
             return Result.Failure(RestaurantErrors.CuisineTypeTooLong(maxCuisineTypeLength));
 
         var oldCuisineType = CuisineType;
         CuisineType = cuisineType.Trim();
-        
+
         AddDomainEvent(new RestaurantCuisineTypeChanged(Id, oldCuisineType, CuisineType));
-        
+
         return Result.Success();
     }
 
@@ -309,19 +309,19 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldLogoUrl = LogoUrl;
         LogoUrl = logoUrl?.Trim() ?? string.Empty;
-        
+
         AddDomainEvent(new RestaurantLogoChanged(Id, oldLogoUrl, LogoUrl));
-        
+
         return Result.Success();
     }
-    
+
     public Result UpdateBackgroundImage(string? backgroundImageUrl)
     {
         var oldBackgroundImageUrl = BackgroundImageUrl;
         BackgroundImageUrl = backgroundImageUrl?.Trim() ?? string.Empty;
-        
+
         AddDomainEvent(new RestaurantLogoChanged(Id, oldBackgroundImageUrl, BackgroundImageUrl));
-        
+
         return Result.Success();
     }
 
@@ -359,9 +359,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldLocation = Location;
         Location = addressResult.Value;
-        
+
         AddDomainEvent(new RestaurantLocationChanged(Id, oldLocation, Location));
-        
+
         return Result.Success();
     }
 
@@ -372,9 +372,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldContactInfo = ContactInfo;
         ContactInfo = contactInfo;
-        
+
         AddDomainEvent(new RestaurantContactInfoChanged(Id, oldContactInfo, ContactInfo));
-        
+
         return Result.Success();
     }
 
@@ -386,9 +386,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldContactInfo = ContactInfo;
         ContactInfo = contactInfoResult.Value;
-        
+
         AddDomainEvent(new RestaurantContactInfoChanged(Id, oldContactInfo, ContactInfo));
-        
+
         return Result.Success();
     }
 
@@ -399,9 +399,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldBusinessHours = BusinessHours;
         BusinessHours = businessHours;
-        
+
         AddDomainEvent(new RestaurantBusinessHoursChanged(Id, oldBusinessHours, BusinessHours));
-        
+
         return Result.Success();
     }
 
@@ -413,9 +413,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
 
         var oldBusinessHours = BusinessHours;
         BusinessHours = businessHoursResult.Value;
-        
+
         AddDomainEvent(new RestaurantBusinessHoursChanged(Id, oldBusinessHours, BusinessHours));
-        
+
         return Result.Success();
     }
 
@@ -451,16 +451,16 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         Name = name.Trim();
         Description = description.Trim();
         LogoUrl = logoUrl?.Trim() ?? string.Empty;
-        
+
         AddDomainEvent(new RestaurantBrandingUpdated(
-            Id, 
-            oldName, 
-            Name, 
-            oldLogoUrl, 
-            LogoUrl, 
-            oldDescription, 
+            Id,
+            oldName,
+            Name,
+            oldLogoUrl,
+            LogoUrl,
+            oldDescription,
             Description));
-        
+
         return Result.Success();
     }
 
@@ -483,9 +483,9 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
         Name = name.Trim();
         Description = description.Trim();
         CuisineType = cuisineType.Trim();
-        
+
         AddDomainEvent(new RestaurantUpdated(Id));
-        
+
         return Result.Success();
     }
 
@@ -615,7 +615,7 @@ public sealed class Restaurant : AggregateRoot<RestaurantId, Guid>, IAuditableEn
     {
         if (string.IsNullOrWhiteSpace(value))
             return Result.Failure(requiredError());
-        
+
         if (value.Length > maxLength)
             return Result.Failure(tooLongError(maxLength));
 

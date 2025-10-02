@@ -19,7 +19,7 @@ public static class CouponTestHelpers
     public static readonly DateTime DefaultStartDate = new(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     public static readonly DateTime DefaultEndDate = new(2025, 12, 31, 23, 59, 59, DateTimeKind.Utc);
     public static readonly Money DefaultMinOrderAmount = new Money(25.00m, Currencies.Default);
-    
+
     /// <summary>
     /// Creates a valid coupon for testing
     /// </summary>
@@ -48,15 +48,15 @@ public static class CouponTestHelpers
             totalUsageLimit,
             usageLimitPerUser,
             isEnabled);
-            
+
         if (result.IsFailure)
         {
             throw new InvalidOperationException($"Failed to create test coupon: {result.Error}");
         }
-        
+
         return result.Value;
     }
-    
+
     /// <summary>
     /// Creates a percentage-based coupon
     /// </summary>
@@ -65,7 +65,7 @@ public static class CouponTestHelpers
         var value = CouponValue.CreatePercentage(percentage).Value;
         return CreateValidCoupon(code: code, value: value);
     }
-    
+
     /// <summary>
     /// Creates a fixed amount coupon
     /// </summary>
@@ -74,7 +74,7 @@ public static class CouponTestHelpers
         var value = CouponValue.CreateFixedAmount(new Money(amount, Currencies.Default)).Value;
         return CreateValidCoupon(code: code, value: value);
     }
-    
+
     /// <summary>
     /// Creates an expired coupon
     /// </summary>
@@ -87,7 +87,7 @@ public static class CouponTestHelpers
             startDate: pastStartDate,
             endDate: pastEndDate);
     }
-    
+
     /// <summary>
     /// Creates a coupon that hasn't started yet
     /// </summary>
@@ -100,7 +100,7 @@ public static class CouponTestHelpers
             startDate: futureStartDate,
             endDate: futureEndDate);
     }
-    
+
     /// <summary>
     /// Creates a disabled coupon
     /// </summary>
@@ -108,7 +108,7 @@ public static class CouponTestHelpers
     {
         return CreateValidCoupon(code: code, isEnabled: false);
     }
-    
+
     /// <summary>
     /// Creates a coupon with usage limits
     /// </summary>
@@ -122,7 +122,7 @@ public static class CouponTestHelpers
             totalUsageLimit: totalUsageLimit,
             usageLimitPerUser: usageLimitPerUser);
     }
-    
+
     /// <summary>
     /// Creates a coupon with minimum order amount
     /// </summary>

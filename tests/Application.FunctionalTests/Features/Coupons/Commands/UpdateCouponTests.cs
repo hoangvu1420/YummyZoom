@@ -1,6 +1,6 @@
-using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
+using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;

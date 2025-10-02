@@ -106,7 +106,7 @@ public class TeamCartAuthContractTests
         var client = factory.CreateClient();
         // No auth header
 
-        var body = new 
+        var body = new
         {
             MenuItemId = Guid.NewGuid(),
             Quantity = 1,
@@ -298,7 +298,7 @@ public class TeamCartAuthContractTests
         var client = factory.CreateClient();
         // No auth header
 
-        var body = new 
+        var body = new
         {
             Street = "123 Main St",
             City = "New York",
@@ -334,7 +334,7 @@ public class TeamCartAuthContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "valid-user");
 
         // Mock a successful response to verify auth passes through
-        factory.Sender.RespondWith(_ => 
+        factory.Sender.RespondWith(_ =>
             YummyZoom.SharedKernel.Result.Success(new YummyZoom.Application.TeamCarts.Commands.CreateTeamCart.CreateTeamCartResponse(
                 Guid.NewGuid(), "TOKEN", DateTime.UtcNow.AddHours(1))));
 
@@ -363,7 +363,7 @@ public class TeamCartAuthContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "valid-user");
 
         // Mock a failure response (e.g., not found) to verify auth passes through
-        factory.Sender.RespondWith(_ => 
+        factory.Sender.RespondWith(_ =>
             YummyZoom.SharedKernel.Result.Failure<YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails.GetTeamCartDetailsResponse>(
                 YummyZoom.SharedKernel.Error.NotFound("TeamCart.NotFound", "Not found")));
 

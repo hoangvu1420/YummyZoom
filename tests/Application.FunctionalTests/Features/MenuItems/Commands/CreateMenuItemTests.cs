@@ -14,7 +14,7 @@ public class CreateMenuItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuItemCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuCategoryId: Testing.TestData.GetMenuCategoryId("Main Dishes"),
@@ -35,7 +35,7 @@ public class CreateMenuItemTests : BaseTestFixture
 
         // Verify the menu item was created in the database
         var menuItem = await FindAsync<MenuItem>(MenuItemId.Create(result.Value.MenuItemId));
-        
+
         menuItem.Should().NotBeNull();
         menuItem!.Name.Should().Be("Test Menu Item");
         menuItem.Description.Should().Be("A delicious test item");
@@ -52,7 +52,7 @@ public class CreateMenuItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuItemCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuCategoryId: Testing.TestData.GetMenuCategoryId("Main Dishes"),
@@ -66,9 +66,9 @@ public class CreateMenuItemTests : BaseTestFixture
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         var menuItem = await FindAsync<MenuItem>(MenuItemId.Create(result.Value.MenuItemId));
-        
+
         menuItem.Should().NotBeNull();
         menuItem!.ImageUrl.Should().BeNull();
         menuItem.IsAvailable.Should().BeTrue(); // Default value
@@ -80,7 +80,7 @@ public class CreateMenuItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var invalidCategoryId = Guid.NewGuid();
         var command = new CreateMenuItemCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -121,7 +121,7 @@ public class CreateMenuItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuItemCommand(
             RestaurantId: Guid.Empty,
             MenuCategoryId: Guid.Empty,
@@ -140,10 +140,10 @@ public class CreateMenuItemTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var tagId1 = Guid.NewGuid();
         var tagId2 = Guid.NewGuid();
-        
+
         var command = new CreateMenuItemCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             MenuCategoryId: Testing.TestData.GetMenuCategoryId("Main Dishes"),
@@ -158,9 +158,9 @@ public class CreateMenuItemTests : BaseTestFixture
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         var menuItem = await FindAsync<MenuItem>(MenuItemId.Create(result.Value.MenuItemId));
-        
+
         menuItem.Should().NotBeNull();
         menuItem!.DietaryTagIds.Should().HaveCount(2);
         menuItem.DietaryTagIds.Select(t => t.Value).Should().Contain([tagId1, tagId2]);

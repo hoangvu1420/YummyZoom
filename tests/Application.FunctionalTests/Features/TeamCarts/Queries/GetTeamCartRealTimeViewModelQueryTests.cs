@@ -30,7 +30,7 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
             .Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
             .BuildAsync();
-        
+
         // Drain outbox to ensure Redis VM is created
         await DrainOutboxAsync();
 
@@ -40,7 +40,7 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         // Assert: Should return the view model from Redis
         result.IsSuccess.Should().BeTrue();
         var vm = result.Value.TeamCart;
-        
+
         vm.CartId.Value.Should().Be(scenario.TeamCartId);
         vm.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
         vm.Status.Should().Be(TeamCartStatus.Open);
@@ -80,15 +80,15 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         // Assert: Should show updated state with both members and items
         result.IsSuccess.Should().BeTrue();
         var vm = result.Value.TeamCart;
-        
+
         vm.Members.Should().HaveCount(2);
         vm.Members.Should().Contain(m => m.UserId == scenario.HostUserId && m.Name == "Host User" && m.Role == "Host");
         vm.Members.Should().Contain(m => m.UserId == scenario.GetGuestUserId("Guest User") && m.Name == "Guest User" && m.Role == "Guest");
-        
+
         vm.Items.Should().HaveCount(2);
         vm.Items.Should().Contain(i => i.AddedByUserId == scenario.HostUserId && i.Quantity == 2);
         vm.Items.Should().Contain(i => i.AddedByUserId == scenario.GetGuestUserId("Guest User") && i.Quantity == 1);
-        
+
         vm.Subtotal.Should().BeGreaterThan(0);
         vm.Total.Should().BeGreaterThan(0);
     }
@@ -128,11 +128,11 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         // Assert: Should reflect locked status and payment information
         result.IsSuccess.Should().BeTrue();
         var vm = result.Value.TeamCart;
-        
+
         vm.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
         vm.TipAmount.Should().Be(5.00m);
         vm.Total.Should().BeGreaterThan(vm.Subtotal); // Should include tip
-        
+
         // At least the host should have payment status updated
         vm.Members.Should().Contain(m => m.UserId == scenario.HostUserId && m.PaymentStatus != "Pending");
     }
@@ -153,7 +153,7 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
 
         // Act & Assert: Should fail with NotMember error
         var result = await SendAsync(new GetTeamCartRealTimeViewModelQuery(scenario.TeamCartId));
-        
+
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("GetTeamCartRealTimeViewModel.NotMember");
     }
@@ -167,7 +167,7 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
 
         // Act & Assert: Should fail with NotFound error
         var result = await SendAsync(new GetTeamCartRealTimeViewModelQuery(nonExistentCartId));
-        
+
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("GetTeamCartRealTimeViewModel.NotFound");
     }
@@ -225,30 +225,30 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         // Assert: Basic data should be consistent
         sqlResult.IsSuccess.Should().BeTrue();
         redisResult.IsSuccess.Should().BeTrue();
-        
+
         var sqlDto = sqlResult.Value.TeamCart;
         var redisVm = redisResult.Value.TeamCart;
-        
+
         redisVm.CartId.Value.Should().Be(sqlDto.TeamCartId);
         redisVm.RestaurantId.Should().Be(sqlDto.RestaurantId);
         redisVm.Status.Should().Be(sqlDto.Status);
         redisVm.Members.Should().HaveCount(sqlDto.Members.Count);
         redisVm.Items.Should().HaveCount(sqlDto.Items.Count);
-        
+
         // Member data consistency
         foreach (var sqlMember in sqlDto.Members)
         {
-            redisVm.Members.Should().Contain(m => 
-                m.UserId == sqlMember.UserId && 
-                m.Name == sqlMember.Name && 
+            redisVm.Members.Should().Contain(m =>
+                m.UserId == sqlMember.UserId &&
+                m.Name == sqlMember.Name &&
                 m.Role == sqlMember.Role);
         }
-        
+
         // Item data consistency  
         foreach (var sqlItem in sqlDto.Items)
         {
-            redisVm.Items.Should().Contain(i => 
-                i.AddedByUserId == sqlItem.AddedByUserId && 
+            redisVm.Items.Should().Contain(i =>
+                i.AddedByUserId == sqlItem.AddedByUserId &&
                 i.Quantity == sqlItem.Quantity);
         }
     }

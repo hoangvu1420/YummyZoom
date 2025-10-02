@@ -3,13 +3,13 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.Web.Endpoints;
-using YummyZoom.SharedKernel;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
 using YummyZoom.Application.MenuItems.Commands.RemoveCustomizationGroupFromMenuItem;
+using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
+using YummyZoom.Web.Endpoints;
 using static YummyZoom.Web.Endpoints.Restaurants;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;

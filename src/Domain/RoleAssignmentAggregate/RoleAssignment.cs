@@ -1,9 +1,9 @@
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
-using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.RoleAssignmentAggregate.Enums;
 using YummyZoom.Domain.RoleAssignmentAggregate.Errors;
 using YummyZoom.Domain.RoleAssignmentAggregate.Events;
+using YummyZoom.Domain.RoleAssignmentAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
@@ -141,13 +141,13 @@ public sealed class RoleAssignment : AggregateRoot<RoleAssignmentId, Guid>, ICre
 
         var previousRole = Role;
         Role = newRole;
-        
+
         // Raise domain event for the update
         AddDomainEvent(new RoleAssignmentUpdated(
-            Id, 
-            UserId, 
-            RestaurantId, 
-            previousRole, 
+            Id,
+            UserId,
+            RestaurantId,
+            previousRole,
             newRole));
 
         return Result.Success();

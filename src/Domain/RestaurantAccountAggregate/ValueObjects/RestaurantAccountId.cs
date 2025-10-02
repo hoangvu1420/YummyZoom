@@ -1,5 +1,5 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.RestaurantAccountAggregate.Errors;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 
@@ -24,7 +24,7 @@ public sealed class RestaurantAccountId : AggregateRootId<Guid>
 
     public static Result<RestaurantAccountId> Create(string value)
     {
-        return !Guid.TryParse(value, out var guid) 
+        return !Guid.TryParse(value, out var guid)
             ? Result.Failure<RestaurantAccountId>(RestaurantAccountErrors.InvalidId(value))
             : Result.Success(new RestaurantAccountId(guid));
     }

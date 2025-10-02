@@ -1,4 +1,4 @@
-﻿﻿using YummyZoom.Domain.Common.Models;
+﻿using YummyZoom.Domain.Common.Models;
 using YummyZoom.Domain.TodoListAggregate.Entities;
 using YummyZoom.Domain.TodoListAggregate.ValueObjects;
 
@@ -9,7 +9,7 @@ public class TodoList : AggregateRoot<TodoListId, Guid>, IAuditableEntity
     private readonly List<TodoItem> _items = [];
 
     public string? Title { get; private set; }
-    public Color Color { get; private set; } 
+    public Color Color { get; private set; }
     public IReadOnlyList<TodoItem> Items => _items.AsReadOnly();
 
     // Properties from IAuditableEntity
@@ -22,7 +22,7 @@ public class TodoList : AggregateRoot<TodoListId, Guid>, IAuditableEntity
     private TodoList(
         TodoListId id,
         string title,
-        Color colour) : base(id) 
+        Color colour) : base(id)
     {
         Title = title;
         Color = colour;

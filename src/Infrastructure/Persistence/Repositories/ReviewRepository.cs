@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.ReviewAggregate.ValueObjects;
-using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 
 namespace YummyZoom.Infrastructure.Persistence.Repositories;
 

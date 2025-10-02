@@ -1,16 +1,16 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
+using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Reviews.Commands.CreateReview;
 using YummyZoom.Application.Reviews.Commands.DeleteReview;
+using YummyZoom.Application.Reviews.Queries.Common;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
 using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
-using YummyZoom.Application.Reviews.Queries.Common;
-using YummyZoom.Application.Common.Models;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 using Result = YummyZoom.SharedKernel.Result;
-using System.Text.Json;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 

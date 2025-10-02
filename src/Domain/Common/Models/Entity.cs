@@ -4,21 +4,21 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>, IHasDomainEvent
     where TId : ValueObject
 {
     private readonly List<IDomainEvent> _domainEvents = [];
-    
+
     public TId Id { get; protected set; }
-    
+
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected Entity(TId id)
     {
         Id = id;
     }
-    
+
     public void AddDomainEvent(IDomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
     }
-    
+
     public void ClearDomainEvents()
     {
         _domainEvents.Clear();

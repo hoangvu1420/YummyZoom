@@ -98,7 +98,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Register device first time
         var firstCommand = new RegisterDeviceCommand(
             FcmToken: "update-test-token",
@@ -216,7 +216,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Register device first time
         var firstCommand = new RegisterDeviceCommand(
             FcmToken: "multi-device-token",
@@ -255,7 +255,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Register device without DeviceId (app installed on device without stable ID)
         var firstCommand = new RegisterDeviceCommand(
             FcmToken: "reinstall-token",
@@ -299,7 +299,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Register device first time
         var firstCommand = new RegisterDeviceCommand(
             FcmToken: "old-token",
@@ -346,7 +346,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // First register a device
         var registerCommand = new RegisterDeviceCommand(
             FcmToken: "token-to-remove",
@@ -420,11 +420,11 @@ public class DeviceManagementTests : BaseTestFixture
     {
         // Arrange
         var userId = await RunAsDefaultUserAsync();
-        
+
         // Create a device and inactive session directly in the database using the new model
         using var scope = CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
         var device = new Device
         {
             Id = Guid.NewGuid(),
@@ -544,7 +544,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         using var scope = CreateScope();
         var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
-        
+
         var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
         if (session == null)
             return null;
@@ -552,7 +552,7 @@ public class DeviceManagementTests : BaseTestFixture
         // Get the device information
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var device = await context.Devices.FirstOrDefaultAsync(d => d.Id == session.DeviceId);
-        
+
         if (device == null)
             return null;
 
@@ -575,7 +575,7 @@ public class DeviceManagementTests : BaseTestFixture
     {
         using var scope = CreateScope();
         var userDeviceSessionRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceSessionRepository>();
-        
+
         var session = await userDeviceSessionRepository.GetActiveSessionByTokenAsync(fcmToken);
         return session != null ? 1 : 0;
     }

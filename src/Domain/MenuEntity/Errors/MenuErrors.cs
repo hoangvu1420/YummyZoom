@@ -9,23 +9,23 @@ public static class MenuErrors
         "Menu.InvalidMenuId", "The menu id is invalid.");
 
     public static Error InvalidMenuName(string? name) => Error.Validation(
-        "Menu.InvalidMenuName", 
+        "Menu.InvalidMenuName",
         $"Menu name '{name ?? "null"}' is invalid. Menu name cannot be null or empty.");
 
     public static Error InvalidMenuDescription(string? description) => Error.Validation(
-        "Menu.InvalidMenuDescription", 
+        "Menu.InvalidMenuDescription",
         $"Menu description '{description ?? "null"}' is invalid. Menu description cannot be null or empty.");
 
     public static Error InvalidCategoryName(string? name) => Error.Validation(
-        "Menu.InvalidCategoryName", 
+        "Menu.InvalidCategoryName",
         $"Category name '{name ?? "null"}' is invalid. Category name cannot be null or empty.");
 
     public static Error DuplicateCategoryName(string name) => Error.Conflict(
-        "Menu.DuplicateCategoryName", 
+        "Menu.DuplicateCategoryName",
         $"A category with the name '{name}' already exists in this menu.");
 
     public static Error CategoryNotFound(string categoryId) => Error.NotFound(
-        "Menu.CategoryNotFound", 
+        "Menu.CategoryNotFound",
         $"The category with ID '{categoryId}' was not found in this menu.");
 
     public static Error InvalidDisplayOrder(int displayOrder) => Error.Validation(

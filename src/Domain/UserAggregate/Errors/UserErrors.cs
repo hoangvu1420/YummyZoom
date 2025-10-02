@@ -11,7 +11,7 @@ public static class UserErrors
     public static Error UserNotFound(Guid userId) => Error.NotFound(
         "User.UserNotFound",
         $"User with ID '{userId}' not found.");
-    
+
     public static Error RegistrationFailed(string message) => Error.Failure(
         "User.RegistrationFailed",
         $"User registration failed: {message}");

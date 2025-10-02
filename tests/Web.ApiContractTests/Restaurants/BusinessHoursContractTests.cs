@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
-using YummyZoom.SharedKernel;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 namespace YummyZoom.Web.ApiContractTests.Restaurants;
 

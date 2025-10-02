@@ -1,6 +1,6 @@
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -75,9 +75,9 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
 
         // Act: Try to initiate payment as non-member (authorization should fail at pipeline level)
         await scenario.ActAsNonMember();
-        
+
         // Assert: Should throw ForbiddenAccessException due to authorization policy
-        await FluentActions.Invoking(() => 
+        await FluentActions.Invoking(() =>
                 SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId)))
             .Should().ThrowAsync<ForbiddenAccessException>();
     }

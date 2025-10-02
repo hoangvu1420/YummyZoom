@@ -48,7 +48,7 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .HasDefaultValue(false);
 
         // --- 3. Owned Value Objects ---
-        
+
         // Map the Location (Address) Value Object using OwnsOne
         // This will create columns like Location_Street, Location_City etc. in the Restaurants table
         builder.OwnsOne(r => r.Location, locationBuilder =>

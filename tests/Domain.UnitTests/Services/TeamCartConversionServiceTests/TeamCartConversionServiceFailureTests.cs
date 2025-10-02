@@ -1,18 +1,18 @@
+using System.Reflection;
+using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
+using YummyZoom.Domain.CouponAggregate.Errors;
+using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.Errors;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Domain.TeamCartAggregate;
+using YummyZoom.Domain.TeamCartAggregate.Entities;
+using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.UnitTests.CouponAggregate;
 using YummyZoom.Domain.UnitTests.TeamCartAggregate;
-using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
-using YummyZoom.Domain.Common.Constants;
-using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.TeamCartAggregate;
-using YummyZoom.Domain.TeamCartAggregate.Errors;
-using YummyZoom.Domain.CouponAggregate.Errors;
-using YummyZoom.Domain.TeamCartAggregate.Entities;
-using System.Reflection;
-using YummyZoom.Domain.OrderAggregate.Errors;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.MenuEntity.ValueObjects;
 
 namespace YummyZoom.Domain.UnitTests.Services.TeamCartConversionServiceTests;
 
@@ -124,9 +124,9 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
         // Add items to the cart
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
-        teamCart.AddItem(teamCart.HostUserId, menuItemId, menuCategoryId, "Host Item", 
+        teamCart.AddItem(teamCart.HostUserId, menuItemId, menuCategoryId, "Host Item",
             new Money(25.00m, Currencies.Default), 1);
-        teamCart.AddItem(teamCart.Members.First(m => m.UserId != teamCart.HostUserId).UserId, 
+        teamCart.AddItem(teamCart.Members.First(m => m.UserId != teamCart.HostUserId).UserId,
             menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
 
         // Lock the cart for payment so we can apply the coupon

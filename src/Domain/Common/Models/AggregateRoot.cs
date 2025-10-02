@@ -5,7 +5,7 @@ public abstract class AggregateRoot<TId, TIdType> : Entity<TId>
 {
     // Remove the shadowing property - let Entity<TId>.Id remain as TId
     // This ensures LINQ queries work with the specific typed ID (e.g., MenuItemId)
-    
+
     protected AggregateRoot(TId id) : base(id)
     {
     }

@@ -52,7 +52,7 @@ public class OrderRepository : IOrderRepository
     public async Task<IReadOnlyList<Guid>> GetActiveOrderIdsForCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)
     {
         using var connection = _dbConnectionFactory.CreateConnection();
-        
+
         const string sql = """
             SELECT o."Id"
             FROM "Orders" o
@@ -68,4 +68,4 @@ public class OrderRepository : IOrderRepository
 
         return orderIds.ToList();
     }
-} 
+}

@@ -113,7 +113,7 @@ public class TeamCartLifecycleContractTests
         TestContext.WriteLine(requestJson);
 
         var resp = await client.PostAsJsonAsync("/api/v1/team-carts", body, DomainJson.Options);
-        
+
         var rawResponse = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}");
         TestContext.WriteLine(rawResponse);

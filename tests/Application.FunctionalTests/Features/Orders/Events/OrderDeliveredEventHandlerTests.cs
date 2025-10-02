@@ -38,7 +38,7 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         // Arrange: setup mocks
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? deliveredDto = null;
-        
+
         notifierMock.Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
@@ -56,7 +56,7 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
                 It.IsAny<CancellationToken>()))
             .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => deliveredDto = dto)
             .Returns(Task.CompletedTask);
-        
+
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
 
         // Create and complete order through delivery
@@ -119,10 +119,10 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
             var restaurantAccountRepo = scope.ServiceProvider.GetRequiredService<IRestaurantAccountRepository>();
             var restaurantId = RestaurantId.Create(Testing.TestData.DefaultRestaurantId);
             var account = await restaurantAccountRepo.GetByRestaurantIdAsync(restaurantId, CancellationToken.None);
-            
+
             account.Should().NotBeNull("Restaurant account should exist");
             account!.CurrentBalance.Amount.Should().BeGreaterThan(initialBalance, "Revenue should have been recorded");
-            
+
             // Verify the revenue amount matches order total
             var orderRepo = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var order = await orderRepo.GetByIdAsync(initiateResponse.OrderId, CancellationToken.None);
@@ -180,12 +180,12 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
+
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
 
         // Use the existing default restaurant but ensure no account exists for it
         var restaurantId = RestaurantId.Create(Testing.TestData.DefaultRestaurantId);
-        
+
         // First, ensure no restaurant account exists for the default restaurant
         using (var scope = CreateScope())
         {
@@ -199,7 +199,7 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
                 await dbContext.SaveChangesAsync();
             }
         }
-        
+
         var cmd = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard,
             restaurantId: restaurantId.Value);
@@ -207,10 +207,10 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
 
         // Process through to delivery
         await SimulatePaymentSuccessAsync(initiateResponse.OrderId);
-        
+
         // Switch to restaurant staff context for restaurant operations
         await OrderLifecycleTestHelper.RunAsDefaultRestaurantStaffAsync();
-        
+
         var acceptCommand = new AcceptOrderCommand(
             initiateResponse.OrderId.Value, restaurantId.Value, DateTime.UtcNow.AddHours(1));
         await SendAndUnwrapAsync(acceptCommand);
@@ -244,14 +244,14 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         {
             var restaurantAccountRepo = scope.ServiceProvider.GetRequiredService<IRestaurantAccountRepository>();
             var account = await restaurantAccountRepo.GetByRestaurantIdAsync(restaurantId, CancellationToken.None);
-            
+
             account.Should().NotBeNull("Restaurant account should be auto-created");
             account!.RestaurantId.Should().Be(restaurantId);
             account.CurrentBalance.Amount.Should().BeGreaterThan(0, "Revenue should have been recorded to new account");
         }
     }
 
-        [Test]
+    [Test]
     public async Task DrainingTwice_Should_Not_Duplicate_Revenue_Recording()
     {
         // Arrange
@@ -263,10 +263,10 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         var initiateResponse = await SendAndUnwrapAsync(cmd);
 
         await SimulatePaymentSuccessAsync(initiateResponse.OrderId);
-        
+
         // Switch to restaurant staff context for restaurant operations
         await OrderLifecycleTestHelper.RunAsDefaultRestaurantStaffAsync();
-        
+
         var acceptCommand = new AcceptOrderCommand(
             initiateResponse.OrderId.Value, Testing.TestData.DefaultRestaurantId, DateTime.UtcNow.AddHours(1));
         await SendAndUnwrapAsync(acceptCommand);
@@ -304,12 +304,12 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
             var restaurantAccountRepo = scope.ServiceProvider.GetRequiredService<IRestaurantAccountRepository>();
             var restaurantId = RestaurantId.Create(Testing.TestData.DefaultRestaurantId);
             var account = await restaurantAccountRepo.GetByRestaurantIdAsync(restaurantId, CancellationToken.None);
-            
+
             account.Should().NotBeNull("Restaurant account should exist after revenue recording");
-            
+
             // The revenue should be recorded exactly once, regardless of how many times outbox is drained
             var expectedBalance = initialBalance + 34.29m; // Order total is $34.29 based on the logs
-            account!.CurrentBalance.Amount.Should().Be(expectedBalance, 
+            account!.CurrentBalance.Amount.Should().Be(expectedBalance,
                 "Revenue should only be recorded once even after draining outbox twice");
         }
     }
@@ -319,18 +319,18 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         using var scope = CreateScope();
         var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
         var order = await orderRepository.GetByIdAsync(orderId, CancellationToken.None);
         order.Should().NotBeNull("Order should exist after creation");
-        
+
         var paymentTransaction = order!.PaymentTransactions.FirstOrDefault();
         paymentTransaction.Should().NotBeNull("Order should have a payment transaction");
         var paymentIntentId = paymentTransaction!.PaymentGatewayReferenceId;
         paymentIntentId.Should().NotBeNullOrEmpty("Payment transaction should have gateway reference ID");
-        
+
         var paymentResult = order.RecordPaymentSuccess(paymentIntentId!);
         paymentResult.ShouldBeSuccessful();
-        
+
         await orderRepository.UpdateAsync(order, CancellationToken.None);
         await dbContext.SaveChangesAsync(CancellationToken.None);
     }

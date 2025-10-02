@@ -14,7 +14,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             Name: "Test Menu",
@@ -30,7 +30,7 @@ public class CreateMenuTests : BaseTestFixture
 
         // Verify the menu was created in the database
         var menu = await FindAsync<Menu>(MenuId.Create(result.Value.MenuId));
-        
+
         menu.Should().NotBeNull();
         menu!.Name.Should().Be("Test Menu");
         menu.Description.Should().Be("A test menu for our restaurant");
@@ -43,7 +43,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             Name: "Simple Menu",
@@ -54,9 +54,9 @@ public class CreateMenuTests : BaseTestFixture
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         var menu = await FindAsync<Menu>(MenuId.Create(result.Value.MenuId));
-        
+
         menu.Should().NotBeNull();
         menu!.IsEnabled.Should().BeTrue(); // Default value
     }
@@ -66,7 +66,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             Name: "Disabled Menu",
@@ -78,9 +78,9 @@ public class CreateMenuTests : BaseTestFixture
 
         // Assert
         result.ShouldBeSuccessful();
-        
+
         var menu = await FindAsync<Menu>(MenuId.Create(result.Value.MenuId));
-        
+
         menu.Should().NotBeNull();
         menu!.IsEnabled.Should().BeFalse();
     }
@@ -106,7 +106,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange - Login as regular user without restaurant staff role
         await RunAsDefaultUserAsync();
-        
+
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
             Name: "Test Menu",
@@ -122,7 +122,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var command = new CreateMenuCommand(
             RestaurantId: Guid.Empty,
             Name: "",
@@ -138,7 +138,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var longName = new string('A', 201); // Exceeds 200 character limit
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,
@@ -155,7 +155,7 @@ public class CreateMenuTests : BaseTestFixture
     {
         // Arrange
         await RunAsRestaurantOwnerAsync("owner@restaurant.com", Testing.TestData.DefaultRestaurantId);
-        
+
         var longDescription = new string('A', 1001); // Exceeds 1000 character limit
         var command = new CreateMenuCommand(
             RestaurantId: Testing.TestData.DefaultRestaurantId,

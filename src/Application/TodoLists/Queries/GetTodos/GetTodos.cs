@@ -36,7 +36,7 @@ public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, Result<TodosV
                 .OrderBy(t => t.Title)
                 .ToListAsync(cancellationToken)
         };
-        
+
         return Result.Success(vm);
     }
 }

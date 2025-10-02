@@ -1,5 +1,5 @@
-using YummyZoom.Application.FunctionalTests.UserManagement;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
+using YummyZoom.Application.FunctionalTests.UserManagement;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -41,7 +41,7 @@ public static class AuthorizationTestSetup
     {
         // Ensure all roles exist
         await SetupForAuthorizationTestsAsync();
-        
+
         // Additional setup can be added here as needed
         // For example: creating test restaurants, test users with specific roles, etc.
     }

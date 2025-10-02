@@ -2,8 +2,8 @@ using MediatR;
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.SharedKernel.Constants;
 using YummyZoom.SharedKernel;
+using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Application.FunctionalTests.Authorization;
 
@@ -35,4 +35,4 @@ public class TestUnprotectedUserCommandHandler : IRequestHandler<TestUnprotected
     {
         return Task.FromResult(Result.Success(Unit.Value));
     }
-} 
+}

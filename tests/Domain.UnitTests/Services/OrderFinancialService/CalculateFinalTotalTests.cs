@@ -212,7 +212,7 @@ public class CalculateFinalTotalTests : OrderFinancialServiceTestsBase
         var deliveryFee = new Money(5.00m, "GBP"); // Different currency
         var tip = new Money(15.00m, "CAD"); // Different currency
         var tax = new Money(8.00m, "JPY"); // Different currency
-        
+
         // Act
         var result = _orderFinancialService.CalculateFinalTotal(subtotal, discount, deliveryFee, tip, tax);
 

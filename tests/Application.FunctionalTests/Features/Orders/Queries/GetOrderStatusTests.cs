@@ -1,13 +1,13 @@
-using static YummyZoom.Application.FunctionalTests.Testing;
-using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.Orders.Queries.GetOrderStatus;
+using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using YummyZoom.Application.Orders.Commands.AcceptOrder;
+using YummyZoom.Application.Orders.Commands.CancelOrder;
+using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
 using YummyZoom.Application.Orders.Commands.MarkOrderPreparing;
 using YummyZoom.Application.Orders.Commands.MarkOrderReadyForDelivery;
-using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
-using YummyZoom.Application.Orders.Commands.CancelOrder;
-using YummyZoom.Application.Common.Exceptions;
+using YummyZoom.Application.Orders.Queries.GetOrderStatus;
+using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Queries;
 

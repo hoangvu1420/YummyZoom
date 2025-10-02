@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
 using Microsoft.Extensions.Hosting; // IHostedService
-using YummyZoom.Infrastructure;
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Infrastructure;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 
 namespace YummyZoom.Web.ApiContractTests.Infrastructure;
@@ -51,8 +51,8 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
             if (hosted3 is not null) services.Remove(hosted3);
 
             // Remove Redis-related services to avoid connection issues in tests
-            var redisServices = services.Where(d => 
-                d.ServiceType.Name.Contains("Redis") || 
+            var redisServices = services.Where(d =>
+                d.ServiceType.Name.Contains("Redis") ||
                 d.ServiceType.Name.Contains("ConnectionMultiplexer") ||
                 d.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache))
                 .ToList();

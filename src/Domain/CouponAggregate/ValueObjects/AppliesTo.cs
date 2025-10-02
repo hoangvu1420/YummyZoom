@@ -1,7 +1,7 @@
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Domain.CouponAggregate.ValueObjects;
 
@@ -100,13 +100,13 @@ public sealed class AppliesTo : ValueObject
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Scope;
-        
+
         // For collections, we need to ensure consistent ordering for equality
         foreach (var itemId in ItemIds.OrderBy(x => x.Value))
         {
             yield return itemId;
         }
-        
+
         foreach (var categoryId in CategoryIds.OrderBy(x => x.Value))
         {
             yield return categoryId;

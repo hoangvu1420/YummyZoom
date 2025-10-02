@@ -1,12 +1,12 @@
 using Dapper;
-using YummyZoom.Application.Common.Security;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Models;
+using YummyZoom.Application.Common.Security;
+using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.RestaurantRegistrations.Queries.Common;
 using YummyZoom.SharedKernel;
-using Result = YummyZoom.SharedKernel.Result;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.Orders.Queries.Common;
+using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrations;
 

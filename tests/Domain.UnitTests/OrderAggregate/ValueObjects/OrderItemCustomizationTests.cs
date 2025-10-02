@@ -26,7 +26,7 @@ public class OrderItemCustomizationTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         var customization = result.Value;
-        
+
         customization.Snapshot_CustomizationGroupName.Should().Be(DefaultGroupName);
         customization.Snapshot_ChoiceName.Should().Be(DefaultChoiceName);
         customization.Snapshot_ChoicePriceAdjustmentAtOrder.Should().Be(DefaultPriceAdjustment);

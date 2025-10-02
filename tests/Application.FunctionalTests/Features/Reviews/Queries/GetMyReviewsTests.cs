@@ -38,7 +38,7 @@ public class GetMyReviewsTests : BaseTestFixture
         await Task.Delay(10);
         // Place and deliver order at the second restaurant
         SetUserId(userId);
-        var cmd2 = InitiateOrderTestHelper.BuildValidCommand(customerId: userId, restaurantId: restaurant2Id, paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery, menuItemIds: new List<Guid>{ menuItemId });
+        var cmd2 = InitiateOrderTestHelper.BuildValidCommand(customerId: userId, restaurantId: restaurant2Id, paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery, menuItemIds: new List<Guid> { menuItemId });
         var r2 = await SendAsync(cmd2);
         r2.ShouldBeSuccessful();
         var o2 = r2.Value.OrderId;

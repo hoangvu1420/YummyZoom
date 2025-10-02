@@ -1,17 +1,17 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using MediatR;
 using NUnit.Framework;
-using YummyZoom.Web.ApiContractTests.Infrastructure;
 using YummyZoom.Application.Orders.Commands.InitiateOrder;
-using YummyZoom.SharedKernel;
-using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.Common.ValueObjects;
-using YummyZoom.Web.Endpoints;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Serialization;
-using System.Text.Json;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
+using YummyZoom.SharedKernel;
+using YummyZoom.Web.ApiContractTests.Infrastructure;
+using YummyZoom.Web.Endpoints;
 
 namespace YummyZoom.Web.ApiContractTests.Orders;
 

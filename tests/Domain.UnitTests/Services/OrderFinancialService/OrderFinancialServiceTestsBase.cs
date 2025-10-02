@@ -1,8 +1,8 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 
@@ -35,7 +35,7 @@ public abstract class OrderFinancialServiceTestsBase
         var basePrice = new Money(basePriceAmount, currency);
         var menuItem = menuItemId ?? MenuItemId.CreateUnique();
         var category = categoryId ?? MenuCategoryId.CreateUnique();
-        
+
         return OrderItem.Create(
             category,
             menuItem,
@@ -47,7 +47,7 @@ public abstract class OrderFinancialServiceTestsBase
     protected List<OrderItem> CreateOrderItems(params (decimal price, int quantity, MenuItemId? itemId, MenuCategoryId? categoryId)[] items)
     {
         var orderItems = new List<OrderItem>();
-        
+
         foreach (var (price, quantity, itemId, categoryId) in items)
         {
             orderItems.Add(CreateOrderItem(
@@ -56,7 +56,7 @@ public abstract class OrderFinancialServiceTestsBase
                 menuItemId: itemId,
                 categoryId: categoryId));
         }
-        
+
         return orderItems;
     }
 
@@ -81,9 +81,9 @@ public abstract class OrderFinancialServiceTestsBase
         var scope = appliesTo ?? AppliesTo.CreateForWholeOrder().ValueOrFail();
         var startDate = validityStartDate ?? _fixedDateTime.AddDays(-1);
         var endDate = validityEndDate ?? _fixedDateTime.AddDays(30);
-        
+
         Coupon coupon;
-        
+
         if (currentTotalUsageCount > 0)
         {
             // Use persistence overload when we need to set current usage count
@@ -118,7 +118,7 @@ public abstract class OrderFinancialServiceTestsBase
                 usageLimitPerUser,
                 isEnabled).ValueOrFail();
         }
-        
+
         return coupon;
     }
 
@@ -136,7 +136,7 @@ public abstract class OrderFinancialServiceTestsBase
             CouponScope.SpecificCategories => AppliesTo.CreateForSpecificCategories(categoryIds ?? new List<MenuCategoryId>()).ValueOrFail(),
             _ => AppliesTo.CreateForWholeOrder().ValueOrFail()
         };
-        
+
         return CreateValidCoupon(couponValue: couponValue, appliesTo: appliesTo);
     }
 
@@ -147,7 +147,7 @@ public abstract class OrderFinancialServiceTestsBase
     {
         var couponValue = CouponValue.CreateFixedAmount(new Money(amount, currency)).ValueOrFail();
         var appliesTo = AppliesTo.CreateForWholeOrder().ValueOrFail(); // Simplified for base class
-        
+
         return CreateValidCoupon(couponValue: couponValue, appliesTo: appliesTo);
     }
 
@@ -157,7 +157,7 @@ public abstract class OrderFinancialServiceTestsBase
     {
         var couponValue = CouponValue.CreateFreeItem(freeItemId).ValueOrFail();
         var appliesTo = AppliesTo.CreateForWholeOrder().ValueOrFail();
-        
+
         return CreateValidCoupon(couponValue: couponValue, appliesTo: appliesTo);
     }
 

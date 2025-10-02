@@ -21,11 +21,11 @@ public sealed class OrderId : AggregateRootId<Guid>
     {
         return new OrderId(value);
     }
-    
+
     public static Result<OrderId> Create(string value)
     {
-        return !Guid.TryParse(value, out var guid) 
-            ? Result.Failure<OrderId>(OrderErrors.InvalidOrderId) 
+        return !Guid.TryParse(value, out var guid)
+            ? Result.Failure<OrderId>(OrderErrors.InvalidOrderId)
             : Result.Success(new OrderId(guid));
     }
 
@@ -33,7 +33,7 @@ public sealed class OrderId : AggregateRootId<Guid>
     {
         yield return Value;
     }
-    
+
 #pragma warning disable CS8618
     private OrderId() { }
 #pragma warning restore CS8618

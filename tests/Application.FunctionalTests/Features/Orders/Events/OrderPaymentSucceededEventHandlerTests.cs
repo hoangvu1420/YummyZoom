@@ -18,7 +18,7 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
     [SetUp]
     public async Task SetUpUserAndPaymentGateway()
     {
-    SetUserId(Testing.TestData.DefaultCustomerId);
+        SetUserId(Testing.TestData.DefaultCustomerId);
         var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
         ReplaceService<IPaymentGatewayService>(paymentGatewayMock.Object);
         await Task.CompletedTask;
@@ -50,20 +50,20 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-            
+
             var order = await orderRepository.GetByIdAsync(response.OrderId, CancellationToken.None);
             order.Should().NotBeNull("Order should exist after creation");
-            
+
             // Get the payment intent ID from the order's payment transaction
             var paymentTransaction = order!.PaymentTransactions.FirstOrDefault();
             paymentTransaction.Should().NotBeNull("Order should have a payment transaction");
             var paymentIntentId = paymentTransaction!.PaymentGatewayReferenceId;
             paymentIntentId.Should().NotBeNullOrEmpty("Payment transaction should have gateway reference ID");
-            
+
             // Record payment success (simulating Stripe webhook)
             var paymentResult = order.RecordPaymentSuccess(paymentIntentId!);
             paymentResult.ShouldBeSuccessful();
-            
+
             // Save the order changes
             await orderRepository.UpdateAsync(order, CancellationToken.None);
             await db.SaveChangesAsync(CancellationToken.None);
@@ -123,7 +123,7 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
 
         var response = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard));
-        
+
         // Simulate payment confirmation (what the Stripe webhook would do)
         using (var paymentScope = CreateScope())
         {
@@ -137,7 +137,7 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
             var dbContext = paymentScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             await dbContext.SaveChangesAsync(CancellationToken.None);
         }
-        
+
         await DrainOutboxAsync();
         await DrainOutboxAsync();
 

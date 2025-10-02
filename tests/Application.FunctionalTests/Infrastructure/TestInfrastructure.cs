@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
-using YummyZoom.Application.FunctionalTests.Infrastructure.Database;
 using YummyZoom.Application.FunctionalTests.Infrastructure.Cache;
+using YummyZoom.Application.FunctionalTests.Infrastructure.Database;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.SharedKernel;
 
@@ -18,7 +18,7 @@ public static class TestInfrastructure
     private static IServiceScopeFactory _scopeFactory = null!;
     private static RedisTestcontainer _redis = null!;
     private static string _redisConnectionString = string.Empty;
-    
+
     // Service replacement tracking
     private static readonly Dictionary<Type, object> _serviceReplacements = new();
     private static CustomWebApplicationFactory? _customFactory;
@@ -36,7 +36,7 @@ public static class TestInfrastructure
 
         _factory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _redisConnectionString);
         _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
-        
+
         // Initialize the test data factory with default entities
         await TestDataFactory.InitializeAsync();
     }
@@ -48,7 +48,7 @@ public static class TestInfrastructure
     {
         // Reset the test data factory state
         TestDataFactory.Reset();
-        
+
         await _database.DisposeAsync();
         await _factory.DisposeAsync();
         await _redis.DisposeAsync();
@@ -111,11 +111,11 @@ public static class TestInfrastructure
 
             // Ensure test data is restored after database reset
             await TestDataFactory.EnsureTestDataAsync();
-            
+
             // Clear service replacements to prevent leakage between test classes
             await ResetServiceReplacements();
         }
-        catch 
+        catch
         {
             // Silently handle database reset failures
         }
@@ -169,13 +169,13 @@ public static class TestInfrastructure
     public static async Task ResetServiceReplacements()
     {
         _serviceReplacements.Clear();
-        
+
         if (_customFactory != null)
         {
             await _customFactory.DisposeAsync();
             _customFactory = null;
         }
-        
+
         // Reset scope factory to use original factory
         _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
     }
@@ -197,7 +197,7 @@ public static class TestInfrastructure
 
         // Create new factory with replacements
         _customFactory = new CustomWebApplicationFactory(_database.GetConnection(), _database.GetConnectionString(), _redisConnectionString, _serviceReplacements);
-        
+
         // Update the scope factory to use the custom factory with service replacements
         _scopeFactory = _customFactory.Services.GetRequiredService<IServiceScopeFactory>();
     }

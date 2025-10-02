@@ -27,7 +27,7 @@ public class OrderLifecycleTests
         order.Status.Should().Be(OrderStatus.Accepted);
         order.EstimatedDeliveryTime.Should().Be(estimatedDeliveryTime);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderAccepted));
         var orderAcceptedEvent = order.DomainEvents.OfType<OrderAccepted>().Single();
@@ -70,7 +70,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Preparing);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderPreparing));
         var orderPreparingEvent = order.DomainEvents.OfType<OrderPreparing>().Single();
@@ -98,15 +98,15 @@ public class OrderLifecycleTests
                 break;
             case OrderStatus.Delivered:
                 order = CreateReadyForDeliveryOrder();
-                order.MarkAsDelivered().ShouldBeSuccessful(); 
+                order.MarkAsDelivered().ShouldBeSuccessful();
                 break;
             case OrderStatus.Cancelled:
                 order = CreateValidOrder();
-                order.Cancel().ShouldBeSuccessful(); 
+                order.Cancel().ShouldBeSuccessful();
                 break;
             case OrderStatus.Rejected:
                 order = CreateValidOrder();
-                order.Reject().ShouldBeSuccessful(); 
+                order.Reject().ShouldBeSuccessful();
                 break;
             case OrderStatus.AwaitingPayment:
                 order = CreateAwaitingPaymentOrder();
@@ -114,7 +114,7 @@ public class OrderLifecycleTests
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
         }
-        
+
         var initialStatus = order.Status;
         var initialEventCount = order.DomainEvents.Count;
 
@@ -146,7 +146,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.ReadyForDelivery);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderReadyForDelivery));
         var orderReadyForDeliveryEvent = order.DomainEvents.OfType<OrderReadyForDelivery>().Single();
@@ -174,15 +174,15 @@ public class OrderLifecycleTests
                 break;
             case OrderStatus.Delivered:
                 order = CreateReadyForDeliveryOrder();
-                order.MarkAsDelivered().ShouldBeSuccessful(); 
+                order.MarkAsDelivered().ShouldBeSuccessful();
                 break;
             case OrderStatus.Cancelled:
                 order = CreateValidOrder();
-                order.Cancel().ShouldBeSuccessful(); 
+                order.Cancel().ShouldBeSuccessful();
                 break;
             case OrderStatus.Rejected:
                 order = CreateValidOrder();
-                order.Reject().ShouldBeSuccessful(); 
+                order.Reject().ShouldBeSuccessful();
                 break;
             case OrderStatus.AwaitingPayment:
                 order = CreateAwaitingPaymentOrder();
@@ -190,7 +190,7 @@ public class OrderLifecycleTests
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
         }
-        
+
         var initialStatus = order.Status;
         var initialEventCount = order.DomainEvents.Count;
 
@@ -223,9 +223,9 @@ public class OrderLifecycleTests
         order.Status.Should().Be(OrderStatus.Delivered);
         order.ActualDeliveryTime.Should().Be(timestamp);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
-        order.DomainEvents.Should().HaveCount(initialEventCount + 1); 
+        order.DomainEvents.Should().HaveCount(initialEventCount + 1);
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderDelivered));
         var orderDeliveredEvent = order.DomainEvents.OfType<OrderDelivered>().Single();
         orderDeliveredEvent.OrderId.Should().Be(order.Id);
@@ -256,11 +256,11 @@ public class OrderLifecycleTests
                 break;
             case OrderStatus.Cancelled:
                 order = CreateValidOrder();
-                order.Cancel().ShouldBeSuccessful(); 
+                order.Cancel().ShouldBeSuccessful();
                 break;
             case OrderStatus.Rejected:
                 order = CreateValidOrder();
-                order.Reject().ShouldBeSuccessful(); 
+                order.Reject().ShouldBeSuccessful();
                 break;
             case OrderStatus.AwaitingPayment:
                 order = CreateAwaitingPaymentOrder();
@@ -268,7 +268,7 @@ public class OrderLifecycleTests
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
         }
-        
+
         var initialStatus = order.Status;
         var initialEventCount = order.DomainEvents.Count;
 
@@ -299,7 +299,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Rejected);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderRejected));
         var orderRejectedEvent = order.DomainEvents.OfType<OrderRejected>().Single();
@@ -340,7 +340,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Cancelled);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().Contain(e => e.GetType() == typeof(OrderCancelled));
         var orderCancelledEvent = order.DomainEvents.OfType<OrderCancelled>().Single();
@@ -378,7 +378,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Cancelled);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().HaveCount(initialEventCount + 1);
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderCancelled));
@@ -399,7 +399,7 @@ public class OrderLifecycleTests
         result.ShouldBeSuccessful();
         order.Status.Should().Be(OrderStatus.Cancelled);
         order.LastUpdateTimestamp.Should().Be(timestamp);
-        
+
         // Verify domain event
         order.DomainEvents.Should().HaveCount(initialEventCount + 1);
         order.DomainEvents.Should().ContainSingle(e => e.GetType() == typeof(OrderCancelled));
@@ -429,7 +429,7 @@ public class OrderLifecycleTests
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalidStatus), invalidStatus, null);
         }
-        
+
         var initialStatus = order.Status;
         var initialEventCount = order.DomainEvents.Count;
 

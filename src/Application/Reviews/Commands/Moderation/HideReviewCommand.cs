@@ -1,11 +1,11 @@
 using FluentValidation;
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.ReviewAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
-using YummyZoom.Application.Common.Caching;
 
 namespace YummyZoom.Application.Reviews.Commands.Moderation;
 

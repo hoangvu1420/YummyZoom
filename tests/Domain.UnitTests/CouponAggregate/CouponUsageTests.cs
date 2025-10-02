@@ -38,7 +38,7 @@ public class CouponUsageTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         coupon.CurrentTotalUsageCount.Should().Be(1);
-        
+
         // Verify domain event
         coupon.DomainEvents.Should().Contain(e => e.GetType() == typeof(CouponUsed));
         var usedEvent = coupon.DomainEvents.OfType<CouponUsed>().Last();
@@ -143,7 +143,7 @@ public class CouponUsageTests
             DefaultEndDate,
             currentTotalUsageCount: 2,
             totalUsageLimit: 2).Value;
-        
+
         var usageTime = new DateTime(2025, 6, 15, 12, 0, 0, DateTimeKind.Utc);
 
         // Act
@@ -172,7 +172,7 @@ public class CouponUsageTests
             DefaultEndDate,
             currentTotalUsageCount: 1,
             totalUsageLimit: 1).Value;
-        
+
         var usageTime = new DateTime(2025, 6, 15, 12, 0, 0, DateTimeKind.Utc);
 
         // Act
@@ -332,7 +332,7 @@ public class CouponUsageTests
             DefaultEndDate,
             currentTotalUsageCount: 5,
             totalUsageLimit: 5).Value;
-        
+
         var checkTime = new DateTime(2025, 6, 15, 12, 0, 0, DateTimeKind.Utc);
 
         // Act
@@ -358,7 +358,7 @@ public class CouponUsageTests
             DefaultEndDate,
             currentTotalUsageCount: 3,
             totalUsageLimit: 5).Value;
-        
+
         var checkTime = new DateTime(2025, 6, 15, 12, 0, 0, DateTimeKind.Utc);
 
         // Act

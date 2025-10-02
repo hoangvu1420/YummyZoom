@@ -151,10 +151,10 @@ public class MenuItemJsonSerializationTests : BaseTestFixture
 
         // Assert
         var jsonContent = await GetJsonbColumnContent(menuItem.Id, "DietaryTagIds");
-        
+
         // Verify that the TagId was serialized as its underlying GUID value
         jsonContent.Should().Contain("12345678-1234-1234-1234-123456789abc");
-        
+
         // Verify round-trip: retrieve and check the TagId
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
         retrieved!.DietaryTagIds.First().Value.Should().Be(knownGuid);
@@ -174,10 +174,10 @@ public class MenuItemJsonSerializationTests : BaseTestFixture
 
         // Assert
         var jsonContent = await GetJsonbColumnContent(menuItem.Id, "AppliedCustomizations");
-        
+
         // Verify that the CustomizationGroupId was serialized as its underlying GUID value
         jsonContent.Should().Contain("87654321-4321-4321-4321-fedcba987654");
-        
+
         // Verify round-trip: retrieve and check the CustomizationGroupId
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
         retrieved!.AppliedCustomizations.First().CustomizationGroupId.Value.Should().Be(knownGuid);
@@ -199,7 +199,7 @@ public class MenuItemJsonSerializationTests : BaseTestFixture
         // Assert - Verify that deserialization works correctly (proving JsonConstructor is used)
         var retrieved = await FindAsync<MenuItem>(menuItem.Id);
         retrieved.Should().NotBeNull();
-        
+
         var retrievedCustomization = retrieved!.AppliedCustomizations.First();
         retrievedCustomization.DisplayTitle.Should().Be("Json Constructor Test");
         retrievedCustomization.DisplayOrder.Should().Be(42);
@@ -358,7 +358,7 @@ public class MenuItemJsonSerializationTests : BaseTestFixture
     {
         using var scope = CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
         var sql = $@"
             SELECT ""{columnName}""::text 
             FROM ""MenuItems"" 

@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
-using YummyZoom.SharedKernel;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
+using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 

@@ -31,7 +31,7 @@ public abstract class InitiateOrderTestBase : BaseTestFixture
 
         // Replace the payment gateway service with our mock
         ReplaceService(PaymentGatewayMock.Object);
-        
+
         await Task.CompletedTask; // Placeholder for any async setup logic
     }
 

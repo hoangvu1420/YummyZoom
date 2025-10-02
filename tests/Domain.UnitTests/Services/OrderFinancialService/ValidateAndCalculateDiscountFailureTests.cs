@@ -1,9 +1,9 @@
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.Errors;
-using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.MenuEntity.ValueObjects;
-using YummyZoom.Domain.OrderAggregate.Entities;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.Entities;
 
 namespace YummyZoom.Domain.UnitTests.Services.OrderFinancialService;
 
@@ -124,7 +124,7 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
         {
             CreateOrderItem(20.00m, 1, menuItemId: differentItemId) // Different item
         };
-        var coupon = CreatePercentageCoupon(10m, CouponScope.SpecificItems, 
+        var coupon = CreatePercentageCoupon(10m, CouponScope.SpecificItems,
             new List<MenuItemId> { targetItemId });
         var subtotal = new Money(20.00m, "USD");
 
@@ -225,23 +225,23 @@ public class ValidateAndCalculateDiscountFailureTests : OrderFinancialServiceTes
         var coupon = CreateValidCoupon();
         var orderItems = CreateOrderItems((20.00m, 1, null, null));
         var subtotal = new Money(20.00m, "USD");
-        
+
         // Use reflection to create a CouponValue with an invalid coupon type
         var couponValue = CouponValue.CreatePercentage(10m).Value;
-        
+
         // Try to find the auto-implemented property backing field for Type in CouponValue
         var typeField = typeof(CouponValue)
             .GetField("<Type>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
+
         if (typeField != null)
         {
             typeField.SetValue(couponValue, (CouponType)999); // Invalid enum value
         }
-        
+
         // Now set this modified CouponValue to the Coupon using reflection
         var couponValueField = typeof(YummyZoom.Domain.CouponAggregate.Coupon)
             .GetField("<Value>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
+
         couponValueField?.SetValue(coupon, couponValue);
 
         // Act

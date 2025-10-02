@@ -31,18 +31,18 @@ public class TeamCartConversionTests
     {
         // Arrange
         var teamCart = CreateValidTeamCart();
-        
+
         // First add an item to the cart so we can lock it
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         teamCart.AddItem(
-            DefaultHostUserId, 
-            menuItemId, 
-            menuCategoryId, 
-            "Test Item", 
-            new Money(10.99m, "USD"), 
+            DefaultHostUserId,
+            menuItemId,
+            menuCategoryId,
+            "Test Item",
+            new Money(10.99m, "USD"),
             1).ShouldBeSuccessful();
-        
+
         // Lock the cart
         teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
         teamCart.Status.Should().Be(TeamCartStatus.Locked);

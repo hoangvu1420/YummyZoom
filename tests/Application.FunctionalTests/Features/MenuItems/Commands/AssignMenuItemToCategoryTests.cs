@@ -1,9 +1,9 @@
+using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
-using YummyZoom.Application.Common.Exceptions;
+using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
-using YummyZoom.Domain.MenuEntity.ValueObjects;
 
 namespace YummyZoom.Application.FunctionalTests.Features.MenuItems.Commands;
 

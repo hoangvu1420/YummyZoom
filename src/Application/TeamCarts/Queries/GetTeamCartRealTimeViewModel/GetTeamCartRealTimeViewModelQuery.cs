@@ -25,7 +25,7 @@ public static class GetTeamCartRealTimeViewModelErrors
 {
     public static Error NotFound => Error.NotFound(
         "GetTeamCartRealTimeViewModel.NotFound", "The requested team cart real-time view was not found.");
-        
+
     public static Error NotMember => Error.Validation(
         "GetTeamCartRealTimeViewModel.NotMember", "You are not a member of this team cart.");
 }
