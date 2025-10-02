@@ -1,6 +1,6 @@
-﻿using YummyZoom.Application.Common.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using YummyZoom.Application.Common.Exceptions;
 
 namespace YummyZoom.Web.Infrastructure;
 

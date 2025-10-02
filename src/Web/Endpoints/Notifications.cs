@@ -1,7 +1,7 @@
-using YummyZoom.Application.Notifications.Commands.SendNotificationToUser;
-using YummyZoom.Application.Notifications.Commands.SendBroadcastNotification;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YummyZoom.Application.Notifications.Commands.SendBroadcastNotification;
+using YummyZoom.Application.Notifications.Commands.SendNotificationToUser;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Web.Endpoints;

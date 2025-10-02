@@ -1,21 +1,21 @@
-using YummyZoom.Application.Users.Commands.RegisterUser;
-using YummyZoom.Application.Users.Commands.CompleteProfile;
-using YummyZoom.Application.Users.Commands.UpsertPrimaryAddress;
-using YummyZoom.Application.Users.Queries.GetMyProfile;
-using YummyZoom.Infrastructure.Identity;
-using Microsoft.AspNetCore.Mvc;
-using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
-using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
-using YummyZoom.Application.Users.Commands.RegisterDevice;
-using YummyZoom.Application.Users.Commands.UnregisterDevice;
 using Microsoft.AspNetCore.Identity;
-using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
-using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
+using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Auth.Commands.CompleteSignup;
+using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.SetPassword;
+using YummyZoom.Application.Auth.Commands.VerifyPhoneOtp;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.RoleAssignments.Commands.CreateRoleAssignment;
+using YummyZoom.Application.RoleAssignments.Commands.DeleteRoleAssignment;
+using YummyZoom.Application.Users.Commands.CompleteProfile;
+using YummyZoom.Application.Users.Commands.RegisterDevice;
+using YummyZoom.Application.Users.Commands.RegisterUser;
+using YummyZoom.Application.Users.Commands.UnregisterDevice;
+using YummyZoom.Application.Users.Commands.UpsertPrimaryAddress;
+using YummyZoom.Application.Users.Queries.GetMyProfile;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Identity;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -110,9 +110,13 @@ public class Users : EndpointGroupBase
         #region My Reviews (Authenticated)
 
         // GET /api/v1/users/me/reviews
-        protectedGroup.MapGet("/me/reviews", async (int pageNumber, int pageSize, ISender sender) =>
+        protectedGroup.MapGet("/me/reviews", async (int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var result = await sender.Send(new YummyZoom.Application.Reviews.Queries.GetMyReviews.GetMyReviewsQuery(pageNumber, pageSize));
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var result = await sender.Send(new YummyZoom.Application.Reviews.Queries.GetMyReviews.GetMyReviewsQuery(page, size));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("GetMyReviews")

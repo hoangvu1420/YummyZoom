@@ -21,7 +21,7 @@ public class BusinessHoursContractTests
         {
             req.Should().BeOfType<UpdateRestaurantBusinessHoursCommand>();
             var cmd = (UpdateRestaurantBusinessHoursCommand)req;
-            cmd.BusinessHours.Should().Be("9-5");
+            cmd.BusinessHours.Should().Be("09:00-17:00");
             return Result.Success();
         });
 

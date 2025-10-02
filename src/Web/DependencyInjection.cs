@@ -1,19 +1,18 @@
 ﻿using System.Text.Json.Serialization;
+using Asp.Versioning;
 using Azure.Identity;
-using YummyZoom.Web.Services;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Mvc;
-
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using Asp.Versioning;
-using Azure.Security.KeyVault.Secrets;
 using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Infrastructure.Serialization;
-using YummyZoom.Web.Realtime;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
+using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.Converters;
 using YummyZoom.Infrastructure.StateStores.TeamCartStore;
 using YummyZoom.Web.Configuration;
+using YummyZoom.Web.Realtime;
+using YummyZoom.Web.Services;
 
 namespace YummyZoom.Web;
 

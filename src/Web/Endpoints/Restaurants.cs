@@ -1,50 +1,50 @@
-using System.Threading;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
-using YummyZoom.Application.Orders.Queries.Common;
-using YummyZoom.Application.Orders.Queries.GetRestaurantNewOrders;
-using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
-using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
-using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
-using YummyZoom.Application.Restaurants.Queries.SearchRestaurants;
-using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
-using YummyZoom.Application.MenuItems.Commands.ChangeMenuItemAvailability;
-using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
-using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
-using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
-using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
+using YummyZoom.Application.Coupons.Commands.CreateCoupon;
+using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
+using YummyZoom.Application.Coupons.Commands.DisableCoupon;
+using YummyZoom.Application.Coupons.Commands.EnableCoupon;
+using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
+using YummyZoom.Application.Coupons.Queries.GetCouponDetails;
+using YummyZoom.Application.Coupons.Queries.GetCouponStats;
+using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
+using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
+using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
+using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
 using YummyZoom.Application.MenuItems.Commands.AssignCustomizationGroupToMenuItem;
+using YummyZoom.Application.MenuItems.Commands.AssignMenuItemToCategory;
+using YummyZoom.Application.MenuItems.Commands.ChangeMenuItemAvailability;
+using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
+using YummyZoom.Application.MenuItems.Commands.DeleteMenuItem;
 using YummyZoom.Application.MenuItems.Commands.RemoveCustomizationGroupFromMenuItem;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDetails;
+using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemDietaryTags;
 using YummyZoom.Application.MenuItems.Commands.UpdateMenuItemPrice;
+using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
 using YummyZoom.Application.Menus.Commands.UpdateMenuDetails;
-using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
-using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
-using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
-using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
-using YummyZoom.Web.Infrastructure.Http;
-using YummyZoom.Application.Restaurants.Queries.Management.GetMenusForManagement;
-using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
-using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;
-using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemDetails;
-using YummyZoom.Application.Reviews.Commands.CreateReview;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
-using YummyZoom.Application.Reviews.Commands.DeleteReview;
-using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Orders.Queries.Common;
+using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
+using YummyZoom.Application.Orders.Queries.GetRestaurantNewOrders;
 using YummyZoom.Application.Restaurants.Commands.SetRestaurantAcceptingOrders;
-using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
-using YummyZoom.Application.Reviews.Queries.Common;
-using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
-using YummyZoom.Application.Coupons.Commands.CreateCoupon;
-using YummyZoom.Application.Coupons.Commands.UpdateCoupon;
-using YummyZoom.Application.Coupons.Commands.EnableCoupon;
-using YummyZoom.Application.Coupons.Commands.DisableCoupon;
-using YummyZoom.Application.Coupons.Queries.ListCouponsByRestaurant;
-using YummyZoom.Application.Coupons.Queries.GetCouponDetails;
-using YummyZoom.Application.Coupons.Queries.GetCouponStats;
-using YummyZoom.Application.Coupons.Commands.DeleteCoupon;
+using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
+using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemDetails;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenusForManagement;
+using YummyZoom.Application.Restaurants.Queries.SearchRestaurants;
+using YummyZoom.Application.Reviews.Commands.CreateReview;
+using YummyZoom.Application.Reviews.Commands.DeleteReview;
+using YummyZoom.Application.Reviews.Queries.Common;
+using YummyZoom.Application.Reviews.Queries.GetRestaurantReviews;
+using YummyZoom.Application.Reviews.Queries.GetRestaurantReviewSummary;
+using YummyZoom.Domain.CouponAggregate.ValueObjects;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
+using YummyZoom.Web.Infrastructure.Http;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -568,9 +568,13 @@ public class Restaurants : EndpointGroupBase
         #region Order Management Endpoints (Restaurant Staff)
 
         // GET /api/v1/restaurants/{restaurantId}/orders/new
-        group.MapGet("/{restaurantId:guid}/orders/new", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
+        group.MapGet("/{restaurantId:guid}/orders/new", async (Guid restaurantId, int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var query = new GetRestaurantNewOrdersQuery(restaurantId, pageNumber, pageSize);
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var query = new GetRestaurantNewOrdersQuery(restaurantId, page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
@@ -578,9 +582,13 @@ public class Restaurants : EndpointGroupBase
         .WithStandardResults<PaginatedList<OrderSummaryDto>>();
 
         // GET /api/v1/restaurants/{restaurantId}/orders/active
-        group.MapGet("/{restaurantId:guid}/orders/active", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
+        group.MapGet("/{restaurantId:guid}/orders/active", async (Guid restaurantId, int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var query = new GetRestaurantActiveOrdersQuery(restaurantId, pageNumber, pageSize);
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var query = new GetRestaurantActiveOrdersQuery(restaurantId, page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
@@ -667,9 +675,13 @@ public class Restaurants : EndpointGroupBase
 
 
         // GET /api/v1/restaurants/{restaurantId}/reviews
-        publicGroup.MapGet("/{restaurantId:guid}/reviews", async (Guid restaurantId, int pageNumber, int pageSize, ISender sender) =>
+        publicGroup.MapGet("/{restaurantId:guid}/reviews", async (Guid restaurantId, int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var result = await sender.Send(new GetRestaurantReviewsQuery(restaurantId, pageNumber, pageSize));
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var result = await sender.Send(new GetRestaurantReviewsQuery(restaurantId, page, size));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("GetRestaurantReviews")
@@ -702,9 +714,13 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/search
-        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int pageNumber, int pageSize, double? minRating, ISender sender) =>
+        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, ISender sender) =>
         {
-            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, pageNumber, pageSize, minRating);
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
@@ -779,12 +795,12 @@ public class Restaurants : EndpointGroupBase
     public sealed record CreateCouponRequestDto(
         string Code,
         string Description,
-        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponType ValueType,
+        CouponType ValueType,
         decimal? Percentage,
         decimal? FixedAmount,
         string? FixedCurrency,
         Guid? FreeItemId,
-        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponScope Scope,
+        CouponScope Scope,
         List<Guid>? ItemIds,
         List<Guid>? CategoryIds,
         DateTime ValidityStartDate,
@@ -799,12 +815,12 @@ public class Restaurants : EndpointGroupBase
         string Description,
         DateTime ValidityStartDate,
         DateTime ValidityEndDate,
-        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponType ValueType,
+        CouponType ValueType,
         decimal? Percentage,
         decimal? FixedAmount,
         string? FixedCurrency,
         Guid? FreeItemId,
-        YummyZoom.Domain.CouponAggregate.ValueObjects.CouponScope Scope,
+        CouponScope Scope,
         List<Guid>? ItemIds,
         List<Guid>? CategoryIds,
         decimal? MinOrderAmount,

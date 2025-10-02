@@ -140,6 +140,44 @@ The API also exposes the standard Identity endpoints for email/password flows vi
 
 Request/response bodies follow the same bearer token response shape shown above for successful sign-in.
 
+#### Username rule and `/login` contract
+
+- **Username equals phone**: In YummyZoom, the username is the phone number in E.164 format (e.g., `+15551234567`).
+- **Library field naming**: The Identity API expects the username in a field named `email`. In our application, that field carries the username (phone number) by convention.
+- **Password source**: OTP-created accounts have no password by default; use `POST /api/v1/users/auth/set-password` first to enable password login.
+
+Endpoint details:
+
+```http
+POST /api/v1/users/login
+```
+
+Query parameters (optional):
+- `useCookies`: boolean
+- `useSessionCookies`: boolean
+
+Request body (username provided in `email` field):
+```json
+{
+  "email": "+15551234567",
+  "password": "string"
+}
+```
+
+Successful response (example):
+```json
+{
+  "tokenType": "Bearer",
+  "accessToken": "<jwt>",
+  "expiresIn": 3600,
+  "refreshToken": "<refresh-token>"
+}
+```
+
+Notes:
+- Treat the `email` property as the username. For OTP users, set it to the phone number in E.164 format.
+- After setting a real email and optionally changing username rules, the same field will carry that email value.
+
 ### Authorization
 
 - Most endpoints require authentication; some are public (e.g., OTP request and certain restaurant menu reads).

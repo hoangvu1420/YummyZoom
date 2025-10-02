@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using YummyZoom.Application.RestaurantRegistrations.Commands.SubmitRestaurantRegistration;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.RestaurantRegistrations.Commands.ApproveRestaurantRegistration;
 using YummyZoom.Application.RestaurantRegistrations.Commands.RejectRestaurantRegistration;
+using YummyZoom.Application.RestaurantRegistrations.Commands.SubmitRestaurantRegistration;
+using YummyZoom.Application.RestaurantRegistrations.Queries.Common;
 using YummyZoom.Application.RestaurantRegistrations.Queries.GetMyRestaurantRegistrations;
 using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrations;
-using YummyZoom.Application.RestaurantRegistrations.Queries.Common;
+using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Web.Infrastructure;
 using YummyZoom.Web.Infrastructure.Http;
-using YummyZoom.Application.Common.Interfaces.IServices;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -64,9 +64,13 @@ public sealed class RestaurantRegistrations : EndpointGroupBase
         // Admin endpoints
         var admin = group.MapGroup("/admin").RequireAuthorization(new AuthorizeAttribute { Roles = "Administrator" });
 
-        admin.MapGet("/pending", async (int pageNumber, int pageSize, ISender sender) =>
+        admin.MapGet("/pending", async (int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var result = await sender.Send(new GetPendingRestaurantRegistrationsQuery(pageNumber, pageSize));
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var result = await sender.Send(new GetPendingRestaurantRegistrationsQuery(page, size));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("GetPendingRestaurantRegistrations")

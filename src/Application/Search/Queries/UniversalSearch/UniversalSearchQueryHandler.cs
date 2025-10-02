@@ -50,6 +50,12 @@ public sealed record SearchResultDto(
     string? Reason
 );
 
+public sealed record SearchBadgeDto(
+    string Code,
+    string Label,
+    object? Data = null
+);
+
 public sealed record UniversalSearchResponseDto(
     PaginatedList<SearchResultDto> Page,
     FacetBlock Facets

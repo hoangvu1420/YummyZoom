@@ -1,17 +1,17 @@
-using YummyZoom.Application.Orders.Commands.InitiateOrder;
+using Microsoft.AspNetCore.Mvc;
+using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Commands.AcceptOrder;
-using YummyZoom.Application.Orders.Commands.RejectOrder;
 using YummyZoom.Application.Orders.Commands.CancelOrder;
+using YummyZoom.Application.Orders.Commands.Common;
+using YummyZoom.Application.Orders.Commands.InitiateOrder;
+using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
 using YummyZoom.Application.Orders.Commands.MarkOrderPreparing;
 using YummyZoom.Application.Orders.Commands.MarkOrderReadyForDelivery;
-using YummyZoom.Application.Orders.Commands.MarkOrderDelivered;
+using YummyZoom.Application.Orders.Commands.RejectOrder;
+using YummyZoom.Application.Orders.Queries.Common;
+using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 using YummyZoom.Application.Orders.Queries.GetOrderById;
 using YummyZoom.Application.Orders.Queries.GetOrderStatus;
-using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
-using YummyZoom.Application.Orders.Queries.Common;
-using YummyZoom.Application.Common.Models;
-using Microsoft.AspNetCore.Mvc;
-using YummyZoom.Application.Orders.Commands.Common;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -136,9 +136,13 @@ public class Orders : EndpointGroupBase
         .WithStandardResults<OrderStatusDto>();
 
         // GET /api/v1/orders/my?pageNumber=1&pageSize=20
-        group.MapGet("/my", async (int pageNumber, int pageSize, ISender sender) =>
+        group.MapGet("/my", async (int? pageNumber, int? pageSize, ISender sender) =>
         {
-            var query = new GetCustomerRecentOrdersQuery(pageNumber, pageSize);
+            // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 10;
+            
+            var query = new GetCustomerRecentOrdersQuery(page, size);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })

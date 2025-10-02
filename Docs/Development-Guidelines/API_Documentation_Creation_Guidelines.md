@@ -172,18 +172,6 @@ See the [Error Codes Appendix](./Appendices/01-Error-Codes.md) for detailed erro
 - An order cannot be placed for a restaurant where `isAcceptingOrders` is `false`.
 - All `menuItemId`s in the order must belong to the same restaurant.
 
----
-
-### Example
-
-**Request (cURL)**
-```bash
-curl -X POST \
-  https://api.yummyzoom.com/v1/orders \
-  -H 'Authorization: Bearer <YOUR_JWT_TOKEN>' \
-  -H 'Content-Type: application/json' \
-  -d '{ ... request body ... }'
-```
 ````
 
 ---
@@ -267,7 +255,7 @@ These are methods the client can call on the server over the real-time connectio
 
 #### **Template 3: Workflow Guide**
 
-Use this for multi-step processes like `TeamCart` or `RestaurantRegistration`.
+Use this for multi-step processes like `Order`, `TeamCart` or `RestaurantRegistration`.
 
 ````markdown
 # Workflow: TeamCart (Group Order)

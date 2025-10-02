@@ -1,190 +1,113 @@
+## Exploration Results
 
-### **1. TeamCartTestScenario Pattern**
-Create a scenario-based approach that encapsulates the entire team cart setup and member management:
+Based on my investigation of the YummyZoom codebase, here's what I found regarding customer-facing features:
 
-```csharp
-public class TeamCartTestScenario
-{
-    public Guid TeamCartId { get; private set; }
-    public string ShareToken { get; private set; }
-    public Guid HostUserId { get; private set; }
-    public Dictionary<string, Guid> GuestUserIds { get; private set; }
-    
-    // Clean switching methods
-    public async Task ActAsHost()
-    public async Task ActAsGuest(string guestName)
-    public async Task ActAsNonMember()  // For negative testing
-}
+### 🔍 **Key Customer Features Implemented**
+
+#### **1. Authentication & User Management** (`/api/v1/users`)
+- **Phone OTP Authentication**: Modern phone-based registration/login flow
+- **Profile Management**: Complete profile, update name/email
+- **Address Management**: Primary address creation/update
+- **Device Management**: Push notification device registration
+- **Password Management**: Optional password setting for OTP accounts
+- **Review History**: Personal review management
+
+#### **2. Restaurant Discovery & Search** (`/api/v1/search`, `/api/v1/restaurants`)
+- **Universal Search**: Cross-restaurant/menu search with location, cuisine, and price filters
+- **Autocomplete**: Search suggestions
+- **Restaurant Browsing**: Public restaurant info, menus, and reviews
+- **Menu Viewing**: Full menu hierarchy (categories, items, customizations)
+- **Review System**: View restaurant reviews and summaries
+
+#### **3. Order Management** (`/api/v1/orders`)
+- **Order Initiation**: Standard order placement with full item customization
+- **Order Tracking**: Real-time status updates and order history
+- **Payment Integration**: Multiple payment methods including coupon support
+- **Order History**: Paginated recent orders for customers
+
+#### **4. Collaborative Ordering** (`/api/v1/team-carts`)
+- **TeamCart Creation**: Host-initiated group ordering
+- **Member Management**: Share tokens, guest joining
+- **Collaborative Item Management**: Multi-user cart building
+- **Mixed Payment Support**: Online payments + Cash on Delivery
+- **Real-time Synchronization**: Live updates via SignalR
+
+#### **5. Review & Rating System** (`/api/v1/restaurants/{id}/reviews`)
+- **Review Creation**: Post reviews for completed orders
+- **Review Management**: View and delete personal reviews
+- **Restaurant Reviews**: Browse reviews for restaurants
+
+#### **6. Real-time Communication**
+- **SignalR Hubs**: Dedicated hubs for order updates and TeamCart collaboration
+- **Push Notifications**: Device-based notification delivery
+
+### 🏗️ **Proposed Customer API Documentation Structure**
+
+Based on the actual implemented features, here's the structured approach for Phase 2:
+
+```
+/Docs/API-Documentation/API-Reference/Customer/
+├── 01-Authentication-and-Profile.md
+├── 02-Restaurant-Discovery.md
+├── 03-Individual-Orders.md
+├── 04-Reviews-and-Ratings.md
+└── Workflows/
+    ├── 01-Complete-Customer-Onboarding.md
+    ├── 02-TeamCart-Collaborative-Ordering.md
+    └── 03-Order-Tracking-and-Real-time-Updates.md
 ```
 
-### **2. TeamCartTestBuilder (Fluent Builder Pattern)**
-```csharp
-public class TeamCartTestBuilder
-{
-    public static TeamCartTestBuilder Create(Guid restaurantId)
-    public TeamCartTestBuilder WithHost(string hostName, string email = null)
-    public TeamCartTestBuilder WithGuest(string guestName, string email = null)
-    public TeamCartTestBuilder WithMultipleGuests(params string[] guestNames)
-    public async Task<TeamCartTestScenario> BuildAsync()
-}
+### 📋 **Detailed Structure Breakdown**
 
-// Usage Example:
-var scenario = await TeamCartTestBuilder
-    .Create(restaurantId)
-    .WithHost("Alice Host")
-    .WithGuest("Bob Guest")
-    .WithGuest("Charlie Guest")
-    .BuildAsync();
-```
+#### **01-Authentication-and-Profile.md**
+- Phone OTP request and verification (`POST /auth/otp/request`, `POST /auth/otp/verify`)
+- Signup completion (`POST /auth/complete-signup`)
+- Profile management (`GET /me`, `PUT /me/profile`)
+- Address management (`PUT /me/address`)
+- Device management (`POST /devices/register`, `POST /devices/unregister`)
+- Authentication status checking (`GET /auth/status`)
 
-### **3. Enhanced TeamCartRoleTestHelper**
-Keep the existing helper but add convenience methods for existing members:
+#### **02-Restaurant-Discovery.md**
+- Universal search (`GET /search`)
+- Autocomplete (`GET /search/autocomplete`)
+- Restaurant browsing (`GET /restaurants/search`, `GET /restaurants/{id}`)
+- Menu viewing (`GET /restaurants/{id}/menu`)
+- Restaurant reviews (`GET /restaurants/{id}/reviews`, `GET /restaurants/{id}/review-summary`)
 
-```csharp
-public static class TeamCartRoleTestHelper
-{
-    // Existing methods (keep)
-    public static async Task<Guid> RunAsTeamCartHostAsync(Guid teamCartId, string email = null, string password = null)
-    
-    // New methods for existing members
-    public static async Task RunAsExistingTeamCartHostAsync(Guid userId, Guid teamCartId)
-    public static async Task RunAsExistingTeamCartMemberAsync(Guid userId, Guid teamCartId)
-    
-    // Scenario-based setup
-    public static async Task<TeamCartTestScenario> SetupTeamCartScenarioAsync(Guid restaurantId, params TeamCartMemberInfo[] members)
-}
-```
+#### **03-Individual-Orders.md**
+- Order initiation (`POST /orders/initiate`)
+- Order tracking (`GET /orders/{id}`, `GET /orders/{id}/status`)
+- Order history (`GET /orders/my`)
+- Payment methods and coupon application
 
-### **4. TeamCartAuthorizationExtensions**
-Extension methods for common patterns:
+#### **04-Reviews-and-Ratings.md**
+- Creating reviews (`POST /restaurants/{id}/reviews`)
+- Managing personal reviews (`GET /users/me/reviews`, `DELETE /reviews/{id}`)
+- Viewing restaurant reviews (`GET /restaurants/{id}/reviews`)
 
-```csharp
-public static class TeamCartAuthorizationExtensions
-{
-    public static async Task AddTeamCartHostPermission(this Guid userId, Guid teamCartId)
-    public static async Task AddTeamCartMemberPermission(this Guid userId, Guid teamCartId)
-    public static async Task SwitchToTeamCartMember(this Guid userId, Guid teamCartId, MemberRole role)
-}
-```
+#### **Workflows/01-Complete-Customer-Onboarding.md**
+- End-to-end onboarding: Phone verification → signup completion → profile setup → first order
 
-### **6. Clean Test Example**
-After implementation, tests would look like:
+#### **Workflows/02-TeamCart-Collaborative-Ordering.md**
+- TeamCart lifecycle: Creation → sharing → collaboration → payment → conversion to order
+- Real-time features and SignalR integration
 
-```csharp
-[Test]
-public async Task GetTeamCartDetails_WithValidCartAndMember_ShouldReturnDetailsWithMembersAndItems()
-{
-    // Arrange
-    var scenario = await TeamCartTestBuilder
-        .Create(Testing.TestData.DefaultRestaurantId)
-        .WithHost("Alice Host")
-        .WithGuest("Bob Guest")
-        .BuildAsync();
+#### **Workflows/03-Order-Tracking-and-Real-time-Updates.md**
+- Order status lifecycle and real-time notifications
+- SignalR hub connection and event handling
 
-    // Add items
-    await scenario.ActAsHost();
-    var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
-    await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 2));
+### 🎯 **Key Differences from Guidelines Example**
 
-    await scenario.ActAsGuest("Bob Guest");
-    await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1));
+1. **Authentication-first approach**: YummyZoom uses phone OTP as the primary auth method, not traditional email/password
+2. **TeamCart as major feature**: Collaborative ordering is a core differentiator requiring its own workflow documentation
+3. **Real-time emphasis**: SignalR integration is central to both ordering and TeamCart features
+4. **Review system integration**: Reviews are tightly coupled with the order experience
+5. **Search-driven discovery**: Universal search is more sophisticated than simple restaurant browsing
 
-    // Host operations
-    await scenario.ActAsHost();
-    await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId));
-    await SendAsync(new ApplyTipToTeamCartCommand(scenario.TeamCartId, 5.00m));
+The structure follows the guidelines' principles while adapting to YummyZoom's actual feature set and customer journey patterns. 
 
-    // Act
-    var result = await SendAsync(new GetTeamCartDetailsQuery(scenario.TeamCartId));
+Completed (4/4) *Propose documentation structure*
 
-    // Assert
-    result.ShouldBeSuccessful();
-    // ... clean assertions using scenario.HostUserId, scenario.GuestUserIds["Bob Guest"]
-}
-```
+This completes the exploration and analysis phase. The proposed structure aligns with the actual features implemented in the YummyZoom codebase and follows the API Documentation Creation Guidelines while adapting to the specific customer journey and feature set discovered.
 
-### 🚨 **Authorization Exception Handling**
-
-**Key Learning:** When authorization policies fail, they throw `ForbiddenAccessException` at the pipeline level, not business logic errors. The test correctly expects:
-
-```csharp
-await FluentActions.Invoking(() => 
-        SendAsync(new ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode)))
-    .Should().ThrowAsync<ForbiddenAccessException>();
-```
-
-Instead of expecting a business logic error code like `"TeamCart.OnlyHostCanModifyFinancials"`.
-
-This approach would eliminate the repetitive authorization setup code while making the tests much more readable and maintainable. The builder pattern particularly helps with complex scenarios involving multiple members.
-
-## Overall Test Changes Required
-
-Here's the comprehensive guide for updating TeamCart tests to work with the new authorization pattern:
-
-### 1. **Commands That Need TeamCart Host Authorization**
-These commands require `MustBeTeamCartHost` policy and tests need `RunAsTeamCartHostAsync()`:
-- `LockTeamCartForPaymentCommand` - Only host can lock
-- `ApplyTipToTeamCartCommand` - Only host can apply tips
-- `ApplyCouponToTeamCartCommand` - Only host can apply coupons
-- `RemoveCouponFromTeamCartCommand` - Only host can remove coupons
-- `HandleTeamCartStripeWebhookCommand` - Only host handles payments
-- `ConvertTeamCartToOrderCommand` - Only host can convert
-
-### 2. **Commands That Need TeamCart Member Authorization**  
-These commands require `MustBeTeamCartMember` policy and tests can use either `RunAsTeamCartHostAsync()` or `RunAsTeamCartMemberAsync()`:
-- `AddItemToTeamCartCommand` - Members can add items
-- `UpdateTeamCartItemQuantityCommand` - Members can update quantities of the items they added
-- `RemoveItemFromTeamCartCommand` - Members can remove items they added
-- `InitializeTeamCartPaymentCommand` - Members can initialize payment
-- `CommitToCodPaymentCommand` - Members can commit to payment
-
-### 3. **Commands That Need Basic Authentication Only**
-These commands use `[Authorize]` and tests can use any authenticated user:
-- `CreateTeamCartCommand` - Host creates the cart (only need authenticated user)
-- `JoinTeamCartCommand` - Anyone can join with valid token (as you fixed)
-
-### 4. **Queries That Need TeamCart Member Authorization**
-These queries require `MustBeTeamCartMember` policy:
-- `GetTeamCartDetailsQuery` - Members can view details
-- `GetTeamCartRealTimeViewModelQuery` - Members can view real-time updates
-
-### 6. **Chicken-and-Egg Problem Solution**
-
-The main challenge is that many tests follow this pattern:
-1. Create team cart as host
-2. Join as guest  
-3. Perform operations as both users
-
-But our authorization requires users to already have permissions. The solution:
-
-**For Join Operations**: Use basic authenticated users (as you fixed with `[Authorize]`)
-**For Other Operations**: Use the helper methods to pre-establish permissions
-
-### 7. **Test Initialization Pattern**
-
-Each test class should initialize TeamCart roles:
-```csharp
-[OneTimeSetUp]
-public async Task OneTimeSetUp()
-{
-    await TeamCartRoleTestHelper.SetupTeamCartAuthorizationTestsAsync();
-}
-```
-
-### 8. **Files That Need Updates**
-
-Based on the test file structure, these test files need authorization updates:
-- GetTeamCartDetailsQueryTests.cs - Use member helpers
-- GetTeamCartRealTimeViewModelQueryTests.cs - Use member helpers  
-- All command test files in `Commands/` folder - Use appropriate host/member helpers
-- Event handler tests - May need member permissions to trigger events
-
-### 9. **Key Principle**
-
-The new pattern separates:
-- **Test Setup** (creating users with permissions) from **Business Logic** (the actual commands)
-- **Authorization Concerns** (who can do what) from **Domain Logic** (what gets done)
-
-This makes tests more explicit about authorization requirements and more reliable.
-
-The `TeamCartRoleTestHelper` provides the missing piece to make this transition smooth and maintainable.
+Would you like me to proceed with creating any specific documentation files from this structure, or do you have feedback on the proposed approach?
