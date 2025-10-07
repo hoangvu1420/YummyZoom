@@ -1,110 +1,66 @@
-Here’s a synthesis of the test coverage report for the `CouponAggregate`:
 
-The overall coverage for the `CouponAggregate` namespace is 82%, indicating most code is exercised by tests, but some areas remain untested.
+### Changes to implement (ASP.NET Core best practices)
 
-Key gaps in coverage:
+- Add global rate limiting middleware
+  - Services: register rate limiting with named policies in `src/Web/DependencyInjection.cs` (or `Program.cs`):
+    - otp-request-ip: fixed window per IP (e.g., 5/min, 30/hour).
+    - otp-verify-ip: fixed window per IP (e.g., 10/5min).
+  - Pipeline: call `app.UseRateLimiter()` early (after exception handler, before auth/endpoint mapping) in `src/Web/Program.cs`.
+  - Rejections: configure `RejectionStatusCode = 429` and `OnRejected` to set `Retry-After` header.
 
-- In the `Errors` namespace, several properties and methods in `CouponErrors` have 0% coverage. Notably, error properties like `CannotIncrementUsageWhenDisabled`, `CannotIncrementUsageWhenExpired`, `InvalidType`, `MinAmountNotMet`, `NotApplicable`, `UserUsageLimitExceeded`, and methods such as `CouponCodeAlreadyExists`, `CouponNotFound`, and `InvalidCouponId` are not covered by tests. These likely represent edge cases or error conditions that are not being triggered in the current test suite.
+- Apply policies to OTP endpoints
+  - In `src/Web/Endpoints/Users.cs`:
+    - `/auth/otp/request` → `.RequireRateLimiting("otp-request-ip")`
+    - `/auth/otp/verify` → `.RequireRateLimiting("otp-verify-ip")`
 
-- In the `Events` namespace, the `CouponDeleted` event’s constructor is not covered, suggesting that scenarios involving coupon deletion are missing from tests.
+- Implement per-phone throttling and lockouts (business-level)
+  - Add store interface `IOtpThrottleStore` in `src/Application/Common/Interfaces/IServices/` with methods:
+    - `IncrementRequestCount(phone, window)`; `GetRequestCount(phone, window)`; `GetRetryAfter(phone, window)`; `Reset(phone)`
+    - `RecordFailedVerify(phone)`; `GetFailedVerifyCount(phone, window)`; `SetLockout(phone, duration)`; `GetLockoutRemaining(phone)`
+  - Provide implementation using distributed cache in `src/Infrastructure/Caching/` (e.g., Redis via `IDistributedCache`) with atomic increments and expirations. Use keys per phone.
+  - Register in `src/Infrastructure/DependencyInjection.cs`.
 
-- Within `ValueObjects`, constructors for `AppliesTo`, `CouponId`, and `CouponValue` with no parameters are not covered. Additionally, methods like `Create` in `CouponId` and some anonymous methods in `GetEqualityComponents` are not fully exercised.
+- Enforce per-phone throttles in handlers
+  - `RequestPhoneOtpCommandHandler`:
+    - Before generating code, check per-phone windows (e.g., 3/min, 10/hour). If exceeded, return Result failure with code `Otp.Throttled`. Include retry seconds in error description.
+  - `VerifyPhoneOtpCommandHandler`:
+    - If locked out, return failure `Otp.LockedOut`.
+    - On invalid code: increment failed count; once threshold hit (e.g., 5 failures in 10 min), set lockout (e.g., 5 min) and return `Otp.LockedOut`.
+    - On success: `ConfirmPhoneAsync(...)` and reset failed counters/lockout.
 
-- The main `Coupon` type has several properties and methods with 0% coverage, especially those related to deletion (`IsDeleted`, `DeletedBy`, `DeletedOn`, `MarkAsDeleted`), creation metadata (`Created`, `CreatedBy`, `LastModified`, `LastModifiedBy`), and some constructors. This suggests that test cases for coupon lifecycle events (creation, deletion, modification) and related metadata are incomplete.
+- Map throttling/lockout to HTTP responses
+  - Keep using `CustomResults` with current pattern:
+    - `Otp.Throttled` → 429 Too Many Requests; add `Retry-After` header from store’s remaining wait.
+    - `Otp.LockedOut` → 423 Locked (or 429; choose one and document), include `Retry-After`.
+  - Implement header setting in endpoint layer:
+    - When `result.ToIResult()` returns a Problem, add a small helper (e.g., extension on `IResult` or wrap in endpoint) to set `Retry-After` when `error.Code` is `Otp.Throttled`/`Otp.LockedOut`.
+    - Alternatively, carry `retryAfterSeconds` in `Error.Description` and set the header right before returning.
 
-In summary, the uncovered code is concentrated around error handling, deletion events, constructors with no parameters, and metadata properties. Improving coverage in these areas would require adding tests that specifically trigger these error conditions, deletion scenarios, and lifecycle events.
+- Configuration and tuning
+  - Add `appsettings` section:
+    - `RateLimiting: OtpRequest: PerIp: {PerMinute, PerHour}, PerPhone: {PerMinute, PerHour}`
+    - `RateLimiting: OtpVerify: PerIp: {Per5Min}, PerPhone: {FailedAttemptsWindowMinutes, LockoutMinutes, MaxFailedAttempts}`
+  - Bind to options and use in both middleware policies and `IOtpThrottleStore`.
 
----
+- Security/infra considerations
+  - If behind a proxy/CDN, enable forwarded headers to get client IP before rate limiting.
+  - Prefer Redis for consistency across instances; fallback to `IMemoryCache` for dev.
 
-Here’s a synthesis of the test coverage report for the `CustomizationGroupAggregate`:
+- Documentation
+  - Update `Docs/API-Documentation/02-Authentication.md`:
+    - Document 429 for throttled OTP request with `Retry-After`.
+    - Document lockout on verify failures (423 or 429) with `Retry-After`.
+    - Clarify per-phone vs per-IP protections.
+  - Note: Development still returns 200 with `{ code }` for `/otp/request`; throttles apply equally.
 
-The overall coverage is 74%, meaning a significant portion of the code is tested, but there are notable gaps.
+- Tests
+  - `tests/Web.ApiContractTests`: assert 429 and `Retry-After` after exceeding `/auth/otp/request` policy.
+  - `tests/Application.FunctionalTests`: simulate failed verify attempts and assert lockout response and header; assert reset after success or lockout duration elapses.
 
-Key areas not fully covered:
-
-- In the `Entities` namespace, the `CustomizationChoice` type has incomplete coverage for its parameterless constructor and the method `Create(ChoiceId, ...)`, which is only 56% covered. This suggests that scenarios involving default construction and some creation paths are not fully exercised.
-
-- The `Events` namespace is mostly covered, but the `CustomizationGroupDeleted` event’s constructor is not tested at all. This indicates that deletion scenarios for customization groups are missing from the test suite.
-
-- The `ValueObjects` namespace has low coverage, especially for constructors without parameters and methods like `Create(Guid)` and `Create(string)` in both `ChoiceId` and `CustomizationGroupId`. These methods and constructors are not covered, implying that edge cases or alternative creation paths are not being tested.
-
-- The main `CustomizationGroup` type has several properties and methods with 0% coverage, particularly those related to metadata and deletion: `Created`, `CreatedBy`, `DeletedBy`, `DeletedOn`, `IsDeleted`, `LastModified`, `LastModifiedBy`, and the method `MarkAsDeleted`. This means that lifecycle events and metadata handling are not validated by tests.
-
-- Some property getters, such as for `Choices`, are only partially covered, and some methods like `AddChoice`, `AddChoiceWithAutoOrder`, `ReorderChoices`, and `UpdateChoice` are not fully exercised, indicating that certain branches or edge cases within these methods are not being hit.
-
-In summary, the uncovered code is concentrated around constructors with no parameters, alternative creation methods, deletion events, and metadata properties. To improve coverage, tests should be added for default construction, deletion scenarios, and all creation paths, as well as for handling and updating metadata. Edge cases and less common branches within methods should also be targeted.
-
----
-
-Here is a detailed list of all methods and properties in the `MenuEntity` that are not covered by tests (0% coverage):
-
-### Errors Namespace (`MenuErrors`)
-- Constructor: `MenuErrors()`
-- Method: `CategoryNotFound(string):Error`
-- Method: `DuplicateCategoryName(string):Error`
-
-### Events Namespace
-- Constructor: `MenuCategoryRemoved(MenuId,MenuCategoryId)`
-- Constructor: `MenuRemoved(MenuId,RestaurantId)`
-
-### ValueObjects Namespace
-#### `MenuCategoryId`
-- Constructor: `MenuCategoryId()`
-- Method: `Create(Guid):MenuCategoryId`
-
-#### `MenuId`
-- Constructor: `MenuId()`
-- Method: `Create(Guid):MenuId`
-- Method: `Create(string):Result<MenuId>`
-
-### Menu Type
-- Constructor: `Menu()`
-- AutoProperty: `Created:DateTimeOffset`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `CreatedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `DeletedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `DeletedOn:Nullable<DateTimeOffset>`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `IsDeleted:bool`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `LastModified:DateTimeOffset`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `LastModifiedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- Method: `MarkAsDeleted(DateTimeOffset,string):Result`
-
-### MenuCategory Type
-- Constructor: `MenuCategory()`
-- AutoProperty: `Created:DateTimeOffset`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `CreatedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `DeletedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `DeletedOn:Nullable<DateTimeOffset>`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `IsDeleted:bool`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `LastModified:DateTimeOffset`
-  - PropertyGetter
-  - PropertySetter
-- AutoProperty: `LastModifiedBy:string`
-  - PropertyGetter
-  - PropertySetter
-- Method: `MarkAsDeleted(DateTimeOffset,string):Result`
-
-These methods and properties are not exercised by any tests and represent the main gaps in coverage for the `MenuEntity`.
+- Impacted files
+  - `src/Web/DependencyInjection.cs` or `src/Web/Program.cs`: AddRateLimiter config; UseRateLimiter.
+  - `src/Web/Endpoints/Users.cs`: Apply `.RequireRateLimiting(...)`; set `Retry-After` for throttled/locked responses.
+  - `src/Application/Auth/Commands/RequestPhoneOtp/*`, `VerifyPhoneOtp/*`: Throttle and lockout checks.
+  - `src/Infrastructure/Caching/*`: `IOtpThrottleStore` implementation.
+  - `Docs/API-Documentation/02-Authentication.md`: Behavior and headers.
+  - appsettings.*: thresholds.

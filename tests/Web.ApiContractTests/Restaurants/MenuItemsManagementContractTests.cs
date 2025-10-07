@@ -88,7 +88,7 @@ public class MenuItemsManagementContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        raw.Should().Contain("\"status\":400").And.Contain("\"title\":\"MenuItem\"");
+        raw.Should().Contain("\"status\":400").And.Contain("\"title\":\"MenuItem.Invalid\"");
     }
 
     [Test]
@@ -220,7 +220,7 @@ public class MenuItemsManagementContractTests
         var resp = await client.PutAsJsonAsync(path, new AssignMenuItemToCategoryRequestDto(Guid.NewGuid()), DomainJson.Options);
         var raw = await resp.Content.ReadAsStringAsync();
         resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        raw.Should().Contain("\"status\":409").And.Contain("\"title\":\"MenuItem\"");
+        raw.Should().Contain("\"status\":409").And.Contain("\"title\":\"MenuItem.CategoryNotBelongsToRestaurant\"");
     }
 
     #endregion

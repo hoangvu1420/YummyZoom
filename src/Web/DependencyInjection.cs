@@ -1,10 +1,14 @@
 ﻿using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Asp.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using YummyZoom.Application.Common.Configuration;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Infrastructure.Serialization;
@@ -136,6 +140,53 @@ public static class DependencyInjection
         // Result explanations & badges options (configurable thresholds)
         builder.Services.Configure<ResultExplanationOptions>(
             builder.Configuration.GetSection("Search:ResultExplanation"));
+
+        // Rate limiting options
+        builder.Services.Configure<RateLimitingOptions>(
+            builder.Configuration.GetSection(RateLimitingOptions.SectionName));
+
+        // Rate limiting for OTP endpoints
+        builder.Services.AddRateLimiter(options =>
+        {
+            var rateLimitingConfig = builder.Configuration.GetSection(RateLimitingOptions.SectionName).Get<RateLimitingOptions>() ?? new RateLimitingOptions();
+            
+            // OTP Request rate limiting per IP
+            options.AddPolicy("otp-request-ip", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = rateLimitingConfig.OtpRequest.PerIp.PerMinute,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+
+            // OTP Verify rate limiting per IP
+            options.AddPolicy("otp-verify-ip", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = rateLimitingConfig.OtpVerify.PerIp.Per5Min,
+                        Window = TimeSpan.FromMinutes(5),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = async (context, token) =>
+            {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter = retryAfter.TotalSeconds.ToString();
+                }
+                
+                await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+            };
+        });
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

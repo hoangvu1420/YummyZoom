@@ -121,6 +121,9 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IPhoneNumberNormalizer, Phone.DefaultPhoneNumberNormalizer>();
         builder.Services.AddTransient<ISmsSender, Notifications.Sms.LoggingSmsSender>();
         builder.Services.AddScoped<IPhoneOtpService, StaticPhoneOtpService>();
+        
+        // OTP throttling store
+        builder.Services.AddScoped<IOtpThrottleStore, OtpThrottleStore>();
     }
 
     private static void AddAuthorizationServices(this IHostApplicationBuilder builder)

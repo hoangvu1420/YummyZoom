@@ -16,6 +16,7 @@ using YummyZoom.Application.Users.Commands.UpsertPrimaryAddress;
 using YummyZoom.Application.Users.Queries.GetMyProfile;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Identity;
+using YummyZoom.Web.Infrastructure;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -172,17 +173,20 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(command);
             if (!result.IsSuccess) return result.ToIResult();
 
+            var environmentName = environment.EnvironmentName;
+
             if (environment.IsDevelopment())
             {
-                return Results.Ok(new { code = result.Value.Code });
+                return new EnvironmentHeaderResult(Results.Ok(new { code = result.Value.Code }), environmentName);
             }
 
-            return Results.Accepted();
+            return new EnvironmentHeaderResult(Results.Accepted(), environmentName);
         })
         .WithName("Auth_Otp_Request")
         .WithSummary("Request phone OTP code")
         .WithDescription("Requests a one-time code for the provided phone number. In development, the code is returned in the response; in production a 202 Accepted is returned and the code is sent via SMS.")
         .WithStandardResults()
+        .RequireRateLimiting("otp-request-ip")
         .AllowAnonymous();
 
         // POST /api/v1/users/auth/otp/verify
@@ -207,6 +211,7 @@ public class Users : EndpointGroupBase
         .WithSummary("Verify phone OTP code")
         .WithDescription("Verifies the one-time code and signs in the user. Returns onboarding flags indicating whether the client should complete signup.")
         .WithStandardResults()
+        .RequireRateLimiting("otp-verify-ip")
         .AllowAnonymous();
 
         #endregion

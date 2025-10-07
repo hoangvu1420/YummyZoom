@@ -17,10 +17,15 @@ Authorization: Bearer <access_token>
 
 Two public endpoints handle OTP-based sign-in. In development, the OTP code is returned in the response for convenience; in production, it is delivered via SMS and the API returns `202 Accepted`.
 
+**Environment Detection**: All OTP request responses include an `X-YummyZoom-Environment` header indicating the current environment (e.g., `Development`, `Production`, `Test`). This allows clients to explicitly detect the environment rather than inferring it from response structure.
+
 #### Request OTP
 
 - **Method/Path**: `POST /api/v1/users/auth/otp/request`
 - **Authorization**: Public
+- **Rate Limiting**: 
+  - Per IP: 5 requests/minute, 30 requests/hour
+  - Per Phone: 1 request/minute, 10 requests/hour
 - **Body**
 ```json
 { "phoneNumber": "+15551234567" }
@@ -30,20 +35,55 @@ Two public endpoints handle OTP-based sign-in. In development, the OTP code is r
     ```json
     { "code": "123456" }
     ```
+    - **Headers**: `X-YummyZoom-Environment: Development`
   - 202 Accepted (production): no body; code is sent via SMS
+    - **Headers**: `X-YummyZoom-Environment: Production`
+  
+  **Note**: The `X-YummyZoom-Environment` header contains the actual environment name and may include other values like `Test` for testing environments.
+  - 429 Too Many Requests: Rate limit exceeded
+    ```json
+    {
+      "status": 429,
+      "title": "Otp.Throttled",
+      "detail": "Too many requests. Please try again in 60 seconds.",
+      "type": "https://tools.ietf.org/html/rfc6585#section-4"
+    }
+    ```
+    - **Headers**: `Retry-After: 60` (seconds until next request allowed)
   - 400/500: Problem details on error
 
 #### Verify OTP (Sign-In)
 
 - **Method/Path**: `POST /api/v1/users/auth/otp/verify`
 - **Authorization**: Public
+- **Rate Limiting**: 
+  - Per IP: 10 requests/5 minutes
+  - Per Phone: Lockout after 5 failed attempts in 10 minutes (5-minute lockout)
 - **Body**
 ```json
 { "phoneNumber": "+15551234567", "code": "123456" }
 ```
-- **Success**
-  - Returns a sign-in that emits bearer tokens (see Token Response below)
-  - Also indicates onboarding flags in the application response model prior to token emission
+- **Responses**
+  - **Success**: Returns a sign-in that emits bearer tokens (see Token Response below)
+  - 400 Bad Request: Invalid or expired code
+    ```json
+    {
+      "status": 400,
+      "title": "Otp.Invalid",
+      "detail": "Invalid or expired code."
+    }
+    ```
+  - 423 Locked: Account temporarily locked due to failed attempts
+    ```json
+    {
+      "status": 423,
+      "title": "Otp.LockedOut",
+      "detail": "Account temporarily locked. Please try again in 300 seconds.",
+      "type": "https://tools.ietf.org/html/rfc4918#section-11.3"
+    }
+    ```
+    - **Headers**: `Retry-After: 300` (seconds until lockout expires)
+  - 429 Too Many Requests: IP rate limit exceeded
 
 ### Token Response and Usage
 
@@ -197,7 +237,39 @@ Authentication and authorization failures return standard problem details:
 { "status": 403, "title": "Forbidden", "type": "https://tools.ietf.org/html/rfc7231#section-6.5.3" }
 ```
 
+- **429 Too Many Requests** (Rate limiting)
+```json
+{ 
+  "status": 429, 
+  "title": "Otp.Throttled", 
+  "detail": "Too many requests. Please try again in 60 seconds.",
+  "type": "https://tools.ietf.org/html/rfc6585#section-4"
+}
+```
+
+- **423 Locked** (Account lockout)
+```json
+{ 
+  "status": 423, 
+  "title": "Otp.LockedOut", 
+  "detail": "Account temporarily locked. Please try again in 300 seconds.",
+  "type": "https://tools.ietf.org/html/rfc4918#section-11.3"
+}
+```
+
+**Rate Limiting Headers**: When rate limits are exceeded, the response includes a `Retry-After` header indicating the number of seconds to wait before making another request.
+
 Validation failures (e.g., malformed phone number) return `400 Bad Request` with validation details.
+
+### Rate Limiting Protection
+
+The OTP endpoints implement multiple layers of protection against abuse:
+
+1. **Per-IP Rate Limiting**: Applied by middleware to prevent abuse from individual IP addresses
+2. **Per-Phone Throttling**: Strict business-level limits (1 request/minute) to prevent spam to specific phone numbers
+3. **Failed Verification Lockout**: Temporary account lockout after repeated failed verification attempts
+
+**Configuration**: Rate limits are configurable via `appsettings.json` under the `RateLimiting` section. Development environments typically have more lenient limits for testing purposes.
 
 ### Field Conventions
 

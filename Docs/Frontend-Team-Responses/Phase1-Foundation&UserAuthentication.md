@@ -244,7 +244,7 @@ X-YummyZoom-Environment: Development|Production|Test
 - **No Email Login**: Phone remains sole authentication method
 
 **Q6. Token Timestamps**
-- **Current**: Only `expiresIn` (3600s access, 7 days refresh)
+- **Current**: Only `expiresIn` (3600s access, 7 days refresh) included in response body
 - **No Absolute Times**: `issuedAt`/`expiresAt` not included by default
 - **Enhancement**: Would require custom token response
 

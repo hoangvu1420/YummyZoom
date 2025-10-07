@@ -111,6 +111,32 @@ ValidationProblemDetails example:
 }
 ```
 
+#### ProblemDetails conventions in YummyZoom
+
+We use RFC 7807 Problem Details for errors. In addition to the standard fields:
+
+- Title: carries the machine-readable error “code” from our Result pattern (e.g., `MenuItem.Invalid`, `Authentication.OtpInvalid`). Clients SHOULD key logic on Title.
+- Detail: human-readable description suitable for display/logging.
+- Type: RFC reference URI indicating the general HTTP semantics (e.g., `https://tools.ietf.org/html/rfc7231#section-6.5.1`), not a product-specific taxonomy.
+- Status: HTTP status code.
+- traceId: distributed trace identifier for diagnostics (when available).
+
+Example (business error returned via CustomResults):
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "MenuItem.Invalid",
+  "status": 400,
+  "detail": "Invalid",
+  "traceId": "00-056eecec5619689e167cfbb47d79f031-80783a52973989bd-01"
+}
+```
+
+Notes:
+- Titles are stable and versioned by domain (e.g., `Authentication.OtpExpired`), enabling deterministic client handling.
+- Validation errors use `ValidationProblemDetails` and include an `errors` dictionary as shown above.
+- We may later add a separate `errorCode` field for telemetry; Title remains the canonical machine code.
+
 See the Error Codes appendix for a categorized list of errors and meanings.
 
 ### Request/Response Style
@@ -124,5 +150,3 @@ See the Error Codes appendix for a categorized list of errors and meanings.
 - Authentication: `./02-Authentication.md`
 - Real-time events: `./04-Real-time-Events-API.md`
 - Error codes: `./Appendices/01-Error-Codes.md`
-
-
