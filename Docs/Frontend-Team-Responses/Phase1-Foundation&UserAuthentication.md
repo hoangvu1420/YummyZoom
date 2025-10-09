@@ -144,7 +144,7 @@ Status: Ready to share with backend for confirmation. No blocking changes identi
 ### 8) Backend Response: Problem Details Convention
 
 **RFC 7807 Structure:**
-- `title` = Error code (e.g., `Otp.Invalid`, `MenuItem.Invalid`)
+- `title` = Application logic Error code (e.g., `Otp.Invalid`, `MenuItem.Invalid`)
 - `detail` = Human-readable message
 - `type` = RFC URI
 - Clients should key off `title` for programmatic handling

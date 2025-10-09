@@ -44,4 +44,12 @@ public interface IUserDeviceSessionRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of all active FCM tokens.</returns>
     Task<List<string>> GetAllActiveFcmTokensAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the most recent login time for a user across all their sessions.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The most recent login time, or null if no sessions found.</returns>
+    Task<DateTime?> GetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default);
 }

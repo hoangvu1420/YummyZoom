@@ -28,6 +28,8 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseRateLimiter();
 
 app.UseAuthentication();
@@ -55,12 +57,12 @@ app.UseStaticFiles();
 app.UseExceptionHandler(options => { });
 
 app.Map("/", () => Results.Redirect("/api"));
+app.Map("/ping", () => Results.Ok("pong"));
 
 app.MapDefaultEndpoints();
 
 // Map versioned endpoints.
 app.MapVersionedEndpoints();
-
 
 // Map SignalR hubs
 app.MapHub<YummyZoom.Web.Realtime.Hubs.RestaurantOrdersHub>("/hubs/restaurant-orders");

@@ -347,4 +347,42 @@ public class IdentityService : IIdentityService
         var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));
         return Result.Failure(UserErrors.RegistrationFailed($"Failed to set password: {errors}"));
     }
+
+    public async Task<Guid?> FindUserIdByPhoneAsync(string phoneNumber)
+    {
+        var user = await _userManager.FindByNameAsync(phoneNumber);
+        return user?.Id;
+    }
+
+    public async Task<bool> HasPasswordAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) return false;
+        
+        return await _userManager.HasPasswordAsync(user);
+    }
+
+    public async Task<bool> IsLockedOutAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) return false;
+        
+        return await _userManager.IsLockedOutAsync(user);
+    }
+
+    public async Task<DateTimeOffset?> GetLockoutEndDateAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) return null;
+        
+        return await _userManager.GetLockoutEndDateAsync(user);
+    }
+
+    public async Task<bool> IsPhoneNumberConfirmedAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) return false;
+        
+        return user.PhoneNumberConfirmed;
+    }
 }

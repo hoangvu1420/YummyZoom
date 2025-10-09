@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using YummyZoom.Application.Auth.Commands.CheckAuthStatus;
 using YummyZoom.Application.Auth.Commands.CompleteSignup;
 using YummyZoom.Application.Auth.Commands.RequestPhoneOtp;
 using YummyZoom.Application.Auth.Commands.SetPassword;
@@ -159,10 +160,26 @@ public class Users : EndpointGroupBase
 
         #endregion
 
-        #region Authentication – Phone OTP (Public)
+        #region Authentication – Status Check (Public)
 
         // Public endpoints (no authentication required)
         var publicGroup = app.MapGroup(this);
+
+        // POST /api/v1/auth/status
+        publicGroup.MapPost("/auth/status", async ([FromBody] CheckAuthStatusCommand command, ISender sender) =>
+        {
+            var result = await sender.Send(command);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("Auth_CheckStatus")
+        .WithSummary("Check authentication status for phone number")
+        .WithDescription("Checks if a phone number exists and what authentication methods are available. Returns user status, profile completion status, and security information.")
+        .WithStandardResults<CheckAuthStatusResponse>()
+        .AllowAnonymous();
+
+        #endregion
+
+        #region Authentication – Phone OTP (Public)
 
         // POST /api/v1/users/auth/otp/request
         publicGroup.MapPost("/auth/otp/request", async (

@@ -25,4 +25,14 @@ public interface IIdentityService
     Task<bool> UserExistsAsync(Guid userId);
 
     Task<Result> SetPasswordAsync(string userId, string newPassword);
+
+    Task<Guid?> FindUserIdByPhoneAsync(string phoneNumber);
+
+    Task<bool> HasPasswordAsync(Guid userId);
+
+    Task<bool> IsLockedOutAsync(Guid userId);
+
+    Task<DateTimeOffset?> GetLockoutEndDateAsync(Guid userId);
+
+    Task<bool> IsPhoneNumberConfirmedAsync(Guid userId);
 }

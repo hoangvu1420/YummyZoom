@@ -61,4 +61,13 @@ public class UserDeviceSessionRepository : IUserDeviceSessionRepository
             .Select(s => s.FcmToken)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<DateTime?> GetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.UserDeviceSessions
+            .Where(s => s.UserId == userId)
+            .OrderByDescending(s => s.LastLoginAt)
+            .Select(s => s.LastLoginAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

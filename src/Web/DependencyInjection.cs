@@ -38,6 +38,17 @@ public static class DependencyInjection
 
         builder.Services.AddEndpointsApiExplorer();
 
+        // Add CORS policy
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
         // Add API Versioning
         builder.Services.AddApiVersioning(options =>
         {

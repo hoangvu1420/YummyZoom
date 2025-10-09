@@ -19,6 +19,89 @@ Authorization: Bearer <access_token>
 
 ---
 
+## Authentication Status Check
+
+### Check Authentication Status
+
+Checks if a phone number exists in the system and what authentication methods are available.
+
+**`POST /api/v1/auth/status`**
+
+- **Authorization:** Public (no authentication required)
+- **Content-Type:** `application/json`
+
+#### Request Body
+
+```json
+{
+  "phone": "+1234567890",
+  "country_code": "US"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `phone` | `string` | Yes | Phone number in E.164 format |
+| `country_code` | `string` | No | Optional country code to assist with validation |
+
+#### Responses
+
+**✅ 200 OK**
+```json
+{
+  "success": true,
+  "data": {
+    "user_status": "existing_with_password",
+    "user_exists": true,
+    "has_password": true,
+    "profile_complete": true,
+    "user_info": {
+      "first_name": "John",
+      "user_id": "uuid-123",
+      "last_login": "2024-10-07T10:30:00Z",
+      "account_created": "2024-08-15T14:22:00Z"
+    },
+    "security_info": {
+      "phone_verified": true,
+      "account_locked": false,
+      "failed_attempts": 0,
+      "lockout_until": null
+    }
+  }
+}
+```
+
+#### User Status Values
+
+| Status | Description |
+|--------|-------------|
+| `NewUser` | Phone number not found in system |
+| `ExistingNoPassword` | User exists but hasn't set a password (OTP-only) |
+| `ExistingWithPassword` | User exists and has password set |
+| `AccountLocked` | User exists but account is temporarily locked |
+
+**❌ 400 Bad Request**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_PHONE_FORMAT",
+    "message": "Phone number must be in E.164 format",
+    "details": null
+  }
+}
+```
+
+#### Error Codes
+
+| Code | Description | HTTP Status |
+|------|-------------|-------------|
+| `INVALID_PHONE_FORMAT` | Phone number format invalid | 400 |
+| `SERVICE_UNAVAILABLE` | Database/service error | 503 |
+| `VALIDATION_ERROR` | Request validation failed | 400 |
+
+---
+
 ## Phone OTP Authentication
 
 ### Request OTP Code
