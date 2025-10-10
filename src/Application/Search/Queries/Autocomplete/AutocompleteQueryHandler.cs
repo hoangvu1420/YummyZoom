@@ -6,7 +6,7 @@ using YummyZoom.SharedKernel;
 namespace YummyZoom.Application.Search.Queries.Autocomplete;
 
 // Request + DTO
-public sealed record AutocompleteQuery(string Term) : IRequest<Result<IReadOnlyList<SuggestionDto>>>;
+public sealed record AutocompleteQuery(string Term, int Limit = 10) : IRequest<Result<IReadOnlyList<SuggestionDto>>>;
 
 public sealed record SuggestionDto(Guid Id, string Type, string Name);
 
@@ -16,6 +16,7 @@ public sealed class AutocompleteQueryValidator : AbstractValidator<AutocompleteQ
     public AutocompleteQueryValidator()
     {
         RuleFor(x => x.Term).NotEmpty().MinimumLength(1).MaximumLength(64);
+        RuleFor(x => x.Limit).InclusiveBetween(1, 50);
     }
 }
 
@@ -43,13 +44,12 @@ public sealed class AutocompleteQueryHandler
                       CASE WHEN s."Name" ILIKE @prefix THEN 1 ELSE 0 END
                    ) DESC,
                    s."UpdatedAt" DESC
-            LIMIT 10;
+            LIMIT @limit;
             """;
 
         var list = await conn.QueryAsync<SuggestionDto>(
-            new CommandDefinition(sql, new { q = request.Term, prefix = request.Term + "%" }, cancellationToken: ct));
+            new CommandDefinition(sql, new { q = request.Term, prefix = request.Term + "%", limit = request.Limit }, cancellationToken: ct));
 
         return Result.Success((IReadOnlyList<SuggestionDto>)list.ToList());
     }
 }
-

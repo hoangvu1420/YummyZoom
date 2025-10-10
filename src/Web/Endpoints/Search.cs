@@ -43,12 +43,13 @@ public class Search : EndpointGroupBase
         publicGroup.MapGet("/autocomplete", async ([AsParameters] AutocompleteRequestDto req, ISender sender) =>
         {
             var term = req.Term ?? string.Empty; // avoid Minimal API 400 for missing non-nullable ref by coalescing here
-            var res = await sender.Send(new AutocompleteQuery(term));
+            var limit = req.Limit ?? 10;
+            var res = await sender.Send(new AutocompleteQuery(term, limit));
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })
         .WithName("Autocomplete")
         .WithSummary("Autocomplete suggestions")
-        .WithDescription("Returns up to 10 suggestions for the given query term across searchable entities.")
+        .WithDescription("Returns up to N suggestions for the given query term across searchable entities. The optional 'limit' query parameter controls N (default 10; range 1..50).")
         .WithStandardResults<IReadOnlyList<SuggestionDto>>();
     }
 }
@@ -71,4 +72,5 @@ public sealed record UniversalSearchRequestDto
 public sealed record AutocompleteRequestDto
 {
     public string? Term { get; init; }
+    public int? Limit { get; init; }
 }

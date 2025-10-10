@@ -704,29 +704,52 @@ public class Restaurants : EndpointGroupBase
         publicGroup.MapGet("/{restaurantId:guid}/info", async (Guid restaurantId, ISender sender) =>
         {
             var result = await sender.Send(new GetRestaurantPublicInfoQuery(restaurantId));
-            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+            if (!result.IsSuccess) return result.ToIResult();
+
+            var dto = result.Value;
+            // Option B: fetch review summary separately and project optional rating fields.
+            decimal? avg = null;
+            int? count = null;
+            var summaryRes = await sender.Send(new GetRestaurantReviewSummaryQuery(restaurantId));
+            if (summaryRes.IsSuccess)
+            {
+                avg = (decimal)summaryRes.Value.AverageRating;
+                count = summaryRes.Value.TotalReviews;
+            }
+
+            var response = new RestaurantPublicInfoResponseDto(
+                dto.RestaurantId,
+                dto.Name,
+                dto.LogoUrl,
+                dto.CuisineTags,
+                dto.IsAcceptingOrders,
+                dto.City,
+                avg,
+                count);
+
+            return Results.Ok(response);
         })
         .WithName("GetRestaurantPublicInfo")
         .WithSummary("Get restaurant's public information")
         .WithDescription("Retrieves basic public information about a restaurant such as name, address, and contact details. Public endpoint - no authentication required.")
-        .Produces<object>(StatusCodes.Status200OK)
+        .Produces<RestaurantPublicInfoResponseDto>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/search
-        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, ISender sender) =>
+        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, string? sort, ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
 
-            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating);
+            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating, sort);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("SearchRestaurants")
         .WithSummary("Search restaurants")
-        .WithDescription("Searches for restaurants by name, cuisine type, and/or location with optional radius filtering. Returns paginated results. Public endpoint - no authentication required.")
+        .WithDescription("Searches for restaurants by name, cuisine type, and/or location. Supports sort=rating|distance. When lat/lng are provided, returns distanceKm and allows sort=distance. Public endpoint - no authentication required.")
         .Produces<object>(StatusCodes.Status200OK)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -827,5 +850,17 @@ public class Restaurants : EndpointGroupBase
         string? MinOrderCurrency,
         int? TotalUsageLimit,
         int? UsageLimitPerUser);
+    #endregion
+
+    #region DTOs for Public Info (Response)
+    public sealed record RestaurantPublicInfoResponseDto(
+        Guid RestaurantId,
+        string Name,
+        string? LogoUrl,
+        IReadOnlyList<string> CuisineTags,
+        bool IsAcceptingOrders,
+        string? City,
+        decimal? AvgRating,
+        int? RatingCount);
     #endregion
 }

@@ -62,19 +62,52 @@ public class CompleteSignupCommandHandler : IRequestHandler<CompleteSignupComman
             var userGuid = Guid.Parse(_currentUser.Id);
             var domainUserId = UserId.Create(userGuid);
 
-            // If user already exists, treat as success (idempotent completion)
+            // Check if user already exists
             var existing = await _userRepository.GetByIdAsync(domainUserId, cancellationToken);
+            
+            var name = request.Name.Trim();
+            var email = string.IsNullOrWhiteSpace(request.Email) ? $"{userGuid:N}@signup.temp" : request.Email.Trim();
+
             if (existing is not null)
             {
+                // Update existing user with new values (idempotent but updates profile)
+                // Preserve existing phone number instead of getting from Identity username (which might have been changed to email)
+                var updateProfileResult = existing.UpdateProfile(name, existing.PhoneNumber);
+                if (updateProfileResult.IsFailure)
+                {
+                    return Result.Failure(updateProfileResult.Error);
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                {
+                    var updateEmailResult = existing.UpdateEmail(email);
+                    if (updateEmailResult.IsFailure)
+                    {
+                        return Result.Failure(updateEmailResult.Error);
+                    }
+                }
+
+                // Update domain user
+                await _userRepository.UpdateAsync(existing, cancellationToken);
+
+                // Also update Identity user to keep them in sync
+                // Update email in Identity if provided and different from temp email
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                {
+                    var identityUpdateResult = await _identityService.UpdateEmailAsync(_currentUser.Id!, email);
+                    if (identityUpdateResult.IsFailure)
+                    {
+                        return identityUpdateResult;
+                    }
+                }
+
                 return Result.Success();
             }
 
-            // Try to use Identity's username as phone (OTP flow sets username to phone E.164)
+            // Create new user if doesn't exist
+            // Get phone from Identity username (OTP flow sets username to phone E.164)
             var username = await _identityService.GetUserNameAsync(_currentUser.Id);
             var phoneE164 = username; // may be null or non-phone in other auth modes
-
-            var name = request.Name.Trim();
-            var email = string.IsNullOrWhiteSpace(request.Email) ? $"{userGuid:N}@signup.temp" : request.Email.Trim();
 
             var createResult = User.Create(
                 domainUserId,
@@ -89,6 +122,18 @@ public class CompleteSignupCommandHandler : IRequestHandler<CompleteSignupComman
             }
 
             await _userRepository.AddAsync(createResult.Value, cancellationToken);
+
+            // Also update Identity user to keep them in sync when creating new domain user
+            // Update email in Identity if provided and different from temp email
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                var identityUpdateResult = await _identityService.UpdateEmailAsync(_currentUser.Id!, email);
+                if (identityUpdateResult.IsFailure)
+                {
+                    return identityUpdateResult;
+                }
+            }
+
             return Result.Success();
         }, cancellationToken);
     }

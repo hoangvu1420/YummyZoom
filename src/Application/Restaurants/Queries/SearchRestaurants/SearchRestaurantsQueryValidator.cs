@@ -19,14 +19,23 @@ public sealed class SearchRestaurantsQueryValidator : AbstractValidator<SearchRe
         RuleFor(x => x.Cuisine)
             .MaximumLength(50);
 
-        When(x => x.Lat.HasValue || x.Lng.HasValue || x.RadiusKm.HasValue, () =>
+        // Geo: allow lat/lng without radius for distance sorting and distanceKm projection.
+        When(x => x.Lat.HasValue || x.Lng.HasValue, () =>
         {
-            RuleFor(x => x.Lat)
-                .NotNull().InclusiveBetween(-90, 90);
-            RuleFor(x => x.Lng)
-                .NotNull().InclusiveBetween(-180, 180);
-            RuleFor(x => x.RadiusKm)
-                .NotNull().GreaterThan(0).LessThanOrEqualTo(25);
+            RuleFor(x => x.Lat).NotNull().InclusiveBetween(-90, 90);
+            RuleFor(x => x.Lng).NotNull().InclusiveBetween(-180, 180);
+        });
+
+        // Radius currently unsupported for this endpoint (map viewport/radius coming later)
+        RuleFor(x => x.RadiusKm)
+            .Null().WithMessage("RadiusKm is not supported.");
+
+        // Sort: allow only rating|distance for now (case-insensitive)
+        When(x => !string.IsNullOrWhiteSpace(x.Sort), () =>
+        {
+            RuleFor(x => x.Sort!)
+                .Must(s => new[] { "rating", "distance" }.Contains(s.Trim().ToLowerInvariant()))
+                .WithMessage("Sort must be one of: rating, distance.");
         });
     }
 }

@@ -30,7 +30,15 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             to_jsonb(array_remove(ARRAY[r."CuisineType"], NULL))::text AS CuisineTagsJson,
             COALESCE(rr."AverageRating", 0)::numeric AS AvgRating,
             COALESCE(rr."TotalReviews", 0)          AS RatingCount,
-            r."Location_City"       AS City
+            r."Location_City"       AS City,
+            CASE 
+                WHEN CAST(@Lat AS double precision) IS NOT NULL AND CAST(@Lng AS double precision) IS NOT NULL 
+                     AND r."Geo_Latitude" IS NOT NULL AND r."Geo_Longitude" IS NOT NULL THEN
+                    6371 * 2 * ASIN(SQRT(POWER(SIN(RADIANS((CAST(@Lat AS double precision) - r."Geo_Latitude")/2)),2) 
+                        + COS(RADIANS(CAST(@Lat AS double precision))) * COS(RADIANS(r."Geo_Latitude")) 
+                        * POWER(SIN(RADIANS((CAST(@Lng AS double precision) - r."Geo_Longitude")/2)),2)))
+                ELSE NULL
+            END                      AS DistanceKm
             """;
 
         var where = new List<string> { "r.\"IsDeleted\" = false", "r.\"IsVerified\" = true" };
@@ -54,8 +62,26 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             parameters.Add("MinRating", request.MinRating.Value);
         }
 
+        // Parameters used in distance calculation (may be null)
+        parameters.Add("Lat", request.Lat);
+        parameters.Add("Lng", request.Lng);
+
         var fromAndWhere = $"FROM \"Restaurants\" r LEFT JOIN \"RestaurantReviewSummaries\" rr ON rr.\"RestaurantId\" = r.\"Id\" WHERE {string.Join(" AND ", where)}";
-        var orderBy = "r.\"Name\" ASC, r.\"Id\" ASC";
+
+        string orderBy;
+        var sort = (request.Sort ?? string.Empty).Trim().ToLowerInvariant();
+        if (sort == "rating")
+        {
+            orderBy = "COALESCE(rr.\"AverageRating\",0) DESC NULLS LAST, r.\"Name\" ASC, r.\"Id\" ASC";
+        }
+        else if (sort == "distance" && request.Lat.HasValue && request.Lng.HasValue)
+        {
+            orderBy = "DistanceKm ASC NULLS LAST, r.\"Name\" ASC, r.\"Id\" ASC";
+        }
+        else
+        {
+            orderBy = "r.\"Name\" ASC, r.\"Id\" ASC";
+        }
 
         var (countSql, pageSql) = DapperPagination.BuildPagedSql(selectColumns, fromAndWhere, orderBy, request.PageNumber, request.PageSize);
 
@@ -87,7 +113,8 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
                     cuisine,
                     row.AvgRating,
                     row.RatingCount,
-                    row.City);
+                    row.City,
+                    row.DistanceKm);
             })
             .ToList();
 
@@ -105,4 +132,5 @@ file sealed class RestaurantSearchRow
     public decimal? AvgRating { get; init; }
     public int? RatingCount { get; init; }
     public string? City { get; init; }
+    public decimal? DistanceKm { get; init; }
 }

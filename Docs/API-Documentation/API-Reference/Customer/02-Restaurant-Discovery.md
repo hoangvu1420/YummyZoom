@@ -166,6 +166,7 @@ Provides quick suggestions for search terms as users type.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `term` | `string` | Yes | Partial search term (1-64 characters) |
+| `limit` | `number` | No | Max suggestions to return. Default 10. Range 1–50. |
 
 #### Response
 
@@ -222,12 +223,13 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 |-----------|------|-------------|---------|
 | `q` | `string` | Search term for restaurant name | `null` |
 | `cuisine` | `string` | Cuisine type filter | `null` |
-| `lat` | `number` | Latitude for location-based search | `null` |
-| `lng` | `number` | Longitude for location-based search | `null` |
-| `radiusKm` | `number` | Search radius in kilometers | `null` |
+| `lat` | `number` | Latitude for distance computation | `null` |
+| `lng` | `number` | Longitude for distance computation | `null` |
+| `radiusKm` | `number` | Reserved for future map viewport/radius (not supported in MVP) | `null` |
 | `minRating` | `number` | Minimum average rating (1.0-5.0) | `null` |
 | `pageNumber` | `number` | Page number for pagination | `1` |
 | `pageSize` | `number` | Number of results per page | `10` |
+| `sort` | `string` | Sort order: `rating` or `distance`. `distance` requires `lat` and `lng`. | `null` |
 
 #### Response
 
@@ -242,7 +244,8 @@ Dedicated endpoint for searching restaurants with location and rating filters.
       "cuisineTags": ["Italian", "Pizza", "Pasta"],
       "avgRating": 4.5,
       "ratingCount": 127,
-      "city": "San Francisco"
+      "city": "San Francisco",
+      "distanceKm": 1.4
     },
     {
       "restaurantId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
@@ -251,7 +254,8 @@ Dedicated endpoint for searching restaurants with location and rating filters.
       "cuisineTags": ["Italian", "Pasta"],
       "avgRating": 4.2,
       "ratingCount": 89,
-      "city": "San Francisco"
+      "city": "San Francisco",
+      "distanceKm": 2.8
     }
   ],
   "pageNumber": 1,
@@ -273,6 +277,7 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 | `avgRating` | `number\|null` | Average customer rating (1.0-5.0) |
 | `ratingCount` | `number\|null` | Total number of ratings |
 | `city` | `string\|null` | City where restaurant is located |
+| `distanceKm` | `number\|null` | Distance in kilometers when `lat`/`lng` are provided; otherwise null |
 
 ---
 
@@ -300,7 +305,9 @@ Retrieves basic public information about a specific restaurant.
   "logoUrl": "https://cdn.yummyzoom.com/logos/marios.jpg",
   "cuisineTags": ["Italian", "Pizza", "Pasta"],
   "isAcceptingOrders": true,
-  "city": "San Francisco"
+  "city": "San Francisco",
+  "avgRating": 4.5,
+  "ratingCount": 127
 }
 ```
 
@@ -314,6 +321,8 @@ Retrieves basic public information about a specific restaurant.
 | `cuisineTags` | `string[]` | Array of cuisine types |
 | `isAcceptingOrders` | `boolean` | Whether the restaurant is currently accepting orders |
 | `city` | `string\|null` | City where restaurant is located |
+| `avgRating` | `number\|null` | Average rating, if available (otherwise null) |
+| `ratingCount` | `number\|null` | Total ratings count, if available (otherwise null) |
 
 #### Error Responses
 
@@ -764,3 +773,4 @@ Here's a typical restaurant discovery flow:
 5. **Browse Menu**: View complete menu with prices and options
 6. **Check Reviews**: Read customer feedback and ratings
 7. **Ready to Order**: Proceed to order placement with selected restaurant
+

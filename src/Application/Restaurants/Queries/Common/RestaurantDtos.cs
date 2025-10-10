@@ -15,4 +15,5 @@ public sealed record RestaurantSearchResultDto(
     IReadOnlyList<string> CuisineTags,
     decimal? AvgRating,
     int? RatingCount,
-    string? City);
+    string? City,
+    decimal? DistanceKm = null);

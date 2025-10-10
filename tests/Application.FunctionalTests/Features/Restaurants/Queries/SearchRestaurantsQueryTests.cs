@@ -14,8 +14,8 @@ namespace YummyZoom.Application.FunctionalTests.Features.Restaurants.Queries;
 public class SearchRestaurantsQueryTests : BaseTestFixture
 {
     private static SearchRestaurantsQuery Build(string? q = null, string? cuisine = null, int page = 1, int size = 10,
-        double? lat = null, double? lng = null, double? radiusKm = null)
-        => new(q, cuisine, lat, lng, radiusKm, page, size);
+        double? lat = null, double? lng = null, double? radiusKm = null, string? sort = null)
+        => new(q, cuisine, lat, lng, radiusKm, page, size, null, sort);
 
     [Test]
     public async Task TextFilter_FiltersByName_OrderedByNameThenId()
@@ -88,6 +88,64 @@ public class SearchRestaurantsQueryTests : BaseTestFixture
         await act2.Should().ThrowAsync<ValidationException>();
     }
 
+    [Test]
+    public async Task Distance_Sort_WithLatLng_ReturnsOrderedAndDistanceKm()
+    {
+        var rNear = await CreateRestaurantAsync("Geo Near");
+        var rFar  = await CreateRestaurantAsync("Geo Far");
+
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Restaurants"" SET ""Geo_Latitude"" = {37.7749}, ""Geo_Longitude"" = {-122.4194} WHERE ""Id"" = {rNear};
+                UPDATE ""Restaurants"" SET ""Geo_Latitude"" = {37.8044}, ""Geo_Longitude"" = {-122.2711} WHERE ""Id"" = {rFar};
+            ");
+        }
+
+        var res = await SendAsync(Build(lat: 37.7749, lng: -122.4194, sort: "distance"));
+        res.ShouldBeSuccessful();
+
+        res.Value.Items.Should().NotBeEmpty();
+        res.Value.Items.First().Name.Should().Be("Geo Near");
+        res.Value.Items.First().DistanceKm.Should().BeApproximately(0m, 0.1m);
+        res.Value.Items.All(i => i.DistanceKm.HasValue).Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Distance_Sort_WithoutGeo_FallsBack_NoDistanceKm()
+    {
+        await CreateRestaurantAsync("No Geo 1");
+        await CreateRestaurantAsync("No Geo 2");
+
+        var res = await SendAsync(Build(sort: "distance"));
+        res.ShouldBeSuccessful();
+        res.Value.Items.All(i => i.DistanceKm is null).Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Rating_Sort_OrdersByAverageRatingDesc()
+    {
+        var rLow  = await CreateRestaurantAsync("Low Rating");
+        var rHigh = await CreateRestaurantAsync("High Rating");
+
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""RestaurantReviewSummaries"" (""RestaurantId"", ""AverageRating"", ""TotalReviews"") VALUES ({rLow}, 3.2, 10)
+                ON CONFLICT (""RestaurantId"") DO UPDATE SET ""AverageRating"" = 3.2, ""TotalReviews"" = 10;
+                INSERT INTO ""RestaurantReviewSummaries"" (""RestaurantId"", ""AverageRating"", ""TotalReviews"") VALUES ({rHigh}, 4.8, 200)
+                ON CONFLICT (""RestaurantId"") DO UPDATE SET ""AverageRating"" = 4.8, ""TotalReviews"" = 200;
+            ");
+        }
+
+        var res = await SendAsync(Build(sort: "rating"));
+        res.ShouldBeSuccessful();
+        res.Value.Items.First().Name.Should().Be("High Rating");
+        res.Value.Items.Select(i => i.AvgRating).Should().BeInDescendingOrder();
+    }
+
     private static async Task<Guid> CreateRestaurantAsync(string name)
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;
@@ -116,5 +174,3 @@ public class SearchRestaurantsQueryTests : BaseTestFixture
         ");
     }
 }
-
-

@@ -80,6 +80,30 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
+    public async Task CustomLimit_ShouldRestrictNumberOfSuggestions()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            await CreateRestaurantAsync($"Bravo {i:00}", "Cafe");
+        }
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new AutocompleteQuery("Bravo", 5));
+        res.ShouldBeSuccessful();
+        res.Value.Count.Should().BeLessOrEqualTo(5);
+    }
+
+    [Test]
+    public async Task Validation_ShouldFail_OnInvalidLimit()
+    {
+        var tooSmall = () => SendAsync(new AutocompleteQuery("Alpha", 0));
+        await tooSmall.Should().ThrowAsync<ValidationException>();
+
+        var tooLarge = () => SendAsync(new AutocompleteQuery("Alpha", 100));
+        await tooLarge.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Test]
     public async Task Diversity_ShouldDedupeAndMixTypes()
     {
         // Restaurant and a similarly named MenuItem should both be allowed (when present)
@@ -142,4 +166,3 @@ public class AutocompleteTests : BaseTestFixture
         return entity.Id.Value;
     }
 }
-

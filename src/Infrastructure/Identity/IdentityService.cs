@@ -210,37 +210,44 @@ public class IdentityService : IIdentityService
 
     public async Task<Result> UpdateEmailAsync(string userId, string newEmail)
     {
-        // Use the UnitOfWork transaction pattern
+        // Step 1: Find and update the Identity user
+        var identityUser = await _userManager.FindByIdAsync(userId);
+        if (identityUser == null)
+        {
+            return Result.Failure(UserErrors.InvalidUserId(userId));
+        }
+
+        // Check if the email is already in use
+        var existingUserWithEmail = await _userManager.FindByEmailAsync(newEmail);
+        if (existingUserWithEmail != null && existingUserWithEmail.Id.ToString() != userId)
+        {
+            return Result.Failure(UserErrors.DuplicateEmail(newEmail));
+        }
+
+        // Update email in Identity (note: this also updates normalized email)
+        var emailUpdateResult = await _userManager.SetEmailAsync(identityUser, newEmail);
+        if (!emailUpdateResult.Succeeded)
+        {
+            var errors = string.Join(", ", emailUpdateResult.Errors.Select(e => e.Description));
+            return Result.Failure(UserErrors.EmailUpdateFailed(errors));
+        }
+
+        // Note: We do NOT update UserName because it should remain as the phone number for login
+        // According to the API design, UserName = phone number (for login), Email = user's actual email
+
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdateEmailWithDomainUserAsync(string userId, string newEmail)
+    {
+        // Use the UnitOfWork transaction pattern - this is for cases where we need to update both Identity and Domain users
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // Step 1: Find and update the Identity user
-            var identityUser = await _userManager.FindByIdAsync(userId);
-            if (identityUser == null)
+            // Step 1: Update Identity user
+            var identityResult = await UpdateEmailAsync(userId, newEmail);
+            if (identityResult.IsFailure)
             {
-                return Result.Failure(UserErrors.InvalidUserId(userId));
-            }
-
-            // Check if the email is already in use
-            var existingUserWithEmail = await _userManager.FindByEmailAsync(newEmail);
-            if (existingUserWithEmail != null && existingUserWithEmail.Id.ToString() != userId)
-            {
-                return Result.Failure(UserErrors.DuplicateEmail(newEmail));
-            }
-
-            // Update email in Identity (note: this also updates normalized email)
-            var emailUpdateResult = await _userManager.SetEmailAsync(identityUser, newEmail);
-            if (!emailUpdateResult.Succeeded)
-            {
-                var errors = string.Join(", ", emailUpdateResult.Errors.Select(e => e.Description));
-                return Result.Failure(UserErrors.EmailUpdateFailed(errors));
-            }
-
-            // Also update UserName since we're using email as the username
-            var usernameUpdateResult = await _userManager.SetUserNameAsync(identityUser, newEmail);
-            if (!usernameUpdateResult.Succeeded)
-            {
-                var errors = string.Join(", ", usernameUpdateResult.Errors.Select(e => e.Description));
-                return Result.Failure(UserErrors.EmailUpdateFailed(errors));
+                return identityResult;
             }
 
             // Step 2: Find and update the domain user

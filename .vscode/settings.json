@@ -41,5 +41,6 @@
             }
         ]
     },
-    "chatgpt.openOnStartup": false
+    "chatgpt.openOnStartup": false,
+    "FSharp.tests.enabled": false
 }
