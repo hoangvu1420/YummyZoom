@@ -37,9 +37,16 @@ The primary search endpoint that searches across restaurants, menu items, and ta
 | `cuisines` | `string[]` | Array of cuisine types to filter by | `null` |
 | `tags` | `string[]` | Array of tags to filter by | `null` |
 | `priceBands` | `number[]` | Array of price bands (1-4) to filter by | `null` |
+| `entityTypes` | `string[]` | Restrict results to specific entity types. Allowed values (case-insensitive): `restaurant`, `menu_item`, `tag`. Repeat the parameter to pass multiple values (e.g., `?entityTypes=menu_item&entityTypes=restaurant`). | `null` |
+| `sort` | `string` | `relevance` (default). Allowed: `relevance`, `distance` (needs lat/lon), `rating`, `priceBand`, `popularity` | `relevance` |
+| `bbox` | `string` | Viewport filter `minLon,minLat,maxLon,maxLat` (WGS84). Distance sort still requires lat/lon. | `null` |
 | `includeFacets` | `boolean` | Include facet counts for filtering options | `false` |
 | `pageNumber` | `number` | Page number for pagination | `1` |
 | `pageSize` | `number` | Number of results per page | `10` |
+
+> Note
+>
+> Use the underscore form `menu_item` for the `entityTypes` filter (not `MenuItem` or `menuitem`). The API matches canonical tokens stored in the search index: `restaurant`, `menu_item`, `tag`.
 
 #### Response
 
@@ -125,14 +132,14 @@ The primary search endpoint that searches across restaurants, menu items, and ta
 |-------|------|-------------|
 | `id` | `UUID` | Unique identifier of the result |
 | `type` | `string` | Type of result: "Restaurant", "MenuItem", or "Tag" |
-| `restaurantId` | `UUID\|null` | Restaurant ID (null for Restaurant type results) |
+| `restaurantId` | `UUID|  `itemId` | `UUID` | Menu item identifier | |null` | Restaurant ID (null for Restaurant type results) |
 | `name` | `string` | Name of the entity |
-| `descriptionSnippet` | `string\|null` | Brief description or excerpt |
-| `cuisine` | `string\|null` | Cuisine type |
+| `descriptionSnippet` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Brief description or excerpt |
+| `cuisine` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Cuisine type |
 | `score` | `number` | Relevance score (0.0 to 1.0) |
-| `distanceKm` | `number\|null` | Distance in kilometers (when location provided) |
+| `distanceKm` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Distance in kilometers (when location provided) |
 | `badges` | `array` | Visual indicators for status, rating, price, etc. |
-| `reason` | `string\|null` | Explanation of why this result was included |
+| `reason` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Explanation of why this result was included |
 
 #### Badge Object
 
@@ -140,7 +147,7 @@ The primary search endpoint that searches across restaurants, menu items, and ta
 |-------|------|-------------|
 | `code` | `string` | Badge code: "open_now", "rating", "near_you", "price_band", etc. |
 | `label` | `string` | Display text for the badge |
-| `data` | `object\|null` | Optional additional data (e.g., rating details, distance info) |
+| `data` | `object|  `itemId` | `UUID` | Menu item identifier | |null` | Optional additional data (e.g., rating details, distance info) |
 
 #### Facets Object
 
@@ -167,6 +174,7 @@ Provides quick suggestions for search terms as users type.
 |-----------|------|----------|-------------|
 | `term` | `string` | Yes | Partial search term (1-64 characters) |
 | `limit` | `number` | No | Max suggestions to return. Default 10. Range 1–50. |
+| `types` | `string[]` | No | Optional filter by entity type(s). Allowed values (case-insensitive): `restaurant`, `menu_item`, `tag`. Repeat the parameter for multiple values. |
 
 #### Response
 
@@ -204,6 +212,64 @@ Provides quick suggestions for search terms as users type.
 - Results are ranked by similarity and relevance
 - Includes prefix matching and fuzzy matching
 - Excludes soft-deleted entities
+
+---
+
+## Menu Items Feed
+
+### Browse Featured Items
+
+Curated menu items feed for the Home screen. Returns a paginated list of popular items.
+
+**`GET /api/v1/menu-items/feed`**
+
+- **Authorization:** Public
+
+#### Query Parameters
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `tab` | `string` | Feed variant. Allowed values: `popular`. | `popular` |
+| `pageNumber` | `number` | Page number for pagination | `1` |
+| `pageSize` | `number` | Number of results per page (1–50) | `20` |
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "items": [
+    {
+      "itemId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Margherita Pizza",
+      "priceAmount": 12.99,
+      "priceCurrency": "USD",
+      "imageUrl": "https://cdn.example.com/img/pizza.jpg",
+      "rating": 4.6,
+      "restaurantName": "Mario's Italian Bistro",
+      "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    }
+  ],
+  "pageNumber": 1,
+  "totalPages": 10,
+  "totalCount": 200,
+  "hasPreviousPage": false,
+  "hasNextPage": true
+}
+```
+
+#### Feed Item Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `itemId` | `UUID` | Menu item identifier |
+| `name` | `string` | Menu item name |
+| `priceAmount` | `number` | Price amount |
+| `priceCurrency` | `string` | ISO 4217 currency code |
+| `imageUrl` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Image URL if available |
+| `rating` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Restaurant average rating |
+| `restaurantName` | `string` | Owning restaurant name |
+| `restaurantId` | `UUID` | Owning restaurant identifier |
 
 ---
 
@@ -272,12 +338,12 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 |-------|------|-------------|
 | `restaurantId` | `UUID` | Unique restaurant identifier |
 | `name` | `string` | Restaurant name |
-| `logoUrl` | `string\|null` | URL to restaurant logo image |
+| `logoUrl` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | URL to restaurant logo image |
 | `cuisineTags` | `string[]` | Array of cuisine types |
-| `avgRating` | `number\|null` | Average customer rating (1.0-5.0) |
-| `ratingCount` | `number\|null` | Total number of ratings |
-| `city` | `string\|null` | City where restaurant is located |
-| `distanceKm` | `number\|null` | Distance in kilometers when `lat`/`lng` are provided; otherwise null |
+| `avgRating` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Average customer rating (1.0-5.0) |
+| `ratingCount` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Total number of ratings |
+| `city` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | City where restaurant is located |
+| `distanceKm` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Distance in kilometers when `lat`/`lng` are provided; otherwise null |
 
 ---
 
@@ -317,12 +383,12 @@ Retrieves basic public information about a specific restaurant.
 |-------|------|-------------|
 | `restaurantId` | `UUID` | Unique restaurant identifier |
 | `name` | `string` | Restaurant name |
-| `logoUrl` | `string\|null` | URL to restaurant logo image |
+| `logoUrl` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | URL to restaurant logo image |
 | `cuisineTags` | `string[]` | Array of cuisine types |
 | `isAcceptingOrders` | `boolean` | Whether the restaurant is currently accepting orders |
-| `city` | `string\|null` | City where restaurant is located |
-| `avgRating` | `number\|null` | Average rating, if available (otherwise null) |
-| `ratingCount` | `number\|null` | Total ratings count, if available (otherwise null) |
+| `city` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | City where restaurant is located |
+| `avgRating` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Average rating, if available (otherwise null) |
+| `ratingCount` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Total ratings count, if available (otherwise null) |
 
 #### Error Responses
 
@@ -495,7 +561,7 @@ All monetary values include currency information, and the structure is optimized
 |-------|------|-------------|
 | `categoryId` | `UUID` | Category identifier |
 | `name` | `string` | Category name |
-| `description` | `string\|null` | Category description |
+| `description` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Category description |
 | `displayOrder` | `number` | Sort order for display |
 | `items` | `array` | Array of menu items in this category |
 
@@ -505,7 +571,7 @@ All monetary values include currency information, and the structure is optimized
 |-------|------|-------------|
 | `itemId` | `UUID` | Item identifier |
 | `name` | `string` | Item name |
-| `description` | `string\|null` | Item description |
+| `description` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Item description |
 | `basePrice` | `Money` | Base price before customizations |
 | `isAvailable` | `boolean` | Whether item is currently available |
 | `dietaryTags` | `string[]` | Dietary information (e.g., "Vegetarian", "Gluten-Free") |
@@ -621,8 +687,8 @@ Retrieves paginated customer reviews for a restaurant.
 | `reviewId` | `UUID` | Review identifier |
 | `authorUserId` | `UUID` | ID of the user who wrote the review |
 | `rating` | `number` | Rating from 1 to 5 stars |
-| `title` | `string\|null` | Optional review title |
-| `comment` | `string\|null` | Review text content |
+| `title` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Optional review title |
+| `comment` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Review text content |
 | `submittedAtUtc` | `string` | ISO 8601 timestamp when review was submitted |
 
 ---
@@ -671,7 +737,7 @@ Retrieves aggregated review statistics for a restaurant.
 | `ratings4` | `number` | Number of 4-star reviews |
 | `ratings5` | `number` | Number of 5-star reviews |
 | `totalWithText` | `number` | Number of reviews with text comments |
-| `lastReviewAtUtc` | `string\|null` | ISO 8601 timestamp of most recent review |
+| `lastReviewAtUtc` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | ISO 8601 timestamp of most recent review |
 | `updatedAtUtc` | `string` | ISO 8601 timestamp when summary was last updated |
 
 ---
@@ -773,4 +839,7 @@ Here's a typical restaurant discovery flow:
 5. **Browse Menu**: View complete menu with prices and options
 6. **Check Reviews**: Read customer feedback and ratings
 7. **Ready to Order**: Proceed to order placement with selected restaurant
+
+
+
 

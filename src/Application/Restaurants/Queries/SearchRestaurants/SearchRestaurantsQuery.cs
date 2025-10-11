@@ -13,4 +13,5 @@ public sealed record SearchRestaurantsQuery(
     int PageNumber,
     int PageSize,
     double? MinRating = null,
-    string? Sort = null) : IRequest<Result<PaginatedList<RestaurantSearchResultDto>>>;
+    string? Sort = null,
+    string? Bbox = null) : IRequest<Result<PaginatedList<RestaurantSearchResultDto>>>;

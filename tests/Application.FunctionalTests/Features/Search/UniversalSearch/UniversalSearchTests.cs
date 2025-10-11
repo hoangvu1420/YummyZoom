@@ -509,6 +509,55 @@ public class UniversalSearchTests : BaseTestFixture
         await invalidLon.Should().ThrowAsync<ValidationException>();
     }
 
+    [Test]
+    public async Task Query_WithNoFilters_AndNoBbox_ShouldSucceed()
+    {
+        await CreateRestaurantAsync("Simple Cafe", "Cafe", null, null);
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new UniversalSearchQuery(
+            Term: null,
+            Latitude: null,
+            Longitude: null,
+            OpenNow: null,
+            Cuisines: null,
+            Tags: null,
+            PriceBands: null,
+            EntityTypes: null,
+            Bbox: null,
+            Sort: "popularity",
+            IncludeFacets: false,
+            PageNumber: 1,
+            PageSize: 20));
+
+        res.ShouldBeSuccessful();
+        res.Value.Page.PageNumber.Should().Be(1);
+    }
+
+    [Test]
+    public async Task Query_WithInvalidBbox_ShouldIgnoreBox_AndSucceed()
+    {
+        await CreateRestaurantAsync("BBOX Cafe", "Cafe", 47.6101, -122.3317);
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new UniversalSearchQuery(
+            Term: null,
+            Latitude: null,
+            Longitude: null,
+            OpenNow: null,
+            Cuisines: null,
+            Tags: null,
+            PriceBands: null,
+            EntityTypes: null,
+            Bbox: "200,200,201,201", // invalid lat/lon values
+            Sort: "popularity",
+            IncludeFacets: false,
+            PageNumber: 1,
+            PageSize: 10));
+
+        res.ShouldBeSuccessful();
+    }
+
     private static async Task<Guid> CreateRestaurantAsync(string name, string cuisine, double? lat, double? lon)
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;

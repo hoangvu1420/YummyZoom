@@ -27,6 +27,9 @@ public class Search : EndpointGroupBase
                 req.Cuisines,
                 req.Tags,
                 req.PriceBands,
+                req.EntityTypes,
+                req.Bbox,
+                req.Sort,
                 includeFacets,
                 pageNumber,
                 pageSize);
@@ -44,7 +47,7 @@ public class Search : EndpointGroupBase
         {
             var term = req.Term ?? string.Empty; // avoid Minimal API 400 for missing non-nullable ref by coalescing here
             var limit = req.Limit ?? 10;
-            var res = await sender.Send(new AutocompleteQuery(term, limit));
+            var res = await sender.Send(new AutocompleteQuery(term, limit, req.Types));
             return res.IsSuccess ? Results.Ok(res.Value) : res.ToIResult();
         })
         .WithName("Autocomplete")
@@ -64,6 +67,9 @@ public sealed record UniversalSearchRequestDto
     public string[]? Cuisines { get; init; }
     public string[]? Tags { get; init; }
     public short[]? PriceBands { get; init; }
+    public string[]? EntityTypes { get; init; }
+    public string? Sort { get; init; }
+    public string? Bbox { get; init; }
     public bool? IncludeFacets { get; init; }
     public int? PageNumber { get; init; }
     public int? PageSize { get; init; }
@@ -73,4 +79,5 @@ public sealed record AutocompleteRequestDto
 {
     public string? Term { get; init; }
     public int? Limit { get; init; }
+    public string[]? Types { get; init; }
 }

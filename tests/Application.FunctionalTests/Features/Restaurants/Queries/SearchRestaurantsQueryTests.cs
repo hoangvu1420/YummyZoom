@@ -146,6 +146,29 @@ public class SearchRestaurantsQueryTests : BaseTestFixture
         res.Value.Items.Select(i => i.AvgRating).Should().BeInDescendingOrder();
     }
 
+    [Test]
+    public async Task Popularity_Sort_OrdersByReviewCountDesc()
+    {
+        var rLow  = await CreateRestaurantAsync("Few Reviews");
+        var rHigh = await CreateRestaurantAsync("Many Reviews");
+
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""RestaurantReviewSummaries"" (""RestaurantId"", ""AverageRating"", ""TotalReviews"") VALUES ({rLow}, 4.9, 3)
+                ON CONFLICT (""RestaurantId"") DO UPDATE SET ""AverageRating"" = 4.9, ""TotalReviews"" = 3;
+                INSERT INTO ""RestaurantReviewSummaries"" (""RestaurantId"", ""AverageRating"", ""TotalReviews"") VALUES ({rHigh}, 4.2, 250)
+                ON CONFLICT (""RestaurantId"") DO UPDATE SET ""AverageRating"" = 4.2, ""TotalReviews"" = 250;
+            ");
+        }
+
+        var res = await SendAsync(Build(sort: "popularity"));
+        res.ShouldBeSuccessful();
+        res.Value.Items.First().Name.Should().Be("Many Reviews");
+        res.Value.Items.Select(i => i.RatingCount ?? 0).Should().BeInDescendingOrder();
+    }
+
     private static async Task<Guid> CreateRestaurantAsync(string name)
     {
         var address = Address.Create("1 St", "C", "S", "Z", "US").Value;

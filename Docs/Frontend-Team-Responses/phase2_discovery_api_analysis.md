@@ -301,3 +301,20 @@ Notes for Integration
 - Params: `lat`, `lng` (optional), `pageSize` (default 10, max 20).
 - Caching: none (for now). Consider short TTL after MVP if needed.
 - Integration: prefer `/home` at app launch; fall back to multi-call if unavailable.
+
+---
+
+## Backend Update – Search Enhancements Delivered (2025-10-10)
+
+- Universal Search (`GET /api/v1/search`)
+  - New params: `entityTypes` (Restaurant|MenuItem|Tag), `sort` (relevance|distance|rating|priceBand|popularity), `bbox` (minLon,minLat,maxLon,maxLat).
+  - Notes: `distance` sort requires `lat`/`lon`. `bbox` filters viewport; distanceKm still needs `lat`/`lon`.
+- Restaurants Search (`GET /api/v1/restaurants/search`)
+  - New: `sort=popularity`; `bbox` viewport filter. Existing `distance` and `rating` sorts remain.
+- Autocomplete (`GET /api/v1/search/autocomplete`)
+  - New: `types` filter (Restaurant|MenuItem|Tag). `limit` retained (default 10; 1–50).
+
+Integration tips
+- Map view: use `bbox` + short page sizes (≤20). Keep `lat`/`lon` when needing distance sort/labels.
+- List view: prefer `sort=rating` or `sort=popularity`.
+- Autocomplete: filter `types` per tab context and keep client debounce + TTL cache.

@@ -6,7 +6,7 @@ using YummyZoom.SharedKernel;
 namespace YummyZoom.Application.Search.Queries.Autocomplete;
 
 // Request + DTO
-public sealed record AutocompleteQuery(string Term, int Limit = 10) : IRequest<Result<IReadOnlyList<SuggestionDto>>>;
+public sealed record AutocompleteQuery(string Term, int Limit = 10, string[]? Types = null) : IRequest<Result<IReadOnlyList<SuggestionDto>>>;
 
 public sealed record SuggestionDto(Guid Id, string Type, string Name);
 
@@ -17,6 +17,7 @@ public sealed class AutocompleteQueryValidator : AbstractValidator<AutocompleteQ
     {
         RuleFor(x => x.Term).NotEmpty().MinimumLength(1).MaximumLength(64);
         RuleFor(x => x.Limit).InclusiveBetween(1, 50);
+        RuleForEach(x => x.Types!).Must(t => !string.IsNullOrWhiteSpace(t)).When(x => x.Types is { Length: > 0 });
     }
 }
 
@@ -39,6 +40,7 @@ public sealed class AutocompleteQueryHandler
                     s."Name" ILIKE @prefix
                  OR similarity(s."Name", @q) > 0.2
               )
+              AND (@types IS NULL OR s."Type" = ANY(@types))
             ORDER BY GREATEST(
                       similarity(s."Name", @q),
                       CASE WHEN s."Name" ILIKE @prefix THEN 1 ELSE 0 END
@@ -47,8 +49,12 @@ public sealed class AutocompleteQueryHandler
             LIMIT @limit;
             """;
 
+        var types = request.Types is { Length: > 0 }
+            ? request.Types.Select(t => t.Trim().ToLowerInvariant()).ToArray()
+            : null;
+
         var list = await conn.QueryAsync<SuggestionDto>(
-            new CommandDefinition(sql, new { q = request.Term, prefix = request.Term + "%", limit = request.Limit }, cancellationToken: ct));
+            new CommandDefinition(sql, new { q = request.Term, prefix = request.Term + "%", limit = request.Limit, types }, cancellationToken: ct));
 
         return Result.Success((IReadOnlyList<SuggestionDto>)list.ToList());
     }

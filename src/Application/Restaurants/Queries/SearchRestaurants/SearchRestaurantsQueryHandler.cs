@@ -66,6 +66,27 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
         parameters.Add("Lat", request.Lat);
         parameters.Add("Lng", request.Lng);
 
+        // BBox filter using numeric lat/lon columns when provided
+        if (!string.IsNullOrWhiteSpace(request.Bbox))
+        {
+            var parts = request.Bbox.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length == 4
+                && double.TryParse(parts[0], out var minLon)
+                && double.TryParse(parts[1], out var minLat)
+                && double.TryParse(parts[2], out var maxLon)
+                && double.TryParse(parts[3], out var maxLat)
+                && minLon < maxLon && minLat < maxLat)
+            {
+                where.Add("r.\"Geo_Latitude\" IS NOT NULL AND r.\"Geo_Longitude\" IS NOT NULL");
+                where.Add("r.\"Geo_Latitude\" BETWEEN @MinLat AND @MaxLat");
+                where.Add("r.\"Geo_Longitude\" BETWEEN @MinLon AND @MaxLon");
+                parameters.Add("MinLat", minLat);
+                parameters.Add("MaxLat", maxLat);
+                parameters.Add("MinLon", minLon);
+                parameters.Add("MaxLon", maxLon);
+            }
+        }
+
         var fromAndWhere = $"FROM \"Restaurants\" r LEFT JOIN \"RestaurantReviewSummaries\" rr ON rr.\"RestaurantId\" = r.\"Id\" WHERE {string.Join(" AND ", where)}";
 
         string orderBy;
@@ -77,6 +98,10 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
         else if (sort == "distance" && request.Lat.HasValue && request.Lng.HasValue)
         {
             orderBy = "DistanceKm ASC NULLS LAST, r.\"Name\" ASC, r.\"Id\" ASC";
+        }
+        else if (sort == "popularity")
+        {
+            orderBy = "COALESCE(rr.\"TotalReviews\",0) DESC, COALESCE(rr.\"AverageRating\",0) DESC, r.\"Name\" ASC, r.\"Id\" ASC";
         }
         else
         {

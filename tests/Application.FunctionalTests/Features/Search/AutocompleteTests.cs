@@ -80,6 +80,29 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
+    public async Task TypesFilter_RestaurantOnly_ReturnsResults()
+    {
+        await CreateRestaurantAsync("Types Alpha", "Cafe");
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new AutocompleteQuery("Types", 10, new[] { "restaurant" }));
+        res.ShouldBeSuccessful();
+        res.Value.Should().NotBeEmpty();
+        res.Value.All(s => s.Type.Equals("restaurant", StringComparison.OrdinalIgnoreCase)).Should().BeTrue();
+    }
+
+    [Test]
+    public async Task TypesFilter_MenuItemOnly_ReturnsEmpty_WhenNoMenuItemsIndexed()
+    {
+        await CreateRestaurantAsync("Types Beta", "Cafe");
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new AutocompleteQuery("Types", 10, new[] { "menu-item" }));
+        res.ShouldBeSuccessful();
+        res.Value.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task CustomLimit_ShouldRestrictNumberOfSuggestions()
     {
         for (int i = 0; i < 20; i++)

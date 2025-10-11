@@ -17,6 +17,9 @@ public sealed partial record UniversalSearchQuery(
     string[]? Cuisines,
     string[]? Tags = null,
     short[]? PriceBands = null,
+    string[]? EntityTypes = null,
+    string? Bbox = null,
+    string? Sort = null,
     bool IncludeFacets = false,
     int PageNumber = 1,
     int PageSize = 10
@@ -33,7 +36,7 @@ public sealed partial record UniversalSearchQuery
         string[]? cuisines,
         int pageNumber,
         int pageSize)
-        : this(term, latitude, longitude, openNow, cuisines, null, null, false, pageNumber, pageSize)
+        : this(term, latitude, longitude, openNow, cuisines, null, null, null, null, null, false, pageNumber, pageSize)
     { }
 }
 
@@ -109,6 +112,19 @@ public sealed class UniversalSearchQueryHandler
         p.Add("lat", request.Latitude, System.Data.DbType.Double);
         p.Add("lon", request.Longitude, System.Data.DbType.Double);
 
+        // Entity types filter (restaurant|menu_item|tag)
+        string[]? types = null;
+        if (request.EntityTypes is { Length: > 0 })
+        {
+            types = request.EntityTypes
+                .Select(t => t?.Trim().ToLowerInvariant().Replace("-", "_")!)
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct()
+                .ToArray();
+            if (types.Length == 0) types = null;
+        }
+        // Defer adding @types until we decide to include the predicate; avoids untyped NULLs
+
         if (!string.IsNullOrWhiteSpace(request.Term))
         {
             var termLength = request.Term.Length;
@@ -134,24 +150,52 @@ public sealed class UniversalSearchQueryHandler
 
         if (request.Cuisines is { Length: > 0 })
         {
-            where.Add("s.\"Cuisine\" = ANY(@cuisines)");
+            where.Add("s.\"Cuisine\" = ANY(@cuisines::text[])");
             p.Add("cuisines", request.Cuisines);
         }
 
         if (request.Tags is { Length: > 0 })
         {
-            where.Add("s.\"Tags\" && @tags");
+            where.Add("s.\"Tags\" && @tags::text[]");
             p.Add("tags", request.Tags);
         }
 
         if (request.PriceBands is { Length: > 0 })
         {
-            where.Add("s.\"PriceBand\" = ANY(@priceBands)");
+            where.Add("s.\"PriceBand\" = ANY(@priceBands::smallint[])");
             p.Add("priceBands", request.PriceBands);
         }
 
         p.Add("pageNumber", request.PageNumber);
         p.Add("pageSize", request.PageSize);
+
+        // BBox parsing and validation (minLon,minLat,maxLon,maxLat)
+        double? minLon = null, minLat = null, maxLon = null, maxLat = null;
+        if (!string.IsNullOrWhiteSpace(request.Bbox))
+        {
+            var parts = request.Bbox.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length == 4
+                && double.TryParse(parts[0], out var a)
+                && double.TryParse(parts[1], out var b)
+                && double.TryParse(parts[2], out var c)
+                && double.TryParse(parts[3], out var d))
+            {
+                (minLon, minLat, maxLon, maxLat) = (a, b, c, d);
+                if (minLon < -180 || maxLon > 180 || minLat < -90 || maxLat > 90 || minLon >= maxLon || minLat >= maxLat)
+                {
+                    minLon = minLat = maxLon = maxLat = null; // ignore invalid
+                }
+            }
+        }
+        // Only add bbox filter and parameters when valid; avoid untyped NULL parameters
+        if (minLon.HasValue && minLat.HasValue && maxLon.HasValue && maxLat.HasValue)
+        {
+            where.Add("(s.\"Geo\" IS NOT NULL AND ST_Intersects(s.\"Geo\", ST_MakeEnvelope(@minLon, @minLat, @maxLon, @maxLat, 4326)::geography))");
+            p.Add("minLon", minLon, System.Data.DbType.Double);
+            p.Add("minLat", minLat, System.Data.DbType.Double);
+            p.Add("maxLon", maxLon, System.Data.DbType.Double);
+            p.Add("maxLat", maxLat, System.Data.DbType.Double);
+        }
 
         const string selectCols = """
             s."Id"                  AS Id,
@@ -178,8 +222,40 @@ public sealed class UniversalSearchQueryHandler
             END AS DistanceKm
             """;
 
+        // Type filter (only when provided)
+        if (types is not null)
+        {
+            where.Add("s.\"Type\" = ANY(@types::text[])");
+            p.Add("types", types);
+        }
+
+        // BBox filter added above only when a valid bbox was provided
+
         var fromWhere = $"FROM \"SearchIndexItems\" s WHERE {string.Join(" AND ", where)}";
-        var orderBy = "Score DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC";
+
+        // Sorting
+        string orderBy;
+        var sort = (request.Sort ?? "relevance").Trim().ToLowerInvariant();
+        if (sort == "distance" && request.Latitude.HasValue && request.Longitude.HasValue)
+        {
+            orderBy = "DistanceKm ASC NULLS LAST, Score DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC";
+        }
+        else if (sort == "rating")
+        {
+            orderBy = "COALESCE(s.\"AvgRating\",0) DESC NULLS LAST, COALESCE(s.\"ReviewCount\",0) DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC";
+        }
+        else if (sort == "priceband")
+        {
+            orderBy = "COALESCE(s.\"PriceBand\", 100) ASC, COALESCE(s.\"AvgRating\",0) DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC";
+        }
+        else if (sort == "popularity")
+        {
+            orderBy = "COALESCE(s.\"ReviewCount\",0) DESC, COALESCE(s.\"AvgRating\",0) DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC";
+        }
+        else
+        {
+            orderBy = "Score DESC, s.\"UpdatedAt\" DESC, s.\"Id\" ASC"; // relevance (default)
+        }
 
         var (countSql, pageSql) = DapperPagination.BuildPagedSql(selectCols, fromWhere, orderBy, request.PageNumber, request.PageSize);
 

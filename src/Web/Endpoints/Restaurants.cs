@@ -737,13 +737,13 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/search
-        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, string? sort, ISender sender) =>
+        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, string? sort, string? bbox, ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
 
-            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating, sort);
+            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating, sort, bbox);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })

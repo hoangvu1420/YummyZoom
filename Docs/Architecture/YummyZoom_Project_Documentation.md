@@ -53,8 +53,10 @@ YummyZoom/
 ## Layer Responsibilities
 
 - **Domain:** This is the heart of the application. It contains the core business logic, including entities (objects with identity), value objects (objects that represent descriptive aspects of the domain with no conceptual identity), aggregate roots (entities that are the root of an aggregate, ensuring consistency within the aggregate), domain events (objects that represent something that happened in the domain), and domain errors. The Domain layer is independent of all other layers.
+Read more about the Domain layer in the [Domain Layer Documentation](Docs\Development-Guidelines\Domain_Layer_Guidelines.md).
 
 - **Application:** This layer contains the application services that orchestrate the domain layer to perform specific use cases. It includes command handlers (for executing actions that change the state of the application), query handlers (for retrieving data), Data Transfer Objects (DTOs) for data exchange, and validators for input validation. The Application layer depends on the Domain layer and defines interfaces for infrastructure concerns.
+Read more about the Application layer in the [Application Layer Documentation](Docs\Development-Guidelines\Application_Layer_Guidelines.md).
 
 - **Infrastructure:** This layer provides the concrete implementations for the interfaces defined in the Application layer. This includes data access implementations (e.g., using Entity Framework Core), external service integrations, identity management, and other technical concerns. The Infrastructure layer depends on the Application and Domain layers.
 
