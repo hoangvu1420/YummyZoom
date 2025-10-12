@@ -50,6 +50,11 @@ public class RestaurantBundleSeeder : ISeeder
 
         foreach (var (fileName, bundle) in bundles)
         {
+            // Determine currency for this bundle
+            var currency = string.IsNullOrWhiteSpace(bundle.DefaultCurrency)
+                ? "USD"
+                : bundle.DefaultCurrency!.Trim().ToUpperInvariant();
+
             // Validate
             var val = RestaurantBundleValidation.Validate(bundle);
             if (!val.IsValid)
@@ -249,7 +254,7 @@ public class RestaurantBundleSeeder : ISeeder
                             foreach (var ch in g.Choices)
                             {
                                 var display = ch.DisplayOrder ?? order;
-                                var add = cg.Value.AddChoice(ch.Name, new Money(ch.PriceAdjustment, "USD"), ch.IsDefault, display);
+                                var add = cg.Value.AddChoice(ch.Name, new Money(ch.PriceAdjustment, currency), ch.IsDefault, display);
                                 if (add.IsFailure)
                                     logger.LogWarning("Failed to add choice {Choice} to group {Group}: {Error}", ch.Name, g.GroupKey, add.Error.Description);
                                 order++;
@@ -271,7 +276,7 @@ public class RestaurantBundleSeeder : ISeeder
                             foreach (var ch in g.Choices)
                             {
                                 if (existingChoiceNames.Contains(ch.Name)) continue;
-                                var add = ex.AddChoice(ch.Name, new Money(ch.PriceAdjustment, "USD"), ch.IsDefault, ch.DisplayOrder ?? order);
+                                var add = ex.AddChoice(ch.Name, new Money(ch.PriceAdjustment, currency), ch.IsDefault, ch.DisplayOrder ?? order);
                                 if (add.IsSuccess) updated.Groups++; else logger.LogWarning("Failed to add missing choice {Choice} to existing group {Group}: {Error}", ch.Name, g.GroupKey, add.Error.Description);
                                 order++;
                             }
@@ -306,7 +311,7 @@ public class RestaurantBundleSeeder : ISeeder
                         }
                         else
                         {
-                            var price = new Money(it.BasePrice, "USD");
+                            var price = new Money(it.BasePrice, currency);
                             var mi = MenuItem.Create(restaurant!.Id, categoryId, it.Name, it.Description, price, it.ImageUrl, it.IsAvailable);
                             if (mi.IsFailure)
                             {
@@ -441,4 +446,3 @@ public class RestaurantBundleSeeder : ISeeder
             => HashCode.Combine(StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item1), obj.Item2.GetHashCode());
     }
 }
-

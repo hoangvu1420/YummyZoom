@@ -1,0 +1,99 @@
+{
+  "restaurantSlug": "cha-ca-la-vong",
+  "name": "Chả Cá Lã Vọng",
+  "description": "Nhà hàng lâu đời tại 14 Phố Chả Cá, Hoàn Kiếm - nơi gắn liền với món chả cá nghệ thì là nức tiếng Hà Nội. Phục vụ theo kiểu chảo nóng xào thì là/hành hoa ngay tại bàn, ăn kèm bún, rau thơm, lạc rang và mắm tôm hoặc nước mắm.",
+  "cuisineType": "Vietnamese",
+  "logoUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cha%20ca%20La%20Vong.jpg",
+  "backgroundImageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grilled%20fish%20%40%20Cha%20Ca%20La%20Vong.jpg",
+  "defaultCurrency": "VND",
+  "isVerified": true,
+  "isAcceptingOrders": true,
+  "address": {
+    "street": "14 Phố Chả Cá, P. Hàng Bồ",
+    "city": "Hà Nội",
+    "state": "Hoàn Kiếm",
+    "zipCode": "100000",
+    "country": "Vietnam"
+  },
+  "contact": {
+    "phone": "+84 24 3825 3929",
+    "email": "contact@cha-ca-la-vong.example"
+  },
+  "businessHours": "11:00-14:00",
+  "tags": [
+    {
+      "tagName": "Historic",
+      "tagCategory": "Cuisine"
+    }
+  ],
+  "customizationGroups": [
+    {
+      "groupKey": "SauceChoice",
+      "minSelections": 1,
+      "maxSelections": 1,
+      "choices": [
+        {
+          "name": "Mắm tôm",
+          "priceAdjustment": 0.0,
+          "isDefault": true,
+          "displayOrder": 1
+        },
+        {
+          "name": "Nước mắm",
+          "priceAdjustment": 0.0,
+          "isDefault": false,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "groupKey": "Extras",
+      "minSelections": 0,
+      "maxSelections": 3,
+      "choices": [
+        {
+          "name": "Thêm bún",
+          "priceAdjustment": 0.0,
+          "isDefault": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "Thêm lạc rang",
+          "priceAdjustment": 0.0,
+          "isDefault": false,
+          "displayOrder": 2
+        },
+        {
+          "name": "Thêm thì là & hành hoa",
+          "priceAdjustment": 0.0,
+          "isDefault": false,
+          "displayOrder": 3
+        }
+      ]
+    }
+  ],
+  "menu": {
+    "name": "Main Menu",
+    "description": "Phục vụ món chả cá truyền thống (giá VND).",
+    "categories": [
+      {
+        "name": "Món đặc trưng",
+        "displayOrder": 1,
+        "items": [
+          {
+            "name": "Chả Cá Lã Vọng (suất chuẩn)",
+            "description": "Cá lăng/cá quả ướp nghệ – xào cùng thì là, hành hoa trên chảo nóng; ăn kèm bún, rau thơm, lạc rang; lựa chọn mắm tôm hoặc nước mắm.",
+            "basePrice": 350000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Turmeric%20and%20oil%20-%20Cha%20Ca%20La%20Vong.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "SauceChoice",
+              "Extras"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

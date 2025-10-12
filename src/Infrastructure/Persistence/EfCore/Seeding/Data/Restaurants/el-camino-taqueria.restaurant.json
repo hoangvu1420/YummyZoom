@@ -5,6 +5,7 @@
   "cuisineType": "Mexican",
   "logoUrl": "https://placehold.co/400x400.png",
   "backgroundImageUrl": "https://placehold.co/1200x800.png",
+  "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
   "address": {
@@ -33,13 +34,13 @@
         },
         {
           "name": "Medium",
-          "priceAdjustment": 1.00,
+          "priceAdjustment": 24000.00,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Large",
-          "priceAdjustment": 2.00,
+          "priceAdjustment": 48000.00,
           "isDefault": false,
           "displayOrder": 3
         }
@@ -52,25 +53,25 @@
       "choices": [
         {
           "name": "Extra Cheese",
-          "priceAdjustment": 1.50,
+          "priceAdjustment": 36000.00,
           "isDefault": false,
           "displayOrder": 1
         },
         {
           "name": "Bacon",
-          "priceAdjustment": 2.00,
+          "priceAdjustment": 48000.00,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Avocado",
-          "priceAdjustment": 2.50,
+          "priceAdjustment": 60000.00,
           "isDefault": false,
           "displayOrder": 3
         },
         {
           "name": "Mushrooms",
-          "priceAdjustment": 1.00,
+          "priceAdjustment": 24000.00,
           "isDefault": false,
           "displayOrder": 4
         }
@@ -88,7 +89,7 @@
           {
             "name": "Bruschetta",
             "description": "Grilled bread with tomato, basil, and garlic",
-            "basePrice": 7.99,
+            "basePrice": 191760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "dietaryTags": [
@@ -98,21 +99,21 @@
           {
             "name": "Garlic Parmesan Wings",
             "description": "Crispy wings tossed in garlic parmesan",
-            "basePrice": 9.49,
+            "basePrice": 227760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Fried Calamari",
             "description": "Lightly breaded rings with marinara",
-            "basePrice": 10.99,
+            "basePrice": 263760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Caprese Skewers",
             "description": "Tomato, mozzarella, basil drizzle",
-            "basePrice": 6.99,
+            "basePrice": 167760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "dietaryTags": [
@@ -122,14 +123,14 @@
           {
             "name": "Stuffed Mushrooms",
             "description": "Herb cream cheese, baked",
-            "basePrice": 8.49,
+            "basePrice": 203760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Spinach Artichoke Dip",
             "description": "Creamy dip with tortilla chips",
-            "basePrice": 8.99,
+            "basePrice": 215760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           }
@@ -142,7 +143,7 @@
           {
             "name": "Margherita Pizza",
             "description": "Tomato, mozzarella, basil",
-            "basePrice": 12.99,
+            "basePrice": 311760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "customizationGroups": [
@@ -153,7 +154,7 @@
           {
             "name": "BBQ Chicken Pizza",
             "description": "BBQ sauce, chicken, red onion",
-            "basePrice": 13.99,
+            "basePrice": 335760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "customizationGroups": [
@@ -164,7 +165,7 @@
           {
             "name": "Classic Cheeseburger",
             "description": "Beef patty with cheddar and pickles",
-            "basePrice": 11.99,
+            "basePrice": 287760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "customizationGroups": [
@@ -174,21 +175,21 @@
           {
             "name": "Grilled Salmon",
             "description": "Lemon herb butter, seasonal veggies",
-            "basePrice": 17.49,
+            "basePrice": 419760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Chicken Alfredo Pasta",
             "description": "Creamy parmesan sauce, fettuccine",
-            "basePrice": 14.49,
+            "basePrice": 347760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Veggie Stir Fry",
             "description": "Mixed vegetables with soy-ginger glaze",
-            "basePrice": 12.49,
+            "basePrice": 299760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "dietaryTags": [
@@ -205,35 +206,35 @@
           {
             "name": "Chocolate Lava Cake",
             "description": "Warm center, vanilla ice cream",
-            "basePrice": 7.49,
+            "basePrice": 179760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Cheesecake",
             "description": "Classic New York style",
-            "basePrice": 6.99,
+            "basePrice": 167760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Tiramisu",
             "description": "Espresso-soaked ladyfingers, mascarpone",
-            "basePrice": 6.99,
+            "basePrice": 167760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Apple Pie",
             "description": "Cinnamon crumb topping",
-            "basePrice": 5.99,
+            "basePrice": 143760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Gelato Trio",
             "description": "Three seasonal flavors",
-            "basePrice": 6.49,
+            "basePrice": 155760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true,
             "dietaryTags": [
@@ -243,7 +244,7 @@
           {
             "name": "Brownie Sundae",
             "description": "Fudge brownie, ice cream, nuts",
-            "basePrice": 6.49,
+            "basePrice": 155760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           }
@@ -256,42 +257,42 @@
           {
             "name": "House Lemonade",
             "description": "Fresh squeezed",
-            "basePrice": 3.99,
+            "basePrice": 95760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Iced Tea",
             "description": "Unsweetened black tea",
-            "basePrice": 2.99,
+            "basePrice": 71760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Sparkling Water",
             "description": "Chilled with lemon",
-            "basePrice": 2.49,
+            "basePrice": 59760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Cola",
             "description": "Classic soda",
-            "basePrice": 2.49,
+            "basePrice": 59760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Coffee",
             "description": "Freshly brewed",
-            "basePrice": 2.49,
+            "basePrice": 59760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           },
           {
             "name": "Espresso",
             "description": "Double shot",
-            "basePrice": 2.99,
+            "basePrice": 71760.00,
             "imageUrl": "https://placehold.co/600x400.png",
             "isAvailable": true
           }

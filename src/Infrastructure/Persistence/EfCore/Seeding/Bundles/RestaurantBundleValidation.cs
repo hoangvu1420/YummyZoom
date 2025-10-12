@@ -9,6 +9,7 @@ public static class RestaurantBundleValidation
     private static readonly Regex PhoneRegex = new("^[\\d\\s\\-\\(\\)\\+\\.]+$", RegexOptions.Compiled);
     private static readonly Regex EmailRegex = new("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", RegexOptions.Compiled);
     private static readonly Regex HoursRegex = new("^([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]$", RegexOptions.Compiled);
+    private static readonly Regex CurrencyRegex = new("^[A-Za-z]{3}$", RegexOptions.Compiled);
 
     public sealed class ValidationResult
     {
@@ -36,6 +37,9 @@ public static class RestaurantBundleValidation
 
         if (string.IsNullOrWhiteSpace(bundle.CuisineType))
             result.Errors.Add("cuisineType is required.");
+
+        if (!string.IsNullOrWhiteSpace(bundle.DefaultCurrency) && !CurrencyRegex.IsMatch(bundle.DefaultCurrency.Trim()))
+            result.Errors.Add("defaultCurrency must be a 3-letter code (e.g., USD, EUR). Optional if omitted.");
 
         if (bundle.Address is null)
             result.Errors.Add("address is required.");
@@ -211,4 +215,3 @@ public static class RestaurantBundleValidation
                                 StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item2));
     }
 }
-

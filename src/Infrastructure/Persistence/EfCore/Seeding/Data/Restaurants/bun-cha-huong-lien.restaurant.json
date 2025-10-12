@@ -1,0 +1,205 @@
+{
+  "restaurantSlug": "bun-cha-huong-lien",
+  "name": "Bún Chả Hương Liên",
+  "description": "Menu tái dựng từ ảnh menu chính thức (Combo Obama, bún chả, nem, đồ uống). Giá theo ảnh menu, tiền tệ VND.",
+  "cuisineType": "Vietnamese",
+  "logoUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Linecons_noodle-bowl.svg",
+  "backgroundImageUrl": "https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
+  "defaultCurrency": "VND",
+  "isVerified": true,
+  "isAcceptingOrders": true,
+  "address": {
+    "street": "24 Lê Văn Hưu, Phan Chu Trinh",
+    "city": "Hà Nội",
+    "state": "Hai Bà Trưng",
+    "zipCode": "11616",
+    "country": "Vietnam"
+  },
+  "contact": {
+    "phone": "+84 24 3943 4106",
+    "email": "contact@buncha-huonglien.example"
+  },
+  "businessHours": "08:00-20:00",
+  "tags": [
+    {
+      "tagName": "Traditional",
+      "tagCategory": "Cuisine"
+    }
+  ],
+  "customizationGroups": [
+    {
+      "groupKey": "AddOns",
+      "minSelections": 0,
+      "maxSelections": 3,
+      "choices": [
+        {
+          "name": "Thêm bún",
+          "priceAdjustment": 5000.0,
+          "isDefault": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "Thêm nem cua bể",
+          "priceAdjustment": 8000.0,
+          "isDefault": false,
+          "displayOrder": 2
+        },
+        {
+          "name": "Thêm nem hải sản",
+          "priceAdjustment": 35000.0,
+          "isDefault": false,
+          "displayOrder": 3
+        }
+      ]
+    }
+  ],
+  "menu": {
+    "name": "Main Menu",
+    "description": "Theo ảnh menu chính thức (VND)",
+    "categories": [
+      {
+        "name": "Món chính",
+        "displayOrder": 1,
+        "items": [
+          {
+            "name": "Combo Obama",
+            "description": "1 Bún chả đặc biệt + 1 Nem hải sản + 1 Bia Hà Nội",
+            "basePrice": 120000.0,
+            "imageUrl": "https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "AddOns"
+            ]
+          },
+          {
+            "name": "The Special Bún Chả",
+            "description": "Suất bún chả đặc biệt",
+            "basePrice": 60000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bun-cha-hanoi.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Bún chả",
+            "description": "Thịt nướng ăn kèm bún, rau thơm và nước chấm",
+            "basePrice": 50000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bun_cha_hanoi.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Nem hải sản",
+            "description": "Nem hải sản chiên (tôm, cua, thịt, rau củ)",
+            "basePrice": 35000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_imperial_spring_rolls.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Nem cua bể",
+            "description": "Nem cua bể chiên",
+            "basePrice": 8000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_spring_roll.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Nem chay",
+            "description": "Nem rau nấm đậu phụ chiên",
+            "basePrice": 7000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vegetarian_Spring_Rolls_-_Cafe_Mi_Hee_(1087976697).jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ]
+          },
+          {
+            "name": "Thịt xiên",
+            "description": "Xiên thịt nướng",
+            "basePrice": 25000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pork_skewers_on_the_grill_-_Banh_Uot_hawker.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Bún (thêm)",
+            "description": "Phần bún thêm",
+            "basePrice": 5000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rice_Vermicelli_(Rice_Noodle)_of_Taiwan.JPG",
+            "isAvailable": true,
+            "dietaryTags": []
+          }
+        ]
+      },
+      {
+        "name": "Đồ uống & Khác",
+        "displayOrder": 2,
+        "items": [
+          {
+            "name": "Khăn ướt",
+            "description": "Khăn ướt dùng một lần",
+            "basePrice": 3000.0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/13/Folding_towel.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Nước suối",
+            "description": "Chai nước suối",
+            "basePrice": 10000.0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Bottled_water.png",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Trà đá",
+            "description": "Trà xanh đá",
+            "basePrice": 15000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_Iced_Coffee_Ba_Chi_Canteen.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Pepsi",
+            "description": "Nước ngọt lon",
+            "basePrice": 15000.0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/59/Pepsi_can.png",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Bia Hà Nội",
+            "description": "Bia chai Hà Nội",
+            "basePrice": 25000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bia_HaNoi_tai_Sam_Son_030720103241.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Bia Sài Gòn",
+            "description": "Bia chai Sài Gòn",
+            "basePrice": 25000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bia_Saigon_Special_beer.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          },
+          {
+            "name": "Heineken",
+            "description": "Bia lon Heineken",
+            "basePrice": 30000.0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/45/Heineken_0.33_litre_can_2009.jpg",
+            "isAvailable": true,
+            "dietaryTags": []
+          }
+        ]
+      }
+    ]
+  }
+}

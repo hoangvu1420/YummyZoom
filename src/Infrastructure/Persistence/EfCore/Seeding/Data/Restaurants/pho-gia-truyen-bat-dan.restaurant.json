@@ -1,0 +1,90 @@
+{
+  "restaurantSlug": "pho-gia-truyen-bat-dan",
+  "name": "Phở Gia Truyền (Bát Đàn)",
+  "description": "Phở bò gia truyền nổi tiếng tại phố Bát Đàn, Hà Nội. Hàng quán nhỏ, thường có xếp hàng; phục vụ phở bò với các phần thịt khác nhau, có quẩy và trứng.",
+  "cuisineType": "Vietnamese",
+  "logoUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Linecons_noodle-bowl.svg",
+  "backgroundImageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20Gia%20Truy%E1%BB%81n.jpg",
+  "defaultCurrency": "VND",
+  "isVerified": true,
+  "isAcceptingOrders": false,
+  "address": {
+    "street": "49 Bát Đàn, Phường Cửa Đông",
+    "city": "Hà Nội",
+    "state": "Hoàn Kiếm",
+    "zipCode": "11016",
+    "country": "Vietnam"
+  },
+  "contact": {
+    "phone": "+84 24 6683 3535",
+    "email": "contact@phogiatruyen-batdan.example"
+  },
+  "businessHours": "06:00-10:00",
+  "tags": [],
+  "customizationGroups": [
+    {
+      "groupKey": "Extras",
+      "minSelections": 0,
+      "maxSelections": 2,
+      "choices": [
+        {
+          "name": "Quẩy",
+          "priceAdjustment": 10000.0,
+          "isDefault": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "Trứng gà",
+          "priceAdjustment": 5000.0,
+          "isDefault": false,
+          "displayOrder": 2
+        }
+      ]
+    }
+  ],
+  "menu": {
+    "name": "Main Menu",
+    "description": "Phở bò truyền thống",
+    "categories": [
+      {
+        "name": "Phở bò",
+        "displayOrder": 1,
+        "items": [
+          {
+            "name": "Phở bò chín",
+            "description": "Phở bò phần chín (brisket well-done)",
+            "basePrice": 50000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pho-Beef-Noodles-2008.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "Extras"
+            ]
+          },
+          {
+            "name": "Phở bò tái",
+            "description": "Phở bò phần tái (round steak)",
+            "basePrice": 55000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20b%C3%B2%20(39425047901).jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "Extras"
+            ]
+          },
+          {
+            "name": "Phở tái nạm",
+            "description": "Phở bò tái nạm (rare + flank)",
+            "basePrice": 60000.0,
+            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Large%20bowl%20of%20Beef%20Pho%20from%20Dalat%20Vietnamese%20Restaurtant.jpg",
+            "isAvailable": true,
+            "dietaryTags": [],
+            "customizationGroups": [
+              "Extras"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

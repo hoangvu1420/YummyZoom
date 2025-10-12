@@ -10,6 +10,7 @@ public sealed class RestaurantBundle
     [JsonPropertyName("cuisineType")] public string CuisineType { get; set; } = string.Empty;
     [JsonPropertyName("logoUrl")] public string? LogoUrl { get; set; }
     [JsonPropertyName("backgroundImageUrl")] public string? BackgroundImageUrl { get; set; }
+    [JsonPropertyName("defaultCurrency")] public string? DefaultCurrency { get; set; }
 
     [JsonPropertyName("address")] public AddressDto Address { get; set; } = new();
     [JsonPropertyName("contact")] public ContactDto Contact { get; set; } = new();
@@ -91,4 +92,3 @@ public sealed class MenuItemDto
     // References to CustomizationGroupDto.GroupKey
     [JsonPropertyName("customizationGroups")] public List<string>? CustomizationGroups { get; set; }
 }
-
