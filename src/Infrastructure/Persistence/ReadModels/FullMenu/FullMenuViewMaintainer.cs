@@ -5,7 +5,6 @@ using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.TagEntity.ValueObjects;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;

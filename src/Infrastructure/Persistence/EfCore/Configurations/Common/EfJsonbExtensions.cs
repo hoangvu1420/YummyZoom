@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Persistence.EfCore.Configurations.Common;

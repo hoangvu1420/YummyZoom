@@ -1,256 +1,160 @@
-## Phase 1 — Foundation & User Authentication (Step 0: Backend API Analysis & Synchronization)
-
-Date: 2025-10-07
-
-Scope: Customer app authentication and initial identity lifecycle to support Sign In, Sign Up (onboarding), token handling, and guarded navigation as defined in `docs/core/overall-roadmap.md` Phase 1 and the workflow in `docs/core/standard-workflow.md` Step 0.
-
----
-
-### 1) Current Backend Capabilities (from API docs)
-
-Based on `docs/API-Documentation/02-Authentication.md` and `docs/API-Documentation/API-Reference/Customer/01-Authentication-and-Profile.md`:
-
-- Phone OTP flow:
-  - `POST /api/v1/users/auth/otp/request`
-  - `POST /api/v1/users/auth/otp/verify` → returns bearer tokens `{ tokenType, accessToken, expiresIn, refreshToken }`
-- Token refresh:
-  - `POST /api/v1/users/refresh`
-- Onboarding & status:
-  - `GET /api/v1/users/auth/status` → `{ isNewUser, requiresOnboarding }`
-  - `POST /api/v1/users/auth/complete-signup` (name required, email optional)
-- Optional password login (after OTP user sets password):
-  - `POST /api/v1/users/auth/set-password`
-  - `POST /api/v1/users/login` (Identity field `email` carries the phone in E.164)
-- Profile & device endpoints for later phases:
-  - `GET /api/v1/users/me`, `PUT /api/v1/users/me/profile`, `PUT /api/v1/users/me/address`
-  - `POST /api/v1/users/devices/register` / `unregister`
-
-Conclusion: The documented endpoints cover all Phase 1 needs for OTP-first sign-in, token issuance, refresh, onboarding, and auth status.
-
----
-
-### 2) Mobile Client Requirements (from Roadmap Phase 1)
-
-- Sign In, Sign Up, Forgot Password screens; loading indicators; error messaging.
-- ViewModel methods: `login(email, password)`, `register(...)` (email/password path) AND OTP path.
-- Persist tokens securely (Hive); attach `Authorization: Bearer` automatically via HTTP client interceptor.
-- Route guarding: redirect unauthenticated users to Sign In.
-
-Notes:
-- Because the platform is phone-first OTP, the initial MVP will prefer OTP flows and use password only if a user has set it. The UI can still show a password path with guidance.
-
----
-
-### 3) Identified Gaps and Proposed Backend Changes
-
-No blocking functional gaps identified for Phase 1. The following proposals aim to simplify mobile integration, reduce ambiguity, and minimize churn:
-
-P1 — Standardize phone username field contract on `/login` (clarification-only)
-- Today, the field is named `email` but must contain the E.164 phone number. Keep contract but explicitly document it in OpenAPI and problem responses (already described in MD docs). Ensure server-side validation message reflects that `email` represents phone for this product.
-
-P1 — Consistent Problem Details for Auth Errors
-- Ensure OTP and login endpoints return RFC 7807 problem details with stable `type` values (e.g., `authentication`, `validation`) and clear `detail`. The docs already show examples; request confirmation that production follows the same structure consistently.
-
-P2 — Explicit Environment Behavior for OTP Request
-- The docs specify 200 (dev with code) vs 202 (prod SMS). Propose a response header `X-YZ-Env: Development|Production` or include an `environment` field only in dev responses to help client-side toggling of flows during internal testing. Optional.
-
-P3 — Token Expiry Metadata (non-blocking)
-- Optionally include `issuedAt` and absolute `expiresAt` timestamps alongside `expiresIn` to simplify client scheduling for token refresh.
-
-P3 — Rate Limiting & Abuse Signals (non-blocking)
-- Provide `Retry-After` on throttled OTP requests and stable status code (e.g., 429). Document any per-phone limits so the app can show user-friendly wait messages.
-
----
-
-### 4) Mobile-Oriented API Contracts (for confirmation)
-
-OTP Request
-- Request: `{ phoneNumber: "+15551234567" }`
-- Dev: `200 { code: "123456" }`; Prod: `202 {}`
-- Errors: 400 validation with problem details; 429 throttling optional.
-
-OTP Verify (Sign-In)
-- Request: `{ phoneNumber: "+15551234567", code: "123456" }`
-- Success: token payload `{ tokenType, accessToken, expiresIn, refreshToken }`
-- Errors: 400 validation; 401 invalid/expired code.
-
-Refresh Token
-- Request: `{ refreshToken: "..." }`
-- Success: same token payload shape; 401 if invalid/expired.
-
-Auth Status
-- Response: `{ isNewUser: boolean, requiresOnboarding: boolean }`
-
-Complete Signup
-- Request: `{ name: string, email?: string }`
-- Success: `200 {}` (idempotent)
-- Errors: 400 validation.
-
-Password Login (optional path)
-- Request: `{ email: "+15551234567", password: string }` (email carries phone)
-- Success: token payload.
-
----
-
-### 5) Open Questions to Backend Team
-
-Q1. OTP Code Policy
-- What are the exact OTP length/rules and expiry window? Current docs imply 4–8 digits; confirm fixed length and exact TTL.
-
-Q2. Throttling & Lockouts
-- Are there rate limits per phone/IP for OTP requests and verify attempts? What are the 429/423 behaviors and headers returned?
-
-Q3. Refresh Token Rotation
-- Are refresh tokens rotated on every refresh (as examples suggest) and is the previous refresh token immediately invalidated? Confirm error code when using an old token after rotation.
-
-Q4. Dev vs Prod Behavior Flags
-- Can we rely on a header or a field to distinguish dev from prod responses on OTP request, or should the client infer from environment config only?
-
-Q5. Username Evolution
-- If a user later sets a real email, does `/login` continue to expect `email`=phone, or does it accept either phone or email? If both are supported, how does the server disambiguate?
-
-Q6. Token Lifetime Configuration
-- Access token TTL is 3600s in docs. Can the server return absolute `expiresAt` and `issuedAt` to reduce client clock drift issues?
-
-Q7. Problem Details Contract
-- Can we lock the `type` values and include optional `errorCode` for client-side telemetry? E.g., `Otp.Invalid`, `Refresh.Invalid`, `Password.AlreadySet`.
-
----
-
-### 6) Acceptance Criteria for Backend Readiness (Phase 1)
-
-- Endpoints in Section 4 respond as documented in production and staging.
-- Problem details follow RFC 7807 with stable `type` and clear `detail`.
-- Token payload includes `tokenType`, `accessToken`, `expiresIn`, `refreshToken` (and optionally `issuedAt`, `expiresAt`).
-- OTP request differentiates 200 (dev) vs 202 (prod); throttling returns 429 with `Retry-After` if applicable.
-
----
-
-### 7) Client Integration Notes
-
-- Store tokens in Hive; add `AuthInterceptor` to attach `Authorization: Bearer <accessToken>`.
-- On 401 with `authentication` type, attempt refresh flow once; if refresh fails, clear tokens and redirect to Sign In.
-- Guard routes via `GoRouter` redirect based on token presence/validity and `requiresOnboarding` status.
-- Support both OTP and password login UI; guide users that the username field expects phone in E.164.
-
----
-
-Status: Ready to share with backend for confirmation. No blocking changes identified; proposals P1-P3 are quality-of-life improvements.
-
-
-
----
-
-### 8) Backend Response: Problem Details Convention
-
-**RFC 7807 Structure:**
-- `title` = Error code (e.g., `Otp.Invalid`, `MenuItem.Invalid`)
-- `detail` = Human-readable message
-- `type` = RFC URI
-- Clients should key off `title` for programmatic handling
-
-**Example:**
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-  "title": "Otp.Invalid",
-  "status": 400,
-  "detail": "Invalid or expired code"
-}
-```
-
----
-
-### 9) Backend Update: Rate Limiting Implementation (2025-10-07)
-
-**Status: ✅ IMPLEMENTED**
-
-**Limits:**
-- Per-IP: 5/min, 30/hour (request); 10/5min (verify)
-- Per-Phone: **1/min**, 10/hour (request); 5 failures → 5min lockout
-
-**Response Codes:**
-- **429**: Rate limit exceeded → title: `Otp.Throttled`
-- **423**: Account locked → title: `Otp.LockedOut`
-- **Retry-After header** included with wait time
-
-**Key Points:**
-- Strict 1 request/minute per phone
-- Limits reset on successful verification
-- Use `title` field for error handling
-
----
-
-### 10) Rate Limiting Update: Stricter Limits (2025-10-07)
-
-**Status: ✅ UPDATED**
-
-**Change:** Reduced OTP requests from 3/min to **1/min per phone**
-
-**Frontend Notes:**
-- Show countdown timer using `Retry-After` header
-- Clear messaging about 1-minute wait
-
----
-
-### 11) Backend Implementation: P2 Environment Header (2025-10-07)
-
-**Status: ✅ IMPLEMENTED**
-
-**Added:** `X-YummyZoom-Environment` header to all OTP responses (`POST /api/v1/users/auth/otp/request`)
-
-**Response Headers:**
-```
-X-YummyZoom-Environment: Development|Production|Test
-```
-
-**Benefits:**
-- Explicit environment detection (no more inferring from 200 vs 202)
-- Better debugging and testing support
-- Backward compatible
-
-**Usage:** `response.headers['X-YummyZoom-Environment']`
-
----
-
-### 12) Backend Responses to Frontend Questions (2025-10-07)
-
-**Q1. OTP Code Policy**
-- **Length**: 6 digits (fixed)
-- **Format**: Numeric only
-- **Expiry**: 5 minutes (ASP.NET Core Identity default)
-- **Dev vs Prod**: Static "111111" (dev) vs generated (prod)
-
-**Q2. Throttling & Lockouts**
-- **Per-Phone**: 1/min, 10/hour (requests); 5 failures → 5min lockout
-- **Per-IP**: 5/min, 30/hour (requests); 10/5min (verify)
-- **Response Codes**: 429 (`Otp.Throttled`), 423 (`Otp.LockedOut`)
-- **Headers**: `Retry-After` included
-
-**Q3. Refresh Token Rotation**
-- **Rotation**: Yes, every refresh invalidates old token
-- **Lifetime**: 7 days
-- **Endpoint**: `/api/Users/Refresh`
-- **Error**: 401 for old/invalid tokens
-
-**Q4. Environment Detection**
-- **Status**: ✅ Implemented (see P2 above)
-- **Header**: `X-YummyZoom-Environment: Development|Production|Test`
-- **Usage**: Reliable environment detection
-
-**Q5. Username Evolution**
-- **Login Field**: Always expects phone number in `email` field
-- **Email Updates**: Only update profile, not login credentials
-- **No Email Login**: Phone remains sole authentication method
-
-**Q6. Token Timestamps**
-- **Current**: Only `expiresIn` (3600s access, 7 days refresh)
-- **No Absolute Times**: `issuedAt`/`expiresAt` not included by default
-- **Enhancement**: Would require custom token response
-
-**Q7. Problem Details**
-- **Status**: ✅ Already RFC 7807 compliant
-- **Error Codes**: Stable `title` field (`Otp.Invalid`, `Otp.Throttled`, etc.)
-- **Client Usage**: Key off `title` for programmatic handling
-- **Telemetry Ready**: Consistent error codes across all endpoints
-
+Here are PostgreSQL queries you can run to verify the bundle seeding end-to-end, plus what you should expect to see given your run.
+
+- Sanity counts
+  - Verifies total rows across key tables.
+    ```sql
+    SELECT
+      (SELECT COUNT(*) FROM "Restaurants")            AS restaurants,
+      (SELECT COUNT(*) FROM "Menus")                  AS menus,
+      (SELECT COUNT(*) FROM "MenuCategories")         AS menu_categories,
+      (SELECT COUNT(*) FROM "MenuItems")              AS menu_items,
+      (SELECT COUNT(*) FROM "CustomizationGroups")    AS customization_groups,
+      (SELECT COUNT(*) FROM "CustomizationChoices")   AS customization_choices,
+      (SELECT COUNT(*) FROM "Tags")                   AS tags;
+    ```
+  - Expected: restaurants=3, menus=3, menu_categories=12, menu_items=72, customization_groups=6, customization_choices=21, tags=12.
+
+- Restaurant details
+  - Spot check core fields and owned VOs mapping.
+    ```sql
+    SELECT
+      r."Name", r."CuisineType", r."IsVerified", r."IsAcceptingOrders",
+      r."Location_City" AS city, r."ContactInfo_Email" AS email, r."BusinessHours"
+    FROM "Restaurants" r
+    ORDER BY r."Name";
+    ```
+  - Expected rows (3):
+    - Bella Vista Italian | Italian | t | t | Downtown | orders@bellavista.com | 11:00-22:00
+    - Sakura Sushi | Japanese | t | t | Midtown | hello@sakurasushi.com | 10:30-21:30
+    - El Camino Taqueria | Mexican | t | t | Uptown | contact@elcamino.com | 11:00-23:00
+
+- Per-restaurant content summary
+  - Ensures graph completeness per restaurant.
+    ```sql
+    SELECT
+      r."Name",
+      COUNT(DISTINCT m."Id") AS menus,
+      COUNT(DISTINCT c."Id") AS categories,
+      COUNT(DISTINCT i."Id") AS items,
+      COUNT(DISTINCT g."Id") AS groups
+    FROM "Restaurants" r
+    LEFT JOIN "Menus" m ON m."RestaurantId" = r."Id"
+    LEFT JOIN "MenuCategories" c ON c."MenuId" = m."Id"
+    LEFT JOIN "MenuItems" i ON i."RestaurantId" = r."Id"
+    LEFT JOIN "CustomizationGroups" g ON g."RestaurantId" = r."Id"
+    GROUP BY r."Name"
+    ORDER BY r."Name";
+    ```
+  - Expected per restaurant: menus=1, categories=4, items=24, groups=2.
+
+- Categories and display order
+  - Verifies menu structure and ordering.
+    ```sql
+    SELECT
+      r."Name" AS restaurant, c."Name" AS category, c."DisplayOrder"
+    FROM "Restaurants" r
+    JOIN "Menus" m ON m."RestaurantId" = r."Id"
+    JOIN "MenuCategories" c ON c."MenuId" = m."Id"
+    ORDER BY r."Name", c."DisplayOrder";
+    ```
+  - Expected per restaurant: Appetizers(1), Mains(2), Desserts(3), Drinks(4).
+
+- Items with assigned customizations
+  - Confirms items reference customization groups (JSONB).
+    ```sql
+    SELECT
+      r."Name", COUNT(*) AS items_with_customizations
+    FROM "Restaurants" r
+    JOIN "MenuItems" i ON i."RestaurantId" = r."Id"
+    WHERE jsonb_array_length(i."AppliedCustomizations"::jsonb) > 0
+    GROUP BY r."Name"
+    ORDER BY r."Name";
+    ```
+  - Expected: 3 per restaurant (Margherita Pizza, BBQ Chicken Pizza, Classic Cheeseburger) → 3 | 3 | 3.
+
+- Customizations on a known item
+  - Shows human titles and order assigned to an item.
+    ```sql
+    SELECT
+      r."Name" AS restaurant, c."Name" AS category, i."Name" AS item,
+      ac->>'DisplayTitle' AS group_title, (ac->>'DisplayOrder')::int AS display_order
+    FROM "MenuItems" i
+    JOIN "MenuCategories" c ON c."Id" = i."MenuCategoryId"
+    JOIN "Menus" m ON m."Id" = c."MenuId"
+    JOIN "Restaurants" r ON r."Id" = m."RestaurantId",
+    LATERAL jsonb_array_elements(i."AppliedCustomizations"::jsonb) AS ac
+    WHERE i."Name" = 'Margherita Pizza'
+    ORDER BY r."Name", display_order;
+    ```
+  - Expected per restaurant: Size (1), Extras (2).
+
+- Items with dietary tags
+  - Confirms JSONB list presence.
+    ```sql
+    SELECT
+      r."Name", COUNT(*) AS items_with_dietary_tags
+    FROM "Restaurants" r
+    JOIN "MenuItems" i ON i."RestaurantId" = r."Id"
+    WHERE jsonb_array_length(COALESCE(i."DietaryTagIds"::jsonb, '[]'::jsonb)) > 0
+    GROUP BY r."Name"
+    ORDER BY r."Name";
+    ```
+  - Expected: 4 per restaurant (e.g., Bruschetta, Caprese Skewers, Veggie Stir Fry, Gelato Trio) → 4 | 4 | 4.
+
+- Expand dietary tags to names
+  - Cross-check tag IDs in JSONB against Tags table.
+    ```sql
+    WITH tag_ids AS (
+      SELECT i."Id" AS menu_item_id, (jt->>'Value')::uuid AS tag_id
+      FROM "MenuItems" i,
+           LATERAL jsonb_array_elements(COALESCE(i."DietaryTagIds"::jsonb, '[]'::jsonb)) jt
+    )
+    SELECT
+      r."Name" AS restaurant, i."Name" AS item, t."TagName", t."TagCategory"
+    FROM tag_ids ti
+    JOIN "MenuItems" i ON i."Id" = ti.menu_item_id
+    JOIN "Tags" t ON t."Id" = ti.tag_id
+    JOIN "MenuCategories" c ON c."Id" = i."MenuCategoryId"
+    JOIN "Menus" m ON m."Id" = c."MenuId"
+    JOIN "Restaurants" r ON r."Id" = m."RestaurantId"
+    ORDER BY restaurant, item, t."TagName";
+    ```
+  - Expected samples: Bruschetta → Vegetarian; Veggie Stir Fry → Vegan, Gluten-Free; Gelato Trio → Vegetarian.
+
+- Customization groups and choices per restaurant
+  - Validates group modules and choice counts.
+    ```sql
+    SELECT
+      r."Name" AS restaurant, g."GroupName", COUNT(ch."ChoiceId") AS choices
+    FROM "CustomizationGroups" g
+    JOIN "Restaurants" r ON r."Id" = g."RestaurantId"
+    LEFT JOIN "CustomizationChoices" ch ON ch."CustomizationGroupId" = g."Id"
+    GROUP BY r."Name", g."GroupName"
+    ORDER BY r."Name", g."GroupName";
+    ```
+  - Expected per restaurant: Size → 3, Extras → 4.
+
+- Price sanity for Mains
+  - Confirms Money VO persisted as amount/currency.
+    ```sql
+    SELECT
+      r."Name" AS restaurant, i."Name" AS item,
+      i."BasePrice_Amount" AS price, i."BasePrice_Currency" AS currency
+    FROM "MenuItems" i
+    JOIN "MenuCategories" c ON c."Id" = i."MenuCategoryId"
+    JOIN "Menus" m ON m."Id" = c."MenuId"
+    JOIN "Restaurants" r ON r."Id" = m."RestaurantId"
+    WHERE c."Name" = 'Mains'
+    ORDER BY restaurant, item;
+    ```
+  - Expected samples (USD): Margherita Pizza 12.99; BBQ Chicken Pizza 13.99; Classic Cheeseburger 11.99; etc.
+
+- Menu names per restaurant
+  - Ensures 1 “Main Menu” per restaurant.
+    ```sql
+    SELECT r."Name", m."Name"
+    FROM "Restaurants" r
+    JOIN "Menus" m ON m."RestaurantId" = r."Id"
+    ORDER BY 1;
+    ```
+  - Expected: all rows show “Main Menu”.

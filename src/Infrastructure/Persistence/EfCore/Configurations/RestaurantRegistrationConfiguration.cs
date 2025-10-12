@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YummyZoom.Domain.RestaurantRegistrationAggregate;
-using YummyZoom.Domain.RestaurantRegistrationAggregate.Enums;
 using YummyZoom.Domain.RestaurantRegistrationAggregate.ValueObjects;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 

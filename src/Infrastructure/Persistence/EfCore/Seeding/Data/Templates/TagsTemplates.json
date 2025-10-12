@@ -1,0 +1,19 @@
+{
+  "tags": [
+    { "tagName": "Vegetarian", "tagCategory": "Dietary", "tagDescription": "No meat or fish" },
+    { "tagName": "Vegan", "tagCategory": "Dietary", "tagDescription": "No animal products" },
+    { "tagName": "Gluten-Free", "tagCategory": "Dietary", "tagDescription": "No gluten ingredients" },
+    { "tagName": "Dairy-Free", "tagCategory": "Dietary" },
+    { "tagName": "Halal", "tagCategory": "Dietary" },
+    { "tagName": "Kosher", "tagCategory": "Dietary" },
+
+    { "tagName": "Italian", "tagCategory": "Cuisine" },
+    { "tagName": "Japanese", "tagCategory": "Cuisine" },
+    { "tagName": "Mexican", "tagCategory": "Cuisine" },
+
+    { "tagName": "Mild", "tagCategory": "SpiceLevel" },
+    { "tagName": "Medium", "tagCategory": "SpiceLevel" },
+    { "tagName": "Hot", "tagCategory": "SpiceLevel" }
+  ]
+}
+

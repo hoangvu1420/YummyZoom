@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;

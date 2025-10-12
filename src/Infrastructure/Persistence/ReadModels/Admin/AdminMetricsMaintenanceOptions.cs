@@ -1,4 +1,3 @@
-using System;
 namespace YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 
 public sealed class AdminMetricsMaintenanceOptions

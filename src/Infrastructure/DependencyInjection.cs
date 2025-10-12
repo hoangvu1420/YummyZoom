@@ -32,6 +32,9 @@ using YummyZoom.Infrastructure.Notifications.Firebase;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.Persistence;
 using YummyZoom.Infrastructure.Persistence.EfCore;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.IdentitySeeders;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.RestaurantSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
@@ -80,6 +83,14 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
+
+        // Seeding framework
+        builder.Services.Configure<SeedingConfiguration>(builder.Configuration.GetSection(SeedingConfiguration.SectionName));
+        builder.Services.AddScoped<SeedingOrchestrator>();
+        builder.Services.AddScoped<ISeeder, RoleSeeder>();
+        builder.Services.AddScoped<ISeeder, UserSeeder>();
+        builder.Services.AddScoped<ISeeder, TagSeeder>();
+        builder.Services.AddScoped<ISeeder, RestaurantBundleSeeder>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
@@ -342,5 +353,3 @@ public static class DependencyInjection
         }
     }
 }
-
-

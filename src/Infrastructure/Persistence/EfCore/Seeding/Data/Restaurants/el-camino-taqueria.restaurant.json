@@ -1,0 +1,302 @@
+{
+  "restaurantSlug": "el-camino-taqueria",
+  "name": "El Camino Taqueria",
+  "description": "Street-style tacos and modern Mexican fare",
+  "cuisineType": "Mexican",
+  "logoUrl": "https://placehold.co/400x400.png",
+  "backgroundImageUrl": "https://placehold.co/1200x800.png",
+  "isVerified": true,
+  "isAcceptingOrders": true,
+  "address": {
+    "street": "789 Fiesta Road",
+    "city": "Uptown",
+    "state": "TX",
+    "zipCode": "73301",
+    "country": "USA"
+  },
+  "contact": {
+    "phone": "+1 (555) 222-3344",
+    "email": "contact@elcamino.com"
+  },
+  "businessHours": "11:00-23:00",
+  "customizationGroups": [
+    {
+      "groupKey": "Size",
+      "minSelections": 1,
+      "maxSelections": 1,
+      "choices": [
+        {
+          "name": "Small",
+          "priceAdjustment": 0.00,
+          "isDefault": true,
+          "displayOrder": 1
+        },
+        {
+          "name": "Medium",
+          "priceAdjustment": 1.00,
+          "isDefault": false,
+          "displayOrder": 2
+        },
+        {
+          "name": "Large",
+          "priceAdjustment": 2.00,
+          "isDefault": false,
+          "displayOrder": 3
+        }
+      ]
+    },
+    {
+      "groupKey": "Extras",
+      "minSelections": 0,
+      "maxSelections": 3,
+      "choices": [
+        {
+          "name": "Extra Cheese",
+          "priceAdjustment": 1.50,
+          "isDefault": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "Bacon",
+          "priceAdjustment": 2.00,
+          "isDefault": false,
+          "displayOrder": 2
+        },
+        {
+          "name": "Avocado",
+          "priceAdjustment": 2.50,
+          "isDefault": false,
+          "displayOrder": 3
+        },
+        {
+          "name": "Mushrooms",
+          "priceAdjustment": 1.00,
+          "isDefault": false,
+          "displayOrder": 4
+        }
+      ]
+    }
+  ],
+  "menu": {
+    "name": "Main Menu",
+    "description": "Our delicious offerings",
+    "categories": [
+      {
+        "name": "Appetizers",
+        "displayOrder": 1,
+        "items": [
+          {
+            "name": "Bruschetta",
+            "description": "Grilled bread with tomato, basil, and garlic",
+            "basePrice": 7.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ]
+          },
+          {
+            "name": "Garlic Parmesan Wings",
+            "description": "Crispy wings tossed in garlic parmesan",
+            "basePrice": 9.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Fried Calamari",
+            "description": "Lightly breaded rings with marinara",
+            "basePrice": 10.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Caprese Skewers",
+            "description": "Tomato, mozzarella, basil drizzle",
+            "basePrice": 6.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ]
+          },
+          {
+            "name": "Stuffed Mushrooms",
+            "description": "Herb cream cheese, baked",
+            "basePrice": 8.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Spinach Artichoke Dip",
+            "description": "Creamy dip with tortilla chips",
+            "basePrice": 8.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          }
+        ]
+      },
+      {
+        "name": "Mains",
+        "displayOrder": 2,
+        "items": [
+          {
+            "name": "Margherita Pizza",
+            "description": "Tomato, mozzarella, basil",
+            "basePrice": 12.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "customizationGroups": [
+              "Size",
+              "Extras"
+            ]
+          },
+          {
+            "name": "BBQ Chicken Pizza",
+            "description": "BBQ sauce, chicken, red onion",
+            "basePrice": 13.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "customizationGroups": [
+              "Size",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Classic Cheeseburger",
+            "description": "Beef patty with cheddar and pickles",
+            "basePrice": 11.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "customizationGroups": [
+              "Extras"
+            ]
+          },
+          {
+            "name": "Grilled Salmon",
+            "description": "Lemon herb butter, seasonal veggies",
+            "basePrice": 17.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Chicken Alfredo Pasta",
+            "description": "Creamy parmesan sauce, fettuccine",
+            "basePrice": 14.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Veggie Stir Fry",
+            "description": "Mixed vegetables with soy-ginger glaze",
+            "basePrice": 12.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegan",
+              "Gluten-Free"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Desserts",
+        "displayOrder": 3,
+        "items": [
+          {
+            "name": "Chocolate Lava Cake",
+            "description": "Warm center, vanilla ice cream",
+            "basePrice": 7.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Cheesecake",
+            "description": "Classic New York style",
+            "basePrice": 6.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Tiramisu",
+            "description": "Espresso-soaked ladyfingers, mascarpone",
+            "basePrice": 6.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Apple Pie",
+            "description": "Cinnamon crumb topping",
+            "basePrice": 5.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Gelato Trio",
+            "description": "Three seasonal flavors",
+            "basePrice": 6.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ]
+          },
+          {
+            "name": "Brownie Sundae",
+            "description": "Fudge brownie, ice cream, nuts",
+            "basePrice": 6.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          }
+        ]
+      },
+      {
+        "name": "Drinks",
+        "displayOrder": 4,
+        "items": [
+          {
+            "name": "House Lemonade",
+            "description": "Fresh squeezed",
+            "basePrice": 3.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Iced Tea",
+            "description": "Unsweetened black tea",
+            "basePrice": 2.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Sparkling Water",
+            "description": "Chilled with lemon",
+            "basePrice": 2.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Cola",
+            "description": "Classic soda",
+            "basePrice": 2.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Coffee",
+            "description": "Freshly brewed",
+            "basePrice": 2.49,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          },
+          {
+            "name": "Espresso",
+            "description": "Double shot",
+            "basePrice": 2.99,
+            "imageUrl": "https://placehold.co/600x400.png",
+            "isAvailable": true
+          }
+        ]
+      }
+    ]
+  }
+}

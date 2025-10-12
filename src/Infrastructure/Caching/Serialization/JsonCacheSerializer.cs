@@ -1,6 +1,5 @@
 using System.Text.Json;
 using YummyZoom.Application.Common.Caching;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Caching.Serialization;

@@ -1,5 +1,3 @@
-using System;
-
 namespace YummyZoom.Infrastructure.BackgroundServices;
 
 public sealed class TeamCartExpirationOptions

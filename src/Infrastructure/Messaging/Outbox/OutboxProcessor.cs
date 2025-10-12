@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using YummyZoom.Domain.Common.Models;
 using YummyZoom.Infrastructure.Persistence.EfCore;
-using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 
 namespace YummyZoom.Infrastructure.Messaging.Outbox;

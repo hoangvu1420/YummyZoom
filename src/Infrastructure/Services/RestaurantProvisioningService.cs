@@ -1,7 +1,6 @@
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.RestaurantAggregate;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Infrastructure.Services;
