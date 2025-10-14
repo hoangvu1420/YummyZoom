@@ -3,8 +3,8 @@
   "name": "Bún Chả Hương Liên",
   "description": "Menu tái dựng từ ảnh menu chính thức (Combo Obama, bún chả, nem, đồ uống). Giá theo ảnh menu, tiền tệ VND.",
   "cuisineType": "Vietnamese",
-  "logoUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Linecons_noodle-bowl.svg",
-  "backgroundImageUrl": "https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
+  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://hotel84.com/hotel84-images/news/img1/bun-cha-huong-lien.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://kenh14cdn.com/2018/3/10/photo-1-15206627578621251613213.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -65,7 +65,7 @@
             "name": "Combo Obama",
             "description": "1 Bún chả đặc biệt + 1 Nem hải sản + 1 Bia Hà Nội",
             "basePrice": 120000.0,
-            "imageUrl": "https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [
@@ -76,7 +76,7 @@
             "name": "The Special Bún Chả",
             "description": "Suất bún chả đặc biệt",
             "basePrice": 60000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bun-cha-hanoi.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun-cha-hanoi.jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [
@@ -87,7 +87,7 @@
             "name": "Bún chả",
             "description": "Thịt nướng ăn kèm bún, rau thơm và nước chấm",
             "basePrice": 50000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bun_cha_hanoi.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun_cha_hanoi.jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [
@@ -98,7 +98,7 @@
             "name": "Nem hải sản",
             "description": "Nem hải sản chiên (tôm, cua, thịt, rau củ)",
             "basePrice": 35000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_imperial_spring_rolls.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_imperial_spring_rolls.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -106,7 +106,7 @@
             "name": "Nem cua bể",
             "description": "Nem cua bể chiên",
             "basePrice": 8000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_spring_roll.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_spring_roll.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -114,7 +114,7 @@
             "name": "Nem chay",
             "description": "Nem rau nấm đậu phụ chiên",
             "basePrice": 7000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vegetarian_Spring_Rolls_-_Cafe_Mi_Hee_(1087976697).jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetarian_Spring_Rolls_-_Cafe_Mi_Hee_(1087976697).jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
@@ -124,7 +124,7 @@
             "name": "Thịt xiên",
             "description": "Xiên thịt nướng",
             "basePrice": 25000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pork_skewers_on_the_grill_-_Banh_Uot_hawker.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pork_skewers_on_the_grill_-_Banh_Uot_hawker.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -132,7 +132,7 @@
             "name": "Bún (thêm)",
             "description": "Phần bún thêm",
             "basePrice": 5000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rice_Vermicelli_(Rice_Noodle)_of_Taiwan.JPG",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Rice_Vermicelli_(Rice_Noodle)_of_Taiwan.JPG",
             "isAvailable": true,
             "dietaryTags": []
           }
@@ -146,7 +146,7 @@
             "name": "Khăn ướt",
             "description": "Khăn ướt dùng một lần",
             "basePrice": 3000.0,
-            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/13/Folding_towel.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://printern.net/wp-content/uploads/2022/10/in-khan-lanh-1.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -154,7 +154,7 @@
             "name": "Nước suối",
             "description": "Chai nước suối",
             "basePrice": 10000.0,
-            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Bottled_water.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/6a/A_bottle_of_water.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -162,7 +162,7 @@
             "name": "Trà đá",
             "description": "Trà xanh đá",
             "basePrice": 15000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_Iced_Coffee_Ba_Chi_Canteen.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_Iced_Coffee_Ba_Chi_Canteen.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -170,7 +170,7 @@
             "name": "Pepsi",
             "description": "Nước ngọt lon",
             "basePrice": 15000.0,
-            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/59/Pepsi_can.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/d/dd/Pepsi_Can.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -178,7 +178,7 @@
             "name": "Bia Hà Nội",
             "description": "Bia chai Hà Nội",
             "basePrice": 25000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bia_HaNoi_tai_Sam_Son_030720103241.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_HaNoi_tai_Sam_Son_030720103241.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -186,7 +186,7 @@
             "name": "Bia Sài Gòn",
             "description": "Bia chai Sài Gòn",
             "basePrice": 25000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bia_Saigon_Special_beer.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_Saigon_Special_beer.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -194,7 +194,7 @@
             "name": "Heineken",
             "description": "Bia lon Heineken",
             "basePrice": 30000.0,
-            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/45/Heineken_0.33_litre_can_2009.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/0/07/Heineken_Flasche_0.33.jpg",
             "isAvailable": true,
             "dietaryTags": []
           }

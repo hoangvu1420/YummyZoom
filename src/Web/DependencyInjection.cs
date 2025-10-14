@@ -198,6 +198,29 @@ public static class DependencyInjection
                 await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
             };
         });
+
+        // Image proxy options
+        builder.Services.Configure<ImageProxyOptions>(
+            builder.Configuration.GetSection(ImageProxyOptions.SectionName));
+
+        // Add rate limiting policy for image proxy (per-IP)
+        builder.Services.AddRateLimiter(options =>
+        {
+            var proxyConfig = builder.Configuration
+                .GetSection(ImageProxyOptions.SectionName)
+                .Get<ImageProxyOptions>() ?? new ImageProxyOptions();
+
+            options.AddPolicy("image-proxy-ip", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 60, // default 60/min; adjust via config later if needed
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+        });
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

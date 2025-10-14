@@ -1,10 +1,10 @@
 {
   "restaurantSlug": "bella-vista-italian",
   "name": "Bella Vista Italian",
-  "description": "Authentic Italian cuisine in the heart of downtown",
+  "description": "Ẩm thực Ý chuẩn vị ngay giữa khu trung tâm – pizza nướng lò, pasta kem béo, món nướng và tráng miệng đặc trưng.",
   "cuisineType": "Italian",
-  "logoUrl": "https://placehold.co/400x400.png",
-  "backgroundImageUrl": "https://placehold.co/1200x800.png",
+  "logoUrl": "https://as2.ftcdn.net/jpg/04/39/16/21/1000_F_439162147_QLs1kmv2A0SzeRXW9X5mplJNyWcXQqzh.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Douglas%20-%20Italian%20restaurant%20interior%20in%20the%20Sea%20Terminal%20-%20geograph.org.uk%20-%201665164.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -79,72 +79,72 @@
     }
   ],
   "menu": {
-    "name": "Main Menu",
-    "description": "Our delicious offerings",
+    "name": "Thực đơn chính",
+    "description": "Gọi cả ngày",
     "categories": [
       {
-        "name": "Appetizers",
+        "name": "Khai vị",
         "displayOrder": 1,
         "items": [
           {
             "name": "Bruschetta",
-            "description": "Grilled bread with tomato, basil, and garlic",
+            "description": "Bánh mì nướng phủ cà chua, tỏi, húng quế và dầu ô-liu",
             "basePrice": 191760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bruschetta.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
             ]
           },
           {
-            "name": "Garlic Parmesan Wings",
-            "description": "Crispy wings tossed in garlic parmesan",
+            "name": "Cánh gà sốt tỏi Parmesan",
+            "description": "Cánh gà giòn sốt bơ tỏi và phô mai Parmesan",
             "basePrice": 227760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Buffalo%20Wild%20Wings%20Parmesan%20Garlic%20Boneless%20Wings%20(16083476037).jpg",
             "isAvailable": true
           },
           {
-            "name": "Fried Calamari",
-            "description": "Lightly breaded rings with marinara",
+            "name": "Mực chiên giòn",
+            "description": "Mực vòng chiên xù kèm sốt cà chua",
             "basePrice": 263760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Fried%20calamari.jpg",
             "isAvailable": true
           },
           {
-            "name": "Caprese Skewers",
-            "description": "Tomato, mozzarella, basil drizzle",
+            "name": "Xiên Caprese",
+            "description": "Cà chua bi, mozzarella và húng quế rưới dầu ô-liu",
             "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Caprese%20salad%20skewer%20appetizers.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
             ]
           },
           {
-            "name": "Stuffed Mushrooms",
-            "description": "Herb cream cheese, baked",
+            "name": "Nấm nhồi đút lò",
+            "description": "Nấm nhồi phô mai/kem, nướng nóng hổi",
             "basePrice": 203760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Longhorn%20Mushrooms.jpg",
             "isAvailable": true
           },
           {
-            "name": "Spinach Artichoke Dip",
-            "description": "Creamy dip with tortilla chips",
+            "name": "Sốt kem cải bó xôi & atisô",
+            "description": "Sốt chấm kem béo ăn kèm bánh giòn/rau củ",
             "basePrice": 215760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spinach%20%26%20artichoke%20dip.jpg",
             "isAvailable": true
           }
         ]
       },
       {
-        "name": "Mains",
+        "name": "Món chính",
         "displayOrder": 2,
         "items": [
           {
-            "name": "Margherita Pizza",
-            "description": "Tomato, mozzarella, basil",
+            "name": "Pizza Margherita",
+            "description": "Cà chua, mozzarella tươi, húng quế",
             "basePrice": 311760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Margherita%20pizza%20(5209912131).jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Size",
@@ -152,10 +152,10 @@
             ]
           },
           {
-            "name": "BBQ Chicken Pizza",
-            "description": "BBQ sauce, chicken, red onion",
+            "name": "Pizza gà sốt BBQ",
+            "description": "Sốt BBQ, gà, hành tím",
             "basePrice": 335760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pieology%20Hickory%20BBQ%20Chicken%20Pizza%20(31965598124).jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Size",
@@ -163,34 +163,34 @@
             ]
           },
           {
-            "name": "Classic Cheeseburger",
-            "description": "Beef patty with cheddar and pickles",
+            "name": "Burger phô mai cổ điển",
+            "description": "Bánh bò kèm cheddar, dưa chua và sốt",
             "basePrice": 287760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Cheeseburger%20on%20Plate.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Extras"
             ]
           },
           {
-            "name": "Grilled Salmon",
-            "description": "Lemon herb butter, seasonal veggies",
+            "name": "Cá hồi nướng",
+            "description": "Bơ chanh thảo mộc, rau củ theo mùa",
             "basePrice": 419760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Grilled%20Salmon%20(15950616571).jpg",
             "isAvailable": true
           },
           {
-            "name": "Chicken Alfredo Pasta",
-            "description": "Creamy parmesan sauce, fettuccine",
+            "name": "Pasta gà sốt Alfredo",
+            "description": "Fettuccine sốt kem phô mai Parmesan, thịt gà",
             "basePrice": 347760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken-alfredo.jpg",
             "isAvailable": true
           },
           {
-            "name": "Veggie Stir Fry",
-            "description": "Mixed vegetables with soy-ginger glaze",
+            "name": "Rau củ xào chay",
+            "description": "Rau tổng hợp sốt gừng–xì dầu",
             "basePrice": 299760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20stir-fry.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegan",
@@ -200,100 +200,100 @@
         ]
       },
       {
-        "name": "Desserts",
+        "name": "Tráng miệng",
         "displayOrder": 3,
         "items": [
           {
-            "name": "Chocolate Lava Cake",
-            "description": "Warm center, vanilla ice cream",
+            "name": "Bánh lava sô-cô-la",
+            "description": "Nhân sô-cô-la chảy, ăn kèm kem vani",
             "basePrice": 179760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chocolate%20Lava%20Cake%201%20(28791097360).jpg",
             "isAvailable": true
           },
           {
-            "name": "Cheesecake",
-            "description": "Classic New York style",
+            "name": "Bánh phô mai kiểu New York",
+            "description": "Cheesecake béo mịn, sốt việt quất",
             "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/New%20York%20cheesecake%202.jpg",
             "isAvailable": true
           },
           {
             "name": "Tiramisu",
-            "description": "Espresso-soaked ladyfingers, mascarpone",
+            "description": "Bánh ladyfinger, cà phê, mascarpone, ca cao",
             "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tiramisu%20dessert.jpg",
             "isAvailable": true
           },
           {
-            "name": "Apple Pie",
-            "description": "Cinnamon crumb topping",
+            "name": "Bánh táo nướng",
+            "description": "Lớp vụn quế thơm, ấm áp",
             "basePrice": 143760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Slice%20of%20apple%20pie.jpg",
             "isAvailable": true
           },
           {
-            "name": "Gelato Trio",
-            "description": "Three seasonal flavors",
+            "name": "Combo kem Gelato (3 vị)",
+            "description": "Ba vị theo mùa, múc ly",
             "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bowl%20~%20Ice%20cream.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
             ]
           },
           {
-            "name": "Brownie Sundae",
-            "description": "Fudge brownie, ice cream, nuts",
+            "name": "Brownie kem",
+            "description": "Brownie sô-cô-la, kem vani, hạt",
             "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/BROWNIE%20SUNDAE.jpg",
             "isAvailable": true
           }
         ]
       },
       {
-        "name": "Drinks",
+        "name": "Đồ uống",
         "displayOrder": 4,
         "items": [
           {
-            "name": "House Lemonade",
-            "description": "Fresh squeezed",
+            "name": "Nước chanh tươi",
+            "description": "Vắt tươi, mát lạnh",
             "basePrice": 95760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass%20of%20lemonade.jpg",
             "isAvailable": true
           },
           {
-            "name": "Iced Tea",
-            "description": "Unsweetened black tea",
+            "name": "Trà đá",
+            "description": "Hồng trà ướp lạnh, không đường",
             "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_of_Iced_Tea.jpg",
             "isAvailable": true
           },
           {
-            "name": "Sparkling Water",
-            "description": "Chilled with lemon",
+            "name": "Nước có ga",
+            "description": "Nước khoáng có ga ướp lạnh",
             "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/San%20Pellegrino%20500ml%20bottle.jpg",
             "isAvailable": true
           },
           {
             "name": "Cola",
-            "description": "Classic soda",
+            "description": "Nước ngọt có ga vị cola",
             "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_cola.jpg",
             "isAvailable": true
           },
           {
-            "name": "Coffee",
-            "description": "Freshly brewed",
+            "name": "Cà phê đen",
+            "description": "Pha nóng, đậm vị",
             "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/White%20cup%20of%20black%20coffee.jpg",
             "isAvailable": true
           },
           {
             "name": "Espresso",
-            "description": "Double shot",
+            "description": "Shot đôi, thơm mạnh",
             "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Espresso%20cup%20and%20saucer%2C%202011.jpg",
             "isAvailable": true
           }
         ]

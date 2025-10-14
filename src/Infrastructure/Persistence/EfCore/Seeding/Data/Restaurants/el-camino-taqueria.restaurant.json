@@ -1,10 +1,10 @@
 {
   "restaurantSlug": "el-camino-taqueria",
   "name": "El Camino Taqueria",
-  "description": "Street-style tacos and modern Mexican fare",
+  "description": "Tacos kiểu đường phố và món Mexico hiện đại – bánh tortilla bắp/mì, thịt nướng tẩm vị, sốt salsa tươi, đồ uống truyền thống.",
   "cuisineType": "Mexican",
-  "logoUrl": "https://placehold.co/400x400.png",
-  "backgroundImageUrl": "https://placehold.co/1200x800.png",
+  "logoUrl": "https://static.vecteezy.com/system/resources/previews/053/407/820/large_2x/playful-taco-restaurant-logo-with-sombrero-and-maracas-vector.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Taquer%C3%ADa%20in%20Mexico%20City.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -22,25 +22,44 @@
   "businessHours": "11:00-23:00",
   "customizationGroups": [
     {
-      "groupKey": "Size",
+      "groupKey": "TortillaChoice",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
         {
-          "name": "Small",
+          "name": "Bắp (Corn)",
           "priceAdjustment": 0.00,
           "isDefault": true,
           "displayOrder": 1
         },
         {
-          "name": "Medium",
-          "priceAdjustment": 24000.00,
+          "name": "Bột mì (Flour)",
+          "priceAdjustment": 0.00,
+          "isDefault": false,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "groupKey": "SalsaHeat",
+      "minSelections": 1,
+      "maxSelections": 1,
+      "choices": [
+        {
+          "name": "Nhẹ (Mild)",
+          "priceAdjustment": 0.00,
+          "isDefault": true,
+          "displayOrder": 1
+        },
+        {
+          "name": "Vừa (Medium)",
+          "priceAdjustment": 0.00,
           "isDefault": false,
           "displayOrder": 2
         },
         {
-          "name": "Large",
-          "priceAdjustment": 48000.00,
+          "name": "Cay (Hot)",
+          "priceAdjustment": 0.00,
           "isDefault": false,
           "displayOrder": 3
         }
@@ -52,26 +71,26 @@
       "maxSelections": 3,
       "choices": [
         {
-          "name": "Extra Cheese",
-          "priceAdjustment": 36000.00,
+          "name": "Guacamole",
+          "priceAdjustment": 20000.00,
           "isDefault": false,
           "displayOrder": 1
         },
         {
-          "name": "Bacon",
-          "priceAdjustment": 48000.00,
+          "name": "Cheese thêm",
+          "priceAdjustment": 15000.00,
           "isDefault": false,
           "displayOrder": 2
         },
         {
-          "name": "Avocado",
-          "priceAdjustment": 60000.00,
+          "name": "Pico de Gallo",
+          "priceAdjustment": 10000.00,
           "isDefault": false,
           "displayOrder": 3
         },
         {
-          "name": "Mushrooms",
-          "priceAdjustment": 24000.00,
+          "name": "Kem chua",
+          "priceAdjustment": 10000.00,
           "isDefault": false,
           "displayOrder": 4
         }
@@ -79,221 +98,205 @@
     }
   ],
   "menu": {
-    "name": "Main Menu",
-    "description": "Our delicious offerings",
+    "name": "Thực đơn chính",
+    "description": "Tacos, burrito, quesadilla, đồ nướng – gọi cả ngày",
     "categories": [
       {
-        "name": "Appetizers",
+        "name": "Khai vị",
         "displayOrder": 1,
         "items": [
           {
-            "name": "Bruschetta",
-            "description": "Grilled bread with tomato, basil, and garlic",
-            "basePrice": 191760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Chips & Salsa",
+            "description": "Tortilla chips giòn với salsa đỏ tươi",
+            "basePrice": 59000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/7/73/Tortilla_Chips.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Vegan"
             ]
           },
           {
-            "name": "Garlic Parmesan Wings",
-            "description": "Crispy wings tossed in garlic parmesan",
-            "basePrice": 227760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Fried Calamari",
-            "description": "Lightly breaded rings with marinara",
-            "basePrice": 263760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Caprese Skewers",
-            "description": "Tomato, mozzarella, basil drizzle",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "dietaryTags": [
-              "Vegetarian"
-            ]
-          },
-          {
-            "name": "Stuffed Mushrooms",
-            "description": "Herb cream cheese, baked",
-            "basePrice": 203760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Spinach Artichoke Dip",
-            "description": "Creamy dip with tortilla chips",
-            "basePrice": 215760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          }
-        ]
-      },
-      {
-        "name": "Mains",
-        "displayOrder": 2,
-        "items": [
-          {
-            "name": "Margherita Pizza",
-            "description": "Tomato, mozzarella, basil",
-            "basePrice": 311760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Size",
-              "Extras"
-            ]
-          },
-          {
-            "name": "BBQ Chicken Pizza",
-            "description": "BBQ sauce, chicken, red onion",
-            "basePrice": 335760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Size",
-              "Extras"
-            ]
-          },
-          {
-            "name": "Classic Cheeseburger",
-            "description": "Beef patty with cheddar and pickles",
-            "basePrice": 287760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Extras"
-            ]
-          },
-          {
-            "name": "Grilled Salmon",
-            "description": "Lemon herb butter, seasonal veggies",
-            "basePrice": 419760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Chicken Alfredo Pasta",
-            "description": "Creamy parmesan sauce, fettuccine",
-            "basePrice": 347760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Veggie Stir Fry",
-            "description": "Mixed vegetables with soy-ginger glaze",
-            "basePrice": 299760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Guacamole",
+            "description": "Bơ nghiền, chanh, hành tím, ngò – kèm chips",
+            "basePrice": 89000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Guacamole.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegan",
               "Gluten-Free"
             ]
-          }
-        ]
-      },
-      {
-        "name": "Desserts",
-        "displayOrder": 3,
-        "items": [
-          {
-            "name": "Chocolate Lava Cake",
-            "description": "Warm center, vanilla ice cream",
-            "basePrice": 179760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
           },
           {
-            "name": "Cheesecake",
-            "description": "Classic New York style",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Tiramisu",
-            "description": "Espresso-soaked ladyfingers, mascarpone",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Apple Pie",
-            "description": "Cinnamon crumb topping",
-            "basePrice": 143760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Gelato Trio",
-            "description": "Three seasonal flavors",
-            "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Queso Fundido",
+            "description": "Phô mai tan chảy, ăn kèm tortilla",
+            "basePrice": 99000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/9/9e/Queso_fundido_con_chorizo_-_Puebla.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
             ]
           },
           {
-            "name": "Brownie Sundae",
-            "description": "Fudge brownie, ice cream, nuts",
-            "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Elote (Bắp nướng)",
+            "description": "Bắp nướng phủ mayo, cotija, ớt bột, chanh",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/67/Elote_recipe.jpg",
             "isAvailable": true
           }
         ]
       },
       {
-        "name": "Drinks",
+        "name": "Tacos & Món chính",
+        "displayOrder": 2,
+        "items": [
+          {
+            "name": "Taco Al Pastor",
+            "description": "Thịt heo quay xiên ướp annatto & dứa, hành, ngò",
+            "basePrice": 65000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tacos_al_Pastor.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "TortillaChoice",
+              "SalsaHeat",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Taco Carne Asada",
+            "description": "Bò nướng thái hạt lựu, hành ngò, chanh",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Carne_asada_tacos.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "TortillaChoice",
+              "SalsaHeat",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Taco Gà (Pollo)",
+            "description": "Gà ướp chanh tỏi nướng, bắp cải tím, sốt kem",
+            "basePrice": 65000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken_tacos.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "TortillaChoice",
+              "SalsaHeat",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Taco Cá kiểu Baja",
+            "description": "Cá chiên giòn, bắp cải, sốt crema chanh",
+            "basePrice": 75000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/65/Fish_Taco_Ensenada_style.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "TortillaChoice",
+              "SalsaHeat",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Burrito Carne Asada",
+            "description": "Cơm Mexico, đậu đen, bò nướng, phô mai, salsa",
+            "basePrice": 129000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/1/17/Shredded_pork_burrito.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "SalsaHeat",
+              "Extras"
+            ]
+          },
+          {
+            "name": "Quesadilla Phô mai",
+            "description": "Bánh tortilla kẹp phô mai nướng vàng",
+            "basePrice": 109000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Quesadilla.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ],
+            "customizationGroups": [
+              "Extras"
+            ]
+          },
+          {
+            "name": "Nachos Supreme",
+            "description": "Chips phủ phô mai, đậu đen, pico, jalapeño",
+            "basePrice": 99000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Nachos_supreme.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "Extras"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Tráng miệng",
+        "displayOrder": 3,
+        "items": [
+          {
+            "name": "Churros",
+            "description": "Bánh rán quẩy Tây Ban Nha lăn quế đường, sốt sô-cô-la",
+            "basePrice": 59000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Churros.jpg",
+            "isAvailable": true
+          },
+          {
+            "name": "Bánh Tres Leches",
+            "description": "Bánh bông lan thấm ba loại sữa, kem tươi",
+            "basePrice": 79000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/ca/Tres_leches_cake.jpg",
+            "isAvailable": true
+          },
+          {
+            "name": "Flan Caramen",
+            "description": "Bánh flan nướng mềm mịn, sốt caramen",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/64/Cr%C3%A8me_caramel_2.jpg",
+            "isAvailable": true
+          }
+        ]
+      },
+      {
+        "name": "Đồ uống",
         "displayOrder": 4,
         "items": [
           {
-            "name": "House Lemonade",
-            "description": "Fresh squeezed",
-            "basePrice": 95760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Horchata",
+            "description": "Nước gạo quế lạnh, béo nhẹ",
+            "basePrice": 39000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Horchata_de_arroz.jpg",
             "isAvailable": true
           },
           {
-            "name": "Iced Tea",
-            "description": "Unsweetened black tea",
-            "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Agua de Jamaica",
+            "description": "Trà hoa dâm bụt chua ngọt, uống lạnh",
+            "basePrice": 39000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Agua_de_Jamaica.jpg",
             "isAvailable": true
           },
           {
-            "name": "Sparkling Water",
-            "description": "Chilled with lemon",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Jarritos (các vị)",
+            "description": "Nước ngọt Mexico – cam, xoài, chanh dây…",
+            "basePrice": 49000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Jarritos_flavors.jpg",
             "isAvailable": true
           },
           {
-            "name": "Cola",
-            "description": "Classic soda",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Mexican Coke",
+            "description": "Coca-Cola chai Mexico",
+            "basePrice": 49000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/a4/Mexicoke.jpg",
             "isAvailable": true
           },
           {
-            "name": "Coffee",
-            "description": "Freshly brewed",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Espresso",
-            "description": "Double shot",
-            "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Nước khoáng có ga",
+            "description": "Uống lạnh với lát chanh",
+            "basePrice": 39000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/cf/Sparkling_Water_with_Mint_in_Glass_Cup.jpg",
             "isAvailable": true
           }
         ]

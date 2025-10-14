@@ -1,10 +1,10 @@
 {
   "restaurantSlug": "sakura-sushi",
   "name": "Sakura Sushi",
-  "description": "Fresh sushi and Japanese favorites",
+  "description": "Sushi tươi mỗi ngày và món Nhật yêu thích – nigiri, sashimi, cuốn maki, donburi, mì nóng.",
   "cuisineType": "Japanese",
-  "logoUrl": "https://placehold.co/400x400.png",
-  "backgroundImageUrl": "https://placehold.co/1200x800.png",
+  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://img.freepik.com/premium-vector/japanese-sushi-restaurant-logo-design-inspiration_500223-504.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Sushi%20bar%20counter.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -22,278 +22,333 @@
   "businessHours": "10:30-21:30",
   "customizationGroups": [
     {
-      "groupKey": "Size",
+      "groupKey": "SoySauce",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
         {
-          "name": "Small",
+          "name": "Shoyu thường",
           "priceAdjustment": 0.00,
           "isDefault": true,
           "displayOrder": 1
         },
         {
-          "name": "Medium",
-          "priceAdjustment": 24000.00,
+          "name": "Shoyu ít muối",
+          "priceAdjustment": 0.00,
+          "isDefault": false,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "groupKey": "AddOns",
+      "minSelections": 0,
+      "maxSelections": 3,
+      "choices": [
+        {
+          "name": "Thêm wasabi",
+          "priceAdjustment": 5000.00,
+          "isDefault": false,
+          "displayOrder": 1
+        },
+        {
+          "name": "Thêm gừng hồng",
+          "priceAdjustment": 5000.00,
           "isDefault": false,
           "displayOrder": 2
         },
         {
-          "name": "Large",
-          "priceAdjustment": 48000.00,
+          "name": "Sốt mayo cay",
+          "priceAdjustment": 7000.00,
           "isDefault": false,
           "displayOrder": 3
         }
       ]
     },
     {
-      "groupKey": "Extras",
-      "minSelections": 0,
-      "maxSelections": 3,
+      "groupKey": "RollSize",
+      "minSelections": 1,
+      "maxSelections": 1,
       "choices": [
         {
-          "name": "Extra Cheese",
-          "priceAdjustment": 36000.00,
-          "isDefault": false,
+          "name": "6 miếng",
+          "priceAdjustment": 0.00,
+          "isDefault": true,
           "displayOrder": 1
         },
         {
-          "name": "Bacon",
-          "priceAdjustment": 48000.00,
+          "name": "8 miếng",
+          "priceAdjustment": 20000.00,
           "isDefault": false,
           "displayOrder": 2
-        },
-        {
-          "name": "Avocado",
-          "priceAdjustment": 60000.00,
-          "isDefault": false,
-          "displayOrder": 3
-        },
-        {
-          "name": "Mushrooms",
-          "priceAdjustment": 24000.00,
-          "isDefault": false,
-          "displayOrder": 4
         }
       ]
     }
   ],
   "menu": {
-    "name": "Main Menu",
-    "description": "Our delicious offerings",
+    "name": "Thực đơn chính",
+    "description": "Gọi cả ngày",
     "categories": [
       {
-        "name": "Appetizers",
+        "name": "Khai vị",
         "displayOrder": 1,
         "items": [
           {
-            "name": "Bruschetta",
-            "description": "Grilled bread with tomato, basil, and garlic",
-            "basePrice": 191760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "dietaryTags": [
-              "Vegetarian"
-            ]
-          },
-          {
-            "name": "Garlic Parmesan Wings",
-            "description": "Crispy wings tossed in garlic parmesan",
-            "basePrice": 227760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Fried Calamari",
-            "description": "Lightly breaded rings with marinara",
-            "basePrice": 263760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Caprese Skewers",
-            "description": "Tomato, mozzarella, basil drizzle",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "dietaryTags": [
-              "Vegetarian"
-            ]
-          },
-          {
-            "name": "Stuffed Mushrooms",
-            "description": "Herb cream cheese, baked",
-            "basePrice": 203760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Spinach Artichoke Dip",
-            "description": "Creamy dip with tortilla chips",
-            "basePrice": 215760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          }
-        ]
-      },
-      {
-        "name": "Mains",
-        "displayOrder": 2,
-        "items": [
-          {
-            "name": "Margherita Pizza",
-            "description": "Tomato, mozzarella, basil",
-            "basePrice": 311760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Size",
-              "Extras"
-            ]
-          },
-          {
-            "name": "BBQ Chicken Pizza",
-            "description": "BBQ sauce, chicken, red onion",
-            "basePrice": 335760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Size",
-              "Extras"
-            ]
-          },
-          {
-            "name": "Classic Cheeseburger",
-            "description": "Beef patty with cheddar and pickles",
-            "basePrice": 287760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true,
-            "customizationGroups": [
-              "Extras"
-            ]
-          },
-          {
-            "name": "Grilled Salmon",
-            "description": "Lemon herb butter, seasonal veggies",
-            "basePrice": 419760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Chicken Alfredo Pasta",
-            "description": "Creamy parmesan sauce, fettuccine",
-            "basePrice": 347760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Veggie Stir Fry",
-            "description": "Mixed vegetables with soy-ginger glaze",
-            "basePrice": 299760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Edamame",
+            "description": "Đậu nành Nhật luộc, rắc muối biển",
+            "basePrice": 49000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/8/87/Edamame_on_a_bamboo_bowl_by_yomi955.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegan",
               "Gluten-Free"
             ]
+          },
+          {
+            "name": "Gyoza chiên",
+            "description": "Há cảo Nhật áp chảo, sốt chấm",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/2/28/Gyoza_-_Tora.jpg",
+            "isAvailable": true
+          },
+          {
+            "name": "Súp miso",
+            "description": "Nước dùng kombu–katsuobushi, đậu phụ, rong biển",
+            "basePrice": 39000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Miso_soup.jpg",
+            "isAvailable": true
+          },
+          {
+            "name": "Salad rong biển",
+            "description": "Wakame giòn, mè rang, sốt gừng",
+            "basePrice": 59000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Wakame_salad.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegan"
+            ]
+          },
+          {
+            "name": "Agedashi Tofu",
+            "description": "Đậu phụ chiên xốt tsuyu, bonito/flakes",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Agedashi_tofu.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ]
           }
         ]
       },
       {
-        "name": "Desserts",
+        "name": "Nigiri & Sashimi",
+        "displayOrder": 2,
+        "items": [
+          {
+            "name": "Nigiri cá hồi (2 miếng)",
+            "description": "Cơm sushi + cá hồi tươi",
+            "basePrice": 75000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Salmon_nigiri.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Gluten-Free"
+            ],
+            "customizationGroups": [
+              "SoySauce",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Nigiri cá ngừ (2 miếng)",
+            "description": "Cơm sushi + cá ngừ đỏ",
+            "basePrice": 79000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3b/8nig_maguro_kihada_s.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Gluten-Free"
+            ],
+            "customizationGroups": [
+              "SoySauce",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Nigiri tôm (2 miếng)",
+            "description": "Cơm sushi + ebi luộc",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/a1/Nigiri_Sushi_%2826478732232%29.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Gluten-Free"
+            ],
+            "customizationGroups": [
+              "SoySauce",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Nigiri trứng (2 miếng)",
+            "description": "Cơm sushi + trứng cuộn",
+            "basePrice": 59000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/af/Nigiri_Sushi_%2826505096851%29.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegetarian"
+            ],
+            "customizationGroups": [
+              "SoySauce",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Sashimi tổng hợp",
+            "description": "Cá hồi, cá ngừ, bạch tuộc/tuỳ mùa",
+            "basePrice": 219000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/e/e4/Sashimi_Moriawase.JPG",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Gluten-Free"
+            ],
+            "customizationGroups": [
+              "SoySauce",
+              "AddOns"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Cuốn Maki & Rolls",
         "displayOrder": 3,
         "items": [
           {
-            "name": "Chocolate Lava Cake",
-            "description": "Warm center, vanilla ice cream",
-            "basePrice": 179760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "California Roll",
+            "description": "Cua/giả cua, bơ, dưa leo, mè",
+            "basePrice": 119000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/California_roll.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "RollSize",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Spicy Tuna Roll",
+            "description": "Cá ngừ trộn mayo cay, hành lá",
+            "basePrice": 129000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spicy_tuna_roll.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "RollSize",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Dragon Roll",
+            "description": "Tôm tempura, bơ, sốt unagi trên mặt",
+            "basePrice": 159000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/5/53/Double_Dragon_Roll_%28brightness_adjusted%29_%283432983831%29.jpg",
+            "isAvailable": true,
+            "customizationGroups": [
+              "RollSize",
+              "AddOns"
+            ]
+          },
+          {
+            "name": "Kappa Maki (chay)",
+            "description": "Cuộn dưa leo giòn, mè",
+            "basePrice": 99000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3d/8hosomak8.jpg",
+            "isAvailable": true,
+            "dietaryTags": [
+              "Vegan"
+            ],
+            "customizationGroups": [
+              "RollSize",
+              "AddOns"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Donburi & Mì",
+        "displayOrder": 4,
+        "items": [
+          {
+            "name": "Chirashi Don",
+            "description": "Cơm sushi phủ sashimi tổng hợp",
+            "basePrice": 199000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chirashi-zushi.jpg",
             "isAvailable": true
           },
           {
-            "name": "Cheesecake",
-            "description": "Classic New York style",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Salmon Don",
+            "description": "Cơm sushi phủ cá hồi tươi",
+            "basePrice": 179000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/63/Chum_salmon%2Csake-ikura-don%2Csyari-town%2Cjapan.JPG",
             "isAvailable": true
           },
           {
-            "name": "Tiramisu",
-            "description": "Espresso-soaked ladyfingers, mascarpone",
-            "basePrice": 167760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Udon nóng",
+            "description": "Nước dùng nhẹ, hành lá, chả cá/đậu phụ",
+            "basePrice": 129000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/39/TEMPURA_UDON_KISHIMEN_in_Nagoya_Station.jpg",
             "isAvailable": true
-          },
+          }
+        ]
+      },
+      {
+        "name": "Tráng miệng",
+        "displayOrder": 5,
+        "items": [
           {
-            "name": "Apple Pie",
-            "description": "Cinnamon crumb topping",
-            "basePrice": 143760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Gelato Trio",
-            "description": "Three seasonal flavors",
-            "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Kem mochi (2 viên)",
+            "description": "Mochi lạnh nhân kem – vị theo ngày",
+            "basePrice": 69000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Mochi_Ice_Cream.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Vegetarian"
             ]
           },
           {
-            "name": "Brownie Sundae",
-            "description": "Fudge brownie, ice cream, nuts",
-            "basePrice": 155760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Bánh phô mai matcha",
+            "description": "Cheesecake vị trà xanh",
+            "basePrice": 79000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/7/72/Julia%27s_Japanese_Green_Tea_Cheesecake_in_ramekins.jpg",
             "isAvailable": true
           }
         ]
       },
       {
-        "name": "Drinks",
-        "displayOrder": 4,
+        "name": "Đồ uống",
+        "displayOrder": 6,
         "items": [
           {
-            "name": "House Lemonade",
-            "description": "Fresh squeezed",
-            "basePrice": 95760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Trà xanh nóng",
+            "description": "Matcha ấm, thanh nhẹ",
+            "basePrice": 29000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/e/e8/Hot_Matcha_Green_Tea_Latte_%2836622433756%29.jpg",
             "isAvailable": true
           },
           {
-            "name": "Iced Tea",
-            "description": "Unsweetened black tea",
-            "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Matcha latte đá",
+            "description": "Matcha, sữa, đá – thơm béo",
+            "basePrice": 49000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Matcha_latte.jpg",
             "isAvailable": true
           },
           {
-            "name": "Sparkling Water",
-            "description": "Chilled with lemon",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Ramune",
+            "description": "Soda Nhật chai bi tròn",
+            "basePrice": 45000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/f/f6/Ramune_melon_flavor.JPG",
             "isAvailable": true
           },
           {
-            "name": "Cola",
-            "description": "Classic soda",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Coffee",
-            "description": "Freshly brewed",
-            "basePrice": 59760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
-            "isAvailable": true
-          },
-          {
-            "name": "Espresso",
-            "description": "Double shot",
-            "basePrice": 71760.00,
-            "imageUrl": "https://placehold.co/600x400.png",
+            "name": "Nước khoáng có ga",
+            "description": "Uống lạnh với lát chanh",
+            "basePrice": 39000.00,
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/cf/Sparkling_Water_with_Mint_in_Glass_Cup.jpg",
             "isAvailable": true
           }
         ]

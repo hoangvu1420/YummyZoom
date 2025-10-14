@@ -3,8 +3,8 @@
   "name": "Phở Gia Truyền (Bát Đàn)",
   "description": "Phở bò gia truyền nổi tiếng tại phố Bát Đàn, Hà Nội. Hàng quán nhỏ, thường có xếp hàng; phục vụ phở bò với các phần thịt khác nhau, có quẩy và trứng.",
   "cuisineType": "Vietnamese",
-  "logoUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Linecons_noodle-bowl.svg",
-  "backgroundImageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20Gia%20Truy%E1%BB%81n.jpg",
+  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://media.mia.vn/uploads/blog-du-lich/Pho-bat-dan-pho-gia-truyen-100-nam-tuoi-tai-ha-noi-02-1639325605.png",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20Gia%20Truy%E1%BB%81n.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": false,
@@ -54,7 +54,7 @@
             "name": "Phở bò chín",
             "description": "Phở bò phần chín (brisket well-done)",
             "basePrice": 50000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pho-Beef-Noodles-2008.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pho-Beef-Noodles-2008.jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [
@@ -65,7 +65,7 @@
             "name": "Phở bò tái",
             "description": "Phở bò phần tái (round steak)",
             "basePrice": 55000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20b%C3%B2%20(39425047901).jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20b%C3%B2%20(39425047901).jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [
@@ -76,7 +76,7 @@
             "name": "Phở tái nạm",
             "description": "Phở bò tái nạm (rare + flank)",
             "basePrice": 60000.0,
-            "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Large%20bowl%20of%20Beef%20Pho%20from%20Dalat%20Vietnamese%20Restaurtant.jpg",
+            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Large%20bowl%20of%20Beef%20Pho%20from%20Dalat%20Vietnamese%20Restaurtant.jpg",
             "isAvailable": true,
             "dietaryTags": [],
             "customizationGroups": [

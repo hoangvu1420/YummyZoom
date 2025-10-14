@@ -212,6 +212,22 @@ public static class DependencyInjection
         }
 
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
+
+        // Image Proxy
+        builder.Services.Configure<YummyZoom.Application.Common.Configuration.ImageProxyOptions>(
+            builder.Configuration.GetSection(YummyZoom.Application.Common.Configuration.ImageProxyOptions.SectionName));
+
+        builder.Services.AddHttpClient("ImageProxy", http =>
+        {
+            http.Timeout = TimeSpan.FromSeconds(
+                Math.Max(1, builder.Configuration
+                    .GetSection(YummyZoom.Application.Common.Configuration.ImageProxyOptions.SectionName)
+                    .GetValue<int?>(nameof(YummyZoom.Application.Common.Configuration.ImageProxyOptions.TimeoutSeconds)) ?? 10));
+            http.DefaultRequestHeaders.ConnectionClose = false;
+        });
+
+        builder.Services.AddScoped<YummyZoom.Application.Common.Interfaces.IServices.IImageProxyService,
+            YummyZoom.Infrastructure.Http.ImageProxy.HttpImageProxyService>();
     }
 
     private static void AddBackgroundServices(this IHostApplicationBuilder builder)
