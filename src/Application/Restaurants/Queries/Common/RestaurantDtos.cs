@@ -16,4 +16,6 @@ public sealed record RestaurantSearchResultDto(
     decimal? AvgRating,
     int? RatingCount,
     string? City,
-    decimal? DistanceKm = null);
+    decimal? DistanceKm = null,
+    double? Latitude = null,
+    double? Longitude = null);

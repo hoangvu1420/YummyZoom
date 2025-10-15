@@ -1,13 +1,15 @@
 {
   "restaurantSlug": "bun-cha-huong-lien",
   "name": "Bún Chả Hương Liên",
-  "description": "Menu tái dựng từ ảnh menu chính thức (Combo Obama, bún chả, nem, đồ uống). Giá theo ảnh menu, tiền tệ VND.",
+  "description": "Nhà hàng bún chả truyền thống nổi tiếng với Combo Obama - nơi Tổng thống Obama từng thưởng thức bún chả Hà Nội cùng đầu bếp Anthony Bourdain. Phục vụ các món ăn đường phố Việt Nam chính gốc với hương vị truyền thống, từ bún chả thơm ngon đến nem rán giòn tan.",
   "cuisineType": "Vietnamese",
   "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://hotel84.com/hotel84-images/news/img1/bun-cha-huong-lien.jpg",
   "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://kenh14cdn.com/2018/3/10/photo-1-15206627578621251613213.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 21.0181241,
+  "longitude": 105.8536659,
   "address": {
     "street": "24 Lê Văn Hưu, Phan Chu Trinh",
     "city": "Hà Nội",
@@ -22,13 +24,13 @@
   "businessHours": "08:00-20:00",
   "tags": [
     {
-      "tagName": "Traditional",
+      "tagName": "Việt Nam",
       "tagCategory": "Cuisine"
     }
   ],
   "customizationGroups": [
     {
-      "groupKey": "AddOns",
+      "groupKey": "Ăn thêm",
       "minSelections": 0,
       "maxSelections": 3,
       "choices": [
@@ -67,9 +69,16 @@
             "basePrice": 120000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Đặc biệt",
+              "Phổ biến"
+            ],
             "customizationGroups": [
-              "AddOns"
+              "Ăn thêm"
             ]
           },
           {
@@ -78,9 +87,15 @@
             "basePrice": 60000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun-cha-hanoi.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Đặc biệt"
+            ],
             "customizationGroups": [
-              "AddOns"
+              "Ăn thêm"
             ]
           },
           {
@@ -89,9 +104,15 @@
             "basePrice": 50000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun_cha_hanoi.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Phổ biến"
+            ],
             "customizationGroups": [
-              "AddOns"
+              "Ăn thêm"
             ]
           },
           {
@@ -100,7 +121,13 @@
             "basePrice": 35000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_imperial_spring_rolls.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Việt Nam",
+              "Khai vị",
+              "Chiên",
+              "Nóng",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Nem cua bể",
@@ -108,7 +135,12 @@
             "basePrice": 8000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_spring_roll.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Việt Nam",
+              "Khai vị",
+              "Chiên",
+              "Nóng"
+            ]
           },
           {
             "name": "Nem chay",
@@ -117,7 +149,11 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetarian_Spring_Rolls_-_Cafe_Mi_Hee_(1087976697).jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Chay",
+              "Việt Nam",
+              "Khai vị",
+              "Chiên",
+              "Nóng"
             ]
           },
           {
@@ -126,7 +162,12 @@
             "basePrice": 25000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pork_skewers_on_the_grill_-_Banh_Uot_hawker.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Việt Nam",
+              "Khai vị",
+              "Nướng",
+              "Nóng"
+            ]
           },
           {
             "name": "Bún (thêm)",
@@ -134,7 +175,11 @@
             "basePrice": 5000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Rice_Vermicelli_(Rice_Noodle)_of_Taiwan.JPG",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Chay",
+              "Việt Nam",
+              "Luộc"
+            ]
           }
         ]
       },
@@ -156,7 +201,11 @@
             "basePrice": 10000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/6a/A_bottle_of_water.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh"
+            ]
           },
           {
             "name": "Trà đá",
@@ -164,7 +213,13 @@
             "basePrice": 15000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_Iced_Coffee_Ba_Chi_Canteen.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Thuần chay",
+              "Việt Nam",
+              "Không cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Pepsi",
@@ -172,7 +227,12 @@
             "basePrice": 15000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/d/dd/Pepsi_Can.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Bia Hà Nội",
@@ -180,7 +240,12 @@
             "basePrice": 25000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_HaNoi_tai_Sam_Son_030720103241.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Việt Nam",
+              "Có cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Bia Sài Gòn",
@@ -188,7 +253,12 @@
             "basePrice": 25000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_Saigon_Special_beer.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Việt Nam",
+              "Có cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Heineken",
@@ -196,7 +266,10 @@
             "basePrice": 30000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/0/07/Heineken_Flasche_0.33.jpg",
             "isAvailable": true,
-            "dietaryTags": []
+            "dietaryTags": [
+              "Có cồn",
+              "Lạnh"
+            ]
           }
         ]
       }

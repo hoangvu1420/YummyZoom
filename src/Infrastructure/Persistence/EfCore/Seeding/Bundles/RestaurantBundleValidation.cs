@@ -41,6 +41,21 @@ public static class RestaurantBundleValidation
         if (!string.IsNullOrWhiteSpace(bundle.DefaultCurrency) && !CurrencyRegex.IsMatch(bundle.DefaultCurrency.Trim()))
             result.Errors.Add("defaultCurrency must be a 3-letter code (e.g., USD, EUR). Optional if omitted.");
 
+        // Optional: latitude/longitude (both or none). Validate ranges if provided.
+        var hasLat = bundle.Latitude.HasValue;
+        var hasLon = bundle.Longitude.HasValue;
+        if (hasLat ^ hasLon)
+        {
+            result.Errors.Add("Both latitude and longitude must be provided together.");
+        }
+        else if (hasLat && hasLon)
+        {
+            if (bundle.Latitude!.Value < -90 || bundle.Latitude!.Value > 90)
+                result.Errors.Add($"latitude out of range [-90, 90]: {bundle.Latitude}");
+            if (bundle.Longitude!.Value < -180 || bundle.Longitude!.Value > 180)
+                result.Errors.Add($"longitude out of range [-180, 180]: {bundle.Longitude}");
+        }
+
         if (bundle.Address is null)
             result.Errors.Add("address is required.");
         else

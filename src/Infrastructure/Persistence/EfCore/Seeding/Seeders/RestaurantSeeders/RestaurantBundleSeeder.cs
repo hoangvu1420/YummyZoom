@@ -125,7 +125,9 @@ public class RestaurantBundleSeeder : ISeeder
                         bundle.Address.Country,
                         bundle.Contact.Phone,
                         bundle.Contact.Email,
-                        bundle.BusinessHours);
+                        bundle.BusinessHours,
+                        bundle.Latitude,
+                        bundle.Longitude);
 
                     if (res.IsFailure)
                     {
@@ -143,6 +145,22 @@ public class RestaurantBundleSeeder : ISeeder
             }
             else
             {
+                // Optionally update geo coordinates if provided
+                if (!opts.ReportOnly && bundle.Latitude.HasValue && bundle.Longitude.HasValue)
+                {
+                    var needUpdate = restaurant.GeoCoordinates is null
+                        || Math.Abs(restaurant.GeoCoordinates.Latitude - bundle.Latitude.Value) > 0.0000005
+                        || Math.Abs(restaurant.GeoCoordinates.Longitude - bundle.Longitude.Value) > 0.0000005;
+                    if (needUpdate)
+                    {
+                        var geoRes = restaurant.ChangeGeoCoordinates(bundle.Latitude.Value, bundle.Longitude.Value);
+                        if (geoRes.IsFailure)
+                        {
+                            logger.LogWarning("Failed to update geo coordinates for {Restaurant}: {Error}", restaurant.Name, geoRes.Error.Description);
+                        }
+                    }
+                }
+
                 skipped.Restaurants++;
             }
 
@@ -286,9 +304,8 @@ public class RestaurantBundleSeeder : ISeeder
             }
 
             // Items
-            // Preload dietary tags lookup by name
-            var dietaryTagLookup = tagLookup.Where(kv => kv.Key.Item2 == TagCategory.Dietary)
-                                            .ToDictionary(kv => kv.Key.Item1, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+            // Preload all tags lookup by name (not just dietary - the JSON field name is misleading)
+            var allTagLookup = tagLookup.ToDictionary(kv => kv.Key.Item1, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
 
             foreach (var cat in bundle.Menu.Categories)
             {
@@ -326,10 +343,10 @@ public class RestaurantBundleSeeder : ISeeder
                                 var tagIds = new List<YummyZoom.Domain.TagEntity.ValueObjects.TagId>();
                                 foreach (var tname in it.DietaryTags)
                                 {
-                                    if (dietaryTagLookup.TryGetValue(tname, out var id))
+                                    if (allTagLookup.TryGetValue(tname, out var id))
                                         tagIds.Add(id);
                                     else
-                                        logger.LogWarning("Dietary tag not found: {TagName}. Define it globally or in bundle tags.", tname);
+                                        logger.LogWarning("Tag not found: {TagName}. Define it globally or in bundle tags.", tname);
                                 }
                                 if (tagIds.Count > 0) mi.Value.SetDietaryTags(tagIds);
                             }

@@ -38,7 +38,9 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
                         + COS(RADIANS(CAST(@Lat AS double precision))) * COS(RADIANS(r."Geo_Latitude")) 
                         * POWER(SIN(RADIANS((CAST(@Lng AS double precision) - r."Geo_Longitude")/2)),2)))
                 ELSE NULL
-            END                      AS DistanceKm
+            END                      AS DistanceKm,
+            CAST(r."Geo_Latitude" AS double precision)  AS Latitude,
+            CAST(r."Geo_Longitude" AS double precision) AS Longitude
             """;
 
         var where = new List<string> { "r.\"IsDeleted\" = false", "r.\"IsVerified\" = true" };
@@ -84,6 +86,36 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
                 parameters.Add("MaxLat", maxLat);
                 parameters.Add("MinLon", minLon);
                 parameters.Add("MaxLon", maxLon);
+            }
+        }
+
+        // Tag filters (by TagIds and/or TagNames). Matches restaurants having at least one menu item with any of the provided tags.
+        var tagIdFilter = request.TagIds is { Count: > 0 };
+        var tagNameFilter = request.Tags is { Count: > 0 };
+
+        if (tagIdFilter || tagNameFilter)
+        {
+            var idExists = tagIdFilter
+                ? "EXISTS (SELECT 1 FROM \"MenuItems\" i WHERE i.\"RestaurantId\" = r.\"Id\" AND i.\"IsDeleted\" = FALSE AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(i.\"DietaryTagIds\") AS t(tag_id_text) WHERE (t.tag_id_text)::uuid = ANY(@TagIds)))"
+                : null;
+
+            var nameExists = tagNameFilter
+                ? "EXISTS (SELECT 1 FROM \"MenuItems\" i WHERE i.\"RestaurantId\" = r.\"Id\" AND i.\"IsDeleted\" = FALSE AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(i.\"DietaryTagIds\") AS t(tag_id_text) JOIN \"Tags\" tg ON tg.\"Id\" = (t.tag_id_text)::uuid AND tg.\"IsDeleted\" = FALSE WHERE LOWER(tg.\"TagName\") = ANY(@TagNamesLower)))"
+                : null;
+
+            var tagWhere = (idExists, nameExists) switch
+            {
+                (not null, not null) => $"(({idExists}) OR ({nameExists}))",
+                (not null, null) => idExists!,
+                (null, not null) => nameExists!,
+                _ => null
+            };
+
+            if (tagWhere is not null)
+            {
+                where.Add(tagWhere);
+                if (tagIdFilter) parameters.Add("TagIds", request.TagIds!.ToArray());
+                if (tagNameFilter) parameters.Add("TagNamesLower", request.Tags!.Select(s => s.ToLowerInvariant()).ToArray());
             }
         }
 
@@ -139,7 +171,9 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
                     row.AvgRating,
                     row.RatingCount,
                     row.City,
-                    row.DistanceKm);
+                    row.DistanceKm,
+                    row.Latitude,
+                    row.Longitude);
             })
             .ToList();
 
@@ -158,4 +192,6 @@ file sealed class RestaurantSearchRow
     public int? RatingCount { get; init; }
     public string? City { get; init; }
     public decimal? DistanceKm { get; init; }
+    public double? Latitude { get; init; }
+    public double? Longitude { get; init; }
 }

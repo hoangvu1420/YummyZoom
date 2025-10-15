@@ -8,6 +8,8 @@
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 21.035694,
+  "longitude": 105.8488572,
   "address": {
     "street": "14 Phố Chả Cá, P. Hàng Bồ",
     "city": "Hà Nội",
@@ -86,7 +88,13 @@
             "basePrice": 350000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Turmeric%20and%20oil%20-%20Cha%20Ca%20La%20Vong.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Đặc biệt"
+            ],
             "customizationGroups": [
               "SauceChoice",
               "Extras"

@@ -1,19 +1,164 @@
 {
   "tags": [
-    { "tagName": "Vegetarian", "tagCategory": "Dietary", "tagDescription": "No meat or fish" },
-    { "tagName": "Vegan", "tagCategory": "Dietary", "tagDescription": "No animal products" },
-    { "tagName": "Gluten-Free", "tagCategory": "Dietary", "tagDescription": "No gluten ingredients" },
-    { "tagName": "Dairy-Free", "tagCategory": "Dietary" },
-    { "tagName": "Halal", "tagCategory": "Dietary" },
-    { "tagName": "Kosher", "tagCategory": "Dietary" },
-
-    { "tagName": "Italian", "tagCategory": "Cuisine" },
-    { "tagName": "Japanese", "tagCategory": "Cuisine" },
-    { "tagName": "Mexican", "tagCategory": "Cuisine" },
-
-    { "tagName": "Mild", "tagCategory": "SpiceLevel" },
-    { "tagName": "Medium", "tagCategory": "SpiceLevel" },
-    { "tagName": "Hot", "tagCategory": "SpiceLevel" }
+    {
+      "tagName": "Chay",
+      "tagCategory": "Dietary",
+      "tagDescription": "Không có thịt hoặc cá"
+    },
+    {
+      "tagName": "Thuần chay",
+      "tagCategory": "Dietary",
+      "tagDescription": "Không có sản phẩm từ động vật"
+    },
+    {
+      "tagName": "Không gluten",
+      "tagCategory": "Dietary",
+      "tagDescription": "Không chứa thành phần gluten"
+    },
+    {
+      "tagName": "Không lactose",
+      "tagCategory": "Dietary",
+      "tagDescription": "Không chứa sữa"
+    },
+    {
+      "tagName": "Halal",
+      "tagCategory": "Dietary",
+      "tagDescription": "Phù hợp với đạo Hồi"
+    },
+    {
+      "tagName": "Kosher",
+      "tagCategory": "Dietary",
+      "tagDescription": "Phù hợp với đạo Do Thái"
+    },
+    {
+      "tagName": "Ý",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Ý"
+    },
+    {
+      "tagName": "Nhật",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Nhật Bản"
+    },
+    {
+      "tagName": "Mexico",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Mexico"
+    },
+    {
+      "tagName": "Việt Nam",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Việt Nam"
+    },
+    {
+      "tagName": "Trung Quốc",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Trung Quốc"
+    },
+    {
+      "tagName": "Thái Lan",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Thái Lan"
+    },
+    {
+      "tagName": "Hàn Quốc",
+      "tagCategory": "Cuisine",
+      "tagDescription": "Ẩm thực Hàn Quốc"
+    },
+    {
+      "tagName": "Nhẹ",
+      "tagCategory": "SpiceLevel",
+      "tagDescription": "Độ cay nhẹ"
+    },
+    {
+      "tagName": "Vừa",
+      "tagCategory": "SpiceLevel",
+      "tagDescription": "Độ cay vừa phải"
+    },
+    {
+      "tagName": "Cay",
+      "tagCategory": "SpiceLevel",
+      "tagDescription": "Độ cay mạnh"
+    },
+    {
+      "tagName": "Nướng",
+      "tagCategory": "CookingMethod",
+      "tagDescription": "Được chế biến bằng cách nướng"
+    },
+    {
+      "tagName": "Chiên",
+      "tagCategory": "CookingMethod",
+      "tagDescription": "Được chế biến bằng cách chiên"
+    },
+    {
+      "tagName": "Hấp",
+      "tagCategory": "CookingMethod",
+      "tagDescription": "Được chế biến bằng cách hấp"
+    },
+    {
+      "tagName": "Xào",
+      "tagCategory": "CookingMethod",
+      "tagDescription": "Được chế biến bằng cách xào"
+    },
+    {
+      "tagName": "Luộc",
+      "tagCategory": "CookingMethod",
+      "tagDescription": "Được chế biến bằng cách luộc"
+    },
+    {
+      "tagName": "Nóng",
+      "tagCategory": "Temperature",
+      "tagDescription": "Món ăn được phục vụ nóng"
+    },
+    {
+      "tagName": "Lạnh",
+      "tagCategory": "Temperature",
+      "tagDescription": "Món ăn được phục vụ lạnh"
+    },
+    {
+      "tagName": "Ấm",
+      "tagCategory": "Temperature",
+      "tagDescription": "Món ăn được phục vụ ấm"
+    },
+    {
+      "tagName": "Khai vị",
+      "tagCategory": "Course",
+      "tagDescription": "Món khai vị"
+    },
+    {
+      "tagName": "Món chính",
+      "tagCategory": "Course",
+      "tagDescription": "Món chính"
+    },
+    {
+      "tagName": "Tráng miệng",
+      "tagCategory": "Course",
+      "tagDescription": "Món tráng miệng"
+    },
+    {
+      "tagName": "Có cồn",
+      "tagCategory": "Beverage",
+      "tagDescription": "Đồ uống có cồn"
+    },
+    {
+      "tagName": "Không cồn",
+      "tagCategory": "Beverage",
+      "tagDescription": "Đồ uống không cồn"
+    },
+    {
+      "tagName": "Phổ biến",
+      "tagCategory": "Popularity",
+      "tagDescription": "Món ăn được yêu thích"
+    },
+    {
+      "tagName": "Đặc biệt",
+      "tagCategory": "Popularity",
+      "tagDescription": "Món ăn đặc biệt của nhà hàng"
+    },
+    {
+      "tagName": "Mới",
+      "tagCategory": "Popularity",
+      "tagDescription": "Món ăn mới"
+    }
   ]
 }
-

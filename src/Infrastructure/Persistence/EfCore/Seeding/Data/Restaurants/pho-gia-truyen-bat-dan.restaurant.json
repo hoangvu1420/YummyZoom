@@ -8,6 +8,8 @@
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": false,
+  "latitude": 21.0334953,
+  "longitude": 105.8460548,
   "address": {
     "street": "49 Bát Đàn, Phường Cửa Đông",
     "city": "Hà Nội",
@@ -56,7 +58,12 @@
             "basePrice": 50000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pho-Beef-Noodles-2008.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Phổ biến",
+              "Nóng",
+              "Luộc"
+            ],
             "customizationGroups": [
               "Extras"
             ]
@@ -67,7 +74,12 @@
             "basePrice": 55000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20b%C3%B2%20(39425047901).jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Phổ biến",
+              "Nóng",
+              "Luộc"
+            ],
             "customizationGroups": [
               "Extras"
             ]
@@ -78,7 +90,12 @@
             "basePrice": 60000.0,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Large%20bowl%20of%20Beef%20Pho%20from%20Dalat%20Vietnamese%20Restaurtant.jpg",
             "isAvailable": true,
-            "dietaryTags": [],
+            "dietaryTags": [
+              "Việt Nam",
+              "Phổ biến",
+              "Nóng",
+              "Luộc"
+            ],
             "customizationGroups": [
               "Extras"
             ]

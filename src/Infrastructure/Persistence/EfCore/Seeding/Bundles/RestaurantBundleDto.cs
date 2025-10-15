@@ -11,6 +11,9 @@ public sealed class RestaurantBundle
     [JsonPropertyName("logoUrl")] public string? LogoUrl { get; set; }
     [JsonPropertyName("backgroundImageUrl")] public string? BackgroundImageUrl { get; set; }
     [JsonPropertyName("defaultCurrency")] public string? DefaultCurrency { get; set; }
+    // Optional geo coordinates for the restaurant's physical location
+    [JsonPropertyName("latitude")] public double? Latitude { get; set; }
+    [JsonPropertyName("longitude")] public double? Longitude { get; set; }
 
     [JsonPropertyName("address")] public AddressDto Address { get; set; } = new();
     [JsonPropertyName("contact")] public ContactDto Contact { get; set; } = new();

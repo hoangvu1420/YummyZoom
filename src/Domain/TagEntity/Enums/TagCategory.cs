@@ -34,7 +34,32 @@ public enum TagCategory
     /// <summary>
     /// Tags related to serving temperature (e.g., Hot, Cold, Room Temperature)
     /// </summary>
-    Temperature
+    Temperature,
+
+    /// <summary>
+    /// Tags related to meal types and occasions (e.g., Breakfast, Lunch, Dinner, Snack, Dessert)
+    /// </summary>
+    CookingMethod,
+
+    /// <summary>
+    /// Tags related to course types (e.g., Appetizer, Main Course, Dessert)
+    /// </summary>
+    Course,
+
+    /// <summary>
+    /// Tags related to beverage types (e.g., Alcoholic, Non-Alcoholic, Hot Beverage, Cold Beverage)
+    /// </summary>
+    Beverage,
+
+    /// <summary>
+    /// Tags related to portion sizes (e.g., Small, Medium, Large, Family Size)
+    /// </summary>
+    PortionSize,
+
+    /// <summary>
+    /// Tags related to popularity (e.g., Most Popular, Trending, New)
+    /// </summary>
+    Popularity
 }
 
 /// <summary>

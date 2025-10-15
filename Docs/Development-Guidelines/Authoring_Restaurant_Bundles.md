@@ -27,6 +27,8 @@ Note: Your team or tooling will tell you where to save the file. The filename fo
   "defaultCurrency": "USD",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 47.6100,
+  "longitude": -122.3317,
   "address": { "street": "...", "city": "...", "state": "...", "zipCode": "...", "country": "..." },
   "contact": { "phone": "+1 (555) 123-4567", "email": "info@mynewrestaurant.com" },
   "businessHours": "11:00-22:00",
@@ -80,6 +82,10 @@ Required
 - `menu`: `name`, `description`, `categories[]` (at least one).
 - `defaultCurrency` (optional): 3‑letter currency code (e.g., `USD`, `VND`). If omitted, prices are treated as USD.
 
+Optional Location
+- `latitude` and `longitude`: when provided, both must be present.
+- Ranges: latitude in [-90, 90], longitude in [-180, 180].
+
 Formatting & Constraints
 - Phone: digits and `()+-.` allowed, min length 10.
 - Email: simple `local@domain.tld`.
@@ -98,6 +104,7 @@ Dietary Tags
 
 - Start from a working bundle and tweak gradually.
 - Keep item names stable to avoid accidental duplicates.
+- Provide `latitude`/`longitude` when available to enable distance-aware features.
 - Use `groupKey` as a stable reference; reference it from items via `customizationGroups`.
 - Keep prices realistic. Set `defaultCurrency` once per bundle, then express all prices in that currency (items and choice adjustments). If you don’t set it, prices are treated as `USD`.
 - Use image URLs even if placeholders to help frontend testing.
@@ -143,4 +150,3 @@ Dietary Tags
 ---
 
 For examples, check existing `*.restaurant.json` files alongside your changes.
-

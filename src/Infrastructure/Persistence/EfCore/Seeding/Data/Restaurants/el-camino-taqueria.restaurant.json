@@ -8,6 +8,8 @@
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 21.002006,
+  "longitude": 105.844792,
   "address": {
     "street": "789 Fiesta Road",
     "city": "Uptown",
@@ -112,7 +114,7 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/7/73/Tortilla_Chips.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan"
+              "Thuần chay"
             ]
           },
           {
@@ -122,8 +124,9 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Guacamole.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan",
-              "Gluten-Free"
+              "Mexico",
+              "Chay",
+              "Không gluten"
             ]
           },
           {
@@ -133,7 +136,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/9/9e/Queso_fundido_con_chorizo_-_Puebla.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Mexico",
+              "Chay"
             ]
           },
           {
@@ -155,6 +159,12 @@
             "basePrice": 65000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tacos_al_Pastor.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Phổ biến",
+              "Nướng",
+              "Nóng"
+            ],
             "customizationGroups": [
               "TortillaChoice",
               "SalsaHeat",
@@ -167,6 +177,12 @@
             "basePrice": 69000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Carne_asada_tacos.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Phổ biến",
+              "Nướng",
+              "Nóng"
+            ],
             "customizationGroups": [
               "TortillaChoice",
               "SalsaHeat",
@@ -179,6 +195,12 @@
             "basePrice": 65000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken_tacos.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Phổ biến",
+              "Nướng",
+              "Nóng"
+            ],
             "customizationGroups": [
               "TortillaChoice",
               "SalsaHeat",
@@ -191,6 +213,12 @@
             "basePrice": 75000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/65/Fish_Taco_Ensenada_style.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Phổ biến",
+              "Chiên",
+              "Nóng"
+            ],
             "customizationGroups": [
               "TortillaChoice",
               "SalsaHeat",
@@ -203,6 +231,13 @@
             "basePrice": 129000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/1/17/Shredded_pork_burrito.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Phổ biến"
+            ],
             "customizationGroups": [
               "SalsaHeat",
               "Extras"
@@ -214,8 +249,13 @@
             "basePrice": 109000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Quesadilla.jpg",
             "isAvailable": true,
+            
             "dietaryTags": [
-              "Vegetarian"
+              "Mexico",
+              "Phổ biến",
+              "Nướng",
+              "Nóng",
+              "Chay"
             ],
             "customizationGroups": [
               "Extras"
@@ -227,6 +267,12 @@
             "basePrice": 99000.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Nachos_supreme.jpg",
             "isAvailable": true,
+            "dietaryTags": [
+              "Mexico",
+              "Phổ biến",
+              "Nóng",
+              "Chay"
+            ],
             "customizationGroups": [
               "Extras"
             ]

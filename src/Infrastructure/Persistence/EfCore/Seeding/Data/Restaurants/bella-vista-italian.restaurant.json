@@ -8,6 +8,8 @@
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 21.008151,
+  "longitude": 105.851467,
   "address": {
     "street": "123 Main Street",
     "city": "Downtown",
@@ -93,7 +95,10 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bruschetta.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Chay",
+              "Ý",
+              "Khai vị",
+              "Nướng"
             ]
           },
           {
@@ -101,14 +106,27 @@
             "description": "Cánh gà giòn sốt bơ tỏi và phô mai Parmesan",
             "basePrice": 227760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Buffalo%20Wild%20Wings%20Parmesan%20Garlic%20Boneless%20Wings%20(16083476037).jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Ý",
+              "Khai vị",
+              "Chiên",
+              "Nóng",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Mực chiên giòn",
             "description": "Mực vòng chiên xù kèm sốt cà chua",
             "basePrice": 263760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Fried%20calamari.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Ý",
+              "Khai vị",
+              "Chiên",
+              "Nóng"
+            ]
           },
           {
             "name": "Xiên Caprese",
@@ -117,7 +135,11 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Caprese%20salad%20skewer%20appetizers.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Chay",
+              "Ý",
+              "Khai vị",
+              "Lạnh",
+              "Phổ biến"
             ]
           },
           {
@@ -125,14 +147,28 @@
             "description": "Nấm nhồi phô mai/kem, nướng nóng hổi",
             "basePrice": 203760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Longhorn%20Mushrooms.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Ý",
+              "Khai vị",
+              "Nướng",
+              "Nóng"
+            ]
           },
           {
             "name": "Sốt kem cải bó xôi & atisô",
             "description": "Sốt chấm kem béo ăn kèm bánh giòn/rau củ",
             "basePrice": 215760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spinach%20%26%20artichoke%20dip.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Ý",
+              "Khai vị",
+              "Nóng",
+              "Đặc biệt"
+            ]
           }
         ]
       },
@@ -149,6 +185,14 @@
             "customizationGroups": [
               "Size",
               "Extras"
+            ],
+            "dietaryTags": [
+              "Chay",
+              "Ý",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Phổ biến"
             ]
           },
           {
@@ -160,6 +204,13 @@
             "customizationGroups": [
               "Size",
               "Extras"
+            ],
+            "dietaryTags": [
+              "Ý",
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Phổ biến"
             ]
           },
           {
@@ -170,6 +221,12 @@
             "isAvailable": true,
             "customizationGroups": [
               "Extras"
+            ],
+            "dietaryTags": [
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Phổ biến"
             ]
           },
           {
@@ -177,14 +234,26 @@
             "description": "Bơ chanh thảo mộc, rau củ theo mùa",
             "basePrice": 419760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Grilled%20Salmon%20(15950616571).jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Món chính",
+              "Nướng",
+              "Nóng",
+              "Đặc biệt"
+            ]
           },
           {
             "name": "Pasta gà sốt Alfredo",
             "description": "Fettuccine sốt kem phô mai Parmesan, thịt gà",
             "basePrice": 347760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken-alfredo.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Ý",
+              "Món chính",
+              "Nóng",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Rau củ xào chay",
@@ -193,8 +262,11 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20stir-fry.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan",
-              "Gluten-Free"
+              "Thuần chay",
+              "Không gluten",
+              "Món chính",
+              "Xào",
+              "Nóng"
             ]
           }
         ]
@@ -208,28 +280,53 @@
             "description": "Nhân sô-cô-la chảy, ăn kèm kem vani",
             "basePrice": 179760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chocolate%20Lava%20Cake%201%20(28791097360).jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Tráng miệng",
+              "Nóng",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Bánh phô mai kiểu New York",
             "description": "Cheesecake béo mịn, sốt việt quất",
             "basePrice": 167760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/New%20York%20cheesecake%202.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Tráng miệng",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Tiramisu",
             "description": "Bánh ladyfinger, cà phê, mascarpone, ca cao",
             "basePrice": 167760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tiramisu%20dessert.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Ý",
+              "Tráng miệng",
+              "Lạnh",
+              "Đặc biệt"
+            ]
           },
           {
             "name": "Bánh táo nướng",
             "description": "Lớp vụn quế thơm, ấm áp",
             "basePrice": 143760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Slice%20of%20apple%20pie.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Tráng miệng",
+              "Nướng",
+              "Nóng"
+            ]
           },
           {
             "name": "Combo kem Gelato (3 vị)",
@@ -238,7 +335,11 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bowl%20~%20Ice%20cream.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Chay",
+              "Ý",
+              "Tráng miệng",
+              "Lạnh",
+              "Phổ biến"
             ]
           },
           {
@@ -246,7 +347,13 @@
             "description": "Brownie sô-cô-la, kem vani, hạt",
             "basePrice": 155760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/BROWNIE%20SUNDAE.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Chay",
+              "Tráng miệng",
+              "Nóng",
+              "Phổ biến"
+            ]
           }
         ]
       },
@@ -259,42 +366,77 @@
             "description": "Vắt tươi, mát lạnh",
             "basePrice": 95760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass%20of%20lemonade.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Trà đá",
             "description": "Hồng trà ướp lạnh, không đường",
             "basePrice": 71760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_of_Iced_Tea.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh"
+            ]
           },
           {
             "name": "Nước có ga",
             "description": "Nước khoáng có ga ướp lạnh",
             "basePrice": 59760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/San%20Pellegrino%20500ml%20bottle.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh"
+            ]
           },
           {
             "name": "Cola",
             "description": "Nước ngọt có ga vị cola",
             "basePrice": 59760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_cola.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Lạnh",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Cà phê đen",
             "description": "Pha nóng, đậm vị",
             "basePrice": 59760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/White%20cup%20of%20black%20coffee.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Không cồn",
+              "Nóng",
+              "Phổ biến"
+            ]
           },
           {
             "name": "Espresso",
             "description": "Shot đôi, thơm mạnh",
             "basePrice": 71760.00,
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Espresso%20cup%20and%20saucer%2C%202011.jpg",
-            "isAvailable": true
+            "isAvailable": true,
+            "dietaryTags": [
+              "Thuần chay",
+              "Ý",
+              "Không cồn",
+              "Nóng",
+              "Đặc biệt"
+            ]
           }
         ]
       }

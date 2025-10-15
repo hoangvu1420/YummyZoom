@@ -215,6 +215,84 @@ Provides quick suggestions for search terms as users type.
 
 ---
 
+### Top Tags
+
+Returns the most-used tags across menu items in verified restaurants. Useful for discovery surfaces like “Trending” or tag carousels.
+
+**`GET /api/v1/tags/top`**
+
+- **Authorization:** Public
+
+#### Query Parameters
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `categories` | `string` | Optional comma-separated list of tag categories to filter by. Allowed values (case-insensitive): `Dietary`, `Cuisine`, `SpiceLevel`, `Allergen`, `Preparation`, `Temperature`, `CookingMethod`, `Course`, `Beverage`, `PortionSize`, `Popularity`. Examples: `Dietary`, `Dietary,Cuisine`, `Cuisine,SpiceLevel,Allergen`. | `null` (all categories) |
+| `limit` | `number` | Max number of tags to return. Range 1–100. | `10` |
+
+> Note
+>
+> Counts are computed from tag assignments on active, non-deleted menu items belonging to verified restaurants. Tags are ordered by usage count (descending), then by name (ascending) for deterministic results.
+
+#### Usage Examples
+
+- **Get all top tags**: `GET /api/v1/tags/top?limit=20`
+- **Get only dietary tags**: `GET /api/v1/tags/top?categories=Dietary&limit=10`
+- **Get dietary and cuisine tags**: `GET /api/v1/tags/top?categories=Dietary,Cuisine&limit=15`
+- **Get multiple categories**: `GET /api/v1/tags/top?categories=Cuisine,SpiceLevel,Allergen&limit=25`
+
+#### Response
+
+**• 200 OK**
+```json
+[
+  {
+    "tagId": "1c9b0b7c-49b7-4e8f-9b9a-7dbf2c3b6b4a",
+    "tagName": "Vegetarian",
+    "tagCategory": "Dietary",
+    "usageCount": 42
+  },
+  {
+    "tagId": "5ea7a9c7-9426-40ae-8e7f-dc6c906d4d87",
+    "tagName": "Italian",
+    "tagCategory": "Cuisine",
+    "usageCount": 38
+  },
+  {
+    "tagId": "2a7e3c1d-5f4b-4a8a-9c1e-8f2b6d3c4a5b",
+    "tagName": "Vegan",
+    "tagCategory": "Dietary",
+    "usageCount": 35
+  },
+  {
+    "tagId": "9c700a6d-be30-48c4-bfaf-532547f6c1db",
+    "tagName": "Vietnamese",
+    "tagCategory": "Cuisine",
+    "usageCount": 24
+  }
+]
+```
+
+**• 400 Bad Request** (Invalid category specified)
+```json
+{
+  "title": "Tags.Top.InvalidCategory",
+  "detail": "Unknown category 'InvalidCategory'. Valid values: Dietary, Cuisine, SpiceLevel, Allergen, Preparation, Temperature.",
+  "status": 400
+}
+```
+
+#### Top Tag Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tagId` | `UUID` | Tag identifier |
+| `tagName` | `string` | Human-readable tag name |
+| `tagCategory` | `string` | One of: `Dietary`, `Cuisine`, `SpiceLevel`, `Allergen`, `Preparation`, `Temperature` |
+| `usageCount` | `number` | Number of menu-item assignments contributing to this tag |
+
+---
+
 ## Menu Items Feed
 
 ### Browse Featured Items
@@ -289,13 +367,15 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 |-----------|------|-------------|---------|
 | `q` | `string` | Search term for restaurant name | `null` |
 | `cuisine` | `string` | Cuisine type filter | `null` |
+| `tags` | `string[]` | Filter by tag name(s). Tag names are unique. Repeat the parameter to pass multiple values (e.g., `?tags=Vegetarian&tags=Vegan`). Matches restaurants having at least one menu item with any of the specified tags. | `null` |
+| `tagIds` | `UUID[]` | Filter by tag ID(s). Repeat the parameter to pass multiple values (e.g., `?tagIds=...&tagIds=...`). Matches restaurants having at least one menu item with any of the specified tag IDs. | `null` |
 | `lat` | `number` | Latitude for distance computation | `null` |
 | `lng` | `number` | Longitude for distance computation | `null` |
 | `radiusKm` | `number` | Reserved for future map viewport/radius (not supported in MVP) | `null` |
 | `minRating` | `number` | Minimum average rating (1.0-5.0) | `null` |
 | `pageNumber` | `number` | Page number for pagination | `1` |
 | `pageSize` | `number` | Number of results per page | `10` |
-| `sort` | `string` | Sort order: `rating` or `distance`. `distance` requires `lat` and `lng`. | `null` |
+| `sort` | `string` | Sort order: `rating`, `distance` (requires `lat`/`lng`), or `popularity`. | `null` |
 
 #### Response
 
@@ -311,7 +391,9 @@ Dedicated endpoint for searching restaurants with location and rating filters.
       "avgRating": 4.5,
       "ratingCount": 127,
       "city": "San Francisco",
-      "distanceKm": 1.4
+      "distanceKm": 1.4,
+      "latitude": 37.7749,
+      "longitude": -122.4194
     },
     {
       "restaurantId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
@@ -321,7 +403,9 @@ Dedicated endpoint for searching restaurants with location and rating filters.
       "avgRating": 4.2,
       "ratingCount": 89,
       "city": "San Francisco",
-      "distanceKm": 2.8
+      "distanceKm": 2.8,
+      "latitude": 37.7812,
+      "longitude": -122.4115
     }
   ],
   "pageNumber": 1,
@@ -344,8 +428,17 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 | `ratingCount` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Total number of ratings |
 | `city` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | City where restaurant is located |
 | `distanceKm` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Distance in kilometers when `lat`/`lng` are provided; otherwise null |
+| `latitude` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Latitude when available; otherwise null |
+| `longitude` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Longitude when available; otherwise null |
 
 ---
+
+#### Tag Filtering Behavior
+
+- Tag names are globally unique; filtering by `tags` uses an exact, case-insensitive match on tag names.
+- `tags` and `tagIds` are combined with OR logic: if both are provided, a restaurant matches when it has at least one menu item with any listed tag name or ID.
+- Matching considers active, non-deleted menu items from verified restaurants only.
+
 
 ### Get Restaurant Information
 

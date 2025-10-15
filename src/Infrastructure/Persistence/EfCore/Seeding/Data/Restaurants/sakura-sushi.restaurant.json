@@ -8,6 +8,8 @@
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
+  "latitude": 21.001428,
+  "longitude": 105.845131,
   "address": {
     "street": "456 Cherry Blossom Ave",
     "city": "Midtown",
@@ -22,7 +24,7 @@
   "businessHours": "10:30-21:30",
   "customizationGroups": [
     {
-      "groupKey": "SoySauce",
+      "groupKey": "Sốt đậu nành",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
@@ -41,7 +43,7 @@
       ]
     },
     {
-      "groupKey": "AddOns",
+      "groupKey": "Ăn kèm",
       "minSelections": 0,
       "maxSelections": 3,
       "choices": [
@@ -66,7 +68,7 @@
       ]
     },
     {
-      "groupKey": "RollSize",
+      "groupKey": "Số lượng cuốn",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
@@ -100,8 +102,9 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/8/87/Edamame_on_a_bamboo_bowl_by_yomi955.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan",
-              "Gluten-Free"
+              "Nhật",
+              "Thuần chay",
+              "Không gluten"
             ]
           },
           {
@@ -125,7 +128,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Wakame_salad.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan"
+              "Nhật",
+              "Thuần chay"
             ]
           },
           {
@@ -135,7 +139,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Agedashi_tofu.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Nhật",
+              "Chay"
             ]
           }
         ]
@@ -151,11 +156,12 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Salmon_nigiri.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Gluten-Free"
+              "Nhật",
+              "Không gluten"
             ],
             "customizationGroups": [
-              "SoySauce",
-              "AddOns"
+              "Sốt đậu nành",
+              "Ăn kèm"
             ]
           },
           {
@@ -165,11 +171,12 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3b/8nig_maguro_kihada_s.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Gluten-Free"
+              "Nhật",
+              "Không gluten"
             ],
             "customizationGroups": [
-              "SoySauce",
-              "AddOns"
+              "Sốt đậu nành",
+              "Ăn kèm"
             ]
           },
           {
@@ -179,11 +186,12 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/a1/Nigiri_Sushi_%2826478732232%29.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Gluten-Free"
+              "Nhật",
+              "Không gluten"
             ],
             "customizationGroups": [
-              "SoySauce",
-              "AddOns"
+              "Sốt đậu nành",
+              "Ăn kèm"
             ]
           },
           {
@@ -193,11 +201,11 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/af/Nigiri_Sushi_%2826505096851%29.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Chay"
             ],
             "customizationGroups": [
-              "SoySauce",
-              "AddOns"
+              "Sốt đậu nành",
+              "Ăn kèm"
             ]
           },
           {
@@ -207,11 +215,12 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/e/e4/Sashimi_Moriawase.JPG",
             "isAvailable": true,
             "dietaryTags": [
-              "Gluten-Free"
+              "Nhật",
+              "Không gluten"
             ],
             "customizationGroups": [
-              "SoySauce",
-              "AddOns"
+              "Sốt đậu nành",
+              "Ăn kèm"
             ]
           }
         ]
@@ -227,8 +236,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/California_roll.jpg",
             "isAvailable": true,
             "customizationGroups": [
-              "RollSize",
-              "AddOns"
+              "Số lượng cuốn",
+              "Ăn kèm"
             ]
           },
           {
@@ -238,8 +247,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spicy_tuna_roll.jpg",
             "isAvailable": true,
             "customizationGroups": [
-              "RollSize",
-              "AddOns"
+              "Số lượng cuốn",
+              "Ăn kèm"
             ]
           },
           {
@@ -249,8 +258,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/5/53/Double_Dragon_Roll_%28brightness_adjusted%29_%283432983831%29.jpg",
             "isAvailable": true,
             "customizationGroups": [
-              "RollSize",
-              "AddOns"
+              "Số lượng cuốn",
+              "Ăn kèm"
             ]
           },
           {
@@ -260,11 +269,12 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3d/8hosomak8.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegan"
+              "Nhật",
+              "Thuần chay"
             ],
             "customizationGroups": [
-              "RollSize",
-              "AddOns"
+              "Số lượng cuốn",
+              "Ăn kèm"
             ]
           }
         ]
@@ -307,7 +317,8 @@
             "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Mochi_Ice_Cream.jpg",
             "isAvailable": true,
             "dietaryTags": [
-              "Vegetarian"
+              "Nhật",
+              "Chay"
             ]
           },
           {
@@ -356,3 +367,4 @@
     ]
   }
 }
+

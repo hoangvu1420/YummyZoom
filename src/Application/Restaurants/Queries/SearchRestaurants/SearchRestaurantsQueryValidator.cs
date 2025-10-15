@@ -55,5 +55,21 @@ public sealed class SearchRestaurantsQueryValidator : AbstractValidator<SearchRe
                 })
                 .WithMessage("bbox must be 'minLon,minLat,maxLon,maxLat' within valid ranges.");
         });
+
+        // Tag filters
+        When(x => x.Tags is { Count: > 0 }, () =>
+        {
+            RuleForEach(x => x.Tags!)
+                .NotEmpty()
+                .MaximumLength(100);
+            RuleFor(x => x.Tags!.Count)
+                .LessThanOrEqualTo(20).WithMessage("At most 20 tags may be provided.");
+        });
+
+        When(x => x.TagIds is { Count: > 0 }, () =>
+        {
+            RuleFor(x => x.TagIds!.Count)
+                .LessThanOrEqualTo(20).WithMessage("At most 20 tagIds may be provided.");
+        });
     }
 }

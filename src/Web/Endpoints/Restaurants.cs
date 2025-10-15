@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Coupons.Commands.CreateCoupon;
@@ -737,19 +738,44 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/search
-        publicGroup.MapGet("/search", async (string? q, string? cuisine, double? lat, double? lng, double? radiusKm, int? pageNumber, int? pageSize, double? minRating, string? sort, string? bbox, ISender sender) =>
+        publicGroup.MapGet("/search", async (
+            string? q,
+            string? cuisine,
+            double? lat,
+            double? lng,
+            double? radiusKm,
+            int? pageNumber,
+            int? pageSize,
+            double? minRating,
+            string? sort,
+            string? bbox,
+            [FromQuery(Name = "tags")] string[]? tags,
+            [FromQuery(Name = "tagIds")] Guid[]? tagIds,
+            ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
 
-            var query = new SearchRestaurantsQuery(q, cuisine, lat, lng, radiusKm, page, size, minRating, sort, bbox);
+            var query = new SearchRestaurantsQuery(
+                q,
+                cuisine,
+                lat,
+                lng,
+                radiusKm,
+                page,
+                size,
+                minRating,
+                sort,
+                bbox,
+                tags?.ToList(),
+                tagIds?.ToList());
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("SearchRestaurants")
         .WithSummary("Search restaurants")
-        .WithDescription("Searches for restaurants by name, cuisine type, and/or location. Supports sort=rating|distance. When lat/lng are provided, returns distanceKm and allows sort=distance. Public endpoint - no authentication required.")
+        .WithDescription("Searches for restaurants by name, cuisine type, tags, and/or location. Supports sort=rating|distance|popularity. When lat/lng are provided, returns distanceKm and allows sort=distance. Public endpoint - no authentication required.")
         .Produces<object>(StatusCodes.Status200OK)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
