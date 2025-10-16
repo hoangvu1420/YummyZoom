@@ -4,7 +4,7 @@
   "description": "Tacos kiểu đường phố và món Mexico hiện đại – bánh tortilla bắp/mì, thịt nướng tẩm vị, sốt salsa tươi, đồ uống truyền thống.",
   "cuisineType": "Mexican",
   "logoUrl": "https://static.vecteezy.com/system/resources/previews/053/407/820/large_2x/playful-taco-restaurant-logo-with-sombrero-and-maracas-vector.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Taquer%C3%ADa%20in%20Mexico%20City.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/c9/TaqueriaGuerrero.JPG",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,

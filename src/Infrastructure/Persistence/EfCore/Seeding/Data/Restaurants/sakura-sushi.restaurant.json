@@ -1,10 +1,10 @@
 {
   "restaurantSlug": "sakura-sushi",
   "name": "Sakura Sushi",
-  "description": "Sushi tươi mỗi ngày và món Nhật yêu thích – nigiri, sashimi, cuốn maki, donburi, mì nóng.",
+  "description": "Sushi tươi mỗi ngày và món Nhật yêu thích - nigiri, sashimi, cuốn maki, donburi, mì nóng.",
   "cuisineType": "Japanese",
   "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://img.freepik.com/premium-vector/japanese-sushi-restaurant-logo-design-inspiration_500223-504.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Sushi%20bar%20counter.jpg",
+  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/b/bc/Sushi_station_in_clipper_lounge.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,

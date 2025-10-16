@@ -702,9 +702,13 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/{restaurantId}/info
-        publicGroup.MapGet("/{restaurantId:guid}/info", async (Guid restaurantId, ISender sender) =>
+        publicGroup.MapGet("/{restaurantId:guid}/info", async (
+            Guid restaurantId, 
+            double? lat, 
+            double? lng, 
+            ISender sender) =>
         {
-            var result = await sender.Send(new GetRestaurantPublicInfoQuery(restaurantId));
+            var result = await sender.Send(new GetRestaurantPublicInfoQuery(restaurantId, lat, lng));
             if (!result.IsSuccess) return result.ToIResult();
 
             var dto = result.Value;
@@ -722,18 +726,27 @@ public class Restaurants : EndpointGroupBase
                 dto.RestaurantId,
                 dto.Name,
                 dto.LogoUrl,
+                dto.BackgroundImageUrl,
+                dto.Description,
+                dto.CuisineType,
                 dto.CuisineTags,
                 dto.IsAcceptingOrders,
-                dto.City,
+                dto.IsVerified,
+                dto.Address,
+                dto.ContactInfo,
+                dto.BusinessHours,
+                dto.EstablishedDate,
                 avg,
-                count);
+                count,
+                dto.DistanceKm);
 
             return Results.Ok(response);
         })
         .WithName("GetRestaurantPublicInfo")
         .WithSummary("Get restaurant's public information")
-        .WithDescription("Retrieves basic public information about a restaurant such as name, address, and contact details. Public endpoint - no authentication required.")
+        .WithDescription("Retrieves basic public information about a restaurant such as name, address, and contact details. Optionally calculates distance when lat and lng query parameters are provided. Public endpoint - no authentication required.")
         .Produces<RestaurantPublicInfoResponseDto>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
@@ -883,10 +896,18 @@ public class Restaurants : EndpointGroupBase
         Guid RestaurantId,
         string Name,
         string? LogoUrl,
+        string? BackgroundImageUrl,
+        string Description,
+        string CuisineType,
         IReadOnlyList<string> CuisineTags,
         bool IsAcceptingOrders,
-        string? City,
+        bool IsVerified,
+        Application.Restaurants.Queries.Common.AddressDto Address,
+        Application.Restaurants.Queries.Common.ContactInfoDto ContactInfo,
+        string BusinessHours,
+        DateTimeOffset EstablishedDate,
         decimal? AvgRating,
-        int? RatingCount);
+        int? RatingCount,
+        decimal? DistanceKm);
     #endregion
 }

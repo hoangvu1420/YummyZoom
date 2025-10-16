@@ -442,7 +442,7 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 
 ### Get Restaurant Information
 
-Retrieves basic public information about a specific restaurant.
+Retrieves comprehensive public information about a specific restaurant including contact details, operating hours, address, and cuisine tags derived from menu items.
 
 **`GET /api/v1/restaurants/{restaurantId}/info`**
 
@@ -454,7 +454,17 @@ Retrieves basic public information about a specific restaurant.
 |-----------|------|----------|-------------|
 | `restaurantId` | `UUID` | Yes | Unique identifier of the restaurant |
 
-#### Response
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `lat` | `number` | No | Latitude for distance calculation. Must be between -90 and 90. Both `lat` and `lng` must be provided together. |
+| `lng` | `number` | No | Longitude for distance calculation. Must be between -180 and 180. Both `lat` and `lng` must be provided together. |
+
+> **Note**  
+> When both `lat` and `lng` are provided, the response includes the calculated distance in kilometers from the provided location to the restaurant. If only one coordinate is provided, or if values are out of range, a 400 Bad Request error is returned.
+
+#### Response Examples
 
 **✅ 200 OK**
 ```json
@@ -462,11 +472,28 @@ Retrieves basic public information about a specific restaurant.
   "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "name": "Mario's Italian Bistro",
   "logoUrl": "https://cdn.yummyzoom.com/logos/marios.jpg",
-  "cuisineTags": ["Italian", "Pizza", "Pasta"],
+  "backgroundImageUrl": "https://cdn.yummyzoom.com/backgrounds/marios-bg.jpg",
+  "description": "Authentic Italian cuisine in the heart of San Francisco",
+  "cuisineType": "Italian",
+  "cuisineTags": ["Italian", "Mediterranean"],
   "isAcceptingOrders": true,
-  "city": "San Francisco",
+  "isVerified": true,
+  "address": {
+    "street": "123 Market Street",
+    "city": "San Francisco",
+    "state": "CA",
+    "zipCode": "94102",
+    "country": "USA"
+  },
+  "contactInfo": {
+    "phoneNumber": "+1-415-555-0123",
+    "email": "info@mariosbistro.com"
+  },
+  "businessHours": "11:00-22:00",
+  "establishedDate": "2020-06-15T10:30:00Z",
   "avgRating": 4.5,
-  "ratingCount": 127
+  "ratingCount": 127,
+  "distanceKm": 2.3
 }
 ```
 
@@ -476,14 +503,44 @@ Retrieves basic public information about a specific restaurant.
 |-------|------|-------------|
 | `restaurantId` | `UUID` | Unique restaurant identifier |
 | `name` | `string` | Restaurant name |
-| `logoUrl` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | URL to restaurant logo image |
-| `cuisineTags` | `string[]` | Array of cuisine types |
+| `logoUrl` | `string|null` | URL to restaurant logo image |
+| `backgroundImageUrl` | `string|null` | URL to restaurant background/banner image |
+| `description` | `string` | Detailed description of the restaurant |
+| `cuisineType` | `string` | Primary cuisine classification |
+| `cuisineTags` | `string[]` | Array of cuisine tags from menu items (Cuisine category only, alphabetically sorted) |
 | `isAcceptingOrders` | `boolean` | Whether the restaurant is currently accepting orders |
-| `city` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | City where restaurant is located |
-| `avgRating` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Average rating, if available (otherwise null) |
-| `ratingCount` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Total ratings count, if available (otherwise null) |
+| `isVerified` | `boolean` | Partner verification status |
+| `address` | `object` | Full restaurant address |
+| `address.street` | `string` | Street address |
+| `address.city` | `string` | City name |
+| `address.state` | `string` | State/province |
+| `address.zipCode` | `string` | Postal/ZIP code |
+| `address.country` | `string` | Country name |
+| `contactInfo` | `object` | Contact information |
+| `contactInfo.phoneNumber` | `string` | Phone number |
+| `contactInfo.email` | `string` | Email address |
+| `businessHours` | `string` | Operating hours (format: `HH:MM-HH:MM`) |
+| `establishedDate` | `string` | ISO 8601 timestamp when restaurant was added to platform |
+| `avgRating` | `number|null` | Average rating (1-5), if available |
+| `ratingCount` | `number|null` | Total number of ratings, if available |
+| `distanceKm` | `number|null` | Distance in kilometers from provided location (only when lat/lng supplied and restaurant has coordinates) |
+
+> **Note on CuisineTags**  
+> The `cuisineTags` array is dynamically populated from tags assigned to the restaurant's menu items. Only tags with category "Cuisine" are included. Tags are unique, sorted alphabetically, and exclude soft-deleted menu items or tags.
 
 #### Error Responses
+
+**❌ 400 Bad Request (validation error)**
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "": ["Both Lat and Lng must be provided together, or both omitted."]
+  }
+}
+```
 
 **❌ 404 Not Found**
 ```json
