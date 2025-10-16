@@ -1,0 +1,9 @@
+[0] Config.pm:328> INFO - This is Biber 2.21
+[0] Config.pm:331> INFO - Logfile is 'Chuong/out/1_Gioi_thieu.blg'
+[331] biber-MSWIN64:342> INFO - === 
+[465] Biber.pm:421> INFO - Reading 'Chuong/out/1_Gioi_thieu.bcf'
+[640] Biber.pm:1002> INFO - Found 0 citekeys in bib section 0
+[658] bbl.pm:676> INFO - Writing 'Chuong/out/1_Gioi_thieu.bbl' with encoding 'UTF-8'
+[659] bbl.pm:779> INFO - Output to Chuong/out/1_Gioi_thieu.bbl
+[659] Biber.pm:132> WARN - The file 'Chuong/out/1_Gioi_thieu.bcf' does not contain any citations!
+[659] Biber.pm:134> INFO - WARNINGS: 1
