@@ -1,10 +1,14 @@
+using System.Linq;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Application.Restaurants.Queries.Common;
 using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -65,6 +69,88 @@ public class GetFullMenuQueryTests : BaseTestFixture
         }
 
         updated.LastRebuiltAt.Should().BeAfter(baseline, "cache should be invalidated and view rebuilt time should advance");
+    }
+
+    [Test]
+    public async Task FullScenario_DeliveredOrderPopulatesSoldCountsInMenuJson()
+    {
+        await ResetState();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        var wingsId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.BuffaloWings);
+
+        // Seed an initial menu view so we can observe differences later.
+        using (var scope = CreateScope())
+        {
+            var maintainer = scope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
+            var initial = await maintainer.RebuildAsync(restaurantId);
+            await maintainer.UpsertAsync(restaurantId, initial.menuJson, initial.lastRebuiltAt);
+        }
+
+        // Walk an order through to Delivered status to trigger sales summary updates.
+        var readyOrderId = await OrderLifecycleTestHelper.CreateReadyOrderAsync();
+        await OrderLifecycleTestHelper.RunAsDefaultRestaurantStaffAsync();
+        var deliveredAtUtc = DateTime.UtcNow.AddMinutes(-2);
+        var deliverResult = await OrderLifecycleTestHelper.MarkDeliveredAsync(readyOrderId, deliveredAtUtc);
+        deliverResult.IsSuccess.Should().BeTrue("marking the order as delivered should succeed");
+
+        // Process outbox so OrderDelivered handlers (including sales summary) execute.
+        await DrainOutboxAsync();
+
+        var deliveredOffset = new DateTimeOffset(DateTime.SpecifyKind(deliveredAtUtc, DateTimeKind.Utc), TimeSpan.Zero);
+
+        // Assert sales summaries were persisted with the expected counters.
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var summaries = await db.MenuItemSalesSummaries
+                .Where(s => s.RestaurantId == restaurantId && (s.MenuItemId == burgerId || s.MenuItemId == wingsId))
+                .ToListAsync();
+
+            summaries.Should().HaveCount(2);
+            foreach (var summary in summaries)
+            {
+                summary.LifetimeQuantity.Should().Be(1);
+                summary.Rolling7DayQuantity.Should().Be(1);
+                summary.Rolling30DayQuantity.Should().Be(1);
+                summary.LastSoldAt.Should().BeCloseTo(deliveredOffset, TimeSpan.FromMilliseconds(5));
+                summary.LastUpdatedAt.Should().BeOnOrAfter(deliveredOffset);
+            }
+        }
+
+        DateTimeOffset rebuiltAt;
+        // Rebuild the FullMenuView so the sold counts are embedded into the JSON document.
+        using (var scope = CreateScope())
+        {
+            var maintainer = scope.ServiceProvider.GetRequiredService<IFullMenuViewMaintainer>();
+            var rebuilt = await maintainer.RebuildAsync(restaurantId);
+            rebuiltAt = rebuilt.lastRebuiltAt;
+            await maintainer.UpsertAsync(restaurantId, rebuilt.menuJson, rebuilt.lastRebuiltAt);
+        }
+
+        var response = await SendAndUnwrapAsync(new GetFullMenuQuery(restaurantId));
+        response.LastRebuiltAt.Should().BeCloseTo(rebuiltAt, TimeSpan.FromMilliseconds(5));
+
+        using var doc = JsonDocument.Parse(response.MenuJson);
+        var root = doc.RootElement;
+        root.GetProperty("version").GetInt32().Should().Be(2);
+
+        var itemsById = root.GetProperty("items").GetProperty("byId");
+        var burgerNode = itemsById.GetProperty(burgerId.ToString());
+        var burgerSold = burgerNode.GetProperty("sold");
+        burgerSold.GetProperty("lifetime").GetInt64().Should().Be(1);
+        burgerSold.GetProperty("rolling7").GetInt64().Should().Be(1);
+        burgerSold.GetProperty("rolling30").GetInt64().Should().Be(1);
+        burgerSold.GetProperty("lastSoldAt").GetDateTimeOffset().Should().BeCloseTo(deliveredOffset, TimeSpan.FromSeconds(1));
+        burgerSold.GetProperty("lastUpdatedAt").GetDateTimeOffset().Should().BeOnOrAfter(deliveredOffset);
+
+        var wingsNode = itemsById.GetProperty(wingsId.ToString());
+        var wingsSold = wingsNode.GetProperty("sold");
+        wingsSold.GetProperty("lifetime").GetInt64().Should().Be(1);
+        wingsSold.GetProperty("rolling7").GetInt64().Should().Be(1);
+        wingsSold.GetProperty("rolling30").GetInt64().Should().Be(1);
+        wingsSold.GetProperty("lastSoldAt").GetDateTimeOffset().Should().BeCloseTo(deliveredOffset, TimeSpan.FromSeconds(1));
+        wingsSold.GetProperty("lastUpdatedAt").GetDateTimeOffset().Should().BeOnOrAfter(deliveredOffset);
     }
 
     [Test]

@@ -112,6 +112,23 @@ public sealed class FullMenuViewMaintainer : IFullMenuViewMaintainer
                 : (IReadOnlyList<AppliedCustomization>)(JsonSerializer.Deserialize<List<AppliedCustomization>>(r.AppliedCustomizationsJson, DomainJson.Options) ?? new List<AppliedCustomization>())
         }).ToList();
 
+        // Fetch sales summaries for popularity metrics
+        const string summariesSql = """
+            SELECT
+              "MenuItemId"          AS "MenuItemId",
+              "LifetimeQuantity"    AS "LifetimeQuantity",
+              "Rolling7DayQuantity" AS "Rolling7DayQuantity",
+              "Rolling30DayQuantity" AS "Rolling30DayQuantity",
+              "LastSoldAt"          AS "LastSoldAt",
+              "LastUpdatedAt"       AS "LastUpdatedAt"
+            FROM "MenuItemSalesSummaries"
+            WHERE "RestaurantId" = @RestaurantId;
+            """;
+
+        var summaryMap = (await connection.QueryAsync<MenuItemSalesSummaryRow>(
+            new CommandDefinition(summariesSql, new { RestaurantId = restaurantId }, cancellationToken: ct)))
+            .ToDictionary(x => x.MenuItemId);
+
         // 1) Customization groups referenced by items
         var groupIds = items
             .SelectMany(i => i.AppliedCustomizations.Select(c => c.CustomizationGroupId.Value))
@@ -172,7 +189,7 @@ public sealed class FullMenuViewMaintainer : IFullMenuViewMaintainer
         var now = DateTimeOffset.UtcNow;
         var doc = new
         {
-            version = 1,
+            version = 2,
             restaurantId,
             menuId = menu.Id,
             menuName = menu.Name,
@@ -210,6 +227,23 @@ public sealed class FullMenuViewMaintainer : IFullMenuViewMaintainer
                         imageUrl = i.ImageUrl,
                         isAvailable = i.IsAvailable,
                         dietaryTagIds = i.DietaryTagIds.Select(t => t.Value).ToList(),
+                        sold = summaryMap.TryGetValue(i.Id, out var summary)
+                            ? new
+                            {
+                                lifetime = summary.LifetimeQuantity,
+                                rolling7 = summary.Rolling7DayQuantity,
+                                rolling30 = summary.Rolling30DayQuantity,
+                                lastSoldAt = ToDateTimeOffset(summary.LastSoldAt),
+                                lastUpdatedAt = ToDateTimeOffset(summary.LastUpdatedAt)
+                            }
+                            : new
+                            {
+                                lifetime = 0L,
+                                rolling7 = 0L,
+                                rolling30 = 0L,
+                                lastSoldAt = (DateTimeOffset?)null,
+                                lastUpdatedAt = (DateTimeOffset?)null
+                            },
                         customizationGroups = i.AppliedCustomizations
                             .OrderBy(c => c.DisplayOrder)
                             .Select(c => new { groupId = c.CustomizationGroupId.Value, displayTitle = c.DisplayTitle, displayOrder = c.DisplayOrder })
@@ -316,4 +350,22 @@ public sealed class FullMenuViewMaintainer : IFullMenuViewMaintainer
         bool IsDefault,
         int DisplayOrder);
     private sealed record TagRow(Guid Id, string TagName, string TagCategory);
+    private sealed record MenuItemSalesSummaryRow(
+        Guid MenuItemId,
+        long LifetimeQuantity,
+        long Rolling7DayQuantity,
+        long Rolling30DayQuantity,
+        DateTime? LastSoldAt,
+        DateTime LastUpdatedAt);
+
+    private static DateTimeOffset? ToDateTimeOffset(DateTime? value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        var ensured = DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
+        return new DateTimeOffset(ensured, TimeSpan.Zero);
+    }
 }

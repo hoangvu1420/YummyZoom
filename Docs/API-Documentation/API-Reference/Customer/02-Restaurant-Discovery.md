@@ -536,7 +536,7 @@ All monetary values include currency information, and the structure is optimized
 **✅ 200 OK**
 ```json
 {
-  "version": 1,
+  "version": 2,
   "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "menuId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "menuName": "Main Menu",
@@ -591,6 +591,13 @@ All monetary values include currency information, and the structure is optimized
             "displayTitle": "Bread Type",
             "displayOrder": 1
           }
+        ],
+        "sold": {
+          "lifetime": 1284,
+          "rolling7": 86,
+          "rolling30": 412,
+          "lastSoldAt": "2025-10-12T18:41:52Z",
+          "lastUpdatedAt": "2025-10-12T18:42:05Z"
         ]
       }
     }
@@ -638,6 +645,8 @@ All monetary values include currency information, and the structure is optimized
 }
 ```
 
+> **New in version 2**: Each `items.byId` entry now includes a `sold` object containing lifetime and rolling sales counts. These values update whenever delivered order totals change, and ETag/Last-Modified headers advance accordingly. Items with no sales return zero counts and `null` timestamps.
+
 #### Menu Structure
 
 | Field | Type | Description |
@@ -669,6 +678,17 @@ All monetary values include currency information, and the structure is optimized
 | `isAvailable` | `boolean` | Whether item is currently available |
 | `dietaryTags` | `string[]` | Dietary information (e.g., "Vegetarian", "Gluten-Free") |
 | `customizationGroups` | `array` | Available customization options |
+| `sold` | `SoldMetrics` | Sales popularity counters (defaults to zeros/null when no sales) |
+
+#### Sold Metrics Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `lifetime` | `number` | Total delivered quantity accumulated for the item |
+| `rolling7` | `number` | Quantity delivered in the trailing 7 days |
+| `rolling30` | `number` | Quantity delivered in the trailing 30 days |
+| `lastSoldAt` | `string|null` | ISO 8601 timestamp of the most recent delivered order (or `null` if never sold) |
+| `lastUpdatedAt` | `string|null` | ISO 8601 timestamp when the counters were last refreshed |
 
 #### Customization Group Object
 

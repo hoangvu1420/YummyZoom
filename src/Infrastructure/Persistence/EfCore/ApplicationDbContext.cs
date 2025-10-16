@@ -24,6 +24,7 @@ using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.MenuItemSales;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.SharedKernel;
@@ -51,6 +52,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<AdminRestaurantHealthSummary> AdminRestaurantHealthSummaries => Set<AdminRestaurantHealthSummary>();
     public DbSet<FullMenuView> FullMenuViews => Set<FullMenuView>();
     public DbSet<SearchIndexItem> SearchIndexItems => Set<SearchIndexItem>();
+    public DbSet<MenuItemSalesSummary> MenuItemSalesSummaries => Set<MenuItemSalesSummary>();
 
     // Domain Entities
     public DbSet<User> DomainUsers => Set<User>();

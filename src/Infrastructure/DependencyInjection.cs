@@ -38,6 +38,7 @@ using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.RestaurantSeed
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
+using YummyZoom.Infrastructure.Persistence.ReadModels.MenuItemSales;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.Infrastructure.Persistence.Repositories;
@@ -270,6 +271,7 @@ public static class DependencyInjection
         builder.Services.AddHostedService<SearchIndexMaintenanceHostedService>();
 
         // Review summaries maintainer
+        builder.Services.AddScoped<IMenuItemSalesSummaryMaintainer, MenuItemSalesSummaryMaintainer>();
         builder.Services.AddScoped<IReviewSummaryMaintainer, ReviewSummaryMaintainer>();
 
         // ReviewSummary read model maintenance
