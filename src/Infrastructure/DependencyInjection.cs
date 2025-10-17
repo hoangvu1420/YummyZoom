@@ -37,6 +37,7 @@ using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.CouponSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.IdentitySeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.OrderSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.RestaurantSeeders;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.ReviewSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
@@ -102,7 +103,7 @@ public static class DependencyInjection
         // Business flow seeders
         builder.Services.AddScoped<ISeeder, CouponBundleSeeder>();
         builder.Services.AddScoped<ISeeder, OrderSeeder>();
-        // builder.Services.AddScoped<ISeeder, ReviewSeeder>();
+        builder.Services.AddScoped<ISeeder, ReviewSeeder>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();

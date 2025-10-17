@@ -69,6 +69,12 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .HasDatabaseName("IX_Reviews_CustomerId");
         builder.HasIndex(r => r.OrderId)
             .HasDatabaseName("IX_Reviews_OrderId");
+
+        // Unique constraints
+        builder.HasIndex(r => r.OrderId)
+            .IsUnique()
+            .HasDatabaseName("UX_Reviews_OrderId_Unique")
+            .HasFilter("\"IsDeleted\" = FALSE");
     }
 }
 

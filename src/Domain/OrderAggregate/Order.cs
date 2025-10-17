@@ -291,7 +291,8 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
                 PaymentMethodType.CashOnDelivery,
                 PaymentTransactionType.Payment,
                 codAmount,
-                currentTimestamp
+                currentTimestamp,
+                paymentMethodDisplay: paymentMethodType.ToString()
             );
 
             if (codTransactionResult.IsFailure)

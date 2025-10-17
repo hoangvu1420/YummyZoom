@@ -1,6 +1,6 @@
 using YummyZoom.Domain.Common.ValueObjects;
-
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Options;
 
 namespace YummyZoom.Infrastructure.Persistence.EfCore.Seeding;
 
@@ -203,6 +203,89 @@ public static class SeedingDataGenerator
             weights[i] = max - i + 1; // Higher weight for lower quantities
         }
         return SelectByWeight(weights);
+    }
+
+    #endregion
+
+    #region Review Generation
+
+    /// <summary>
+    /// Selects a rating based on weighted distribution.
+    /// </summary>
+    /// <param name="distribution">Dictionary with rating as key and weight as value</param>
+    /// <returns>Selected rating (1-5)</returns>
+    public static int SelectRatingByWeight(Dictionary<string, int> distribution)
+    {
+        var ratingWeights = distribution.ToDictionary(kvp => int.Parse(kvp.Key), kvp => kvp.Value);
+        return SelectByWeight(ratingWeights);
+    }
+
+    /// <summary>
+    /// Determines if a review should have a comment based on percentage.
+    /// </summary>
+    /// <param name="commentPercentage">Percentage of reviews that should have comments</param>
+    /// <returns>True if review should have a comment</returns>
+    public static bool ShouldGenerateComment(decimal commentPercentage)
+    {
+        return Random.NextDouble() < (double)(commentPercentage / 100);
+    }
+
+    /// <summary>
+    /// Selects a random comment template for the given rating.
+    /// </summary>
+    /// <param name="templates">Review templates organized by rating</param>
+    /// <param name="rating">Rating value (1-5)</param>
+    /// <returns>Selected comment template</returns>
+    public static string SelectReviewComment(ReviewTemplates templates, int rating)
+    {
+        var ratingKey = rating.ToString();
+        if (!templates.ByRating.TryGetValue(ratingKey, out var templateSet) || templateSet.Comments.Count == 0)
+        {
+            return $"Rating: {rating} stars"; // Fallback
+        }
+        
+        return templateSet.Comments[Random.Next(templateSet.Comments.Count)];
+    }
+
+    /// <summary>
+    /// Generates a realistic review timestamp after the delivery time.
+    /// </summary>
+    /// <param name="deliveryTime">When the order was delivered</param>
+    /// <param name="minDays">Minimum days after delivery</param>
+    /// <param name="maxDays">Maximum days after delivery</param>
+    /// <returns>Random timestamp between min and max days after delivery</returns>
+    public static DateTime GenerateReviewTimestamp(DateTime deliveryTime, int minDays, int maxDays)
+    {
+        var daysAfter = Random.Next(minDays, maxDays + 1);
+        var hoursAfter = Random.Next(1, 24);
+        var minutesAfter = Random.Next(0, 60);
+        
+        return deliveryTime.AddDays(daysAfter).AddHours(hoursAfter).AddMinutes(minutesAfter);
+    }
+
+    /// <summary>
+    /// Determines if a review should receive a reply based on percentage.
+    /// </summary>
+    /// <param name="replyPercentage">Percentage of reviews that should get replies (0-100)</param>
+    /// <returns>True if the review should get a reply</returns>
+    public static bool ShouldGenerateReply(decimal replyPercentage)
+    {
+        return Random.NextDouble() * 100 < (double)replyPercentage;
+    }
+
+    /// <summary>
+    /// Selects a random reply template from the available templates.
+    /// </summary>
+    /// <param name="replyTemplates">List of reply templates</param>
+    /// <returns>Random reply template</returns>
+    public static string SelectReplyTemplate(List<string> replyTemplates)
+    {
+        if (replyTemplates.Count == 0)
+        {
+            return "Cảm ơn bạn đã đánh giá!"; // Fallback
+        }
+        
+        return replyTemplates[Random.Next(replyTemplates.Count)];
     }
 
     #endregion

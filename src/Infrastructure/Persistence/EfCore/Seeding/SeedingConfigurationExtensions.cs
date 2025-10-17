@@ -347,13 +347,12 @@ public static class SeedingConfigurationExtensions
     {
         return new ReviewSeedingOptions
         {
-            ReviewPercentage = TryGetDecimal(jo, "ReviewPercentage", defaults.ReviewPercentage),
-            ReplyPercentage = TryGetDecimal(jo, "ReplyPercentage", defaults.ReplyPercentage),
-            GenerateComments = TryGetBool(jo, "GenerateComments", defaults.GenerateComments),
-            PositiveComments = TryGetStringArray(jo, "PositiveComments", defaults.PositiveComments),
-            NeutralComments = TryGetStringArray(jo, "NeutralComments", defaults.NeutralComments),
-            NegativeComments = TryGetStringArray(jo, "NegativeComments", defaults.NegativeComments),
-            ReplyTemplates = TryGetStringArray(jo, "ReplyTemplates", defaults.ReplyTemplates)
+            ReviewCoveragePercentage = TryGetDecimal(jo, "ReviewCoveragePercentage", defaults.ReviewCoveragePercentage),
+            CommentPercentage = TryGetDecimal(jo, "CommentPercentage", defaults.CommentPercentage),
+            MinDaysAfterDelivery = TryGetInt(jo, "MinDaysAfterDelivery", defaults.MinDaysAfterDelivery),
+            MaxDaysAfterDelivery = TryGetInt(jo, "MaxDaysAfterDelivery", defaults.MaxDaysAfterDelivery),
+            RatingDistribution = defaults.RatingDistribution, // Keep defaults for complex types
+            Templates = defaults.Templates
         };
     }
 
@@ -361,13 +360,12 @@ public static class SeedingConfigurationExtensions
     {
         return new ReviewSeedingOptions
         {
-            ReviewPercentage = el.TryGetProperty("ReviewPercentage", out var r) ? TryDecimal(r, defaults.ReviewPercentage) : defaults.ReviewPercentage,
-            ReplyPercentage = el.TryGetProperty("ReplyPercentage", out var rp) ? TryDecimal(rp, defaults.ReplyPercentage) : defaults.ReplyPercentage,
-            GenerateComments = el.TryGetProperty("GenerateComments", out var g) && TryBool(g, defaults.GenerateComments),
-            PositiveComments = el.TryGetProperty("PositiveComments", out var p) ? ToStringArray(p) : defaults.PositiveComments,
-            NeutralComments = el.TryGetProperty("NeutralComments", out var n) ? ToStringArray(n) : defaults.NeutralComments,
-            NegativeComments = el.TryGetProperty("NegativeComments", out var neg) ? ToStringArray(neg) : defaults.NegativeComments,
-            ReplyTemplates = el.TryGetProperty("ReplyTemplates", out var rt) ? ToStringArray(rt) : defaults.ReplyTemplates
+            ReviewCoveragePercentage = el.TryGetProperty("ReviewCoveragePercentage", out var rcp) ? TryDecimal(rcp, defaults.ReviewCoveragePercentage) : defaults.ReviewCoveragePercentage,
+            CommentPercentage = el.TryGetProperty("CommentPercentage", out var cp) ? TryDecimal(cp, defaults.CommentPercentage) : defaults.CommentPercentage,
+            MinDaysAfterDelivery = el.TryGetProperty("MinDaysAfterDelivery", out var mind) ? TryInt(mind, defaults.MinDaysAfterDelivery) : defaults.MinDaysAfterDelivery,
+            MaxDaysAfterDelivery = el.TryGetProperty("MaxDaysAfterDelivery", out var maxd) ? TryInt(maxd, defaults.MaxDaysAfterDelivery) : defaults.MaxDaysAfterDelivery,
+            RatingDistribution = el.TryGetProperty("RatingDistribution", out var rd) ? TryDictionary(rd, defaults.RatingDistribution) : defaults.RatingDistribution,
+            Templates = defaults.Templates
         };
     }
 
@@ -375,13 +373,12 @@ public static class SeedingConfigurationExtensions
     {
         return new ReviewSeedingOptions
         {
-            ReviewPercentage = TryGetDecimal(dict, "ReviewPercentage", defaults.ReviewPercentage),
-            ReplyPercentage = TryGetDecimal(dict, "ReplyPercentage", defaults.ReplyPercentage),
-            GenerateComments = TryGetBool(dict, "GenerateComments", defaults.GenerateComments),
-            PositiveComments = TryGetStringArray(dict, "PositiveComments", defaults.PositiveComments),
-            NeutralComments = TryGetStringArray(dict, "NeutralComments", defaults.NeutralComments),
-            NegativeComments = TryGetStringArray(dict, "NegativeComments", defaults.NegativeComments),
-            ReplyTemplates = TryGetStringArray(dict, "ReplyTemplates", defaults.ReplyTemplates)
+            ReviewCoveragePercentage = dict.TryGetValue("ReviewCoveragePercentage", out var rcp) && decimal.TryParse(rcp?.ToString(), out var rcpValue) ? rcpValue : defaults.ReviewCoveragePercentage,
+            CommentPercentage = dict.TryGetValue("CommentPercentage", out var cp) && decimal.TryParse(cp?.ToString(), out var cpValue) ? cpValue : defaults.CommentPercentage,
+            MinDaysAfterDelivery = dict.TryGetValue("MinDaysAfterDelivery", out var mind) && int.TryParse(mind?.ToString(), out var mindValue) ? mindValue : defaults.MinDaysAfterDelivery,
+            MaxDaysAfterDelivery = dict.TryGetValue("MaxDaysAfterDelivery", out var maxd) && int.TryParse(maxd?.ToString(), out var maxdValue) ? maxdValue : defaults.MaxDaysAfterDelivery,
+            RatingDistribution = defaults.RatingDistribution,
+            Templates = defaults.Templates
         };
     }
 
