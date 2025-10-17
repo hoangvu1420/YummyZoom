@@ -1,0 +1,16 @@
+{
+  "restaurantSlug": "bun-cha-huong-lien",
+  "code": "FREENEM",
+  "description": "Tặng 1 phần nem hải sản khi đặt Combo Obama hoặc bún chả đặc biệt",
+  "valueType": "FreeItem",
+  "freeItemName": "Nem hải sản",
+  "scope": "SpecificItems",
+  "itemNames": ["Combo Obama", "The Special Bún Chả"],
+  "validityStartDate": "2024-01-01T00:00:00Z",
+  "validityEndDate": "2025-12-31T23:59:59Z",
+  "minOrderAmount": null,
+  "minOrderCurrency": null,
+  "totalUsageLimit": 500,
+  "usageLimitPerUser": 1,
+  "isEnabled": true
+}

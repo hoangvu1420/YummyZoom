@@ -1,0 +1,16 @@
+{
+  "restaurantSlug": "bun-cha-huong-lien",
+  "code": "MORNING10",
+  "description": "Giảm 10% cho các món đồ uống - Áp dụng cả ngày",
+  "valueType": "Percentage",
+  "percentage": 10,
+  "scope": "SpecificCategories",
+  "categoryNames": ["Đồ uống & Khác"],
+  "validityStartDate": "2024-01-01T00:00:00Z",
+  "validityEndDate": "2025-12-31T23:59:59Z",
+  "minOrderAmount": 50000,
+  "minOrderCurrency": "VND",
+  "totalUsageLimit": null,
+  "usageLimitPerUser": 10,
+  "isEnabled": true
+}

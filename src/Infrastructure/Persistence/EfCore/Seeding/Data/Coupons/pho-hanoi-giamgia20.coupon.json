@@ -1,0 +1,15 @@
+{
+  "restaurantSlug": "pho-gia-truyen-bat-dan",
+  "code": "GIAMGIA20",
+  "description": "Giảm 20% cho toàn bộ đơn hàng - Áp dụng cho khách hàng mới",
+  "valueType": "Percentage",
+  "percentage": 20,
+  "scope": "WholeOrder",
+  "validityStartDate": "2024-01-01T00:00:00Z",
+  "validityEndDate": "2025-12-31T23:59:59Z",
+  "minOrderAmount": 100000,
+  "minOrderCurrency": "VND",
+  "totalUsageLimit": 500,
+  "usageLimitPerUser": 1,
+  "isEnabled": true
+}

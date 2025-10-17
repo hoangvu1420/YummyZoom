@@ -1,0 +1,16 @@
+{
+  "restaurantSlug": "bun-cha-huong-lien",
+  "code": "FREECHA",
+  "description": "Tặng 1 ly trà đá miễn phí khi đặt combo hoặc bún chả",
+  "valueType": "FreeItem",
+  "freeItemName": "Trà đá",
+  "scope": "SpecificCategories",
+  "categoryNames": ["Món chính"],
+  "validityStartDate": "2024-06-01T00:00:00Z",
+  "validityEndDate": "2024-12-31T23:59:59Z",
+  "minOrderAmount": null,
+  "minOrderCurrency": null,
+  "totalUsageLimit": null,
+  "usageLimitPerUser": null,
+  "isEnabled": true
+}

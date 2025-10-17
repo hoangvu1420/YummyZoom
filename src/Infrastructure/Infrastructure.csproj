@@ -34,6 +34,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Persistence\EfCore\Seeding\Data\Templates\TagsTemplates.json" />
     <EmbeddedResource Include="Persistence\EfCore\Seeding\Data\Restaurants\**\*.restaurant.json" />
+    <EmbeddedResource Include="Persistence\EfCore\Seeding\Data\Coupons\**\*.coupon.json" />
   </ItemGroup>
 
 </Project>

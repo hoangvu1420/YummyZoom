@@ -164,6 +164,18 @@ public class RestaurantBundleSeeder : ISeeder
                 skipped.Restaurants++;
             }
 
+            // Store slug-to-ID mapping in SharedData for other seeders (e.g., CouponBundleSeeder)
+            if (restaurant is not null && !string.IsNullOrWhiteSpace(bundle.RestaurantSlug))
+            {
+                var slugMapKey = "RestaurantSlugMap";
+                if (!context.SharedData.ContainsKey(slugMapKey))
+                {
+                    context.SharedData[slugMapKey] = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+                }
+                var slugMap = (Dictionary<string, Guid>)context.SharedData[slugMapKey];
+                slugMap[bundle.RestaurantSlug] = restaurant.Id.Value;
+            }
+
             // Menu
             Menu? menu = null;
             if (!opts.ReportOnly)

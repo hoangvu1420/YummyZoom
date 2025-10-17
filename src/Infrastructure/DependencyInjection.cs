@@ -33,6 +33,7 @@ using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.Persistence;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.CouponSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.IdentitySeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Seeders.RestaurantSeeders;
 using YummyZoom.Infrastructure.Persistence.EfCore.Interceptors;
@@ -88,10 +89,19 @@ public static class DependencyInjection
         // Seeding framework
         builder.Services.Configure<SeedingConfiguration>(builder.Configuration.GetSection(SeedingConfiguration.SectionName));
         builder.Services.AddScoped<SeedingOrchestrator>();
+        
+        // Identity seeders
         builder.Services.AddScoped<ISeeder, RoleSeeder>();
         builder.Services.AddScoped<ISeeder, UserSeeder>();
+        
+        // Restaurant seeders
         builder.Services.AddScoped<ISeeder, TagSeeder>();
         builder.Services.AddScoped<ISeeder, RestaurantBundleSeeder>();
+        
+        // Business flow seeders
+        builder.Services.AddScoped<ISeeder, CouponBundleSeeder>();
+        // builder.Services.AddScoped<ISeeder, OrderSeeder>();
+        // builder.Services.AddScoped<ISeeder, ReviewSeeder>();
 
         // Register the connection factory for Dapper queries
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
