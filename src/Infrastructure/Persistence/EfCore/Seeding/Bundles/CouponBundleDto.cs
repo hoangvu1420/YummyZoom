@@ -3,19 +3,31 @@ using System.Text.Json.Serialization;
 namespace YummyZoom.Infrastructure.Persistence.EfCore.Seeding.Bundles;
 
 /// <summary>
-/// Represents a coupon bundle loaded from a JSON file for seeding purposes.
-/// File naming convention: *.coupon.json
+/// Represents a restaurant's coupon bundle loaded from a JSON file for seeding purposes.
+/// File naming convention: {restaurant-slug}.coupon.json
 /// </summary>
 public sealed class CouponBundle
 {
     /// <summary>
-    /// The slug of the restaurant this coupon belongs to.
+    /// The slug of the restaurant these coupons belong to.
     /// Used to resolve the restaurant ID during seeding.
-    /// Example: "pho-ha-noi", "bun-cha-huong-lien"
+    /// Example: "pho-gia-truyen-bat-dan", "bun-cha-huong-lien"
     /// </summary>
     [JsonPropertyName("restaurantSlug")]
     public string RestaurantSlug { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Array of coupons for this restaurant.
+    /// </summary>
+    [JsonPropertyName("coupons")]
+    public List<CouponData> Coupons { get; set; } = new();
+}
+
+/// <summary>
+/// Represents a single coupon's data within a bundle.
+/// </summary>
+public sealed class CouponData
+{
     /// <summary>
     /// Unique coupon code that customers will enter.
     /// Will be normalized to uppercase during creation.
@@ -144,3 +156,4 @@ public sealed class CouponBundle
     [JsonPropertyName("isEnabled")]
     public bool IsEnabled { get; set; } = true;
 }
+

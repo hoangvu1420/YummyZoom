@@ -76,8 +76,8 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
     {
         try
         {
-            // Use atomic get-or-create - no race condition possible
-            var restaurantAccount = await _restaurantAccountRepository.GetOrCreateAsync(order.RestaurantId, ct);
+            // Use atomic get-or-create with the order's currency to ensure currency consistency
+            var restaurantAccount = await _restaurantAccountRepository.GetOrCreateAsync(order.RestaurantId, order.TotalAmount.Currency, ct);
 
             // Record revenue (gross amount for now; platform fee TODO)
             var revenueResult = restaurantAccount.RecordRevenue(order.TotalAmount, order.Id);

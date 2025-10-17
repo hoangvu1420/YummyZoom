@@ -317,6 +317,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
                 PaymentTransactionType.Payment,
                 txAmount,
                 currentTimestamp,
+                paymentMethodDisplay: paymentMethodType.ToString(),
                 paymentGatewayReferenceId: paymentGatewayReferenceId
             );
 

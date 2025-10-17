@@ -45,8 +45,8 @@ public class CouponBundleSeeder : ISeeder
 
         foreach (var (fileName, bundle) in bundles)
         {
-            logger.LogInformation("Processing coupon bundle: {FileName}", fileName);
-
+            var bundleStats = new SeedingStats();
+            
             // Validate bundle
             var validation = CouponBundleValidation.Validate(bundle);
             if (!validation.IsValid)
@@ -55,12 +55,25 @@ public class CouponBundleSeeder : ISeeder
                 {
                     logger.LogWarning("Bundle {File}: {Error}", fileName, error);
                 }
-                stats.Skipped++;
+                stats.Skipped += bundle.Coupons.Count;
                 continue;
             }
 
-            // Process the bundle
-            await ProcessBundleAsync(context, bundle, options, logger, stats, cancellationToken);
+            // Process each coupon in the bundle
+            foreach (var coupon in bundle.Coupons)
+            {
+                await ProcessCouponAsync(context, bundle.RestaurantSlug, coupon, options, logger, bundleStats, cancellationToken);
+            }
+            
+            // Log bundle summary
+            logger.LogInformation(
+                "Processed coupon bundle '{Slug}': {Created} created, {Updated} updated, {Skipped} skipped",
+                bundle.RestaurantSlug, bundleStats.Created, bundleStats.Updated, bundleStats.Skipped);
+            
+            // Add to total stats
+            stats.Created += bundleStats.Created;
+            stats.Updated += bundleStats.Updated;
+            stats.Skipped += bundleStats.Skipped;
         }
 
         // Log summary
@@ -71,9 +84,10 @@ public class CouponBundleSeeder : ISeeder
         return Result.Success();
     }
 
-    private async Task ProcessBundleAsync(
+    private async Task ProcessCouponAsync(
         SeedingContext context,
-        CouponBundle bundle,
+        string restaurantSlug,
+        CouponData coupon,
         CouponBundleOptions options,
         ILogger logger,
         SeedingStats stats,
@@ -85,7 +99,7 @@ public class CouponBundleSeeder : ISeeder
         // Try to get from slug map first
         if (context.SharedData.TryGetValue("RestaurantSlugMap", out var slugMapObj) 
             && slugMapObj is Dictionary<string, Guid> slugMap
-            && slugMap.TryGetValue(bundle.RestaurantSlug, out var restaurantGuid))
+            && slugMap.TryGetValue(restaurantSlug, out var restaurantGuid))
         {
             restaurantId = RestaurantId.Create(restaurantGuid);
         }
@@ -95,12 +109,12 @@ public class CouponBundleSeeder : ISeeder
         {
             var restaurant = await context.DbContext.Restaurants
                 .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.Name.ToLower() == bundle.RestaurantSlug.ToLower(), cancellationToken);
+                .FirstOrDefaultAsync(r => r.Name.ToLower() == restaurantSlug.ToLower(), cancellationToken);
 
             if (restaurant is null)
             {
                 logger.LogWarning("Restaurant with slug/name '{Slug}' not found. Skipping coupon '{Code}'", 
-                    bundle.RestaurantSlug, bundle.Code);
+                    restaurantSlug, coupon.Code);
                 stats.Skipped++;
                 return;
             }
@@ -109,7 +123,7 @@ public class CouponBundleSeeder : ISeeder
         }
 
         // Check if coupon already exists
-        var normalizedCode = bundle.Code.ToUpperInvariant();
+        var normalizedCode = coupon.Code.ToUpperInvariant();
         var existing = await context.DbContext.Coupons
             .FirstOrDefaultAsync(c => c.RestaurantId == restaurantId && c.Code == normalizedCode, cancellationToken);
 
@@ -118,18 +132,14 @@ public class CouponBundleSeeder : ISeeder
             if (options.OverwriteExisting)
             {
                 // Update description if option is enabled
-                var updateResult = existing.UpdateDescription(bundle.Description);
+                var updateResult = existing.UpdateDescription(coupon.Description);
                 if (updateResult.IsSuccess)
                 {
                     stats.Updated++;
-                    logger.LogInformation("Updated coupon '{Code}' for restaurant slug '{Slug}'", 
-                        bundle.Code, bundle.RestaurantSlug);
                 }
             }
             else
             {
-                logger.LogInformation("Coupon '{Code}' already exists for restaurant slug '{Slug}'. Skipping.", 
-                    bundle.Code, bundle.RestaurantSlug);
                 stats.Skipped++;
             }
             return;
@@ -137,57 +147,55 @@ public class CouponBundleSeeder : ISeeder
 
         if (options.ReportOnly)
         {
-            logger.LogInformation("[ReportOnly] Would create coupon '{Code}' for restaurant slug '{Slug}'", 
-                bundle.Code, bundle.RestaurantSlug);
             stats.Created++;
             return;
         }
 
         // Build CouponValue
-        var valueResult = await BuildCouponValueAsync(context, bundle, restaurantId, logger, cancellationToken);
+        var valueResult = await BuildCouponValueAsync(context, coupon, restaurantId, logger, cancellationToken);
         if (valueResult.IsFailure)
         {
             logger.LogWarning("Failed to build coupon value for '{Code}': {Error}", 
-                bundle.Code, valueResult.Error.Description);
+                coupon.Code, valueResult.Error.Description);
             stats.Skipped++;
             return;
         }
 
         // Build AppliesTo
-        var appliesToResult = await BuildAppliesToAsync(context, bundle, restaurantId, logger, cancellationToken);
+        var appliesToResult = await BuildAppliesToAsync(context, coupon, restaurantId, logger, cancellationToken);
         if (appliesToResult.IsFailure)
         {
             logger.LogWarning("Failed to build AppliesTo for '{Code}': {Error}", 
-                bundle.Code, appliesToResult.Error.Description);
+                coupon.Code, appliesToResult.Error.Description);
             stats.Skipped++;
             return;
         }
 
         // Build optional minimum order amount
         Money? minOrderAmount = null;
-        if (bundle.MinOrderAmount.HasValue)
+        if (coupon.MinOrderAmount.HasValue)
         {
-            minOrderAmount = new Money(bundle.MinOrderAmount.Value, bundle.MinOrderCurrency!);
+            minOrderAmount = new Money(coupon.MinOrderAmount.Value, coupon.MinOrderCurrency!);
         }
 
         // Create coupon
         var couponResult = Coupon.Create(
             restaurantId,
-            bundle.Code,
-            bundle.Description,
+            coupon.Code,
+            coupon.Description,
             valueResult.Value,
             appliesToResult.Value,
-            bundle.ValidityStartDate,
-            bundle.ValidityEndDate,
+            coupon.ValidityStartDate,
+            coupon.ValidityEndDate,
             minOrderAmount,
-            bundle.TotalUsageLimit,
-            bundle.UsageLimitPerUser,
-            bundle.IsEnabled);
+            coupon.TotalUsageLimit,
+            coupon.UsageLimitPerUser,
+            coupon.IsEnabled);
 
         if (couponResult.IsFailure)
         {
             logger.LogWarning("Failed to create coupon '{Code}': {Error}", 
-                bundle.Code, couponResult.Error.Description);
+                coupon.Code, couponResult.Error.Description);
             stats.Skipped++;
             return;
         }
@@ -198,29 +206,27 @@ public class CouponBundleSeeder : ISeeder
         await context.DbContext.SaveChangesAsync(cancellationToken);
 
         stats.Created++;
-        logger.LogInformation("Created coupon '{Code}' for restaurant slug '{Slug}'", 
-            bundle.Code, bundle.RestaurantSlug);
     }
 
     private async Task<Result<CouponValue>> BuildCouponValueAsync(
         SeedingContext context,
-        CouponBundle bundle,
+        CouponData coupon,
         RestaurantId restaurantId,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        return bundle.ValueType.ToLowerInvariant() switch
+        return coupon.ValueType.ToLowerInvariant() switch
         {
-            "percentage" => CouponValue.CreatePercentage(bundle.Percentage!.Value),
-            "fixedamount" => CouponValue.CreateFixedAmount(new Money(bundle.FixedAmount!.Value, bundle.FixedCurrency!)),
-            "freeitem" => await BuildFreeItemValueAsync(context, bundle, restaurantId, logger, cancellationToken),
-            _ => Result.Failure<CouponValue>(Error.Validation("Coupon.InvalidValueType", $"Unknown value type: {bundle.ValueType}"))
+            "percentage" => CouponValue.CreatePercentage(coupon.Percentage!.Value),
+            "fixedamount" => CouponValue.CreateFixedAmount(new Money(coupon.FixedAmount!.Value, coupon.FixedCurrency!)),
+            "freeitem" => await BuildFreeItemValueAsync(context, coupon, restaurantId, logger, cancellationToken),
+            _ => Result.Failure<CouponValue>(Error.Validation("Coupon.InvalidValueType", $"Unknown value type: {coupon.ValueType}"))
         };
     }
 
     private async Task<Result<CouponValue>> BuildFreeItemValueAsync(
         SeedingContext context,
-        CouponBundle bundle,
+        CouponData coupon,
         RestaurantId restaurantId,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -238,7 +244,7 @@ public class CouponBundleSeeder : ISeeder
                 combined => combined.category.MenuId,
                 menu => menu.Id,
                 (combined, menu) => new { combined.item, menu })
-            .Where(x => x.menu.RestaurantId == restaurantId && x.item.Name == bundle.FreeItemName)
+            .Where(x => x.menu.RestaurantId == restaurantId && x.item.Name == coupon.FreeItemName)
             .Select(x => x.item)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -246,7 +252,7 @@ public class CouponBundleSeeder : ISeeder
         {
             return Result.Failure<CouponValue>(Error.NotFound(
                 "Coupon.FreeItemNotFound",
-                $"Menu item '{bundle.FreeItemName}' not found in restaurant"));
+                $"Menu item '{coupon.FreeItemName}' not found in restaurant"));
         }
 
         return CouponValue.CreateFreeItem(menuItem.Id);
@@ -254,18 +260,18 @@ public class CouponBundleSeeder : ISeeder
 
     private async Task<Result<AppliesTo>> BuildAppliesToAsync(
         SeedingContext context,
-        CouponBundle bundle,
+        CouponData coupon,
         RestaurantId restaurantId,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        switch (bundle.Scope.ToLowerInvariant())
+        switch (coupon.Scope.ToLowerInvariant())
         {
             case "wholeorder":
                 return AppliesTo.CreateForWholeOrder();
 
             case "specificitems":
-                var itemIds = await ResolveMenuItemIdsAsync(context, bundle.ItemNames!, restaurantId, logger, cancellationToken);
+                var itemIds = await ResolveMenuItemIdsAsync(context, coupon.ItemNames!, restaurantId, logger, cancellationToken);
                 if (itemIds.Count == 0)
                 {
                     return Result.Failure<AppliesTo>(Error.NotFound(
@@ -275,7 +281,7 @@ public class CouponBundleSeeder : ISeeder
                 return AppliesTo.CreateForSpecificItems(itemIds);
 
             case "specificcategories":
-                var categoryIds = await ResolveMenuCategoryIdsAsync(context, bundle.CategoryNames!, restaurantId, logger, cancellationToken);
+                var categoryIds = await ResolveMenuCategoryIdsAsync(context, coupon.CategoryNames!, restaurantId, logger, cancellationToken);
                 if (categoryIds.Count == 0)
                 {
                     return Result.Failure<AppliesTo>(Error.NotFound(
@@ -287,7 +293,7 @@ public class CouponBundleSeeder : ISeeder
             default:
                 return Result.Failure<AppliesTo>(Error.Validation(
                     "Coupon.InvalidScope",
-                    $"Unknown scope: {bundle.Scope}"));
+                    $"Unknown scope: {coupon.Scope}"));
         }
     }
 
@@ -370,8 +376,6 @@ public class CouponBundleSeeder : ISeeder
                 .Where(n => options.CouponGlobs.Any(glob => MatchesGlob(Path.GetFileName(n), glob)))
                 .ToArray();
         }
-
-        logger.LogInformation("Found {Count} coupon bundle files", resourceNames.Length);
 
         foreach (var resourceName in resourceNames)
         {

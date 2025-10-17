@@ -8,21 +8,18 @@ public sealed class OrderSeedingOptions
     /// <summary>
     /// Number of orders to create per restaurant.
     /// </summary>
-    public int OrdersPerRestaurant { get; set; } = 10;
+    public int OrdersPerRestaurant { get; set; } = 30;
 
     /// <summary>
     /// Distribution of order statuses as percentages (must sum to 100).
     /// Key is the OrderStatus name, value is the percentage (0-100).
-    /// Example: { "Delivered": 60, "Accepted": 10, "Preparing": 10, "ReadyForDelivery": 5, "Cancelled": 10, "Rejected": 5 }
+    /// Example: { "Delivered": 70, "Cancelled": 20, "Rejected": 10 }
     /// </summary>
     public Dictionary<string, int> StatusDistribution { get; set; } = new()
     {
-        { "Delivered", 60 },
-        { "Accepted", 10 },
-        { "Preparing", 10 },
-        { "ReadyForDelivery", 5 },
-        { "Cancelled", 10 },
-        { "Rejected", 5 }
+        { "Delivered", 70 },
+        { "Cancelled", 20 },
+        { "Rejected", 10 }
     };
 
     /// <summary>
@@ -32,8 +29,9 @@ public sealed class OrderSeedingOptions
 
     /// <summary>
     /// Percentage of orders that should use online payment vs Cash on Delivery (0-100).
+    /// Set to 0 to ensure all seeded orders use COD for simplicity and proper status transitions.
     /// </summary>
-    public decimal OnlinePaymentPercentage { get; set; } = 70;
+    public decimal OnlinePaymentPercentage { get; set; } = 0;
 
     /// <summary>
     /// When true, generates realistic timestamps spread over OrderHistoryDays.

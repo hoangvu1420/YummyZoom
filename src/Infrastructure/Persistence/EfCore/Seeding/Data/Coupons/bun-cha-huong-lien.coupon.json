@@ -1,0 +1,80 @@
+{
+  "restaurantSlug": "bun-cha-huong-lien",
+  "coupons": [
+    {
+      "code": "FREESHIP30K",
+      "description": "Miễn phí vận chuyển - Giảm cố định 30.000đ phí ship",
+      "valueType": "FixedAmount",
+      "fixedAmount": 30000,
+      "fixedCurrency": "VND",
+      "scope": "WholeOrder",
+      "validityStartDate": "2024-01-01T00:00:00Z",
+      "validityEndDate": "2025-12-31T23:59:59Z",
+      "minOrderAmount": 150000,
+      "minOrderCurrency": "VND",
+      "totalUsageLimit": 1000,
+      "usageLimitPerUser": 3,
+      "isEnabled": true
+    },
+    {
+      "code": "FREETRA",
+      "description": "Tặng 1 ly trà đá miễn phí khi đặt combo hoặc bún chả",
+      "valueType": "FreeItem",
+      "freeItemName": "Trà đá",
+      "scope": "SpecificCategories",
+      "categoryNames": ["Món chính"],
+      "validityStartDate": "2024-06-01T00:00:00Z",
+      "validityEndDate": "2024-12-31T23:59:59Z",
+      "minOrderAmount": null,
+      "minOrderCurrency": null,
+      "totalUsageLimit": null,
+      "usageLimitPerUser": null,
+      "isEnabled": true
+    },
+    {
+      "code": "COMBO15",
+      "description": "Giảm 15% cho Combo Obama đặc biệt",
+      "valueType": "Percentage",
+      "percentage": 15,
+      "scope": "SpecificItems",
+      "itemNames": ["Combo Obama"],
+      "validityStartDate": "2024-01-01T00:00:00Z",
+      "validityEndDate": "2025-12-31T23:59:59Z",
+      "minOrderAmount": 80000,
+      "minOrderCurrency": "VND",
+      "totalUsageLimit": 300,
+      "usageLimitPerUser": 5,
+      "isEnabled": true
+    },
+    {
+      "code": "MORNING10",
+      "description": "Giảm 10% cho các món đồ uống - Áp dụng cả ngày",
+      "valueType": "Percentage",
+      "percentage": 10,
+      "scope": "SpecificCategories",
+      "categoryNames": ["Đồ uống & Khác"],
+      "validityStartDate": "2024-01-01T00:00:00Z",
+      "validityEndDate": "2025-12-31T23:59:59Z",
+      "minOrderAmount": 50000,
+      "minOrderCurrency": "VND",
+      "totalUsageLimit": null,
+      "usageLimitPerUser": 10,
+      "isEnabled": true
+    },
+    {
+      "code": "FREENEM",
+      "description": "Tặng 1 phần nem hải sản khi đặt Combo Obama hoặc bún chả đặc biệt",
+      "valueType": "FreeItem",
+      "freeItemName": "Nem hải sản",
+      "scope": "SpecificItems",
+      "itemNames": ["Combo Obama", "The Special Bún Chả"],
+      "validityStartDate": "2024-01-01T00:00:00Z",
+      "validityEndDate": "2025-12-31T23:59:59Z",
+      "minOrderAmount": null,
+      "minOrderCurrency": null,
+      "totalUsageLimit": 500,
+      "usageLimitPerUser": 1,
+      "isEnabled": true
+    }
+  ]
+}

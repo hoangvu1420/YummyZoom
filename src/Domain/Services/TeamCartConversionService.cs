@@ -164,6 +164,7 @@ public sealed class TeamCartConversionService
                 PaymentTransactionType.Payment,
                 adjustedAmount,
                 DateTime.UtcNow,
+                paymentMethodDisplay: paymentMethodType.ToString(), 
                 paymentGatewayReferenceId: memberPayment.OnlineTransactionId,
                 paidByUserId: memberPayment.UserId);
 
