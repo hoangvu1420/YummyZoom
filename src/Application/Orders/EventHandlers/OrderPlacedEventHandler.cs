@@ -36,7 +36,7 @@ public sealed class OrderPlacedEventHandler : IdempotentNotificationHandler<Orde
             return;
         }
 
-        _logger.LogInformation("Handling OrderPlaced (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderPlaced (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -58,7 +58,5 @@ public sealed class OrderPlacedEventHandler : IdempotentNotificationHandler<Orde
             _logger.LogError(ex, "Failed broadcasting OrderPlaced (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderPlaced (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

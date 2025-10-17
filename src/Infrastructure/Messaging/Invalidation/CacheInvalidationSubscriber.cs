@@ -54,7 +54,7 @@ public sealed class CacheInvalidationSubscriber : BackgroundService
                     }
                 }
 
-                _logger.LogInformation("Processed cache invalidation: removed keys={Keys}, invalidated tags={Tags}", keysCount, tagsCount);
+                _logger.LogDebug("Processed cache invalidation: removed keys={Keys}, invalidated tags={Tags}", keysCount, tagsCount);
             }
             catch (Exception ex)
             {

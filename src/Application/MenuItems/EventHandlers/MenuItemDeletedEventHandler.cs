@@ -19,6 +19,9 @@ public sealed class MenuItemDeletedEventHandler : MenuItemProjectorBase<MenuItem
 
     protected override async Task HandleCore(MenuItemDeleted notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemDeleted (EventId={EventId}, MenuItemId={MenuItemId})",
+            notification.EventId, notification.MenuItemId.Value);
+
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null) return;
 

@@ -24,7 +24,7 @@ public sealed class MenuItemCreatedEventHandler : MenuItemProjectorBase<MenuItem
 
     protected override async Task HandleCore(MenuItemCreated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling MenuItemCreated (EventId={EventId}, MenuItemId={MenuItemId}, RestaurantId={RestaurantId})",
+        _logger.LogDebug("Handling MenuItemCreated (EventId={EventId}, MenuItemId={MenuItemId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.MenuItemId.Value, notification.RestaurantId.Value);
 
         await RebuildForRestaurantAsync(notification.RestaurantId.Value, ct);

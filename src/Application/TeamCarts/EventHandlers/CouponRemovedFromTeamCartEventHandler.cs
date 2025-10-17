@@ -31,7 +31,7 @@ public sealed class CouponRemovedFromTeamCartEventHandler : IdempotentNotificati
     protected override async Task HandleCore(CouponRemovedFromTeamCart notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling CouponRemovedFromTeamCart (EventId={EventId}, CartId={CartId})",
+        _logger.LogDebug("Handling CouponRemovedFromTeamCart (EventId={EventId}, CartId={CartId})",
             notification.EventId, cartId.Value);
 
         try
@@ -45,9 +45,6 @@ public sealed class CouponRemovedFromTeamCartEventHandler : IdempotentNotificati
                 cartId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled CouponRemovedFromTeamCart (EventId={EventId}, CartId={CartId})",
-            notification.EventId, cartId.Value);
     }
 }
 

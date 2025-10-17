@@ -27,7 +27,7 @@ public sealed class TeamCartReadyForConfirmationEventHandler : IdempotentNotific
     protected override async Task HandleCore(TeamCartReadyForConfirmation notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartReadyForConfirmation (EventId={EventId}, CartId={CartId})",
+        _logger.LogDebug("Handling TeamCartReadyForConfirmation (EventId={EventId}, CartId={CartId})",
             notification.EventId, cartId.Value);
 
         try

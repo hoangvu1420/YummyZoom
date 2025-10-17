@@ -186,7 +186,7 @@ public sealed class SearchIndexMaintenanceHostedService : BackgroundService
                     Interlocked.Increment(ref success);
                     if (_options.LogEveryN > 0 && n % _options.LogEveryN == 0)
                     {
-                        _logger.LogInformation("SearchIndexMaintenance: processed {Count} restaurants", n);
+                        _logger.LogDebug("SearchIndexMaintenance: processed {Count} restaurants", n);
                     }
                 }
                 catch (Exception ex)
@@ -228,7 +228,7 @@ public sealed class SearchIndexMaintenanceHostedService : BackgroundService
                     Interlocked.Increment(ref success);
                     if (_options.LogEveryN > 0 && n % _options.LogEveryN == 0)
                     {
-                        _logger.LogInformation("SearchIndexMaintenance: processed {Count} menu items", n);
+                        _logger.LogDebug("SearchIndexMaintenance: processed {Count} menu items", n);
                     }
                 }
                 catch (Exception ex)

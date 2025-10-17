@@ -19,6 +19,8 @@ public sealed class MenuItemDietaryTagsUpdatedEventHandler : MenuItemProjectorBa
 
     protected override async Task HandleCore(MenuItemDietaryTagsUpdated notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemDietaryTagsUpdated (EventId={EventId}, MenuItemId={MenuItemId})",
+            notification.EventId, notification.MenuItemId.Value);
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null) return;
 

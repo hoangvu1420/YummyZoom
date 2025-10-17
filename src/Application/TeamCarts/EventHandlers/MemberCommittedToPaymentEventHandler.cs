@@ -30,7 +30,7 @@ public sealed class MemberCommittedToPaymentEventHandler : IdempotentNotificatio
         var userId = notification.UserId;
         var amount = notification.Amount;
 
-        _logger.LogInformation("Handling MemberCommittedToPayment (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency})",
+        _logger.LogDebug("Handling MemberCommittedToPayment (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency})",
             notification.EventId, cartId.Value, userId.Value, amount.Amount, amount.Currency);
 
         try

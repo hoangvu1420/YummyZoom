@@ -30,7 +30,7 @@ public sealed class OnlinePaymentFailedEventHandler : IdempotentNotificationHand
         var userId = notification.UserId;
         var amount = notification.Amount;
 
-        _logger.LogInformation("Handling OnlinePaymentFailed (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency})",
+        _logger.LogDebug("Handling OnlinePaymentFailed (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency})",
             notification.EventId, cartId.Value, userId.Value, amount.Amount, amount.Currency);
 
         try

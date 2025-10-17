@@ -34,7 +34,7 @@ public sealed class OrderRejectedEventHandler : IdempotentNotificationHandler<Or
 
     protected override async Task HandleCore(OrderRejected notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderRejected (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderRejected (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -56,7 +56,5 @@ public sealed class OrderRejectedEventHandler : IdempotentNotificationHandler<Or
             _logger.LogError(ex, "Failed broadcasting OrderRejected (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderRejected (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

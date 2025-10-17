@@ -31,7 +31,7 @@ public sealed class OnlinePaymentSucceededEventHandler : IdempotentNotificationH
         var amount = notification.Amount;
         var transactionId = notification.TransactionId;
 
-        _logger.LogInformation("Handling OnlinePaymentSucceeded (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency}, Tx={Tx})",
+        _logger.LogDebug("Handling OnlinePaymentSucceeded (EventId={EventId}, CartId={CartId}, UserId={UserId}, Amount={Amount} {Currency}, Tx={Tx})",
             notification.EventId, cartId.Value, userId.Value, amount.Amount, amount.Currency, transactionId);
 
         try

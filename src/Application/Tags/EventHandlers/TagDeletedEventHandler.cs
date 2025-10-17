@@ -20,7 +20,7 @@ public sealed class TagDeletedEventHandler : TagProjectorBase<TagDeleted>
 
     protected override async Task HandleCore(TagDeleted notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling TagDeleted (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
+        _logger.LogDebug("Handling TagDeleted (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
 
         // Even if tag is deleted, items may still reference its Guid in DietaryTagIds.
         // Rebuild menus for impacted restaurants so tagLegend reflects removal.

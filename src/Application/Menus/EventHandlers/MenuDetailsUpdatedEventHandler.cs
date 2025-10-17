@@ -29,7 +29,7 @@ public sealed class MenuDetailsUpdatedEventHandler : IdempotentNotificationHandl
 
     protected override async Task HandleCore(MenuDetailsUpdated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling MenuDetailsUpdated (EventId={EventId}, MenuId={MenuId}, RestaurantId={RestaurantId})",
+        _logger.LogDebug("Handling MenuDetailsUpdated (EventId={EventId}, MenuId={MenuId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.MenuId.Value, notification.RestaurantId.Value);
 
         await RebuildForRestaurantAsync(notification.RestaurantId.Value, ct);

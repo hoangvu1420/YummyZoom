@@ -79,6 +79,7 @@ public static class DependencyInjection
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(connectionString, npgsql => npgsql.UseNetTopologySuite());
+            options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
         });
 
         builder.EnrichNpgsqlDbContext<ApplicationDbContext>();

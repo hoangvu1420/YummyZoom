@@ -20,7 +20,7 @@ public sealed class TagUpdatedEventHandler : TagProjectorBase<TagUpdated>
 
     protected override async Task HandleCore(TagUpdated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling TagUpdated (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
+        _logger.LogDebug("Handling TagUpdated (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
 
         var restaurantIds = await FindRestaurantsByTagAsync(notification.TagId, ct);
         foreach (var rId in restaurantIds)

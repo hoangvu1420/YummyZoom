@@ -81,6 +81,6 @@ public sealed class OrderDeliveredMenuItemSalesSummaryHandler : IdempotentNotifi
                 ct);
         }
 
-        _logger.LogInformation("Updated MenuItemSalesSummaries for delivered order {OrderId}", order.Id.Value);
+        _logger.LogDebug("Updated MenuItemSalesSummaries for delivered order {OrderId}", order.Id.Value);
     }
 }

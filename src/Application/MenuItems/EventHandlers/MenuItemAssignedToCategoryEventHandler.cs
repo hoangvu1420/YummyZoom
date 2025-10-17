@@ -19,6 +19,9 @@ public sealed class MenuItemAssignedToCategoryEventHandler : MenuItemProjectorBa
 
     protected override async Task HandleCore(MenuItemAssignedToCategory notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemAssignedToCategory (EventId={EventId}, MenuItemId={MenuItemId}, CategoryId={CategoryId})",
+            notification.EventId, notification.MenuItemId.Value, notification.NewCategoryId.Value);
+            
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null) return;
 

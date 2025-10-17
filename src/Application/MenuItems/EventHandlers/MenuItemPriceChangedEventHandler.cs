@@ -19,6 +19,9 @@ public sealed class MenuItemPriceChangedEventHandler : MenuItemProjectorBase<Men
 
     protected override async Task HandleCore(MenuItemPriceChanged notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemPriceChanged (EventId={EventId}, MenuItemId={MenuItemId}, NewPrice={NewPrice})",
+            notification.EventId, notification.MenuItemId.Value, notification.NewPrice);
+            
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null) return;
 

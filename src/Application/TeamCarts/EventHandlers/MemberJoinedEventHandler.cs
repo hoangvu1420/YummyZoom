@@ -33,7 +33,7 @@ public sealed class MemberJoinedEventHandler : IdempotentNotificationHandler<Mem
     protected override async Task HandleCore(MemberJoined notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling MemberJoined (EventId={EventId}, CartId={CartId}, UserId={UserId})", notification.EventId, cartId.Value, notification.UserId.Value);
+        _logger.LogDebug("Handling MemberJoined (EventId={EventId}, CartId={CartId}, UserId={UserId})", notification.EventId, cartId.Value, notification.UserId.Value);
 
         var member = new TeamCartViewModel.Member
         {
@@ -55,8 +55,6 @@ public sealed class MemberJoinedEventHandler : IdempotentNotificationHandler<Mem
             _logger.LogError(ex, "Failed to add member to VM or notify (CartId={CartId}, UserId={UserId}, EventId={EventId})", cartId.Value, notification.UserId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled MemberJoined (EventId={EventId}, CartId={CartId}, UserId={UserId})", notification.EventId, cartId.Value, notification.UserId.Value);
     }
 }
 

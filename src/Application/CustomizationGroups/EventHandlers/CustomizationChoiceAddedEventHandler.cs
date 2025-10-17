@@ -22,7 +22,7 @@ public sealed class CustomizationChoiceAddedEventHandler : CustomizationGroupPro
         var restaurantId = await ResolveRestaurantIdAsync(notification.CustomizationGroupId, ct);
         if (restaurantId is null) return;
 
-        _logger.LogInformation("Handling CustomizationChoiceAdded (EventId={EventId}, GroupId={GroupId}, ChoiceId={ChoiceId}, RestaurantId={RestaurantId})",
+        _logger.LogDebug("Handling CustomizationChoiceAdded (EventId={EventId}, GroupId={GroupId}, ChoiceId={ChoiceId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.CustomizationGroupId.Value, notification.ChoiceId.Value, restaurantId.Value);
 
         await RebuildForRestaurantAsync(restaurantId.Value, ct);

@@ -25,7 +25,7 @@ public sealed class RedisInvalidationPublisher : ICacheInvalidationPublisher
             var payload = JsonSerializer.Serialize(message, JsonOptions);
             var sub = _redis.GetSubscriber();
             await sub.PublishAsync(RedisChannel.Literal(DefaultChannel), payload);
-            _logger.LogInformation("Published cache invalidation: keys={KeysCount}, tags={TagsCount}", message.Keys?.Count ?? 0, message.Tags?.Count ?? 0);
+            _logger.LogDebug("Published cache invalidation: keys={KeysCount}, tags={TagsCount}", message.Keys?.Count ?? 0, message.Tags?.Count ?? 0);
         }
         catch (Exception ex)
         {

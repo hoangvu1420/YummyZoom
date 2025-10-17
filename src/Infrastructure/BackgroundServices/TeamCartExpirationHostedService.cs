@@ -36,7 +36,7 @@ public sealed class TeamCartExpirationHostedService : BackgroundService
             return;
         }
 
-        _logger.LogInformation("TeamCartExpirationHostedService started: cadence={Cadence}, batch={Batch}, grace={Grace}",
+        _logger.LogDebug("TeamCartExpirationHostedService started: cadence={Cadence}, batch={Batch}, grace={Grace}",
             options.Cadence, options.BatchSize, options.GraceWindow);
 
         while (!stoppingToken.IsCancellationRequested)

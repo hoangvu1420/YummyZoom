@@ -95,9 +95,7 @@ public class OrderSeeder : ISeeder
             var totalOrdersCreated = 0;
 
             foreach (var restaurant in dependencies.Restaurants)
-            {
-                _logger.LogInformation("[Order] Creating orders for restaurant: {RestaurantName}", restaurant.Name);
-                
+            {   
                 var restaurantOrders = await CreateOrdersForRestaurantAsync(
                     restaurant, 
                     dependencies, 
@@ -136,13 +134,16 @@ public class OrderSeeder : ISeeder
         // Load domain users directly from DbContext for seeding
         // Note: Take without OrderBy is acceptable for seeding as we just need any N records
         var activeUsers = await _dbContext.DomainUsers
-            .Take(100) // Limit for seeding
-            .OrderBy(u => u.Created) // Add OrderBy to avoid unpredictable results with Take
+            // .Take(100) // Limit for seeding
+            .OrderBy(u => u.Created) 
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
         // Load restaurants directly from DbContext for seeding
         var activeRestaurants = await _dbContext.Restaurants
-            .Take(20) // Limit for seeding
+            // .Take(20) // Limit for seeding
+            .AsSplitQuery()
+            .OrderBy(r => r.Created) 
             .ToListAsync(cancellationToken);
 
         // Filter restaurants that have menu items
@@ -160,7 +161,8 @@ public class OrderSeeder : ISeeder
         // Load coupons directly from DbContext for seeding
         var activeCoupons = await _dbContext.Coupons
             .Where(c => c.IsEnabled)
-            .Take(50) // Limit for seeding
+            // .Take(50) // Limit for seeding
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation("[Order] Loaded {UserCount} users, {RestaurantCount} restaurants with menu items, {CouponCount} coupons", 

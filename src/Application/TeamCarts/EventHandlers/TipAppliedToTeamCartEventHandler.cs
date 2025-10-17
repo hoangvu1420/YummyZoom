@@ -33,7 +33,7 @@ public sealed class TipAppliedToTeamCartEventHandler : IdempotentNotificationHan
         var cartId = notification.TeamCartId;
         var tip = notification.TipAmount;
 
-        _logger.LogInformation("Handling TipAppliedToTeamCart (EventId={EventId}, CartId={CartId}, Tip={Tip} {Currency})",
+        _logger.LogDebug("Handling TipAppliedToTeamCart (EventId={EventId}, CartId={CartId}, Tip={Tip} {Currency})",
             notification.EventId, cartId.Value, tip.Amount, tip.Currency);
 
         try
@@ -47,9 +47,6 @@ public sealed class TipAppliedToTeamCartEventHandler : IdempotentNotificationHan
                 cartId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled TipAppliedToTeamCart (EventId={EventId}, CartId={CartId})",
-            notification.EventId, cartId.Value);
     }
 }
 

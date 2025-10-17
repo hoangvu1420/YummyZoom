@@ -34,7 +34,7 @@ public sealed class OrderAcceptedEventHandler : IdempotentNotificationHandler<Or
 
     protected override async Task HandleCore(OrderAccepted notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderAccepted (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderAccepted (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -56,7 +56,5 @@ public sealed class OrderAcceptedEventHandler : IdempotentNotificationHandler<Or
             _logger.LogError(ex, "Failed broadcasting OrderAccepted (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderAccepted (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

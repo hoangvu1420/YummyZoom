@@ -33,7 +33,7 @@ public sealed class OrderPreparingEventHandler : IdempotentNotificationHandler<O
 
     protected override async Task HandleCore(OrderPreparing notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderPreparing (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderPreparing (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -55,7 +55,5 @@ public sealed class OrderPreparingEventHandler : IdempotentNotificationHandler<O
             _logger.LogError(ex, "Failed broadcasting OrderPreparing (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderPreparing (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

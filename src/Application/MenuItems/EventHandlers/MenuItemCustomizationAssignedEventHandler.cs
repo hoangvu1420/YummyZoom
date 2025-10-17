@@ -19,6 +19,9 @@ public sealed class MenuItemCustomizationAssignedEventHandler : MenuItemProjecto
 
     protected override async Task HandleCore(MenuItemCustomizationAssigned notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemCustomizationAssigned (EventId={EventId}, MenuItemId={MenuItemId}, CustomizationGroupId={CustomizationGroupId})",
+            notification.EventId, notification.MenuItemId.Value, notification.CustomizationGroupId.Value);
+
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null) return;
 

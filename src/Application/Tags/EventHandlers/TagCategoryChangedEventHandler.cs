@@ -20,7 +20,7 @@ public sealed class TagCategoryChangedEventHandler : TagProjectorBase<TagCategor
 
     protected override async Task HandleCore(TagCategoryChanged notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling TagCategoryChanged (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
+        _logger.LogDebug("Handling TagCategoryChanged (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
 
         var restaurantIds = await FindRestaurantsByTagAsync(notification.TagId, ct);
         foreach (var rId in restaurantIds)

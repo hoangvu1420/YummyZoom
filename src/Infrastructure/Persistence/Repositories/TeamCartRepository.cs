@@ -44,6 +44,7 @@ public sealed class TeamCartRepository : ITeamCartRepository
                         && c.ExpiresAt <= cutoffUtc)
             .OrderBy(c => c.ExpiresAt)
             .Take(take)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
     }
 }

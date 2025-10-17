@@ -36,7 +36,7 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
     protected override async Task HandleCore(ItemAddedToTeamCart notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling ItemAddedToTeamCart (EventId={EventId}, CartId={CartId}, ItemId={ItemId})", notification.EventId, cartId.Value, notification.TeamCartItemId.Value);
+        _logger.LogDebug("Handling ItemAddedToTeamCart (EventId={EventId}, CartId={CartId}, ItemId={ItemId})", notification.EventId, cartId.Value, notification.TeamCartItemId.Value);
 
         // Load aggregate with items to map snapshot fields
         var cart = await _teamCartRepository.GetByIdAsync(cartId, ct);
@@ -79,8 +79,6 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
             _logger.LogError(ex, "Failed to add item to VM or notify (CartId={CartId}, ItemId={ItemId}, EventId={EventId})", cartId.Value, notification.TeamCartItemId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled ItemAddedToTeamCart (EventId={EventId}, CartId={CartId}, ItemId={ItemId})", notification.EventId, cartId.Value, notification.TeamCartItemId.Value);
     }
 }
 

@@ -24,7 +24,7 @@ public sealed class CustomizationGroupCreatedEventHandler : CustomizationGroupPr
 
     protected override async Task HandleCore(CustomizationGroupCreated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling CustomizationGroupCreated (EventId={EventId}, GroupId={GroupId}, RestaurantId={RestaurantId})",
+        _logger.LogDebug("Handling CustomizationGroupCreated (EventId={EventId}, GroupId={GroupId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.CustomizationGroupId.Value, notification.RestaurantId.Value);
 
         await RebuildForRestaurantAsync(notification.RestaurantId.Value, ct);

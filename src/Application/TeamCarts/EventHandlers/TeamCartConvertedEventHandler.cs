@@ -27,7 +27,7 @@ public sealed class TeamCartConvertedEventHandler : IdempotentNotificationHandle
     protected override async Task HandleCore(TeamCartConverted notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartConverted (EventId={EventId}, CartId={CartId}, OrderId={OrderId})",
+        _logger.LogDebug("Handling TeamCartConverted (EventId={EventId}, CartId={CartId}, OrderId={OrderId})",
             notification.EventId, cartId.Value, notification.OrderId.Value);
 
         try

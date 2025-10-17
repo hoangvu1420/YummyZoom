@@ -31,7 +31,7 @@ public sealed class TeamCartExpiredEventHandler : IdempotentNotificationHandler<
     protected override async Task HandleCore(TeamCartExpired notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartExpired (EventId={EventId}, CartId={CartId})",
+        _logger.LogDebug("Handling TeamCartExpired (EventId={EventId}, CartId={CartId})",
             notification.EventId, cartId.Value);
 
         try
@@ -45,9 +45,6 @@ public sealed class TeamCartExpiredEventHandler : IdempotentNotificationHandler<
                 cartId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled TeamCartExpired (EventId={EventId}, CartId={CartId})",
-            notification.EventId, cartId.Value);
     }
 }
 

@@ -30,7 +30,7 @@ public sealed class TeamCartQuoteUpdatedEventHandler : IdempotentNotificationHan
     protected override async Task HandleCore(TeamCartQuoteUpdated notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartQuoteUpdated (EventId={EventId}, CartId={CartId}, Version={Version})",
+        _logger.LogDebug("Handling TeamCartQuoteUpdated (EventId={EventId}, CartId={CartId}, Version={Version})",
             notification.EventId, cartId.Value, notification.QuoteVersion);
 
         try
@@ -54,8 +54,5 @@ public sealed class TeamCartQuoteUpdatedEventHandler : IdempotentNotificationHan
                 cartId.Value, notification.QuoteVersion, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled TeamCartQuoteUpdated (EventId={EventId}, CartId={CartId}, Version={Version})",
-            notification.EventId, cartId.Value, notification.QuoteVersion);
     }
 }

@@ -39,7 +39,7 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
 
     protected override async Task HandleCore(OrderDelivered notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderDelivered (EventId={EventId}, OrderId={OrderId})",
+        _logger.LogDebug("Handling OrderDelivered (EventId={EventId}, OrderId={OrderId})",
             notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
@@ -67,9 +67,6 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
                 notification.OrderId.Value, notification.EventId);
             throw; // allow retry
         }
-
-        _logger.LogInformation("Handled OrderDelivered (EventId={EventId}, OrderId={OrderId})",
-            notification.EventId, notification.OrderId.Value);
     }
 
     private async Task RecordRevenueAsync(Domain.OrderAggregate.Order order, CancellationToken ct)
@@ -90,7 +87,7 @@ public sealed class OrderDeliveredEventHandler : IdempotentNotificationHandler<O
 
             await _restaurantAccountRepository.UpdateAsync(restaurantAccount, ct);
 
-            _logger.LogInformation("Recorded revenue {Amount} for order {OrderId} to restaurant account {RestaurantId}",
+            _logger.LogDebug("Recorded revenue {Amount} for order {OrderId} to restaurant account {RestaurantId}",
                 order.TotalAmount.Amount, order.Id.Value, order.RestaurantId.Value);
         }
         catch (Exception ex)

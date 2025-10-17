@@ -93,7 +93,7 @@ LIMIT @Batch;
             }
 
             sw.Stop();
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "MenuReadModelMaintenance backfill: built={Built}, deleted={Deleted}, took={ElapsedMs}ms",
                 built, deleted, sw.ElapsedMilliseconds);
         }
@@ -157,7 +157,7 @@ LIMIT @Batch;
                     Interlocked.Increment(ref success);
                     if (_options.LogEveryN > 0 && n % _options.LogEveryN == 0)
                     {
-                        _logger.LogInformation("MenuReadModelMaintenance: processed {Count} restaurants", n);
+                        _logger.LogDebug("MenuReadModelMaintenance: processed {Count} restaurants", n);
                     }
                 }
                 catch (InvalidOperationException ex) when (ex.Message.Contains("Enabled menu not found", StringComparison.OrdinalIgnoreCase))

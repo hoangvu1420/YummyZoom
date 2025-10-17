@@ -32,7 +32,7 @@ public sealed class OrderPaymentFailedEventHandler : IdempotentNotificationHandl
 
     protected override async Task HandleCore(OrderPaymentFailed notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderPaymentFailed (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderPaymentFailed (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -54,7 +54,5 @@ public sealed class OrderPaymentFailedEventHandler : IdempotentNotificationHandl
             _logger.LogError(ex, "Failed broadcasting OrderPaymentFailed (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderPaymentFailed (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

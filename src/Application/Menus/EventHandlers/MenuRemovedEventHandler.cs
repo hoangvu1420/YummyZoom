@@ -28,7 +28,7 @@ public sealed class MenuRemovedEventHandler : IdempotentNotificationHandler<Menu
 
     protected override async Task HandleCore(MenuRemoved notification, CancellationToken ct)
     {
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Handling MenuRemoved (EventId={EventId}, MenuId={MenuId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.MenuId.Value, notification.RestaurantId.Value);
 

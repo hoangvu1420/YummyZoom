@@ -37,7 +37,7 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
     protected override async Task HandleCore(CouponAppliedToTeamCart notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling CouponAppliedToTeamCart (EventId={EventId}, CartId={CartId}, CouponId={CouponId})",
+        _logger.LogDebug("Handling CouponAppliedToTeamCart (EventId={EventId}, CartId={CartId}, CouponId={CouponId})",
             notification.EventId, cartId.Value, notification.CouponId.Value);
 
         // Load cart for currency
@@ -68,9 +68,6 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
                 cartId.Value, couponCode, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled CouponAppliedToTeamCart (EventId={EventId}, CartId={CartId}, CouponCode={CouponCode})",
-            notification.EventId, cartId.Value, couponCode);
     }
 }
 

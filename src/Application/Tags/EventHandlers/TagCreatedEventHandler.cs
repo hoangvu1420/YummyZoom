@@ -20,7 +20,7 @@ public sealed class TagCreatedEventHandler : TagProjectorBase<TagCreated>
 
     protected override async Task HandleCore(TagCreated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling TagCreated (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
+        _logger.LogDebug("Handling TagCreated (EventId={EventId}, TagId={TagId})", notification.EventId, notification.TagId.Value);
 
         // Usually no items reference a brand new tag yet; safe no-op.
         var restaurantIds = await FindRestaurantsByTagAsync(notification.TagId, ct);

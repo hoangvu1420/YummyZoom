@@ -23,6 +23,9 @@ public sealed class MenuItemAvailabilityChangedEventHandler : MenuItemProjectorB
 
     protected override async Task HandleCore(MenuItemAvailabilityChanged notification, CancellationToken ct)
     {
+        _logger.LogDebug("Handling MenuItemAvailabilityChanged (EventId={EventId}, MenuItemId={MenuItemId}, IsAvailable={IsAvailable})",
+            notification.EventId, notification.MenuItemId.Value, notification.IsAvailable);
+
         var restaurantId = await ResolveRestaurantIdAsync(notification.MenuItemId, ct);
         if (restaurantId is null)
         {

@@ -37,7 +37,7 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
     protected override async Task HandleCore(TeamCartCreated notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartCreated (EventId={EventId}, CartId={CartId})", notification.EventId, cartId.Value);
+        _logger.LogDebug("Handling TeamCartCreated (EventId={EventId}, CartId={CartId})", notification.EventId, cartId.Value);
 
         var cart = await _teamCartRepository.GetByIdAsync(cartId, ct);
         if (cart is null)
@@ -94,8 +94,6 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
             _logger.LogError(ex, "Failed to create VM or notify for TeamCartId={CartId} (EventId={EventId})", cart.Id.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled TeamCartCreated (EventId={EventId}, CartId={CartId})", notification.EventId, cart.Id.Value);
     }
 }
 

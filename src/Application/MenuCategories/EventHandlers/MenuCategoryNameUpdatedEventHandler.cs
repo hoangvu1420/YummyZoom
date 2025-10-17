@@ -32,7 +32,7 @@ public sealed class MenuCategoryNameUpdatedEventHandler : IdempotentNotification
 
     protected override async Task HandleCore(MenuCategoryNameUpdated notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling MenuCategoryNameUpdated (EventId={EventId}, CategoryId={CategoryId}, MenuId={MenuId})",
+        _logger.LogDebug("Handling MenuCategoryNameUpdated (EventId={EventId}, CategoryId={CategoryId}, MenuId={MenuId})",
             notification.EventId, notification.CategoryId.Value, notification.MenuId.Value);
 
         // Get the restaurant ID from the menu

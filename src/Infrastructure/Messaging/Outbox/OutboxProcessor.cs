@@ -75,7 +75,7 @@ public sealed class OutboxProcessor : IOutboxProcessor
                     await db2.SaveChangesAsync(ct);
 
                     processedCount++;
-                    _logger.LogInformation("Outbox: published event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
+                    _logger.LogDebug("Outbox: published event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
                 }
                 catch (Exception ex)
                 {
@@ -92,6 +92,11 @@ public sealed class OutboxProcessor : IOutboxProcessor
 
                     _logger.LogError(ex, "Outbox: failed to publish event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
                 }
+            }
+
+            if (processedCount > 0)
+            {
+                _logger.LogInformation("Outbox: processed {Count} events in batch", processedCount);
             }
 
             return processedCount;

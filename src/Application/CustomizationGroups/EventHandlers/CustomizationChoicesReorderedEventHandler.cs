@@ -22,7 +22,7 @@ public sealed class CustomizationChoicesReorderedEventHandler : CustomizationGro
         var restaurantId = await ResolveRestaurantIdAsync(notification.CustomizationGroupId, ct);
         if (restaurantId is null) return;
 
-        _logger.LogInformation("Handling CustomizationChoicesReordered (EventId={EventId}, GroupId={GroupId}, RestaurantId={RestaurantId})",
+        _logger.LogDebug("Handling CustomizationChoicesReordered (EventId={EventId}, GroupId={GroupId}, RestaurantId={RestaurantId})",
             notification.EventId, notification.CustomizationGroupId.Value, restaurantId.Value);
 
         await RebuildForRestaurantAsync(restaurantId.Value, ct);

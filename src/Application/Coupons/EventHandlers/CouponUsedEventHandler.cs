@@ -21,9 +21,8 @@ public sealed class CouponUsedEventHandler : IdempotentNotificationHandler<Coupo
 
     protected override Task HandleCore(CouponUsed notification, CancellationToken ct)
     {
-        _logger.LogInformation("Processed CouponUsed via outbox: CouponId={CouponId}, Prev={Prev}, New={New}",
+        _logger.LogDebug("Processed CouponUsed via outbox: CouponId={CouponId}, Prev={Prev}, New={New}",
             notification.CouponId.Value, notification.PreviousUsageCount, notification.NewUsageCount);
         return Task.CompletedTask;
     }
 }
-

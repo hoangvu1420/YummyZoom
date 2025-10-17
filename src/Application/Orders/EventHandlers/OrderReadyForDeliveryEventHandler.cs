@@ -33,7 +33,7 @@ public sealed class OrderReadyForDeliveryEventHandler : IdempotentNotificationHa
 
     protected override async Task HandleCore(OrderReadyForDelivery notification, CancellationToken ct)
     {
-        _logger.LogInformation("Handling OrderReadyForDelivery (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
+        _logger.LogDebug("Handling OrderReadyForDelivery (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
 
         var order = await _orderRepository.GetByIdAsync(notification.OrderId, ct);
         if (order is null)
@@ -55,7 +55,5 @@ public sealed class OrderReadyForDeliveryEventHandler : IdempotentNotificationHa
             _logger.LogError(ex, "Failed broadcasting OrderReadyForDelivery (OrderId={OrderId}, EventId={EventId})", notification.OrderId.Value, notification.EventId);
             throw;
         }
-
-        _logger.LogInformation("Handled OrderReadyForDelivery (EventId={EventId}, OrderId={OrderId})", notification.EventId, notification.OrderId.Value);
     }
 }

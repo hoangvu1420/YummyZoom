@@ -31,7 +31,7 @@ public sealed class TeamCartLockedForPaymentEventHandler : IdempotentNotificatio
     protected override async Task HandleCore(TeamCartLockedForPayment notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
-        _logger.LogInformation("Handling TeamCartLockedForPayment (EventId={EventId}, CartId={CartId}, HostUserId={HostUserId})",
+        _logger.LogDebug("Handling TeamCartLockedForPayment (EventId={EventId}, CartId={CartId}, HostUserId={HostUserId})",
             notification.EventId, cartId.Value, notification.HostUserId.Value);
 
         try
@@ -46,9 +46,6 @@ public sealed class TeamCartLockedForPaymentEventHandler : IdempotentNotificatio
                 cartId.Value, notification.EventId);
             throw; // allow outbox retry
         }
-
-        _logger.LogInformation("Handled TeamCartLockedForPayment (EventId={EventId}, CartId={CartId})",
-            notification.EventId, cartId.Value);
     }
 }
 
