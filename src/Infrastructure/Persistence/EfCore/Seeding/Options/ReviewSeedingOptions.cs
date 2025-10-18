@@ -8,7 +8,7 @@ public sealed class ReviewSeedingOptions
     /// <summary>
     /// Percentage of delivered orders that should receive reviews (0-100).
     /// </summary>
-    public decimal ReviewCoveragePercentage { get; set; } = 65;
+    public decimal ReviewCoveragePercentage { get; set; } = 70;
 
     /// <summary>
     /// Distribution of review ratings as percentages (must sum to 100).

@@ -325,7 +325,8 @@ Curated menu items feed for the Home screen. Returns a paginated list of popular
       "imageUrl": "https://cdn.example.com/img/pizza.jpg",
       "rating": 4.6,
       "restaurantName": "Mario's Italian Bistro",
-      "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "lifetimeSoldCount": 342
     }
   ],
   "pageNumber": 1,
@@ -344,10 +345,11 @@ Curated menu items feed for the Home screen. Returns a paginated list of popular
 | `name` | `string` | Menu item name |
 | `priceAmount` | `number` | Price amount |
 | `priceCurrency` | `string` | ISO 4217 currency code |
-| `imageUrl` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | Image URL if available |
-| `rating` | `number|  `itemId` | `UUID` | Menu item identifier | |null` | Restaurant average rating |
+| `imageUrl` | `string \ null` | Image URL if available |
+| `rating` | `number \ null` | Restaurant average rating |
 | `restaurantName` | `string` | Owning restaurant name |
 | `restaurantId` | `UUID` | Owning restaurant identifier |
+| `lifetimeSoldCount` | `number` | Total lifetime quantity sold (delivered orders only) |
 
 ---
 

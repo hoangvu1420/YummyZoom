@@ -55,13 +55,13 @@ public class TagSeeder : ISeeder
                 await context.DbContext.SaveChangesAsync(cancellationToken);
             }
 
-            context.Logger.LogInformation("Seeded {Count} tags.", seeded);
+            context.Logger.LogInformation("[Tags] Seeded {Count} tags.", seeded);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            context.Logger.LogError(ex, "Tag seeding failed.");
-            return Result.Failure(YummyZoom.SharedKernel.Error.Failure("Seeding.Tag", "Tag seeding failed"));
+            context.Logger.LogError(ex, "[Tags] Tag seeding failed.");
+            return Result.Failure(Error.Failure("Seeding.Tag", "Tag seeding failed"));
         }
     }
 

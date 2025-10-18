@@ -71,8 +71,6 @@ public class OrderSeeder : ISeeder
                 hasUsers, hasRestaurants, hasMenuItems);
             return false;
         }
-
-        _logger.LogInformation("[Order] Prerequisites satisfied for order seeding");
         return true;
     }
 
@@ -129,8 +127,6 @@ public class OrderSeeder : ISeeder
 
     private async Task<SeedingDependencies> LoadDependenciesAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[Order] Loading seeding dependencies...");
-
         // Load domain users directly from DbContext for seeding
         // Note: Take without OrderBy is acceptable for seeding as we just need any N records
         var activeUsers = await _dbContext.DomainUsers
@@ -164,9 +160,6 @@ public class OrderSeeder : ISeeder
             // .Take(50) // Limit for seeding
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
-
-        _logger.LogInformation("[Order] Loaded {UserCount} users, {RestaurantCount} restaurants with menu items, {CouponCount} coupons", 
-            activeUsers.Count, restaurantsWithMenuItems.Count, activeCoupons.Count);
 
         return new SeedingDependencies(activeUsers, restaurantsWithMenuItems, activeCoupons);
     }

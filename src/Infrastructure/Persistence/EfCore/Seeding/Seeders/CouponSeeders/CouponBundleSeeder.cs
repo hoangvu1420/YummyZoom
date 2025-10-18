@@ -65,11 +65,6 @@ public class CouponBundleSeeder : ISeeder
                 await ProcessCouponAsync(context, bundle.RestaurantSlug, coupon, options, logger, bundleStats, cancellationToken);
             }
             
-            // Log bundle summary
-            logger.LogInformation(
-                "Processed coupon bundle '{Slug}': {Created} created, {Updated} updated, {Skipped} skipped",
-                bundle.RestaurantSlug, bundleStats.Created, bundleStats.Updated, bundleStats.Skipped);
-            
             // Add to total stats
             stats.Created += bundleStats.Created;
             stats.Updated += bundleStats.Updated;
@@ -78,7 +73,7 @@ public class CouponBundleSeeder : ISeeder
 
         // Log summary
         logger.LogInformation(
-            "Coupon seeding completed: {Created} created, {Updated} updated, {Skipped} skipped",
+            "[Coupon] Seeding completed: {Created} created, {Updated} updated, {Skipped} skipped",
             stats.Created, stats.Updated, stats.Skipped);
 
         return Result.Success();

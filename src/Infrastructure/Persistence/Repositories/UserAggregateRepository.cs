@@ -38,7 +38,9 @@ public class UserAggregateRepository : IUserAggregateRepository
     {
         // Ensure case-insensitive comparison if needed by the database collation or requirements
         // Global query filter automatically excludes soft-deleted users
+        // Use AsSplitQuery to avoid multiple collection include warning
         return await _dbContext.DomainUsers
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase), cancellationToken);
     }
 
@@ -50,9 +52,11 @@ public class UserAggregateRepository : IUserAggregateRepository
     /// <returns>The user if found and not soft-deleted</returns>
     public async Task<User?> GetByIdAsync(UserId userId, CancellationToken cancellationToken = default)
     {
-        // FindAsync is suitable for finding by primary key
+        // Use explicit query with AsSplitQuery to avoid multiple collection include warning
         // Global query filter automatically excludes soft-deleted users
-        return await _dbContext.DomainUsers.FindAsync([userId], cancellationToken);
+        return await _dbContext.DomainUsers
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
     }
 
     /// <summary>
@@ -102,6 +106,7 @@ public class UserAggregateRepository : IUserAggregateRepository
     {
         return await _dbContext.DomainUsers
             .IncludeSoftDeleted()
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
     }
 
@@ -116,6 +121,7 @@ public class UserAggregateRepository : IUserAggregateRepository
     {
         return await _dbContext.DomainUsers
             .IncludeSoftDeleted()
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase), cancellationToken);
     }
 

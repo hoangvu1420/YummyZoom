@@ -43,14 +43,12 @@ public class ReviewSeeder : ISeeder
             return Task.FromResult(false);
         }
 
-        _logger.LogInformation("[Review] Prerequisites satisfied for review seeding");
         return Task.FromResult(true);
     }
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {
         var options = context.Configuration.GetReviewSeedingOptions();
-        _logger.LogInformation("[Review] Starting review seeding with {CoveragePercentage}% coverage", options.ReviewCoveragePercentage);
 
         try
         {
@@ -64,8 +62,8 @@ public class ReviewSeeder : ISeeder
 
             // Apply coverage percentage - not all orders get reviews
             var reviewableOrders = SelectOrdersForReview(deliveredOrders, options.ReviewCoveragePercentage);
-            _logger.LogInformation("[Review] Selected {ReviewableCount} out of {TotalCount} delivered orders for review generation", 
-                reviewableOrders.Count, deliveredOrders.Count);
+            _logger.LogInformation("[Review] Selected {ReviewableCount} out of {TotalCount} delivered orders for review generation with {CoveragePercentage}% coverage", 
+                reviewableOrders.Count, deliveredOrders.Count, options.ReviewCoveragePercentage);
 
             var seededReviews = new List<Review>();
             var totalReviewsCreated = 0;
@@ -126,9 +124,6 @@ public class ReviewSeeder : ISeeder
 
     private List<OrderAggregate> SelectOrdersForReview(List<OrderAggregate> deliveredOrders, decimal coveragePercentage)
     {
-        _logger.LogInformation("[Review] Applying {CoveragePercentage}% coverage to {TotalCount} delivered orders",
-            coveragePercentage, deliveredOrders.Count);
-
         if (coveragePercentage >= 100)
         {
             return deliveredOrders;

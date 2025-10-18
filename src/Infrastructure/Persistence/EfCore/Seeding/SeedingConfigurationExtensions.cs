@@ -349,9 +349,10 @@ public static class SeedingConfigurationExtensions
         {
             ReviewCoveragePercentage = TryGetDecimal(jo, "ReviewCoveragePercentage", defaults.ReviewCoveragePercentage),
             CommentPercentage = TryGetDecimal(jo, "CommentPercentage", defaults.CommentPercentage),
+            ReplyPercentage = TryGetDecimal(jo, "ReplyPercentage", defaults.ReplyPercentage),
             MinDaysAfterDelivery = TryGetInt(jo, "MinDaysAfterDelivery", defaults.MinDaysAfterDelivery),
             MaxDaysAfterDelivery = TryGetInt(jo, "MaxDaysAfterDelivery", defaults.MaxDaysAfterDelivery),
-            RatingDistribution = defaults.RatingDistribution, // Keep defaults for complex types
+            RatingDistribution = TryGetDictionary(jo, "RatingDistribution", defaults.RatingDistribution),
             Templates = defaults.Templates
         };
     }
@@ -362,6 +363,7 @@ public static class SeedingConfigurationExtensions
         {
             ReviewCoveragePercentage = el.TryGetProperty("ReviewCoveragePercentage", out var rcp) ? TryDecimal(rcp, defaults.ReviewCoveragePercentage) : defaults.ReviewCoveragePercentage,
             CommentPercentage = el.TryGetProperty("CommentPercentage", out var cp) ? TryDecimal(cp, defaults.CommentPercentage) : defaults.CommentPercentage,
+            ReplyPercentage = el.TryGetProperty("ReplyPercentage", out var rp) ? TryDecimal(rp, defaults.ReplyPercentage) : defaults.ReplyPercentage,
             MinDaysAfterDelivery = el.TryGetProperty("MinDaysAfterDelivery", out var mind) ? TryInt(mind, defaults.MinDaysAfterDelivery) : defaults.MinDaysAfterDelivery,
             MaxDaysAfterDelivery = el.TryGetProperty("MaxDaysAfterDelivery", out var maxd) ? TryInt(maxd, defaults.MaxDaysAfterDelivery) : defaults.MaxDaysAfterDelivery,
             RatingDistribution = el.TryGetProperty("RatingDistribution", out var rd) ? TryDictionary(rd, defaults.RatingDistribution) : defaults.RatingDistribution,
@@ -375,9 +377,10 @@ public static class SeedingConfigurationExtensions
         {
             ReviewCoveragePercentage = dict.TryGetValue("ReviewCoveragePercentage", out var rcp) && decimal.TryParse(rcp?.ToString(), out var rcpValue) ? rcpValue : defaults.ReviewCoveragePercentage,
             CommentPercentage = dict.TryGetValue("CommentPercentage", out var cp) && decimal.TryParse(cp?.ToString(), out var cpValue) ? cpValue : defaults.CommentPercentage,
+            ReplyPercentage = dict.TryGetValue("ReplyPercentage", out var rp) && decimal.TryParse(rp?.ToString(), out var rpValue) ? rpValue : defaults.ReplyPercentage,
             MinDaysAfterDelivery = dict.TryGetValue("MinDaysAfterDelivery", out var mind) && int.TryParse(mind?.ToString(), out var mindValue) ? mindValue : defaults.MinDaysAfterDelivery,
             MaxDaysAfterDelivery = dict.TryGetValue("MaxDaysAfterDelivery", out var maxd) && int.TryParse(maxd?.ToString(), out var maxdValue) ? maxdValue : defaults.MaxDaysAfterDelivery,
-            RatingDistribution = defaults.RatingDistribution,
+            RatingDistribution = TryGetDictionary(dict, "RatingDistribution", defaults.RatingDistribution),
             Templates = defaults.Templates
         };
     }

@@ -17,7 +17,8 @@ public sealed record MenuItemFeedDto(
     string? ImageUrl,
     double? Rating,
     string RestaurantName,
-    Guid RestaurantId
+    Guid RestaurantId,
+    long LifetimeSoldCount
 );
 
 public static class GetMenuItemsFeedErrors
@@ -26,4 +27,3 @@ public static class GetMenuItemsFeedErrors
         "MenuItems.Feed.InvalidTab",
         "Tab must be one of: popular.");
 }
-

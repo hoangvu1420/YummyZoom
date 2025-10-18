@@ -410,7 +410,7 @@ public class RestaurantBundleSeeder : ISeeder
                 await context.DbContext.SaveChangesAsync(cancellationToken);
             }
 
-            context.Logger.LogInformation("[{File}] Created R:{R} M:{M} C:{C} G:{G} I:{I} | Updated M:{UM} C:{UC} G:{UG} I:{UI} | Skipped R:{SR} M:{SM} C:{SC} I:{SI}",
+            context.Logger.LogInformation("[Restaurant] {File}: Created R:{R} M:{M} C:{C} G:{G} I:{I} | Updated M:{UM} C:{UC} G:{UG} I:{UI} | Skipped R:{SR} M:{SM} C:{SC} I:{SI}",
                 fileName, created.Restaurants, created.Menus, created.Categories, created.Groups, created.Items,
                 updated.Menus, updated.Categories, updated.Groups, updated.Items,
                 skipped.Restaurants, skipped.Menus, skipped.Categories, skipped.Items);

@@ -8,7 +8,7 @@ public sealed class OrderSeedingOptions
     /// <summary>
     /// Number of orders to create per restaurant.
     /// </summary>
-    public int OrdersPerRestaurant { get; set; } = 30;
+    public int OrdersPerRestaurant { get; set; } = 50;
 
     /// <summary>
     /// Distribution of order statuses as percentages (must sum to 100).

@@ -26,7 +26,8 @@ public sealed class GetMenuItemsFeedQueryHandler
         Guid RestaurantId,
         string RestaurantName,
         double? Rating,
-        int Popularity);
+        int Popularity,
+        long LifetimeSoldCount);
 
     public async Task<Result<PaginatedList<MenuItemFeedDto>>> Handle(GetMenuItemsFeedQuery request, CancellationToken cancellationToken)
     {
@@ -47,13 +48,16 @@ public sealed class GetMenuItemsFeedQueryHandler
             r."Id"                  AS "RestaurantId",
             r."Name"                AS "RestaurantName",
             rr."AverageRating"      AS "Rating",
-            COALESCE(pop."qty30", 0) AS "Popularity"
+            COALESCE(pop."qty30", 0) AS "Popularity",
+            COALESCE(ms."LifetimeQuantity", 0) AS "LifetimeSoldCount"
             """;
 
         const string fromBase = """
             FROM "MenuItems" mi
             JOIN "Restaurants" r ON r."Id" = mi."RestaurantId"
             LEFT JOIN "RestaurantReviewSummaries" rr ON rr."RestaurantId" = r."Id"
+            LEFT JOIN "MenuItemSalesSummaries" ms
+                ON ms."RestaurantId" = mi."RestaurantId" AND ms."MenuItemId" = mi."Id"
             LEFT JOIN (
                 SELECT oi."Snapshot_MenuItemId" AS "ItemId", CAST(SUM(oi."Quantity") AS int) AS qty30
                 FROM "OrderItems" oi
@@ -88,10 +92,10 @@ public sealed class GetMenuItemsFeedQueryHandler
             r.ImageUrl,
             r.Rating,
             r.RestaurantName,
-            r.RestaurantId)).ToList();
+            r.RestaurantId,
+            r.LifetimeSoldCount)).ToList();
 
         var result = new PaginatedList<MenuItemFeedDto>(mapped, page.TotalCount, page.PageNumber, request.PageSize);
         return Result.Success(result);
     }
 }
-

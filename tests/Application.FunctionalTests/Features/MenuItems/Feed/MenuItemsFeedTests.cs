@@ -270,6 +270,7 @@ public class MenuItemsFeedTests : BaseTestFixture
         response.TotalCount.Should().BeGreaterThan(0);
         response.PageNumber.Should().Be(1);
         response.TotalPages.Should().BeGreaterThan(0);
+        response.Items.Should().OnlyContain(i => i.LifetimeSoldCount >= 0);
 
         // Verify item structure
         var firstItem = response.Items.First();
@@ -278,6 +279,7 @@ public class MenuItemsFeedTests : BaseTestFixture
         firstItem.PriceAmount.Should().BeGreaterThan(0);
         firstItem.PriceCurrency.Should().NotBeNullOrWhiteSpace();
         firstItem.RestaurantName.Should().NotBeNullOrWhiteSpace();
+        firstItem.LifetimeSoldCount.Should().BeGreaterOrEqualTo(0);
         firstItem.RestaurantId.Should().NotBeEmpty();
         // ImageUrl and Rating can be null, so we don't assert their values
     }
@@ -406,6 +408,27 @@ public class MenuItemsFeedTests : BaseTestFixture
         itemIds.Should().Contain(itemId, "items from placed orders should be included");
     }
 
+    [Test]
+    public async Task GetMenuItemsFeed_PopularTab_ShouldExposeLifetimeSoldCountFromSummary()
+    {
+        // Arrange
+        await RunAsDefaultUserAsync();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        const long lifetimeQuantity = 123;
+
+        await UpsertMenuItemSalesSummaryAsync(restaurantId, itemId, lifetimeQuantity);
+
+        // Act
+        var result = await SendAsync(new GetMenuItemsFeedQuery("popular", 1, 10));
+
+        // Assert
+        result.ShouldBeSuccessful();
+        var item = result.Value.Items.FirstOrDefault(i => i.ItemId == itemId);
+        item.Should().NotBeNull("the seeded menu item should still be returned in the feed");
+        item!.LifetimeSoldCount.Should().Be(lifetimeQuantity);
+    }
+
     private static async Task CreateOrderWithQuantityAsync(Guid restaurantId, Guid menuItemId, Guid customerId, int quantity)
     {
         // Use the established test patterns to create orders
@@ -471,5 +494,27 @@ public class MenuItemsFeedTests : BaseTestFixture
             UPDATE ""MenuItems"" 
             SET ""IsAvailable"" = FALSE, ""LastModified"" = now() 
             WHERE ""IsDeleted"" = FALSE");
+    }
+
+    private static async Task UpsertMenuItemSalesSummaryAsync(Guid restaurantId, Guid menuItemId, long lifetimeQuantity)
+    {
+        using var scope = CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var now = DateTimeOffset.UtcNow;
+
+        await db.Database.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""MenuItemSalesSummaries""
+                (""RestaurantId"", ""MenuItemId"", ""LifetimeQuantity"", ""Rolling7DayQuantity"", ""Rolling30DayQuantity"", ""LastSoldAt"", ""LastUpdatedAt"", ""SourceVersion"")
+            VALUES
+                ({restaurantId}, {menuItemId}, {lifetimeQuantity}, 0, 0, NULL, {now}, {now.UtcTicks})
+            ON CONFLICT (""RestaurantId"", ""MenuItemId"")
+            DO UPDATE SET
+                ""LifetimeQuantity"" = {lifetimeQuantity},
+                ""Rolling7DayQuantity"" = 0,
+                ""Rolling30DayQuantity"" = 0,
+                ""LastSoldAt"" = NULL,
+                ""LastUpdatedAt"" = {now},
+                ""SourceVersion"" = {now.UtcTicks};
+        ");
     }
 }
