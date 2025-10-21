@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
@@ -32,6 +33,7 @@ using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
 using YummyZoom.Application.Restaurants.Queries.GetFullMenu;
+using YummyZoom.Application.Restaurants.Queries.GetRestaurantAggregatedDetails;
 using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemDetails;
@@ -701,6 +703,98 @@ public class Restaurants : EndpointGroupBase
         .Produces<RestaurantReviewSummaryDto>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+        // GET /api/v1/restaurants/{restaurantId}/details
+        publicGroup.MapGet("/{restaurantId:guid}/details", async (
+            Guid restaurantId,
+            double? lat,
+            double? lng,
+            ISender sender,
+            HttpContext http) =>
+        {
+            var result = await sender.Send(new GetRestaurantAggregatedDetailsQuery(restaurantId, lat, lng));
+            if (!result.IsSuccess) return result.ToIResult();
+
+            var details = result.Value;
+            var isPersonalized = lat.HasValue || lng.HasValue;
+
+            if (!isPersonalized)
+            {
+                var etag = HttpCaching.BuildWeakEtag(restaurantId, details.LastChangedUtc);
+                var lastModified = HttpCaching.ToRfc1123(details.LastChangedUtc);
+
+                if (HttpCaching.MatchesIfNoneMatch(http.Request, etag) ||
+                    HttpCaching.NotModifiedSince(http.Request, details.LastChangedUtc))
+                {
+                    http.Response.Headers.ETag = etag.ToString();
+                    http.Response.Headers.LastModified = lastModified;
+                    http.Response.Headers.CacheControl = "public, max-age=120";
+                    return Results.StatusCode(StatusCodes.Status304NotModified);
+                }
+
+                http.Response.Headers.ETag = etag.ToString();
+                http.Response.Headers.LastModified = lastModified;
+                http.Response.Headers.CacheControl = "public, max-age=120";
+            }
+            else
+            {
+                http.Response.Headers.CacheControl = "no-store";
+            }
+
+            JsonElement menuElement = ParseMenuJson(details.Menu.MenuJson);
+
+            var info = details.Info;
+            decimal? avgRating = (decimal)details.ReviewSummary.AverageRating;
+            int? ratingCount = details.ReviewSummary.TotalReviews;
+
+            var infoResponse = new RestaurantPublicInfoResponseDto(
+                info.RestaurantId,
+                info.Name,
+                info.LogoUrl,
+                info.BackgroundImageUrl,
+                info.Description,
+                info.CuisineType,
+                info.CuisineTags,
+                info.IsAcceptingOrders,
+                info.IsVerified,
+                info.Address,
+                info.ContactInfo,
+                info.BusinessHours,
+                info.EstablishedDate,
+                avgRating,
+                ratingCount,
+                info.DistanceKm);
+
+            var response = new RestaurantAggregatedDetailsResponseDto(
+                infoResponse,
+                new RestaurantAggregatedMenuResponseDto(details.Menu.LastRebuiltAt, menuElement),
+                details.ReviewSummary,
+                details.LastChangedUtc);
+
+            return Results.Ok(response);
+
+            static JsonElement ParseMenuJson(string json)
+            {
+                var payload = string.IsNullOrWhiteSpace(json) ? "{}" : json;
+                try
+                {
+                    using var menuDoc = JsonDocument.Parse(payload);
+                    return menuDoc.RootElement.Clone();
+                }
+                catch (JsonException)
+                {
+                    using var fallbackDoc = JsonDocument.Parse("{}");
+                    return fallbackDoc.RootElement.Clone();
+                }
+            }
+        })
+        .WithName("GetRestaurantAggregatedDetails")
+        .WithSummary("Get combined restaurant info, menu, and review summary")
+        .WithDescription("Aggregates public restaurant information, full menu JSON, and review summary into one response. Supports conditional HTTP caching when no personalization parameters are provided.")
+        .Produces<RestaurantAggregatedDetailsResponseDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status304NotModified)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         // GET /api/v1/restaurants/{restaurantId}/info
         publicGroup.MapGet("/{restaurantId:guid}/info", async (
             Guid restaurantId, 
@@ -764,6 +858,8 @@ public class Restaurants : EndpointGroupBase
             string? bbox,
             [FromQuery(Name = "tags")] string[]? tags,
             [FromQuery(Name = "tagIds")] Guid[]? tagIds,
+            [FromQuery(Name = "discountedOnly")] bool? discountedOnly,
+            [FromQuery(Name = "includeFacets")] bool? includeFacets,
             ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
@@ -782,13 +878,25 @@ public class Restaurants : EndpointGroupBase
                 sort,
                 bbox,
                 tags?.ToList(),
-                tagIds?.ToList());
+                tagIds?.ToList(),
+                discountedOnly,
+                includeFacets ?? false);
             var result = await sender.Send(query);
-            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+            if (!result.IsSuccess)
+            {
+                return result.ToIResult();
+            }
+
+            return result.Value switch
+            {
+                RestaurantSearchPageResult pageResult => Results.Ok(pageResult.Page),
+                RestaurantSearchWithFacetsDto withFacets => Results.Ok(withFacets),
+                _ => Results.Ok(result.Value)
+            };
         })
         .WithName("SearchRestaurants")
         .WithSummary("Search restaurants")
-        .WithDescription("Searches for restaurants by name, cuisine type, tags, and/or location. Supports sort=rating|distance|popularity. When lat/lng are provided, returns distanceKm and allows sort=distance. Public endpoint - no authentication required.")
+        .WithDescription("Searches for restaurants by name, cuisine type, tags, and/or location. Supports sort=rating|distance|popularity, discountedOnly=true to restrict results to venues with currently active coupons, and includeFacets=true to retrieve `{ page, facets }` metadata. When lat/lng are provided, returns distanceKm and allows sort=distance. Public endpoint - no authentication required.")
         .Produces<object>(StatusCodes.Status200OK)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -909,5 +1017,15 @@ public class Restaurants : EndpointGroupBase
         decimal? AvgRating,
         int? RatingCount,
         decimal? DistanceKm);
+
+    public sealed record RestaurantAggregatedDetailsResponseDto(
+        RestaurantPublicInfoResponseDto Info,
+        RestaurantAggregatedMenuResponseDto Menu,
+        RestaurantReviewSummaryDto ReviewSummary,
+        DateTimeOffset LastChangedUtc);
+
+    public sealed record RestaurantAggregatedMenuResponseDto(
+        DateTimeOffset LastRebuiltAt,
+        JsonElement Data);
     #endregion
 }

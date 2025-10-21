@@ -32,29 +32,58 @@ public sealed class AutocompleteQueryHandler
     {
         using var conn = _db.CreateConnection();
 
+        var term = request.Term.Trim();
+        var includeFts = term.Length <= 2;
+
         const string sql = """
-            SELECT s."Id" AS Id, s."Type" AS Type, s."Name" AS Name
-            FROM "SearchIndexItems" s
-            WHERE s."SoftDeleted" = FALSE
-              AND (
-                    s."Name" ILIKE @prefix
-                 OR similarity(s."Name", @q) > 0.2
-              )
-              AND (@types IS NULL OR s."Type" = ANY(@types))
-            ORDER BY GREATEST(
-                      similarity(s."Name", @q),
-                      CASE WHEN s."Name" ILIKE @prefix THEN 1 ELSE 0 END
-                   ) DESC,
-                   s."UpdatedAt" DESC
-            LIMIT @limit;
-            """;
+WITH ranked AS (
+    SELECT
+        s."Id" AS Id,
+        s."Type" AS Type,
+        s."Name" AS Name,
+        s."UpdatedAt" AS UpdatedAt,
+        (s."Name" ILIKE @prefix) AS name_prefix,
+        similarity(s."Name", @q) AS name_similarity,
+        CASE
+            WHEN @includeFts THEN (s."TsAll" @@ plainto_tsquery('simple', unaccent(@q)))
+            ELSE FALSE
+        END AS fts_match
+    FROM "SearchIndexItems" s
+    WHERE s."SoftDeleted" = FALSE
+      AND (@filterByTypes = FALSE OR s."Type" = ANY(@types))
+)
+SELECT Id, Type, Name
+FROM ranked
+WHERE name_prefix
+   OR name_similarity > 0.2
+   OR fts_match
+ORDER BY GREATEST(
+          name_similarity,
+          CASE WHEN name_prefix THEN 1 ELSE 0 END,
+          CASE WHEN fts_match THEN 0.8 ELSE 0 END
+       ) DESC,
+       UpdatedAt DESC
+LIMIT @limit;
+""";
 
         var types = request.Types is { Length: > 0 }
             ? request.Types.Select(t => t.Trim().ToLowerInvariant()).ToArray()
-            : null;
+            : Array.Empty<string>();
+        var filterByTypes = types.Length > 0;
 
         var list = await conn.QueryAsync<SuggestionDto>(
-            new CommandDefinition(sql, new { q = request.Term, prefix = request.Term + "%", limit = request.Limit, types }, cancellationToken: ct));
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    q = term,
+                    prefix = term + "%",
+                    limit = request.Limit,
+                    types,
+                    filterByTypes,
+                    includeFts
+                },
+                cancellationToken: ct));
 
         return Result.Success((IReadOnlyList<SuggestionDto>)list.ToList());
     }

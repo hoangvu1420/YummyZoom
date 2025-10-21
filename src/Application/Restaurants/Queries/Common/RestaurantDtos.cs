@@ -1,3 +1,5 @@
+using YummyZoom.Application.Reviews.Queries.Common;
+
 namespace YummyZoom.Application.Restaurants.Queries.Common;
 
 public sealed record RestaurantPublicInfoDto(
@@ -14,6 +16,7 @@ public sealed record RestaurantPublicInfoDto(
     ContactInfoDto ContactInfo,
     string BusinessHours,
     DateTimeOffset EstablishedDate,
+    DateTimeOffset LastModified,
     decimal? DistanceKm = null);
 
 public sealed record AddressDto(
@@ -26,6 +29,16 @@ public sealed record AddressDto(
 public sealed record ContactInfoDto(
     string PhoneNumber,
     string Email);
+
+public sealed record RestaurantAggregatedDetailsDto(
+    RestaurantPublicInfoDto Info,
+    RestaurantAggregatedMenuDto Menu,
+    RestaurantReviewSummaryDto ReviewSummary,
+    DateTimeOffset LastChangedUtc);
+
+public sealed record RestaurantAggregatedMenuDto(
+    string MenuJson,
+    DateTimeOffset LastRebuiltAt);
 
 public sealed record RestaurantSearchResultDto(
     Guid RestaurantId,

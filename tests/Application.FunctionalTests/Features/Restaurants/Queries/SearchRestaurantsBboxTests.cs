@@ -18,10 +18,11 @@ public class SearchRestaurantsBboxTests : BaseTestFixture
         var outside = await CreateRestaurantAsync("Outside", 37.40, -122.00);
         await DrainOutboxAsync();
 
-        var res = await SendAsync(new SearchRestaurantsQuery(null, null, null, null, null, 1, 20, null, null, "-122.52,37.70,-122.35,37.82"));
+        var res = await SendAsync(new SearchRestaurantsQuery(null, null, null, null, null, 1, 20, null, null, "-122.52,37.70,-122.35,37.82", null, null, false));
         res.ShouldBeSuccessful();
-        res.Value.Items.Select(i => i.RestaurantId).Should().Contain(inside);
-        res.Value.Items.Select(i => i.RestaurantId).Should().NotContain(outside);
+        var page = res.Value.Should().BeOfType<RestaurantSearchPageResult>().Subject.Page;
+        page.Items.Select(i => i.RestaurantId).Should().Contain(inside);
+        page.Items.Select(i => i.RestaurantId).Should().NotContain(outside);
     }
 
     private static async Task<Guid> CreateRestaurantAsync(string name, double lat, double lon)
@@ -38,4 +39,3 @@ public class SearchRestaurantsBboxTests : BaseTestFixture
         return entity.Id.Value;
     }
 }
-

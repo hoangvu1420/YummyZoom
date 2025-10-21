@@ -53,7 +53,9 @@ public class SearchContractTests
             query.Lat.Should().Be(40.7128);
             query.Lng.Should().Be(-74.0060);
             query.RadiusKm.Should().Be(5.0);
-            return Result.Success(paginatedList);
+            query.DiscountedOnly.Should().BeNull();
+            query.IncludeFacets.Should().BeFalse();
+            return Result.Success<SearchRestaurantsResult>(new RestaurantSearchPageResult(paginatedList));
         });
 
         var path = "/api/v1/restaurants/search?q=pizza&cuisine=Italian&lat=40.7128&lng=-74.0060&radiusKm=5.0&pageNumber=1&pageSize=10";
@@ -122,7 +124,9 @@ public class SearchContractTests
             query.RadiusKm.Should().BeNull();
             query.PageNumber.Should().Be(1);
             query.PageSize.Should().Be(25);
-            return Result.Success(emptyList);
+            query.DiscountedOnly.Should().BeNull();
+            query.IncludeFacets.Should().BeFalse();
+            return Result.Success<SearchRestaurantsResult>(new RestaurantSearchPageResult(emptyList));
         });
 
         var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=25";
@@ -140,13 +144,86 @@ public class SearchContractTests
     }
 
     [Test]
+    public async Task SearchRestaurants_WithDiscountedOnlyTrue_BindsFlag()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+
+        var emptyList = new PaginatedList<RestaurantSearchResultDto>(new List<RestaurantSearchResultDto>(), 0, 1, 10);
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<SearchRestaurantsQuery>();
+            var query = (SearchRestaurantsQuery)req;
+            query.DiscountedOnly.Should().BeTrue();
+            query.IncludeFacets.Should().BeFalse();
+            return Result.Success<SearchRestaurantsResult>(new RestaurantSearchPageResult(emptyList));
+        });
+
+        var path = "/api/v1/restaurants/search?discountedOnly=true";
+        TestContext.WriteLine($"REQUEST GET {path}");
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task SearchRestaurants_WithIncludeFacetsTrue_ReturnsCompositeShape()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+
+        var searchResults = new List<RestaurantSearchResultDto>
+        {
+            CreateSearchResult(Guid.NewGuid())
+        };
+        var paginatedList = new PaginatedList<RestaurantSearchResultDto>(searchResults, 1, 1, 10);
+        var facets = new RestaurantFacetsDto(
+            new List<FacetCount<string>> { new("italian", 1) },
+            new List<FacetCount<string>> { new("gluten-free", 1) },
+            new List<FacetCount<short>>(),
+            1);
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<SearchRestaurantsQuery>();
+            var query = (SearchRestaurantsQuery)req;
+            query.IncludeFacets.Should().BeTrue();
+            return Result.Success<SearchRestaurantsResult>(new RestaurantSearchWithFacetsDto(paginatedList, facets));
+        });
+
+        var path = "/api/v1/restaurants/search?includeFacets=true";
+        TestContext.WriteLine($"REQUEST GET {path}");
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using var doc = JsonDocument.Parse(raw);
+        var root = doc.RootElement;
+
+        var page = root.GetProperty("page");
+        page.GetProperty("items").GetArrayLength().Should().Be(1);
+        page.GetProperty("totalCount").GetInt32().Should().Be(1);
+
+        var facetsElement = root.GetProperty("facets");
+        facetsElement.GetProperty("cuisines")[0].GetProperty("value").GetString().Should().Be("italian");
+        facetsElement.GetProperty("cuisines")[0].GetProperty("count").GetInt32().Should().Be(1);
+        facetsElement.GetProperty("tags")[0].GetProperty("value").GetString().Should().Be("gluten-free");
+        facetsElement.GetProperty("openNowCount").GetInt32().Should().Be(1);
+    }
+
+    [Test]
     public async Task SearchRestaurants_WithValidationFailure_Returns400Problem()
     {
         var factory = new ApiContractWebAppFactory();
         var client = factory.CreateClient();
 
         factory.Sender.RespondWith(_ =>
-            Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.Invalid", "Invalid search parameters")));
+            Result.Failure<SearchRestaurantsResult>(Error.Validation("Public.Search.Invalid", "Invalid search parameters")));
 
         var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=25";
         TestContext.WriteLine($"REQUEST GET {path}");
@@ -157,7 +234,7 @@ public class SearchContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Public");
+        prob.Title.Should().Be("Public.Search.Invalid");
     }
 
     [Test]
@@ -167,7 +244,7 @@ public class SearchContractTests
         var client = factory.CreateClient();
 
         factory.Sender.RespondWith(_ =>
-            Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.PageSizeInvalid", "Page size must be between 1 and 50")));
+            Result.Failure<SearchRestaurantsResult>(Error.Validation("Public.Search.PageSizeInvalid", "Page size must be between 1 and 50")));
 
         var path = "/api/v1/restaurants/search?pageNumber=1&pageSize=100";
         TestContext.WriteLine($"REQUEST GET {path}");
@@ -178,7 +255,7 @@ public class SearchContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Public");
+        prob.Title.Should().Be("Public.Search.PageSizeInvalid");
     }
 
     [Test]
@@ -188,7 +265,7 @@ public class SearchContractTests
         var client = factory.CreateClient();
 
         factory.Sender.RespondWith(_ =>
-            Result.Failure<PaginatedList<RestaurantSearchResultDto>>(Error.Validation("Public.Search.GeoInvalid", "Geo parameters must be provided together")));
+            Result.Failure<SearchRestaurantsResult>(Error.Validation("Public.Search.GeoInvalid", "Geo parameters must be provided together")));
 
         // Only providing lat without lng and radiusKm
         var path = "/api/v1/restaurants/search?lat=40.7128&pageNumber=1&pageSize=25";
@@ -200,6 +277,6 @@ public class SearchContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Public");
+        prob.Title.Should().Be("Public.Search.GeoInvalid");
     }
 }

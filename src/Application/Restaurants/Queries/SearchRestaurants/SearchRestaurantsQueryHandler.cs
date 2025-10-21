@@ -9,7 +9,7 @@ using Result = YummyZoom.SharedKernel.Result;
 
 namespace YummyZoom.Application.Restaurants.Queries.SearchRestaurants;
 
-public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestaurantsQuery, Result<PaginatedList<RestaurantSearchResultDto>>>
+public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestaurantsQuery, Result<SearchRestaurantsResult>>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
 
@@ -18,7 +18,7 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
         _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public async Task<Result<PaginatedList<RestaurantSearchResultDto>>> Handle(SearchRestaurantsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<SearchRestaurantsResult>> Handle(SearchRestaurantsQuery request, CancellationToken cancellationToken)
     {
         using var connection = _dbConnectionFactory.CreateConnection();
 
@@ -119,6 +119,21 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             }
         }
 
+        if (request.DiscountedOnly is true)
+        {
+            parameters.Add("UtcNow", DateTime.UtcNow);
+            where.Add("""
+                EXISTS (
+                    SELECT 1
+                    FROM "Coupons" c
+                    WHERE c."RestaurantId" = r."Id"
+                      AND c."IsDeleted" = FALSE
+                      AND c."IsEnabled" = TRUE
+                      AND @UtcNow BETWEEN c."ValidityStartDate" AND c."ValidityEndDate"
+                )
+                """);
+        }
+
         var fromAndWhere = $"FROM \"Restaurants\" r LEFT JOIN \"RestaurantReviewSummaries\" rr ON rr.\"RestaurantId\" = r.\"Id\" WHERE {string.Join(" AND ", where)}";
 
         string orderBy;
@@ -178,7 +193,67 @@ public sealed class SearchRestaurantsQueryHandler : IRequestHandler<SearchRestau
             .ToList();
 
         var resultPage = new PaginatedList<RestaurantSearchResultDto>(mapped, page.TotalCount, page.PageNumber, request.PageSize);
-        return Result.Success(resultPage);
+        if (!request.IncludeFacets)
+        {
+            return Result.Success<SearchRestaurantsResult>(new RestaurantSearchPageResult(resultPage));
+        }
+
+        parameters.Add("FacetTop", 10);
+
+        var whereClause = string.Join(" AND ", where);
+        var baseFrom = $"""
+FROM "Restaurants" r
+LEFT JOIN "RestaurantReviewSummaries" rr ON rr."RestaurantId" = r."Id"
+WHERE {whereClause}
+""";
+
+        var facetsSql = $"""
+WITH base AS (
+    SELECT r."Id", r."CuisineType"
+    {baseFrom}
+)
+SELECT LOWER(b."CuisineType") AS Value, CAST(COUNT(*) AS int) AS Count
+FROM base b
+WHERE b."CuisineType" IS NOT NULL AND b."CuisineType" <> ''
+GROUP BY LOWER(b."CuisineType")
+ORDER BY Count DESC, Value ASC
+LIMIT @FacetTop;
+
+WITH base AS (
+    SELECT r."Id"
+    {baseFrom}
+)
+SELECT LOWER(tg."TagName") AS Value, CAST(COUNT(DISTINCT base."Id") AS int) AS Count
+FROM base
+JOIN "MenuItems" mi ON mi."RestaurantId" = base."Id" AND mi."IsDeleted" = FALSE
+JOIN LATERAL jsonb_array_elements_text(mi."DietaryTagIds") AS tag(tag_id_text) ON TRUE
+JOIN "Tags" tg ON tg."Id" = (tag.tag_id_text)::uuid AND tg."IsDeleted" = FALSE
+WHERE tg."TagName" IS NOT NULL AND tg."TagName" <> ''
+GROUP BY LOWER(tg."TagName")
+ORDER BY Count DESC, Value ASC
+LIMIT @FacetTop;
+
+SELECT CAST(NULL AS smallint) AS Value, CAST(0 AS int) AS Count
+WHERE FALSE;
+
+WITH base AS (
+    SELECT r."IsAcceptingOrders"
+    {baseFrom}
+)
+SELECT CAST(COUNT(*) AS int) AS Count
+FROM base
+WHERE base."IsAcceptingOrders" = TRUE;
+""";
+
+        using var grid = await connection.QueryMultipleAsync(new CommandDefinition(facetsSql, parameters, cancellationToken: cancellationToken));
+        var cuisineBuckets = grid.Read<FacetCount<string>>().ToList();
+        var tagBuckets = grid.Read<FacetCount<string>>().ToList();
+        var priceBandBuckets = grid.Read<FacetCount<short>>().ToList();
+        var openNowCount = grid.ReadSingle<int>();
+
+        var facets = new RestaurantFacetsDto(cuisineBuckets, tagBuckets, priceBandBuckets, openNowCount);
+        var response = new RestaurantSearchWithFacetsDto(resultPage, facets);
+        return Result.Success<SearchRestaurantsResult>(response);
     }
 }
 

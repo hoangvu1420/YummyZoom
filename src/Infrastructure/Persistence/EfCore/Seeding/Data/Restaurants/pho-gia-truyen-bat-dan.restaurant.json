@@ -2,7 +2,7 @@
   "restaurantSlug": "pho-gia-truyen-bat-dan",
   "name": "Phở Gia Truyền (Bát Đàn)",
   "description": "Phở bò gia truyền nổi tiếng tại phố Bát Đàn, Hà Nội. Hàng quán nhỏ, thường có xếp hàng; phục vụ phở bò với các phần thịt khác nhau, có quẩy và trứng.",
-  "cuisineType": "Vietnamese",
+  "cuisineType": "Việt Nam",
   "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://media.mia.vn/uploads/blog-du-lich/Pho-bat-dan-pho-gia-truyen-100-nam-tuoi-tai-ha-noi-02-1639325605.png",
   "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20Gia%20Truy%E1%BB%81n.jpg",
   "defaultCurrency": "VND",

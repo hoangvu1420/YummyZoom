@@ -2,7 +2,7 @@
   "restaurantSlug": "bella-vista-italian",
   "name": "Bella Vista Italian",
   "description": "Ẩm thực Ý chuẩn vị ngay giữa khu trung tâm – pizza nướng lò, pasta kem béo, món nướng và tráng miệng đặc trưng.",
-  "cuisineType": "Italian",
+  "cuisineType": "Ý",
   "logoUrl": "https://as2.ftcdn.net/jpg/04/39/16/21/1000_F_439162147_QLs1kmv2A0SzeRXW9X5mplJNyWcXQqzh.jpg",
   "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Douglas%20-%20Italian%20restaurant%20interior%20in%20the%20Sea%20Terminal%20-%20geograph.org.uk%20-%201665164.jpg",
   "defaultCurrency": "VND",

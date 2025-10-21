@@ -25,11 +25,18 @@ public sealed class CachingBehaviour<TRequest, TResponse> : IPipelineBehavior<TR
 
         try
         {
-            var cached = await _cache.GetAsync<TResponse>(cacheable.CacheKey, cancellationToken);
-            if (cached is not null)
+            if (!string.IsNullOrWhiteSpace(cacheable.CacheKey))
             {
-                _logger.LogDebug("Cache hit for {CacheKey}", cacheable.CacheKey);
-                return cached;
+                var cached = await _cache.GetAsync<TResponse>(cacheable.CacheKey, cancellationToken);
+                if (cached is not null)
+                {
+                    _logger.LogDebug("Cache hit for {CacheKey}", cacheable.CacheKey);
+                    return cached;
+                }
+            }
+            else
+            {
+                _logger.LogDebug("Cache bypassed for request {RequestType} due to missing cache key", typeof(TRequest).Name);
             }
         }
         catch (Exception ex)
@@ -50,8 +57,11 @@ public sealed class CachingBehaviour<TRequest, TResponse> : IPipelineBehavior<TR
         {
             try
             {
-                await _cache.SetAsync(cacheable.CacheKey, response!, cacheable.Policy, cancellationToken);
-                _logger.LogDebug("Cache set for {CacheKey}", cacheable.CacheKey);
+                if (!string.IsNullOrWhiteSpace(cacheable.CacheKey))
+                {
+                    await _cache.SetAsync(cacheable.CacheKey, response!, cacheable.Policy, cancellationToken);
+                    _logger.LogDebug("Cache set for {CacheKey}", cacheable.CacheKey);
+                }
             }
             catch (Exception ex)
             {

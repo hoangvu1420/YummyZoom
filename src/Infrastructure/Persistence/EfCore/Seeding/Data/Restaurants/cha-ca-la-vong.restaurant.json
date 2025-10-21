@@ -2,7 +2,7 @@
   "restaurantSlug": "cha-ca-la-vong",
   "name": "Chả Cá Lã Vọng",
   "description": "Nhà hàng lâu đời tại 14 Phố Chả Cá, Hoàn Kiếm - nơi gắn liền với món chả cá nghệ thì là nức tiếng Hà Nội. Phục vụ theo kiểu chảo nóng xào thì là/hành hoa ngay tại bàn, ăn kèm bún, rau thơm, lạc rang và mắm tôm hoặc nước mắm.",
-  "cuisineType": "Vietnamese",
+  "cuisineType": "Việt Nam",
   "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Cha%20ca%20La%20Vong.jpg",
   "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Grilled%20fish%20%40%20Cha%20Ca%20La%20Vong.jpg",
   "defaultCurrency": "VND",

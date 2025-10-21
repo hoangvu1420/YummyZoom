@@ -31,6 +31,7 @@ public class InfoContractTests
             new ContactInfoDto("123-456-7890", "test@example.com"),
             "Mon-Fri 09:00-17:00",
             DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow,
             distanceKm);
 
     [Test]

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.RegularExpressions;
 using Dapper;
 using YummyZoom.Application.Common.Interfaces;
@@ -182,6 +183,7 @@ LIMIT 1;
 
         var currentTime = _timeProvider.GetUtcNow();
         bool isOpenNow = ComputeIsOpenNow(row.BusinessHours, currentTime);
+        var restaurantTags = await LoadRestaurantTagsAsync(conn, row.Id, ct);
 
         var dto = new SearchIndexUpsert
         {
@@ -191,7 +193,7 @@ LIMIT 1;
             Name = row.Name,
             Description = row.Description,
             Cuisine = row.CuisineType,
-            Tags = null,
+            Tags = restaurantTags,
             Keywords = null,
             IsOpenNow = isOpenNow,
             IsAcceptingOrders = row.IsAcceptingOrders,
@@ -257,6 +259,7 @@ UPDATE "SearchIndexItems"
             : null;
 
         bool isOpenNow = ComputeIsOpenNow(parent.BusinessHours, _timeProvider.GetUtcNow());
+        var itemTags = await LoadMenuItemTagsAsync(conn, row.Id, ct);
 
         var dto = new SearchIndexUpsert
         {
@@ -266,7 +269,7 @@ UPDATE "SearchIndexItems"
             Name = row.Name,
             Description = row.Description,
             Cuisine = parent.CuisineType,
-            Tags = null,
+            Tags = itemTags,
             Keywords = null,
             IsOpenNow = isOpenNow,
             IsAcceptingOrders = parent.IsAcceptingOrders,
@@ -362,6 +365,46 @@ WHERE i."RestaurantId" = @RestaurantId AND i."IsDeleted" = FALSE;
         var nowTime = nowUtc.TimeOfDay;
         bool result = nowTime >= start && nowTime <= end;
         return result;
+    }
+
+    private static async Task<string[]?> LoadRestaurantTagsAsync(IDbConnection conn, Guid restaurantId, CancellationToken ct)
+    {
+        const string sql = """
+SELECT COALESCE(ARRAY(
+    SELECT DISTINCT LOWER(TRIM(t."TagName"))
+    FROM "MenuItems" mi
+    CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(mi."DietaryTagIds", '[]'::jsonb)) AS tag_id_text
+    JOIN "Tags" t ON t."Id" = tag_id_text::uuid
+    WHERE mi."RestaurantId" = @RestaurantId
+      AND mi."IsDeleted" = FALSE
+      AND t."IsDeleted" = FALSE
+      AND NULLIF(TRIM(t."TagName"), '') IS NOT NULL
+    ORDER BY LOWER(TRIM(t."TagName"))
+), ARRAY[]::text[]) AS Tags;
+""";
+
+        var tags = await conn.QuerySingleAsync<string[]>(new CommandDefinition(sql, new { RestaurantId = restaurantId }, cancellationToken: ct));
+        return tags.Length == 0 ? null : tags;
+    }
+
+    private static async Task<string[]?> LoadMenuItemTagsAsync(IDbConnection conn, Guid menuItemId, CancellationToken ct)
+    {
+        const string sql = """
+SELECT COALESCE(ARRAY(
+    SELECT DISTINCT LOWER(TRIM(t."TagName"))
+    FROM "MenuItems" mi
+    CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(mi."DietaryTagIds", '[]'::jsonb)) AS tag_id_text
+    JOIN "Tags" t ON t."Id" = tag_id_text::uuid
+    WHERE mi."Id" = @MenuItemId
+      AND mi."IsDeleted" = FALSE
+      AND t."IsDeleted" = FALSE
+      AND NULLIF(TRIM(t."TagName"), '') IS NOT NULL
+    ORDER BY LOWER(TRIM(t."TagName"))
+), ARRAY[]::text[]) AS Tags;
+""";
+
+        var tags = await conn.QuerySingleAsync<string[]>(new CommandDefinition(sql, new { MenuItemId = menuItemId }, cancellationToken: ct));
+        return tags.Length == 0 ? null : tags;
     }
 }
 

@@ -130,9 +130,9 @@ public sealed class UniversalSearchQueryHandler
             var termLength = request.Term.Length;
             if (termLength <= 2)
             {
-                // For very short queries, restrict to prefix match to avoid noisy substring matches
-                // Make prefix check accent-insensitive via unaccent
-                where.Add("unaccent(s.\"Name\") ILIKE unaccent(@prefix)");
+                // For very short queries include prefix matching on the name plus a light-weight
+                // full-text lookup so that accented cuisines/tags still match.
+                where.Add("(unaccent(s.\"Name\") ILIKE unaccent(@prefix) OR s.\"TsAll\" @@ plainto_tsquery('simple', unaccent(@q)))");
                 p.Add("prefix", request.Term + "%");
             }
             else

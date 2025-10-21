@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dapper;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Restaurants.Queries.Common;
@@ -48,6 +47,7 @@ public sealed class GetRestaurantPublicInfoQueryHandler : IRequestHandler<GetRes
                 r."ContactInfo_Email"           AS Email,
                 r."BusinessHours"               AS BusinessHours,
                 r."Created"                     AS EstablishedDate,
+                COALESCE(r."LastModified", r."Created") AS LastModified,
                 CASE 
                     WHEN CAST(@Lat AS double precision) IS NOT NULL AND CAST(@Lng AS double precision) IS NOT NULL 
                          AND r."Geo_Latitude" IS NOT NULL AND r."Geo_Longitude" IS NOT NULL THEN
@@ -60,7 +60,7 @@ public sealed class GetRestaurantPublicInfoQueryHandler : IRequestHandler<GetRes
             WHERE r."Id" = @RestaurantId AND r."IsDeleted" = false AND r."IsVerified" = true
             """;
 
-        var row = await connection.QuerySingleOrDefaultAsync<RestaurantPublicInfoRow>(
+        var row = await connection.QuerySingleOrDefaultAsync<RestaurantPublicInfoData>(
             new CommandDefinition(sql, new { request.RestaurantId, request.Lat, request.Lng }, cancellationToken: cancellationToken));
 
         if (row is null)
@@ -68,68 +68,8 @@ public sealed class GetRestaurantPublicInfoQueryHandler : IRequestHandler<GetRes
             return Result.Failure<RestaurantPublicInfoDto>(GetRestaurantPublicInfoErrors.NotFound);
         }
 
-        // CuisineTags stored as jsonb/text array: parse minimally
-        IReadOnlyList<string> cuisine = [];
-        try
-        {
-            string tagsJson = row.CuisineTagsJson ?? "[]";
-            cuisine = JsonSerializer.Deserialize<List<string>>(tagsJson) ?? [];
-        }
-        catch
-        {
-            cuisine = [];
-        }
-
-        var addressDto = new AddressDto(
-            row.Street,
-            row.City,
-            row.State,
-            row.ZipCode,
-            row.Country);
-
-        var contactInfoDto = new ContactInfoDto(
-            row.PhoneNumber,
-            row.Email);
-
-        var dto = new RestaurantPublicInfoDto(
-            row.RestaurantId,
-            row.Name,
-            row.LogoUrl,
-            row.BackgroundImageUrl,
-            row.Description,
-            row.CuisineType,
-            cuisine,
-            row.IsAcceptingOrders,
-            row.IsVerified,
-            addressDto,
-            contactInfoDto,
-            row.BusinessHours,
-            row.EstablishedDate,
-            row.DistanceKm);
+        var dto = RestaurantPublicInfoMapper.Map(row);
 
         return Result.Success(dto);
     }
-}
-
-file sealed class RestaurantPublicInfoRow
-{
-    public Guid RestaurantId { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string? LogoUrl { get; init; }
-    public string? BackgroundImageUrl { get; init; }
-    public string Description { get; init; } = string.Empty;
-    public string CuisineType { get; init; } = string.Empty;
-    public string? CuisineTagsJson { get; init; }
-    public bool IsAcceptingOrders { get; init; }
-    public bool IsVerified { get; init; }
-    public string Street { get; init; } = string.Empty;
-    public string City { get; init; } = string.Empty;
-    public string State { get; init; } = string.Empty;
-    public string ZipCode { get; init; } = string.Empty;
-    public string Country { get; init; } = string.Empty;
-    public string PhoneNumber { get; init; } = string.Empty;
-    public string Email { get; init; } = string.Empty;
-    public string BusinessHours { get; init; } = string.Empty;
-    public DateTimeOffset EstablishedDate { get; init; }
-    public decimal? DistanceKm { get; init; }
 }

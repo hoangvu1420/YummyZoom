@@ -2,9 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.MenuItems.Commands.CreateMenuItem;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.TagEntity;
+using YummyZoom.Domain.TagEntity.Enums;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -37,6 +40,26 @@ public class UniversalSearchTests : BaseTestFixture
         names.Should().Contain(new[] { "Alpha Cafe", "Alpine Diner" });
         names.Should().NotContain("Beta Bistro");
         res.Value.Page.Items.Should().OnlyContain(i => i.Name.Contains("Al", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Test]
+    public async Task Search_ShouldMatchShortTermAcrossFields()
+    {
+        var restaurantId = await CreateRestaurantAsync("Ẩm Thực Ý", "Ý", null, null);
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new UniversalSearchQuery(
+            Term: "Ý",
+            Latitude: null,
+            Longitude: null,
+            OpenNow: null,
+            Cuisines: null,
+            IncludeFacets: false,
+            PageNumber: 1,
+            PageSize: 10));
+
+        res.ShouldBeSuccessful();
+        res.Value.Page.Items.Should().Contain(i => i.Id == restaurantId);
     }
 
     [Test]
@@ -131,44 +154,64 @@ public class UniversalSearchTests : BaseTestFixture
     [Test]
     public async Task Facets_ShouldReturnTags_WhenTagsPresent()
     {
-        var r1 = await CreateRestaurantAsync("Tag R1", "Italian", null, null);
-        var r2 = await CreateRestaurantAsync("Tag R2", "Italian", null, null);
-        var r3 = await CreateRestaurantAsync("Tag R3", "Cafe", null, null);
-        await DrainOutboxAsync();
-
-        using (var scope = CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var tags1 = new[] { "vegan" };
-            var tags2 = new[] { "vegan", "spicy" };
-            var tags3 = new[] { "gluten-free" };
-            await db.Database.ExecuteSqlInterpolatedAsync($@"
-                UPDATE ""SearchIndexItems"" SET ""Tags"" = {tags1} WHERE ""Id"" = {r1};
-                UPDATE ""SearchIndexItems"" SET ""Tags"" = {tags2} WHERE ""Id"" = {r2};
-                UPDATE ""SearchIndexItems"" SET ""Tags"" = {tags3} WHERE ""Id"" = {r3};
-            ");
-        }
+        var seed = await SeedMenuItemsWithTagsAsync();
 
         var res = await SendAsync(new UniversalSearchQuery(
-            Term: null,
+            Term: TagSeedSearchTerm,
             Latitude: null,
             Longitude: null,
             OpenNow: null,
             Cuisines: null,
+            Tags: null,
+            PriceBands: null,
+            EntityTypes: new[] { "menu_item" },
+            Bbox: null,
+            Sort: null,
             IncludeFacets: true,
             PageNumber: 1,
             PageSize: 10));
 
         res.ShouldBeSuccessful();
+
+        res.Value.Page.Items.Should().HaveCount(seed.ItemNames.Count);
+        res.Value.Page.Items.Select(i => i.Name)
+            .Should().BeEquivalentTo(seed.ItemNames);
+
         var dict = res.Value.Facets.Tags
             .ToDictionary(x => x.Value, x => x.Count, StringComparer.OrdinalIgnoreCase);
 
-        dict.Should().ContainKey("vegan");
-        dict["vegan"].Should().Be(2);
-        dict.Should().ContainKey("spicy");
-        dict["spicy"].Should().Be(1);
-        dict.Should().ContainKey("gluten-free");
-        dict["gluten-free"].Should().Be(1);
+        foreach (var expected in seed.ExpectedCounts)
+        {
+            dict.Should().ContainKey(expected.Key);
+            dict[expected.Key].Should().Be(expected.Value);
+        }
+    }
+
+    [Test]
+    public async Task Search_ShouldMatchMenuItems_WhenSearchingByTag()
+    {
+        var seed = await SeedMenuItemsWithTagsAsync();
+
+        var res = await SendAsync(new UniversalSearchQuery(
+            Term: "vegan",
+            Latitude: null,
+            Longitude: null,
+            OpenNow: null,
+            Cuisines: null,
+            Tags: null,
+            PriceBands: null,
+            EntityTypes: new[] { "menu_item" },
+            Bbox: null,
+            Sort: null,
+            IncludeFacets: false,
+            PageNumber: 1,
+            PageSize: 10));
+
+        res.ShouldBeSuccessful();
+        var names = res.Value.Page.Items.Select(i => i.Name).ToList();
+        names.Should().Contain(seed.ItemNames[0]);
+        names.Should().Contain(seed.ItemNames[1]);
+        names.Should().NotContain(seed.ItemNames[2]);
     }
 
     [Test]
@@ -556,6 +599,74 @@ public class UniversalSearchTests : BaseTestFixture
             PageSize: 10));
 
         res.ShouldBeSuccessful();
+    }
+
+    private const string TagSeedSearchTerm = "TagSeed";
+
+    private sealed record TagSeedData(IReadOnlyList<string> ItemNames, IReadOnlyDictionary<string, int> ExpectedCounts);
+
+    private static async Task<TagSeedData> SeedMenuItemsWithTagsAsync()
+    {
+        var veganTagId = await CreateDietaryTagAsync("Vegan");
+        var spicyTagId = await CreateDietaryTagAsync("Spicy");
+        var glutenFreeTagId = await CreateDietaryTagAsync("Gluten-Free");
+
+        await RunAsRestaurantStaffAsync("tag-seed-staff@yummyzoom.test", Testing.TestData.DefaultRestaurantId);
+
+        var categoryId = Testing.TestData.GetMenuCategoryId("Main Dishes");
+        var itemNames = new[]
+        {
+            $"{TagSeedSearchTerm} Item A",
+            $"{TagSeedSearchTerm} Item B",
+            $"{TagSeedSearchTerm} Item C"
+        };
+
+        await SendAsync(new CreateMenuItemCommand(
+            RestaurantId: Testing.TestData.DefaultRestaurantId,
+            MenuCategoryId: categoryId,
+            Name: itemNames[0],
+            Description: "Seed item A",
+            Price: 11.50m,
+            Currency: "USD",
+            DietaryTagIds: new List<Guid> { veganTagId }));
+
+        await SendAsync(new CreateMenuItemCommand(
+            RestaurantId: Testing.TestData.DefaultRestaurantId,
+            MenuCategoryId: categoryId,
+            Name: itemNames[1],
+            Description: "Seed item B",
+            Price: 12.25m,
+            Currency: "USD",
+            DietaryTagIds: new List<Guid> { veganTagId, spicyTagId }));
+
+        await SendAsync(new CreateMenuItemCommand(
+            RestaurantId: Testing.TestData.DefaultRestaurantId,
+            MenuCategoryId: categoryId,
+            Name: itemNames[2],
+            Description: "Seed item C",
+            Price: 9.75m,
+            Currency: "USD",
+            DietaryTagIds: new List<Guid> { glutenFreeTagId }));
+
+        await DrainOutboxAsync();
+
+        var expectedCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["vegan"] = 2,
+            ["spicy"] = 1,
+            ["gluten-free"] = 1
+        };
+
+        return new TagSeedData(itemNames, expectedCounts);
+    }
+
+    private static async Task<Guid> CreateDietaryTagAsync(string tagName)
+    {
+        var tagResult = Tag.Create(tagName, TagCategory.Dietary);
+        tagResult.ShouldBeSuccessful();
+        var tag = tagResult.Value;
+        await AddAsync(tag);
+        return tag.Id.Value;
     }
 
     private static async Task<Guid> CreateRestaurantAsync(string name, string cuisine, double? lat, double? lon)

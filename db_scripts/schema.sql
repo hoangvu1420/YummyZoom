@@ -717,6 +717,22 @@ COMMENT ON COLUMN public."MenuCategories"."DeletedBy" IS 'Identifier of who dele
 
 
 --
+-- Name: MenuItemSalesSummaries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."MenuItemSalesSummaries" (
+    "RestaurantId" uuid NOT NULL,
+    "MenuItemId" uuid NOT NULL,
+    "LifetimeQuantity" bigint DEFAULT 0 NOT NULL,
+    "Rolling7DayQuantity" bigint DEFAULT 0 NOT NULL,
+    "Rolling30DayQuantity" bigint DEFAULT 0 NOT NULL,
+    "LastSoldAt" timestamp with time zone,
+    "LastUpdatedAt" timestamp with time zone NOT NULL,
+    "SourceVersion" bigint DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: MenuItems; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1773,6 +1789,14 @@ ALTER TABLE ONLY public."MenuCategories"
 
 
 --
+-- Name: MenuItemSalesSummaries PK_MenuItemSalesSummaries; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."MenuItemSalesSummaries"
+    ADD CONSTRAINT "PK_MenuItemSalesSummaries" PRIMARY KEY ("RestaurantId", "MenuItemId");
+
+
+--
 -- Name: MenuItems PK_MenuItems; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2228,6 +2252,20 @@ CREATE INDEX "IX_MenuCategory_LastModified" ON public."MenuCategories" USING btr
 
 
 --
+-- Name: IX_MenuItemSalesSummaries_LastUpdatedAt; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "IX_MenuItemSalesSummaries_LastUpdatedAt" ON public."MenuItemSalesSummaries" USING btree ("LastUpdatedAt");
+
+
+--
+-- Name: IX_MenuItemSalesSummaries_MenuItemId; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "IX_MenuItemSalesSummaries_MenuItemId" ON public."MenuItemSalesSummaries" USING btree ("MenuItemId");
+
+
+--
 -- Name: IX_MenuItem_Created; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2505,13 +2543,6 @@ CREATE INDEX "IX_Review_LastModified" ON public."Reviews" USING btree ("LastModi
 --
 
 CREATE INDEX "IX_Reviews_CustomerId" ON public."Reviews" USING btree ("CustomerId");
-
-
---
--- Name: IX_Reviews_OrderId; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "IX_Reviews_OrderId" ON public."Reviews" USING btree ("OrderId");
 
 
 --
@@ -2795,10 +2826,10 @@ CREATE INDEX "SIDX_Updated_At" ON public."SearchIndexItems" USING btree ("Update
 
 
 --
--- Name: UX_Reviews_Restaurant_Customer_Active; Type: INDEX; Schema: public; Owner: -
+-- Name: UX_Reviews_OrderId_Unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "UX_Reviews_Restaurant_Customer_Active" ON public."Reviews" USING btree ("RestaurantId", "CustomerId") WHERE ("IsDeleted" = false);
+CREATE UNIQUE INDEX "UX_Reviews_OrderId_Unique" ON public."Reviews" USING btree ("OrderId") WHERE ("IsDeleted" = false);
 
 
 --

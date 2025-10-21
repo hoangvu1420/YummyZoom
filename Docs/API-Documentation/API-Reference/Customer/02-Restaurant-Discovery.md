@@ -10,9 +10,64 @@ Restaurant discovery in YummyZoom provides multiple ways to find restaurants:
 - **Autocomplete**: Quick suggestions for search terms
 - **Restaurant Search**: Dedicated restaurant search with location and rating filters
 - **Menu Browsing**: View complete restaurant menus with categories and items
+- **Aggregated Details**: Fetch restaurant info, menu, and review summary in one call
 - **Review System**: Access restaurant ratings and customer reviews
 
 All endpoints in this section are **public** and require no authentication.
+
+---
+
+## Home: Active Deals
+
+Surfaces restaurants that currently have active, enabled coupons. Intended for the search entry “Promotions/Featured” row.
+
+**`GET /api/v1/home/active-deals`**
+
+- **Authorization:** Public
+
+#### Query Parameters
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `limit` | `number` | Max number of cards to return. Range 1–50. | `10` |
+
+#### Response
+
+**• 200 OK**
+```json
+[
+  {
+    "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "name": "Mario's Italian Bistro",
+    "logoUrl": "https://cdn.example.com/r/mario-logo.png",
+    "bestCouponLabel": "20% off"
+  },
+  {
+    "restaurantId": "0ad7f1cb-0a3c-4d6e-9f2a-6bb8b2f3e0c1",
+    "name": "Sushi Garden",
+    "logoUrl": null,
+    "bestCouponLabel": "5 off"
+  }
+]
+```
+
+#### Card Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `restaurantId` | `UUID` | Restaurant identifier |
+| `name` | `string` | Restaurant display name |
+| `logoUrl` | `string|null` | Optional logo image URL |
+| `bestCouponLabel` | `string` | Human-friendly label derived from the best available coupon (e.g., "20% off", "5 off", "Free item") |
+
+#### Business Rules
+- Only includes restaurants with at least one active, enabled coupon within its validity window.
+- When multiple coupons exist for a restaurant, the “best” label is selected by:
+  1) Prefer percentage over fixed amount over free item.
+  2) For percentage, higher percentage first; for fixed amount, higher amount first.
+  3) For ties, earlier expiry is preferred.
+- Results are limited by `limit` and returned in a deterministic order based on the above ranking.
+- This endpoint does not compute user-specific eligibility (e.g., per-user usage limits); it reflects general availability.
 
 ---
 
@@ -375,6 +430,8 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 | `lng` | `number` | Longitude for distance computation | `null` |
 | `radiusKm` | `number` | Reserved for future map viewport/radius (not supported in MVP) | `null` |
 | `minRating` | `number` | Minimum average rating (1.0-5.0) | `null` |
+| `discountedOnly` | `boolean` | When `true`, only restaurants with an active, enabled coupon (current UTC time between validity start/end) are returned. | `false` |
+| `includeFacets` | `boolean` | Return `{ page, facets }` payload with cuisine/tag/priceBand buckets and `openNowCount`. When `false`, the response remains the original paginated list shape. | `false` |
 | `pageNumber` | `number` | Page number for pagination | `1` |
 | `pageSize` | `number` | Number of results per page | `10` |
 | `sort` | `string` | Sort order: `rating`, `distance` (requires `lat`/`lng`), or `popularity`. | `null` |
@@ -440,6 +497,52 @@ Dedicated endpoint for searching restaurants with location and rating filters.
 - Tag names are globally unique; filtering by `tags` uses an exact, case-insensitive match on tag names.
 - `tags` and `tagIds` are combined with OR logic: if both are provided, a restaurant matches when it has at least one menu item with any listed tag name or ID.
 - Matching considers active, non-deleted menu items from verified restaurants only.
+
+#### Discount Filter Behavior
+
+- Use `discountedOnly=true` to return only restaurants that have at least one enabled coupon whose validity window includes the current UTC timestamp.
+- The discount filter is additive; it works alongside other query parameters (e.g., `minRating`, `bbox`, `tags`) so only restaurants meeting every supplied criterion are returned.
+
+#### Faceted Response (`includeFacets=true`)
+
+- When `includeFacets=true`, the response is wrapped in `{ "page": { ... }, "facets": { ... } }`.
+- `page` retains the original pagination metadata and restaurant result items.
+- `facets.cuisines` and `facets.tags` return lowercase values with counts based on the filtered restaurant set.
+- `facets.priceBands` is currently empty (returned as `[]`) until price band data is populated.
+- `facets.openNowCount` reports how many filtered restaurants are currently accepting orders.
+
+**Example (`includeFacets=true`):**
+```json
+{
+  "page": {
+    "items": [
+      {
+        "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Mario's Italian Bistro",
+        "cuisineTags": ["Italian"],
+        "avgRating": 4.5,
+        "ratingCount": 127,
+        "city": "San Francisco"
+      }
+    ],
+    "pageNumber": 1,
+    "totalPages": 1,
+    "totalCount": 1,
+    "hasPreviousPage": false,
+    "hasNextPage": false
+  },
+  "facets": {
+    "cuisines": [
+      { "value": "italian", "count": 1 }
+    ],
+    "tags": [
+      { "value": "gluten-free", "count": 1 }
+    ],
+    "priceBands": [],
+    "openNowCount": 1
+  }
+}
+```
 
 
 ### Get Restaurant Information
@@ -912,6 +1015,112 @@ Retrieves aggregated review statistics for a restaurant.
 | `lastReviewAtUtc` | `string|  `itemId` | `UUID` | Menu item identifier | |null` | ISO 8601 timestamp of most recent review |
 | `updatedAtUtc` | `string` | ISO 8601 timestamp when summary was last updated |
 
+### Get Aggregated Restaurant Details
+
+Retrieve public restaurant info, full menu JSON, and review summary in a single call.
+
+**`GET /api/v1/restaurants/{restaurantId}/details`**
+
+- **Authorization:** Public
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `restaurantId` | `UUID` | Yes | Unique identifier of the restaurant |
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `lat` | `number` | No | Latitude for distance calculation. Must be between -90 and 90. Provide alongside `lng`. |
+| `lng` | `number` | No | Longitude for distance calculation. Must be between -180 and 180. Provide alongside `lat`. |
+
+> **Note**
+>
+> This endpoint mirrors the query parameters and behaviors of `/info`, `/menu`, and `/reviews/summary`. When those endpoints add new toggles or filters, the aggregated response surfaces them automatically so clients can avoid multiple network calls.
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "info": {
+    "restaurantId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "name": "Mario's Italian Bistro",
+    "logoUrl": "https://cdn.yummyzoom.com/logos/marios.jpg",
+    "backgroundImageUrl": "https://cdn.yummyzoom.com/backgrounds/marios-bg.jpg",
+    "description": "Authentic Italian cuisine in the heart of San Francisco",
+    "cuisineType": "Italian",
+    "cuisineTags": ["Italian", "Mediterranean"],
+    "isAcceptingOrders": true,
+    "isVerified": true,
+    "address": {
+      "street": "123 Market Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "zipCode": "94102",
+      "country": "USA"
+    },
+    "contactInfo": {
+      "phoneNumber": "+1-415-555-0100",
+      "email": "hello@marios.example"
+    },
+    "businessHours": "Mon-Sun 11:00-22:00",
+    "establishedDate": "2012-05-01T00:00:00Z",
+    "avgRating": 4.5,
+    "ratingCount": 278,
+    "distanceKm": 1.8
+  },
+  "menu": {
+    "lastRebuiltAt": "2025-10-18T01:22:44Z",
+    "data": {
+      "menus": [
+        {
+          "id": "dinner",
+          "name": "Dinner Menu",
+          "categories": [
+            {
+              "id": "starters",
+              "name": "Starters",
+              "items": [
+                {
+                  "id": "bruschetta",
+                  "name": "Tomato Basil Bruschetta",
+                  "price": 8.5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "reviewSummary": {
+    "averageRating": 4.5,
+    "totalReviews": 278,
+    "ratings1": 5,
+    "ratings2": 8,
+    "ratings3": 25,
+    "ratings4": 80,
+    "ratings5": 160,
+    "totalWithText": 140,
+    "lastReviewAtUtc": "2025-10-17T20:15:00Z",
+    "updatedAtUtc": "2025-10-18T11:05:17Z"
+  },
+  "lastChangedUtc": "2025-10-18T11:05:17Z"
+}
+```
+
+#### Caching Behavior
+- When no personalization parameters are provided, the response includes `ETag`, `Last-Modified`, and `Cache-Control: public, max-age=120`. Send `If-None-Match` or `If-Modified-Since` to receive `304 Not Modified` when nothing changed.
+- When `lat`/`lng` are provided, caching is bypassed (`Cache-Control: no-store`) and no ETag is emitted to avoid reusing location-personalized content.
+
+#### Error Responses
+- **404 Not Found** – Restaurant is missing, deleted, or not publicly verified.
+- **304 Not Modified** – Returned automatically when validators match current state (only when cacheable).
+- **500 Internal Server Error** – Unexpected failure.
+
 ---
 
 ## Business Rules & Validations
@@ -984,6 +1193,7 @@ All endpoints return standard HTTP status codes and problem details:
 
 ### Caching Strategy
 - **Menu data**: Cached for 5 minutes with ETag support
+- **Aggregated details**: Cached for 2 minutes with conditional requests when no personalization parameters are used
 - **Restaurant info**: Cached for 2 minutes
 - **Search results**: Not cached due to dynamic nature
 - **Review summaries**: Cached with invalidation on new reviews

@@ -166,6 +166,17 @@ public class AutocompleteTests : BaseTestFixture
     }
 
     [Test]
+    public async Task ShortTerm_ShouldMatchCuisine()
+    {
+        await CreateRestaurantAsync("Rau Củ Đà Lạt", "Ý");
+        await DrainOutboxAsync();
+
+        var res = await SendAsync(new AutocompleteQuery("Ý"));
+        res.ShouldBeSuccessful();
+        res.Value.Select(s => s.Name).Should().Contain(n => n.Contains("Rau Củ", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Test]
     public async Task Validation_ShouldFail_OnEmptyOrTooLongTerm()
     {
         var empty = () => SendAsync(new AutocompleteQuery(""));
