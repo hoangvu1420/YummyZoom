@@ -3,8 +3,8 @@
   "name": "El Camino Taqueria",
   "description": "Tacos kiểu đường phố và món Mexico hiện đại – bánh tortilla bắp/mì, thịt nướng tẩm vị, sốt salsa tươi, đồ uống truyền thống.",
   "cuisineType": "Mexican",
-  "logoUrl": "https://static.vecteezy.com/system/resources/previews/053/407/820/large_2x/playful-taco-restaurant-logo-with-sombrero-and-maracas-vector.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/c9/TaqueriaGuerrero.JPG",
+  "logoUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120013/yummyzoom/restaurants/el-camino-taqueria/profile/playful-taco-restaur_2b9fc037.jpg",
+  "backgroundImageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118672/yummyzoom/restaurants/el-camino-taqueria/profile/TaqueriaGuerrero_0ab8ee9c.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -30,13 +30,13 @@
       "choices": [
         {
           "name": "Bắp (Corn)",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": true,
           "displayOrder": 1
         },
         {
           "name": "Bột mì (Flour)",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": false,
           "displayOrder": 2
         }
@@ -49,19 +49,19 @@
       "choices": [
         {
           "name": "Nhẹ (Mild)",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": true,
           "displayOrder": 1
         },
         {
           "name": "Vừa (Medium)",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Cay (Hot)",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": false,
           "displayOrder": 3
         }
@@ -74,25 +74,25 @@
       "choices": [
         {
           "name": "Guacamole",
-          "priceAdjustment": 20000.00,
+          "priceAdjustment": 20000.0,
           "isDefault": false,
           "displayOrder": 1
         },
         {
           "name": "Cheese thêm",
-          "priceAdjustment": 15000.00,
+          "priceAdjustment": 15000.0,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Pico de Gallo",
-          "priceAdjustment": 10000.00,
+          "priceAdjustment": 10000.0,
           "isDefault": false,
           "displayOrder": 3
         },
         {
           "name": "Kem chua",
-          "priceAdjustment": 10000.00,
+          "priceAdjustment": 10000.0,
           "isDefault": false,
           "displayOrder": 4
         }
@@ -110,8 +110,8 @@
           {
             "name": "Chips & Salsa",
             "description": "Tortilla chips giòn với salsa đỏ tươi",
-            "basePrice": 59000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/7/73/Tortilla_Chips.jpg",
+            "basePrice": 59000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118676/yummyzoom/restaurants/el-camino-taqueria/menu-items/Tortilla_Chips_3f29b34e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay"
@@ -120,8 +120,8 @@
           {
             "name": "Guacamole",
             "description": "Bơ nghiền, chanh, hành tím, ngò – kèm chips",
-            "basePrice": 89000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Guacamole.jpg",
+            "basePrice": 89000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118679/yummyzoom/restaurants/el-camino-taqueria/menu-items/Guacamole_83e476f3.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -132,8 +132,8 @@
           {
             "name": "Queso Fundido",
             "description": "Phô mai tan chảy, ăn kèm tortilla",
-            "basePrice": 99000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/9/9e/Queso_fundido_con_chorizo_-_Puebla.jpg",
+            "basePrice": 99000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118681/yummyzoom/restaurants/el-camino-taqueria/menu-items/Queso_fundido_con_ch_2067b1a7.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -143,8 +143,8 @@
           {
             "name": "Elote (Bắp nướng)",
             "description": "Bắp nướng phủ mayo, cotija, ớt bột, chanh",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/67/Elote_recipe.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118683/yummyzoom/restaurants/el-camino-taqueria/menu-items/Elote_recipe_789f9556.jpg",
             "isAvailable": true
           }
         ]
@@ -156,8 +156,8 @@
           {
             "name": "Taco Al Pastor",
             "description": "Thịt heo quay xiên ướp annatto & dứa, hành, ngò",
-            "basePrice": 65000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tacos_al_Pastor.jpg",
+            "basePrice": 65000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118688/yummyzoom/restaurants/el-camino-taqueria/menu-items/Tacos_al_Pastor_a444f7c7.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -174,8 +174,8 @@
           {
             "name": "Taco Carne Asada",
             "description": "Bò nướng thái hạt lựu, hành ngò, chanh",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Carne_asada_tacos.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118690/yummyzoom/restaurants/el-camino-taqueria/menu-items/Carne_asada_tacos_1137904c.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -192,8 +192,8 @@
           {
             "name": "Taco Gà (Pollo)",
             "description": "Gà ướp chanh tỏi nướng, bắp cải tím, sốt kem",
-            "basePrice": 65000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken_tacos.jpg",
+            "basePrice": 65000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118693/yummyzoom/restaurants/el-camino-taqueria/menu-items/Chicken_tacos_8f01e92f.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -210,8 +210,8 @@
           {
             "name": "Taco Cá kiểu Baja",
             "description": "Cá chiên giòn, bắp cải, sốt crema chanh",
-            "basePrice": 75000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/65/Fish_Taco_Ensenada_style.jpg",
+            "basePrice": 75000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118699/yummyzoom/restaurants/el-camino-taqueria/menu-items/Fish_Taco_Ensenada_s_c47e1f52.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -228,8 +228,8 @@
           {
             "name": "Burrito Carne Asada",
             "description": "Cơm Mexico, đậu đen, bò nướng, phô mai, salsa",
-            "basePrice": 129000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/1/17/Shredded_pork_burrito.jpg",
+            "basePrice": 129000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118702/yummyzoom/restaurants/el-camino-taqueria/menu-items/Shredded_pork_burrit_0e80b619.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -246,10 +246,9 @@
           {
             "name": "Quesadilla Phô mai",
             "description": "Bánh tortilla kẹp phô mai nướng vàng",
-            "basePrice": 109000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Quesadilla.jpg",
+            "basePrice": 109000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118705/yummyzoom/restaurants/el-camino-taqueria/menu-items/Quesadilla_265c3233.jpg",
             "isAvailable": true,
-            
             "dietaryTags": [
               "Mexico",
               "Phổ biến",
@@ -264,8 +263,8 @@
           {
             "name": "Nachos Supreme",
             "description": "Chips phủ phô mai, đậu đen, pico, jalapeño",
-            "basePrice": 99000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Nachos_supreme.jpg",
+            "basePrice": 99000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118714/yummyzoom/restaurants/el-camino-taqueria/menu-items/Nachos_supreme_b80ce52b.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Mexico",
@@ -286,22 +285,22 @@
           {
             "name": "Churros",
             "description": "Bánh rán quẩy Tây Ban Nha lăn quế đường, sốt sô-cô-la",
-            "basePrice": 59000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Churros.jpg",
+            "basePrice": 59000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118718/yummyzoom/restaurants/el-camino-taqueria/menu-items/Churros_e9c76b2d.jpg",
             "isAvailable": true
           },
           {
             "name": "Bánh Tres Leches",
             "description": "Bánh bông lan thấm ba loại sữa, kem tươi",
-            "basePrice": 79000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/ca/Tres_leches_cake.jpg",
+            "basePrice": 79000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118725/yummyzoom/restaurants/el-camino-taqueria/menu-items/Tres_leches_cake_6616b365.jpg",
             "isAvailable": true
           },
           {
             "name": "Flan Caramen",
             "description": "Bánh flan nướng mềm mịn, sốt caramen",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/64/Cr%C3%A8me_caramel_2.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118731/yummyzoom/restaurants/el-camino-taqueria/menu-items/Cr%C3%A8me_caramel_2_1dba8c36.jpg",
             "isAvailable": true
           }
         ]
@@ -313,36 +312,36 @@
           {
             "name": "Horchata",
             "description": "Nước gạo quế lạnh, béo nhẹ",
-            "basePrice": 39000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Horchata_de_arroz.jpg",
+            "basePrice": 39000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118737/yummyzoom/restaurants/el-camino-taqueria/menu-items/Horchata_de_arroz_0ae037c2.jpg",
             "isAvailable": true
           },
           {
             "name": "Agua de Jamaica",
             "description": "Trà hoa dâm bụt chua ngọt, uống lạnh",
-            "basePrice": 39000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Agua_de_Jamaica.jpg",
+            "basePrice": 39000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118742/yummyzoom/restaurants/el-camino-taqueria/menu-items/Agua_de_Jamaica_f8fa3cc3.jpg",
             "isAvailable": true
           },
           {
             "name": "Jarritos (các vị)",
             "description": "Nước ngọt Mexico – cam, xoài, chanh dây…",
-            "basePrice": 49000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Jarritos_flavors.jpg",
+            "basePrice": 49000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118745/yummyzoom/restaurants/el-camino-taqueria/menu-items/Jarritos_flavors_3af43f34.jpg",
             "isAvailable": true
           },
           {
             "name": "Mexican Coke",
             "description": "Coca-Cola chai Mexico",
-            "basePrice": 49000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/a4/Mexicoke.jpg",
+            "basePrice": 49000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118749/yummyzoom/restaurants/el-camino-taqueria/menu-items/Mexicoke_1001e57d.jpg",
             "isAvailable": true
           },
           {
             "name": "Nước khoáng có ga",
             "description": "Uống lạnh với lát chanh",
-            "basePrice": 39000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/cf/Sparkling_Water_with_Mint_in_Glass_Cup.jpg",
+            "basePrice": 39000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118755/yummyzoom/restaurants/el-camino-taqueria/menu-items/Sparkling_Water_with_9cce3fc8.jpg",
             "isAvailable": true
           }
         ]

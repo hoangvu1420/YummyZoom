@@ -3,8 +3,8 @@
   "name": "Sakura Sushi",
   "description": "Sushi tươi mỗi ngày và món Nhật yêu thích - nigiri, sashimi, cuốn maki, donburi, mì nóng.",
   "cuisineType": "Nhật Bản",
-  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://img.freepik.com/premium-vector/japanese-sushi-restaurant-logo-design-inspiration_500223-504.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/b/bc/Sushi_station_in_clipper_lounge.jpg",
+  "logoUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118786/yummyzoom/restaurants/sakura-sushi/profile/japanese-sushi-resta_e183fe12.jpg",
+  "backgroundImageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118790/yummyzoom/restaurants/sakura-sushi/profile/Sushi_station_in_cli_48496d6b.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -30,13 +30,13 @@
       "choices": [
         {
           "name": "Shoyu thường",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": true,
           "displayOrder": 1
         },
         {
           "name": "Shoyu ít muối",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": false,
           "displayOrder": 2
         }
@@ -49,19 +49,19 @@
       "choices": [
         {
           "name": "Thêm wasabi",
-          "priceAdjustment": 5000.00,
+          "priceAdjustment": 5000.0,
           "isDefault": false,
           "displayOrder": 1
         },
         {
           "name": "Thêm gừng hồng",
-          "priceAdjustment": 5000.00,
+          "priceAdjustment": 5000.0,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Sốt mayo cay",
-          "priceAdjustment": 7000.00,
+          "priceAdjustment": 7000.0,
           "isDefault": false,
           "displayOrder": 3
         }
@@ -74,13 +74,13 @@
       "choices": [
         {
           "name": "6 miếng",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": true,
           "displayOrder": 1
         },
         {
           "name": "8 miếng",
-          "priceAdjustment": 20000.00,
+          "priceAdjustment": 20000.0,
           "isDefault": false,
           "displayOrder": 2
         }
@@ -98,8 +98,8 @@
           {
             "name": "Edamame",
             "description": "Đậu nành Nhật luộc, rắc muối biển",
-            "basePrice": 49000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/8/87/Edamame_on_a_bamboo_bowl_by_yomi955.jpg",
+            "basePrice": 49000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118793/yummyzoom/restaurants/sakura-sushi/menu-items/Edamame_on_a_bamboo__2f5d1e01.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -110,22 +110,22 @@
           {
             "name": "Gyoza chiên",
             "description": "Há cảo Nhật áp chảo, sốt chấm",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/2/28/Gyoza_-_Tora.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118795/yummyzoom/restaurants/sakura-sushi/menu-items/Gyoza_-_Tora_0a17ef30.jpg",
             "isAvailable": true
           },
           {
             "name": "Súp miso",
             "description": "Nước dùng kombu–katsuobushi, đậu phụ, rong biển",
-            "basePrice": 39000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Miso_soup.jpg",
+            "basePrice": 39000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118798/yummyzoom/restaurants/sakura-sushi/menu-items/Miso_soup_e42211dc.jpg",
             "isAvailable": true
           },
           {
             "name": "Salad rong biển",
             "description": "Wakame giòn, mè rang, sốt gừng",
-            "basePrice": 59000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Wakame_salad.jpg",
+            "basePrice": 59000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120495/yummyzoom/restaurants/sakura-sushi/menu-items/Wakame_salad_cd9f4c60.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -135,8 +135,8 @@
           {
             "name": "Agedashi Tofu",
             "description": "Đậu phụ chiên xốt tsuyu, bonito/flakes",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Agedashi_tofu.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118806/yummyzoom/restaurants/sakura-sushi/menu-items/Agedashi_tofu_9582f014.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -152,8 +152,8 @@
           {
             "name": "Nigiri cá hồi (2 miếng)",
             "description": "Cơm sushi + cá hồi tươi",
-            "basePrice": 75000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Salmon_nigiri.jpg",
+            "basePrice": 75000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118810/yummyzoom/restaurants/sakura-sushi/menu-items/Salmon_nigiri_5fb3f787.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -167,8 +167,8 @@
           {
             "name": "Nigiri cá ngừ (2 miếng)",
             "description": "Cơm sushi + cá ngừ đỏ",
-            "basePrice": 79000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3b/8nig_maguro_kihada_s.jpg",
+            "basePrice": 79000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118813/yummyzoom/restaurants/sakura-sushi/menu-items/8nig_maguro_kihada_s_5e9d6aff.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -182,8 +182,8 @@
           {
             "name": "Nigiri tôm (2 miếng)",
             "description": "Cơm sushi + ebi luộc",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/a1/Nigiri_Sushi_%2826478732232%29.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118818/yummyzoom/restaurants/sakura-sushi/menu-items/Nigiri_Sushi_2647873_61410f8e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -197,8 +197,8 @@
           {
             "name": "Nigiri trứng (2 miếng)",
             "description": "Cơm sushi + trứng cuộn",
-            "basePrice": 59000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/a/af/Nigiri_Sushi_%2826505096851%29.jpg",
+            "basePrice": 59000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118823/yummyzoom/restaurants/sakura-sushi/menu-items/Nigiri_Sushi_2650509_de936725.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay"
@@ -211,8 +211,8 @@
           {
             "name": "Sashimi tổng hợp",
             "description": "Cá hồi, cá ngừ, bạch tuộc/tuỳ mùa",
-            "basePrice": 219000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/e/e4/Sashimi_Moriawase.JPG",
+            "basePrice": 219000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118829/yummyzoom/restaurants/sakura-sushi/menu-items/Sashimi_Moriawase_55a72d63.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -232,8 +232,8 @@
           {
             "name": "California Roll",
             "description": "Cua/giả cua, bơ, dưa leo, mè",
-            "basePrice": 119000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/California_roll.jpg",
+            "basePrice": 119000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118832/yummyzoom/restaurants/sakura-sushi/menu-items/California_roll_ecb263f6.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Số lượng cuốn",
@@ -243,8 +243,8 @@
           {
             "name": "Spicy Tuna Roll",
             "description": "Cá ngừ trộn mayo cay, hành lá",
-            "basePrice": 129000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spicy_tuna_roll.jpg",
+            "basePrice": 129000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118839/yummyzoom/restaurants/sakura-sushi/menu-items/Spicy_tuna_roll_7472f4fe.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Số lượng cuốn",
@@ -254,8 +254,8 @@
           {
             "name": "Dragon Roll",
             "description": "Tôm tempura, bơ, sốt unagi trên mặt",
-            "basePrice": 159000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/5/53/Double_Dragon_Roll_%28brightness_adjusted%29_%283432983831%29.jpg",
+            "basePrice": 159000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118858/yummyzoom/restaurants/sakura-sushi/menu-items/Double_Dragon_Roll_b_3b229d0c.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Số lượng cuốn",
@@ -265,8 +265,8 @@
           {
             "name": "Kappa Maki (chay)",
             "description": "Cuộn dưa leo giòn, mè",
-            "basePrice": 99000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/3d/8hosomak8.jpg",
+            "basePrice": 99000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118860/yummyzoom/restaurants/sakura-sushi/menu-items/8hosomak8_8a17511d.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -286,22 +286,22 @@
           {
             "name": "Chirashi Don",
             "description": "Cơm sushi phủ sashimi tổng hợp",
-            "basePrice": 199000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chirashi-zushi.jpg",
+            "basePrice": 199000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118868/yummyzoom/restaurants/sakura-sushi/menu-items/Chirashi-zushi_769cdd4d.jpg",
             "isAvailable": true
           },
           {
             "name": "Salmon Don",
             "description": "Cơm sushi phủ cá hồi tươi",
-            "basePrice": 179000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/63/Chum_salmon%2Csake-ikura-don%2Csyari-town%2Cjapan.JPG",
+            "basePrice": 179000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118873/yummyzoom/restaurants/sakura-sushi/menu-items/Chum_salmonsake-ikur_ec547f7b.jpg",
             "isAvailable": true
           },
           {
             "name": "Udon nóng",
             "description": "Nước dùng nhẹ, hành lá, chả cá/đậu phụ",
-            "basePrice": 129000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/3/39/TEMPURA_UDON_KISHIMEN_in_Nagoya_Station.jpg",
+            "basePrice": 129000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118877/yummyzoom/restaurants/sakura-sushi/menu-items/TEMPURA_UDON_KISHIME_198c1cc3.jpg",
             "isAvailable": true
           }
         ]
@@ -313,8 +313,8 @@
           {
             "name": "Kem mochi (2 viên)",
             "description": "Mochi lạnh nhân kem – vị theo ngày",
-            "basePrice": 69000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Mochi_Ice_Cream.jpg",
+            "basePrice": 69000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118881/yummyzoom/restaurants/sakura-sushi/menu-items/Mochi_Ice_Cream_1720b9a3.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Nhật",
@@ -324,8 +324,8 @@
           {
             "name": "Bánh phô mai matcha",
             "description": "Cheesecake vị trà xanh",
-            "basePrice": 79000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/7/72/Julia%27s_Japanese_Green_Tea_Cheesecake_in_ramekins.jpg",
+            "basePrice": 79000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118885/yummyzoom/restaurants/sakura-sushi/menu-items/Julias_Japanese_Gree_013ce9d3.jpg",
             "isAvailable": true
           }
         ]
@@ -337,29 +337,29 @@
           {
             "name": "Trà xanh nóng",
             "description": "Matcha ấm, thanh nhẹ",
-            "basePrice": 29000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/e/e8/Hot_Matcha_Green_Tea_Latte_%2836622433756%29.jpg",
+            "basePrice": 29000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118890/yummyzoom/restaurants/sakura-sushi/menu-items/Hot_Matcha_Green_Tea_8ae246a7.jpg",
             "isAvailable": true
           },
           {
             "name": "Matcha latte đá",
             "description": "Matcha, sữa, đá – thơm béo",
-            "basePrice": 49000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Matcha_latte.jpg",
+            "basePrice": 49000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118895/yummyzoom/restaurants/sakura-sushi/menu-items/Matcha_latte_7387a02c.jpg",
             "isAvailable": true
           },
           {
             "name": "Ramune",
             "description": "Soda Nhật chai bi tròn",
-            "basePrice": 45000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/f/f6/Ramune_melon_flavor.JPG",
+            "basePrice": 45000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118899/yummyzoom/restaurants/sakura-sushi/menu-items/Ramune_melon_flavor_3b220384.jpg",
             "isAvailable": true
           },
           {
             "name": "Nước khoáng có ga",
             "description": "Uống lạnh với lát chanh",
-            "basePrice": 39000.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/c/cf/Sparkling_Water_with_Mint_in_Glass_Cup.jpg",
+            "basePrice": 39000.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118755/yummyzoom/restaurants/el-camino-taqueria/menu-items/Sparkling_Water_with_9cce3fc8.jpg",
             "isAvailable": true
           }
         ]
@@ -367,4 +367,3 @@
     ]
   }
 }
-

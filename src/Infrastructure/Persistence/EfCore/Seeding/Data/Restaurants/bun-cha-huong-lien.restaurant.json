@@ -3,8 +3,8 @@
   "name": "Bún Chả Hương Liên",
   "description": "Nhà hàng bún chả truyền thống nổi tiếng với Combo Obama - nơi Tổng thống Obama từng thưởng thức bún chả Hà Nội cùng đầu bếp Anthony Bourdain. Phục vụ các món ăn đường phố Việt Nam chính gốc với hương vị truyền thống, từ bún chả thơm ngon đến nem rán giòn tan.",
   "cuisineType": "Việt Nam",
-  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://hotel84.com/hotel84-images/news/img1/bun-cha-huong-lien.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://kenh14cdn.com/2018/3/10/photo-1-15206627578621251613213.jpg",
+  "logoUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118567/yummyzoom/restaurants/bun-cha-huong-lien/profile/bun-cha-huong-lien_ba69bcb1.jpg",
+  "backgroundImageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118570/yummyzoom/restaurants/bun-cha-huong-lien/profile/photo-1-152066275786_840ca0b1.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -67,7 +67,7 @@
             "name": "Combo Obama",
             "description": "1 Bún chả đặc biệt + 1 Nem hải sản + 1 Bia Hà Nội",
             "basePrice": 120000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://truongdaihocvietnam.com/wp-content/uploads/2023/10/menu-bun-cha-huong-lien.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118572/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/menu-bun-cha-huong-l_176793e4.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -85,7 +85,7 @@
             "name": "The Special Bún Chả",
             "description": "Suất bún chả đặc biệt",
             "basePrice": 60000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun-cha-hanoi.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118576/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Bun-cha-hanoi_06abb3ee.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -102,7 +102,7 @@
             "name": "Bún chả",
             "description": "Thịt nướng ăn kèm bún, rau thơm và nước chấm",
             "basePrice": 50000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bun_cha_hanoi.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118587/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Bun_cha_hanoi_6287d0b2.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -119,7 +119,7 @@
             "name": "Nem hải sản",
             "description": "Nem hải sản chiên (tôm, cua, thịt, rau củ)",
             "basePrice": 35000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_imperial_spring_rolls.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118599/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Vietnamese_imperial__5a9e0425.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -133,7 +133,7 @@
             "name": "Nem cua bể",
             "description": "Nem cua bể chiên",
             "basePrice": 8000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_spring_roll.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118606/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Vietnamese_spring_ro_b45eabed.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -146,7 +146,7 @@
             "name": "Nem chay",
             "description": "Nem rau nấm đậu phụ chiên",
             "basePrice": 7000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetarian_Spring_Rolls_-_Cafe_Mi_Hee_(1087976697).jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118609/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Vegetarian_Spring_Ro_6e3fcafe.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -160,7 +160,7 @@
             "name": "Thịt xiên",
             "description": "Xiên thịt nướng",
             "basePrice": 25000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pork_skewers_on_the_grill_-_Banh_Uot_hawker.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118612/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Pork_skewers_on_the__7fa20a7b.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -173,7 +173,7 @@
             "name": "Bún (thêm)",
             "description": "Phần bún thêm",
             "basePrice": 5000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Rice_Vermicelli_(Rice_Noodle)_of_Taiwan.JPG",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118616/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Rice_Vermicelli_Rice_bbf6aab2.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -191,7 +191,7 @@
             "name": "Khăn ướt",
             "description": "Khăn ướt dùng một lần",
             "basePrice": 3000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://printern.net/wp-content/uploads/2022/10/in-khan-lanh-1.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118618/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/in-khan-lanh-1_75a80048.jpg",
             "isAvailable": true,
             "dietaryTags": []
           },
@@ -199,7 +199,7 @@
             "name": "Nước suối",
             "description": "Chai nước suối",
             "basePrice": 10000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/6/6a/A_bottle_of_water.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118622/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/A_bottle_of_water_95a2bfe3.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -211,7 +211,7 @@
             "name": "Trà đá",
             "description": "Trà xanh đá",
             "basePrice": 15000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vietnamese_Iced_Coffee_Ba_Chi_Canteen.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118629/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Vietnamese_Iced_Coff_078fb04c.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -225,7 +225,7 @@
             "name": "Pepsi",
             "description": "Nước ngọt lon",
             "basePrice": 15000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/d/dd/Pepsi_Can.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118632/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Pepsi_Can_c2d38d70.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -238,7 +238,7 @@
             "name": "Bia Hà Nội",
             "description": "Bia chai Hà Nội",
             "basePrice": 25000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_HaNoi_tai_Sam_Son_030720103241.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118651/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Bia_HaNoi_tai_Sam_So_25f8d4da.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -251,7 +251,7 @@
             "name": "Bia Sài Gòn",
             "description": "Bia chai Sài Gòn",
             "basePrice": 25000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bia_Saigon_Special_beer.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118654/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Bia_Saigon_Special_b_cd5cc331.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -264,7 +264,7 @@
             "name": "Heineken",
             "description": "Bia lon Heineken",
             "basePrice": 30000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://upload.wikimedia.org/wikipedia/commons/0/07/Heineken_Flasche_0.33.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118657/yummyzoom/restaurants/bun-cha-huong-lien/menu-items/Heineken_Flasche_033_b1e44671.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Có cồn",

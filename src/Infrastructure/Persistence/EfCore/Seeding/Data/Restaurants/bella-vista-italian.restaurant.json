@@ -3,8 +3,8 @@
   "name": "Bella Vista Italian",
   "description": "Ẩm thực Ý chuẩn vị ngay giữa khu trung tâm – pizza nướng lò, pasta kem béo, món nướng và tráng miệng đặc trưng.",
   "cuisineType": "Ý",
-  "logoUrl": "https://as2.ftcdn.net/jpg/04/39/16/21/1000_F_439162147_QLs1kmv2A0SzeRXW9X5mplJNyWcXQqzh.jpg",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Douglas%20-%20Italian%20restaurant%20interior%20in%20the%20Sea%20Terminal%20-%20geograph.org.uk%20-%201665164.jpg",
+  "logoUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118442/yummyzoom/restaurants/bella-vista-italian/profile/1000_F_439162147_QLs_c6b359c8.jpg",
+  "backgroundImageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118462/yummyzoom/restaurants/bella-vista-italian/profile/Douglas-Italianresta_95148a0f.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": true,
@@ -30,19 +30,19 @@
       "choices": [
         {
           "name": "Small",
-          "priceAdjustment": 0.00,
+          "priceAdjustment": 0.0,
           "isDefault": true,
           "displayOrder": 1
         },
         {
           "name": "Medium",
-          "priceAdjustment": 24000.00,
+          "priceAdjustment": 24000.0,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Large",
-          "priceAdjustment": 48000.00,
+          "priceAdjustment": 48000.0,
           "isDefault": false,
           "displayOrder": 3
         }
@@ -55,25 +55,25 @@
       "choices": [
         {
           "name": "Extra Cheese",
-          "priceAdjustment": 36000.00,
+          "priceAdjustment": 36000.0,
           "isDefault": false,
           "displayOrder": 1
         },
         {
           "name": "Bacon",
-          "priceAdjustment": 48000.00,
+          "priceAdjustment": 48000.0,
           "isDefault": false,
           "displayOrder": 2
         },
         {
           "name": "Avocado",
-          "priceAdjustment": 60000.00,
+          "priceAdjustment": 60000.0,
           "isDefault": false,
           "displayOrder": 3
         },
         {
           "name": "Mushrooms",
-          "priceAdjustment": 24000.00,
+          "priceAdjustment": 24000.0,
           "isDefault": false,
           "displayOrder": 4
         }
@@ -91,8 +91,8 @@
           {
             "name": "Bruschetta",
             "description": "Bánh mì nướng phủ cà chua, tỏi, húng quế và dầu ô-liu",
-            "basePrice": 191760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bruschetta.jpg",
+            "basePrice": 191760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118468/yummyzoom/restaurants/bella-vista-italian/menu-items/Bruschetta_2d457a21.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -104,8 +104,8 @@
           {
             "name": "Cánh gà sốt tỏi Parmesan",
             "description": "Cánh gà giòn sốt bơ tỏi và phô mai Parmesan",
-            "basePrice": 227760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Buffalo%20Wild%20Wings%20Parmesan%20Garlic%20Boneless%20Wings%20(16083476037).jpg",
+            "basePrice": 227760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118471/yummyzoom/restaurants/bella-vista-italian/menu-items/BuffaloWildWingsParm_14de5bfc.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Ý",
@@ -118,8 +118,8 @@
           {
             "name": "Mực chiên giòn",
             "description": "Mực vòng chiên xù kèm sốt cà chua",
-            "basePrice": 263760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Fried%20calamari.jpg",
+            "basePrice": 263760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118474/yummyzoom/restaurants/bella-vista-italian/menu-items/Friedcalamari_41efce8e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Ý",
@@ -131,8 +131,8 @@
           {
             "name": "Xiên Caprese",
             "description": "Cà chua bi, mozzarella và húng quế rưới dầu ô-liu",
-            "basePrice": 167760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Caprese%20salad%20skewer%20appetizers.jpg",
+            "basePrice": 167760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118479/yummyzoom/restaurants/bella-vista-italian/menu-items/Capresesaladskewerap_d998f5a1.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -145,8 +145,8 @@
           {
             "name": "Nấm nhồi đút lò",
             "description": "Nấm nhồi phô mai/kem, nướng nóng hổi",
-            "basePrice": 203760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Longhorn%20Mushrooms.jpg",
+            "basePrice": 203760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118482/yummyzoom/restaurants/bella-vista-italian/menu-items/LonghornMushrooms_cdae2362.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -159,8 +159,8 @@
           {
             "name": "Sốt kem cải bó xôi & atisô",
             "description": "Sốt chấm kem béo ăn kèm bánh giòn/rau củ",
-            "basePrice": 215760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Spinach%20%26%20artichoke%20dip.jpg",
+            "basePrice": 215760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118485/yummyzoom/restaurants/bella-vista-italian/menu-items/Spinachartichokedip_1b08e0a5.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -179,8 +179,8 @@
           {
             "name": "Pizza Margherita",
             "description": "Cà chua, mozzarella tươi, húng quế",
-            "basePrice": 311760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Margherita%20pizza%20(5209912131).jpg",
+            "basePrice": 311760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120462/yummyzoom/restaurants/bella-vista-italian/menu-items/Margheritapizza52099_7b3d7b2a.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Size",
@@ -198,8 +198,8 @@
           {
             "name": "Pizza gà sốt BBQ",
             "description": "Sốt BBQ, gà, hành tím",
-            "basePrice": 335760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pieology%20Hickory%20BBQ%20Chicken%20Pizza%20(31965598124).jpg",
+            "basePrice": 335760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118494/yummyzoom/restaurants/bella-vista-italian/menu-items/PieologyHickoryBBQCh_ef7dcf5f.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Size",
@@ -216,8 +216,8 @@
           {
             "name": "Burger phô mai cổ điển",
             "description": "Bánh bò kèm cheddar, dưa chua và sốt",
-            "basePrice": 287760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Cheeseburger%20on%20Plate.jpg",
+            "basePrice": 287760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118500/yummyzoom/restaurants/bella-vista-italian/menu-items/CheeseburgeronPlate_6de7b00e.jpg",
             "isAvailable": true,
             "customizationGroups": [
               "Extras"
@@ -232,8 +232,8 @@
           {
             "name": "Cá hồi nướng",
             "description": "Bơ chanh thảo mộc, rau củ theo mùa",
-            "basePrice": 419760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Grilled%20Salmon%20(15950616571).jpg",
+            "basePrice": 419760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118505/yummyzoom/restaurants/bella-vista-italian/menu-items/GrilledSalmon1595061_6ebe157e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Món chính",
@@ -245,8 +245,8 @@
           {
             "name": "Pasta gà sốt Alfredo",
             "description": "Fettuccine sốt kem phô mai Parmesan, thịt gà",
-            "basePrice": 347760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chicken-alfredo.jpg",
+            "basePrice": 347760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118510/yummyzoom/restaurants/bella-vista-italian/menu-items/Chicken-alfredo_29a06075.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Ý",
@@ -258,8 +258,8 @@
           {
             "name": "Rau củ xào chay",
             "description": "Rau tổng hợp sốt gừng–xì dầu",
-            "basePrice": 299760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20stir-fry.jpg",
+            "basePrice": 299760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118519/yummyzoom/restaurants/bella-vista-italian/menu-items/Vegetablestir-fry_5b910222.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -278,8 +278,8 @@
           {
             "name": "Bánh lava sô-cô-la",
             "description": "Nhân sô-cô-la chảy, ăn kèm kem vani",
-            "basePrice": 179760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Chocolate%20Lava%20Cake%201%20(28791097360).jpg",
+            "basePrice": 179760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118522/yummyzoom/restaurants/bella-vista-italian/menu-items/ChocolateLavaCake128_579f4138.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -291,8 +291,8 @@
           {
             "name": "Bánh phô mai kiểu New York",
             "description": "Cheesecake béo mịn, sốt việt quất",
-            "basePrice": 167760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/New%20York%20cheesecake%202.jpg",
+            "basePrice": 167760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118525/yummyzoom/restaurants/bella-vista-italian/menu-items/NewYorkcheesecake2_bea38a7c.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -304,8 +304,8 @@
           {
             "name": "Tiramisu",
             "description": "Bánh ladyfinger, cà phê, mascarpone, ca cao",
-            "basePrice": 167760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Tiramisu%20dessert.jpg",
+            "basePrice": 167760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120472/yummyzoom/restaurants/bella-vista-italian/menu-items/Tiramisudessert_670889cb.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -318,8 +318,8 @@
           {
             "name": "Bánh táo nướng",
             "description": "Lớp vụn quế thơm, ấm áp",
-            "basePrice": 143760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Slice%20of%20apple%20pie.jpg",
+            "basePrice": 143760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118538/yummyzoom/restaurants/bella-vista-italian/menu-items/Sliceofapplepie_ebd5aa3d.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -331,8 +331,8 @@
           {
             "name": "Combo kem Gelato (3 vị)",
             "description": "Ba vị theo mùa, múc ly",
-            "basePrice": 155760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Bowl%20~%20Ice%20cream.jpg",
+            "basePrice": 155760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118540/yummyzoom/restaurants/bella-vista-italian/menu-items/BowlIcecream_d62e8034.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -345,8 +345,8 @@
           {
             "name": "Brownie kem",
             "description": "Brownie sô-cô-la, kem vani, hạt",
-            "basePrice": 155760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/BROWNIE%20SUNDAE.jpg",
+            "basePrice": 155760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118544/yummyzoom/restaurants/bella-vista-italian/menu-items/BROWNIESUNDAE_d7655720.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Chay",
@@ -364,8 +364,8 @@
           {
             "name": "Nước chanh tươi",
             "description": "Vắt tươi, mát lạnh",
-            "basePrice": 95760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass%20of%20lemonade.jpg",
+            "basePrice": 95760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118547/yummyzoom/restaurants/bella-vista-italian/menu-items/Glassoflemonade_6a18d9bb.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -377,8 +377,8 @@
           {
             "name": "Trà đá",
             "description": "Hồng trà ướp lạnh, không đường",
-            "basePrice": 71760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_of_Iced_Tea.jpg",
+            "basePrice": 71760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118549/yummyzoom/restaurants/bella-vista-italian/menu-items/Glass_of_Iced_Tea_9176bc7b.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -389,8 +389,8 @@
           {
             "name": "Nước có ga",
             "description": "Nước khoáng có ga ướp lạnh",
-            "basePrice": 59760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/San%20Pellegrino%20500ml%20bottle.jpg",
+            "basePrice": 59760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118555/yummyzoom/restaurants/bella-vista-italian/menu-items/SanPellegrino500mlbo_93faa21e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -401,8 +401,8 @@
           {
             "name": "Cola",
             "description": "Nước ngọt có ga vị cola",
-            "basePrice": 59760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Glass_cola.jpg",
+            "basePrice": 59760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118558/yummyzoom/restaurants/bella-vista-italian/menu-items/Glass_cola_52778762.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -414,8 +414,8 @@
           {
             "name": "Cà phê đen",
             "description": "Pha nóng, đậm vị",
-            "basePrice": 59760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/White%20cup%20of%20black%20coffee.jpg",
+            "basePrice": 59760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118563/yummyzoom/restaurants/bella-vista-italian/menu-items/Whitecupofblackcoffe_4a22a22e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",
@@ -427,8 +427,8 @@
           {
             "name": "Espresso",
             "description": "Shot đôi, thơm mạnh",
-            "basePrice": 71760.00,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Espresso%20cup%20and%20saucer%2C%202011.jpg",
+            "basePrice": 71760.0,
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120477/yummyzoom/restaurants/bella-vista-italian/menu-items/Espressocupandsaucer_934a5b23.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Thuần chay",

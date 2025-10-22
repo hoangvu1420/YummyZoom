@@ -3,8 +3,8 @@
   "name": "Phở Gia Truyền (Bát Đàn)",
   "description": "Phở bò gia truyền nổi tiếng tại phố Bát Đàn, Hà Nội. Hàng quán nhỏ, thường có xếp hàng; phục vụ phở bò với các phần thịt khác nhau, có quẩy và trứng.",
   "cuisineType": "Việt Nam",
-  "logoUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://media.mia.vn/uploads/blog-du-lich/Pho-bat-dan-pho-gia-truyen-100-nam-tuoi-tai-ha-noi-02-1639325605.png",
-  "backgroundImageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20Gia%20Truy%E1%BB%81n.jpg",
+  "logoUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118758/yummyzoom/restaurants/pho-gia-truyen-bat-dan/profile/Pho-bat-dan-pho-gia-_7c6130ff.jpg",
+  "backgroundImageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118761/yummyzoom/restaurants/pho-gia-truyen-bat-dan/profile/Ph%E1%BB%9FGiaTruy%E1%BB%81n_587bfd78.jpg",
   "defaultCurrency": "VND",
   "isVerified": true,
   "isAcceptingOrders": false,
@@ -56,7 +56,7 @@
             "name": "Phở bò chín",
             "description": "Phở bò phần chín (brisket well-done)",
             "basePrice": 50000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Pho-Beef-Noodles-2008.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118764/yummyzoom/restaurants/pho-gia-truyen-bat-dan/menu-items/Pho-Beef-Noodles-200_6c4e08d3.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -72,7 +72,7 @@
             "name": "Phở bò tái",
             "description": "Phở bò phần tái (round steak)",
             "basePrice": 55000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Ph%E1%BB%9F%20b%C3%B2%20(39425047901).jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761118778/yummyzoom/restaurants/pho-gia-truyen-bat-dan/menu-items/Ph%E1%BB%9Fb%C3%B239425047901_69ed786e.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
@@ -88,7 +88,7 @@
             "name": "Phở tái nạm",
             "description": "Phở bò tái nạm (rare + flank)",
             "basePrice": 60000.0,
-            "imageUrl": "https://yz.hnv1420.org/api/v1/media/proxy?url=https://commons.wikimedia.org/wiki/Special:FilePath/Large%20bowl%20of%20Beef%20Pho%20from%20Dalat%20Vietnamese%20Restaurtant.jpg",
+            "imageUrl": "https://res.cloudinary.com/dtjl7hjbe/image/upload/v1761120486/yummyzoom/restaurants/pho-gia-truyen-bat-dan/menu-items/LargebowlofBeefPhofr_2054c1b0.jpg",
             "isAvailable": true,
             "dietaryTags": [
               "Việt Nam",
