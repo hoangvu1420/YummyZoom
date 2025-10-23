@@ -24,8 +24,11 @@ public class Orders : EndpointGroupBase
             .RequireAuthorization();
 
         // POST /api/v1/orders/initiate
-        group.MapPost("/initiate", async ([FromBody] InitiateOrderRequest request, ISender sender) =>
+        group.MapPost("/initiate", async ([FromBody] InitiateOrderRequest request, HttpContext context, ISender sender) =>
         {
+            // Extract idempotency key from header
+            var idempotencyKey = context.Request.Headers["Idempotency-Key"].FirstOrDefault();
+            
             // Map request DTO -> command (explicit mapping keeps layers decoupled)
             var command = new InitiateOrderCommand(
                 request.CustomerId,
@@ -42,7 +45,8 @@ public class Orders : EndpointGroupBase
                 request.SpecialInstructions,
                 request.CouponCode,
                 request.TipAmount,
-                request.TeamCartId
+                request.TeamCartId,
+                idempotencyKey
             );
 
             var result = await sender.Send(command);

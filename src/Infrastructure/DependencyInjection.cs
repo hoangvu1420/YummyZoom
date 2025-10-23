@@ -47,6 +47,8 @@ using YummyZoom.Infrastructure.Persistence.ReadModels.Search;
 using YummyZoom.Infrastructure.Persistence.Repositories;
 using YummyZoom.Infrastructure.Realtime;
 using YummyZoom.Infrastructure.StateStores.TeamCartStore;
+using YummyZoom.Application.TeamCarts.EventHandlers;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Coupons;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Infrastructure;
@@ -208,6 +210,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<TeamCartConversionService>();
         builder.Services.AddSingleton<IFcmService, FcmService>();
         builder.Services.AddScoped<IRestaurantProvisioningService, Services.RestaurantProvisioningService>();
+        builder.Services.AddScoped<IFastCouponCheckService, Services.FastCouponCheckService>();
+        builder.Services.AddScoped<TeamCartCouponSuggestionsService>();
     }
 
     private static void AddExternalServices(this IHostApplicationBuilder builder)
@@ -291,6 +295,15 @@ public static class DependencyInjection
         builder.Services.Configure<ReviewSummaryMaintenanceOptions>(
             builder.Configuration.GetSection("ReviewSummaryMaintenance"));
         builder.Services.AddHostedService<ReviewSummaryMaintenanceHostedService>();
+
+        // ActiveCouponView materialized view maintenance
+        builder.Services.Configure<ActiveCouponViewMaintenanceOptions>(
+            builder.Configuration.GetSection(ActiveCouponViewMaintenanceOptions.SectionName));
+        builder.Services.AddHostedService<ActiveCouponViewMaintenanceHostedService>();
+
+        // TeamCart coupon suggestions real-time notifications
+        builder.Services.Configure<TeamCartCouponSuggestionsOptions>(
+            builder.Configuration.GetSection(TeamCartCouponSuggestionsOptions.SectionName));
 
         builder.Services.AddScoped<IAdminMetricsMaintainer, AdminMetricsMaintainer>();
         builder.Services.Configure<AdminMetricsMaintenanceOptions>(

@@ -4,6 +4,7 @@ using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
 using YummyZoom.Application.Coupons.Queries.FastCheck;
+using YummyZoom.Application.Coupons.Queries.Common;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 
@@ -18,19 +19,21 @@ public class FastCheckContractTests
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
 
-        var expectedBest = new FastCouponCandidateDto(
+        var expectedBest = new CouponSuggestion(
             Code: "SAVE15",
             Label: "15% off",
             Savings: 7.50m,
-            MeetsMinOrder: true,
+            IsEligible: true,
+            EligibilityReason: null,
             MinOrderGap: 0m,
-            ValidityEnd: DateTime.UtcNow.AddDays(3),
+            ExpiresOn: DateTime.UtcNow.AddDays(3),
             Scope: "WholeOrder",
-            ReasonIfIneligible: null);
+            Urgency: CouponUrgency.None);
 
-        var expectedResponse = new FastCouponCheckResponse(
+        var expectedResponse = new CouponSuggestionsResponse(
+            CartSummary: new CartSummary(28.98m, "USD", 3),
             BestDeal: expectedBest,
-            Candidates: new List<FastCouponCandidateDto> { expectedBest }
+            Suggestions: new List<CouponSuggestion> { expectedBest }
         );
 
         factory.Sender.RespondWith(req =>
@@ -59,11 +62,11 @@ public class FastCheckContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}");
         TestContext.WriteLine(raw);
 
-        var dto = JsonSerializer.Deserialize<FastCouponCheckResponse>(raw, DomainJson.Options);
+        var dto = JsonSerializer.Deserialize<CouponSuggestionsResponse>(raw, DomainJson.Options);
         dto.Should().NotBeNull();
         dto!.BestDeal.Should().NotBeNull();
         dto.BestDeal!.Code.Should().Be(expectedBest.Code);
-        dto.Candidates.Should().HaveCount(1);
+        dto.Suggestions.Should().HaveCount(1);
     }
 }
 

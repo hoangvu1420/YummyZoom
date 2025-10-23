@@ -22,6 +22,7 @@ Creates a new cart and returns identifiers and a share token for others to join.
 **`POST /api/v1/team-carts`**
 
 - Authorization: Required (Customer)
+- Idempotency: Supported via `Idempotency-Key` header
 - Body
 ```json
 { "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "hostName": "Alex", "deadlineUtc": "2025-10-01T18:30:00Z" }
@@ -71,7 +72,7 @@ Typical errors
 
 Members can add items with optional customizations, update their quantities, or remove their own items.
 
-- Add item — `POST /api/v1/team-carts/{teamCartId}/items`
+- Add item — `POST /api/v1/team-carts/{teamCartId}/items` (supports `Idempotency-Key` header)
   ```json
   {
     "menuItemId": "b2c3...",
@@ -115,6 +116,7 @@ Freezes items and computes per-member quotes. Notifies members to pay/commit.
 **`POST /api/v1/team-carts/{teamCartId}/lock`**
 
 - Authorization: Host only
+- Idempotency: Supported via `Idempotency-Key` header
 - Response: 204 No Content
 
 Rules
@@ -175,6 +177,7 @@ After all members are settled, convert the cart to a standard order.
 **`POST /api/v1/team-carts/{teamCartId}/convert`**
 
 - Authorization: Host only
+- Idempotency: Supported via `Idempotency-Key` header
 - Body
 ```json
 {
@@ -220,10 +223,14 @@ Errors
   - Participant: members and host can apply tip.
 - Item Rules
   - Only `Open` carts accept changes; item owner must perform updates/removals.
-  - Items must belong to the cart’s restaurant; customizations must be valid for the item.
+  - Items must belong to the cart's restaurant; customizations must be valid for the item.
 - Payments
   - Per-member quotes computed at lock; amounts must match on commit.
   - All members must be settled before conversion.
+- Idempotency Protection
+  - Critical operations (create, add items, lock, convert) support `Idempotency-Key` header
+  - Prevents duplicate actions from network retries or client errors
+  - Keys are cached for 5 minutes after successful operation
 - Feature Flags & Availability
   - Endpoints may return 503 if TeamCart or real-time store is disabled.
 

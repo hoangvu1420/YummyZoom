@@ -23,6 +23,7 @@ using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Admin;
+using YummyZoom.Infrastructure.Persistence.ReadModels.Coupons;
 using YummyZoom.Infrastructure.Persistence.ReadModels.FullMenu;
 using YummyZoom.Infrastructure.Persistence.ReadModels.MenuItemSales;
 using YummyZoom.Infrastructure.Persistence.ReadModels.Reviews;
@@ -46,6 +47,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     // Read Models
     public DbSet<CouponUserUsage> CouponUserUsages => Set<CouponUserUsage>();
+    public DbSet<ActiveCouponView> ActiveCouponViews => Set<ActiveCouponView>();
     public DbSet<RestaurantReviewSummary> RestaurantReviewSummaries => Set<RestaurantReviewSummary>();
     public DbSet<AdminPlatformMetricsSnapshot> AdminPlatformMetricsSnapshots => Set<AdminPlatformMetricsSnapshot>();
     public DbSet<AdminDailyPerformanceSeries> AdminDailyPerformanceSeries => Set<AdminDailyPerformanceSeries>();

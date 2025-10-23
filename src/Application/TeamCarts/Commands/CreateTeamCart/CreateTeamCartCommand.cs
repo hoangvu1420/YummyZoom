@@ -1,3 +1,4 @@
+using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.SharedKernel;
 
@@ -7,8 +8,9 @@ namespace YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
 public sealed record CreateTeamCartCommand(
     Guid RestaurantId,
     string HostName,
-    DateTime? DeadlineUtc = null
-) : IRequest<Result<CreateTeamCartResponse>>;
+    DateTime? DeadlineUtc = null,
+    string? IdempotencyKey = null
+) : IRequest<Result<CreateTeamCartResponse>>, IIdempotentCommand;
 
 public sealed record CreateTeamCartResponse(
     Guid TeamCartId,

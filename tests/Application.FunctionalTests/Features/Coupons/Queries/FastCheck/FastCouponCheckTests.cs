@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Coupons.Queries.FastCheck;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Domain.MenuItemAggregate;
@@ -35,6 +37,15 @@ public class FastCouponCheckTests : BaseTestFixture
             new(wings!.Id.Value, wings.MenuCategoryId.Value, 1, wings.BasePrice.Amount)
         };
 
+        // Create a coupon for the restaurant
+        await CreateActiveCouponAsync(Testing.TestData.DefaultRestaurantId, "TEST15", 15m);
+
+        // Process outbox events to ensure coupon is persisted
+        await DrainOutboxAsync();
+
+        // Refresh the materialized view to include the new coupon
+        await RefreshMaterializedViewAsync();
+
         var q = new FastCouponCheckQuery(Testing.TestData.DefaultRestaurantId, items);
 
         // Act
@@ -43,7 +54,7 @@ public class FastCouponCheckTests : BaseTestFixture
         // Assert
         result.IsSuccess.Should().BeTrue(result.Error?.ToString());
         var resp = result.Value;
-        resp.Candidates.Should().NotBeEmpty();
+        resp.Suggestions.Should().NotBeEmpty();
         resp.BestDeal.Should().NotBeNull();
 
         // Expected subtotal = (15.99 * 2) + (12.99 * 1) = 44.97
@@ -74,9 +85,41 @@ public class FastCouponCheckTests : BaseTestFixture
         // Assert
         result.IsSuccess.Should().BeTrue(result.Error?.ToString());
         var resp = result.Value;
-        // Default coupons belong to the default restaurant only; expect no candidates here
-        resp.Candidates.Should().BeEmpty();
+        // Default coupons belong to the default restaurant only; expect no suggestions here
+        resp.Suggestions.Should().BeEmpty();
         resp.BestDeal.Should().BeNull();
+    }
+
+    private static async Task CreateActiveCouponAsync(Guid restaurantId, string code, decimal percentageValue)
+    {
+        var restaurantIdVo = YummyZoom.Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(restaurantId);
+        var valueResult = YummyZoom.Domain.CouponAggregate.ValueObjects.CouponValue.CreatePercentage(percentageValue);
+        var appliesToResult = YummyZoom.Domain.CouponAggregate.ValueObjects.AppliesTo.CreateForWholeOrder();
+
+        var couponResult = YummyZoom.Domain.CouponAggregate.Coupon.Create(
+            restaurantIdVo,
+            code,
+            $"{percentageValue}% off entire order",
+            valueResult.Value,
+            appliesToResult.Value,
+            validityStartDate: DateTime.UtcNow.AddDays(-1),
+            validityEndDate: DateTime.UtcNow.AddDays(30),
+            minOrderAmount: null,
+            totalUsageLimit: null,
+            usageLimitPerUser: null,
+            isEnabled: true);
+
+        couponResult.ShouldBeSuccessful();
+        var coupon = couponResult.Value;
+        coupon.ClearDomainEvents();
+        await AddAsync(coupon);
+    }
+
+    private static async Task RefreshMaterializedViewAsync()
+    {
+        using var scope = CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<YummyZoom.Infrastructure.Persistence.EfCore.ApplicationDbContext>();
+        await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW active_coupons_view;");
     }
 }
 

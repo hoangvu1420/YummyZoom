@@ -153,6 +153,32 @@ erDiagram
         string DeletedBy
     }
 
+    RestaurantRegistrations {
+        UUID Id PK
+        UUID SubmitterUserId
+        string Name
+        string Description
+        string CuisineType
+        string Street
+        string City
+        string State
+        string ZipCode
+        string Country
+        string PhoneNumber
+        string Email
+        string BusinessHours
+        string LogoUrl
+        double Latitude
+        double Longitude
+        int Status
+        timestamp SubmittedAtUtc
+        timestamp ReviewedAtUtc
+        UUID ReviewedByUserId
+        string ReviewNote
+        timestamp Created
+        string CreatedBy
+    }
+
     %% ---------------- Cross-Context Bridge (Identity ↔ Catalog) ----------------
     %% --- RoleAssignments Aggregate ---
     RoleAssignments {
@@ -550,7 +576,18 @@ erDiagram
         UUID RestaurantId PK
         double AverageRating
         int TotalReviews
-    }    
+    }
+
+    MenuItemSalesSummaries {
+        UUID RestaurantId
+        UUID MenuItemId
+        bigint LifetimeQuantity
+        bigint Rolling7DayQuantity
+        bigint Rolling30DayQuantity
+        timestamp LastSoldAt
+        timestamp LastUpdatedAt
+        bigint SourceVersion
+    }
 
     %% Universal Search Read Model
     SearchIndexItems {
@@ -575,6 +612,49 @@ erDiagram
         tsvector TsAll
         tsvector TsName
         tsvector TsDescr
+    }
+
+    %% ---------------- Admin Context ----------------
+    AdminDailyPerformanceSeries {
+        date BucketDate PK
+        int TotalOrders
+        int DeliveredOrders
+        decimal GrossMerchandiseVolume
+        decimal TotalRefunds
+        int NewCustomers
+        int NewRestaurants
+        timestamp UpdatedAtUtc
+    }
+
+    AdminPlatformMetricsSnapshots {
+        string SnapshotId PK
+        bigint TotalOrders
+        bigint ActiveOrders
+        bigint DeliveredOrders
+        decimal GrossMerchandiseVolume
+        decimal TotalRefunds
+        int ActiveRestaurants
+        int ActiveCustomers
+        int OpenSupportTickets
+        int TotalReviews
+        timestamp LastOrderAtUtc
+        timestamp UpdatedAtUtc
+    }
+
+    AdminRestaurantHealthSummaries {
+        UUID RestaurantId PK
+        string RestaurantName
+        boolean IsVerified
+        boolean IsAcceptingOrders
+        int OrdersLast7Days
+        int OrdersLast30Days
+        decimal RevenueLast30Days
+        double AverageRating
+        int TotalReviews
+        int CouponRedemptionsLast30Days
+        decimal OutstandingBalance
+        timestamp LastOrderAtUtc
+        timestamp UpdatedAtUtc
     }
 
     %% --- Relationships ---
@@ -675,6 +755,7 @@ erDiagram
     Restaurants ||..o| RestaurantReviewSummaries : "is summarized by"
     Restaurants ||..o| SearchIndexItems : "is indexed by"
     MenuItems   ||..o| SearchIndexItems : "is indexed by"
+    MenuItems   ||..o| MenuItemSalesSummaries : "is summarized by"
     
     %% ---------------- Styling (Bounded Context Colors) ----------------
     %% Identity & Access (Blue)
@@ -694,6 +775,7 @@ erDiagram
 
     %% Restaurant Catalog (Green)
     style Restaurants fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
+    style RestaurantRegistrations fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
     style Menus fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
     style MenuCategories fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
     style MenuItems fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px
@@ -733,6 +815,10 @@ erDiagram
     style FullMenuViews fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
     style RestaurantReviewSummaries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
     style SearchIndexItems fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style MenuItemSalesSummaries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style AdminDailyPerformanceSeries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style AdminPlatformMetricsSnapshots fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
+    style AdminRestaurantHealthSummaries fill:#E8EAF6,stroke:#3949AB,stroke-width:1px
 
     %% ------------------------------------------------------------------
     %% NOTE: Mermaid's erDiagram styling support may vary by renderer.

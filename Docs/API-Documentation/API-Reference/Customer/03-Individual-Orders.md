@@ -25,6 +25,14 @@ Creates a new individual order with specified items, delivery details, and payme
 **`POST /api/v1/orders/initiate`**
 
 - **Authorization:** Required (Customer)
+- **Idempotency:** Supported via `Idempotency-Key` header
+
+#### Request Headers
+
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `Authorization` | `string` | Yes | Bearer token for customer authentication |
+| `Idempotency-Key` | `UUID` | No | Unique identifier to prevent duplicate order creation. Must be a valid UUID v4 format. |
 
 #### Request Body
 
@@ -381,6 +389,10 @@ Cancels an order if it's in a cancellable state. Customers can cancel orders bef
    - Tax = subtotal × 8% (configurable rate)
    - Delivery fee = $2.99 (configurable)
    - Total = subtotal - discount + delivery fee + tip + tax
+6. **Idempotency Protection**: 
+   - Duplicate requests with the same `Idempotency-Key` return cached response
+   - Prevents accidental duplicate orders from network retries or client errors
+   - Idempotency keys are cached for 5 minutes after successful order creation
 
 ### Payment Processing
 

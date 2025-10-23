@@ -1,3 +1,4 @@
+using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
@@ -15,8 +16,9 @@ public record InitiateOrderCommand(
     string? SpecialInstructions = null,
     string? CouponCode = null,
     decimal? TipAmount = null,
-    Guid? TeamCartId = null
-) : IRequest<Result<InitiateOrderResponse>>;
+    Guid? TeamCartId = null,
+    string? IdempotencyKey = null
+) : IRequest<Result<InitiateOrderResponse>>, IIdempotentCommand;
 
 public record OrderItemDto(
     Guid MenuItemId,

@@ -12,6 +12,8 @@ using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.RemoveItemFromTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
+using YummyZoom.Application.Coupons.Queries.Common;
+using YummyZoom.Application.TeamCarts.Queries.GetCouponSuggestions;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel;
 using YummyZoom.Web.Infrastructure;
@@ -27,7 +29,8 @@ public sealed class TeamCarts : EndpointGroupBase
 
         // POST /api/v1/team-carts
         group.MapPost("/", async (
-            [FromBody] CreateTeamCartCommand command,
+            [FromBody] CreateTeamCartRequest request,
+            HttpContext context,
             ISender sender,
             ITeamCartFeatureAvailability availability) =>
         {
@@ -35,6 +38,16 @@ public sealed class TeamCarts : EndpointGroupBase
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
+            
+            // Extract idempotency key from header
+            var idempotencyKey = context.Request.Headers["Idempotency-Key"].FirstOrDefault();
+            
+            var command = new CreateTeamCartCommand(
+                request.RestaurantId,
+                request.HostName,
+                request.DeadlineUtc,
+                idempotencyKey);
+                
             var result = await sender.Send(command);
             return result.IsSuccess
                 ? TypedResults.Created($"/api/v1/team-carts/{result.Value.TeamCartId}", result.Value)
@@ -80,6 +93,19 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithDescription("Returns the TeamCart view model from Redis for real-time updates.")
         .WithStandardResults<GetTeamCartRealTimeViewModelResponse>();
 
+        // GET /api/v1/team-carts/{id}/coupon-suggestions
+        group.MapGet("/{id}/coupon-suggestions", async (Guid id, ISender sender) =>
+        {
+            var query = new TeamCartCouponSuggestionsQuery(id);
+            var result = await sender.Send(query);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .RequireAuthorization()
+        .WithName("GetTeamCartCouponSuggestions")
+        .WithSummary("Get coupon suggestions for TeamCart")
+        .WithDescription("Returns applicable coupons with savings calculations for the current TeamCart items.")
+        .WithStandardResults<CouponSuggestionsResponse>();
+
         // POST /api/v1/team-carts/{id}/join
         group.MapPost("/{id}/join", async (Guid id, [FromBody] JoinTeamCartRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
@@ -98,13 +124,17 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/items
-        group.MapPost("/{id}/items", async (Guid id, [FromBody] AddItemRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapPost("/{id}/items", async (Guid id, [FromBody] AddItemRequest body, HttpContext context, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
-            var command = new AddItemToTeamCartCommand(id, body.MenuItemId, body.Quantity, body.SelectedCustomizations);
+            
+            // Extract idempotency key from header
+            var idempotencyKey = context.Request.Headers["Idempotency-Key"].FirstOrDefault();
+            
+            var command = new AddItemToTeamCartCommand(id, body.MenuItemId, body.Quantity, body.SelectedCustomizations, idempotencyKey);
             var result = await sender.Send(command);
             return result.ToIResult();
         })
@@ -143,13 +173,17 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/lock
-        group.MapPost("/{id}/lock", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapPost("/{id}/lock", async (Guid id, HttpContext context, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
-            var command = new LockTeamCartForPaymentCommand(id);
+            
+            // Extract idempotency key from header
+            var idempotencyKey = context.Request.Headers["Idempotency-Key"].FirstOrDefault();
+            
+            var command = new LockTeamCartForPaymentCommand(id, idempotencyKey);
             var result = await sender.Send(command);
             return result.ToIResult();
         })
@@ -233,12 +267,16 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithStandardResults<InitiateMemberOnlinePaymentResponse>();
 
         // POST /api/v1/team-carts/{id}/convert
-        group.MapPost("/{id}/convert", async (Guid id, [FromBody] ConvertTeamCartRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapPost("/{id}/convert", async (Guid id, [FromBody] ConvertTeamCartRequest body, HttpContext context, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
+            
+            // Extract idempotency key from header
+            var idempotencyKey = context.Request.Headers["Idempotency-Key"].FirstOrDefault();
+            
             var command = new ConvertTeamCartToOrderCommand(
                 id,
                 body.Street,
@@ -246,7 +284,8 @@ public sealed class TeamCarts : EndpointGroupBase
                 body.State,
                 body.ZipCode,
                 body.Country,
-                body.SpecialInstructions
+                body.SpecialInstructions,
+                idempotencyKey
             );
             var result = await sender.Send(command);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
@@ -258,6 +297,12 @@ public sealed class TeamCarts : EndpointGroupBase
 }
 
 // Request DTOs for TeamCarts endpoints (keep explicit for decoupling)
+public sealed record CreateTeamCartRequest(
+    Guid RestaurantId,
+    string HostName,
+    DateTime? DeadlineUtc = null
+);
+
 public sealed record JoinTeamCartRequest(string ShareToken, string GuestName);
 
 public sealed record AddItemRequest(

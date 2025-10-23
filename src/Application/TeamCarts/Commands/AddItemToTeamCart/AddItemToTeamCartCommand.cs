@@ -11,8 +11,9 @@ public sealed record AddItemToTeamCartCommand(
     Guid TeamCartId,
     Guid MenuItemId,
     int Quantity,
-    IReadOnlyList<AddItemToTeamCartCustomizationSelection>? SelectedCustomizations = null
-) : IRequest<Result>, ITeamCartCommand
+    IReadOnlyList<AddItemToTeamCartCustomizationSelection>? SelectedCustomizations = null,
+    string? IdempotencyKey = null
+) : IRequest<Result>, ITeamCartCommand, IIdempotentCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 };

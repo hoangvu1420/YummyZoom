@@ -30,7 +30,7 @@ public class GetOrderByIdTests : BaseTestFixture
     private Guid ClassicBurgerId => Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
 
     private OrderItemDto BuildBurgerWithAddOns(params Guid[] choiceIds)
-    {
+    { 
         var customization = new OrderItemCustomizationRequestDto(
             TestDataFactory.CustomizationGroup_BurgerAddOnsId,
             choiceIds.ToList());
@@ -57,6 +57,7 @@ public class GetOrderByIdTests : BaseTestFixture
         dto.Items.Should().NotBeNull();
         dto.Items.Count.Should().Be(initiate.Items.Count);
         dto.Status.Should().NotBeNullOrWhiteSpace();
+        dto.Currency.Should().NotBeNullOrWhiteSpace(); // Assert currency is present
         dto.TotalAmount.Should().BeGreaterThan(0m);
         dto.SubtotalAmount.Should().BeGreaterThan(0m);
         dto.DeliveryAddress_Street.Should().NotBeNull();
@@ -160,6 +161,8 @@ public class GetOrderByIdTests : BaseTestFixture
         order.DiscountAmount.Should().BeGreaterThan(0m);
         order.TotalAmount.Should().BeGreaterThan(0m);
         order.SubtotalAmount.Should().BeGreaterThan(0m);
+        order.Currency.Should().Be("USD"); // Assert top-level currency
+
         // Optional lightweight arithmetic check
         var reconstructed = order.SubtotalAmount - order.DiscountAmount + order.DeliveryFeeAmount + order.TaxAmount + order.TipAmount;
         reconstructed.Should().Be(order.TotalAmount);

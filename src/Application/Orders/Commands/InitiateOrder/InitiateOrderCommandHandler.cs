@@ -32,20 +32,18 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
     private readonly OrderFinancialService _orderFinancialService;
     private readonly IUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
     private readonly ILogger<InitiateOrderCommandHandler> _logger;
 
     public InitiateOrderCommandHandler(
         IOrderRepository orderRepository,
         IRestaurantRepository restaurantRepository,
         IMenuItemRepository menuItemRepository,
-    ICouponRepository couponRepository,
-    ICustomizationGroupRepository customizationGroupRepository,
+        ICouponRepository couponRepository,
+        ICustomizationGroupRepository customizationGroupRepository,
         IPaymentGatewayService paymentGatewayService,
         OrderFinancialService orderFinancialService,
         IUnitOfWork unitOfWork,
         IUser currentUser,
-        IMediator mediator,
         ILogger<InitiateOrderCommandHandler> logger)
     {
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
@@ -57,7 +55,6 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
         _orderFinancialService = orderFinancialService ?? throw new ArgumentNullException(nameof(orderFinancialService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 

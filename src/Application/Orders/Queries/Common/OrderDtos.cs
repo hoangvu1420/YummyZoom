@@ -31,19 +31,14 @@ public record OrderDetailsDto(
     DateTime LastUpdateTimestamp,
     DateTime? EstimatedDeliveryTime,
     DateTime? ActualDeliveryTime,
-    // Monetary breakdown (amount + currency for each money component)
+    // Monetary breakdown
+    string Currency, // All monetary values below share this currency
     decimal SubtotalAmount,
-    string SubtotalCurrency,
     decimal DiscountAmount,
-    string DiscountCurrency,
     decimal DeliveryFeeAmount,
-    string DeliveryFeeCurrency,
     decimal TipAmount,
-    string TipCurrency,
     decimal TaxAmount,
-    string TaxCurrency,
     decimal TotalAmount,
-    string TotalCurrency,
     // Optional references
     Guid? AppliedCouponId,
     Guid? SourceTeamCartId,
@@ -64,9 +59,7 @@ public record OrderItemDto(
     string Name,
     int Quantity,
     decimal UnitPriceAmount,
-    string UnitPriceCurrency,
     decimal LineItemTotalAmount,
-    string LineItemTotalCurrency,
     IReadOnlyList<OrderItemCustomizationDto> Customizations);
 
 /// <summary>
@@ -75,8 +68,7 @@ public record OrderItemDto(
 public record OrderItemCustomizationDto(
     string GroupName,
     string ChoiceName,
-    decimal? PriceAdjustmentAmount,
-    string? PriceAdjustmentCurrency);
+    decimal? PriceAdjustmentAmount);
 
 /// <summary>
 /// Lean order status projection useful for polling clients.
@@ -117,8 +109,7 @@ public static class OrderCustomizationJsonParser
                 .Select(r => new OrderItemCustomizationDto(
                     r.Snapshot_CustomizationGroupName!,
                     r.Snapshot_ChoiceName!,
-                    r.Snapshot_ChoicePriceAdjustmentAtOrder?.Amount,
-                    r.Snapshot_ChoicePriceAdjustmentAtOrder?.Currency))
+                    r.Snapshot_ChoicePriceAdjustmentAtOrder?.Amount))
                 .ToList();
         }
         catch

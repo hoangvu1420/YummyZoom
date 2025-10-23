@@ -24,12 +24,13 @@ public class GetOrderByIdContractTests
             DateTime.UtcNow,
             DateTime.UtcNow.AddMinutes(40),
             null,
-            20m, "USD",
-            0m, "USD",
-            5m, "USD",
-            2m, "USD",
-            3m, "USD",
-            30m, "USD",
+            "USD",
+            20m,
+            0m,
+            5m,
+            2m,
+            3m,
+            30m,
             null,
             null,
             "Street", "City", "State", "Country", "12345",
@@ -58,7 +59,11 @@ public class GetOrderByIdContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
         using var doc = JsonDocument.Parse(raw);
-        doc.RootElement.GetProperty("order").GetProperty("orderId").ValueKind.Should().Be(JsonValueKind.String);
+        var order = doc.RootElement.GetProperty("order");
+        order.GetProperty("orderId").ValueKind.Should().Be(JsonValueKind.String);
+        order.GetProperty("currency").ValueKind.Should().Be(JsonValueKind.String);
+        order.GetProperty("totalAmount").ValueKind.Should().Be(JsonValueKind.Number);
+        order.TryGetProperty("totalCurrency", out _).Should().BeFalse(); // Ensure old field is gone
     }
 
     [Test]
@@ -76,7 +81,7 @@ public class GetOrderByIdContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(404);
-        prob.Title.Should().Be("Order");
+        prob.Title.Should().Be("Order.NotFound");
     }
 
     [Test]

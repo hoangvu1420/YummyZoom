@@ -15,8 +15,9 @@ public sealed record ConvertTeamCartToOrderCommand(
     string State,
     string ZipCode,
     string Country,
-    string? SpecialInstructions
-) : IRequest<Result<ConvertTeamCartToOrderResponse>>, ITeamCartCommand
+    string? SpecialInstructions,
+    string? IdempotencyKey = null
+) : IRequest<Result<ConvertTeamCartToOrderResponse>>, ITeamCartCommand, IIdempotentCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }

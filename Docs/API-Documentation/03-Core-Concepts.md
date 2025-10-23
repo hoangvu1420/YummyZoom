@@ -76,6 +76,47 @@ Response shape:
 - **totalPages**: Total pages given the current `pageSize`.
 - **totalCount**: Total number of matching records.
 
+### Idempotency
+
+Critical mutation endpoints support idempotency to prevent duplicate operations from network retries or client errors.
+
+#### Usage
+
+Send an `Idempotency-Key` header with a unique UUID v4 identifier:
+
+```http
+POST /api/v1/orders/initiate
+Authorization: Bearer <token>
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+
+{
+  "customerId": "...",
+  "restaurantId": "..."
+}
+```
+
+#### Behavior
+
+- **First Request**: Processes normally and caches the successful response
+- **Duplicate Requests**: Returns the cached response without re-execution
+- **Cache Duration**: 5 minutes after successful completion
+- **Scope**: Keys are scoped per user and command type for security
+
+#### Supported Endpoints
+
+- `POST /api/v1/orders/initiate` - Prevent duplicate order creation
+- `POST /api/v1/team-carts` - Prevent duplicate team cart creation
+- `POST /api/v1/team-carts/{id}/items` - Prevent duplicate item additions
+- `POST /api/v1/team-carts/{id}/lock` - Prevent duplicate cart locking
+- `POST /api/v1/team-carts/{id}/convert` - Prevent duplicate order conversions
+
+#### Requirements
+
+- Must be a valid UUID v4 format (e.g., `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`)
+- Should be unique per logical operation
+- Optional but recommended for all supported endpoints
+
 ### Error Handling
 
 Errors follow RFC 7807 Problem Details. Validation errors use the `errors` dictionary.
