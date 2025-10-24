@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.Orders.Commands.InitiateOrder;
+using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
@@ -98,7 +99,7 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
 
         // Verify the failure is specifically about per-user usage limit
         var failedResult = failedResults.First();
-        failedResult.Error.Description.Should().Contain("maximum number of times allowed", "failure should be about per-user limit");
+        failedResult.ShouldBeFailure(CouponErrors.UsageLimitExceeded.Code);
     }
 
     [Test]
@@ -198,9 +199,15 @@ public class InitiateOrderEdgeCaseTests : InitiateOrderTestBase
 
         // Verify all orders were created for the same restaurant
         var orderIds = allResults.Select(r => r.Value.OrderId).ToList();
-        using var scope = CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var orders = await context.Orders.Where(o => orderIds.Contains(o.Id)).ToListAsync();
+        var orders = new List<Domain.OrderAggregate.Order>();
+
+        // Use individual FindOrderAsync calls to avoid EF Core warning
+        foreach (var orderId in orderIds)
+        {
+            var order = await FindOrderAsync(orderId);
+            order.Should().NotBeNull($"order {orderId} should exist");
+            orders.Add(order!);
+        }
 
         orders.Should().HaveCount(5, "all orders should be persisted");
         orders.Should().AllSatisfy(order => order.RestaurantId.Value.Should().Be(restaurantId, "all orders should be for the same restaurant"));

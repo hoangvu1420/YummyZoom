@@ -1,5 +1,6 @@
 using System.Reflection;
 using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Services;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
@@ -61,18 +62,18 @@ public static class TeamCartTestHelpers
         var menuCategoryId = MenuCategoryId.CreateUnique();
 
         teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Host Item",
-            new Money(25.00m, Currencies.Default), 1);
+            new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId,
-            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
+            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
 
-        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
         hostResult.IsSuccess.Should().BeTrue();
 
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
-        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
+        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_guest_456");
         guestResult.IsSuccess.Should().BeTrue();
 
         return teamCart;
@@ -86,14 +87,14 @@ public static class TeamCartTestHelpers
         var menuCategoryId = MenuCategoryId.CreateUnique();
 
         teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Host Item",
-            new Money(25.00m, Currencies.Default), 1);
+            new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId,
-            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
+            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
 
-        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
         hostResult.IsSuccess.Should().BeTrue();
 
         return teamCart;
@@ -107,18 +108,18 @@ public static class TeamCartTestHelpers
         var menuCategoryId = MenuCategoryId.CreateUnique();
 
         teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Host Item",
-            new Money(25.00m, Currencies.Default), 1);
+            new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
         teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId,
-            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, Currencies.Default), 1);
+            menuItemId, menuCategoryId, "Guest Item", new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
 
-        var hostResult = teamCart.CommitToCashOnDelivery(DefaultHostUserId, new Money(25.00m, Currencies.Default));
+        var hostResult = teamCart.CommitToCashOnDelivery(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency));
         hostResult.IsSuccess.Should().BeTrue();
 
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
-        var guestResult = teamCart.CommitToCashOnDelivery(guestUserId, new Money(30.00m, Currencies.Default));
+        var guestResult = teamCart.CommitToCashOnDelivery(guestUserId, new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency));
         guestResult.IsSuccess.Should().BeTrue();
 
         return teamCart;
@@ -161,7 +162,7 @@ public static class TeamCartTestHelpers
     {
         var teamCart = CreateTeamCartWithPartialPayment();
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
-        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
+        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_guest_456");
         guestResult.IsSuccess.Should().BeTrue();
         teamCart.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
         return teamCart;
@@ -176,9 +177,9 @@ public static class TeamCartTestHelpers
         var menuItemId3 = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
 
-        teamCart.AddItem(DefaultHostUserId, menuItemId1, menuCategoryId, "Pizza Margherita", new Money(15.00m, Currencies.Default), 2);
-        teamCart.AddItem(DefaultHostUserId, menuItemId2, menuCategoryId, "Caesar Salad", new Money(12.00m, Currencies.Default), 1);
-        teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, menuItemId3, menuCategoryId, "Pasta Carbonara", new Money(18.00m, Currencies.Default), 1);
+        teamCart.AddItem(DefaultHostUserId, menuItemId1, menuCategoryId, "Pizza Margherita", new Money(15.00m, StaticPricingService.DefaultDeliveryFee.Currency), 2);
+        teamCart.AddItem(DefaultHostUserId, menuItemId2, menuCategoryId, "Caesar Salad", new Money(12.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
+        teamCart.AddItem(teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId, menuItemId3, menuCategoryId, "Pasta Carbonara", new Money(18.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         return teamCart;
     }
@@ -192,11 +193,11 @@ public static class TeamCartTestHelpers
 
         var customizations = new List<TeamCartItemCustomization>
         {
-            TeamCartItemCustomization.Create("Size", "Extra Cheese", new Money(2.50m, Currencies.Default)).Value,
-            TeamCartItemCustomization.Create("Toppings", "Pepperoni", new Money(3.00m, Currencies.Default)).Value
+            TeamCartItemCustomization.Create("Size", "Extra Cheese", new Money(2.50m, StaticPricingService.DefaultDeliveryFee.Currency)).Value,
+            TeamCartItemCustomization.Create("Toppings", "Pepperoni", new Money(3.00m, StaticPricingService.DefaultDeliveryFee.Currency)).Value
         };
 
-        var addResult = teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Custom Pizza", new Money(20.00m, Currencies.Default), 1, customizations);
+        var addResult = teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Custom Pizza", new Money(20.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1, customizations);
         addResult.IsSuccess.Should().BeTrue();
 
         return teamCart;
@@ -223,21 +224,21 @@ public static class TeamCartTestHelpers
         var menuItemId = MenuItemId.CreateUnique();
         var menuCategoryId = MenuCategoryId.CreateUnique();
         teamCart.AddItem(DefaultHostUserId, menuItemId, menuCategoryId, "Host Temp Item",
-            new Money(25.00m, Currencies.Default), 1);
+            new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         var guestUserId = teamCart.Members.First(m => m.UserId != DefaultHostUserId).UserId;
         teamCart.AddItem(guestUserId, menuItemId, menuCategoryId, "Guest Temp Item",
-            new Money(30.00m, Currencies.Default), 1);
+            new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), 1);
 
         // Lock the cart for payment
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
 
         // Set up payments for both members (amounts must match their item totals)
-        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
+        var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
         hostResult.IsSuccess.Should().BeTrue();
 
-        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, Currencies.Default), "txn_guest_456");
+        var guestResult = teamCart.RecordSuccessfulOnlinePayment(guestUserId, new Money(30.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_guest_456");
         guestResult.IsSuccess.Should().BeTrue();
 
         // Now use reflection to remove all items while keeping the ReadyToConfirm status and payments

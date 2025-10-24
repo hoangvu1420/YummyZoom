@@ -46,11 +46,7 @@ public class AddItemToTeamCartTests : BaseTestFixture
         addResult.IsSuccess.Should().BeTrue();
 
         // Assert: Verify persisted
-        using var scope = TestInfrastructure.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var cart = await db.TeamCarts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
 
         cart.Should().NotBeNull();
         cart!.Items.Should().Contain(i => i.Quantity == 2 && i.AddedByUserId.Value == scenario.GetGuestUserId("Bob Guest"));

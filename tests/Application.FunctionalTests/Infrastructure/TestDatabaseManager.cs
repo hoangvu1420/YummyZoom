@@ -35,6 +35,21 @@ public static class TestDatabaseManager
     }
 
     /// <summary>
+    /// Finds a TeamCart entity by its key values, including related entities with split query optimization.
+    /// </summary>
+    public static async Task<Domain.TeamCartAggregate.TeamCart?> FindTeamCartAsync(Domain.TeamCartAggregate.ValueObjects.TeamCartId teamCartId)
+    {
+        using var scope = TestInfrastructure.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.TeamCarts
+            .AsSplitQuery()
+            .Include(tc => tc.Items)
+            .Include(tc => tc.Members)
+            .Include(tc => tc.MemberPayments)
+            .FirstOrDefaultAsync(tc => tc.Id == teamCartId);
+    }
+
+    /// <summary>
     /// Adds an entity to the database.
     /// </summary>
     public static async Task AddAsync<TEntity>(TEntity entity)

@@ -148,20 +148,20 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         // Process Stripe webhooks for each member intent
         async Task ProcessSucceededAsync(string paymentIntentId, Guid memberUserId)
         {
-            var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+            var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
             var quoted = cart!.MemberTotals.First(kv => kv.Key.Value == memberUserId).Value.Amount;
             var quotedCents = (long)Math.Round(quoted * 100m, 0, MidpointRounding.AwayFromZero);
             var payload = PaymentTestHelper.GenerateWebhookPayload(
                 TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
                 paymentIntentId,
                 amount: quotedCents,
-                currency: "usd",
+                currency: "vnd",
                 metadata: new Dictionary<string, string>
                 {
                     ["source"] = "teamcart",
                     ["teamcart_id"] = scenario.TeamCartId.ToString(),
                     ["member_user_id"] = memberUserId.ToString(),
-                    ["quote_version"] = cart.QuoteVersion.ToString(),
+                    ["quote_version"] = cart!.QuoteVersion.ToString(),
                     ["quoted_cents"] = quotedCents.ToString()
                 });
 
@@ -176,7 +176,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         await ProcessSucceededAsync(guestBPayment.Value.PaymentIntentId, guestBUserId);
 
         // Assert: TeamCart becomes ReadyToConfirm
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
 
@@ -202,7 +202,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         order.PaymentTransactions.Should().OnlyContain(t => t.PaymentMethodType == PaymentMethodType.CreditCard);
 
         // Assert: TeamCart is Converted
-        cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Converted);
     }
 }

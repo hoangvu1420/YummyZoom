@@ -23,10 +23,8 @@ public class CreateTeamCartTests : BaseTestFixture
         result.Value.ShareToken.Should().NotBeNullOrEmpty();
 
         // Verify persisted
-        using var scope = TestInfrastructure.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var createdId = result.Value.TeamCartId;
-        var cart = await db.TeamCarts.FindAsync(Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(createdId));
+        var cart = await Testing.FindTeamCartAsync(Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(createdId));
         cart.Should().NotBeNull();
     }
 

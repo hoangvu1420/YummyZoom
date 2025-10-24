@@ -40,7 +40,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         convert.IsSuccess.Should().BeTrue();
         convert.Value.OrderId.Should().NotBeEmpty();
 
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Converted);
     }
 

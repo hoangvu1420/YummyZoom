@@ -301,14 +301,16 @@ public static class InitiateOrderTestHelper
 
     /// <summary>
     /// Test amounts for common financial calculations.
+    /// These should match the values in StaticPricingService for consistency.
     /// </summary>
     public static class TestAmounts
     {
         public static readonly decimal SmallTip = 2.00m;
         public static readonly decimal MediumTip = 5.00m;
         public static readonly decimal LargeTip = 10.00m;
-        public static readonly decimal StandardDeliveryFee = 2.99m;
-        public static readonly decimal TaxRate = 0.08m; // 8%
+        public static readonly decimal StandardDeliveryFee = 15000m; // VND - matches StaticPricingService
+        public static readonly decimal TaxRate = 0.08m; // 8% - matches StaticPricingService
+        public static readonly string Currency = "VND"; // Matches StaticPricingService
     }
 
     /// <summary>

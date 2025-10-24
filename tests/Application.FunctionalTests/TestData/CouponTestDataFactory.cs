@@ -278,7 +278,7 @@ public class CouponTestOptions
     public decimal? FixedDiscountAmount { get; set; }
 
     /// <summary>
-    /// The currency for monetary values. Defaults to USD.
+    /// The currency for monetary values. Defaults to VND.
     /// </summary>
-    public string Currency { get; set; } = "USD";
+    public string Currency { get; set; } = "VND";
 }

@@ -128,7 +128,121 @@ Errors
 
 ---
 
-## Step 6 — Apply Tip and Coupon (Host/Participant)
+## Step 6 — Discover Coupons (Members)
+
+Get real-time coupon suggestions and savings calculations for the current TeamCart items. This helps members and the host discover applicable coupons before applying them.
+
+**`GET /api/v1/team-carts/{teamCartId}/coupon-suggestions`**
+
+- Authorization: TeamCart member (host or guest)
+- Response: 200 OK with coupon suggestions
+
+#### Response
+
+```json
+{
+  "cartSummary": {
+    "subtotal": 45.97,
+    "currency": "USD",
+    "itemCount": 3
+  },
+  "bestDeal": {
+    "code": "TEAM15",
+    "label": "15% off entire order",
+    "savings": 6.90,
+    "isEligible": true,
+    "eligibilityReason": null,
+    "minOrderGap": 0,
+    "expiresOn": "2025-11-15T23:59:59Z",
+    "scope": "WholeOrder",
+    "urgency": "None"
+  },
+  "suggestions": [
+    {
+      "code": "TEAM15",
+      "label": "15% off entire order",
+      "savings": 6.90,
+      "isEligible": true,
+      "eligibilityReason": null,
+      "minOrderGap": 0,
+      "expiresOn": "2025-11-15T23:59:59Z",
+      "scope": "WholeOrder",
+      "urgency": "None"
+    },
+    {
+      "code": "BIGORDER",
+      "label": "10% off orders over $100",
+      "savings": 0,
+      "isEligible": false,
+      "eligibilityReason": "MinAmountNotMet",
+      "minOrderGap": 54.03,
+      "expiresOn": "2025-12-01T23:59:59Z",
+      "scope": "WholeOrder",
+      "urgency": "ExpiresWithin7Days"
+    }
+  ]
+}
+```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cartSummary` | `CartSummary` | Cart totals and item count |
+| `bestDeal` | `CouponSuggestion?` | Highest-value eligible coupon (null if none) |
+| `suggestions` | `CouponSuggestion[]` | All applicable coupons, sorted by value |
+
+#### Cart Summary Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `subtotal` | `decimal` | Total cart value before discounts |
+| `currency` | `string` | Currency code |
+| `itemCount` | `integer` | Total number of items |
+
+#### Coupon Suggestion Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | `string` | Coupon code |
+| `label` | `string` | Human-readable description |
+| `savings` | `decimal` | Calculated savings amount |
+| `isEligible` | `boolean` | Whether coupon can be applied |
+| `eligibilityReason` | `string?` | Reason if not eligible (null if eligible) |
+| `minOrderGap` | `decimal` | Additional amount needed for minimum order |
+| `expiresOn` | `datetime` | Coupon expiration date |
+| `scope` | `string` | Coupon scope: "WholeOrder", "SpecificItems", "SpecificCategories" |
+| `urgency` | `string` | Urgency level: "None", "ExpiresWithin24Hours", "ExpiresWithin7Days", "LimitedUsesRemaining" |
+
+#### Eligibility Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `MinAmountNotMet` | Cart total below minimum order requirement |
+| `UsageLimitExceeded` | User or total usage limit reached |
+| `Expired` | Coupon has expired |
+| `NotYetValid` | Coupon not yet active |
+| `Disabled` | Coupon is disabled |
+| `NotApplicable` | Coupon doesn't apply to cart items |
+
+#### Business Rules
+
+- **Authorization**: User must be a member of the TeamCart (host or guest)
+- **Performance**: Response optimized for <500ms using materialized views
+- **Consistency**: Calculations match actual order financial service
+- **Real-time**: Results reflect current cart state including all member items
+- **Usage Limits**: Respects per-user and total usage limits
+
+#### Error Responses
+
+- **401 Unauthorized**: Missing or invalid authentication token
+- **403 Forbidden**: User is not a member of the TeamCart
+- **404 Not Found**: TeamCart not found
+- **500 Internal Server Error**: System error during processing
+
+---
+
+## Step 7 — Apply Tip and Coupon (Host/Participant)
 
 - Apply tip — `POST /api/v1/team-carts/{teamCartId}/tip`
   - Authorization: Participant (member or host)
@@ -147,7 +261,7 @@ Errors (examples)
 
 ---
 
-## Step 7 — Member Payments
+## Step 8 — Member Payments
 
 Members settle their share via one of:
 
@@ -170,7 +284,7 @@ Errors
 
 ---
 
-## Step 8 — Convert to Order (Host)
+## Step 9 — Convert to Order (Host)
 
 After all members are settled, convert the cart to a standard order.
 

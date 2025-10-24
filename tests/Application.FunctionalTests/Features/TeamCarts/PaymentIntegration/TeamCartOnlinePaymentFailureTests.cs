@@ -78,7 +78,7 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentPaymentFailed,
             initiate.Value.PaymentIntentId!,
             amount: 1000,
-            currency: "usd",
+            currency: "vnd",
             metadata: new Dictionary<string, string>
             {
                 ["source"] = "teamcart",
@@ -92,7 +92,7 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
         await DrainOutboxAsync();
 
         // Assert: domain records a payment entry and remains Locked
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.Locked);
         cart.MemberPayments.Should().NotBeEmpty();
@@ -113,7 +113,7 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             retry.Value.PaymentIntentId!,
             amount: 1000,
-            currency: "usd",
+            currency: "vnd",
             metadata: new Dictionary<string, string>
             {
                 ["source"] = "teamcart",
@@ -130,7 +130,7 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
         (await SendAsync(new CommitToCodPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
         await DrainOutboxAsync();
 
-        cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
         cart.MemberPayments.Should().Contain(p => p.UserId.Value == scenario.GetGuestUserId("Guest A") && p.Status == TeamCartPaymentStatus.PaidOnline);
     }

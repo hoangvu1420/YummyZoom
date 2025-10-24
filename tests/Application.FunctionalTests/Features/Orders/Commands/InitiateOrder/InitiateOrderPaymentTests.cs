@@ -42,7 +42,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with correct parameters
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
 
@@ -200,7 +200,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with correct metadata
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.Is<IDictionary<string, string>>(metadata =>
                 metadata.ContainsKey("user_id") &&
                 metadata.ContainsKey("restaurant_id") &&
@@ -226,7 +226,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with correct total amount
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount == result.Value.TotalAmount.Amount),
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -248,7 +248,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with amount including tip
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount > 0), // Total should include tip
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
 
@@ -274,7 +274,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with discounted amount
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.Is<Money>(m => m.Amount == result.Value.TotalAmount.Amount),
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
 
@@ -379,7 +379,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         // Verify payment gateway was called with USD currency
         PaymentGatewayMock.Verify(x => x.CreatePaymentIntentAsync(
             It.IsAny<Money>(),
-            "USD",
+            InitiateOrderTestHelper.TestAmounts.Currency,
             It.IsAny<IDictionary<string, string>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -467,7 +467,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
     /// </summary>
     private static async Task<Order?> FindOrderAsync(OrderId orderId)
     {
-        return await FindAsync<Order>(orderId);
+        return await Testing.FindOrderAsync(orderId);
     }
 
     /// <summary>

@@ -289,8 +289,12 @@ public class InitiateOrderCommandHandler : IRequestHandler<InitiateOrderCommand,
             }
 
             var tipAmount = new Money(request.TipAmount ?? 0m, currency);
-            var deliveryFee = new Money(2.99m, currency);
-            var taxAmount = new Money(subtotal.Amount * 0.08m, currency);
+            var pricingConfig = StaticPricingService.GetPricingConfiguration(restaurantId);
+            var deliveryFee = pricingConfig.DeliveryFee;
+            
+            // Calculate tax based on policy
+            var taxBase = StaticPricingService.CalculateTaxBase(subtotal, deliveryFee, tipAmount, pricingConfig.TaxBasePolicy);
+            var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, currency);
 
             var totalAmount = _orderFinancialService.CalculateFinalTotal(
                 subtotal, discountAmount, deliveryFee, tipAmount, taxAmount);

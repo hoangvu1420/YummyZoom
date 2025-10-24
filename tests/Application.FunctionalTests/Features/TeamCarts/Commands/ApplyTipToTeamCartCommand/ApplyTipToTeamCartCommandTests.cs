@@ -33,7 +33,7 @@ public class ApplyTipToTeamCartCommandTests : BaseTestFixture
         // Assert: Success and persisted TipAmount updated
         apply.IsSuccess.Should().BeTrue();
 
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.TipAmount.Amount.Should().Be(tipAmount);
         cart.TipAmount.Currency.Should().Be(Currencies.Default);

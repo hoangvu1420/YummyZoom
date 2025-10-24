@@ -77,10 +77,16 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
                 coupon = await _couponRepository.GetByIdAsync(cart.AppliedCouponId, cancellationToken);
             }
 
-            // Compute delivery fee and tax (placeholder logic; refine per restaurant policy)
+            // Compute delivery fee and tax using centralized static pricing
             var currency = cart.TipAmount.Currency;
-            var deliveryFee = new Money(2.99m, currency);
-            var taxAmount = new Money(0m, currency); // can be computed via tax service in future
+            var pricingConfig = StaticPricingService.GetPricingConfiguration(cart.RestaurantId);
+            var deliveryFee = pricingConfig.DeliveryFee;
+            
+            // Calculate tax based on policy using centralized service
+            var cartSubtotal = new Money(cart.Items.Sum(i => i.LineItemTotal.Amount), currency);
+            var tipAmount = cart.TipAmount;
+            var taxBase = StaticPricingService.CalculateTaxBase(cartSubtotal, deliveryFee, tipAmount, pricingConfig.TaxBasePolicy);
+            var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, currency);
 
             // Compute and validate discount if coupon exists
             var discount = new Money(0m, currency);

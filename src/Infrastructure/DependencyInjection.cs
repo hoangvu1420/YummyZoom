@@ -211,7 +211,6 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IFcmService, FcmService>();
         builder.Services.AddScoped<IRestaurantProvisioningService, Services.RestaurantProvisioningService>();
         builder.Services.AddScoped<IFastCouponCheckService, Services.FastCouponCheckService>();
-        builder.Services.AddScoped<TeamCartCouponSuggestionsService>();
     }
 
     private static void AddExternalServices(this IHostApplicationBuilder builder)
@@ -232,20 +231,20 @@ public static class DependencyInjection
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
 
         // Image Proxy
-        builder.Services.Configure<YummyZoom.Application.Common.Configuration.ImageProxyOptions>(
-            builder.Configuration.GetSection(YummyZoom.Application.Common.Configuration.ImageProxyOptions.SectionName));
+        builder.Services.Configure<Application.Common.Configuration.ImageProxyOptions>(
+            builder.Configuration.GetSection(Application.Common.Configuration.ImageProxyOptions.SectionName));
 
         builder.Services.AddHttpClient("ImageProxy", http =>
         {
             http.Timeout = TimeSpan.FromSeconds(
                 Math.Max(1, builder.Configuration
-                    .GetSection(YummyZoom.Application.Common.Configuration.ImageProxyOptions.SectionName)
-                    .GetValue<int?>(nameof(YummyZoom.Application.Common.Configuration.ImageProxyOptions.TimeoutSeconds)) ?? 10));
+                    .GetSection(Application.Common.Configuration.ImageProxyOptions.SectionName)
+                    .GetValue<int?>(nameof(Application.Common.Configuration.ImageProxyOptions.TimeoutSeconds)) ?? 10));
             http.DefaultRequestHeaders.ConnectionClose = false;
         });
 
-        builder.Services.AddScoped<YummyZoom.Application.Common.Interfaces.IServices.IImageProxyService,
-            YummyZoom.Infrastructure.Http.ImageProxy.HttpImageProxyService>();
+        builder.Services.AddScoped<IImageProxyService,
+            Http.ImageProxy.HttpImageProxyService>();
     }
 
     private static void AddBackgroundServices(this IHostApplicationBuilder builder)
@@ -300,10 +299,6 @@ public static class DependencyInjection
         builder.Services.Configure<ActiveCouponViewMaintenanceOptions>(
             builder.Configuration.GetSection(ActiveCouponViewMaintenanceOptions.SectionName));
         builder.Services.AddHostedService<ActiveCouponViewMaintenanceHostedService>();
-
-        // TeamCart coupon suggestions real-time notifications
-        builder.Services.Configure<TeamCartCouponSuggestionsOptions>(
-            builder.Configuration.GetSection(TeamCartCouponSuggestionsOptions.SectionName));
 
         builder.Services.AddScoped<IAdminMetricsMaintainer, AdminMetricsMaintainer>();
         builder.Services.Configure<AdminMetricsMaintenanceOptions>(

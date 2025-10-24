@@ -53,7 +53,7 @@ public class TeamCartCouponAndTipFlowTests : BaseTestFixture
         await DrainOutboxAsync();
 
         // Assert cart state pre-conversion
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
 
@@ -85,7 +85,7 @@ public class TeamCartCouponAndTipFlowTests : BaseTestFixture
         order.TotalAmount.Amount.Should().BeApproximately(recomputed, 0.01m);
 
         // Cart converted
-        cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Converted);
     }
 
@@ -110,7 +110,7 @@ public class TeamCartCouponAndTipFlowTests : BaseTestFixture
         coupon.IsFailure.Should().BeTrue();
         coupon.Error.Code.Should().Be("TeamCart.CanOnlyApplyFinancialsToLockedCart");
 
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Open);
     }
 

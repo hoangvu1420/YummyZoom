@@ -242,12 +242,16 @@ public class OrderSeeder : ISeeder
                 }
             }
 
-            // Calculate other amounts - create new Money instances to avoid entity tracking issues
-            var deliveryFee = new Money(15000m, subtotal.Currency); // Standard delivery fee
+            // Calculate other amounts using centralized static pricing
+            var pricingConfig = StaticPricingService.GetPricingConfiguration(scenario.Restaurant.Id);
+            var deliveryFee = pricingConfig.DeliveryFee;
             var tipAmount = scenario.TipAmount?.Currency == subtotal.Currency 
                 ? scenario.TipAmount 
                 : new Money(scenario.TipAmount?.Amount ?? 0m, subtotal.Currency); // Ensure same currency
-            var taxAmount = new Money(subtotal.Amount * 0.08m, subtotal.Currency); // 8% tax rate
+            
+            // Calculate tax based on policy
+            var taxBase = StaticPricingService.CalculateTaxBase(subtotal, deliveryFee, tipAmount, pricingConfig.TaxBasePolicy);
+            var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, subtotal.Currency);
 
             // Calculate final total
             var totalAmount = _orderFinancialService.CalculateFinalTotal(subtotal, discountAmount, deliveryFee, tipAmount, taxAmount);
@@ -523,7 +527,6 @@ public class OrderSeeder : ISeeder
                 break;
         }
     }
-
 
 }
 

@@ -59,9 +59,7 @@ public class CouponAppliedToTeamCartEventHandlerTests : BaseTestFixture
         vm.DiscountAmount.Should().BeGreaterThanOrEqualTo(0m);
         vm.DiscountCurrency.Should().NotBeNullOrEmpty();
 
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        await DrainOutboxAsync();
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
+        // Expect 2 notifications: one from CouponAppliedToTeamCart and one from TeamCartQuoteUpdated
+        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }

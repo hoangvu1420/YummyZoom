@@ -5,6 +5,7 @@ using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Queries.GetCouponSuggestions;
+using YummyZoom.Domain.Common.Constants;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -61,7 +62,7 @@ public class TeamCartCouponSuggestionsTests : BaseTestFixture
         suggestions.CartSummary.Should().NotBeNull();
         suggestions.CartSummary.ItemCount.Should().Be(3); // 2 + 1 items
         suggestions.CartSummary.Subtotal.Should().BeGreaterThan(0);
-        suggestions.CartSummary.Currency.Should().Be("USD");
+        suggestions.CartSummary.Currency.Should().Be(Currencies.Default);
         
         suggestions.Suggestions.Should().NotBeEmpty();
         suggestions.Suggestions.Should().Contain(s => s.Code == "TEAM15");
@@ -109,8 +110,8 @@ public class TeamCartCouponSuggestionsTests : BaseTestFixture
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1)); // Small order
 
-        // Create coupon with high minimum order requirement
-        await CreateActiveCouponWithMinOrderAsync(Testing.TestData.DefaultRestaurantId, "BIGORDER", 10m, 100m);
+        // Create coupon with high minimum order requirement (higher than burger price of 383,760m)
+        await CreateActiveCouponWithMinOrderAsync(Testing.TestData.DefaultRestaurantId, "BIGORDER", 10m, 500000m);
 
         // Process outbox events to ensure coupon is persisted
         await DrainOutboxAsync();
@@ -245,7 +246,7 @@ public class TeamCartCouponSuggestionsTests : BaseTestFixture
         var restaurantIdVo = RestaurantId.Create(restaurantId);
         var valueResult = CouponValue.CreatePercentage(percentageValue);
         var appliesToResult = AppliesTo.CreateForWholeOrder();
-        var minOrder = new Money(minOrderAmount, "USD");
+        var minOrder = new Money(minOrderAmount, Currencies.Default);
 
         var couponResult = Coupon.Create(
             restaurantIdVo,

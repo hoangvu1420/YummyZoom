@@ -1,4 +1,5 @@
 using YummyZoom.Domain.Common.Constants;
+using YummyZoom.Domain.Services;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
@@ -37,7 +38,7 @@ public class TeamCartFinancialTests
             _menuItemId1,
             _menuCategoryId,
             "Test Item 1",
-            new Money(10.00m, Currencies.Default),
+            new Money(10.00m, StaticPricingService.DefaultDeliveryFee.Currency),
             1).ShouldBeSuccessful();
 
         _teamCart.AddItem(
@@ -45,7 +46,7 @@ public class TeamCartFinancialTests
             _menuItemId2,
             _menuCategoryId,
             "Test Item 2",
-            new Money(15.00m, Currencies.Default),
+            new Money(15.00m, StaticPricingService.DefaultDeliveryFee.Currency),
             1).ShouldBeSuccessful();
 
         // Lock the cart for payment
@@ -58,7 +59,7 @@ public class TeamCartFinancialTests
     public void ApplyTip_WhenHostRequests_ShouldSucceed()
     {
         // Arrange
-        var tipAmount = new Money(5.00m, Currencies.Default);
+        var tipAmount = new Money(5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         var result = _teamCart.ApplyTip(DefaultHostUserId, tipAmount);
@@ -72,7 +73,7 @@ public class TeamCartFinancialTests
     public void ApplyTip_WhenNonHostRequests_ShouldFail()
     {
         // Arrange
-        var tipAmount = new Money(5.00m, Currencies.Default);
+        var tipAmount = new Money(5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         var result = _teamCart.ApplyTip(_guestUserId, tipAmount);
@@ -80,14 +81,14 @@ public class TeamCartFinancialTests
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.OnlyHostCanModifyFinancials);
-        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default));
+        _teamCart.TipAmount.Should().Be(Money.Zero(StaticPricingService.DefaultDeliveryFee.Currency));
     }
 
     [Test]
     public void ApplyTip_WithNegativeAmount_ShouldFail()
     {
         // Arrange
-        var tipAmount = new Money(-5.00m, Currencies.Default);
+        var tipAmount = new Money(-5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         var result = _teamCart.ApplyTip(DefaultHostUserId, tipAmount);
@@ -95,7 +96,7 @@ public class TeamCartFinancialTests
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.InvalidTip);
-        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default));
+        _teamCart.TipAmount.Should().Be(Money.Zero(StaticPricingService.DefaultDeliveryFee.Currency));
     }
 
     [Test]
@@ -103,7 +104,7 @@ public class TeamCartFinancialTests
     {
         // Arrange
         var teamCart = TeamCart.Create(DefaultHostUserId, DefaultRestaurantId, DefaultHostName).Value;
-        var tipAmount = new Money(5.00m, Currencies.Default);
+        var tipAmount = new Money(5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         var result = teamCart.ApplyTip(DefaultHostUserId, tipAmount);
@@ -111,7 +112,7 @@ public class TeamCartFinancialTests
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.CanOnlyApplyFinancialsToLockedCart);
-        teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default));
+        teamCart.TipAmount.Should().Be(Money.Zero(StaticPricingService.DefaultDeliveryFee.Currency));
     }
 
     [Test]
@@ -119,7 +120,7 @@ public class TeamCartFinancialTests
     {
         // Arrange - Set up a cart in ReadyToConfirm status
         var teamCart = CreateTeamCartReadyForConversion();
-        var tipAmount = new Money(5.00m, Currencies.Default);
+        var tipAmount = new Money(5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         var result = teamCart.ApplyTip(DefaultHostUserId, tipAmount);
@@ -133,8 +134,8 @@ public class TeamCartFinancialTests
     public void ApplyTip_CanUpdateExistingTip()
     {
         // Arrange
-        var initialTip = new Money(5.00m, Currencies.Default);
-        var updatedTip = new Money(7.50m, Currencies.Default);
+        var initialTip = new Money(5.00m, StaticPricingService.DefaultDeliveryFee.Currency);
+        var updatedTip = new Money(7.50m, StaticPricingService.DefaultDeliveryFee.Currency);
 
         // Act
         _teamCart.ApplyTip(DefaultHostUserId, initialTip).ShouldBeSuccessful();
@@ -161,7 +162,7 @@ public class TeamCartFinancialTests
         // Assert
         result.ShouldBeSuccessful();
         _teamCart.AppliedCouponId.Should().Be(couponId);
-        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default)); // Tip should be reset
+        _teamCart.TipAmount.Should().Be(Money.Zero(StaticPricingService.DefaultDeliveryFee.Currency)); // Tip should be reset
     }
 
     [Test]
@@ -278,7 +279,7 @@ public class TeamCartFinancialTests
         // Assert
         result.ShouldBeSuccessful();
         _teamCart.AppliedCouponId.Should().BeNull();
-        _teamCart.TipAmount.Should().Be(Money.Zero(Currencies.Default)); // Tip should be reset
+        _teamCart.TipAmount.Should().Be(Money.Zero(StaticPricingService.DefaultDeliveryFee.Currency)); // Tip should be reset
     }
 
     [Test]

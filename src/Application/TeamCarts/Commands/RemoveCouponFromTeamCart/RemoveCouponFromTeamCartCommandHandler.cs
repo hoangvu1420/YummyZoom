@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.Services;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
@@ -59,9 +60,14 @@ public sealed class RemoveCouponFromTeamCartCommandHandler : IRequestHandler<Rem
                 .GroupBy(i => i.AddedByUserId)
                 .ToDictionary(g => g.Key, g => new Money(g.Sum(x => x.LineItemTotal.Amount), currency));
 
-            var feesTotal = new Money(2.99m, currency); // MVP placeholder
+            var pricingConfig = StaticPricingService.GetPricingConfiguration(cart.RestaurantId);
+            var feesTotal = pricingConfig.DeliveryFee;
             var tipAmount = cart.TipAmount;
-            var taxAmount = new Money(0m, currency); // MVP placeholder
+            
+            // Calculate tax based on policy using centralized service
+            var cartSubtotal = new Money(memberSubtotals.Values.Sum(m => m.Amount), currency);
+            var taxBase = StaticPricingService.CalculateTaxBase(cartSubtotal, feesTotal, tipAmount, pricingConfig.TaxBasePolicy);
+            var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, currency);
             var discount = new Money(0m, currency);
 
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);

@@ -408,6 +408,156 @@ Cancels an order if it's in a cancellable state. Customers can cancel orders bef
 - Webhook confirms payment success/failure
 - Status transitions to `Placed` on success or `Cancelled` on failure
 
+## Coupon Discovery
+
+### Fast Coupon Check
+
+Get real-time coupon suggestions and savings calculations for a cart before placing an order. This endpoint helps customers discover applicable coupons and see potential savings.
+
+**`POST /api/v1/coupons/fast-check`**
+
+- **Authorization:** Required (Customer)
+- **Performance:** Optimized for <500ms response times
+
+#### Request Body
+
+```json
+{
+  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "items": [
+    {
+      "menuItemId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
+      "menuCategoryId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
+      "quantity": 2,
+      "unitPrice": 15.99,
+      "currency": "USD"
+    }
+  ]
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `restaurantId` | `UUID` | Yes | Restaurant identifier |
+| `items` | `CartItem[]` | Yes | Array of cart items for evaluation |
+
+#### Cart Item Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `menuItemId` | `UUID` | Yes | Menu item identifier |
+| `menuCategoryId` | `UUID` | Yes | Menu category identifier |
+| `quantity` | `integer` | Yes | Item quantity (≥1) |
+| `unitPrice` | `decimal` | Yes | Price per unit |
+| `currency` | `string` | No | Currency code (default: "USD") |
+
+#### Response
+
+```json
+{
+  "cartSummary": {
+    "subtotal": 31.98,
+    "currency": "USD",
+    "itemCount": 2
+  },
+  "bestDeal": {
+    "code": "SAVE20",
+    "label": "20% off your order",
+    "savings": 6.40,
+    "isEligible": true,
+    "eligibilityReason": null,
+    "minOrderGap": 0,
+    "expiresOn": "2025-11-15T23:59:59Z",
+    "scope": "WholeOrder",
+    "urgency": "None"
+  },
+  "suggestions": [
+    {
+      "code": "SAVE20",
+      "label": "20% off your order",
+      "savings": 6.40,
+      "isEligible": true,
+      "eligibilityReason": null,
+      "minOrderGap": 0,
+      "expiresOn": "2025-11-15T23:59:59Z",
+      "scope": "WholeOrder",
+      "urgency": "None"
+    },
+    {
+      "code": "FREEDRINK",
+      "label": "Free drink with order",
+      "savings": 0,
+      "isEligible": false,
+      "eligibilityReason": "MinAmountNotMet",
+      "minOrderGap": 8.02,
+      "expiresOn": "2025-12-01T23:59:59Z",
+      "scope": "SpecificItems",
+      "urgency": "ExpiresWithin7Days"
+    }
+  ]
+}
+```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cartSummary` | `CartSummary` | Cart totals and item count |
+| `bestDeal` | `CouponSuggestion?` | Highest-value eligible coupon (null if none) |
+| `suggestions` | `CouponSuggestion[]` | All applicable coupons, sorted by value |
+
+#### Cart Summary Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `subtotal` | `decimal` | Total cart value before discounts |
+| `currency` | `string` | Currency code |
+| `itemCount` | `integer` | Total number of items |
+
+#### Coupon Suggestion Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | `string` | Coupon code |
+| `label` | `string` | Human-readable description |
+| `savings` | `decimal` | Calculated savings amount |
+| `isEligible` | `boolean` | Whether coupon can be applied |
+| `eligibilityReason` | `string?` | Reason if not eligible (null if eligible) |
+| `minOrderGap` | `decimal` | Additional amount needed for minimum order |
+| `expiresOn` | `datetime` | Coupon expiration date |
+| `scope` | `string` | Coupon scope: "WholeOrder", "SpecificItems", "SpecificCategories" |
+| `urgency` | `string` | Urgency level: "None", "ExpiresWithin24Hours", "ExpiresWithin7Days", "LimitedUsesRemaining" |
+
+#### Eligibility Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `MinAmountNotMet` | Cart total below minimum order requirement |
+| `UsageLimitExceeded` | User or total usage limit reached |
+| `Expired` | Coupon has expired |
+| `NotYetValid` | Coupon not yet active |
+| `Disabled` | Coupon is disabled |
+| `NotApplicable` | Coupon doesn't apply to cart items |
+
+#### Business Rules
+
+- **Performance**: Response optimized for <500ms using materialized views
+- **Consistency**: Calculations match actual order financial service
+- **Authorization**: User must be authenticated
+- **Validation**: Restaurant must exist and be active
+- **Usage Limits**: Respects per-user and total usage limits
+
+#### Error Responses
+
+- **400 Bad Request**: Invalid request format or missing required fields
+- **401 Unauthorized**: Missing or invalid authentication token
+- **404 Not Found**: Restaurant not found or inactive
+- **500 Internal Server Error**: System error during processing
+
+---
+
 ### Coupon Application
 
 1. **Validation**: Coupon must exist, be active, and belong to the restaurant

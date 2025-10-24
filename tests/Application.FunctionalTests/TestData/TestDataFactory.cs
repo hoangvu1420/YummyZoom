@@ -472,8 +472,8 @@ public static class TestDataFactory
         var burgerAddOnsGroup = burgerAddOnsGroupResult.Value;
 
         // Choices
-        burgerAddOnsGroup.AddChoice("Extra Cheese", new Money(1.50m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 1);
-        burgerAddOnsGroup.AddChoice("Bacon", new Money(2.00m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
+        burgerAddOnsGroup.AddChoice("Extra Cheese", new Money(36000m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 1);
+        burgerAddOnsGroup.AddChoice("Bacon", new Money(48000m, DefaultTestData.Currency.Default), isDefault: false, displayOrder: 2);
 
         // Clear domain events to avoid producing events during seeding
         burgerAddOnsGroup.ClearDomainEvents();

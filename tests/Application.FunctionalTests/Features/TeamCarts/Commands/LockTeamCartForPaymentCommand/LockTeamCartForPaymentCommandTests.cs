@@ -39,7 +39,7 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
         lockResult.IsSuccess.Should().BeTrue();
 
         // Verify persisted state changed to Locked
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.Locked);
     }
@@ -61,7 +61,7 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
         lockResult.IsFailure.Should().BeTrue();
         lockResult.Error.Code.Should().Be("TeamCart.CannotLockEmptyCart");
 
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.Open);
     }
@@ -91,7 +91,7 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
             .Should().ThrowAsync<ForbiddenAccessException>();
 
         // Verify cart status remains Open
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.Open);
     }
@@ -120,7 +120,7 @@ public class LockTeamCartForPaymentCommandTests : BaseTestFixture
             .Should().ThrowAsync<ForbiddenAccessException>();
 
         // Verify cart status remains Open
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.Open);
     }

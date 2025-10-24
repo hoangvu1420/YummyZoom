@@ -32,7 +32,7 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
         // Assert: Success and payment recorded
         result.IsSuccess.Should().BeTrue();
 
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
         cart.MemberPayments.Should().ContainSingle(p => p.UserId == Domain.UserAggregate.ValueObjects.UserId.Create(scenario.HostUserId) && p.Method == PaymentMethod.CashOnDelivery);

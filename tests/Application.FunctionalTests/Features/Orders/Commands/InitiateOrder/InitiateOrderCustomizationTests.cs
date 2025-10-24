@@ -40,7 +40,7 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue(result.Error?.ToString());
-        var order = await FindAsync<Order>(result.Value.OrderId);
+        var order = await FindOrderAsync(result.Value.OrderId);
         order.Should().NotBeNull();
         order!.OrderItems.Count.Should().Be(1);
         var orderItem = order.OrderItems[0];
@@ -48,9 +48,9 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
         var customizationNames = orderItem.SelectedCustomizations.Select(c => c.Snapshot_ChoiceName).ToList();
         customizationNames.Should().Contain(new[] { "Extra Cheese", "Bacon" });
 
-        // Financial: base + 1.50 + 2.00
+        // Financial: base + 36000 + 48000 (VND equivalents of Extra Cheese and Bacon)
         var basePrice = orderItem.Snapshot_BasePriceAtOrder.Amount;
-        orderItem.LineItemTotal.Amount.Should().Be(basePrice + 1.50m + 2.00m);
+        orderItem.LineItemTotal.Amount.Should().Be(basePrice + 36000m + 48000m);
         order.Subtotal.Amount.Should().Be(orderItem.LineItemTotal.Amount);
     }
 
@@ -69,7 +69,7 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue(result.Error?.ToString());
-        var order = await FindAsync<Order>(result.Value.OrderId);
+        var order = await FindOrderAsync(result.Value.OrderId);
         var orderItem = order!.OrderItems[0];
         orderItem.SelectedCustomizations.Should().BeEmpty();
     }
@@ -131,9 +131,9 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
         var requiredGroup = requiredGroupResult.Value;
 
         // Add some choices to this group
-        requiredGroup.AddChoice("Choice 1", new Money(1.00m, Currencies.USD), false, 1);
-        requiredGroup.AddChoice("Choice 2", new Money(1.50m, Currencies.USD), false, 2);
-        requiredGroup.AddChoice("Choice 3", new Money(2.00m, Currencies.USD), false, 3);
+        requiredGroup.AddChoice("Choice 1", new Money(24000m, DefaultTestData.Currency.Default), false, 1);
+        requiredGroup.AddChoice("Choice 2", new Money(36000m, DefaultTestData.Currency.Default), false, 2);
+        requiredGroup.AddChoice("Choice 3", new Money(48000m, DefaultTestData.Currency.Default), false, 3);
         await AddAsync(requiredGroup);
 
         // Assign this group to the burger so selection count validation triggers
@@ -171,7 +171,7 @@ public class InitiateOrderCustomizationTests : InitiateOrderTestBase
             restaurantIdVO, "Other Group", 0, 1);
         otherGroupResult.IsSuccess.Should().BeTrue();
         var otherGroup = otherGroupResult.Value;
-        otherGroup.AddChoice("Other Choice", new Money(0.25m, DefaultTestData.Currency.Default), false, 1);
+        otherGroup.AddChoice("Other Choice", new Money(6000m, DefaultTestData.Currency.Default), false, 1);
         await AddAsync(otherGroup);
 
         var item = new OrderItemDto(ClassicBurgerId, 1, new List<OrderItemCustomizationRequestDto>{

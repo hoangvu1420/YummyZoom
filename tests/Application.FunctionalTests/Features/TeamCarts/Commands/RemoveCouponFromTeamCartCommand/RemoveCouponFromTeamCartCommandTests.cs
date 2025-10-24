@@ -45,9 +45,7 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
         // Assert
         remove.IsSuccess.Should().BeTrue();
 
-        using var scope = TestInfrastructure.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var cart = await db.TeamCarts.FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.AppliedCouponId.Should().BeNull();
     }
@@ -72,7 +70,7 @@ public class RemoveCouponFromTeamCartCommandTests : BaseTestFixture
 
         // Assert
         remove.IsSuccess.Should().BeTrue();
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.AppliedCouponId.Should().BeNull();
     }

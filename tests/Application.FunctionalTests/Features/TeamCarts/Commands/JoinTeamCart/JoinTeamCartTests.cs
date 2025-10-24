@@ -36,12 +36,7 @@ public class JoinTeamCartTests : BaseTestFixture
         joinResult.IsSuccess.Should().BeTrue();
 
         // Verify persisted membership
-        using var scope = TestInfrastructure.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        var cart = await db.TeamCarts
-            .Include(c => c.Members)
-            .FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(teamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(teamCartId));
 
         cart.Should().NotBeNull();
         cart!.Members.Should().Contain(m => m.UserId.Value == guestUserId);

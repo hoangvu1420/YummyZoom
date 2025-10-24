@@ -196,23 +196,29 @@ public class InitiateOrderBusinessRuleTests : InitiateOrderTestBase
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(CouponErrors.UserUsageLimitExceeded);
+        result.Error.Should().Be(CouponErrors.UsageLimitExceeded);
     }
 
     [Test]
     public async Task InitiateOrder_WithCouponBelowMinimumOrder_ShouldFailWithMinAmountNotMet()
     {
-        // Arrange - Create a coupon with high minimum order amount
-        var minOrderCouponCode = await CouponTestDataFactory.CreateCouponWithMinimumOrderAmountAsync(minimumAmount: 100.00m);
+        // Arrange - Create a coupon with high minimum order amount (higher than Classic Burger price of 383,760 VND)
+        var minOrderCouponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions
+        {
+            Code = "MINORDER500000",
+            MinimumOrderAmount = 500000m, // 500,000 VND - higher than Classic Burger (383,760 VND)
+            Currency = "VND",
+            Description = "Minimum order test coupon - 500,000 VND"
+        });
 
-        // Create order with low value (default items are around $15-16)
+        // Create order with low value (Classic Burger is 383,760 VND)
         var command = InitiateOrderTestHelper.BuildValidCommand(
             menuItemIds: new List<Guid> { Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger) },
             couponCode: minOrderCouponCode);
 
         // Act
         var result = await SendAsync(command);
-
+        
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(CouponErrors.MinAmountNotMet);

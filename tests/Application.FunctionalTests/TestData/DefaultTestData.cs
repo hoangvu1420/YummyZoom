@@ -105,13 +105,13 @@ public static class DefaultTestData
         public static class MainDishes
         {
             public static readonly (string Name, string Description, decimal Price) ClassicBurger =
-                ("Classic Beef Burger", "Juicy beef patty with lettuce, tomato, pickles, and our special sauce on a brioche bun", 15.99m);
+                ("Classic Beef Burger", "Juicy beef patty with lettuce, tomato, pickles, and our special sauce on a brioche bun", 383760m);
 
             public static readonly (string Name, string Description, decimal Price) MargheritaPizza =
-                ("Margherita Pizza", "Traditional pizza with fresh mozzarella, tomatoes, and basil on hand-tossed dough", 18.50m);
+                ("Margherita Pizza", "Traditional pizza with fresh mozzarella, tomatoes, and basil on hand-tossed dough", 444000m);
 
             public static readonly (string Name, string Description, decimal Price) GrilledSalmon =
-                ("Grilled Atlantic Salmon", "Fresh salmon fillet grilled to perfection with lemon herb seasoning and seasonal vegetables", 24.99m);
+                ("Grilled Atlantic Salmon", "Fresh salmon fillet grilled to perfection with lemon herb seasoning and seasonal vegetables", 599760m);
         }
 
         /// <summary>
@@ -120,10 +120,10 @@ public static class DefaultTestData
         public static class Appetizers
         {
             public static readonly (string Name, string Description, decimal Price) BuffaloWings =
-                ("Buffalo Chicken Wings", "Crispy chicken wings tossed in our signature buffalo sauce, served with celery and ranch", 12.99m);
+                ("Buffalo Chicken Wings", "Crispy chicken wings tossed in our signature buffalo sauce, served with celery and ranch", 311760m);
 
             public static readonly (string Name, string Description, decimal Price) CaesarSalad =
-                ("Caesar Salad", "Crisp romaine lettuce with parmesan cheese, croutons, and our house-made Caesar dressing", 9.99m);
+                ("Caesar Salad", "Crisp romaine lettuce with parmesan cheese, croutons, and our house-made Caesar dressing", 239760m);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ public static class DefaultTestData
         public static class Desserts
         {
             public static readonly (string Name, string Description, decimal Price) ChocolateCake =
-                ("Chocolate Fudge Cake", "Rich chocolate cake with layers of chocolate fudge and fresh berries", 8.99m);
+                ("Chocolate Fudge Cake", "Rich chocolate cake with layers of chocolate fudge and fresh berries", 215760m);
         }
 
         /// <summary>
@@ -141,10 +141,10 @@ public static class DefaultTestData
         public static class Beverages
         {
             public static readonly (string Name, string Description, decimal Price) CraftBeer =
-                ("Local Craft Beer", "Rotating selection of local craft beers on tap", 6.99m);
+                ("Local Craft Beer", "Rotating selection of local craft beers on tap", 167760m);
 
             public static readonly (string Name, string Description, decimal Price) FreshJuice =
-                ("Fresh Orange Juice", "Freshly squeezed orange juice made to order", 4.99m);
+                ("Fresh Orange Juice", "Freshly squeezed orange juice made to order", 119760m);
         }
     }
 
@@ -156,7 +156,7 @@ public static class DefaultTestData
         public const string Code = "SAVE15TEST";
         public const string Description = "Save 15% on your test order - Valid for functional testing";
         public const decimal DiscountPercentage = 15m;
-        public const decimal MinimumOrderAmount = 20.00m;
+        public const decimal MinimumOrderAmount = 480000m;
         public const int TotalUsageLimit = 100;
         public const int UsageLimitPerUser = 5;
         public const int ValidDaysFromNow = 30;
@@ -167,6 +167,6 @@ public static class DefaultTestData
     /// </summary>
     public static class Currency
     {
-        public const string Default = "USD";
+        public const string Default = "VND";
     }
 }

@@ -117,9 +117,14 @@ public sealed class ApplyCouponToTeamCartCommandHandler : IRequestHandler<ApplyC
                 .GroupBy(i => i.AddedByUserId)
                 .ToDictionary(g => g.Key, g => new Money(g.Sum(x => x.LineItemTotal.Amount), currency));
 
-            var feesTotal = new Money(2.99m, currency); // MVP placeholder
+            var pricingConfig = StaticPricingService.GetPricingConfiguration(cart.RestaurantId);
+            var feesTotal = pricingConfig.DeliveryFee;
             var tipAmount = cart.TipAmount;
-            var taxAmount = new Money(0m, currency); // MVP placeholder
+            
+            // Calculate tax based on policy using centralized service
+            var cartSubtotal = new Money(memberSubtotals.Values.Sum(m => m.Amount), currency);
+            var taxBase = StaticPricingService.CalculateTaxBase(cartSubtotal, feesTotal, tipAmount, pricingConfig.TaxBasePolicy);
+            var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, currency);
             var discount = discountCheck.Value; // already computed for these items
 
             cart.ComputeQuoteLite(memberSubtotals, feesTotal, tipAmount, taxAmount, discount);

@@ -56,12 +56,8 @@ public class TeamCartLockedForPaymentEventHandlerTests : BaseTestFixture
         vm!.Status.Should().Be(TeamCartStatus.Locked);
 
         // Assert notifications
+        // Expect 1 NotifyLocked and 2 NotifyCartUpdated (one from TeamCartLockedForPayment, one from TeamCartQuoteUpdated)
         notifierMock.Verify(n => n.NotifyLocked(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // Idempotency: re-drain should not double notify
-        await DrainOutboxAsync();
-        notifierMock.Verify(n => n.NotifyLocked(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
+        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }

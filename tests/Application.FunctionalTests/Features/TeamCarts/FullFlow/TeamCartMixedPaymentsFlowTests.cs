@@ -101,7 +101,7 @@ public class TeamCartMixedPaymentsFlowTests : BaseTestFixture
                 TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
                 paymentIntentId,
                 amount: 1000,
-                currency: "usd",
+                currency: "vnd",
                 metadata: new Dictionary<string, string>
                 {
                     ["source"] = "teamcart",
@@ -119,7 +119,7 @@ public class TeamCartMixedPaymentsFlowTests : BaseTestFixture
         await ProcessSucceededAsync(guestAPayment.Value.PaymentIntentId!, guestAUserId);
 
         // Assert: Cart is ReadyToConfirm (all committed: 2 online paid + 1 COD)
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.Status.Should().Be(TeamCartStatus.ReadyToConfirm);
 
@@ -145,7 +145,7 @@ public class TeamCartMixedPaymentsFlowTests : BaseTestFixture
         order.PaymentTransactions.Count(t => t.PaymentMethodType == PaymentMethodType.CashOnDelivery).Should().Be(1);
 
         // Final: TeamCart is Converted
-        cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Converted);
     }
 }

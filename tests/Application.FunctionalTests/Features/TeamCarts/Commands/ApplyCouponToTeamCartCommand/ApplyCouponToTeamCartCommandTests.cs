@@ -36,13 +36,13 @@ public class ApplyCouponToTeamCartCommandTests : BaseTestFixture
         // Assert: success and persisted AppliedCouponId set to the coupon's ID
         apply.IsSuccess.Should().BeTrue();
 
-        using var scope = TestInfrastructure.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var cart = await db.TeamCarts.FirstOrDefaultAsync(c => c.Id == TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
         cart!.AppliedCouponId.Should().NotBeNull();
 
-        var coupon = await db.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+        using var scope = Testing.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var coupon = await context.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
         coupon.Should().NotBeNull();
         cart!.AppliedCouponId!.Value.Should().Be(coupon!.Id.Value);
     }
@@ -159,7 +159,7 @@ public class ApplyCouponToTeamCartCommandTests : BaseTestFixture
         // Create a coupon with a high minimum order amount to force failure
         var couponCode = await CouponTestDataFactory.CreateTestCouponAsync(new CouponTestOptions
         {
-            MinimumOrderAmount = 999m
+            MinimumOrderAmount = 500000m  // Higher than burger price (383760m)
         });
 
         // Act: Try to apply coupon with unmet minimum amount as host

@@ -3,6 +3,7 @@ using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.Errors;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
 using YummyZoom.Domain.OrderAggregate.Entities;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate.Entities;
 using YummyZoom.SharedKernel;
 
@@ -102,6 +103,27 @@ public class OrderFinancialService
 
         // Ensure discount doesn't exceed the subtotal it applies to
         return new Money(Math.Min(calculatedDiscount.Amount, discountBaseAmount), subtotal.Currency);
+    }
+
+    /// <summary>
+    /// Calculates the final total amount with centralized static pricing.
+    /// </summary>
+    public virtual Money CalculateFinalTotalWithStaticPricing(
+        RestaurantId restaurantId,
+        Money subtotal,
+        Money discount,
+        Money tip)
+    {
+        var pricingConfig = StaticPricingService.GetPricingConfiguration(restaurantId);
+
+        // Calculate tax based on policy
+        var taxBase = StaticPricingService.CalculateTaxBase(subtotal, pricingConfig.DeliveryFee, tip, pricingConfig.TaxBasePolicy);
+        var taxAmount = new Money(taxBase.Amount * pricingConfig.TaxRate, subtotal.Currency);
+
+        // Calculate final total
+        var finalTotal = subtotal - discount + pricingConfig.DeliveryFee + tip + taxAmount;
+        
+        return finalTotal;
     }
 
     /// <summary>

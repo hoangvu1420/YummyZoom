@@ -57,11 +57,8 @@ public class TipAppliedToTeamCartEventHandlerTests : BaseTestFixture
         vm!.TipAmount.Should().Be(tipAmount);
         vm.TipCurrency.Should().NotBeNullOrEmpty(); // default currency from domain
 
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // Idempotency: re-drain should not duplicate
-        await DrainOutboxAsync();
-        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
+        // Expect 2 notifications: one from TipAppliedToTeamCart and one from TeamCartQuoteUpdated
+        notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }
 

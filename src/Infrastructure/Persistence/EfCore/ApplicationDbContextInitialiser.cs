@@ -53,7 +53,8 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            await _seedingOrchestrator.ExecuteSeedingAsync();
+            // await _seedingOrchestrator.ExecuteSeedingAsync();
+            await Task.CompletedTask;
         }
         catch (Exception ex)
         {

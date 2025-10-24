@@ -297,6 +297,16 @@ public partial class Testing
         return await TestDatabaseManager.FindOrderAsync(orderId);
     }
 
+    /// <summary>
+    /// Finds a TeamCart entity by its ID, including related entities with optimized queries.
+    /// </summary>
+    /// <param name="teamCartId">The team cart ID to search for.</param>
+    /// <returns>The found team cart, or null if not found.</returns>
+    public static async Task<Domain.TeamCartAggregate.TeamCart?> FindTeamCartAsync(Domain.TeamCartAggregate.ValueObjects.TeamCartId teamCartId)
+    {
+        return await TestDatabaseManager.FindTeamCartAsync(teamCartId);
+    }
+
     #endregion
 
     #region Service Access

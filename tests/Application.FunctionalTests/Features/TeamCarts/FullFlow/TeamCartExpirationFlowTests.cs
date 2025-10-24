@@ -44,7 +44,7 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
         await DrainOutboxAsync();
 
         // Assert: Cart is Expired
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Expired);
 
         // Attempt conversion should fail (invalid status)
@@ -105,7 +105,7 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             paymentIntentId,
             amount: 1000,
-            currency: "usd",
+            currency: "vnd",
             metadata: new Dictionary<string, string>
             {
                 ["source"] = "teamcart",
@@ -117,7 +117,7 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
 
         // Assert: handler returns failure due to non-locked status; cart remains expired
         result.IsFailure.Should().BeTrue();
-        var cart = await FindAsync<TeamCart>(TeamCartId.Create(scenario.TeamCartId));
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart!.Status.Should().Be(TeamCartStatus.Expired);
     }
 }

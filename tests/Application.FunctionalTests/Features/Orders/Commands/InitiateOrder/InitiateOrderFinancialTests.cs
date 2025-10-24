@@ -36,10 +36,10 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Classic Burger price: $15.99 * 1 = $15.99
-        const decimal expectedSubtotal = 15.99m;
+        // Classic Burger price: 383,760 VND * 1 = 383,760 VND
+        const decimal expectedSubtotal = 383760m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
-        orderInDb.Subtotal.Currency.Should().Be("USD");
+        orderInDb.Subtotal.Currency.Should().Be(InitiateOrderTestHelper.TestAmounts.Currency);
 
         // Verify individual order item calculation
         orderInDb.OrderItems.Should().HaveCount(1);
@@ -86,8 +86,8 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Total: (15.99 * 2) + (12.99 * 1) = 31.98 + 12.99 = $44.97
-        const decimal expectedSubtotal = 44.97m;
+        // Total: (383,760 * 2) + (311,760 * 1) = 767,520 + 311,760 = 1,079,280 VND
+        const decimal expectedSubtotal = 1079280m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
         // Verify individual line items are calculated correctly
@@ -95,8 +95,8 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var burgerItem = orderInDb.OrderItems.First(oi => oi.Quantity == 2);
         var wingsItem = orderInDb.OrderItems.First(oi => oi.Quantity == 1);
 
-        burgerItem.LineItemTotal.Amount.Should().Be(31.98m);
-        wingsItem.LineItemTotal.Amount.Should().Be(12.99m);
+        burgerItem.LineItemTotal.Amount.Should().Be(767520m); // 383,760 * 2
+        wingsItem.LineItemTotal.Amount.Should().Be(311760m); // 311,760 * 1
     }
 
     [Test]
@@ -139,8 +139,8 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Total: (18.50 * 1) + (9.99 * 2) + (6.99 * 3) = 18.50 + 19.98 + 20.97 = $59.45
-        const decimal expectedSubtotal = 59.45m;
+        // Total: (444,000 * 1) + (239,760 * 2) + (167,760 * 3) = 444,000 + 479,520 + 503,280 = 1,426,800 VND
+        const decimal expectedSubtotal = 1426800m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
         // Verify each line item calculation
@@ -148,11 +148,11 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         foreach (var orderItem in orderInDb.OrderItems)
         {
             if (orderItem.Quantity == 1)
-                orderItem.LineItemTotal.Amount.Should().Be(18.50m); // Pizza
+                orderItem.LineItemTotal.Amount.Should().Be(444000m); // Pizza: 444,000 * 1
             else if (orderItem.Quantity == 2)
-                orderItem.LineItemTotal.Amount.Should().Be(19.98m); // Salad
+                orderItem.LineItemTotal.Amount.Should().Be(479520m); // Salad: 239,760 * 2
             else if (orderItem.Quantity == 3)
-                orderItem.LineItemTotal.Amount.Should().Be(20.97m); // Beer
+                orderItem.LineItemTotal.Amount.Should().Be(503280m); // Beer: 167,760 * 3
         }
     }
 
@@ -177,14 +177,14 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Verify delivery fee is applied correctly (should be $2.99 as per TestAmounts)
+        // Verify delivery fee is applied correctly (should be 15000 VND as per StaticPricingService)
         orderInDb!.DeliveryFee.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee);
-        orderInDb.DeliveryFee.Currency.Should().Be("USD");
+        orderInDb.DeliveryFee.Currency.Should().Be(InitiateOrderTestHelper.TestAmounts.Currency);
 
         // Verify tax amount is calculated at correct rate (8% of subtotal)
         var expectedTaxAmount = orderInDb.Subtotal.Amount * InitiateOrderTestHelper.TestAmounts.TaxRate;
         orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
-        orderInDb.TaxAmount.Currency.Should().Be("USD");
+        orderInDb.TaxAmount.Currency.Should().Be(InitiateOrderTestHelper.TestAmounts.Currency);
 
         // Verify total includes all components
         var expectedTotal = orderInDb.Subtotal.Amount + orderInDb.DeliveryFee.Amount + orderInDb.TaxAmount.Amount;
@@ -230,17 +230,17 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Subtotal: 49.98 + 18.50 + 25.98 = $94.46
-        const decimal expectedSubtotal = 94.46m;
+        // Subtotal: 1,199,520 + 444,000 + 623,520 = 2,267,040 VND
+        const decimal expectedSubtotal = 2267040m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
-        // Tax: $94.46 * 8% = $7.5568 ≈ $7.56
+        // Tax: 2,267,040 * 8% = 181,363.2 ≈ 181,363 VND
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
-        orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
+        orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 1m);
 
-        // Total: $94.46 + $2.99 + $7.56 = $105.01
+        // Total: 2,267,040 + 15,000 + 181,363 = 2,463,403 VND
         var expectedTotal = expectedSubtotal + InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee + expectedTaxAmount;
-        orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 0.01m);
+        orderInDb.TotalAmount.Amount.Should().BeApproximately(expectedTotal, 1m);
     }
 
     #endregion
@@ -316,13 +316,13 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Subtotal: 74.97 + 37.00 = $111.97
-        const decimal expectedSubtotal = 111.97m;
+        // Subtotal: 1,799,280 + 888,000 = 2,687,280 VND
+        const decimal expectedSubtotal = 2687280m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
-        // Discount: $111.97 * 15% = $16.7955 ≈ $16.80
+        // Discount: 2,687,280 * 15% = 403,092 VND
         var expectedDiscountAmount = expectedSubtotal * 0.15m;
-        orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 0.01m);
+        orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 1m);
 
         // Verify coupon was applied
         orderInDb.AppliedCouponId.Should().NotBeNull();
@@ -397,11 +397,11 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         orderInDb.Should().NotBeNull();
 
         // Verify all financial components
-        const decimal expectedSubtotal = 49.98m; // $24.99 x 2
+        const decimal expectedSubtotal = 1199520m; // 599,760 * 2 VND
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
         var expectedDiscountAmount = expectedSubtotal * 0.15m; // 15% coupon
-        orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 0.01m);
+        orderInDb.DiscountAmount.Amount.Should().BeApproximately(expectedDiscountAmount, 1m);
 
         orderInDb.DeliveryFee.Amount.Should().Be(InitiateOrderTestHelper.TestAmounts.StandardDeliveryFee);
         orderInDb.TipAmount.Amount.Should().Be(tipAmount);
@@ -488,8 +488,8 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         var orderInDb = await FindOrderAsync(response.OrderId);
         orderInDb.Should().NotBeNull();
 
-        // Verify precise subtotal: 29.97 + 9.98 = $39.95
-        const decimal expectedSubtotal = 39.95m;
+        // Verify precise subtotal: 719,280 + 239,520 = 958,800 VND
+        const decimal expectedSubtotal = 958800m;
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
         // Verify tip precision
@@ -537,12 +537,12 @@ public class InitiateOrderFinancialTests : InitiateOrderTestBase
         orderInDb.Should().NotBeNull();
 
         // Verify minimum order calculations
-        const decimal expectedSubtotal = 4.99m;
+        const decimal expectedSubtotal = 119760m; // 119,760 VND
         orderInDb!.Subtotal.Amount.Should().Be(expectedSubtotal);
 
         // Tax should still be calculated correctly on small amounts
         var expectedTaxAmount = expectedSubtotal * InitiateOrderTestHelper.TestAmounts.TaxRate;
-        orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 0.01m);
+        orderInDb.TaxAmount.Amount.Should().BeApproximately(expectedTaxAmount, 1m);
 
         // Total should include all components even for small orders
         var expectedTotal = expectedSubtotal
