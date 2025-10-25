@@ -67,6 +67,39 @@ public sealed class OrderItem : Entity<OrderItemId>
             selectedCustomizations ?? new List<OrderItemCustomization>());
     }
 
+    /// <summary>
+    /// Creates a temporary OrderItem for pricing calculations without persistence.
+    /// This method is used for pricing preview operations where we need to calculate
+    /// totals without creating actual order items in the database.
+    /// </summary>
+    public static Result<OrderItem> CreateTemporaryForPricing(
+        MenuCategoryId snapshotMenuCategoryId,
+        MenuItemId snapshotMenuItemId,
+        string snapshotItemName,
+        Money snapshotBasePriceAtOrder,
+        int quantity,
+        List<OrderItemCustomization>? selectedCustomizations = null)
+    {
+        if (quantity <= 0)
+        {
+            return Result.Failure<OrderItem>(OrderErrors.OrderItemInvalidQuantity);
+        }
+
+        if (string.IsNullOrWhiteSpace(snapshotItemName))
+        {
+            return Result.Failure<OrderItem>(OrderErrors.OrderItemInvalidName);
+        }
+
+        return new OrderItem(
+            OrderItemId.CreateUnique(),
+            snapshotMenuCategoryId,
+            snapshotMenuItemId,
+            snapshotItemName,
+            snapshotBasePriceAtOrder,
+            quantity,
+            selectedCustomizations ?? new List<OrderItemCustomization>());
+    }
+
     private Money CalculateLineItemTotal()
     {
         var currency = Snapshot_BasePriceAtOrder.Currency;

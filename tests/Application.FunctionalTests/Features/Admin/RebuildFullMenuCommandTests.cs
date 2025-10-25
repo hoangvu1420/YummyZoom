@@ -35,7 +35,7 @@ public class RebuildFullMenuCommandTests : BaseTestFixture
         result2.ShouldBeSuccessful();
         var view2 = await FindAsync<FullMenuView>(restaurantId);
         view2!.LastRebuiltAt.Should().BeOnOrAfter(view.LastRebuiltAt);
-        view2.MenuJson.Should().Contain("\"version\": 1");
+        view2.MenuJson.Should().Contain("\"version\": 2");
     }
 
     [Test]
