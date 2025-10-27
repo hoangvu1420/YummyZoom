@@ -35,6 +35,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasConversion<string>()
             .HasMaxLength(50)
             .IsRequired();
+        builder.Property(o => o.Version)
+            .HasColumnName("Version")
+            .IsRequired()
+            .HasDefaultValue(0L);
+
         builder.Property(o => o.PlacementTimestamp)
             .IsRequired();
         builder.Property(o => o.SpecialInstructions)

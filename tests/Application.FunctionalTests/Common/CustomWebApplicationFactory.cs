@@ -127,6 +127,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                         It.IsAny<Dictionary<string, string>>()))
                     .ReturnsAsync(Result.Success());
 
+                // Mock successful multicast data sending
+                mock.Setup(s => s.SendMulticastDataAsync(
+                        It.IsAny<IEnumerable<string>>(),
+                        It.IsAny<Dictionary<string, string>>()))
+                    .ReturnsAsync(Result.Success<List<string>>(new List<string>()));
+
                 return mock.Object;
             });
     }

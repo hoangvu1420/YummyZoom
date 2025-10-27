@@ -130,11 +130,29 @@ public class Orders : EndpointGroupBase
         .WithStandardResults<GetOrderByIdResponse>();
 
         // GET /api/v1/orders/{orderId}/status
-        group.MapGet("/{orderId:guid}/status", async (Guid orderId, ISender sender) =>
+        group.MapGet("/{orderId:guid}/status", async (Guid orderId, HttpContext http, ISender sender) =>
         {
             var query = new GetOrderStatusQuery(orderId);
             var result = await sender.Send(query);
-            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+            if (!result.IsSuccess)
+            {
+                return result.ToIResult();
+            }
+
+            var dto = result.Value;
+
+            // Compute strong ETag from Version
+            var etag = $"\"order-{dto.OrderId}-v{dto.Version}\"";
+            var ifNoneMatch = http.Request.Headers.IfNoneMatch.FirstOrDefault();
+            if (!string.IsNullOrEmpty(ifNoneMatch) && string.Equals(ifNoneMatch, etag, StringComparison.Ordinal))
+            {
+                return Results.StatusCode(StatusCodes.Status304NotModified);
+            }
+
+            http.Response.Headers.ETag = etag;
+            http.Response.Headers.LastModified = dto.LastUpdateTimestamp.ToUniversalTime().ToString("R");
+            http.Response.Headers.CacheControl = "no-cache, must-revalidate";
+            return Results.Ok(dto);
         })
         .WithName("GetOrderStatus")
         .WithStandardResults<OrderStatusDto>();

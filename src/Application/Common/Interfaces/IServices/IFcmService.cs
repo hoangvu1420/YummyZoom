@@ -34,4 +34,12 @@ public interface IFcmService
     /// <param name="data">Optional additional data to include with the notification</param>
     /// <returns>Result with list of failed tokens on partial failure, or empty list on success</returns>
     Task<Result<List<string>>> SendMulticastNotificationAsync(IEnumerable<string> fcmTokens, string title, string body, Dictionary<string, string>? data = null);
+
+    /// <summary>
+    /// Sends a data-only message to multiple device tokens (multicast)
+    /// </summary>
+    /// <param name="fcmTokens">Collection of FCM tokens to send to</param>
+    /// <param name="data">Data payload to send</param>
+    /// <returns>Result with list of failed tokens on partial failure, or empty list on success</returns>
+    Task<Result<List<string>>> SendMulticastDataAsync(IEnumerable<string> fcmTokens, Dictionary<string, string> data);
 }

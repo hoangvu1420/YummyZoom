@@ -253,9 +253,19 @@ Retrieves lightweight order status information optimized for polling and real-ti
   "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "status": "Preparing",
   "lastUpdateTimestamp": "2023-10-27T14:45:00Z",
-  "estimatedDeliveryTime": "2023-10-27T15:30:00Z"
+  "estimatedDeliveryTime": "2023-10-27T15:30:00Z",
+  "version": 7
 }
 ```
+
+Response Headers
+- `ETag`: "order-<orderId>-v<version>" (strong)
+- `Last-Modified`: RFC1123 date from `lastUpdateTimestamp`
+- `Cache-Control`: `no-cache, must-revalidate`
+
+Conditional Requests
+- Send `If-None-Match: "order-<orderId>-v<version>"`. If unchanged, server returns `304 Not Modified` with an empty body.
+- If changed, server returns `200 OK` with the latest body and headers above.
 
 #### Order Status Values
 
@@ -656,9 +666,9 @@ Orders generate domain events for status changes:
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-  "title": "Not Found",
+  "title": "Order.NotFound",
   "status": 404,
-  "detail": "Order not found."
+  "detail": "Missing"
 }
 ```
 
@@ -675,7 +685,7 @@ Orders generate domain events for status changes:
 ### Status Polling
 - Only fall back to polling if real-time updates are not available
 - Use lightweight `/status` endpoint for frequent updates
-- ETag caching planned for conditional responses
+- ETag caching implemented: use `If-None-Match` with the strong ETag format `"order-<orderId>-v<version>"` to receive `304 Not Modified` when unchanged
 - Full order details endpoint optimized for detailed views
 
 ### Pagination Best Practices

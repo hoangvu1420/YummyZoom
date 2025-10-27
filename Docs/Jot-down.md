@@ -1,121 +1,174 @@
-info: YummyZoom.Application.Search.Queries.UniversalSearch.UniversalSearchQuery[0]
-      YummyZoom Request: UniversalSearchQuery  Unknown UniversalSearchQuery { Term = Ý, Latitude = , Longitude = , OpenNow = , Cuisines = System.String[], Tags = System.String[], PriceBands = System.Int16[], EntityTypes = System.String[], Bbox = , Sort = relevance, IncludeFacets = False, PageNumber = 1, PageSize = 20 }
-fail: YummyZoom.Application.Restaurants.Queries.SearchRestaurants.SearchRestaurantsQuery[0]
-      YummyZoom Request: Unhandled Exception for Request SearchRestaurantsQuery SearchRestaurantsQuery { Q = , Cuisine = , Lat = , Lng = , RadiusKm = , PageNumber = 1, PageSize = 20, MinRating = , Sort = relevance, Bbox = , Tags = System.Collections.Generic.List`1[System.String], TagIds = System.Collections.Generic.List`1[System.Guid], DiscountedOnly = , IncludeFacets = False }
-      YummyZoom.Application.Common.Exceptions.ValidationException: One or more validation failures have occurred.
-         at YummyZoom.Application.Common.Behaviours.ValidationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\ValidationBehaviour.cs:line 32
-         at YummyZoom.Application.Common.Behaviours.UnhandledExceptionBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\UnhandledExceptionBehaviour.cs:line 18
-fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
-      An unhandled exception has occurred while executing the request.
-      YummyZoom.Application.Common.Exceptions.ValidationException: One or more validation failures have occurred.
-         at YummyZoom.Application.Common.Behaviours.ValidationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\ValidationBehaviour.cs:line 32
-         at YummyZoom.Application.Common.Behaviours.UnhandledExceptionBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\UnhandledExceptionBehaviour.cs:line 18
-         at YummyZoom.Web.Endpoints.Restaurants.<>c.<<Map>b__0_39>d.MoveNext() in E:\source\repos\CA\YummyZoom\src\Web\Endpoints\Restaurants.cs:line 790
-      --- End of stack trace from previous location ---
-         at Microsoft.AspNetCore.Http.RequestDelegateFactory.ExecuteTaskResult[T](Task`1 task, HttpContext httpContext)
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
-info: YummyZoom.Application.Search.Queries.Autocomplete.AutocompleteQuery[0]
-      YummyZoom Request: AutocompleteQuery  Unknown AutocompleteQuery { Term = p, Limit = 10, Types = System.String[] }
-fail: YummyZoom.Application.Search.Queries.Autocomplete.AutocompleteQuery[0]
-      YummyZoom Request: Unhandled Exception for Request AutocompleteQuery AutocompleteQuery { Term = p, Limit = 10, Types = System.String[] }
-      Npgsql.PostgresException (0x80004005): 42P08: could not determine data type of parameter $3
-      
-      POSITION: 197
-         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
-         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
-         at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
-         at YummyZoom.Application.Search.Queries.Autocomplete.AutocompleteQueryHandler.Handle(AutocompleteQuery request, CancellationToken ct) in E:\source\repos\CA\YummyZoom\src\Application\Search\Queries\Autocomplete\AutocompleteQueryHandler.cs:line 56
-         at YummyZoom.Application.Common.Behaviours.LoggingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\LoggingBehaviour.cs:line 31
-         at YummyZoom.Application.Common.Behaviours.PerformanceBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\PerformanceBehaviour.cs:line 28
-         at YummyZoom.Application.Common.Behaviours.CachingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\CachingBehaviour.cs:line 23
-         at YummyZoom.Application.Common.Behaviours.AuthorizationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\AuthorizationBehaviour.cs:line 89
-         at YummyZoom.Application.Common.Behaviours.ValidationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\ValidationBehaviour.cs:line 35
-         at YummyZoom.Application.Common.Behaviours.UnhandledExceptionBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\UnhandledExceptionBehaviour.cs:line 18
-        Exception data:
-          Severity: ERROR
-          SqlState: 42P08
-          MessageText: could not determine data type of parameter $3
-          Position: 197
-          File: parse_param.c
-          Line: 307
-          Routine: check_parameter_resolution_walker
-fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
-      An unhandled exception has occurred while executing the request.
-      Npgsql.PostgresException (0x80004005): 42P08: could not determine data type of parameter $3
-      
-      POSITION: 197
-         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
-         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
-         at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
-         at YummyZoom.Application.Search.Queries.Autocomplete.AutocompleteQueryHandler.Handle(AutocompleteQuery request, CancellationToken ct) in E:\source\repos\CA\YummyZoom\src\Application\Search\Queries\Autocomplete\AutocompleteQueryHandler.cs:line 56
-         at YummyZoom.Application.Common.Behaviours.LoggingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\LoggingBehaviour.cs:line 31
-         at YummyZoom.Application.Common.Behaviours.PerformanceBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\PerformanceBehaviour.cs:line 28
-         at YummyZoom.Application.Common.Behaviours.CachingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\CachingBehaviour.cs:line 23
-         at YummyZoom.Application.Common.Behaviours.AuthorizationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\AuthorizationBehaviour.cs:line 89
-         at YummyZoom.Application.Common.Behaviours.ValidationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\ValidationBehaviour.cs:line 35
-         at YummyZoom.Application.Common.Behaviours.UnhandledExceptionBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\UnhandledExceptionBehaviour.cs:line 18
-         at YummyZoom.Web.Endpoints.Search.<>c.<<Map>b__0_1>d.MoveNext() in E:\source\repos\CA\YummyZoom\src\Web\Endpoints\Search.cs:line 50
-      --- End of stack trace from previous location ---
-         at Microsoft.AspNetCore.Http.RequestDelegateFactory.ExecuteTaskResult[T](Task`1 task, HttpContext httpContext)
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
-        Exception data:
-          Severity: ERROR
-          SqlState: 42P08
-          MessageText: could not determine data type of parameter $3
-          Position: 197
-          File: parse_param.c
-          Line: 307
-          Routine: check_parameter_resolution_walker
-fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
-      An unhandled exception has occurred while executing the request.
-      System.InvalidOperationException: The exception handler configured on ExceptionHandlerOptions produced a 404 status response. This InvalidOperationException containing the original exception was thrown since this is often due to a misconfigured ExceptionHandlingPath. If the exception handler is expected to return 404 status responses then set AllowStatusCode404Response to true.
-       ---> Npgsql.PostgresException (0x80004005): 42P08: could not determine data type of parameter $3
-      
-      POSITION: 197
-         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
-         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
-         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
-         at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
-         at YummyZoom.Application.Search.Queries.Autocomplete.AutocompleteQueryHandler.Handle(AutocompleteQuery request, CancellationToken ct) in E:\source\repos\CA\YummyZoom\src\Application\Search\Queries\Autocomplete\AutocompleteQueryHandler.cs:line 56
-         at YummyZoom.Application.Common.Behaviours.LoggingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\LoggingBehaviour.cs:line 31
-         at YummyZoom.Application.Common.Behaviours.PerformanceBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\PerformanceBehaviour.cs:line 28
-         at YummyZoom.Application.Common.Behaviours.CachingBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\CachingBehaviour.cs:line 23
-         at YummyZoom.Application.Common.Behaviours.AuthorizationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\AuthorizationBehaviour.cs:line 89
-         at YummyZoom.Application.Common.Behaviours.ValidationBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\ValidationBehaviour.cs:line 35
-         at YummyZoom.Application.Common.Behaviours.UnhandledExceptionBehaviour`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in E:\source\repos\CA\YummyZoom\src\Application\Common\Behaviours\UnhandledExceptionBehaviour.cs:line 18
-         at YummyZoom.Web.Endpoints.Search.<>c.<<Map>b__0_1>d.MoveNext() in E:\source\repos\CA\YummyZoom\src\Web\Endpoints\Search.cs:line 50
-      --- End of stack trace from previous location ---
-         at Microsoft.AspNetCore.Http.RequestDelegateFactory.ExecuteTaskResult[T](Task`1 task, HttpContext httpContext)
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
-        Exception data:
-          Severity: ERROR
-          SqlState: 42P08
-          MessageText: could not determine data type of parameter $3
-          Position: 197
-          File: parse_param.c
-          Line: 307
-          Routine: check_parameter_resolution_walker
-         --- End of inner exception stack trace ---
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.HandleException(HttpContext context, ExceptionDispatchInfo edi)
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.HandleException(HttpContext context, ExceptionDispatchInfo edi)
-         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
-         at NSwag.AspNetCore.Middlewares.SwaggerUiIndexMiddleware.Invoke(HttpContext context)
-         at NSwag.AspNetCore.Middlewares.RedirectToIndexMiddleware.Invoke(HttpContext context)
-         at NSwag.AspNetCore.Middlewares.OpenApiDocumentMiddleware.Invoke(HttpContext context)
-         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
-         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
-         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+Got it—here’s a crisp, implementation-ready spec for the **backend** to support the Phase-1 flow (**Push-first, Poll-as-needed**). It’s organized so you can hand it to the team and build.
+
+# 1) Core objectives
+
+* **Single source of truth:** `GET /orders/{id}/status`
+* **Realtime trigger:** FCM **data** push `{ orderId, version }` on **every** state change
+* **Clients pull details:** Clients always fetch `/status` before surfacing UI/notification
+* **Efficient polling:** Support conditional responses (ETag / `sinceVersion`) to minimize load
+* **Reliability:** Durable eventing with retries; dedupe by `version`
+
+---
+
+# 2) Domain model & invariants
+
+**Order**
+
+* `orderId: string`
+* `userId: string`
+* `state: enum` (`Created`, `Confirmed`, `Preparing`, `OutForDelivery`, `Delivered`, `Canceled`, `Failed`, …)
+* `version: int` — **strictly monotonic**, increment on *any* user-visible change
+* `updatedAt: instant`
+* Optional: `eta`, `rider`, `steps[]`, `notes`, etc.
+
+**Invariants**
+
+* `version` increments **atomically** with `state` (same transaction).
+* Terminal states (`Delivered|Canceled|Failed`) freeze `version` (no further pushes).
+* Only the **owner** or authorized viewer can read the status.
+
+---
+
+# 3) Status API (polling endpoint)
+
+### `GET /orders/{id}/status`
+
+**Auth:** required (user must own the order or be explicitly authorized).
+
+**Query params (optional):**
+
+* `sinceVersion=<int>`: if server’s `version` ≤ provided → return **204 No Content** (or **304 Not Modified** if using validators)
+* `include=meta` (optional): control payload verbosity (e.g., include `steps`, `rider`)
+
+**Request headers (optional):**
+
+* `If-None-Match: "<etag>"` or `If-Modified-Since: <http-date>`
+
+**Responses:**
+
+* **200 OK** with JSON:
+
+  ```json
+  {
+    "orderId": "abc123",
+    "state": "OutForDelivery",
+    "version": 7,
+    "updatedAt": "2025-10-27T08:41:00Z",
+    "eta": "2025-10-27T09:05:00Z",
+    "rider": { "name": "…" },
+    "steps": [ /* timeline */ ]
+  }
+  ```
+
+  Include headers:
+
+  * `ETag: "order-abc123-v7"`
+  * `Last-Modified: <updatedAt>`
+  * `Cache-Control: no-cache, must-revalidate` (or `private, no-store` if stricter)
+* **204 No Content** when unchanged **with `sinceVersion`**.
+* **304 Not Modified** when unchanged **with ETag/If-Modified-Since**.
+* **401/403** unauthorized; **404** if order not found/visible.
+
+**Rules:**
+
+* Compute `ETag` deterministically (e.g., `"order-<id>-v<version>"`).
+* Prefer **either** `sinceVersion` **or** validators; support both but handle conflicts predictably (validators take precedence).
+
+---
+
+# 4) Event emission (on state change)
+
+When an order update is **committed**:
+
+1. Persist new `state`, increment `version`, set `updatedAt`.
+2. Write an **OrderChanged** record into an **Outbox** table/stream:
+
+   * `{ id, orderId, version, userId, occurredAt }`
+3. A background **Dispatcher** pulls the outbox and sends FCM **data** message:
+
+   * Payload: `{ "orderId": "<id>", "version": <int> }`
+   * Platform config (per target token):
+
+     * **Android:** `priority=high`, `collapse_key="order_<id>"`, `time_to_live` short (e.g., 300s)
+     * **iOS/APNs:** headers `apns-push-type=background`, `content-available=1`, `apns-collapse-id=order_<id>`, short expiry
+     * **Web:** standard Webpush with data payload
+4. Mark outbox item **sent** (idempotently). Retries on transient failures.
+
+**Why Outbox:** ensures push delivery attempts are **durable** and consistent with DB state; prevents “updated DB but forgot to push”.
+
+---
+
+# 5) Targeting & addressing
+
+You can choose either (or both):
+
+**A) Direct tokens**
+
+* Maintain a table: `{ userId, deviceToken, platform, enabled, updatedAt }`
+* On order change → push to **all active tokens** for `userId`.
+
+**B) Per-order topics** (optional)
+
+* Topic: `orders_<orderId>_<userHash>`
+* Client subscribes on “start tracking”, unsubscribes on terminal
+* Server publishes once; FCM distributes
+
+**Recommendation:** Start with **direct tokens** (simpler). Add topics if fan-out or ACLs benefit.
+
+---
+
+# 6) Notification strategy (server side)
+
+Phase-1 default is **data-only** push; the app will fetch and render a **local** notification.
+
+**Optional safety net for critical states:**
+
+* For `OutForDelivery`, `ArrivingSoon`, `Delivered`, send **hybrid**:
+
+  * `notification` (title/body) **and** `data`
+  * iOS: optionally set `mutable-content=1` to allow client NSE to refresh text
+* Keep text generic & non-PII; details still come from `/status`.
+
+**Collapse & TTL**
+
+* Always set per-order collapse keys/ids so the newest replaces older alerts.
+* Use short TTLs (e.g., 2–5 minutes) to avoid late, stale pushes.
+
+---
+
+# 7) Security & authorization
+
+* **AuthN:** OAuth2/JWT (or existing session) on `/status`.
+* **AuthZ:** Verify `order.userId == auth.userId` (or shared access via order share records).
+* **PII:** Push payloads contain **no** PII. Only `{orderId, version}`.
+* **Rate limits:** Per user and per order to protect `/status` (e.g., token bucket; generous since clients use validators).
+
+---
+
+# 8) Idempotency & deduplication
+
+* **Outbox dispatcher** must be idempotent:
+
+  * Use `outbox.id` as the unique send key; record send attempts and final result.
+* **FCM payload** carries `version`; clients ignore `<= local.version`.
+* **Server** does not need to dedupe incoming `/status` requests; just honor validators.
+
+---
+
+# 9) Performance & scalability
+
+* **Indexes:** `(orderId)` primary; secondary index `(userId, updatedAt desc)` for audits; `(orderId, version)` unique.
+* **Read path hotness:** `/status` should be **fast** and side-effect-free; consider a **read model** (materialized view) denormalized for quick fetch.
+* **Conditional responses:** Expect many **304/204** hits; keep those very cheap.
+* **Compression:** Enable gzip/br on JSON responses.
+* **Concurrency:** If multiple updates race, `version` increments inside a **transaction** (or via DB sequence).
+
+---
+
+## TL;DR
+
+* Build a rock-solid **`/status`** endpoint with conditional responses.
+* Use an **Outbox** to reliably push **data-only** FCM `{orderId, version}` on each change.
+* Keep **`version` monotonic** and atomic with state updates.
+* Provide **short-TTL, collapsed** pushes; clients fetch details and show local notifications.
+* This ships Phase-1 cleanly and sets you up to drop in SignalR later without changing the contract.

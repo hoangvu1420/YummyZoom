@@ -203,7 +203,7 @@ public class LifecycleContractTests
         {
             req.Should().BeOfType<GetOrderStatusQuery>();
             ((GetOrderStatusQuery)req).OrderIdGuid.Should().Be(orderId);
-            return Result.Success(new OrderStatusDto(orderId, "Preparing", DateTime.UtcNow, DateTime.UtcNow.AddMinutes(30)));
+            return Result.Success(new OrderStatusDto(orderId, "Preparing", DateTime.UtcNow, DateTime.UtcNow.AddMinutes(30), 1));
         });
         var path = $"/api/v1/orders/{orderId}/status";
         TestContext.WriteLine($"REQUEST GET {path}");
@@ -227,7 +227,7 @@ public class LifecycleContractTests
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.NotFound("Order.NotFound", "Missing")));
         var orderId = Guid.NewGuid();
         var path = $"/api/v1/orders/{orderId}/accept";
-        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
+        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30)};
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
         var resp = await client.PostAsJsonAsync(path, body);
@@ -291,7 +291,7 @@ public class LifecycleContractTests
         factory.Sender.RespondWith(_ => Result.Failure<OrderLifecycleResultDto>(Error.Conflict("Order.InvalidState", "Cannot accept order")));
         var orderId = Guid.NewGuid();
         var path = $"/api/v1/orders/{orderId}/accept";
-        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
+        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30)};
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
         var resp = await client.PostAsJsonAsync(path, body);
@@ -359,7 +359,7 @@ public class LifecycleContractTests
         var client = factory.CreateClient();
         var orderId = Guid.NewGuid();
         var path = $"/api/v1/orders/{orderId}/accept";
-        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30) };
+        var body = new { restaurantId = Guid.NewGuid(), estimatedDeliveryTime = DateTime.UtcNow.AddMinutes(30)};
         TestContext.WriteLine($"REQUEST POST {path}");
         TestContext.WriteLine(JsonSerializer.Serialize(body, JsonOptions));
         var resp = await client.PostAsJsonAsync(path, body);

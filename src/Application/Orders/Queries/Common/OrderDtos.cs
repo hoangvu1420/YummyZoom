@@ -77,7 +77,8 @@ public record OrderStatusDto(
     Guid OrderId,
     string Status,
     DateTime LastUpdateTimestamp,
-    DateTime? EstimatedDeliveryTime);
+    DateTime? EstimatedDeliveryTime,
+    long Version);
 
 /// <summary>
 /// Helper for parsing persisted JSON for SelectedCustomizations -> list of OrderItemCustomizationDto.

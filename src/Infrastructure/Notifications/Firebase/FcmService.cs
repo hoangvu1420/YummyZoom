@@ -127,13 +127,39 @@ public class FcmService : IFcmService
     {
         try
         {
+            // Derive collapse key and platform-specific hints from known fields
+            data ??= new Dictionary<string, string>();
+            data.TryGetValue("orderId", out var orderIdForCollapse);
+            var collapseKey = string.IsNullOrWhiteSpace(orderIdForCollapse) ? "yummyzoom_data" : $"order_{orderIdForCollapse}";
+            var ttl = TimeSpan.FromMinutes(5);
+
             var message = new Message
             {
                 Token = fcmToken,
-                Data = data
+                Data = data,
+                Android = new AndroidConfig
+                {
+                    Priority = Priority.High,
+                    CollapseKey = collapseKey,
+                    TimeToLive = ttl
+                },
+                Apns = new ApnsConfig
+                {
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "apns-push-type", "background" },
+                        { "apns-collapse-id", collapseKey },
+                        { "apns-priority", "5" }, // background
+                        { "apns-expiration", ((long)DateTimeOffset.UtcNow.Add(ttl).ToUnixTimeSeconds()).ToString() }
+                    },
+                    Aps = new Aps
+                    {
+                        ContentAvailable = true
+                    }
+                }
             };
 
-            string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            string response = await _firebaseMessaging.SendAsync(message);
             _logger.LogInformation("Successfully sent data message to token {FcmTokenPrefix}. Response: {Response}",
                 fcmToken[..Math.Min(8, fcmToken.Length)], response);
             return Result.Success();
@@ -166,6 +192,94 @@ public class FcmService : IFcmService
             return Result.Failure(Error.Failure(
                 "FcmService.UnexpectedDataError",
                 $"Unexpected FCM data error: {ex.Message}"));
+        }
+    }
+
+    public async Task<Result<List<string>>> SendMulticastDataAsync(IEnumerable<string> fcmTokens, Dictionary<string, string> data)
+    {
+        var tokensList = fcmTokens?.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList() ?? new();
+        if (tokensList.Count == 0)
+        {
+            _logger.LogWarning("Attempted to send multicast data with no tokens provided.");
+            return Result.Success<List<string>>([]);
+        }
+
+        // Derive collapse key and platform-specific hints from known fields
+        data ??= new Dictionary<string, string>();
+        data.TryGetValue("orderId", out var orderIdForCollapse);
+        var collapseKey = string.IsNullOrWhiteSpace(orderIdForCollapse) ? "yummyzoom_data" : $"order_{orderIdForCollapse}";
+        var ttl = TimeSpan.FromMinutes(5);
+
+        try
+        {
+            var multicastMessage = new MulticastMessage
+            {
+                Tokens = tokensList,
+                Data = data,
+                Android = new AndroidConfig
+                {
+                    Priority = Priority.High,
+                    CollapseKey = collapseKey,
+                    TimeToLive = ttl
+                },
+                Apns = new ApnsConfig
+                {
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "apns-push-type", "background" },
+                        { "apns-collapse-id", collapseKey },
+                        { "apns-priority", "5" }, // background
+                        { "apns-expiration", ((long)DateTimeOffset.UtcNow.Add(ttl).ToUnixTimeSeconds()).ToString() }
+                    },
+                    Aps = new Aps
+                    {
+                        ContentAvailable = true
+                    }
+                }
+            };
+
+            var response = await _firebaseMessaging.SendEachForMulticastAsync(multicastMessage);
+
+            if (response.FailureCount > 0)
+            {
+                var failedTokens = new List<string>();
+                for (int i = 0; i < response.Responses.Count; i++)
+                {
+                    var sendResponse = response.Responses[i];
+                    if (!sendResponse.IsSuccess)
+                    {
+                        failedTokens.Add(tokensList[i]);
+                        _logger.LogError(sendResponse.Exception, "Failed to send data message to token {FcmTokenPrefix}. Error: {ErrorMessage}",
+                            tokensList[i][..Math.Min(8, tokensList[i].Length)], sendResponse.Exception?.Message);
+
+                        if (sendResponse.Exception is FirebaseMessagingException fmEx &&
+                            (fmEx.MessagingErrorCode == MessagingErrorCode.Unregistered || fmEx.MessagingErrorCode == MessagingErrorCode.InvalidArgument))
+                        {
+                            var markResult = await MarkTokenAsInvalidAsync(tokensList[i]);
+                            if (markResult.IsFailure)
+                            {
+                                _logger.LogError("Failed to mark FCM token as invalid: {Error}", markResult.Error);
+                            }
+
+                            _logger.LogWarning("Marked FCM token {FcmTokenPrefix} as invalid due to error code {ErrorCode}.",
+                                tokensList[i][..Math.Min(8, tokensList[i].Length)], fmEx.MessagingErrorCode);
+                        }
+                    }
+                }
+                return Result.Failure<List<string>>(Error.Failure(
+                    "FcmService.MulticastDataSendFailed",
+                    $"Multicast FCM data send failed for {response.FailureCount} tokens."));
+            }
+
+            _logger.LogInformation("Successfully sent multicast data message to {SuccessCount} tokens.", response.SuccessCount);
+            return Result.Success<List<string>>([]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while sending multicast FCM data message.");
+            return Result.Failure<List<string>>(Error.Failure(
+                "FcmService.UnexpectedMulticastDataError",
+                $"Unexpected multicast FCM data error: {ex.Message}"));
         }
     }
 

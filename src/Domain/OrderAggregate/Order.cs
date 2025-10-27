@@ -53,6 +53,11 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     public DateTime LastUpdateTimestamp { get; private set; }
 
     /// <summary>
+    /// Gets the version of the order, incremented on each user-visible change.
+    /// </summary>
+    public long Version { get; private set; }
+
+    /// <summary>
     /// Gets the estimated delivery time provided by the restaurant.
     /// </summary>
     public DateTime? EstimatedDeliveryTime { get; private set; }
@@ -181,6 +186,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Status = initialStatus;
         PlacementTimestamp = timestamp;
         LastUpdateTimestamp = timestamp;
+        Version = 0;
     }
 
     /// <summary>
@@ -493,6 +499,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Status = OrderStatus.Accepted;
         EstimatedDeliveryTime = estimatedDeliveryTime;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
 
         AddDomainEvent(new OrderAccepted(Id));
         return Result.Success();
@@ -510,6 +517,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.Rejected;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
 
         AddDomainEvent(new OrderRejected(Id));
         return Result.Success();
@@ -530,6 +538,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.Cancelled;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
 
         AddDomainEvent(new OrderCancelled(Id));
         return Result.Success();
@@ -547,6 +556,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.Preparing;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
 
         AddDomainEvent(new OrderPreparing(Id));
         return Result.Success();
@@ -564,6 +574,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.ReadyForDelivery;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
 
         AddDomainEvent(new OrderReadyForDelivery(Id));
         return Result.Success();
@@ -584,6 +595,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
         Status = OrderStatus.Delivered;
         ActualDeliveryTime = currentTimestamp;
         LastUpdateTimestamp = currentTimestamp;
+        Version++;
 
         AddDomainEvent(new OrderDelivered(Id, ActualDeliveryTime.Value));
         return Result.Success();
@@ -609,6 +621,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.Placed;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
         // Payment event + lifecycle event
         AddDomainEvent(new OrderPaymentSucceeded(Id));
         AddDomainEvent(new OrderPlaced(Id));
@@ -635,6 +648,7 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
 
         Status = OrderStatus.Cancelled;
         LastUpdateTimestamp = timestamp ?? DateTime.UtcNow;
+        Version++;
         // Payment failure also triggers cancellation lifecycle event
         AddDomainEvent(new OrderPaymentFailed(Id));
         AddDomainEvent(new OrderCancelled(Id));

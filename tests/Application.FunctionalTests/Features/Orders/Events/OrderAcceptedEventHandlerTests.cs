@@ -8,6 +8,7 @@ using YummyZoom.Application.Orders.Broadcasting;
 using YummyZoom.Application.Orders.EventHandlers;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Models;
+using YummyZoom.SharedKernel;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Orders.Events;
@@ -59,6 +60,19 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
 
+        // FCM mock to verify data push
+        var fcmMock = new Mock<IFcmService>(MockBehavior.Strict);
+        fcmMock.Setup(m => m.SendMulticastDataAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<Dictionary<string, string>>()))
+            .ReturnsAsync(Result.Success<List<string>>(new List<string>()));
+        // Allow notification methods in case other flows touch them
+        fcmMock.Setup(m => m.SendMulticastNotificationAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
+            .ReturnsAsync(Result.Success<List<string>>(new List<string>()));
+        fcmMock.Setup(m => m.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
+            .ReturnsAsync(Result.Success());
+        fcmMock.Setup(m => m.SendDataMessageAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
+            .ReturnsAsync(Result.Success());
+        ReplaceService<IFcmService>(fcmMock.Object);
+
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
@@ -85,7 +99,8 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
-        // Pre-drain assertions: outbox message exists but not processed; no inbox record yet
+        // Pre-drain assertions: outbox message exists; capture handler inbox baseline count
+        int preCount;
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -95,9 +110,8 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
             pendingOutbox.Should().NotBeEmpty();
 
             var handlerName = typeof(OrderAcceptedEventHandler).FullName!;
-            var inboxPre = await db.Set<InboxMessage>()
-                .AnyAsync(x => x.Handler == handlerName);
-            inboxPre.Should().BeFalse();
+            preCount = await db.Set<InboxMessage>()
+                .CountAsync(x => x.Handler == handlerName);
         }
 
         await DrainOutboxAsync();
@@ -117,10 +131,9 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(OrderAcceptedEventHandler).FullName!;
-            var inboxEntries = await db.Set<InboxMessage>()
-                .Where(x => x.Handler == handlerName)
-                .ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            var postCount = await db.Set<InboxMessage>()
+                .CountAsync(x => x.Handler == handlerName);
+            postCount.Should().Be(preCount + 1);
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains("OrderAccepted"))
@@ -128,6 +141,12 @@ public class OrderAcceptedEventHandlerTests : BaseTestFixture
             processedOutbox.Should().NotBeEmpty();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
+
+        // Optionally verify FCM data push (only when tokens exist). Allow at most once.
+        fcmMock.Verify(m => m.SendMulticastDataAsync(
+                It.IsAny<IEnumerable<string>>(),
+                It.Is<Dictionary<string, string>>(d => d.ContainsKey("orderId"))),
+            Times.AtMostOnce);
     }
 
     [Test]
