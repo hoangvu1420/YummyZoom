@@ -185,11 +185,13 @@ public sealed class TeamCarts : EndpointGroupBase
             
             var command = new LockTeamCartForPaymentCommand(id, idempotencyKey);
             var result = await sender.Send(command);
-            return result.ToIResult();
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .RequireAuthorization()
         .WithName("LockTeamCartForPayment")
-        .WithStandardResults();
+        .WithSummary("Lock TeamCart for payment")
+        .WithDescription("Locks the TeamCart for payment and returns the quote version for concurrency control.")
+        .WithStandardResults<LockTeamCartForPaymentResponse>();
 
         // POST /api/v1/team-carts/{id}/tip
         group.MapPost("/{id}/tip", async (Guid id, [FromBody] ApplyTipRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
@@ -237,33 +239,37 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/payments/cod
-        group.MapPost("/{id}/payments/cod", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapPost("/{id}/payments/cod", async (Guid id, [FromBody] CommitToCodPaymentRequest? body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
-            var command = new CommitToCodPaymentCommand(id);
+            var command = new CommitToCodPaymentCommand(id, body?.QuoteVersion);
             var result = await sender.Send(command);
             return result.ToIResult();
         })
         .RequireAuthorization()
         .WithName("CommitToCodPayment")
+        .WithSummary("Commit to Cash on Delivery payment")
+        .WithDescription("Commits the current user to pay cash on delivery for their portion of the TeamCart.")
         .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/payments/online
-        group.MapPost("/{id}/payments/online", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapPost("/{id}/payments/online", async (Guid id, [FromBody] InitiateMemberOnlinePaymentRequest? body, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
                 return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
-            var command = new InitiateMemberOnlinePaymentCommand(id);
+            var command = new InitiateMemberOnlinePaymentCommand(id, body?.QuoteVersion);
             var result = await sender.Send(command);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .RequireAuthorization()
         .WithName("InitiateMemberOnlinePayment")
+        .WithSummary("Initiate online payment for TeamCart")
+        .WithDescription("Initiates an online payment for the current user's portion of the TeamCart.")
         .WithStandardResults<InitiateMemberOnlinePaymentResponse>();
 
         // POST /api/v1/team-carts/{id}/convert
@@ -285,7 +291,8 @@ public sealed class TeamCarts : EndpointGroupBase
                 body.ZipCode,
                 body.Country,
                 body.SpecialInstructions,
-                idempotencyKey
+                idempotencyKey,
+                body.QuoteVersion
             );
             var result = await sender.Send(command);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
@@ -323,5 +330,14 @@ public sealed record ConvertTeamCartRequest(
     string State,
     string ZipCode,
     string Country,
-    string? SpecialInstructions
+    string? SpecialInstructions,
+    long? QuoteVersion = null
+);
+
+public sealed record CommitToCodPaymentRequest(
+    long? QuoteVersion = null
+);
+
+public sealed record InitiateMemberOnlinePaymentRequest(
+    long? QuoteVersion = null
 );

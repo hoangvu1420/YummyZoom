@@ -12,49 +12,59 @@
 \contentsline {section}{\numberline {1.4}Bố cục đồ án}{5}{section.1.4}%
 \contentsline {chapter}{\numberline {2}KHẢO SÁT VÀ PHÂN TÍCH YÊU CẦU}{10}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Khảo sát hiện trạng}{10}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Tổng quan chức năng}{10}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Biểu đồ use case tổng quát}{10}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Biểu đồ use case phân rã XYZ}{10}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Quy trình nghiệp vụ}{10}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}Đặc tả chức năng}{11}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Đặc tả use case A}{11}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Đặc tả use case B}{11}{subsection.2.3.2}%
-\contentsline {section}{\numberline {2.4}Yêu cầu phi chức năng}{11}{section.2.4}%
-\contentsline {chapter}{\numberline {3}CÔNG NGHỆ SỬ DỤNG}{12}{chapter.3}%
-\contentsline {chapter}{\numberline {4}THIẾT KẾ, TRIỂN KHAI VÀ ĐÁNH GIÁ HỆ THỐNG}{13}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Thiết kế kiến trúc}{13}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Lựa chọn kiến trúc phần mềm}{13}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Thiết kế tổng quan}{13}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}Thiết kế chi tiết gói}{13}{subsection.4.1.3}%
-\contentsline {section}{\numberline {4.2}Thiết kế chi tiết}{14}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Thiết kế giao diện}{14}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Thiết kế lớp}{14}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Thiết kế cơ sở dữ liệu}{15}{subsection.4.2.3}%
-\contentsline {section}{\numberline {4.3}Xây dựng ứng dụng}{15}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Thư viện và công cụ sử dụng}{15}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Kết quả đạt được}{15}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Minh họa các chức năng chính}{15}{subsection.4.3.3}%
-\contentsline {section}{\numberline {4.4}Kiểm thử}{15}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Triển khai}{16}{section.4.5}%
-\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{17}{chapter.5}%
-\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{18}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Kết luận}{18}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Hướng phát triển}{18}{section.6.2}%
-\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{21}{section*.12}%
-\contentsline {chapter}{PHỤ LỤC}{23}{section*.13}%
+\contentsline {subsection}{\numberline {2.1.1}Bối cảnh và xu hướng thị trường}{10}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Phân tích các ứng dụng giao đồ ăn hiện có}{11}{subsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {a}GrabFood - Sức mạnh từ hệ sinh thái siêu ứng dụng}{11}{subsubsection.2.1.2.1}%
+\contentsline {subsubsection}{\numberline {b}ShopeeFood - Thống lĩnh bằng văn hóa săn khuyến mãi}{12}{subsubsection.2.1.2.2}%
+\contentsline {subsubsection}{\numberline {c}Phân tích so sánh và nhận định tổng quan}{13}{subsubsection.2.1.2.3}%
+\contentsline {subsection}{\numberline {2.1.3}Nhu cầu và thách thức của người dùng}{13}{subsection.2.1.3}%
+\contentsline {subsubsection}{\numberline {a}Nhu cầu cốt lõi của người dùng cuối}{13}{subsubsection.2.1.3.1}%
+\contentsline {subsubsection}{\numberline {b}Nhu cầu của nhà hàng đối tác}{14}{subsubsection.2.1.3.2}%
+\contentsline {subsubsection}{\numberline {c}Những thách thức chưa được giải quyết tốt}{14}{subsubsection.2.1.3.3}%
+\contentsline {subsubsection}{\numberline {d}Định hướng phát triển cho YummyZoom}{15}{subsubsection.2.1.3.4}%
+\contentsline {section}{\numberline {2.2}Tổng quan chức năng}{15}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Biểu đồ use case tổng quát}{15}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Biểu đồ use case phân rã XYZ}{16}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Quy trình nghiệp vụ}{16}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Đặc tả chức năng}{16}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Đặc tả use case A}{16}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Đặc tả use case B}{16}{subsection.2.3.2}%
+\contentsline {section}{\numberline {2.4}Yêu cầu phi chức năng}{16}{section.2.4}%
+\contentsline {chapter}{\numberline {3}CÔNG NGHỆ SỬ DỤNG}{17}{chapter.3}%
+\contentsline {chapter}{\numberline {4}THIẾT KẾ, TRIỂN KHAI VÀ ĐÁNH GIÁ HỆ THỐNG}{18}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Thiết kế kiến trúc}{18}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Lựa chọn kiến trúc phần mềm}{18}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Thiết kế tổng quan}{18}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Thiết kế chi tiết gói}{18}{subsection.4.1.3}%
+\contentsline {section}{\numberline {4.2}Thiết kế chi tiết}{19}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Thiết kế giao diện}{19}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Thiết kế lớp}{19}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Thiết kế cơ sở dữ liệu}{20}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}Xây dựng ứng dụng}{20}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Thư viện và công cụ sử dụng}{20}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Kết quả đạt được}{20}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Minh họa các chức năng chính}{20}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Kiểm thử}{20}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Triển khai}{21}{section.4.5}%
+\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{22}{chapter.5}%
+\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{23}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Kết luận}{23}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Hướng phát triển}{23}{section.6.2}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{26}{section*.12}%
+\contentsline {chapter}{PHỤ LỤC}{28}{section*.13}%
 \ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
 \ttl@change@v {chapter}{}{}{}\relax 
-\contentsline {chapter}{\numberline {A}HƯỚNG DẪN VIẾT ĐỒ ÁN TỐT NGHIỆP}{23}{appendix.1.A}%
-\contentsline {section}{\numberline {A.1}Ngành học}{24}{section.1.A.1}%
-\contentsline {section}{\numberline {A.2}Đánh dấu (bullet) và đánh số (numering)}{24}{section.1.A.2}%
-\contentsline {section}{\numberline {A.3}Cách thêm bảng}{25}{section.1.A.3}%
-\contentsline {section}{\numberline {A.4}Chèn hình ảnh}{25}{section.1.A.4}%
-\contentsline {section}{\numberline {A.5}Tài liệu tham khảo}{26}{section.1.A.5}%
-\contentsline {paragraph}{Cách liệt kê}{26}{paragraph*.16}%
-\contentsline {paragraph}{Các loại tài liệu tham khảo}{26}{paragraph*.17}%
-\contentsline {section}{\numberline {A.6}Cách viết phương trình và công thức toán học}{26}{section.1.A.6}%
-\contentsline {section}{\numberline {A.7}Qui cách đóng quyển}{26}{section.1.A.7}%
-\contentsline {chapter}{\numberline {B}ĐẶC TẢ USE CASE}{28}{appendix.1.B}%
-\contentsline {section}{\numberline {B.1}Đặc tả use case ``Thống kê tình hình mượn sách''}{28}{section.1.B.1}%
-\contentsline {section}{\numberline {B.2}Đặc tả use case ``Đăng ký làm thẻ mượn''}{28}{section.1.B.2}%
+\contentsline {chapter}{\numberline {A}HƯỚNG DẪN VIẾT ĐỒ ÁN TỐT NGHIỆP}{28}{appendix.1.A}%
+\contentsline {section}{\numberline {A.1}Ngành học}{29}{section.1.A.1}%
+\contentsline {section}{\numberline {A.2}Đánh dấu (bullet) và đánh số (numering)}{29}{section.1.A.2}%
+\contentsline {section}{\numberline {A.3}Cách thêm bảng}{30}{section.1.A.3}%
+\contentsline {section}{\numberline {A.4}Chèn hình ảnh}{30}{section.1.A.4}%
+\contentsline {section}{\numberline {A.5}Tài liệu tham khảo}{31}{section.1.A.5}%
+\contentsline {paragraph}{Cách liệt kê}{31}{paragraph*.16}%
+\contentsline {paragraph}{Các loại tài liệu tham khảo}{31}{paragraph*.17}%
+\contentsline {section}{\numberline {A.6}Cách viết phương trình và công thức toán học}{31}{section.1.A.6}%
+\contentsline {section}{\numberline {A.7}Qui cách đóng quyển}{31}{section.1.A.7}%
+\contentsline {chapter}{\numberline {B}ĐẶC TẢ USE CASE}{33}{appendix.1.B}%
+\contentsline {section}{\numberline {B.1}Đặc tả use case ``Thống kê tình hình mượn sách''}{33}{section.1.B.1}%
+\contentsline {section}{\numberline {B.2}Đặc tả use case ``Đăng ký làm thẻ mượn''}{33}{section.1.B.2}%
 \contentsfinish 

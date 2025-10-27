@@ -62,6 +62,14 @@ public sealed class ConvertTeamCartToOrderCommandHandler : IRequestHandler<Conve
                 return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.InvalidStatusForConversion);
             }
 
+            // Validate quote version if provided
+            if (request.QuoteVersion.HasValue && request.QuoteVersion != cart.QuoteVersion)
+            {
+                _logger.LogWarning("Quote version mismatch for TeamCart {TeamCartId}. Requested: {RequestedVersion}, Current: {CurrentVersion}", 
+                    request.TeamCartId, request.QuoteVersion, cart.QuoteVersion);
+                return Result.Failure<ConvertTeamCartToOrderResponse>(TeamCartErrors.QuoteVersionMismatch(cart.QuoteVersion));
+            }
+
             // Build delivery address VO
             var addressResult = DeliveryAddress.Create(
                 request.Street, request.City, request.State, request.ZipCode, request.Country);

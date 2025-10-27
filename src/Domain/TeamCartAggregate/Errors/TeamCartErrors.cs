@@ -247,4 +247,8 @@ public static class TeamCartErrors
     public static readonly Error FinalPaymentMismatch = Error.Validation(
         "TeamCart.FinalPaymentMismatch",
         "The sum of payment transactions does not match the total order amount");
+
+    public static Error QuoteVersionMismatch(long currentVersion) => Error.Conflict(
+        "TeamCart.QuoteVersionMismatch",
+        $"Quote version mismatch. Current version is {currentVersion}. Please refresh and try again.");
 }

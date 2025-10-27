@@ -43,24 +43,28 @@ P1.1 Idempotency for Mutations
 - Proposal: Support Idempotency-Key header on all POST/DELETE mutating endpoints (orders initiate/cancel; teamcart add/update/remove item, lock, payments, convert). Server stores key→result for TTL (e.g., 24h). Duplicate key returns first result (HTTP 200/201/204 as applicable).
 - Client behavior: Generate UUIDv4 per action; reuse on retry; treat 2xx repeat as success.
 - Acceptance: Replaying same request with same key is safe and returns identical semantic result.
+-> **Backend response:** This feature has been implemented and is now available. Idempotency key support is implemented through the `IIdempotentCommand` interface and `SimpleIdempotencyBehaviour` middleware. Supported endpoints include: `POST /api/v1/orders/initiate`, `POST /api/v1/team-carts`, `POST /api/v1/team-carts/{id}/items`, `POST /api/v1/team-carts/{id}/lock`, and `POST /api/v1/team-carts/{id}/convert`. The system uses Redis caching with 5-minute TTL for successful responses and proper UUID v4 validation. See the [Idempotency section](API-Documentation/03-Core-Concepts.md#idempotency) in the Core Concepts documentation for complete implementation details and usage examples.
 
 P1.2 Pricing Preview (Authoritative)
 - Problem: Client mirrors pricing (tax 8%, fee 2.99) which can drift by restaurant/promotion.
 - Proposal: POST /api/v1/pricing/preview with { restaurantId, items[], couponCode?, tipAmount? } → returns { subtotal, discount, deliveryFee, tip, tax, total, currency, notes[] }.
 - Client behavior: Call before showing final review when online; cache briefly; reconcile deltas in UI.
 - Acceptance: Preview totals match order totals at initiate unless state changed (then response includes change notes).
+-> **Backend response:** This feature has been implemented and is now available. The pricing preview endpoint provides authoritative, server-side pricing calculations including subtotals, taxes, delivery fees, discounts, and tips. It includes comprehensive validation, customization support, and performance optimization with 2-minute caching. The endpoint uses the same pricing logic as order initiation to ensure consistency. See the [Pricing Preview API documentation](API-Documentation/API-Reference/Customer/05-Pricing-Preview.md) for complete implementation details and usage examples.
 
 P1.3 Coupon Validation (Pre-submit)
 - Problem: Validating coupon only on initiate produces poor UX.
 - Proposal: POST /api/v1/coupons/validate with { restaurantId, items[], couponCode } → { valid: bool, discount?, message }.
 - Client behavior: Validate on entry, show discount preview.
 - Acceptance: Invalid codes provide specific messages; server uses same rules as initiate.
+-> **Backend response:** This functionality is already available through the existing Fast Coupon Check endpoint. The client can derive single-coupon validation by filtering the fast-check results for a specific coupon code. The existing endpoint provides comprehensive coupon validation, eligibility checks, discount calculations, and detailed error messages using the same authoritative validation logic as order initiation. See the [Fast Coupon Check section](API-Documentation/API-Reference/Customer/03-Individual-Orders.md#fast-coupon-check) in the Individual Orders API documentation for implementation details. No additional development is needed.
 
 P2.1 Payments Status Probe
 - Problem: SDK callback interruptions (app killed, deep link lost) leave client uncertain of payment result.
 - Proposal: GET /api/v1/payments/{paymentIntentId} → { status: Succeeded|Processing|Failed|Canceled, amount, currency, lastUpdate }.
 - Client behavior: On resume, probe and decide whether to poll order status or re-attempt.
 - Acceptance: Probe reflects gateway truth within seconds of webhook processing.
+-> **Backend response:** This feature is not recommended for MVP. The existing order status tracking infrastructure already provides sufficient payment status information through `GET /api/v1/orders/{orderId}/status` and real-time SignalR events (`ReceiveOrderPaymentSucceeded`/`ReceiveOrderPaymentFailed`). The order status transitions from `AwaitingPayment` to `Placed` (success) or `Cancelled` (failure), which clients can use to determine payment results. Real-time events provide immediate notification of payment outcomes, making direct payment probing unnecessary. This addresses a low-frequency edge case that can be handled through existing endpoints. For MVP, we recommend using order status polling as fallback when real-time events are unavailable.
 
 P2.2 TeamCart Batch Item Operations
 - Problem: Promoting personal cart requires N sequential calls (slow, error-prone).
@@ -98,6 +102,7 @@ P3.2 Quote Versioning for TeamCart
 - Proposal: Include quoteVersion (ETag) in lock response and require it in payments/convert; return 409 on mismatch with latest version in body.
 - Client behavior: Refresh VM and prompt members to re-confirm.
 - Acceptance: No payment accepted against stale quotes; mismatch clearly communicated.
+-> **Backend response:** This feature has been implemented and is now available. Quote versioning is included in the lock response (`LockTeamCartForPaymentResponse` with `quoteVersion` field) and optional `quoteVersion` parameters have been added to payment and conversion commands (`InitiateMemberOnlinePaymentCommand`, `CommitToCodPaymentCommand`, `ConvertTeamCartToOrderCommand`). The system validates quote versions and returns 409 Conflict with `TeamCart.QuoteVersionMismatch` error when versions don't match, providing the current version for client retry logic. This prevents payments against stale quotes and ensures financial accuracy in concurrent scenarios. Read the latest documentation in `API-Documentation\API-Reference\Customer\Workflows\02-TeamCart-Collaborative-Ordering.md` for the complete implementation details.
 
 P3.3 Standardized Problem Details `code`
 - Problem: Error handling requires parsing free-text `detail`.

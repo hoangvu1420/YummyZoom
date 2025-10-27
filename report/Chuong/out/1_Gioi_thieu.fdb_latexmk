@@ -1,18 +1,16 @@
 # Fdb version 4
-["biber Chuong/out/1_Gioi_thieu"] 1760594903.53248 "Chuong/out/1_Gioi_thieu.bcf" "Chuong/out/1_Gioi_thieu.bbl" "Chuong/out/1_Gioi_thieu" 1760605121.86852 0
-  "Chuong/out/1_Gioi_thieu.bcf" 1760605121 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
+["biber out/1_Gioi_thieu"] 0 "out/1_Gioi_thieu.bcf" "out/1_Gioi_thieu.bbl" "out/1_Gioi_thieu" 0 0
+  "Danh_sach_tai_lieu_tham_khao.bib" 0 -1 0 ""
+  "out/1_Gioi_thieu.bcf" 0 -1 0 "pdflatex"
   (generated)
-  "Chuong/out/1_Gioi_thieu.bbl"
-  "Chuong/out/1_Gioi_thieu.blg"
+  "out/1_Gioi_thieu.bbl"
+  "out/1_Gioi_thieu.blg"
   (rewritten before read)
-["pdflatex"] 1760605119.11041 "e:/source/repos/CA/YummyZoom/report/Chuong/1_Gioi_thieu.tex" "Chuong/out/1_Gioi_thieu.pdf" "1_Gioi_thieu" 1760605121.86955 0
-  "Chuong/1_Gioi_thieu.tex" 1760605119 30117 a6b46091e55b4b70e76418eaf7a0d422 ""
-  "Chuong/out/../../DoAn.tex" 1760550291 11411 ca33c93e69e1a1dd5779172d1fc99ce4 ""
-  "Chuong/out/1_Gioi_thieu.aux" 1760605121 1320 81e2ea9fe8e5a37035fd1003a7e7bae8 "pdflatex"
-  "Chuong/out/1_Gioi_thieu.bbl" 1760594912 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/1_Gioi_thieu"
-  "Chuong/out/1_Gioi_thieu.out" 1760605121 631 38d544a01dce6487af342b7b18815b4c "pdflatex"
-  "Chuong/out/1_Gioi_thieu.run.xml" 1760605121 2476 11b879d2f8d95d28645559786f193588 "pdflatex"
-  "Tu_viet_tat.tex" 1760548346 1138 292d7f642e8880cb42d4356cd1bf7153 ""
+["pdflatex"] 1761491128.95805 "e:/source/repos/CA/YummyZoom/report/Chuong/1_Gioi_thieu.tex" "out/1_Gioi_thieu.pdf" "1_Gioi_thieu" 1761491132.37232 0
+  "../DoAn.tex" 1760550291 11411 ca33c93e69e1a1dd5779172d1fc99ce4 ""
+  "../Tu_viet_tat.tex" 1760548346 1138 292d7f642e8880cb42d4356cd1bf7153 ""
+  "../lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
+  "1_Gioi_thieu.tex" 1761491117 30106 f7190eb6e2aed8b43c3bc25029243960 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc" 1759742116 7824 21ade6c3c7fd67cb4ace8dbc91c53118 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1759735106 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr12.tfm" 1759733077 1288 655e228510b4c2a1abe905c368440826 ""
@@ -171,13 +169,16 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1759742788 5574153 af86687748baf417d9e7d549313527be ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1759742980 3629007 f591f00ca598b3ec52fc9fc6bb645105 ""
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
-  "e:/source/repos/CA/YummyZoom/report/Chuong/1_Gioi_thieu.tex" 1760605119 30117 a6b46091e55b4b70e76418eaf7a0d422 ""
-  "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
+  "e:/source/repos/CA/YummyZoom/report/Chuong/1_Gioi_thieu.tex" 1761491117 30106 f7190eb6e2aed8b43c3bc25029243960 ""
+  "out/1_Gioi_thieu.aux" 1761491131 1320 81e2ea9fe8e5a37035fd1003a7e7bae8 "pdflatex"
+  "out/1_Gioi_thieu.bbl" 1760594912 486 76d65a242ec496c9b4361af646ff12cb "biber out/1_Gioi_thieu"
+  "out/1_Gioi_thieu.out" 1761491131 631 38d544a01dce6487af342b7b18815b4c "pdflatex"
+  "out/1_Gioi_thieu.run.xml" 1761491131 2476 11b879d2f8d95d28645559786f193588 "pdflatex"
   (generated)
-  "Chuong/out/1_Gioi_thieu.aux"
-  "Chuong/out/1_Gioi_thieu.bcf"
-  "Chuong/out/1_Gioi_thieu.log"
-  "Chuong/out/1_Gioi_thieu.out"
-  "Chuong/out/1_Gioi_thieu.pdf"
-  "Chuong/out/1_Gioi_thieu.run.xml"
+  "out/1_Gioi_thieu.aux"
+  "out/1_Gioi_thieu.bcf"
+  "out/1_Gioi_thieu.log"
+  "out/1_Gioi_thieu.out"
+  "out/1_Gioi_thieu.pdf"
+  "out/1_Gioi_thieu.run.xml"
   (rewritten before read)

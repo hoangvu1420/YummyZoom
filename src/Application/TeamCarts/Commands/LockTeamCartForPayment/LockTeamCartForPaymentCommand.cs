@@ -10,8 +10,12 @@ namespace YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 public sealed record LockTeamCartForPaymentCommand(
     Guid TeamCartId,
     string? IdempotencyKey = null
-) : IRequest<Result>, ITeamCartCommand, IIdempotentCommand
+) : IRequest<Result<LockTeamCartForPaymentResponse>>, ITeamCartCommand, IIdempotentCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);
 }
+
+public sealed record LockTeamCartForPaymentResponse(
+    long QuoteVersion
+);
 

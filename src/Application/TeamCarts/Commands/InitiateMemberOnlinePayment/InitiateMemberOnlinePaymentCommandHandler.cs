@@ -59,6 +59,14 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
                 return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.UserNotMember);
             }
 
+            // Validate quote version if provided
+            if (request.QuoteVersion.HasValue && request.QuoteVersion != cart.QuoteVersion)
+            {
+                _logger.LogWarning("Quote version mismatch for TeamCart {TeamCartId}. Requested: {RequestedVersion}, Current: {CurrentVersion}", 
+                    request.TeamCartId, request.QuoteVersion, cart.QuoteVersion);
+                return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.QuoteVersionMismatch(cart.QuoteVersion));
+            }
+
             // Use quoted per-member total (Quote Lite)
             var quoted = cart.GetMemberQuote(userId);
             if (quoted.IsFailure)

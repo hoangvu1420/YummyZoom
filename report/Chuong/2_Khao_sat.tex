@@ -1,16 +1,85 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
-Chương này có độ dài từ 9 đến 11 trang.
 
-Với phương pháp phân tích thiết kế hướng đối tượng, sinh viên sử dụng biểu đồ use case theo hướng dẫn của template này. Với các phương pháp khác, sinh viên trao đổi với giáo viên hướng dẫn để đổi tên và sắp xếp lại đề mục cho phù hợp. Ví dụ, thay vì sử dụng biểu đồ use case, sinh viên đi theo hướng tiếp cận Agile có thể dùng User Story.
-
-
-\textbf{Lưu ý}: Mỗi chương nên có thêm 1 đoạn mở đầu chương và kết thúc chương, mở đầu giới thiệu những nội dung sẽ trình bày trong chương, kết thúc tổng kết lại các nội dung đã trình bày
+Trong chương này, nghiên cứu tiến hành khảo sát và phân tích toàn diện về hiện trạng của ngành giao đồ ăn trực tuyến, từ đó xác định được các yêu cầu cần thiết cho việc phát triển hệ thống YummyZoom. Chương bao gồm bốn phần chính: khảo sát hiện trạng thị trường và các ứng dụng tương tự hiện có, tổng quan về các chức năng cần thiết của hệ thống thông qua biểu đồ ca sử dụng (use case) và quy trình nghiệp vụ, đặc tả chi tiết các ca sử dụng quan trọng nhất, và cuối cùng là xác định các yêu cầu phi chức năng của hệ thống. Thông qua việc phân tích các ứng dụng như GrabFood, ShopeeFood cùng với khảo sát nhu cầu thực tế của người dùng và nhà hàng, chương này sẽ làm rõ những khoảng trống còn tồn tại trong thị trường hiện tại và định hướng các tính năng độc đáo mà YummyZoom cần phát triển để tạo ra lợi thế cạnh tranh.
 
 \section{Khảo sát hiện trạng}
 \label{section:2.1}
-Thông thường, khảo sát chi tiết về hiện trạng và yêu cầu của phần mềm sẽ được lấy từ ba nguồn chính, đó là (i) người dùng/khách hàng, (ii) các hệ thống đã có, (iii) và các ứng dụng tương tự.
-Sinh viên cần tiến hành phân tích, so sánh, đánh giá chi tiết ưu nhược điểm của các sản phẩm/nghiên cứu hiện có. Sinh viên có thể lập bảng so sánh nếu cần thiết. Kết hợp với khảo sát người dùng/khách hàng (nếu có), sinh viên nêu và mô tả sơ lược các tính năng phần mềm quan trọng cần phát triển.
+
+\subsection{Bối cảnh và xu hướng thị trường}
+\label{subsection:2.1.1}
+
+Trong bối cảnh chuyển đổi số mạnh mẽ và sự thay đổi thói quen tiêu dùng của người dân Việt Nam, ngành giao đồ ăn trực tuyến đã trải qua một giai đoạn tăng trưởng ấn tượng trong những năm gần đây. Theo báo cáo của Hiệp hội Thương mại điện tử Việt Nam (VECOM), thị trường giao đồ ăn trực tuyến tại Việt Nam đạt giá trị khoảng 1,2 tỷ USD vào năm 2023 và dự kiến sẽ tăng trưởng với tốc độ trung bình 15-20\% mỗi năm trong giai đoạn 2024-2028. Sự bùng nổ này được thúc đẩy bởi nhiều yếu tố quan trọng, bao gồm sự phát triển của công nghệ di động, tăng cường khả năng tiếp cận internet băng rộng, và đặc biệt là sự thay đổi mạnh mẽ trong hành vi tiêu dùng sau đại dịch COVID-19.
+
+Đại dịch COVID-19 đã tạo ra một bước ngoặt quan trọng trong ngành dịch vụ ăn uống, khi các biện pháp giãn cách xã hội và phong tỏa đã buộc người tiêu dùng phải chuyển sang sử dụng các dịch vụ giao đồ ăn trực tuyến như một giải pháp thay thế cho việc dùng bữa tại nhà hàng. Điều đáng chú ý là sau khi các biện pháp hạn chế được nới lỏng, thói quen sử dụng dịch vụ giao đồ ăn trực tuyến vẫn được duy trì và tiếp tục phát triển, cho thấy sự chuyển đổi căn bản trong hành vi tiêu dùng. Theo khảo sát của công ty nghiên cứu thị trường Nielsen Vietnam, khoảng 78\% người tiêu dùng tại các thành phố lớn như Hà Nội và TP.HCM đã sử dụng dịch vụ giao đồ ăn trực tuyến ít nhất một lần trong năm 2023, trong đó có 45\% sử dụng thường xuyên với tần suất từ 2-3 lần mỗi tuần.
+
+Xu hướng phát triển của thị trường giao đồ ăn trực tuyến không chỉ thể hiện qua con số tăng trưởng về doanh thu mà còn qua sự đa dạng hóa trong nhu cầu của người tiêu dùng. Khách hàng ngày càng đòi hỏi cao hơn về chất lượng dịch vụ, tính tiện lợi, tốc độ giao hàng, và đặc biệt là trải nghiệm người dùng trên ứng dụng di động. Đồng thời, nhu cầu về tính cá nhân hóa và các tính năng xã hội hóa như đặt hàng nhóm, chia sẻ trải nghiệm ẩm thực cũng đang trở thành các yếu tố quan trọng trong việc lựa chọn nền tảng giao đồ ăn. Điều này tạo ra cơ hội lớn cho các ứng dụng mới có khả năng đáp ứng những nhu cầu chưa được thỏa mãn một cách đầy đủ bởi các nền tảng hiện có.
+
+Từ góc độ doanh nghiệp, ngành nhà hàng và dịch vụ ăn uống cũng đã chứng kiến sự thay đổi mạnh mẽ trong mô hình kinh doanh. Nhiều nhà hàng truyền thống đã phải chuyển đổi sang mô hình hybrid, kết hợp giữa phục vụ tại chỗ và giao hàng trực tuyến để duy trì hoạt động kinh doanh. Đặc biệt, các nhà hàng quy mô vừa và nhỏ đang tìm kiếm những nền tảng giao đồ ăn có chính sách hoa hồng hợp lý và cung cấp các công cụ quản lý hiệu quả để tối ưu hóa hoạt động kinh doanh của mình. Điều này không chỉ tạo ra nhu cầu về các giải pháp công nghệ mới mà còn mở ra cơ hội cho các ứng dụng có thể hỗ trợ tốt hơn cho cộng đồng nhà hàng địa phương.
+
+\subsection{Phân tích các ứng dụng giao đồ ăn hiện có}
+\label{subsection:2.1.2}
+
+Để hiểu rõ bối cảnh cạnh tranh và xác định được các cơ hội phát triển cho YummyZoom, nghiên cứu tiến hành phân tích chi tiết hai ứng dụng giao đồ ăn đang thống lĩnh thị trường Việt Nam hiện nay: GrabFood và ShopeeFood. Theo báo cáo của Momentum Works năm 2024, hai nền tảng này chiếm giữ gần như toàn bộ thị phần với GrabFood dẫn đầu ở mức 48\% và ShopeeFood bám sát với 47\%, tạo nên một thế song cực trong ngành giao đồ ăn trực tuyến tại Việt Nam.
+
+\subsubsection{GrabFood - Sức mạnh từ hệ sinh thái siêu ứng dụng}
+
+GrabFood không đơn thuần là một ứng dụng giao đồ ăn độc lập mà là một thành phần quan trọng trong hệ sinh thái siêu ứng dụng Grab. Lợi thế cạnh tranh cốt lõi của GrabFood xuất phát từ khả năng tận dụng tối đa các dịch vụ khác trong hệ sinh thái này, bao gồm dịch vụ di chuyển (GrabBike, GrabCar), giao hàng (GrabExpress), và hệ thống thanh toán tích hợp (ví điện tử Moca). Sự liên kết chặt chẽ này cho phép Grab có được một lượng khách hàng khổng lồ có sẵn, đội ngũ tài xế đông đảo, và đặc biệt là một kho dữ liệu người dùng phong phú để tối ưu hóa trải nghiệm dịch vụ.
+
+Từ góc độ tính năng, GrabFood excel trong việc cung cấp trải nghiệm theo dõi đơn hàng theo thời gian thực với khả năng hiển thị vị trí tài xế trên bản đồ một cách chính xác. Hệ thống gợi ý món ăn của GrabFood được đánh giá cao nhờ việc áp dụng các thuật toán học máy để phân tích hành vi người dùng và đưa ra các đề xuất cá nhân hóa. Đồng thời, GrabFood cũng có một hệ thống đánh giá và phản hồi khá hoàn chỉnh, cho phép người dùng đánh giá cả nhà hàng và tài xế, từ đó tạo ra một cơ chế kiểm soát chất lượng dịch vụ hiệu quả.
+
+Tuy nhiên, GrabFood cũng tồn tại những điểm yếu đáng chú ý. Chi phí sử dụng dịch vụ của GrabFood thường cao hơn so với các đối thủ, với phí giao hàng và phí dịch vụ có thể lên đến 15-20\% giá trị đơn hàng. Giao diện người dùng của ứng dụng Grab, do phải tích hợp nhiều dịch vụ, đôi khi trở nên phức tạp và khó điều hướng, đặc biệt đối với người dùng lớn tuổi hoặc ít am hiểu công nghệ. Về tính năng đặt hàng nhóm, mặc dù GrabFood có hỗ trợ chức năng này, nhưng quy trình vẫn yêu cầu một người làm chủ nhóm phải đứng ra thanh toán toàn bộ đơn hàng, sau đó tự thu lại tiền từ các thành viên khác.
+
+\subsubsection{ShopeeFood - Thống lĩnh bằng văn hóa săn khuyến mãi}
+
+ShopeeFood, với tiền thân là Now.vn - một trong những nền tảng giao đồ ăn tiên phong tại Việt Nam, đã được tích hợp sâu vào hệ sinh thái thương mại điện tử Shopee sau khi SEA Group mua lại. Điểm mạnh nổi bật nhất của ShopeeFood nằm ở chiến lược marketing aggressive với vô số chương trình khuyến mãi, voucher giảm giá và ưu đãi miễn phí giao hàng. Nền tảng này rất thành công trong việc khai thác tâm lý "săn sale" đặc trưng của người tiêu dùng Việt Nam, đặc biệt là thông qua việc tận dụng các sự kiện mua sắm lớn của Shopee như 11/11, 12/12 để thu hút người dùng.
+
+Về mặt tính năng, ShopeeFood có giao diện tương đối đơn giản và trực quan, phù hợp với đối tượng người dùng trẻ tuổi. Hệ thống tìm kiếm và lọc món ăn được thiết kế khá hiệu quả, cho phép người dùng dễ dàng tìm thấy các món ăn theo sở thích và ngân sách. ShopeeFood cũng tích hợp tốt với ví điện tử ShopeePay, tạo ra một trải nghiệm thanh toán mượt mà và thường đi kèm với các ưu đãi hoàn tiền. Đặc biệt, nền tảng này có điểm mạnh trong việc hỗ trợ các cửa hàng nhỏ lẻ, quán ăn vặt với chính sách hoa hồng cạnh tranh.
+
+Tuy nhiên, ShopeeFood cũng đối mặt với một số thách thức đáng kể. Chất lượng dịch vụ giao hàng không ổn định là một vấn đề thường xuyên được người dùng phàn nàn, với tình trạng giao hàng chậm trễ và thái độ phục vụ của tài xế chưa đồng đều. Số lượng nhà hàng đối tác và phạm vi phủ sóng của ShopeeFood vẫn còn hạn chế hơn so với GrabFood, đặc biệt tại các khu vực ngoại thành. Về tính năng đặt hàng nhóm, ShopeeFood cũng gặp phải vấn đề tương tự như GrabFood khi yêu cầu một người phải đứng ra thanh toán cho toàn bộ nhóm.
+
+\subsubsection{Phân tích so sánh và nhận định tổng quan}
+
+Qua việc phân tích chi tiết hai nền tảng dẫn đầu thị trường, có thể thấy rằng cả GrabFood và ShopeeFood đều đã xây dựng được những lợi thế cạnh tranh riêng biệt nhưng cũng tồn tại những khoảng trống có thể khai thác. GrabFood thành công nhờ hệ sinh thái tích hợp và chất lượng dịch vụ ổn định, trong khi ShopeeFood chiến thắng bằng chiến lược giá cả cạnh tranh và chương trình khuyến mãi hấp dẫn. Tuy nhiên, cả hai nền tảng đều chưa giải quyết được hoàn toàn vấn đề trong quy trình đặt hàng nhóm, nơi mà một người phải gánh vác trách nhiệm tài chính cho cả nhóm.
+
+Đây chính là cơ hội mà YummyZoom có thể tận dụng thông qua tính năng TeamCart độc đáo, cho phép mỗi thành viên trong nhóm tự thanh toán phần của mình. Bên cạnh đó, cả hai nền tảng hiện tại đều có giao diện khá phức tạp với nhiều tính năng không cần thiết, tạo ra cơ hội cho một ứng dụng tập trung vào sự đơn giản và trải nghiệm người dùng tối ưu. Đối với nhóm khách hàng mục tiêu là sinh viên và nhân viên văn phòng - những người có nhu cầu đặt hàng nhóm cao và thời gian nghỉ trưa hạn chế, việc có một giải pháp đơn giản, nhanh chóng và giải quyết được vấn đề thanh toán nhóm sẽ mang lại giá trị thực tiễn đáng kể.
+
+\subsection{Nhu cầu và thách thức của người dùng}
+\label{subsection:2.1.3}
+
+Dựa trên việc phân tích thị trường và các ứng dụng hiện có, có thể nhận diện được những nhu cầu cốt lõi và thách thức chưa được giải quyết triệt để trong lĩnh vực giao đồ ăn trực tuyến. Việc hiểu rõ các nhu cầu này không chỉ giúp định hướng phát triển sản phẩm mà còn tạo cơ sở để YummyZoom xây dựng được lợi thế cạnh tranh bền vững.
+
+\subsubsection{Nhu cầu cốt lõi của người dùng cuối}
+
+Người dùng cuối, đặc biệt là nhóm sinh viên và nhân viên văn phòng, có những nhu cầu rất cụ thể khi sử dụng dịch vụ giao đồ ăn trực tuyến. Nhu cầu quan trọng nhất là tính tiện lợi và tốc độ trong việc đặt hàng, đặc biệt trong những khoảng thời gian nghỉ trưa ngắn ngủi. Họ mong muốn có thể tìm kiếm, lựa chọn và đặt hàng một cách nhanh chóng mà không phải trải qua quá nhiều bước phức tạp. Đồng thời, sự đa dạng trong lựa chọn món ăn và nhà hàng cũng là yếu tố quan trọng, giúp người dùng có thể thỏa mãn các sở thích ẩm thực khác nhau và tránh cảm giác nhàm chán.
+
+Tính minh bạch về giá cả, phí dịch vụ và thời gian giao hàng là một nhu cầu không thể thiếu khác. Người dùng muốn biết chính xác họ sẽ phải trả bao nhiều tiền và món ăn sẽ đến khi nào, từ đó có thể lập kế hoạch thời gian và ngân sách một cách hợp lý. Đặc biệt quan trọng là nhu cầu về trải nghiệm đặt hàng nhóm không rườm rà, khi một nhóm bạn bè hoặc đồng nghiệp muốn cùng đặt món từ một nhà hàng. Hiện tại, việc phải có một người đứng ra làm chủ nhóm và thanh toán toàn bộ, sau đó thu lại tiền từ các thành viên khác, tạo ra không ít phiền phức và ngại ngùng trong các mối quan hệ xã hội.
+
+Cuối cùng, nhu cầu về thanh toán linh hoạt và an toàn cũng rất được quan tâm. Người dùng muốn có nhiều lựa chọn về phương thức thanh toán và đảm bảo rằng thông tin tài chính của họ được bảo vệ một cách tối ưu. Đặc biệt với thế hệ trẻ, việc thanh toán điện tử nhanh chóng và thuận tiện thường được ưu tiên hơn so với thanh toán tiền mặt.
+
+\subsubsection{Nhu cầu của nhà hàng đối tác}
+
+Từ góc độ nhà hàng, đặc biệt là các cơ sở kinh doanh quy mô vừa và nhỏ, họ cần có công cụ quản lý đơn hàng hiệu quả và dễ sử dụng. Nhà hàng muốn có thể nhận thông báo đơn hàng mới một cách kịp thời, xem chi tiết đơn hàng rõ ràng, và cập nhật trạng thái chuẩn bị món ăn một cách thuận tiện. Việc quản lý thực đơn cũng cần phải linh hoạt, cho phép nhà hàng dễ dàng thêm món mới, cập nhật giá cả, và đặt trạng thái "hết hàng" khi cần thiết.
+
+Hệ thống khuyến mãi linh hoạt là một nhu cầu quan trọng khác của nhà hàng. Họ muốn có thể tự tạo và quản lý các chương trình giảm giá, coupon theo ý muốn để thu hút khách hàng mà không phụ thuộc hoàn toàn vào các chương trình khuyến mãi của nền tảng. Điều này giúp nhà hàng chủ động hơn trong việc điều chỉnh chiến lược kinh doanh và cạnh tranh trên thị trường.
+
+Chi phí hoa hồng hợp lý cũng là mối quan tâm lớn của các nhà hàng, đặc biệt là những cơ sở nhỏ lẻ với biên lợi nhuận không cao. Họ mong muốn có thể tiếp cận được khách hàng mới thông qua nền tảng trực tuyến mà không phải gánh chịu chi phí quá lớn. Cuối cùng, nhà hàng cũng cần được hỗ trợ kỹ thuật kịp thời khi gặp vấn đề trong quá trình sử dụng hệ thống.
+
+\subsubsection{Những thách thức chưa được giải quyết tốt}
+
+Mặc dù thị trường đã có những ứng dụng thành công, vẫn tồn tại một số thách thức chưa được giải quyết một cách tối ưu. Thách thức lớn nhất và rõ ràng nhất là quy trình đặt hàng nhóm phức tạp với vấn đề thanh toán tập trung. Việc một người phải đứng ra thanh toán cho cả nhóm không chỉ tạo ra gánh nặng tài chính tạm thời mà còn gây ra những tình huống khó xử trong các mối quan hệ xã hội, đặc biệt khi có thành viên quên hoặc chậm trả tiền.
+
+Giao diện ứng dụng quá phức tạp với nhiều tính năng không cần thiết là một thách thức khác. Các ứng dụng hiện tại thường cố gắng tích hợp quá nhiều chức năng, dẫn đến việc người dùng, đặc biệt là những người ít am hiểu công nghệ, cảm thấy khó khăn trong việc điều hướng và sử dụng. Điều này đặc biệt trở nên rõ ràng khi người dùng có thời gian hạn chế, như trong giờ nghỉ trưa, và muốn đặt hàng một cách nhanh chóng.
+
+Thiếu giải pháp tối ưu cho nhóm khách hàng trẻ, đặc biệt là sinh viên và nhân viên văn phòng, cũng là một khoảng trống đáng chú ý. Nhóm người dùng này có thói quen và nhu cầu rất cụ thể: họ thường đặt hàng theo nhóm, có ngân sách hạn chế, ưa thích sự đơn giản và tốc độ, nhưng lại chưa có ứng dụng nào thực sự được thiết kế riêng để phục vụ những đặc thù này.
+
+\subsubsection{Định hướng phát triển cho YummyZoom}
+
+Dựa trên việc phân tích các nhu cầu và thách thức trên, YummyZoom được định hướng phát triển theo những nguyên tắc rõ ràng. Trước hết, ứng dụng sẽ tập trung vào việc tạo ra một trải nghiệm đơn giản và trực quan, loại bỏ những tính năng phức tạp không cần thiết để người dùng có thể đặt hàng một cách nhanh chóng và hiệu quả nhất. Giao diện được thiết kế với triết lý "ít hơn là nhiều hơn", ưu tiên tính dễ sử dụng và tốc độ thao tác.
+
+Giải quyết triệt để vấn đề đặt hàng nhóm thông qua tính năng TeamCart là định hướng cốt lõi của YummyZoom. Thay vì yêu cầu một người thanh toán cho cả nhóm, mỗi thành viên sẽ tự chịu trách nhiệm thanh toán phần món ăn của mình, từ đó loại bỏ hoàn toàn những phiền phức và ngại ngùng trong các mối quan hệ xã hội. Tính năng này không chỉ là một cải tiến kỹ thuật mà còn mang lại giá trị thực tiễn cao cho người dùng.
+
+Cuối cùng, YummyZoom được định hướng để phục vụ đặc thù của sinh viên và nhân viên văn phòng - những người có nhu cầu đặt hàng nhóm cao, thời gian hạn chế, và ưa thích sự tiện lợi. Từ việc tối ưu hóa quy trình đặt hàng cho đến việc cung cấp các tùy chọn thanh toán phù hợp với thói quen của thế hệ trẻ, tất cả đều được thiết kế với sự hiểu biết sâu sắc về nhu cầu và hành vi của nhóm khách hàng mục tiêu này.
 
 \section{Tổng quan chức năng}
 \label{section:2.2}

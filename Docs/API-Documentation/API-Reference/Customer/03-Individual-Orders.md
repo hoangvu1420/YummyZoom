@@ -6,6 +6,7 @@ This guide covers all APIs for placing, tracking, and managing individual orders
 
 Individual orders in YummyZoom support the complete order lifecycle:
 
+- **Pricing Preview**: Get accurate pricing calculations before placing an order (see `./05-Pricing-Preview.md`)
 - **Order Placement**: Create orders with menu items, customizations, and payment methods
 - **Payment Processing**: Handle online payments via Stripe or cash-on-delivery options
 - **Order Tracking**: Real-time status updates from placement to delivery
@@ -724,3 +725,14 @@ Orders integrate with notification services for:
 - Status update push notifications
 - Restaurant order management alerts
 - Delivery coordination messages
+
+---
+
+## Cross-References
+
+- **Pricing Preview**: `./05-Pricing-Preview.md` - Get accurate pricing calculations before placing orders
+- **Authentication**: `./01-Authentication-and-Profile.md`
+- **Restaurant Discovery**: `./02-Restaurant-Discovery.md`
+- **Reviews and Ratings**: `./04-Reviews-and-Ratings.md`
+- **Core Concepts**: `../../03-Core-Concepts.md`
+- **Real-time Events**: `../../04-Real-time-Events-API.md`

@@ -41,6 +41,14 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
                 return Result.Failure(TeamCartErrors.TeamCartNotFound);
             }
 
+            // Validate quote version if provided
+            if (request.QuoteVersion.HasValue && request.QuoteVersion != cart.QuoteVersion)
+            {
+                _logger.LogWarning("Quote version mismatch for TeamCart {TeamCartId}. Requested: {RequestedVersion}, Current: {CurrentVersion}", 
+                    request.TeamCartId, request.QuoteVersion, cart.QuoteVersion);
+                return Result.Failure(TeamCartErrors.QuoteVersionMismatch(cart.QuoteVersion));
+            }
+
             // Use quoted per-member total when available (Quote Lite); fallback to items subtotal
             Money memberTotal;
             if (cart.QuoteVersion > 0)

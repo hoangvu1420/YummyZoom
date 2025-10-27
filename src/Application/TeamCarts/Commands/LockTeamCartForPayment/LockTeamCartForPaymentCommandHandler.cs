@@ -10,7 +10,7 @@ using YummyZoom.SharedKernel;
 
 namespace YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 
-public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockTeamCartForPaymentCommand, Result>
+public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockTeamCartForPaymentCommand, Result<LockTeamCartForPaymentResponse>>
 {
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly IUser _currentUser;
@@ -38,7 +38,7 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result> Handle(LockTeamCartForPaymentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LockTeamCartForPaymentResponse>> Handle(LockTeamCartForPaymentCommand request, CancellationToken cancellationToken)
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -49,14 +49,14 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
             if (cart is null)
             {
                 _logger.LogWarning("TeamCart not found: {TeamCartId}", request.TeamCartId);
-                return Result.Failure(TeamCartErrors.TeamCartNotFound);
+                return Result.Failure<LockTeamCartForPaymentResponse>(TeamCartErrors.TeamCartNotFound);
             }
 
             var lockResult = cart.LockForPayment(userId);
             if (lockResult.IsFailure)
             {
                 _logger.LogWarning("Failed to lock TeamCart {TeamCartId}: {Reason}", request.TeamCartId, lockResult.Error.Code);
-                return Result.Failure(lockResult.Error);
+                return Result.Failure<LockTeamCartForPaymentResponse>(lockResult.Error);
             }
 
             // Compute Quote Lite after locking
@@ -92,11 +92,11 @@ public sealed class LockTeamCartForPaymentCommandHandler : IRequestHandler<LockT
 
             await _teamCartRepository.UpdateAsync(cart, cancellationToken);
 
-            _logger.LogInformation("TeamCart locked for payment. CartId={CartId} HostUserId={UserId} Status={Status}",
-                request.TeamCartId, userId.Value, cart.Status);
+            _logger.LogInformation("TeamCart locked for payment. CartId={CartId} HostUserId={UserId} Status={Status} QuoteVersion={QuoteVersion}",
+                request.TeamCartId, userId.Value, cart.Status, cart.QuoteVersion);
 
             // VM quote update will be handled by TeamCartQuoteUpdated outbox event handler.
-            return Result.Success();
+            return Result.Success(new LockTeamCartForPaymentResponse(cart.QuoteVersion));
         }, cancellationToken);
     }
 }

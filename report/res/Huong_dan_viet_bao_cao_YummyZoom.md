@@ -77,7 +77,6 @@ và các công nghệ liên quan khác, đồng thời phân tích lý do lựa 
 - **Phân tích các ứng dụng hiện có**:
   - GrabFood: Ưu điểm (phủ sóng rộng, thanh toán đa dạng), nhược điểm (phí cao, UX phức tạp)
   - ShopeeFood: Ưu điểm (tích hợp ecommerce, voucher nhiều), nhược điểm (chất lượng dịch vụ)
-  - Baemin: Ưu điểm (giao diện đẹp, marketing tốt), nhược điểm (ít tính năng cho nhà hàng)
 - **Bảng so sánh tính năng**: Lập bảng so sánh các tính năng chính
 - **Khảo sát người dùng**: Kết quả khảo sát nhu cầu (nếu có thực hiện)
 
@@ -387,6 +386,9 @@ report/
 - Thiếu tham chiếu đến hình/bảng trong nội dung
 - Sử dụng từ ngữ không khoa học
 - Cấu trúc câu không đầy đủ chủ-vị
+
+### Các lưu ý quan trọng:
+- Mỗi chương nên có thêm 1 đoạn mở đầu chương và kết thúc chương, mở đầu giới thiệu những nội dung sẽ trình bày trong chương, kết thúc tổng kết lại các nội dung đã trình bày
 
 ---
 

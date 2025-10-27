@@ -244,7 +244,7 @@ public class OrderSeeder : ISeeder
 
             // Calculate other amounts using centralized static pricing
             var pricingConfig = StaticPricingService.GetPricingConfiguration(scenario.Restaurant.Id);
-            var deliveryFee = pricingConfig.DeliveryFee;
+            var deliveryFee = new Money(pricingConfig.DeliveryFee.Amount, pricingConfig.DeliveryFee.Currency);
             var tipAmount = scenario.TipAmount?.Currency == subtotal.Currency 
                 ? scenario.TipAmount 
                 : new Money(scenario.TipAmount?.Amount ?? 0m, subtotal.Currency); // Ensure same currency
@@ -577,3 +577,4 @@ public class DeliveryAddressData
     public required string ZipCode { get; set; }
     public required string Country { get; set; }
 }
+

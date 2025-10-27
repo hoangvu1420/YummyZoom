@@ -8,7 +8,8 @@ namespace YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
 
 [Authorize(Policy = Policies.MustBeTeamCartMember)]
 public sealed record InitiateMemberOnlinePaymentCommand(
-    Guid TeamCartId
+    Guid TeamCartId,
+    long? QuoteVersion = null
 ) : IRequest<Result<InitiateMemberOnlinePaymentResponse>>, ITeamCartCommand
 {
     TeamCartId ITeamCartCommand.TeamCartId => Domain.TeamCartAggregate.ValueObjects.TeamCartId.Create(TeamCartId);

@@ -17,95 +17,313 @@ All endpoints require `Authorization: Bearer <access_token>` unless stated. Feat
 
 ## Step 1 — Create a TeamCart (Host)
 
-Creates a new cart and returns identifiers and a share token for others to join.
+Creates a new collaborative cart for a specific restaurant and returns identifiers and a share token for others to join.
 
 **`POST /api/v1/team-carts`**
 
 - Authorization: Required (Customer)
 - Idempotency: Supported via `Idempotency-Key` header
-- Body
+
+#### Request Body
+
 ```json
-{ "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "hostName": "Alex", "deadlineUtc": "2025-10-01T18:30:00Z" }
+{
+  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "hostName": "Alex",
+  "deadlineUtc": "2025-10-01T18:30:00Z"
+}
 ```
 
-Response — 201 Created
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `restaurantId` | `string` | Yes | UUID of the restaurant for this TeamCart |
+| `hostName` | `string` | Yes | Display name for the host (1-100 characters) |
+| `deadlineUtc` | `string` | No | ISO 8601 deadline for cart completion (must be in future) |
+
+#### Response
+
+**✅ 201 Created**
 ```json
-{ "teamCartId": "c1a2b3d4-e5f6-7890-abcd-ef1234567890", "shareToken": "XYZ123", "shareTokenExpiresAtUtc": "2025-10-01T18:30:00Z" }
+{
+  "teamCartId": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+  "shareToken": "XYZ123",
+  "shareTokenExpiresAtUtc": "2025-10-01T18:30:00Z"
+}
 ```
 
-Rules
-- Restaurant must exist.
-- Host must be authenticated; host is added as a member with role "Host".
-- Optional `deadlineUtc` must be in the future.
+#### Response Schema
 
-Errors
-- 404 `CreateTeamCart.RestaurantNotFound`
-- 503 when feature/realtime not available
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamCartId` | `string` | UUID of the created TeamCart |
+| `shareToken` | `string` | 6-character alphanumeric token for members to join |
+| `shareTokenExpiresAtUtc` | `string` | ISO 8601 expiration time for the share token |
+
+#### Business Rules
+
+- Restaurant must exist and be active
+- Host must be authenticated; automatically added as member with role "Host"
+- `deadlineUtc` must be in the future if provided
+- Share token expires 24 hours after creation
+- TeamCart starts in `Open` state
+
+#### Errors
+
+- **400** `CreateTeamCart.InvalidHostName` - Host name validation failed
+- **400** `CreateTeamCart.InvalidDeadline` - Deadline is in the past
+- **404** `CreateTeamCart.RestaurantNotFound` - Restaurant doesn't exist
+- **503** Service unavailable when TeamCart feature is disabled
 
 ---
 
 ## Step 2 — Join the TeamCart (Member)
 
-Members join using the share token and provide a display name.
+Members join an existing TeamCart using the share token and provide a display name.
 
 **`POST /api/v1/team-carts/{teamCartId}/join`**
 
-- Authorization: Required
-- Body
+- Authorization: Required (Customer)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Request Body
+
 ```json
-{ "shareToken": "XYZ123", "guestName": "Sam" }
+{
+  "shareToken": "XYZ123",
+  "guestName": "Sam"
+}
 ```
 
-Response — 204 No Content
+#### Request Schema
 
-Rules
-- Member name required.
-- Cart must be `Open` and not expired; duplicate membership rejected.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `shareToken` | `string` | Yes | 6-character alphanumeric share token from host |
+| `guestName` | `string` | Yes | Display name for the member (1-100 characters) |
 
-Typical errors
-- 400 `GetTeamCartRealTimeViewModel.NotMember` (when attempting to fetch without joining)
-- 400/409 member validation errors; 503 feature disabled
+#### Response
+
+**✅ 204 No Content** - Successfully joined the TeamCart
+
+#### Business Rules
+
+- Member name is required and must be unique within the cart
+- Cart must be in `Open` state and not expired
+- Share token must be valid and not expired
+- Duplicate membership is rejected (user already a member)
+- Member is added with role "Guest"
+
+#### Errors
+
+- **400** `JoinTeamCart.InvalidGuestName` - Guest name validation failed
+- **400** `JoinTeamCart.InvalidShareToken` - Share token is invalid or expired
+- **400** `JoinTeamCart.AlreadyMember` - User is already a member of this cart
+- **404** `JoinTeamCart.TeamCartNotFound` - TeamCart doesn't exist
+- **409** `JoinTeamCart.CartNotOpen` - Cart is not in Open state
+- **409** `JoinTeamCart.CartExpired` - Cart has expired
+- **503** Service unavailable when TeamCart feature is disabled
 
 ---
 
-## Step 3 — Add and Manage Items (Members)
+## Step 3 — Add Items to TeamCart (Members)
 
-Members can add items with optional customizations, update their quantities, or remove their own items.
+Members can add menu items with optional customizations to the TeamCart.
 
-- Add item — `POST /api/v1/team-carts/{teamCartId}/items` (supports `Idempotency-Key` header)
-  ```json
-  {
-    "menuItemId": "b2c3...",
-    "quantity": 2,
-    "selectedCustomizations": [ { "groupId": "g1", "choiceId": "c1" } ]
-  }
-  ```
-- Update quantity — `POST /api/v1/team-carts/{teamCartId}/items/{teamCartItemId}`
-  ```json
-  { "newQuantity": 3 }
-  ```
-- Remove item — `DELETE /api/v1/team-carts/{teamCartId}/items/{teamCartItemId}`
+**`POST /api/v1/team-carts/{teamCartId}/items`**
 
-Rules
-- Cart must be `Open`.
-- Caller must be a member; only the owner of an item may update/remove it.
-- Menu item must belong to the same restaurant and be available; customization groups/choices must be valid for the item.
+- Authorization: Required (TeamCart member)
+- Idempotency: Supported via `Idempotency-Key` header
+- Path Parameter: `teamCartId` (UUID)
 
-Error codes (examples)
-- 404 `AddItemToTeamCart.MenuItemNotFound`, `CustomizationGroupNotFound`, `CustomizationChoiceNotFound`, `UpdateTeamCartItemQuantity.ItemNotFound`
-- 400 `AddItemToTeamCart.MenuItemUnavailable`, `CustomizationGroupNotApplied`, `UpdateTeamCartItemQuantity.NotOwner`, `RemoveItemFromTeamCart.NotOwner`
+#### Request Body
+
+```json
+{
+  "menuItemId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+  "quantity": 2,
+  "selectedCustomizations": [
+    {
+      "groupId": "g1",
+      "choiceId": "c1"
+    }
+  ]
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `menuItemId` | `string` | Yes | UUID of the menu item to add |
+| `quantity` | `integer` | Yes | Quantity to add (1-99) |
+| `selectedCustomizations` | `array` | No | Array of customization selections |
+
+#### Customization Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `groupId` | `string` | Yes | UUID of the customization group |
+| `choiceId` | `string` | Yes | UUID of the selected choice within the group |
+
+#### Response
+
+**✅ 201 Created**
+```json
+{
+  "teamCartItemId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamCartItemId` | `string` | UUID of the created TeamCart item |
+
+#### Business Rules
+
+- Cart must be in `Open` state
+- Caller must be a TeamCart member
+- Menu item must belong to the same restaurant as the cart
+- Menu item must be available for ordering
+- Customization groups and choices must be valid for the menu item
+- Quantity must be between 1 and 99
+
+#### Errors
+
+- **400** `AddItemToTeamCart.InvalidQuantity` - Quantity is out of range
+- **400** `AddItemToTeamCart.MenuItemUnavailable` - Menu item is not available
+- **400** `AddItemToTeamCart.CustomizationGroupNotApplied` - Customization group not valid for item
+- **400** `AddItemToTeamCart.CustomizationChoiceNotValid` - Customization choice not valid for group
+- **404** `AddItemToTeamCart.MenuItemNotFound` - Menu item doesn't exist
+- **404** `AddItemToTeamCart.CustomizationGroupNotFound` - Customization group doesn't exist
+- **404** `AddItemToTeamCart.CustomizationChoiceNotFound` - Customization choice doesn't exist
+- **404** `AddItemToTeamCart.TeamCartNotFound` - TeamCart doesn't exist
+- **409** `AddItemToTeamCart.CartNotOpen` - Cart is not in Open state
+- **403** `AddItemToTeamCart.NotMember` - User is not a member of this cart
 
 ---
 
 ## Step 4 — Get Live Cart State
 
-- Details (SQL) — `GET /api/v1/team-carts/{teamCartId}`
-- Real-time VM (Redis) — `GET /api/v1/team-carts/{teamCartId}/rt`
-- SignalR hub subscription — `wss://<host>/hubs/teamcart` then `SubscribeToCart(teamCartId)`
+Retrieve the current state of the TeamCart for real-time updates and member coordination.
 
-Notes
-- Membership enforced; non-members receive authorization errors.
-- Real-time notifications include: `CartUpdated`, `Locked`, `PaymentEvent`, `ReadyToConfirm`, `Converted`, `Expired`.
+### Get Cart Details (SQL)
+
+**`GET /api/v1/team-carts/{teamCartId}`**
+
+- Authorization: Required (TeamCart member)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "Open",
+  "hostUserId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+  "deadlineUtc": "2025-10-01T18:30:00Z",
+  "createdAtUtc": "2025-09-15T10:30:00Z",
+  "members": [
+    {
+      "userId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "name": "Alex",
+      "role": "Host"
+    }
+  ],
+  "items": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "menuItemId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "ownerUserId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "quantity": 2,
+      "unitPrice": 12.99,
+      "totalPrice": 25.98
+    }
+  ]
+}
+```
+
+### Get Real-time View Model (Redis)
+
+**`GET /api/v1/team-carts/{teamCartId}/rt`**
+
+- Authorization: Required (TeamCart member)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "Open",
+  "version": 1,
+  "quoteVersion": 0,
+  "grandTotal": 25.98,
+  "currency": "USD",
+  "members": [
+    {
+      "userId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "name": "Alex",
+      "role": "Host",
+      "paymentStatus": "Pending",
+      "committedAmount": 0,
+      "quotedAmount": 25.98
+    }
+  ],
+  "items": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "menuItemId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "ownerUserId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "quantity": 2,
+      "unitPrice": 12.99,
+      "totalPrice": 25.98
+    }
+  ]
+}
+```
+
+### Real-time Updates via SignalR
+
+**WebSocket Connection**: `wss://<host>/hubs/teamcart`
+
+#### Subscribe to Cart Updates
+
+```javascript
+// Subscribe to cart updates
+connection.invoke("SubscribeToCart", teamCartId);
+```
+
+#### Real-time Event Types
+
+| Event | Description | Payload |
+|-------|-------------|---------|
+| `CartUpdated` | Items added/removed/updated | Cart view model |
+| `Locked` | Cart locked for payment | Lock notification |
+| `PaymentEvent` | Member payment status changed | Payment details |
+| `ReadyToConfirm` | All members settled | Ready state |
+| `Converted` | Cart converted to order | Order details |
+| `Expired` | Cart expired | Expiration details |
+
+#### Business Rules
+
+- Membership enforced; non-members receive authorization errors
+- Real-time view model is optimized for UI updates
+- SQL endpoint provides complete cart details for administrative purposes
+- SignalR provides immediate updates for collaborative experience
+
+#### Errors
+
+- **403** `GetTeamCartRealTimeViewModel.NotMember` - User is not a member of this cart
+- **404** `GetTeamCartRealTimeViewModel.TeamCartNotFound` - TeamCart doesn't exist
+- **503** Service unavailable when real-time features are disabled
 
 ---
 
@@ -117,11 +335,27 @@ Freezes items and computes per-member quotes. Notifies members to pay/commit.
 
 - Authorization: Host only
 - Idempotency: Supported via `Idempotency-Key` header
-- Response: 204 No Content
+- Response: 200 OK
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "quoteVersion": 1
+}
+```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `quoteVersion` | `long` | Quote version for concurrency control. Include this in payment and conversion requests. |
 
 Rules
 - Only in `Open` state; transitions to `Locked`.
 - Computes quote (member subtotals, fees, tip, tax, discount); updates VM.
+- Returns quote version for concurrency control in subsequent operations.
 
 Errors
 - 400/409 domain validations; 404 `TeamCartErrors.TeamCartNotFound`
@@ -244,20 +478,109 @@ Get real-time coupon suggestions and savings calculations for the current TeamCa
 
 ## Step 7 — Apply Tip and Coupon (Host/Participant)
 
-- Apply tip — `POST /api/v1/team-carts/{teamCartId}/tip`
-  - Authorization: Participant (member or host)
-  - Body: `{ "tipAmount": 5.00 }`
-- Apply coupon — `POST /api/v1/team-carts/{teamCartId}/coupon`
-  - Authorization: Host only
-  - Body: `{ "couponCode": "WELCOME10" }`
-- Remove coupon — `DELETE /api/v1/team-carts/{teamCartId}/coupon`
+Apply tips and coupons to the TeamCart to adjust the final pricing.
 
-Rules
-- Tip/coupon typically applied after locking. Coupon validated against cart items.
+### Apply Tip
 
-Errors (examples)
-- 404 `Coupon.CouponNotFound`
-- 400 validation when amounts/codes invalid
+**`POST /api/v1/team-carts/{teamCartId}/tip`**
+
+- Authorization: Required (TeamCart participant - member or host)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Request Body
+
+```json
+{
+  "tipAmount": 5.00
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tipAmount` | `decimal` | Yes | Tip amount in cart currency (0.00 - 999.99) |
+
+#### Response
+
+**✅ 204 No Content** - Tip applied successfully
+
+#### Business Rules
+
+- Cart must be in `Open` or `Locked` state
+- Caller must be a TeamCart participant (member or host)
+- Tip amount must be non-negative
+- Tip is distributed proportionally among all members
+
+#### Errors
+
+- **400** `ApplyTipToTeamCart.InvalidTipAmount` - Tip amount is negative or invalid
+- **404** `ApplyTipToTeamCart.TeamCartNotFound` - TeamCart doesn't exist
+- **409** `ApplyTipToTeamCart.CartNotOpenOrLocked` - Cart is not in valid state for tip application
+- **403** `ApplyTipToTeamCart.NotParticipant` - User is not a participant in this cart
+
+### Apply Coupon
+
+**`POST /api/v1/team-carts/{teamCartId}/coupon`**
+
+- Authorization: Required (Host only)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Request Body
+
+```json
+{
+  "couponCode": "WELCOME10"
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `couponCode` | `string` | Yes | Coupon code to apply (1-50 characters) |
+
+#### Response
+
+**✅ 204 No Content** - Coupon applied successfully
+
+#### Business Rules
+
+- Cart must be in `Open` or `Locked` state
+- Only the host can apply coupons
+- Coupon must be valid and applicable to cart items
+- Coupon is validated against current cart contents
+
+#### Errors
+
+- **400** `ApplyCouponToTeamCart.InvalidCouponCode` - Coupon code is invalid format
+- **404** `ApplyCouponToTeamCart.CouponNotFound` - Coupon doesn't exist
+- **404** `ApplyCouponToTeamCart.TeamCartNotFound` - TeamCart doesn't exist
+- **409** `ApplyCouponToTeamCart.CouponNotApplicable` - Coupon not valid for cart items
+- **409** `ApplyCouponToTeamCart.CartNotOpenOrLocked` - Cart is not in valid state
+- **403** `ApplyCouponToTeamCart.NotHost` - User is not the host of this cart
+
+### Remove Coupon
+
+**`DELETE /api/v1/team-carts/{teamCartId}/coupon`**
+
+- Authorization: Required (Host only)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Response
+
+**✅ 204 No Content** - Coupon removed successfully
+
+#### Business Rules
+
+- Only the host can remove coupons
+- Cart must be in `Open` or `Locked` state
+- If no coupon is applied, operation succeeds (idempotent)
+
+#### Errors
+
+- **404** `RemoveCouponFromTeamCart.TeamCartNotFound` - TeamCart doesn't exist
+- **403** `RemoveCouponFromTeamCart.NotHost` - User is not the host of this cart
 
 ---
 
@@ -265,22 +588,73 @@ Errors (examples)
 
 Members settle their share via one of:
 
-- Cash on Delivery commit — `POST /api/v1/team-carts/{teamCartId}/payments/cod`
-  - Authorization: Member
-  - Response: 204 No Content
-- Online payment intent — `POST /api/v1/team-carts/{teamCartId}/payments/online`
-  - Authorization: Member
-  - Response 200 OK
-    ```json
-    { "paymentIntentId": "pi_...", "clientSecret": "pi_..._secret_..." }
-    ```
+### Cash on Delivery Payment
+
+**`POST /api/v1/team-carts/{teamCartId}/payments/cod`**
+
+- Authorization: Member
+- Response: 204 No Content
+
+#### Request Body (Optional)
+
+```json
+{
+  "quoteVersion": 1
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `quoteVersion` | `long` | No | Quote version from lock response. Validates against current quote to prevent stale payments. |
+
+### Online Payment
+
+**`POST /api/v1/team-carts/{teamCartId}/payments/online`**
+
+- Authorization: Member
+- Response: 200 OK
+
+#### Request Body (Optional)
+
+```json
+{
+  "quoteVersion": 1
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `quoteVersion` | `long` | No | Quote version from lock response. Validates against current quote to prevent stale payments. |
+
+#### Response
+
+**✅ 200 OK**
+```json
+{
+  "paymentIntentId": "pi_...",
+  "clientSecret": "pi_..._secret_..."
+}
+```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paymentIntentId` | `string` | Stripe PaymentIntent ID for tracking |
+| `clientSecret` | `string` | Client secret for Stripe payment confirmation |
 
 Rules
 - Only members can pay; amounts must match their quoted share.
 - System tracks per-member payment status; when everyone is settled, cart becomes `ReadyToConfirm`.
+- Quote version validation prevents payments against stale quotes.
 
 Errors
 - 400 invalid payment amount; 404 cart not found
+- 409 `TeamCart.QuoteVersionMismatch` when quote version doesn't match current version
 
 ---
 
@@ -292,7 +666,9 @@ After all members are settled, convert the cart to a standard order.
 
 - Authorization: Host only
 - Idempotency: Supported via `Idempotency-Key` header
-- Body
+
+#### Request Body
+
 ```json
 {
   "street": "123 Market St",
@@ -300,22 +676,47 @@ After all members are settled, convert the cart to a standard order.
   "state": "CA",
   "zipCode": "94105",
   "country": "US",
-  "specialInstructions": "Leave at lobby"
+  "specialInstructions": "Leave at lobby",
+  "quoteVersion": 1
 }
 ```
 
-Response — 200 OK
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `street` | `string` | Yes | Delivery street address |
+| `city` | `string` | Yes | Delivery city |
+| `state` | `string` | Yes | Delivery state/province |
+| `zipCode` | `string` | Yes | Delivery postal code |
+| `country` | `string` | Yes | Delivery country code |
+| `specialInstructions` | `string` | No | Special delivery instructions |
+| `quoteVersion` | `long` | No | Quote version from lock response. Validates against current quote to prevent conversion with stale data. |
+
+#### Response
+
+**✅ 200 OK**
 ```json
-{ "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479" }
+{
+  "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+}
 ```
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `orderId` | `string` | UUID of the created order |
 
 Rules
 - Cart must be `ReadyToConfirm`; converts to terminal `Converted` state.
 - Validates paid sum equals grand total; computes fees/taxes as per policy.
+- Quote version validation prevents conversion with stale quote data.
 
 Errors
 - 400 `TeamCartErrors.InvalidPaymentAmount`
 - 409 `TeamCartErrors.InvalidStatusForConversion`
+- 409 `TeamCart.QuoteVersionMismatch` when quote version doesn't match current version
 
 ---
 
@@ -341,6 +742,11 @@ Errors
 - Payments
   - Per-member quotes computed at lock; amounts must match on commit.
   - All members must be settled before conversion.
+- Quote Versioning
+  - Lock operation returns a quote version for concurrency control.
+  - Payment and conversion operations can include quote version for validation.
+  - Prevents payments against stale quotes when cart is modified concurrently.
+  - Returns 409 `TeamCart.QuoteVersionMismatch` when version doesn't match current quote.
 - Idempotency Protection
   - Critical operations (create, add items, lock, convert) support `Idempotency-Key` header
   - Prevents duplicate actions from network retries or client errors
