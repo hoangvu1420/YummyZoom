@@ -209,6 +209,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<OrderFinancialService>();
         builder.Services.AddScoped<TeamCartConversionService>();
         builder.Services.AddSingleton<IFcmService, FcmService>();
+        builder.Services.AddScoped<ITeamCartPushNotifier, YummyZoom.Infrastructure.Notifications.TeamCarts.TeamCartPushNotifier>();
         builder.Services.AddScoped<IRestaurantProvisioningService, Services.RestaurantProvisioningService>();
         builder.Services.AddScoped<IFastCouponCheckService, Services.FastCouponCheckService>();
     }

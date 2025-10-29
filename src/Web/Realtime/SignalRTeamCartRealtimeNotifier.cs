@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 using YummyZoom.Web.Realtime.Hubs;
@@ -13,13 +14,16 @@ namespace YummyZoom.Web.Realtime;
 public sealed class SignalRTeamCartRealtimeNotifier : ITeamCartRealtimeNotifier
 {
     private readonly IHubContext<TeamCartHub> _hubContext;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SignalRTeamCartRealtimeNotifier> _logger;
 
     public SignalRTeamCartRealtimeNotifier(
         IHubContext<TeamCartHub> hubContext,
+        IServiceProvider serviceProvider,
         ILogger<SignalRTeamCartRealtimeNotifier> logger)
     {
         _hubContext = hubContext;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -49,6 +53,15 @@ public sealed class SignalRTeamCartRealtimeNotifier : ITeamCartRealtimeNotifier
         {
             await _hubContext.Clients.Group(Group(cartId)).SendAsync(method, args, ct);
             _logger.LogDebug("Broadcasted {Method} for TeamCartId={CartId} to group {Group}", method, cartId.Value, Group(cartId));
+
+            // Also emit FCM data-only push to all active member devices (scoped dependency)
+            using var scope = _serviceProvider.CreateScope();
+            var push = scope.ServiceProvider.GetRequiredService<ITeamCartPushNotifier>();
+            var pushResult = await push.PushTeamCartDataAsync(cartId, ct);
+            if (pushResult.IsFailure)
+            {
+                _logger.LogWarning("Failed to send TeamCart FCM data push (CartId={CartId}): {Error}", cartId.Value, pushResult.Error);
+            }
         }
         catch (Exception ex)
         {
@@ -56,4 +69,3 @@ public sealed class SignalRTeamCartRealtimeNotifier : ITeamCartRealtimeNotifier
         }
     }
 }
-

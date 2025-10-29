@@ -77,7 +77,7 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithStandardResults<GetTeamCartDetailsResponse>();
 
         // GET /api/v1/team-carts/{id}/rt
-        group.MapGet("/{id}/rt", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
+        group.MapGet("/{id}/rt", async (Guid id, HttpContext context, ISender sender, ITeamCartFeatureAvailability availability) =>
         {
             if (!availability.Enabled || !availability.RealTimeReady)
             {
@@ -85,7 +85,28 @@ public sealed class TeamCarts : EndpointGroupBase
             }
             var query = new GetTeamCartRealTimeViewModelQuery(id);
             var result = await sender.Send(query);
-            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+            if (!result.IsSuccess)
+            {
+                return result.ToIResult();
+            }
+
+            // Strong ETag based on VM Version: "teamcart-<id>-v<Version>"
+            var vm = result.Value.TeamCart;
+            var etag = $"\"teamcart-{id}-v{vm.Version}\""; // quoted strong ETag
+
+            var ifNoneMatch = context.Request.Headers["If-None-Match"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(ifNoneMatch) && string.Equals(ifNoneMatch, etag, StringComparison.Ordinal))
+            {
+                context.Response.Headers.ETag = etag;
+                context.Response.Headers.CacheControl = "no-cache, must-revalidate";
+                return Results.StatusCode(StatusCodes.Status304NotModified);
+            }
+
+            context.Response.Headers.ETag = etag;
+            context.Response.Headers.CacheControl = "no-cache, must-revalidate";
+            context.Response.Headers.LastModified = DateTime.UtcNow.ToString("R");
+
+            return Results.Ok(result.Value);
         })
         .RequireAuthorization()
         .WithName("GetTeamCartRealTimeViewModel")

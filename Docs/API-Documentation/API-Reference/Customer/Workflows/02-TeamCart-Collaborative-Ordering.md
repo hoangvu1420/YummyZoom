@@ -11,6 +11,8 @@ TeamCart enables group ordering with roles and a lightweight payment flow:
 - When all members are settled, the host converts the cart to a standard order
 - Real-time updates are available via SignalR
 
+Live tracking (MVP) uses a poll‑first endpoint with strong ETag to minimize payloads. Mobile push (FCM data) nudges clients to poll immediately when something changes.
+
 All endpoints require `Authorization: Bearer <access_token>` unless stated. Feature is behind a flag; APIs can return `503 Service Unavailable` if disabled.
 
 ---
@@ -127,6 +129,113 @@ Members join an existing TeamCart using the share token and provide a display na
 
 ---
 
+## Live Tracking (Poll‑First, FCM‑Triggered)
+
+Track TeamCart state changes efficiently while the session is active. Clients poll a lightweight real‑time view endpoint and use ETag validators to avoid unnecessary payloads. FCM data messages from the backend act as a trigger to poll immediately after changes.
+
+### Endpoint — TeamCart Real‑time View (Redis)
+
+**`GET /api/v1/team-carts/{teamCartId}/rt`**
+
+- Authorization: Required (TeamCart member or host)
+- Path Parameter: `teamCartId` (UUID)
+- Caching: Strong ETag based on VM `Version`
+
+Response — 200 OK
+```json
+{
+  "teamCart": {
+    "cartId": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+    "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "status": "Open",
+    "deadline": "2025-10-27T19:30:00Z",
+    "expiresAt": "2025-10-27T20:00:00Z",
+    "shareTokenMasked": "***XYZ",
+    "tipAmount": 0.0,
+    "tipCurrency": "USD",
+    "couponCode": null,
+    "discountAmount": 0.0,
+    "discountCurrency": "USD",
+    "subtotal": 25.0,
+    "currency": "USD",
+    "deliveryFee": 0.0,
+    "taxAmount": 0.0,
+    "total": 25.0,
+    "cashOnDeliveryPortion": 0.0,
+    "quoteVersion": 0,
+    "version": 7,
+    "members": [
+      {
+        "userId": "1e2d3c4b-5a69-…",
+        "name": "Host",
+        "role": "Host",
+        "paymentStatus": "Pending",
+        "committedAmount": 0.0,
+        "onlineTransactionId": null,
+        "quotedAmount": 0.0
+      }
+    ],
+    "items": [
+      {
+        "itemId": "f1e2d3c4-b5a6-…",
+        "addedByUserId": "1e2d3c4b-5a69-…",
+        "name": "Burger XL",
+        "quantity": 1,
+        "basePrice": 10.0,
+        "lineTotal": 10.0,
+        "customizations": []
+      }
+    ]
+  }
+}
+```
+
+Headers (200)
+- `ETag: "teamcart-<teamCartId>-v<Version>"` (strong)
+- `Last-Modified: <http-date>`
+- `Cache-Control: no-cache, must-revalidate`
+
+Conditional Requests
+- Send `If-None-Match` with the last ETag to check for changes.
+- If unchanged → **304 Not Modified** (empty body).
+
+Authorization rules
+- Auth required; caller must be a member of the TeamCart. Unauthorized carts are masked as 404.
+
+Notes
+- `version` increases on every user‑visible VM mutation (members/items/coupon/tip/status/payments/quote update).
+- `quoteVersion` increases on quote recomputation (primarily while Locked/financials) and is included for financial context, but ETag validation uses `version`.
+
+### Push Trigger — FCM (Data‑Only)
+
+On every TeamCart change, the backend sends a data‑only FCM message to active member devices:
+
+```json
+{ "teamCartId": "<uuid>", "version": 7 }
+```
+
+Platform hints
+- Android: `priority=high`, collapse key `teamcart_<id>`, TTL ≈ 5 minutes
+- iOS/APNs: `apns-push-type=background`, `content-available=1`, collapse id `teamcart_<id>`
+
+### Client Guidance (MVP)
+
+- On screen open or app foreground: call `GET /team-carts/{id}/rt` and store both the body and ETag.
+- While active: poll `/{id}/rt` every 10–15s with `If-None-Match: <etag>`.
+- On receiving FCM `{teamCartId, version}`:
+  - If `version` ≤ local `version`, ignore.
+  - Else, call `/{id}/rt` with `If-None-Match` and update if 200; ignore if 304.
+- Stop polling after terminal states: `Converted` or `Expired`.
+
+Activity messages (client‑side diff, optional)
+- Derive messages by diffing the last VM snapshot vs new VM:
+  - New member → “{name} joined”
+  - Item added/removed/quantity changed → “{actor} added/removed/updated {item}”
+  - Coupon/tip toggled → “Host applied/removed coupon {code}” / “Host set tip to {amount}”
+  - Status transitions → banners (Locked/ReadyToConfirm/Converted/Expired)
+
+---
+
 ## Step 3 — Add Items to TeamCart (Members)
 
 Members can add menu items with optional customizations to the TeamCart.
@@ -233,48 +342,6 @@ Retrieve the current state of the TeamCart for real-time updates and member coor
       "userId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
       "name": "Alex",
       "role": "Host"
-    }
-  ],
-  "items": [
-    {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "menuItemId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
-      "ownerUserId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
-      "quantity": 2,
-      "unitPrice": 12.99,
-      "totalPrice": 25.98
-    }
-  ]
-}
-```
-
-### Get Real-time View Model (Redis)
-
-**`GET /api/v1/team-carts/{teamCartId}/rt`**
-
-- Authorization: Required (TeamCart member)
-- Path Parameter: `teamCartId` (UUID)
-
-#### Response
-
-**✅ 200 OK**
-```json
-{
-  "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
-  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "status": "Open",
-  "version": 1,
-  "quoteVersion": 0,
-  "grandTotal": 25.98,
-  "currency": "USD",
-  "members": [
-    {
-      "userId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
-      "name": "Alex",
-      "role": "Host",
-      "paymentStatus": "Pending",
-      "committedAmount": 0,
-      "quotedAmount": 25.98
     }
   ],
   "items": [
