@@ -61,6 +61,7 @@ public sealed class TeamCartPushNotifier : ITeamCartPushNotifier
 
         var data = new Dictionary<string, string>
         {
+            ["type"] = "teamcart",
             ["teamCartId"] = teamCartId.Value.ToString(),
             ["version"] = vm.Version.ToString()
         };
@@ -77,4 +78,3 @@ public sealed class TeamCartPushNotifier : ITeamCartPushNotifier
         return Result.Success();
     }
 }
-

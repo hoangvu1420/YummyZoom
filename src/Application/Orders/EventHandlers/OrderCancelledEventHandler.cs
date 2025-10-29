@@ -17,8 +17,7 @@ public sealed class OrderCancelledEventHandler : IdempotentNotificationHandler<O
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IOrderRealtimeNotifier _notifier;
-    private readonly IUserDeviceSessionRepository _userDeviceSessionRepository;
-    private readonly IFcmService _fcm;
+    private readonly IOrderPushNotifier _orderPushNotifier;
     private readonly ILogger<OrderCancelledEventHandler> _logger;
 
     public OrderCancelledEventHandler(
@@ -26,14 +25,12 @@ public sealed class OrderCancelledEventHandler : IdempotentNotificationHandler<O
         IInboxStore inbox,
         IOrderRepository orderRepository,
         IOrderRealtimeNotifier notifier,
-        IUserDeviceSessionRepository userDeviceSessionRepository,
-        IFcmService fcm,
+        IOrderPushNotifier orderPushNotifier,
         ILogger<OrderCancelledEventHandler> logger) : base(uow, inbox)
     {
         _orderRepository = orderRepository;
         _notifier = notifier;
-        _userDeviceSessionRepository = userDeviceSessionRepository;
-        _fcm = fcm;
+        _orderPushNotifier = orderPushNotifier;
         _logger = logger;
     }
 
@@ -55,20 +52,10 @@ public sealed class OrderCancelledEventHandler : IdempotentNotificationHandler<O
             // Notify restaurant via SignalR
             await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Restaurant, ct);
 
-            // Push data-only to customer devices: {orderId, version}
-            var tokens = await _userDeviceSessionRepository.GetActiveFcmTokensByUserIdAsync(order.CustomerId.Value, ct);
-            if (tokens.Count > 0)
+            var push = await _orderPushNotifier.PushOrderDataAsync(order.Id.Value, order.CustomerId.Value, order.Version, ct);
+            if (push.IsFailure)
             {
-                var data = new Dictionary<string, string>
-                {
-                    ["orderId"] = order.Id.Value.ToString(),
-                    ["version"] = order.Version.ToString()
-                };
-                var push = await _fcm.SendMulticastDataAsync(tokens, data);
-                if (push.IsFailure)
-                {
-                    throw new InvalidOperationException(push.Error.Description);
-                }
+                throw new InvalidOperationException(push.Error.Description);
             }
         }
         catch (Exception ex)

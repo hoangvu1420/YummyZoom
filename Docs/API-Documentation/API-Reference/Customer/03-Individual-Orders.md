@@ -23,6 +23,9 @@ All order endpoints require **authentication** except where noted.
 
 Creates a new individual order with specified items, delivery details, and payment method. For online payments, returns payment credentials for client-side completion.
 
+> See also
+> For end-to-end client steps (Stripe confirmation, real-time updates, retry patterns), read [Online Payments Integration](./06-Online-Payments-Integration.md).
+
 **`POST /api/v1/orders/initiate`**
 
 - **Authorization:** Required (Customer)
@@ -266,6 +269,9 @@ Response Headers
 Conditional Requests
 - Send `If-None-Match: "order-<orderId>-v<version>"`. If unchanged, server returns `304 Not Modified` with an empty body.
 - If changed, server returns `200 OK` with the latest body and headers above.
+
+> See also
+> Client guidance for SignalR subscriptions and ETag polling is covered in [Online Payments Integration](./06-Online-Payments-Integration.md).
 
 #### Order Status Values
 

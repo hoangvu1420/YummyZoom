@@ -11,6 +11,9 @@ TeamCart enables group ordering with roles and a lightweight payment flow:
 - When all members are settled, the host converts the cart to a standard order
 - Real-time updates are available via SignalR
 
+> See also
+> For client payment confirmation flows, ETag polling, and real-time recommendations, read [Online Payments Integration](../06-Online-Payments-Integration.md).
+
 Live tracking (MVP) uses a poll‑first endpoint with strong ETag to minimize payloads. Mobile push (FCM data) nudges clients to poll immediately when something changes.
 
 All endpoints require `Authorization: Bearer <access_token>` unless stated. Feature is behind a flag; APIs can return `503 Service Unavailable` if disabled.
@@ -718,6 +721,9 @@ Rules
 - Only members can pay; amounts must match their quoted share.
 - System tracks per-member payment status; when everyone is settled, cart becomes `ReadyToConfirm`.
 - Quote version validation prevents payments against stale quotes.
+
+> See also
+> Client steps to collect card details and confirm the Stripe Payment Intent using the returned `clientSecret` are detailed in [Online Payments Integration](../06-Online-Payments-Integration.md).
 
 Errors
 - 400 invalid payment amount; 404 cart not found
