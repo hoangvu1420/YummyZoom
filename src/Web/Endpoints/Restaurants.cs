@@ -113,15 +113,16 @@ public class Restaurants : EndpointGroupBase
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        // GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}
-        group.MapGet("/{restaurantId:guid}/menu-items/{itemId:guid}", async (Guid restaurantId, Guid itemId, ISender sender) =>
+        // GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/management
+        // Management-only details to avoid route ambiguity with public item details
+        group.MapGet("/{restaurantId:guid}/menu-items/{itemId:guid}/management", async (Guid restaurantId, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new GetMenuItemDetailsQuery(restaurantId, itemId));
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })
         .WithName("GetMenuItemDetails")
-        .WithSummary("Get menu item details")
-        .WithDescription("Returns full details for a specific menu item including tags and applied customizations. Requires restaurant staff authorization.")
+        .WithSummary("Get menu item details (management)")
+        .WithDescription("Returns full details for a specific menu item including tags and applied customizations. Management endpoint - requires restaurant staff authorization.")
         .Produces<MenuItemDetailsDto>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -691,6 +692,58 @@ public class Restaurants : EndpointGroupBase
         .WithSummary("List public reviews for this restaurant")
         .Produces<PaginatedList<ReviewDto>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}
+        publicGroup.MapGet("/{restaurantId:guid}/menu-items/{itemId:guid}", async (
+            Guid restaurantId,
+            Guid itemId,
+            ISender sender,
+            HttpContext http) =>
+        {
+            var result = await sender.Send(new YummyZoom.Application.Restaurants.Queries.Public.GetMenuItemDetails.GetMenuItemPublicDetailsQuery(restaurantId, itemId));
+            if (!result.IsSuccess) return result.ToIResult();
+
+            var dto = result.Value;
+            var etag = HttpCaching.BuildWeakEtag(restaurantId, dto.LastModified);
+            var lastModified = HttpCaching.ToRfc1123(dto.LastModified);
+
+            if (HttpCaching.MatchesIfNoneMatch(http.Request, etag) ||
+                HttpCaching.NotModifiedSince(http.Request, dto.LastModified))
+            {
+                http.Response.Headers.ETag = etag.ToString();
+                http.Response.Headers.LastModified = lastModified;
+                http.Response.Headers.CacheControl = "public, max-age=120";
+                return Results.StatusCode(StatusCodes.Status304NotModified);
+            }
+
+            http.Response.Headers.ETag = etag.ToString();
+            http.Response.Headers.LastModified = lastModified;
+            http.Response.Headers.CacheControl = "public, max-age=120";
+            return Results.Ok(dto);
+        })
+        .WithName("GetMenuItemPublicDetails")
+        .WithSummary("Get public menu item details")
+        .WithDescription("Returns full public details for a menu item including customization groups, sold count, rating, and upsell suggestions. Supports HTTP caching via ETag and Last-Modified.")
+        .WithStandardResults<YummyZoom.Application.Restaurants.Queries.Public.GetMenuItemDetails.MenuItemPublicDetailsDto>()
+        .Produces(StatusCodes.Status304NotModified);
+
+        // GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/availability
+        publicGroup.MapGet("/{restaurantId:guid}/menu-items/{itemId:guid}/availability", async (
+            Guid restaurantId,
+            Guid itemId,
+            ISender sender,
+            HttpContext http) =>
+        {
+            var result = await sender.Send(new YummyZoom.Application.Restaurants.Queries.Public.GetMenuItemAvailability.GetMenuItemAvailabilityQuery(restaurantId, itemId));
+            if (!result.IsSuccess) return result.ToIResult();
+
+            http.Response.Headers.CacheControl = "public, max-age=15";
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetMenuItemAvailability")
+        .WithSummary("Get quick menu item availability")
+        .WithDescription("Returns a short-lived availability snapshot for a menu item. Uses short TTL caching on the server side and Cache-Control header for clients.")
+        .WithStandardResults<YummyZoom.Application.Restaurants.Queries.Public.GetMenuItemAvailability.MenuItemAvailabilityDto>();
 
         // GET /api/v1/restaurants/{restaurantId}/reviews/summary
         publicGroup.MapGet("/{restaurantId:guid}/reviews/summary", async (Guid restaurantId, ISender sender) =>

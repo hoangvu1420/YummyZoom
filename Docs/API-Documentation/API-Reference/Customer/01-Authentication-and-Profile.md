@@ -458,7 +458,8 @@ Retrieves the authenticated user's profile information.
     "country": "USA",
     "label": "Home",
     "deliveryInstructions": "Leave at front door"
-  }
+  },
+  "lastLoginAt": "2023-03-15T12:34:56Z"
 }
 ```
 
@@ -469,6 +470,7 @@ Retrieves the authenticated user's profile information.
 | `email` | `string` | User's email address |
 | `phoneNumber` | `string` | User's phone number in E.164 format |
 | `address` | `object\|null` | Primary address information (null if not set) |
+| `lastLoginAt` | `string\|null` | Timestamp of the user's last login (ISO 8601 format) |
 
 #### Address Object
 

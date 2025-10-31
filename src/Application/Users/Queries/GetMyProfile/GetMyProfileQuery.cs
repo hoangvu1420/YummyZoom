@@ -13,7 +13,8 @@ public record GetMyProfileResponse(
     string Name,
     string Email,
     string? PhoneNumber,
-    MyProfileAddress? Address);
+    MyProfileAddress? Address,
+    DateTime? LastLoginAt);
 
 public record MyProfileAddress(
     Guid AddressId,
@@ -31,11 +32,16 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, Resul
 
     private readonly IUser _currentUser;
     private readonly IUserAggregateRepository _userRepository;
+    private readonly IUserDeviceSessionRepository _sessionRepository;
 
-    public GetMyProfileQueryHandler(IUser currentUser, IUserAggregateRepository userRepository)
+    public GetMyProfileQueryHandler(
+        IUser currentUser,
+        IUserAggregateRepository userRepository,
+        IUserDeviceSessionRepository sessionRepository)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _sessionRepository = sessionRepository ?? throw new ArgumentNullException(nameof(sessionRepository));
     }
 
     public async Task<Result<GetMyProfileResponse>> Handle(GetMyProfileQuery request, CancellationToken cancellationToken)
@@ -67,12 +73,16 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, Resul
                 address.DeliveryInstructions);
         }
 
+        // Last login is recorded per device session; expose the latest across sessions
+        var lastLogin = await _sessionRepository.GetLastLoginAsync(user.Id.Value, cancellationToken);
+
         var response = new GetMyProfileResponse(
             user.Id.Value,
             user.Name,
             user.Email,
             user.PhoneNumber,
-            view);
+            view,
+            lastLogin);
 
         return Result.Success(response);
     }

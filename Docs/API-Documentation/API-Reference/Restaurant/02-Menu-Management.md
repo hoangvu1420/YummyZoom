@@ -237,9 +237,9 @@ Remove (soft-delete) a category.
 
 ## Items
 
-### GET /restaurants/{restaurantId}/menu-items/{itemId}
+### GET /restaurants/{restaurantId}/menu-items/{itemId}/management
 
-Get full item details.
+Get full item details (management).
 
 - Authorization: MustBeRestaurantStaff
 
@@ -266,6 +266,10 @@ Get full item details.
 #### Errors
 
 - 404 Not Found — `Management.GetMenuItemDetails.NotFound`
+
+> Note
+>
+> The management details route has a distinct path (`/management`) to avoid ambiguity with the public menu item details endpoint used by customers.
 
 ---
 
@@ -521,4 +525,3 @@ Soft-delete an item.
 Versioning: All routes are under `/api/v1/`.
 
 Security: Bearer token required; caller must be Owner/Staff in the restaurant’s scope.
-

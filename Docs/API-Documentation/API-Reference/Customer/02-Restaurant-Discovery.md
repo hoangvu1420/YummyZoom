@@ -17,6 +17,114 @@ All endpoints in this section are **public** and require no authentication.
 
 ---
 
+## Menu Item Details
+
+Fetch full public details for a specific menu item, including customization groups, availability, and related information used to render the item page.
+
+**`GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}`**
+
+- Authorization: Public
+- HTTP Caching: Supports conditional requests with `ETag` (weak), `Last-Modified`, and `Cache-Control: public, max-age=120`.
+
+### Response
+
+**• 200 OK**
+```json
+{
+  "restaurantId": "e7e2f9a2-4a17-4ef4-b1b1-9e4f8a8a2a9f",
+  "itemId": "d3a4c5b6-7890-4abc-8def-1234567890ab",
+  "name": "Bún đậu đầy đủ",
+  "description": "Mẹt bún đậu truyền thống",
+  "imageUrl": "https://cdn.example.com/items/bundau.jpg",
+  "basePrice": 45000,
+  "currency": "VND",
+  "isAvailable": true,
+  "soldCount": 1400,
+  "rating": 4.6,
+  "reviewCount": 120,
+  "customizationGroups": [
+    {
+      "groupId": "c73e3d0f-7f06-4a5b-8f65-65a3ebc6a001",
+      "name": "Gọi thêm",
+      "type": "multi",
+      "required": false,
+      "min": 0,
+      "max": 10,
+      "items": [
+        { "id": "7f1b...", "name": "Dồi sụn", "priceDelta": 10000, "default": false, "outOfStock": false },
+        { "id": "a9c2...", "name": "Chả cốm", "priceDelta": 10000 }
+      ]
+    },
+    {
+      "groupId": "5c2e...",
+      "name": "Nước chấm",
+      "type": "radio",
+      "required": true,
+      "min": 1,
+      "max": 1,
+      "items": [
+        { "id": "s1", "name": "Mắm tôm", "priceDelta": 0, "default": true },
+        { "id": "s2", "name": "Nước mắm", "priceDelta": 0 }
+      ]
+    }
+  ],
+  "notesHint": "Cho quán biết thêm về yêu cầu của bạn.",
+  "limits": { "minQty": 1, "maxQty": 99 },
+  "upsell": [
+    { "itemId": "f0ab...", "name": "Nem rán", "price": 10000, "imageUrl": "https://.../nem.jpg" }
+  ]
+}
+```
+
+**• 304 Not Modified**
+- When `If-None-Match` or `If-Modified-Since` validators match the current representation.
+
+**• 404 Not Found**
+- Item not found or not part of the specified restaurant.
+
+### Response Headers
+- `ETag`: Weak ETag derived from restaurant ID and last modification ticks.
+- `Last-Modified`: Timestamp of last change (UTC, RFC1123 format).
+- `Cache-Control`: `public, max-age=120`.
+
+### Notes
+- `rating` and `reviewCount` reflect the current restaurant-level review summary (item-level ratings may be introduced later).
+- `outOfStock` is always `false` in v1; inventory-level stock will be introduced in a separate feature.
+
+---
+
+## Menu Item Availability (Quick)
+
+Lightweight endpoint to quickly check if a specific menu item is currently available for ordering. Designed for short polling or refetch.
+
+**`GET /api/v1/restaurants/{restaurantId}/menu-items/{itemId}/availability`**
+
+- Authorization: Public
+- HTTP Caching: `Cache-Control: public, max-age=15` (no ETag).
+
+### Response
+
+**• 200 OK**
+```json
+{
+  "restaurantId": "e7e2f9a2-4a17-4ef4-b1b1-9e4f8a8a2a9f",
+  "itemId": "d3a4c5b6-7890-4abc-8def-1234567890ab",
+  "isAvailable": true,
+  "stock": null,
+  "checkedAt": "2025-10-30T12:00:00Z",
+  "ttlSeconds": 15
+}
+```
+
+**• 404 Not Found**
+- Item not found or not part of the specified restaurant.
+
+### Notes
+- `isAvailable` accounts for both the restaurant accepting orders and the item’s own availability flag.
+- `stock` is reserved for future inventory integration and is `null` in this version.
+
+---
+
 ## Home: Active Deals
 
 Surfaces restaurants that currently have active, enabled coupons. Intended for the search entry “Promotions/Featured” row.
