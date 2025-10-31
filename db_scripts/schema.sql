@@ -930,7 +930,8 @@ CREATE TABLE public."Orders" (
     "CustomerId" uuid NOT NULL,
     "RestaurantId" uuid NOT NULL,
     "SourceTeamCartId" uuid,
-    "AppliedCouponId" uuid
+    "AppliedCouponId" uuid,
+    "Version" bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -1626,6 +1627,37 @@ CREATE TABLE public."__EFMigrationsHistory" (
     "MigrationId" character varying(150) NOT NULL,
     "ProductVersion" character varying(32) NOT NULL
 );
+
+
+--
+-- Name: active_coupons_view; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.active_coupons_view AS
+ SELECT "Id" AS coupon_id,
+    "RestaurantId" AS restaurant_id,
+    "Code" AS code,
+    "Description" AS description,
+    "Value_Type" AS value_type,
+    "Value_PercentageValue" AS percentage_value,
+    "Value_FixedAmount_Amount" AS fixed_amount_value,
+    "Value_FixedAmount_Currency" AS fixed_amount_currency,
+    "Value_FreeItemValue" AS free_item_id,
+    "AppliesTo_Scope" AS applies_to_scope,
+    "AppliesTo_ItemIds" AS applies_to_item_ids,
+    "AppliesTo_CategoryIds" AS applies_to_category_ids,
+    "MinOrderAmount_Amount" AS min_order_amount,
+    "MinOrderAmount_Currency" AS min_order_currency,
+    "ValidityStartDate" AS validity_start_date,
+    "ValidityEndDate" AS validity_end_date,
+    "IsEnabled" AS is_enabled,
+    "TotalUsageLimit" AS total_usage_limit,
+    "UsageLimitPerUser" AS usage_limit_per_user,
+    "CurrentTotalUsageCount" AS current_total_usage_count,
+    now() AS last_refreshed_at
+   FROM public."Coupons" c
+  WHERE (("IsEnabled" = true) AND ("IsDeleted" = false) AND ("ValidityEndDate" >= now()))
+  WITH NO DATA;
 
 
 --
@@ -2837,6 +2869,27 @@ CREATE UNIQUE INDEX "UX_Reviews_OrderId_Unique" ON public."Reviews" USING btree 
 --
 
 CREATE UNIQUE INDEX "UserNameIndex" ON public."AspNetUsers" USING btree ("NormalizedUserName");
+
+
+--
+-- Name: idx_active_coupons_view_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_active_coupons_view_id ON public.active_coupons_view USING btree (coupon_id);
+
+
+--
+-- Name: idx_active_coupons_view_restaurant; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_active_coupons_view_restaurant ON public.active_coupons_view USING btree (restaurant_id, validity_end_date, code);
+
+
+--
+-- Name: idx_active_coupons_view_validity; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_active_coupons_view_validity ON public.active_coupons_view USING btree (validity_start_date, validity_end_date);
 
 
 --

@@ -76,7 +76,7 @@ public class ReviewSeeder : ISeeder
                     if (review.IsSuccess)
                     {
                         // Clear domain events for seeding
-                        // review.Value.ClearDomainEvents();
+                        review.Value.ClearDomainEvents();
                         await _reviewRepository.AddAsync(review.Value, cancellationToken);
                         seededReviews.Add(review.Value);
                         totalReviewsCreated++;

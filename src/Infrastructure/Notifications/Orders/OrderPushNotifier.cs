@@ -33,6 +33,12 @@ public sealed class OrderPushNotifier : IOrderPushNotifier
             _logger.LogDebug("No active device tokens; skipping Order FCM push (OrderId={OrderId}, UserId={UserId})", orderId, customerUserId);
             return Result.Success();
         }
+        // if first token starts with "seedToken", it's a seeded device - skip push
+        if (tokens[0].StartsWith("seedToken"))
+        {
+            _logger.LogDebug("Skipping Order FCM push to seeded device token (OrderId={OrderId}, UserId={UserId})", orderId, customerUserId);
+            return Result.Success();
+        }
 
         var data = new Dictionary<string, string>
         {

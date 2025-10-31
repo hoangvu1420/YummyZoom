@@ -1,174 +1,187 @@
-Got it—here’s a crisp, implementation-ready spec for the **backend** to support the Phase-1 flow (**Push-first, Poll-as-needed**). It’s organized so you can hand it to the team and build.
+Mẫu gốc (chưa điền thông tin):
 
-# 1) Core objectives
-
-* **Single source of truth:** `GET /orders/{id}/status`
-* **Realtime trigger:** FCM **data** push `{ orderId, version }` on **every** state change
-* **Clients pull details:** Clients always fetch `/status` before surfacing UI/notification
-* **Efficient polling:** Support conditional responses (ETag / `sinceVersion`) to minimize load
-* **Reliability:** Durable eventing with retries; dedupe by `version`
-
----
-
-# 2) Domain model & invariants
-
-**Order**
-
-* `orderId: string`
-* `userId: string`
-* `state: enum` (`Created`, `Confirmed`, `Preparing`, `OutForDelivery`, `Delivered`, `Canceled`, `Failed`, …)
-* `version: int` — **strictly monotonic**, increment on *any* user-visible change
-* `updatedAt: instant`
-* Optional: `eta`, `rider`, `steps[]`, `notes`, etc.
-
-**Invariants**
-
-* `version` increments **atomically** with `state` (same transaction).
-* Terminal states (`Delivered|Canceled|Failed`) freeze `version` (no further pushes).
-* Only the **owner** or authorized viewer can read the status.
-
----
-
-# 3) Status API (polling endpoint)
-
-### `GET /orders/{id}/status`
-
-**Auth:** required (user must own the order or be explicitly authorized).
-
-**Query params (optional):**
-
-* `sinceVersion=<int>`: if server’s `version` ≤ provided → return **204 No Content** (or **304 Not Modified** if using validators)
-* `include=meta` (optional): control payload verbosity (e.g., include `steps`, `rider`)
-
-**Request headers (optional):**
-
-* `If-None-Match: "<etag>"` or `If-Modified-Since: <http-date>`
-
-**Responses:**
-
-* **200 OK** with JSON:
-
-  ```json
-  {
-    "orderId": "abc123",
-    "state": "OutForDelivery",
-    "version": 7,
-    "updatedAt": "2025-10-27T08:41:00Z",
-    "eta": "2025-10-27T09:05:00Z",
-    "rider": { "name": "…" },
-    "steps": [ /* timeline */ ]
-  }
-  ```
-
-  Include headers:
-
-  * `ETag: "order-abc123-v7"`
-  * `Last-Modified: <updatedAt>`
-  * `Cache-Control: no-cache, must-revalidate` (or `private, no-store` if stricter)
-* **204 No Content** when unchanged **with `sinceVersion`**.
-* **304 Not Modified** when unchanged **with ETag/If-Modified-Since**.
-* **401/403** unauthorized; **404** if order not found/visible.
-
-**Rules:**
-
-* Compute `ETag` deterministically (e.g., `"order-<id>-v<version>"`).
-* Prefer **either** `sinceVersion` **or** validators; support both but handle conflicts predictably (validators take precedence).
-
----
-
-# 4) Event emission (on state change)
-
-When an order update is **committed**:
-
-1. Persist new `state`, increment `version`, set `updatedAt`.
-2. Write an **OrderChanged** record into an **Outbox** table/stream:
-
-   * `{ id, orderId, version, userId, occurredAt }`
-3. A background **Dispatcher** pulls the outbox and sends FCM **data** message:
-
-   * Payload: `{ "orderId": "<id>", "version": <int> }`
-   * Platform config (per target token):
-
-     * **Android:** `priority=high`, `collapse_key="order_<id>"`, `time_to_live` short (e.g., 300s)
-     * **iOS/APNs:** headers `apns-push-type=background`, `content-available=1`, `apns-collapse-id=order_<id>`, short expiry
-     * **Web:** standard Webpush with data payload
-4. Mark outbox item **sent** (idempotently). Retries on transient failures.
-
-**Why Outbox:** ensures push delivery attempts are **durable** and consistent with DB state; prevents “updated DB but forgot to push”.
+"""
+									Mẫu ĐATN 02	
+ĐẠI HỌC BÁCH KHOA HÀ NỘI										
+TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG										
+										
+PHIẾU GIAO NHIỆM VỤ ĐỒ ÁN TỐT NGHIỆP HỆ CỬ NHÂN										
+				KỲ						
+										
+Thông tin về sinh viên										
+Họ và tên sinh viên:		Nguyễn Văn A					MSSV:			
+Điện thoại liên lạc:							Lớp:			
+Email:							Mã lớp:			
+Thông tin giáo viên hướng dẫn										
+Họ và tên GVHD:		Trần Văn B								
+Đồ án được thực hiện tại:										
+Thời gian làm ĐATN: 		Từ ngày					đến ngày			
+1. Tên đề tài:										
+										
+2. Lĩnh vực đề tài:										
+-	Lựa chọn 1:									
+-	Lựa chọn 2:									
+-	Lựa chọn 3:									
+-	Nếu lĩnh vực không nằm trong danh sách có sẵn, giáo viên hướng dẫn có thể đề xuất:									
+										
+3. Mục tiêu của ĐATN:										
+3.1. Kiến thức sinh viên thu thập được:										
+-  (bấm Alt-Enter để xuống dòng, và điều chỉnh kích thước dòng phù hợp để hiển thị đủ nội dung)										
+										
+										
+3.2. Công nghệ sinh viên thu thập được:										
+-										
+-										
+-										
+3.3. Kỹ năng sinh viên phát triển được:										
+-										
+3.4. Sản phẩm kỳ vọng:										
+-										
+-										
+-										
+3.5. Vấn đề thực tiễn đồ án giải quyết:  										
+-										
+-										
+-										
+4. Các nội dung sẽ thực hiện và kế hoạch triển khai:										
+Lưu ý: khối lượng yêu cầu đối với đồ án tốt nghiệp hệ cử nhân là 6(0-0-12-12), i.e. 12 tiết làm việc/tuần trong 17 tuần.										
+Nội dung 1: Tìm hiểu tổng quan về bài toán,						từ Tuần		đến Tuần		
+Chi tiết:										
+-	Tìm hiểu hệ thống GPS và các hệ thống định vị toàn cầu trên Thế giới và các hệ thống khu vực trên thế giới									
+-										
+-										
+Nội dung 2: Tìm hiểu tổng quan về công nghệ liên quan, 						từ Tuần		đến Tuần		
+Chi tiết:										
+-										
+-										
+-										
+Nội dung 3: Phân tích thiết kế,						từ Tuần		đến Tuần		
+Chi tiết:										
+"-
+"										
+										
+										
+Nội dung 4: Xây dựng chương trình,						từ Tuần		đến Tuần		
+Chi tiết:										
+-										
+-										
+-										
+Nội dung 5: Thử nghiệm và đánh giá,						từ Tuần		đến Tuần		
+Chi tiết:										
+-										
+										
+										
+5. Lời cam đoan của sinh viên đã nhận được nhiệm vụ										
+Em xin cam kết sẽ hoàn thành các nhiệm vụ theo đúng kế hoạch.										
+"""
 
 ---
 
-# 5) Targeting & addressing
+Gợi ý điền thông tin:
 
-You can choose either (or both):
+"""
+									Mẫu ĐATN 02	
+ĐẠI HỌC BÁCH KHOA HÀ NỘI										
+TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG										
+										
+PHIẾU GIAO NHIỆM VỤ ĐỒ ÁN TỐT NGHIỆP HỆ CỬ NHÂN										
+				KỲ	2022.2					
+										
+Thông tin về sinh viên										
+Họ và tên sinh viên:		Nguyễn Văn A					MSSV:			
+Điện thoại liên lạc:							Lớp:			
+Email:							Mã lớp:			
+Thông tin giáo viên hướng dẫn										
+Họ và tên GVHD:		Trần Văn B								
+Đồ án được thực hiện tại:		Trường Công. Nghệ thông tin và Truyền thông								
+Thời gian làm ĐATN: 		Từ ngày	20/03/2023				đến ngày	21/07/2023		
+1. Tên đề tài:										
+Hệ thống quản lý dạy học và nhân sự cho Lớp học Cầu Vồng										
+2. Lĩnh vực đề tài:										
+-	Lựa chọn 1:	Công nghệ và giải pháp chuyển đổi số giáo dục (EdTech)								
+-	Lựa chọn 2:	Phần mềm doanh nghiệp								
+-	Lựa chọn 3:	Thương mại điện tử (eCommerce) và hậu cần (Logistic)								
+-	Nếu lĩnh vực không nằm trong danh sách có sẵn, giáo viên hướng dẫn có thể đề xuất:									
+Tích hợp hệ thống										
+3. Mục tiêu của ĐATN:										
+3.1. Kiến thức sinh viên thu thập được:										
+"- Quy trình xây dựng phần mềm quản lý và việc áp dụng trong thực thế các giai đoạn khảo sát, phân tích, thiết kế, cài đặt và kiểm thử. Đặc biệt là kinh nghiệm phân tích yêu cầu người dùng;
+- Phát triển tất cả các thành phần của một ứng dụng dựa Web (fullstack).
+"										
+3.2. Công nghệ sinh viên thu thập được:										
+"- MERN stack: công nghệ nguồn mở cho Javascripts (MongoDB, Express JS, React JS, NodeJS);
+- Dịch vụ lưu trữ dữ liệu Azure Bob Storage;
+- Xử lý đăng nhập với Oauth2;
+- Cách thức kết hợp nhiều công nghệ trong một hệ thống."										
+3.2. Công nghệ sinh viên thu thập được:										
+"- MERN stack: công nghệ nguồn mở cho Javascripts (MongoDB, Express JS, React JS, NodeJS);
+- Dịch vụ lưu trữ dữ liệu Azure Bob Storage;
+- Xử lý đăng nhập với Oauth2;
+- Cách thức kết hợp nhiều công nghệ trong một hệ thống."										
+-										
+-										
+3.3. Kỹ năng sinh viên phát triển được:										
+"- Giao tiếp, phỏng vấn khi phân tích yêu cầu, trao đổi với khách hàng, người sử dụng;
+- Tìm kiếm tổng hợp thông tin từ nhiều nguồn;
+- Khả năng xác định yếu tố trọng tâm, thứ tự ưu tiên;
+- Tính độc lập, chủ động, kiên trì trong công việc."										
+3.4. Sản phẩm kỳ vọng:										
+"- Hệ thống phần mềm web quản lý vận hành trong thực tế hỗ trợ công việc tại hệ thống lớp học tình thương “Cầu vồng”;
+- Có thể chạy trên máy tính và điện thoại thông minh."										
+-										
+-										
+3.5. Vấn đề thực tiễn đồ án giải quyết:  										
+"- Hỗ trợ quản trị viên trong việc tuyển dụng nhân sự tình nguyện viên. Tạo ra hệ thống hỗ trợ nhận, lưu trữ các CV gửi về. Cải tiến, hệ thống hóa quy trình nghiệp vụ xét duyệt hồ sơ đăng ký ứng tuyển làm tình nguyện viên;
+- Hỗ trợ quản trị viên và quản lý lớp quản lý việc dạy học của các lớp học tình thương: lịch học, nội dung bài học, báo cáo các buổi học."										
+-										
+-										
+4. Các nội dung sẽ thực hiện và kế hoạch triển khai:										
+Lưu ý: khối lượng yêu cầu đối với đồ án tốt nghiệp hệ cử nhân là 6(0-0-12-12), ie. 12 tiết làm việc/tuần trong 17 tuần.										
+Nội dung 1: Tìm hiểu tổng quan về bài toán,						từ Tuần	1	đến Tuần	5	
+Chi tiết:										
+"-  Củng cố kiến thức về phần mềm quản lý, phần mềm phục vụ các tổ chức;
+- Khảo sát thực trạng, quy trình và công cụ hiện tại trong quản lý dạy học và nhân sự của tổ chức;
+- Khảo sát các phần mềm, ứng dụng về quản lý học tập và quản lý nhân sự."	Tìm hiểu hệ thống GPS và các hệ thống định vị toàn cầu trên Thế giới và các hệ thống khu vực trên thế giới									
+-										
+-										
+Nội dung 2: Tìm hiểu tổng quan về công nghệ liên quan, 						từ Tuần	2	đến Tuần	7	
+Chi tiết:										
+"- Javascript, ReactJS;
+- NodeJS, express, socketio;
+- MongoDB, Mongoose;
+- Nodemailer, Oauth2;
+- Azure Blob Storage, Azure App Servives."										
+-										
+-										
+Nội dung 3: Phân tích thiết kế,						từ Tuần	5	đến Tuần	10	
+Chi tiết:										
+"- Phân tích các usecase và các vai trò người dùng;
+- Cải tiến, hệ thống hóa quy trình thu thập hồ sơ đăng ký làm Tình nguyện
+viên;
+- Thiết kế kiến trúc – chi tiết các phân hệ Backend, Front End;
+- Thiết kế cơ sở dữ liệu;
+- Thiết kế giao diện sử dụng mock up.
 
-**A) Direct tokens**
-
-* Maintain a table: `{ userId, deviceToken, platform, enabled, updatedAt }`
-* On order change → push to **all active tokens** for `userId`.
-
-**B) Per-order topics** (optional)
-
-* Topic: `orders_<orderId>_<userHash>`
-* Client subscribes on “start tracking”, unsubscribes on terminal
-* Server publishes once; FCM distributes
-
-**Recommendation:** Start with **direct tokens** (simpler). Add topics if fan-out or ACLs benefit.
-
----
-
-# 6) Notification strategy (server side)
-
-Phase-1 default is **data-only** push; the app will fetch and render a **local** notification.
-
-**Optional safety net for critical states:**
-
-* For `OutForDelivery`, `ArrivingSoon`, `Delivered`, send **hybrid**:
-
-  * `notification` (title/body) **and** `data`
-  * iOS: optionally set `mutable-content=1` to allow client NSE to refresh text
-* Keep text generic & non-PII; details still come from `/status`.
-
-**Collapse & TTL**
-
-* Always set per-order collapse keys/ids so the newest replaces older alerts.
-* Use short TTLs (e.g., 2–5 minutes) to avoid late, stale pushes.
-
----
-
-# 7) Security & authorization
-
-* **AuthN:** OAuth2/JWT (or existing session) on `/status`.
-* **AuthZ:** Verify `order.userId == auth.userId` (or shared access via order share records).
-* **PII:** Push payloads contain **no** PII. Only `{orderId, version}`.
-* **Rate limits:** Per user and per order to protect `/status` (e.g., token bucket; generous since clients use validators).
-
----
-
-# 8) Idempotency & deduplication
-
-* **Outbox dispatcher** must be idempotent:
-
-  * Use `outbox.id` as the unique send key; record send attempts and final result.
-* **FCM payload** carries `version`; clients ignore `<= local.version`.
-* **Server** does not need to dedupe incoming `/status` requests; just honor validators.
-
----
-
-# 9) Performance & scalability
-
-* **Indexes:** `(orderId)` primary; secondary index `(userId, updatedAt desc)` for audits; `(orderId, version)` unique.
-* **Read path hotness:** `/status` should be **fast** and side-effect-free; consider a **read model** (materialized view) denormalized for quick fetch.
-* **Conditional responses:** Expect many **304/204** hits; keep those very cheap.
-* **Compression:** Enable gzip/br on JSON responses.
-* **Concurrency:** If multiple updates race, `version` increments inside a **transaction** (or via DB sequence).
-
----
-
-## TL;DR
-
-* Build a rock-solid **`/status`** endpoint with conditional responses.
-* Use an **Outbox** to reliably push **data-only** FCM `{orderId, version}` on each change.
-* Keep **`version` monotonic** and atomic with state updates.
-* Provide **short-TTL, collapsed** pushes; clients fetch details and show local notifications.
-* This ships Phase-1 cleanly and sets you up to drop in SignalR later without changing the contract.
+"										
+										
+										
+Nội dung 4: Xây dựng chương trình,						từ Tuần	8	đến Tuần	15	
+Chi tiết:										
+"- Xây dựng các API services;
+- Xây dựng website đăng tuyển tình nguyện viên và tiếp nhận hồ sơ trực tuyến;
+- Xây dựng module quản lý người dùng và đăng nhập;
+- Xây dựng module quản lý lớp học: Các tính năng cho quản trị viên, quản lý lớp, tình nguyện viên và học sinh;
+- Xây dựng Dash Board, hệ thống Notification."										
+-										
+-										
+Nội dung 5: Thử nghiệm và đánh giá,						từ Tuần	14	đến Tuần	17	
+Chi tiết:										
+"- Kiểm thử API services;
+- Kiểm thử phân hệ đăng tuyển và xét duyện hồ sơ tình nguyện viên;
+- Kiểm thử phân hệ quản lý dạy học;
+- Kiểm thử hệ thống khi chạy trên điện thoại thông minh."										
+-										
+-										
+5. Lời cam đoan của sinh viên đã nhận được nhiệm vụ										
+Em xin cam kết sẽ hoàn thành các nhiệm vụ theo đúng kế hoạch.										
+"""

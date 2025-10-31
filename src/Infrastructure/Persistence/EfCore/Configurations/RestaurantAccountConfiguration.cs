@@ -53,5 +53,3 @@ public class RestaurantAccountConfiguration : IEntityTypeConfiguration<Restauran
             .HasDatabaseName("IX_RestaurantAccounts_RestaurantId");
     }
 }
-
-

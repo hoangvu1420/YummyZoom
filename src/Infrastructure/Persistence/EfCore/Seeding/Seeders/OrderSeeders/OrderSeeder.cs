@@ -192,6 +192,8 @@ public class OrderSeeder : ISeeder
                 if (orderResult.IsSuccess)
                 {
                     TransitionOrderToTargetStatus(orderResult.Value, scenario.TargetStatus, scenario.OrderTimestamp);
+
+                    // orderResult.Value.ClearDomainEvents();
                     orders.Add(orderResult.Value);
                 }
                 else

@@ -69,7 +69,14 @@ public class RestaurantAccountRepository : IRestaurantAccountRepository
 
     public Task UpdateAsync(RestaurantAccount account, CancellationToken cancellationToken = default)
     {
-        _dbContext.RestaurantAccounts.Update(account);
+        // No-op for tracked entities: relying on EF change tracking avoids marking key/index columns as modified
+        // which can trigger circular dependency detection when unique indexes exist.
+        // If the entity is detached (unexpected in current usage), attach without flagging RestaurantId as modified.
+        var entry = _dbContext.Entry(account);
+        if (entry.State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+        {
+            _dbContext.RestaurantAccounts.Attach(account);
+        }
         return Task.CompletedTask;
     }
 }
