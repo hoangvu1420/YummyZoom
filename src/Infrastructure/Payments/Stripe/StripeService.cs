@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Stripe;
+using System.Text.Json;
+using YummyZoom.Application.Common.Currency;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Domain.Common.ValueObjects;
@@ -38,7 +40,7 @@ public class StripeService : IPaymentGatewayService
         {
             var options = new PaymentIntentCreateOptions
             {
-                Amount = (long)(amount.Amount * 100),
+                Amount = CurrencyMinorUnitConverter.ToMinorUnits(amount.Amount, currency),
                 Currency = currency.ToLower(),
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
@@ -98,10 +100,35 @@ public class StripeService : IPaymentGatewayService
                 metadata = objectWithMetadata.Metadata;
             }
 
+            // Normalize RelevantObjectId: use PaymentIntent ID for charge.* events when available
+            var relevantId = relevantObject.Id;
+            if (!string.IsNullOrWhiteSpace(stripeEvent.Type) && stripeEvent.Type.StartsWith("charge."))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("data", out var dataEl)
+                        && dataEl.TryGetProperty("object", out var objEl)
+                        && objEl.TryGetProperty("payment_intent", out var piEl)
+                        && piEl.ValueKind == JsonValueKind.String)
+                    {
+                        var pi = piEl.GetString();
+                        if (!string.IsNullOrWhiteSpace(pi))
+                        {
+                            relevantId = pi!; // prefer PaymentIntent for correlation
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Fall back silently to original relevantObject.Id
+                }
+            }
+
             var result = new WebhookEventResult(
                 EventId: stripeEvent.Id,
                 EventType: stripeEvent.Type,
-                RelevantObjectId: relevantObject.Id,
+                RelevantObjectId: relevantId,
                 Metadata: metadata
             );
 
@@ -122,7 +149,7 @@ public class StripeService : IPaymentGatewayService
             var options = new RefundCreateOptions
             {
                 PaymentIntent = gatewayTransactionId,
-                Amount = (long)(amountToRefund.Amount * 100),
+                Amount = CurrencyMinorUnitConverter.ToMinorUnits(amountToRefund.Amount, amountToRefund.Currency),
                 Reason = reason
             };
 

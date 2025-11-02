@@ -14,3 +14,10 @@ docker cp postgres-jcrqsgth:/tmp/. E:/source/repos/CA/YummyZoom/db_scripts/
 ```
 
 Note: PGPASSWORD might be different between runs.
+
+```
+dotnet user-secrets list --project .\src\Web\Web.csproj
+
+dotnet user-secrets set "Stripe:WebhookSecret" "whsec_880350f8ed42a0728afac33ddb8242c5e4ab5e4b634fb5ed954430f8dd52998" --project .\src\Web\Web.csproj
+```
+

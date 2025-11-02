@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.SharedKernel;
 using Result = YummyZoom.SharedKernel.Result;
 
@@ -72,9 +73,18 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
                 return Result.Success();
             }
 
-            // 3. Order Lookup
-            var order = await _orderRepository.GetByPaymentGatewayReferenceIdAsync(
-                webhookEvent.RelevantObjectId, cancellationToken);
+            // 3. Order Lookup (prefer metadata order_id, then fallback to PaymentIntent id)
+            Domain.OrderAggregate.Order? order = null;
+            if (!string.IsNullOrWhiteSpace(orderId) && Guid.TryParse(orderId, out var orderGuid))
+            {
+                order = await _orderRepository.GetByIdAsync(OrderId.Create(orderGuid), cancellationToken);
+            }
+
+            if (order is null)
+            {
+                order = await _orderRepository.GetByPaymentGatewayReferenceIdAsync(
+                    webhookEvent.RelevantObjectId, cancellationToken);
+            }
 
             if (order is null)
             {
@@ -86,7 +96,7 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
                 return Result.Success();
             }
 
-            _logger.LogInformation("Found order {OrderId} for payment gateway reference ID: {PaymentGatewayReferenceId}",
+            _logger.LogInformation("Found order {OrderId} for correlation id: {CorrelationId}",
                 order.Id.Value, webhookEvent.RelevantObjectId);
 
             // 4. Event Processing

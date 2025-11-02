@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Currency;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
@@ -139,10 +140,10 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
         }
         var expected = quoted.Value;
 
-        if (!string.IsNullOrWhiteSpace(quotedCentsStr) && long.TryParse(quotedCentsStr, out var cents))
+        if (!string.IsNullOrWhiteSpace(quotedCentsStr) && long.TryParse(quotedCentsStr, out var quotedMinorUnits))
         {
-            var expectedCents = (long)Math.Round(expected.Amount * 100m, 0, System.MidpointRounding.AwayFromZero);
-            if (cents != expectedCents)
+            var expectedMinorUnits = CurrencyMinorUnitConverter.ToMinorUnits(expected.Amount, expected.Currency);
+            if (quotedMinorUnits != expectedMinorUnits)
             {
                 return Result.Failure(TeamCartErrors.InvalidPaymentAmount);
             }

@@ -33,7 +33,7 @@ public class Orders : EndpointGroupBase
             var command = new InitiateOrderCommand(
                 request.CustomerId,
                 request.RestaurantId,
-                request.Items.Select(i => new YummyZoom.Application.Orders.Commands.InitiateOrder.OrderItemDto(i.MenuItemId, i.Quantity)).ToList(),
+                request.Items.Select(i => new Application.Orders.Commands.InitiateOrder.OrderItemDto(i.MenuItemId, i.Quantity)).ToList(),
                 new DeliveryAddressDto(
                     request.DeliveryAddress.Street,
                     request.DeliveryAddress.City,
