@@ -30,7 +30,7 @@
   ],
   "customizationGroups": [
     {
-      "groupKey": "SauceChoice",
+      "groupKey": "Nước chấm",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "groupKey": "Extras",
+      "groupKey": "Ăn thêm",
       "minSelections": 0,
       "maxSelections": 3,
       "choices": [

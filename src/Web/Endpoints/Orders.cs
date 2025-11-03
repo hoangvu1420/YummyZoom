@@ -33,7 +33,14 @@ public class Orders : EndpointGroupBase
             var command = new InitiateOrderCommand(
                 request.CustomerId,
                 request.RestaurantId,
-                request.Items.Select(i => new Application.Orders.Commands.InitiateOrder.OrderItemDto(i.MenuItemId, i.Quantity)).ToList(),
+                request.Items.Select(i => new Application.Orders.Commands.InitiateOrder.OrderItemDto(
+                    i.MenuItemId, 
+                    i.Quantity,
+                    i.Customizations?.Select(c => new OrderItemCustomizationRequestDto(
+                        c.CustomizationGroupId,
+                        c.ChoiceIds
+                    )).ToList()
+                )).ToList(),
                 new DeliveryAddressDto(
                     request.DeliveryAddress.Street,
                     request.DeliveryAddress.City,
@@ -188,7 +195,13 @@ public sealed record InitiateOrderRequest(
 
 public sealed record InitiateOrderItemRequest(
     Guid MenuItemId,
-    int Quantity
+    int Quantity,
+    List<InitiateOrderCustomizationRequest>? Customizations = null
+);
+
+public sealed record InitiateOrderCustomizationRequest(
+    Guid CustomizationGroupId,
+    List<Guid> ChoiceIds
 );
 
 public sealed record DeliveryAddressRequest(

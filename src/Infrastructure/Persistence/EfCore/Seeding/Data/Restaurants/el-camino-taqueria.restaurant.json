@@ -24,7 +24,7 @@
   "businessHours": "11:00-23:00",
   "customizationGroups": [
     {
-      "groupKey": "TortillaChoice",
+      "groupKey": "Tortilla choice",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
