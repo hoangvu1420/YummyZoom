@@ -162,7 +162,7 @@ For **Cash on Delivery** orders:
 
 ### Get Order Details
 
-Retrieves complete order information including items, pricing breakdown, and current status.
+Retrieves complete order information including items, pricing breakdown, and current status. Enriched to include restaurant snapshot, payment method, basic cancellation flag, and item thumbnails.
 
 **`GET /api/v1/orders/{orderId}`**
 
@@ -179,7 +179,7 @@ Retrieves complete order information including items, pricing breakdown, and cur
 **✅ 200 OK**
 ```json
 {
-  "orderDetails": {
+  "order": {
     "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
     "orderNumber": "ORD-2023-001234",
     "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -189,18 +189,13 @@ Retrieves complete order information including items, pricing breakdown, and cur
     "lastUpdateTimestamp": "2023-10-27T14:45:00Z",
     "estimatedDeliveryTime": "2023-10-27T15:30:00Z",
     "actualDeliveryTime": null,
+    "currency": "USD",
     "subtotalAmount": 26.98,
-    "subtotalCurrency": "USD",
     "discountAmount": 2.70,
-    "discountCurrency": "USD",
     "deliveryFeeAmount": 2.99,
-    "deliveryFeeCurrency": "USD",
     "tipAmount": 5.00,
-    "tipCurrency": "USD",
     "taxAmount": 2.16,
-    "taxCurrency": "USD",
     "totalAmount": 34.43,
-    "totalCurrency": "USD",
     "appliedCouponId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
     "sourceTeamCartId": null,
     "deliveryAddress_Street": "123 Market Street, Apt 4B",
@@ -215,22 +210,43 @@ Retrieves complete order information including items, pricing breakdown, and cur
         "name": "Classic Burger",
         "quantity": 2,
         "unitPriceAmount": 12.99,
-        "unitPriceCurrency": "USD",
         "lineItemTotalAmount": 25.98,
-        "lineItemTotalCurrency": "USD",
         "customizations": [
-          {
-            "groupName": "Cheese",
-            "choiceName": "Swiss",
-            "priceAdjustmentAmount": 1.00,
-            "priceAdjustmentCurrency": "USD"
-          }
-        ]
+          { "groupName": "Cheese", "choiceName": "Swiss", "priceAdjustmentAmount": 1.00 }
+        ],
+        "imageUrl": "https://cdn.example.com/menu/classic-burger-thumb.jpg"
       }
-    ]
+    ],
+    "restaurantName": "Bun Cha Huong Lien",
+    "restaurantAddress_Street": "24 Le Van Huu",
+    "restaurantAddress_City": "Hanoi",
+    "restaurantAddress_State": "HN",
+    "restaurantAddress_Country": "VN",
+    "restaurantAddress_PostalCode": "100000",
+    "restaurantLat": 21.0167,
+    "restaurantLon": 105.8500,
+    "deliveryLat": null,
+    "deliveryLon": null,
+    "distanceKm": null,
+    "paymentMethod": "CreditCard",
+    "cancellable": true
   }
 }
 ```
+
+Response Headers
+- `ETag`: "order-<orderId>-t<lastUpdateTicks>" (strong)
+- `Last-Modified`: RFC1123 date from `lastUpdateTimestamp`
+- `Cache-Control`: `no-cache, must-revalidate`
+
+Conditional Requests
+- Send `If-None-Match: "order-<orderId>-t<lastUpdateTicks>"`. If unchanged, server returns `304 Not Modified` with an empty body.
+- If changed, server returns `200 OK` with the latest body and headers above.
+
+Notes
+- New fields are optional and may be null depending on data availability: `restaurant*`, `restaurantLat`, `restaurantLon`, `deliveryLat`, `deliveryLon`, `distanceKm`, `paymentMethod`, `cancellable`, and `items[].imageUrl`.
+- `distanceKm` is a placeholder for future enhancement; currently null as delivery coordinates are not captured.
+- `cancellable` is true for statuses `AwaitingPayment` and `Placed`.
 
 ---
 

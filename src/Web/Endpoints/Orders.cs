@@ -127,11 +127,29 @@ public class Orders : EndpointGroupBase
         .WithStandardResults<OrderLifecycleResultDto>();
 
         // GET /api/v1/orders/{orderId}
-        group.MapGet("/{orderId:guid}", async (Guid orderId, ISender sender) =>
+        group.MapGet("/{orderId:guid}", async (Guid orderId, HttpContext http, ISender sender) =>
         {
             var query = new GetOrderByIdQuery(orderId);
             var result = await sender.Send(query);
-            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+            if (!result.IsSuccess)
+            {
+                return result.ToIResult();
+            }
+
+            var dto = result.Value.Order;
+
+            // Simple ETag based on LastUpdateTimestamp (ticks)
+            var etag = $"\"order-{dto.OrderId}-t{dto.LastUpdateTimestamp.Ticks}\"";
+            var ifNoneMatch = http.Request.Headers.IfNoneMatch.FirstOrDefault();
+            if (!string.IsNullOrEmpty(ifNoneMatch) && string.Equals(ifNoneMatch, etag, StringComparison.Ordinal))
+            {
+                return Results.StatusCode(StatusCodes.Status304NotModified);
+            }
+
+            http.Response.Headers.ETag = etag;
+            http.Response.Headers.LastModified = dto.LastUpdateTimestamp.ToUniversalTime().ToString("R");
+            http.Response.Headers.CacheControl = "no-cache, must-revalidate";
+            return Results.Ok(result.Value);
         })
         .WithName("GetOrderById")
         .WithStandardResults<GetOrderByIdResponse>();

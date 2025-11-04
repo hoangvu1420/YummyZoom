@@ -34,8 +34,6 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
     {
         return await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            _logger.LogInformation("Processing Stripe webhook event");
-
             // 1. Webhook Event Construction & Verification
             var webhookEventResult = _paymentGatewayService.ConstructWebhookEvent(
                 request.RawJson,
@@ -96,9 +94,6 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
                 return Result.Success();
             }
 
-            _logger.LogInformation("Found order {OrderId} for correlation id: {CorrelationId}",
-                order.Id.Value, webhookEvent.RelevantObjectId);
-
             // 4. Event Processing
             var processingResult = webhookEvent.EventType switch
             {
@@ -118,20 +113,16 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
             if (webhookEvent.EventType is "payment_intent.succeeded" or "payment_intent.payment_failed")
             {
                 await _orderRepository.UpdateAsync(order, cancellationToken);
-                _logger.LogInformation("Order {OrderId} updated successfully", order.Id.Value);
             }
 
             await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
 
-            _logger.LogInformation("Webhook event {EventId} processed successfully", webhookEvent.EventId);
             return Result.Success();
         }, cancellationToken);
     }
 
     private Result ProcessPaymentSuccess(Domain.OrderAggregate.Order order, string paymentGatewayReferenceId)
     {
-        _logger.LogInformation("Processing payment success for order {OrderId}", order.Id.Value);
-
         var result = order.RecordPaymentSuccess(paymentGatewayReferenceId);
 
         if (result.IsFailure)
@@ -147,8 +138,6 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
     private Result ProcessPaymentFailure(Domain.OrderAggregate.Order order, string paymentGatewayReferenceId)
     {
-        _logger.LogInformation("Processing payment failure for order {OrderId}", order.Id.Value);
-
         var result = order.RecordPaymentFailure(paymentGatewayReferenceId);
 
         if (result.IsFailure)
@@ -164,7 +153,6 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
     private Result ProcessUnsupportedEvent(string eventType)
     {
-        _logger.LogInformation("Received unsupported event type: {EventType}. Ignoring.", eventType);
         return Result.Success();
     }
 
@@ -178,8 +166,6 @@ public class HandleStripeWebhookCommandHandler : IRequestHandler<HandleStripeWeb
 
         _dbContext.ProcessedWebhookEvents.Add(processedEvent);
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Marked webhook event {EventId} as processed", eventId);
     }
 }
 

@@ -48,7 +48,23 @@ public record OrderDetailsDto(
     string? DeliveryAddress_State,
     string? DeliveryAddress_Country,
     string? DeliveryAddress_PostalCode,
-    IReadOnlyList<OrderItemDto> Items);
+    IReadOnlyList<OrderItemDto> Items,
+    // Restaurant snapshot (live read for now)
+    string? RestaurantName,
+    string? RestaurantAddress_Street,
+    string? RestaurantAddress_City,
+    string? RestaurantAddress_State,
+    string? RestaurantAddress_Country,
+    string? RestaurantAddress_PostalCode,
+    // Geo info
+    double? RestaurantLat,
+    double? RestaurantLon,
+    double? DeliveryLat,
+    double? DeliveryLon,
+    double? DistanceKm,
+    // Payment & cancellation UX
+    string? PaymentMethod,
+    bool Cancellable);
 
 /// <summary>
 /// Line item snapshot at time of order placement.
@@ -60,7 +76,8 @@ public record OrderItemDto(
     int Quantity,
     decimal UnitPriceAmount,
     decimal LineItemTotalAmount,
-    IReadOnlyList<OrderItemCustomizationDto> Customizations);
+    IReadOnlyList<OrderItemCustomizationDto> Customizations,
+    string? ImageUrl);
 
 /// <summary>
 /// Customization applied to an order item.

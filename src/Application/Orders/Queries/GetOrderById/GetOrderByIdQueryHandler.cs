@@ -58,8 +58,17 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 o."DeliveryAddress_City"    AS DeliveryAddress_City,
                 o."DeliveryAddress_State"   AS DeliveryAddress_State,
                 o."DeliveryAddress_Country" AS DeliveryAddress_Country,
-                o."DeliveryAddress_ZipCode" AS DeliveryAddress_PostalCode
+                o."DeliveryAddress_ZipCode" AS DeliveryAddress_PostalCode,
+                r."Name"                     AS RestaurantName,
+                r."Location_Street"          AS RestaurantAddress_Street,
+                r."Location_City"            AS RestaurantAddress_City,
+                r."Location_State"           AS RestaurantAddress_State,
+                r."Location_Country"         AS RestaurantAddress_Country,
+                r."Location_ZipCode"         AS RestaurantAddress_PostalCode,
+                r."Geo_Latitude"             AS RestaurantLat,
+                r."Geo_Longitude"            AS RestaurantLon
             FROM "Orders" o
+            LEFT JOIN "Restaurants" r ON r."Id" = o."RestaurantId"
             WHERE o."Id" = @OrderId
             """;
 
@@ -102,8 +111,10 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 i."Quantity"                 AS Quantity,
                 i."BasePrice_Amount"         AS UnitPriceAmount,
                 i."LineItemTotal_Amount"     AS LineItemTotalAmount,
-                i."SelectedCustomizations"   AS SelectedCustomizations
+                i."SelectedCustomizations"   AS SelectedCustomizations,
+                mi."ImageUrl"                AS ImageUrl
             FROM "OrderItems" i
+            LEFT JOIN "MenuItems" mi ON mi."Id" = i."Snapshot_MenuItemId"
             WHERE i."OrderId" = @OrderId
             ORDER BY i."OrderItemId"
             """;
@@ -119,8 +130,35 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 r.Quantity,
                 r.UnitPriceAmount,
                 r.LineItemTotalAmount,
-                OrderCustomizationJsonParser.Parse(r.SelectedCustomizations)))
+                OrderCustomizationJsonParser.Parse(r.SelectedCustomizations),
+                r.ImageUrl))
             .ToList();
+
+        // 4. Payment method: pick the earliest Payment transaction for this order (if any)
+        const string paymentSql = """
+            SELECT pt."PaymentMethodType" AS PaymentMethod
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = @OrderId AND pt."Type" = 'Payment'
+            ORDER BY pt."Timestamp" ASC
+            LIMIT 1
+        """;
+
+        var paymentMethod = await connection.ExecuteScalarAsync<string?>(
+            new CommandDefinition(paymentSql, new { OrderId = request.OrderIdGuid }, cancellationToken: cancellationToken));
+
+        // 5. Cancellation: simple policy (AwaitingPayment, Placed)
+        bool cancellable = false;
+        try
+        {
+            if (Enum.TryParse<YummyZoom.Domain.OrderAggregate.Enums.OrderStatus>(orderRow.Status, out var statusEnum))
+            {
+                cancellable = YummyZoom.Domain.OrderAggregate.Enums.OrderStatusExtensions.IsCancellable(statusEnum);
+            }
+        }
+        catch
+        {
+            cancellable = false;
+        }
 
         var details = new OrderDetailsDto(
             orderRow.OrderId,
@@ -146,7 +184,20 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             orderRow.DeliveryAddress_State,
             orderRow.DeliveryAddress_Country,
             orderRow.DeliveryAddress_PostalCode,
-            itemDtos);
+            itemDtos,
+            orderRow.RestaurantName,
+            orderRow.RestaurantAddress_Street,
+            orderRow.RestaurantAddress_City,
+            orderRow.RestaurantAddress_State,
+            orderRow.RestaurantAddress_Country,
+            orderRow.RestaurantAddress_PostalCode,
+            orderRow.RestaurantLat,
+            orderRow.RestaurantLon,
+            null, // DeliveryLat not available currently
+            null, // DeliveryLon not available currently
+            null, // DistanceKm placeholder for future computation
+            paymentMethod,
+            cancellable);
 
         _logger.LogInformation("Order {OrderId} retrieved with {ItemCount} items", request.OrderIdGuid, itemDtos.Count);
         return Result.Success(new GetOrderByIdResponse(details));
@@ -176,7 +227,15 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
         string? DeliveryAddress_City,
         string? DeliveryAddress_State,
         string? DeliveryAddress_Country,
-        string? DeliveryAddress_PostalCode);
+        string? DeliveryAddress_PostalCode,
+        string? RestaurantName,
+        string? RestaurantAddress_Street,
+        string? RestaurantAddress_City,
+        string? RestaurantAddress_State,
+        string? RestaurantAddress_Country,
+        string? RestaurantAddress_PostalCode,
+        double? RestaurantLat,
+        double? RestaurantLon);
 
     private sealed record OrderItemRow(
         Guid OrderItemId,
@@ -185,5 +244,6 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
         int Quantity,
         decimal UnitPriceAmount,
         decimal LineItemTotalAmount,
-        string? SelectedCustomizations);
+        string? SelectedCustomizations,
+        string? ImageUrl);
 }

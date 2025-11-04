@@ -131,8 +131,7 @@ public class StripeService : IPaymentGatewayService
                 RelevantObjectId: relevantId,
                 Metadata: metadata
             );
-
-            _logger.LogInformation("Successfully constructed WebhookEventResult for Event ID: {EventId}, Type: {EventType}", result.EventId, result.EventType);
+            
             return Result.Success(result);
         }
         catch (StripeException e)
