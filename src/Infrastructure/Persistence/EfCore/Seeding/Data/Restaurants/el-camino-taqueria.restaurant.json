@@ -43,7 +43,7 @@
       ]
     },
     {
-      "groupKey": "SalsaHeat",
+      "groupKey": "Salsa heat",
       "minSelections": 1,
       "maxSelections": 1,
       "choices": [
@@ -166,8 +166,8 @@
               "Nóng"
             ],
             "customizationGroups": [
-              "TortillaChoice",
-              "SalsaHeat",
+              "Tortilla choice",
+              "Salsa heat",
               "Extras"
             ]
           },
@@ -184,8 +184,8 @@
               "Nóng"
             ],
             "customizationGroups": [
-              "TortillaChoice",
-              "SalsaHeat",
+              "Tortilla choice",
+              "Salsa heat",
               "Extras"
             ]
           },
@@ -202,8 +202,8 @@
               "Nóng"
             ],
             "customizationGroups": [
-              "TortillaChoice",
-              "SalsaHeat",
+              "Tortilla choice",
+              "Salsa heat",
               "Extras"
             ]
           },
@@ -220,8 +220,8 @@
               "Nóng"
             ],
             "customizationGroups": [
-              "TortillaChoice",
-              "SalsaHeat",
+              "Tortilla choice",
+              "Salsa heat",
               "Extras"
             ]
           },
@@ -239,7 +239,7 @@
               "Phổ biến"
             ],
             "customizationGroups": [
-              "SalsaHeat",
+              "Salsa heat",
               "Extras"
             ]
           },
