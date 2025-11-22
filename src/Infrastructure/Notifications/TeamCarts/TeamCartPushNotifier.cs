@@ -59,11 +59,19 @@ public sealed class TeamCartPushNotifier : ITeamCartPushNotifier
             return Result.Success();
         }
 
+        var state = vm.Status.ToString(); // keep source casing
+        var (title, body) = LocalizeState(state);
+        var route = $"/team-carts/{teamCartId.Value}";
+
         var data = new Dictionary<string, string>
         {
             ["type"] = "teamcart",
             ["teamCartId"] = teamCartId.Value.ToString(),
-            ["version"] = vm.Version.ToString()
+            ["version"] = vm.Version.ToString(),
+            ["state"] = state,
+            ["title"] = title,
+            ["body"] = body,
+            ["route"] = route
         };
 
         var push = await _fcm.SendMulticastDataAsync(tokens, data);
@@ -73,8 +81,23 @@ public sealed class TeamCartPushNotifier : ITeamCartPushNotifier
             return Result.Failure(push.Error);
         }
 
-        _logger.LogInformation("Sent TeamCart FCM data push to {Count} tokens (CartId={CartId}, Version={Version})",
-            tokens.Count, teamCartId.Value, vm.Version);
+        _logger.LogInformation("Sent TeamCart FCM data push to {Count} tokens (CartId={CartId}, State={State}, Version={Version})",
+            tokens.Count, teamCartId.Value, state, vm.Version);
         return Result.Success();
     }
+
+    private static (string Title, string Body) LocalizeState(string state)
+        => state switch
+        {
+            // Common states (adapt to actual TeamCartStatus values present in VM)
+            "Active" => ("Giỏ nhóm đang hoạt động", "Giỏ của bạn đã được cập nhật."),
+            "Open" => ("Giỏ nhóm đang mở", "Giỏ của bạn đã được cập nhật."),
+            "Locked" => ("Giỏ nhóm đã khóa", "Chủ giỏ đang xác nhận thanh toán."),
+            "ReadyToConfirm" => ("Sẵn sàng xác nhận", "Giỏ nhóm đã sẵn sàng để xác nhận thanh toán."),
+            "Converted" => ("Đã tạo đơn hàng", "Giỏ nhóm đã được chuyển thành đơn hàng."),
+            "Expired" => ("Giỏ nhóm đã hết hạn", "Giỏ nhóm của bạn đã đóng."),
+
+            // Fallback
+            _ => ("Cập nhật giỏ nhóm", "Giỏ nhóm của bạn đã được cập nhật.")
+        };
 }

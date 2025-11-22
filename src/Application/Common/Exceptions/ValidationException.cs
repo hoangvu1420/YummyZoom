@@ -11,7 +11,7 @@ public class ValidationException : Exception
     }
 
     public ValidationException(IEnumerable<ValidationFailure> failures)
-        : this()
+        : base(BuildMessage(failures))
     {
         Errors = failures
             .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
@@ -19,4 +19,27 @@ public class ValidationException : Exception
     }
 
     public IDictionary<string, string[]> Errors { get; }
+
+    private static string BuildMessage(IEnumerable<ValidationFailure> failures)
+    {
+        if (failures == null)
+        {
+            return "One or more validation failures have occurred.";
+        }
+
+        var parts = failures
+            .Where(f => f is not null)
+            .Select(f => string.IsNullOrWhiteSpace(f.PropertyName)
+                ? f.ErrorMessage
+                : $"{f.PropertyName}: {f.ErrorMessage}")
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToArray();
+
+        if (parts.Length == 0)
+        {
+            return "One or more validation failures have occurred.";
+        }
+
+        return $"Validation failed: {string.Join(" | ", parts)}";
+    }
 }
