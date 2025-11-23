@@ -1,0 +1,57 @@
+@startuml Restaurant_Approval_UseCase_Decomposition
+!theme plain
+
+title Biểu đồ Use Case Phân rã - Duyệt đăng ký nhà hàng
+
+' Define actors
+actor "Quản trị viên\n(Admin)" as Admin
+actor "Hệ thống Email" as EmailSystem
+
+' Define system boundary
+package "Hệ thống YummyZoom - Admin Module" {
+  
+  ' Main use cases
+  usecase "Xem danh sách yêu cầu" as UC1
+  usecase "Xem chi tiết hồ sơ" as UC2
+  usecase "Phê duyệt đăng ký" as UC3
+  usecase "Từ chối đăng ký" as UC4
+  usecase "Yêu cầu bổ sung thông tin" as UC5
+  
+  ' Sub use cases
+  usecase "Lọc theo trạng thái" as UC1_1
+  usecase "Kiểm tra giấy phép KD" as UC2_1
+  usecase "Kiểm tra menu dự kiến" as UC2_2
+  usecase "Kích hoạt tài khoản" as UC3_1
+  usecase "Nhập lý do từ chối" as UC4_1
+  usecase "Gửi thông báo kết quả" as UC6
+}
+
+' Relationships
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+
+' Include relationships
+UC1 ..> UC1_1 : <<extend>>
+UC2 ..> UC2_1 : <<include>>
+UC2 ..> UC2_2 : <<include>>
+
+UC3 ..> UC3_1 : <<include>>
+UC3 ..> UC6 : <<include>>
+
+UC4 ..> UC4_1 : <<include>>
+UC4 ..> UC6 : <<include>>
+
+UC5 ..> UC6 : <<include>>
+
+' System interactions
+UC6 -- EmailSystem
+
+' Notes
+note right of UC2_1 : Đối chiếu mã số thuế,\nCMND/CCCD chủ quán
+note bottom of UC3_1 : Tạo tài khoản Merchant\nvà gửi mật khẩu tạm
+note left of UC5 : Khi hồ sơ thiếu hoặc\nhình ảnh không rõ nét
+
+@enduml

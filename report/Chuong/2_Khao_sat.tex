@@ -83,7 +83,8 @@ Cuối cùng, YummyZoom được định hướng để phục vụ đặc thù 
 
 \section{Tổng quan chức năng}
 \label{section:2.2}
-Phần \ref{section:2.2} này có nhiệm vụ tóm tắt các chức năng của phần mềm. Trong phần này, sinh viên lưu ý chỉ mô tả chức năng mức cao (tổng quan) mà không đặc tả chi tiết cho từng chức năng. Đặc tả chi tiết được trình bày trong phần \ref{section:2.3}.
+
+Trên cơ sở các yêu cầu đã được xác định từ quá trình khảo sát, phần này cung cấp cái nhìn tổng quan về các chức năng của hệ thống YummyZoom. Hệ thống được mô hình hóa thông qua biểu đồ ca sử dụng (Use Case), bao gồm biểu đồ tổng quát và các biểu đồ phân rã cho những chức năng phức tạp. Việc phân chia này giúp làm rõ vai trò của các tác nhân cũng như phạm vi nghiệp vụ của hệ thống trước khi đi vào đặc tả chi tiết trong phần \ref{section:2.3}.
 
 \subsection{Biểu đồ use case tổng quát}
 \label{subsection:2.2.1}
@@ -99,56 +100,44 @@ Hình \ref{fig:usecase_overview} minh họa biểu đồ use case tổng quát c
 
 \subsubsection{Các tác nhân chính trong hệ thống}
 
-Hệ thống YummyZoom được thiết kế để phục vụ ba nhóm tác nhân chính, mỗi nhóm có vai trò và quyền hạn khác nhau trong quy trình vận hành nền tảng giao đồ ăn trực tuyến.
+Hệ thống YummyZoom bao gồm các tác nhân chính tương tác với phần mềm:
 
-\paragraph{Khách hàng (Customer)}
-Đây là tác nhân chính và quan trọng nhất của hệ thống, bao gồm tất cả người dùng cuối có nhu cầu đặt món ăn thông qua nền tảng. Nhóm tác nhân này bao gồm cả khách hàng cá nhân thực hiện đặt hàng riêng lẻ và những người tham gia vào các đơn hàng nhóm thông qua tính năng TeamCart. Khách hàng có quyền truy cập vào toàn bộ các tính năng liên quan đến việc tìm kiếm, đặt hàng, thanh toán và theo dõi đơn hàng, đồng thời có thể đóng góp phản hồi thông qua hệ thống đánh giá.
+\textbf{Khách hàng (Customer):} Người dùng cuối sử dụng ứng dụng để tìm kiếm, đặt món và thanh toán. Khách hàng có thể là cá nhân đặt món riêng lẻ hoặc thành viên tham gia đặt hàng nhóm (TeamCart).
 
-\paragraph{Nhà hàng (Restaurant)}
-Tác nhân này đại diện cho các đối tác kinh doanh của nền tảng, bao gồm chủ nhà hàng và nhân viên được ủy quyền quản lý hoạt động trên hệ thống. Nhà hàng có trách nhiệm cung cấp thông tin chính xác về cơ sở kinh doanh, quản lý thực đơn một cách hiệu quả, xử lý các đơn hàng đến từ khách hàng, và thực hiện các chiến lược marketing thông qua hệ thống khuyến mãi. Đây là tác nhân then chốt quyết định chất lượng dịch vụ và trải nghiệm khách hàng trên nền tảng.
+\textbf{Nhà hàng (Restaurant):} Đối tác kinh doanh cung cấp món ăn. Họ sử dụng hệ thống để quản lý thực đơn, cập nhật thông tin cửa hàng, thiết lập khuyến mãi và xử lý đơn hàng.
 
-\paragraph{Quản trị viên (Admin)}
-Tác nhân có quyền hạn cao nhất trong hệ thống, chịu trách nhiệm giám sát và điều hành toàn bộ hoạt động của nền tảng. Quản trị viên có khả năng can thiệp vào mọi khía cạnh của hệ thống, từ việc phê duyệt các nhà hàng mới tham gia nền tảng, kiểm soát chất lượng nội dung, cho đến việc xử lý các tình huống đặc biệt và đảm bảo hệ thống vận hành một cách ổn định. Vai trò này đặc biệt quan trọng trong việc duy trì uy tín và chất lượng dịch vụ của toàn bộ nền tảng.
+\textbf{Quản trị viên (Admin):} Người quản lý vận hành hệ thống, chịu trách nhiệm phê duyệt nhà hàng, kiểm duyệt nội dung và giám sát các hoạt động trên nền tảng.
 
 \subsubsection{Các use case chính và mô tả chức năng}
 
-Dựa trên phân tích nhu cầu và đặc thù của nền tảng giao đồ ăn trực tuyến, hệ thống YummyZoom được thiết kế với 14 use case chính, được phân nhóm theo từng tác nhân để đảm bảo tính logic và dễ quản lý.
+Dựa trên phân tích yêu cầu, các chức năng cốt lõi của hệ thống được tóm tắt theo từng nhóm tác nhân như sau:
 
-\paragraph{Nhóm use case dành cho Khách hàng}
+\paragraph{Nhóm chức năng của Khách hàng}
+\begin{description}
+    \item[Quản lý tài khoản:] Đăng ký, đăng nhập, cập nhật thông tin cá nhân và sổ địa chỉ.
+    \item[Tìm kiếm nhà hàng:] Tra cứu nhà hàng và món ăn theo tên, danh mục hoặc vị trí.
+    \item[Đặt hàng (Cá nhân \& TeamCart):] Thực hiện quy trình chọn món và tạo đơn hàng. Tính năng TeamCart cho phép nhiều người dùng cùng tham gia một đơn hàng và thanh toán riêng biệt.
+    \item[Thanh toán:] Xử lý giao dịch tài chính cho đơn hàng.
+    \item[Theo dõi đơn hàng:] Cập nhật trạng thái đơn hàng từ lúc đặt đến khi giao thành công.
+    \item[Đánh giá:] Gửi phản hồi và chấm điểm chất lượng dịch vụ của nhà hàng.
+\end{description}
 
-\textbf{Quản lý tài khoản:} Use case cơ bản cho phép khách hàng thực hiện các thao tác liên quan đến việc tạo mới, đăng nhập, và cập nhật thông tin cá nhân. Đây là use case có mối quan hệ include với các use case đặt hàng, do việc xác thực danh tính là bắt buộc trước khi thực hiện bất kỳ giao dịch nào.
+\paragraph{Nhóm chức năng của Nhà hàng}
+\begin{description}
+    \item[Quản lý thông tin:] Cập nhật thông tin cơ bản, giờ mở cửa và trạng thái hoạt động.
+    \item[Quản lý thực đơn:] Thêm mới, chỉnh sửa thông tin món ăn, giá cả và tùy chọn.
+    \item[Xử lý đơn hàng:] Tiếp nhận đơn mới, cập nhật tiến độ chuẩn bị (đang nấu, đã xong).
+    \item[Quản lý khuyến mãi:] Tạo các mã giảm giá và chương trình ưu đãi cho khách hàng.
+\end{description}
 
-\textbf{Tìm kiếm nhà hàng:} Cho phép khách hàng duyệt và tìm kiếm nhà hàng dựa trên nhiều tiêu chí khác nhau như vị trí địa lý, loại món ăn, mức giá, và đánh giá. Use case này được thiết kế để mang lại trải nghiệm khám phá phong phú và cá nhân hóa.
+\paragraph{Nhóm chức năng của Quản trị viên}
+\begin{description}
+    \item[Quản trị hệ thống:] Quản lý danh sách người dùng, danh mục món ăn và cấu hình hệ thống.
+    \item[Duyệt nhà hàng:] Kiểm tra và phê duyệt hồ sơ đăng ký của đối tác nhà hàng mới.
+    \item[Kiểm duyệt nội dung:] Giám sát các đánh giá, bình luận để đảm bảo tiêu chuẩn cộng đồng.
+\end{description}
 
-\textbf{Đặt hàng cá nhân:} Quy trình đặt hàng truyền thống cho một khách hàng, bao gồm việc chọn món, tùy chỉnh, và thanh toán. Use case này yêu cầu khách hàng phải đăng nhập (mối quan hệ include với "Quản lý tài khoản").
-
-\textbf{Quản lý TeamCart:} Đây là tính năng độc đáo và nổi bật nhất của YummyZoom, cho phép nhiều khách hàng cùng tham gia vào một đơn hàng nhóm mà mỗi người có thể tự thanh toán phần của mình. Tính năng này giải quyết triệt để vấn đề thanh toán tập trung trong các đơn hàng nhóm truyền thống.
-
-\textbf{Theo dõi đơn hàng:} Cung cấp khả năng theo dõi trạng thái đơn hàng theo thời gian thực, giúp khách hàng nắm được tình hình chuẩn bị và giao hàng của nhà hàng.
-
-\textbf{Đánh giá nhà hàng:} Cho phép khách hàng chia sẻ trải nghiệm thông qua hệ thống đánh giá sao và nhận xét văn bản, đóng góp vào việc xây dựng uy tín cho nhà hàng và hỗ trợ khách hàng khác trong việc lựa chọn.
-
-\paragraph{Nhóm use case dành cho Nhà hàng}
-
-\textbf{Quản lý thông tin nhà hàng:} Cho phép nhà hàng cập nhật các thông tin cơ bản như tên, địa chỉ, giờ hoạt động, thông tin liên lạc, và trạng thái nhận đơn hàng.
-
-\textbf{Quản lý thực đơn:} Use case phức tạp bao gồm việc tạo và tổ chức menu, thêm/sửa/xóa món ăn, cập nhật giá cả, quản lý tình trạng còn hàng, và thiết lập các tùy chọn customization cho từng món ăn.
-
-\textbf{Xử lý đơn hàng:} Quy trình nhận và xử lý đơn hàng từ khách hàng, bao gồm chấp nhận/từ chối đơn hàng, cập nhật trạng thái chuẩn bị, và đánh dấu sẵn sàng giao hàng.
-
-\textbf{Quản lý khuyến mãi:} Cho phép nhà hàng tự tạo và quản lý các chương trình khuyến mãi, mã giảm giá với các điều kiện áp dụng linh hoạt để thu hút và giữ chân khách hàng.
-
-\paragraph{Nhóm use case dành cho Quản trị viên}
-
-\textbf{Quản lý hệ thống:} Cung cấp dashboard tổng quan với các metrics quan trọng về hoạt động của nền tảng, giúp admin nắm bắt tình hình kinh doanh và đưa ra các quyết định vận hành phù hợp.
-
-\textbf{Duyệt đăng ký nhà hàng:} Quy trình onboarding cho các nhà hàng mới muốn tham gia nền tảng, bao gồm việc xác minh thông tin, kiểm tra giấy tờ pháp lý, và phê duyệt hoặc từ chối đơn đăng ký.
-
-\textbf{Kiểm duyệt nội dung:} Giám sát và kiểm soát chất lượng nội dung do người dùng tạo ra, đặc biệt là các đánh giá và nhận xét, để đảm bảo tính phù hợp và chính xác.
-
-\textbf{Giám sát vận hành:} Theo dõi toàn bộ hoạt động giao dịch trên nền tảng, can thiệp khi cần thiết để xử lý các tình huống đặc biệt hoặc khiếu nại từ người dùng.
-
-Tổng thể, 14 use case này tạo nên một hệ sinh thái hoàn chỉnh cho nền tảng giao đồ ăn trực tuyến, trong đó tính năng TeamCart là điểm nhấn độc đáo giúp YummyZoom khác biệt so với các đối thủ cạnh tranh hiện tại trên thị trường.
+\vfill
 
 \subsection{Biểu đồ use case phân rã "Quản lý tài khoản"}
 \label{subsection:2.2.2}
@@ -194,14 +183,46 @@ Thông qua biểu đồ, quy trình nghiệp vụ của TeamCart được thể 
 
 \vfill
 
-\subsection{Quy trình nghiệp vụ}
+\subsection{Biểu đồ use case phân rã "Quản lý thực đơn"}
 \label{subsection:2.2.5}
-Nếu sản phẩm/hệ thống cần xây dựng có quy trình nghiệp vụ quan trọng/đáng chú ý, sinh viên cần mô tả và vẽ biểu đồ hoạt động minh họa quy trình nghiệp vụ đó. Sinh viên lưu ý đây không phải là luồng sự kiện của từng use case, mà là luồng hoạt động kết hợp nhiều use case để thực hiện một nghiệp vụ nào đó.
 
-Ví dụ, một hệ thống quản lý thư viện có quy trình nghiệp vụ mượn trả với mô tả sơ bộ như sau: Sinh viên làm thẻ mượn, sau đó sinh viên đăng ký mượn sách, thủ thư cho mượn, và cuối cùng sinh viên trả lại sách cho thư viện. Một hệ thống có thể có một vài quy trình nghiệp vụ quan trọng như vậy.
+Đối với tác nhân Nhà hàng, "Quản lý thực đơn" là chức năng có độ phức tạp cao và tần suất sử dụng thường xuyên nhất. Hình \ref{fig:usecase_menu_management_decomposition} minh họa chi tiết cấu trúc phân cấp của thực đơn trong hệ thống.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_menu_management_decomposition.drawio.png}
+    \caption{Biểu đồ use case phân rã - Quản lý thực đơn}
+    \label{fig:usecase_menu_management_decomposition}
+\end{figure}
+
+Biểu đồ cho thấy sự phân rã chi tiết từ việc quản lý danh mục, món ăn cho đến các nhóm tùy chọn (topping, size, mức đường/đá). Đặc biệt, chức năng cập nhật trạng thái món (còn/hết) được tách biệt để đảm bảo tính phản hồi nhanh (real-time) trong giờ cao điểm. \vfill
+
+\subsection{Biểu đồ use case phân rã "Duyệt đăng ký nhà hàng"}
+\label{subsection:2.2.6}
+
+Về phía Quản trị viên, quy trình "Duyệt đăng ký nhà hàng" đóng vai trò quan trọng trong việc kiểm soát chất lượng đầu vào của hệ thống. Hình \ref{fig:usecase_restaurant_approval_decomposition} mô tả các bước xử lý hồ sơ đăng ký của đối tác.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_restaurant_approval_decomposition.drawio.png}
+    \caption{Biểu đồ use case phân rã - Duyệt đăng ký nhà hàng}
+    \label{fig:usecase_restaurant_approval_decomposition}
+\end{figure}
+
+Quy trình này bao gồm các bước kiểm tra tính pháp lý (giấy phép kinh doanh), xác thực thực đơn dự kiến và cơ chế phản hồi (phê duyệt/từ chối/yêu cầu bổ sung) thông qua hệ thống email tự động. Điều này giúp đảm bảo tính minh bạch và chuyên nghiệp trong quy trình hợp tác. \vfill
+
+\subsection{Quy trình nghiệp vụ}
+\label{subsection:2.2.7}
+
+% Nếu sản phẩm/hệ thống cần xây dựng có quy trình nghiệp vụ quan trọng/đáng chú ý, sinh viên cần mô tả và vẽ biểu đồ hoạt động minh họa quy trình nghiệp vụ đó. Sinh viên lưu ý đây không phải là luồng sự kiện của từng use case, mà là luồng hoạt động kết hợp nhiều use case để thực hiện một nghiệp vụ nào đó.
+
+% Ví dụ, một hệ thống quản lý thư viện có quy trình nghiệp vụ mượn trả với mô tả sơ bộ như sau: Sinh viên làm thẻ mượn, sau đó sinh viên đăng ký mượn sách, thủ thư cho mượn, và cuối cùng sinh viên trả lại sách cho thư viện. Một hệ thống có thể có một vài quy trình nghiệp vụ quan trọng như vậy.
+
 \section{Đặc tả chức năng}
 \label{section:2.3}
-Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ án để đặc tả chi tiết. Mỗi đặc tả bao gồm ít nhất các thông tin sau: (i) Tên use case, (ii) Luồng sự kiện (chính và phát sinh), (iii) Tiền điều kiện, và (iv) Hậu điều kiện. Sinh viên chỉ vẽ bổ sung biểu đồ hoạt động khi đặc tả use case phức tạp.
+
+% Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ án để đặc tả chi tiết. Mỗi đặc tả bao gồm ít nhất các thông tin sau: (i) Tên use case, (ii) Luồng sự kiện (chính và phát sinh), (iii) Tiền điều kiện, và (iv) Hậu điều kiện. Sinh viên chỉ vẽ bổ sung biểu đồ hoạt động khi đặc tả use case phức tạp.
+
 \subsection{Đặc tả use case A}
 \hfill
 \subsection{Đặc tả use case B}
@@ -209,7 +230,8 @@ Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ
 
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}
-Trong phần này, sinh viên đưa ra các yêu cầu khác nếu có, bao gồm các yêu cầu phi chức năng như hiệu năng, độ tin cậy, tính dễ dùng, tính dễ bảo trì, hoặc các yêu cầu về mặt kỹ thuật như về CSDL, công nghệ sử dụng, v.v.
+
+% Trong phần này, sinh viên đưa ra các yêu cầu khác nếu có, bao gồm các yêu cầu phi chức năng như hiệu năng, độ tin cậy, tính dễ dùng, tính dễ bảo trì, hoặc các yêu cầu về mặt kỹ thuật như về CSDL, công nghệ sử dụng, v.v.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
