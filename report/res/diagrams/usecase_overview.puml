@@ -1,0 +1,72 @@
+@startuml YummyZoom_UseCase_Overview
+!theme plain
+
+title YummyZoom - Biểu đồ Use Case Tổng quan
+
+' Define actors
+actor "Khách hàng\n(Customer)" as Customer
+actor "Nhà hàng\n(Restaurant)" as Restaurant  
+actor "Quản trị viên\n(Admin)" as Admin
+
+' Define system boundary
+package "Hệ thống YummyZoom" {
+  
+  ' Customer use cases
+  usecase "Quản lý tài khoản" as UC1
+  usecase "Tìm kiếm nhà hàng" as UC2
+  usecase "Đặt hàng cá nhân" as UC3
+  usecase "Quản lý TeamCart" as UC4
+  usecase "Theo dõi đơn hàng" as UC5
+  usecase "Đánh giá nhà hàng" as UC6
+  
+  ' Restaurant use cases
+  usecase "Quản lý thông tin nhà hàng" as UC7
+  usecase "Quản lý thực đơn" as UC8
+  usecase "Xử lý đơn hàng" as UC9
+  usecase "Quản lý khuyến mãi" as UC10
+  
+  ' Admin use cases
+  usecase "Quản lý hệ thống" as UC11
+  usecase "Duyệt đăng ký nhà hàng" as UC12
+  usecase "Kiểm duyệt nội dung" as UC13
+  usecase "Giám sát vận hành" as UC14
+}
+
+' Customer relationships
+Customer --> UC1
+Customer --> UC2
+Customer --> UC3
+Customer --> UC4
+Customer --> UC5
+Customer --> UC6
+
+' Restaurant relationships
+Restaurant --> UC7
+Restaurant --> UC8
+Restaurant --> UC9
+Restaurant --> UC10
+
+' Admin relationships
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+
+' Include relationships - Use cases that MUST use other use cases
+UC3 ..> UC1 : <<include>>
+UC4 ..> UC1 : <<include>>
+
+' Dependencies (simple associations are better than forced include/extend)
+' UC6 requires completed order, but this is business logic, not use case structure
+
+' Generalization (inheritance)
+Customer --|> "Người dùng"
+Restaurant --|> "Người dùng"
+
+' Notes
+note right of UC4 : Tính năng độc đáo:\nCho phép nhiều thành viên\ntự thanh toán riêng
+note bottom of UC9 : Bao gồm: Chấp nhận,\nChuẩn bị, Giao hàng
+note top of UC12 : Quy trình onboarding\nnhà hàng mới
+note bottom of UC6 : Yêu cầu: Có đơn hàng\nđã hoàn thành
+
+@enduml

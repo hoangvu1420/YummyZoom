@@ -1,0 +1,66 @@
+@startuml Individual_Order_UseCase_Decomposition
+!theme plain
+
+title Biểu đồ Use Case Phân rã - Đặt hàng cá nhân
+
+' Define actors
+actor "Khách hàng\n(Customer)" as Customer
+
+' Define system boundary
+package "Hệ thống YummyZoom - Order Module" {
+  
+  ' Core ordering use cases
+  usecase "Chọn nhà hàng" as UC1
+  usecase "Xem thực đơn" as UC2
+  usecase "Chọn món ăn" as UC3
+  usecase "Tùy chỉnh món ăn" as UC4
+  usecase "Thêm vào giỏ hàng" as UC5
+  usecase "Xem giỏ hàng" as UC6
+  usecase "Áp dụng coupon" as UC7
+  usecase "Chọn địa chỉ giao hàng" as UC8
+  usecase "Chọn phương thức thanh toán" as UC9
+  usecase "Xác nhận đặt hàng" as UC10
+  usecase "Xử lý thanh toán" as UC11
+  usecase "Tạo đơn hàng" as UC12
+  
+  ' Additional use cases
+  usecase "Lưu địa chỉ mới" as UC13
+  usecase "Thêm phương thức thanh toán" as UC14
+  usecase "Hủy đặt hàng" as UC15
+}
+
+' Customer relationships - Only direct actor actions
+Customer --> UC1
+Customer --> UC3
+Customer --> UC5
+Customer --> UC6
+Customer --> UC7
+Customer --> UC8
+Customer --> UC9
+Customer --> UC10
+Customer --> UC13
+Customer --> UC14
+Customer --> UC15
+
+' Include relationships - System behaviors
+UC1 ..> UC2 : <<include>>
+UC3 ..> UC4 : <<include>>
+UC10 ..> UC11 : <<include>>
+UC11 ..> UC12 : <<include>>
+
+' Extend relationships
+UC13 <.. UC8 : <<extend>>
+UC14 <.. UC9 : <<extend>>
+UC7 <.. UC10 : <<extend>>
+UC15 <.. UC10 : <<extend>>
+
+' Business flow notes are better expressed in activity diagrams
+
+' Notes
+note right of UC4 : Size, topping,\nspice level, etc.
+note bottom of UC7 : Giảm giá tự động\nnếu có coupon hợp lệ
+note left of UC11 : Stripe Payment\nIntent processing
+note bottom of UC13 : Lưu cho\nlần đặt hàng sau
+note top of UC15 : Trong vòng\n5 phút sau đặt hàng
+
+@enduml

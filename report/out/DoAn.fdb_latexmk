@@ -1,18 +1,19 @@
 # Fdb version 4
-["biber out/DoAn"] 1760548482.29439 "out/DoAn.bcf" "out/DoAn.bbl" "out/DoAn" 1761497353.57029 0
+["biber out/DoAn"] 1760548482.29439 "out/DoAn.bcf" "out/DoAn.bbl" "out/DoAn" 1763876576.19072 0
   "Danh_sach_tai_lieu_tham_khao.bib" 1759730695 1488 c84ec2be0e7384c9343be26b8c6eb7b7 ""
-  "out/DoAn.bcf" 1761497353 108445 79fb39353b57436fc6303b23e30e4305 "pdflatex"
+  "out/DoAn.bcf" 1763876575 108445 79fb39353b57436fc6303b23e30e4305 "pdflatex"
   (generated)
   "out/DoAn.bbl"
   "out/DoAn.blg"
   (rewritten before read)
-["pdflatex"] 1761497349.35565 "e:/source/repos/CA/YummyZoom/report/DoAn.tex" "out/DoAn.pdf" "DoAn" 1761497353.5712 0
+["pdflatex"] 1763876572.82737 "e:/source/repos/CA/YummyZoom/report/DoAn.tex" "out/DoAn.pdf" "DoAn" 1763876576.19234 0
   "Bia.tex" 1759730695 1438 2a570573a8f371ac4ce752aaa01f324b ""
+  "Chuong/../Hinhve/usecase_overview.drawio.png" 1762783871 121760 ec27f869cb36177fdbfa54e227d39a7a ""
   "Chuong/0_2_Loi_cam_on.tex" 1759730695 513 811234bc7fe0d90f8a5ae2df5678a53d ""
   "Chuong/0_3_Tom_tat_noi_dung.tex" 1759730695 1048 3097ebaf912daec2f73f59b4729747e9 ""
   "Chuong/0_4_Tom_tat_noi_dung_English.tex" 1759730695 625 bc88fa923884cf7b768cb64eb62537c5 ""
   "Chuong/1_Gioi_thieu.tex" 1761491117 30106 f7190eb6e2aed8b43c3bc25029243960 ""
-  "Chuong/2_Khao_sat.tex" 1761495031 22236 6b6025eb70077de9e19a645a66256725 ""
+  "Chuong/2_Khao_sat.tex" 1763876527 29501 0a97398eee8e449dcd1d8d098f057168 ""
   "Chuong/3_Cong_nghe.tex" 1759730696 2023 bfe39bfb36259bbeb15d9732e50fa8eb ""
   "Chuong/4_Ket_qua_thuc_nghiem.tex" 1760549192 7560 b75551d09c1111f4a655444a62b2cc00 ""
   "Chuong/5_Giai_phap_dong_gop.tex" 1759730696 2243 8f8f53b9a7d3193c2570ff1de5f3ab6a ""
@@ -225,13 +226,15 @@
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
   "e:/source/repos/CA/YummyZoom/report/DoAn.tex" 1760550291 11411 ca33c93e69e1a1dd5779172d1fc99ce4 ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
-  "out/DoAn.aux" 1761497353 16137 f7164f2a7c78cc9582e3ab0b0a38f577 "pdflatex"
+  "out/../Hinhve/usecase_overview.drawio.png" 1762783871 121760 ec27f869cb36177fdbfa54e227d39a7a ""
+  "out/DoAn.aux" 1763876575 17494 99960e8659f17506bc196ed45e9b39f5 "pdflatex"
   "out/DoAn.bbl" 1760548543 9775 237527cdaf323104bd02705ce6054883 "biber out/DoAn"
-  "out/DoAn.lof" 1761497353 756 8fbd8f4a40040e12f937c503c28ed079 "pdflatex"
-  "out/DoAn.lot" 1761497353 436 4c4d7fc7bdfac7d03faac3b6957cf13c "pdflatex"
-  "out/DoAn.out" 1761497353 9875 fadf53e4a25a66ddea8398c09a1e788d "pdflatex"
-  "out/DoAn.run.xml" 1761497353 2420 870e78ade61913599db1e9f942eafbe6 "pdflatex"
-  "out/DoAn.toc" 1761497353 6562 b96ccfa89dc2e6436e13e965d89355fc "pdflatex"
+  "out/DoAn.lof" 1763876575 902 820424763a580773d5f3a0eddc3f6ac4 "pdflatex"
+  "out/DoAn.lot" 1763876575 437 d9826a3aef4069c6a39cd2ec73a65855 "pdflatex"
+  "out/DoAn.out" 1763876575 9875 a49da605a3def47ddc575d64b9620967 "pdflatex"
+  "out/DoAn.run.xml" 1763876575 2420 870e78ade61913599db1e9f942eafbe6 "pdflatex"
+  "out/DoAn.toc" 1763876575 7272 bae19bd23e411f10caac2c2a4c9b4f47 "pdflatex"
+  "use Chuong/../Hinhve/usecase_overview.drawio.png" 1762783871 121760 ec27f869cb36177fdbfa54e227d39a7a ""
   (generated)
   "out/DoAn.aux"
   "out/DoAn.bcf"

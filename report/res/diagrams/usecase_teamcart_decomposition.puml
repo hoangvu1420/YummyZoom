@@ -1,0 +1,81 @@
+@startuml TeamCart_UseCase_Decomposition
+!theme plain
+
+title Biểu đồ Use Case Phân rã - Quản lý TeamCart
+
+' Define actors
+actor "Khách hàng\n(Host)" as Host
+actor "Khách hàng\n(Member)" as Member
+
+' Define system boundary
+package "Hệ thống YummyZoom - TeamCart Module" {
+  
+  ' Host specific use cases
+  usecase "Tạo TeamCart" as UC1
+  usecase "Thiết lập deadline" as UC2
+  usecase "Mời thành viên" as UC3
+  usecase "Khóa giỏ hàng" as UC4
+  usecase "Áp dụng tip" as UC5
+  usecase "Áp dụng coupon" as UC6
+  usecase "Chuyển thành đơn hàng" as UC7
+  
+  ' Member specific use cases
+  usecase "Tham gia TeamCart" as UC8
+  usecase "Thêm món vào giỏ" as UC9
+  usecase "Xóa món khỏi giỏ" as UC10
+  usecase "Cập nhật số lượng" as UC11
+  usecase "Thanh toán online" as UC12
+  usecase "Cam kết COD" as UC13
+  
+  ' Shared use cases
+  usecase "Xem chi tiết giỏ hàng" as UC14
+  usecase "Nhận thông báo real-time" as UC15
+  usecase "Rời khỏi TeamCart" as UC16
+}
+
+' Host relationships - Only direct host actions
+Host --> UC1
+Host --> UC3
+Host --> UC4
+Host --> UC5
+Host --> UC6
+
+' Member relationships  
+Member --> UC8
+Member --> UC9
+Member --> UC10
+Member --> UC11
+Member --> UC12
+Member --> UC13
+
+' Shared relationships
+Host --> UC14
+Member --> UC14
+Host --> UC15
+Member --> UC15
+Member --> UC16
+
+' Include relationships - System behaviors
+UC1 ..> UC2 : <<include>>
+UC4 ..> UC7 : <<include>>
+UC12 ..> UC14 : <<include>>
+UC13 ..> UC14 : <<include>>
+
+' Extend relationships
+UC16 <.. UC8 : <<extend>>
+UC5 <.. UC7 : <<extend>>
+UC6 <.. UC7 : <<extend>>
+
+' Generalization
+Host --|> "Khách hàng"
+Member --|> "Khách hàng"
+
+' Notes
+note right of UC1 : Host tạo TeamCart\nvà trở thành chủ sở hữu
+note bottom of UC4 : Sau khi khóa,\nkhông thể thêm/sửa món
+note left of UC12 : Thanh toán qua\nStripe/PayPal
+note left of UC13 : Cam kết trả tiền mặt\nkhi nhận hàng
+note bottom of UC15 : SignalR Hub\ncập nhật real-time
+note top of UC7 : Chỉ host mới có thể\nchuyển thành đơn hàng
+
+@enduml

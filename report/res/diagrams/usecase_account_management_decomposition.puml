@@ -1,0 +1,80 @@
+@startuml Account_Management_UseCase_Decomposition
+!theme plain
+
+title Biểu đồ Use Case Phân rã - Quản lý tài khoản
+
+' Define actors
+actor "Khách hàng\n(Customer)" as Customer
+actor "Hệ thống SMS\n(SMS Service)" as SMS
+
+' Define system boundary
+package "Hệ thống YummyZoom - Account Module" {
+  
+  ' Authentication use cases
+  usecase "Đăng ký tài khoản" as UC1
+  usecase "Xác thực số điện thoại" as UC2
+  usecase "Thiết lập mật khẩu" as UC3
+  usecase "Đăng nhập" as UC4
+  usecase "Đăng xuất" as UC5
+  
+  ' Profile management use cases
+  usecase "Xem thông tin cá nhân" as UC6
+  usecase "Cập nhật thông tin cá nhân" as UC7
+  usecase "Thay đổi mật khẩu" as UC8
+  
+  ' Address management use cases
+  usecase "Thêm địa chỉ giao hàng" as UC9
+  usecase "Sửa địa chỉ giao hàng" as UC10
+  usecase "Xóa địa chỉ giao hàng" as UC11
+  usecase "Đặt địa chỉ mặc định" as UC12
+  
+  ' Payment method management use cases
+  usecase "Thêm phương thức thanh toán" as UC13
+  usecase "Xóa phương thức thanh toán" as UC14
+  usecase "Đặt phương thức mặc định" as UC15
+  
+  ' Device management use cases
+  usecase "Đăng ký thiết bị" as UC16
+  usecase "Hủy đăng ký thiết bị" as UC17
+}
+
+' Customer relationships - Only direct customer actions
+Customer --> UC1
+Customer --> UC3
+Customer --> UC4
+Customer --> UC5
+Customer --> UC6
+Customer --> UC7
+Customer --> UC8
+Customer --> UC9
+Customer --> UC10
+Customer --> UC11
+Customer --> UC12
+Customer --> UC13
+Customer --> UC14
+Customer --> UC15
+
+' SMS Service relationships
+SMS --> UC2
+
+' Include relationships - System behaviors
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC16 : <<include>>
+UC4 ..> UC16 : <<include>>
+UC7 ..> UC6 : <<include>>
+
+' Extend relationships
+UC3 <.. UC1 : <<extend>>
+UC8 <.. UC7 : <<extend>>
+UC17 <.. UC5 : <<extend>>
+
+' Business sequence is handled by system, not shown in use case relationships
+
+' Notes
+note right of UC2 : Gửi OTP qua SMS\nvà xác thực
+note bottom of UC8 : Yêu cầu mật khẩu\ncũ để xác thực
+note left of UC12 : Chỉ một địa chỉ\nmặc định
+note left of UC15 : Chỉ một phương thức\nthanh toán mặc định
+note top of UC16 : Đăng ký Firebase\nDevice Token
+
+@enduml
