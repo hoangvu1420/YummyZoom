@@ -190,7 +190,7 @@ Thông qua biểu đồ, quy trình nghiệp vụ của TeamCart được thể 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_menu_management_decomposition.drawio.png}
+    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_menu_management_decomposition.png}
     \caption{Biểu đồ use case phân rã - Quản lý thực đơn}
     \label{fig:usecase_menu_management_decomposition}
 \end{figure}
@@ -204,19 +204,39 @@ Về phía Quản trị viên, quy trình "Duyệt đăng ký nhà hàng" đóng
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_restaurant_approval_decomposition.drawio.png}
+    \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_restaurant_approval_decomposition.png}
     \caption{Biểu đồ use case phân rã - Duyệt đăng ký nhà hàng}
     \label{fig:usecase_restaurant_approval_decomposition}
 \end{figure}
 
-Quy trình này bao gồm các bước kiểm tra tính pháp lý (giấy phép kinh doanh), xác thực thực đơn dự kiến và cơ chế phản hồi (phê duyệt/từ chối/yêu cầu bổ sung) thông qua hệ thống email tự động. Điều này giúp đảm bảo tính minh bạch và chuyên nghiệp trong quy trình hợp tác. \vfill
+Quy trình này bao gồm các bước kiểm tra tính pháp lý (giấy phép kinh doanh), xác thực thực đơn dự kiến và cơ chế phản hồi (phê duyệt/từ chối/yêu cầu bổ sung) thông qua hệ thống email tự động. Điều này giúp đảm bảo tính minh bạch và chuyên nghiệp trong quy trình hợp tác. 
 
 \subsection{Quy trình nghiệp vụ}
 \label{subsection:2.2.7}
 
-% Nếu sản phẩm/hệ thống cần xây dựng có quy trình nghiệp vụ quan trọng/đáng chú ý, sinh viên cần mô tả và vẽ biểu đồ hoạt động minh họa quy trình nghiệp vụ đó. Sinh viên lưu ý đây không phải là luồng sự kiện của từng use case, mà là luồng hoạt động kết hợp nhiều use case để thực hiện một nghiệp vụ nào đó.
+Hệ thống YummyZoom có nhiều quy trình nghiệp vụ, trong đó quy trình Xử lý Đặt hàng (Order Processing) là quan trọng và phức tạp nhất. Quy trình này đảm bảo tính chính xác về mặt dữ liệu (tồn kho, giá cả), tuân thủ các quy tắc kinh doanh (khuyến mãi, giờ hoạt động) và an toàn trong giao dịch tài chính.
 
-% Ví dụ, một hệ thống quản lý thư viện có quy trình nghiệp vụ mượn trả với mô tả sơ bộ như sau: Sinh viên làm thẻ mượn, sau đó sinh viên đăng ký mượn sách, thủ thư cho mượn, và cuối cùng sinh viên trả lại sách cho thư viện. Một hệ thống có thể có một vài quy trình nghiệp vụ quan trọng như vậy.
+Hình \ref{fig:activity_order_processing} dưới đây mô tả chi tiết các bước trong quy trình xử lý đặt hàng, từ lúc tiếp nhận yêu cầu, xác thực, tính toán tài chính cho đến khi hoàn tất đơn hàng.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_order_processing.png}
+    \caption{Biểu đồ hoạt động - Quy trình xử lý đặt hàng}
+    \label{fig:activity_order_processing}
+\end{figure}
+\clearpage
+
+Ngoài ra, Quy trình Đặt hàng Nhóm (Team Cart) là một tính năng đặc trưng của YummyZoom, cho phép nhiều người dùng cùng tham gia chọn món và thanh toán. Quy trình này đòi hỏi sự đồng bộ hóa cao giữa các thành viên và hệ thống.
+
+Hình \ref{fig:activity_teamcart_process} minh họa luồng hoạt động của Team Cart, từ lúc Host khởi tạo, các thành viên tham gia chọn món, cho đến khi hoàn tất thanh toán và chốt đơn.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_teamcart_process.png}
+    \caption{Biểu đồ hoạt động - Quy trình đặt hàng nhóm}
+    \label{fig:activity_teamcart_process}
+\end{figure}
+\clearpage
 
 \section{Đặc tả chức năng}
 \label{section:2.3}

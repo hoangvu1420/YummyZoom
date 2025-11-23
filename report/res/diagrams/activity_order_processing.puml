@@ -1,0 +1,79 @@
+@startuml Order_Processing_Activity_Diagram
+!theme plain
+
+title Biểu đồ Hoạt động - Quy trình Xử lý Đặt hàng
+
+start
+
+:Tiếp nhận yêu cầu Đặt hàng;
+note right
+  Thông tin: Khách hàng, Nhà hàng,
+  Món ăn, Địa chỉ, Thanh toán
+end note
+
+partition "Xác thực (Validation)" {
+  if (Nhà hàng tồn tại & Đang hoạt động?) then (Không)
+    :Trả về lỗi "Nhà hàng không khả dụng";
+    stop
+  else (Có)
+  endif
+
+  :Lấy thông tin Món ăn từ DB;
+  
+  if (Món ăn hợp lệ & Có sẵn?) then (Không)
+    :Trả về lỗi "Món ăn không khả dụng";
+    stop
+  else (Có)
+  endif
+
+  :Kiểm tra Tùy chọn (Topping/Size);
+  if (Tùy chọn hợp lệ?) then (Không)
+    :Trả về lỗi "Tùy chọn không hợp lệ";
+    stop
+  else (Có)
+  endif
+}
+
+partition "Tính toán Tài chính" {
+  :Tính Tổng phụ (Subtotal);
+  
+  if (Có mã giảm giá?) then (Có)
+    :Kiểm tra & Xác thực Coupon;
+    if (Coupon hợp lệ?) then (Có)
+      :Tính số tiền giảm;
+      :Cập nhật số lần sử dụng Coupon;
+    else (Không)
+      :Trả về lỗi "Coupon không hợp lệ";
+      stop
+    endif
+  else (Không)
+  endif
+
+  :Tính Phí giao hàng, Thuế & Tip;
+  :Tính Tổng tiền cuối cùng (Total Amount);
+}
+
+partition "Xử lý Thanh toán" {
+  if (Phương thức thanh toán?) then (Online)
+    :Gọi Payment Gateway;
+    :Tạo Payment Intent;
+    if (Thành công?) then (Có)
+      :Nhận PaymentIntentId;
+    else (Không)
+      :Trả về lỗi "Lỗi cổng thanh toán";
+      stop
+    endif
+  else (COD - Tiền mặt)
+    :Ghi nhận thanh toán khi nhận hàng;
+  endif
+}
+
+partition "Hoàn tất" {
+  :Khởi tạo đối tượng Đơn hàng (Order);
+  :Lưu Đơn hàng vào CSDL;
+  :Gửi sự kiện "OrderCreated";
+}
+
+stop
+
+@enduml
