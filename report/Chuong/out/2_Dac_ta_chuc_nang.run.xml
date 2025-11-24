@@ -44,10 +44,10 @@
   <internal package="biblatex" priority="9" active="0">
     <generic>latex</generic>
     <provides type="dynamic">
-      <file>1_Gioi_thieu.bcf</file>
+      <file>2_Dac_ta_chuc_nang.bcf</file>
     </provides>
     <requires type="dynamic">
-      <file>1_Gioi_thieu.bbl</file>
+      <file>2_Dac_ta_chuc_nang.bbl</file>
     </requires>
     <requires type="static">
       <file>blx-dm.def</file>
@@ -67,19 +67,19 @@
     <generic>biber</generic>
     <cmdline>
       <binary>biber</binary>
-      <infile>1_Gioi_thieu</infile>
+      <infile>2_Dac_ta_chuc_nang</infile>
     </cmdline>
     <input>
-      <file>1_Gioi_thieu.bcf</file>
+      <file>2_Dac_ta_chuc_nang.bcf</file>
     </input>
     <output>
-      <file>1_Gioi_thieu.bbl</file>
+      <file>2_Dac_ta_chuc_nang.bbl</file>
     </output>
     <provides type="dynamic">
-      <file>1_Gioi_thieu.bbl</file>
+      <file>2_Dac_ta_chuc_nang.bbl</file>
     </provides>
     <requires type="dynamic">
-      <file>1_Gioi_thieu.bcf</file>
+      <file>2_Dac_ta_chuc_nang.bcf</file>
     </requires>
     <requires type="editable">
       <file>Danh_sach_tai_lieu_tham_khao.bib</file>
