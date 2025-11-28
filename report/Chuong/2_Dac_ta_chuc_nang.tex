@@ -6,242 +6,329 @@
 
 % Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ án để đặc tả chi tiết. Mỗi đặc tả bao gồm ít nhất các thông tin sau: (i) Tên use case, (ii) Luồng sự kiện (chính và phát sinh), (iii) Tiền điều kiện, và (iv) Hậu điều kiện. Sinh viên chỉ vẽ bổ sung biểu đồ hoạt động khi đặc tả use case phức tạp.
 
+% \clearpage
 \subsection{Template đặc tả use case}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-001 & \textbf{Tên use case} & Đăng nhập \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng, Quản trị viên} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép người dùng truy cập vào hệ thống bằng tài khoản đã đăng ký.} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Người dùng nhấn vào nút "Đăng nhập" trên giao diện.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng chưa đăng nhập.} \\ \hline
-        \multirow{3}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Khách hàng & Nhập tên đăng nhập và mật khẩu. \\ \cline{2-4} 
-         & 2 & Hệ thống & Kiểm tra thông tin và chuyển hướng. \\ \hline
-        \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1a & Hệ thống & Hiển thị thông báo lỗi nếu sai thông tin. \\ \cline{2-4} 
-         & 2a & Khách hàng & Nhập lại thông tin hoặc chọn quên mật khẩu. \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng được chuyển đến trang chủ hoặc trang quản trị.} \\ \hline
-    \end{tabular}
-    \caption{Template đặc tả use case}
-    \label{tab:template_uc}
-\end{table}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-001 & \textbf{Tên use case} & Đăng nhập \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng, Quản trị viên} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép người dùng truy cập vào hệ thống bằng tài khoản đã đăng ký.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Người dùng nhấn vào nút "Đăng nhập" trên giao diện.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng chưa đăng nhập.} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Template đặc tả use case} \label{tab:template_uc} \\
+    \endlastfoot
+    
+    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Khách hàng & Nhập tên đăng nhập và mật khẩu. \\ \cline{2-4} 
+     & 2 & Hệ thống & Kiểm tra thông tin và chuyển hướng. \\ \hline
+    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1a & Hệ thống & Hiển thị thông báo lỗi nếu sai thông tin. \\ \cline{2-4} 
+     & 2a & Khách hàng & Nhập lại thông tin hoặc chọn quên mật khẩu. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng được chuyển đến trang chủ hoặc trang quản trị.} \\ \hline
+\end{longtable}
 
 Dữ liệu đầu vào cho use case Đăng nhập gồm các trường dữ liệu như sau:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{2.2cm}|p{3cm}|c|p{2.2cm}|p{2.1cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} & \textbf{Ví dụ} \\ \hline
-        1 & Tên đăng nhập & Email hoặc số điện thoại & Có & Đúng định dạng & user123 \\ \hline
-        2 & Mật khẩu & Chuỗi ký tự bảo mật & Có & Tối thiểu 6 ký tự & 123456 \\ \hline
-    \end{tabular}
-    \caption{Template dữ liệu đầu vào}
-    \label{tab:template_input}
-\end{table}
+\begin{longtable}{|c|p{2.2cm}|p{3cm}|c|p{2.2cm}|p{2.1cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} & \textbf{Ví dụ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{6}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} & \textbf{Ví dụ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{6}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Template dữ liệu đầu vào} \label{tab:template_input} \\
+    \endlastfoot
+
+    1 & Tên đăng nhập & Email hoặc số điện thoại & Có & Đúng định dạng & user123 \\ \hline
+    2 & Mật khẩu & Chuỗi ký tự bảo mật & Có & Tối thiểu 6 ký tự & 123456 \\ \hline
+\end{longtable}
 
 
+\clearpage
 \subsection{Đặc tả Use Case: Đăng ký nhà hàng}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-007 & \textbf{Tên use case} & Đăng ký nhà hàng \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Đối tác tiềm năng)} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép người dùng gửi yêu cầu đăng ký mở nhà hàng mới trên hệ thống.} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Người dùng nhấn nút "Đăng ký quán" trên giao diện.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng đã đăng nhập và tài khoản đang hoạt động.} \\ \hline
-        \multirow{4}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Khách hàng & Nhập thông tin nhà hàng (Tên, địa chỉ, liên hệ, giờ mở cửa...). \\ \cline{2-4} 
-         & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu nhập vào. \\ \cline{2-4} 
-         & 3 & Hệ thống & Tạo hồ sơ đăng ký với trạng thái "Đã nộp" (Submitted). \\ \cline{2-4} 
-         & 4 & Hệ thống & Thông báo đăng ký thành công và chờ duyệt. \\ \hline
-        \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 2a & Hệ thống & Hiển thị thông báo lỗi nếu dữ liệu thiếu hoặc sai định dạng. \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Hồ sơ đăng ký được lưu vào hệ thống, chờ Admin phê duyệt.} \\ \hline
-    \end{tabular}
-    \caption{Đặc tả Use Case Đăng ký nhà hàng}
-    \label{tab:uc_007}
-\end{table}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-007 & \textbf{Tên use case} & Đăng ký nhà hàng \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Đối tác tiềm năng)} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép người dùng gửi yêu cầu đăng ký mở nhà hàng mới trên hệ thống.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Người dùng nhấn nút "Đăng ký quán" trên giao diện.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng đã đăng nhập và tài khoản đang hoạt động.} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Đặc tả Use Case Đăng ký nhà hàng} \label{tab:uc_007} \\
+    \endlastfoot
+
+    \multirow{4}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Khách hàng & Nhập thông tin nhà hàng (Tên, địa chỉ, liên hệ, giờ mở cửa...). \\ \cline{2-4} 
+     & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu nhập vào. \\ \cline{2-4} 
+     & 3 & Hệ thống & Tạo hồ sơ đăng ký với trạng thái "Đã nộp" (Submitted). \\ \cline{2-4} 
+     & 4 & Hệ thống & Thông báo đăng ký thành công và chờ duyệt. \\ \hline
+    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 2a & Hệ thống & Hiển thị thông báo lỗi nếu dữ liệu thiếu hoặc sai định dạng. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Hồ sơ đăng ký được lưu vào hệ thống, chờ Admin phê duyệt.} \\ \hline
+\end{longtable}
 
 Dữ liệu đầu vào cho use case Đăng ký nhà hàng:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & Name & Tên hiển thị của quán & Có & Tối đa 100 ký tự \\ \hline
-        2 & Description & Giới thiệu ngắn gọn & Có & Tối đa 500 ký tự \\ \hline
-        3 & CuisineType & Ví dụ: Cơm, Phở, Trà sữa & Có & Tối đa 50 ký tự \\ \hline
-        4 & Street & Số nhà, tên đường & Có & Tối đa 200 ký tự \\ \hline
-        5 & City & Tên thành phố & Có & Tối đa 100 ký tự \\ \hline
-        6 & State & Tên tỉnh hoặc bang & Có & Tối đa 100 ký tự \\ \hline
-        7 & ZipCode & Zip Code & Có & Tối đa 20 ký tự \\ \hline
-        8 & Country & Tên quốc gia & Có & Tối đa 100 ký tự \\ \hline
-        9 & PhoneNumber & SĐT liên hệ của quán & Có & Tối đa 30 ký tự \\ \hline
-        10 & Email & Email liên hệ & Có & Đúng định dạng Email \\ \hline
-        11 & BusinessHours & Khung giờ hoạt động & Có & Tối đa 200 ký tự \\ \hline
-        12 & LogoUrl & Đường dẫn ảnh đại diện & Không & URL hợp lệ \\ \hline
-        13 & Latitude & Tọa độ địa lý & Không & -90 đến 90 \\ \hline
-        14 & Longitude & Tọa độ địa lý & Không & -180 đến 180 \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Đăng ký nhà hàng}
-    \label{tab:input_uc_007}
-\end{table}
+\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Đăng ký nhà hàng} \label{tab:input_uc_007} \\
+    \endlastfoot
+
+    1 & Name & Tên hiển thị của quán & Có & Tối đa 100 ký tự \\ \hline
+    2 & Description & Giới thiệu ngắn gọn & Có & Tối đa 500 ký tự \\ \hline
+    3 & CuisineType & Ví dụ: Cơm, Phở, Trà sữa & Có & Tối đa 50 ký tự \\ \hline
+    4 & Street & Số nhà, tên đường & Có & Tối đa 200 ký tự \\ \hline
+    5 & City & Tên thành phố & Có & Tối đa 100 ký tự \\ \hline
+    6 & State & Tên tỉnh hoặc bang & Có & Tối đa 100 ký tự \\ \hline
+    7 & ZipCode & Zip Code & Có & Tối đa 20 ký tự \\ \hline
+    8 & Country & Tên quốc gia & Có & Tối đa 100 ký tự \\ \hline
+    9 & PhoneNumber & SĐT liên hệ của quán & Có & Tối đa 30 ký tự \\ \hline
+    10 & Email & Email liên hệ & Có & Đúng định dạng Email \\ \hline
+    11 & BusinessHours & Khung giờ hoạt động & Có & Tối đa 200 ký tự \\ \hline
+    12 & LogoUrl & Đường dẫn ảnh đại diện & Không & URL hợp lệ \\ \hline
+    13 & Latitude & Tọa độ địa lý & Không & -90 đến 90 \\ \hline
+    14 & Longitude & Tọa độ địa lý & Không & -180 đến 180 \\ \hline
+\end{longtable}
 
 
+\clearpage
 \subsection{Đặc tả Use Case: Duyệt đăng ký nhà hàng}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-012 & \textbf{Tên use case} & Duyệt đăng ký nhà hàng \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Quản trị viên (Admin)} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Admin xem xét và phê duyệt yêu cầu đăng ký nhà hàng, đồng thời khởi tạo nhà hàng mới trên hệ thống.} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Admin nhấn nút "Duyệt" (Approve) trên chi tiết hồ sơ đăng ký.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Admin đã đăng nhập. Hồ sơ đăng ký tồn tại và đang ở trạng thái chờ duyệt (Submitted/UnderReview).} \\ \hline
-        \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Admin & Nhập ghi chú (tùy chọn) và xác nhận duyệt. \\ \cline{2-4} 
-         & 2 & Hệ thống & Tạo mới thực thể Nhà hàng (Restaurant) từ thông tin đăng ký. \\ \cline{2-4} 
-         & 3 & Hệ thống & Gán quyền Chủ sở hữu (Owner) cho tài khoản người đăng ký. \\ \cline{2-4} 
-         & 4 & Hệ thống & Cập nhật trạng thái hồ sơ thành "Đã duyệt" (Approved). \\ \cline{2-4} 
-         & 5 & Hệ thống & Gửi thông báo thành công cho Admin và người đăng ký. \\ \hline
-        \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 2a & Hệ thống & Báo lỗi nếu quá trình tạo nhà hàng hoặc gán quyền thất bại. \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Nhà hàng mới được tạo và hiển thị trên hệ thống. Người đăng ký có quyền quản lý nhà hàng đó.} \\ \hline
-    \end{tabular}
-    \caption{Đặc tả Use Case Duyệt đăng ký nhà hàng}
-    \label{tab:uc_012}
-\end{table}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-012 & \textbf{Tên use case} & Duyệt đăng ký nhà hàng \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Quản trị viên (Admin)} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Admin xem xét và phê duyệt yêu cầu đăng ký nhà hàng, đồng thời khởi tạo nhà hàng mới trên hệ thống.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Admin nhấn nút "Duyệt" (Approve) trên chi tiết hồ sơ đăng ký.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Admin đã đăng nhập. Hồ sơ đăng ký tồn tại và đang ở trạng thái chờ duyệt (Submitted/UnderReview).} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Đặc tả Use Case Duyệt đăng ký nhà hàng} \label{tab:uc_012} \\
+    \endlastfoot
+
+    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Admin & Nhập ghi chú (tùy chọn) và xác nhận duyệt. \\ \cline{2-4} 
+     & 2 & Hệ thống & Tạo mới thực thể Nhà hàng (Restaurant) từ thông tin đăng ký. \\ \cline{2-4} 
+     & 3 & Hệ thống & Gán quyền Chủ sở hữu (Owner) cho tài khoản người đăng ký. \\ \cline{2-4} 
+     & 4 & Hệ thống & Cập nhật trạng thái hồ sơ thành "Đã duyệt" (Approved). \\ \cline{2-4} 
+     & 5 & Hệ thống & Gửi thông báo thành công cho Admin và người đăng ký. \\ \hline
+    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 2a & Hệ thống & Báo lỗi nếu quá trình tạo nhà hàng hoặc gán quyền thất bại. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Nhà hàng mới được tạo và hiển thị trên hệ thống. Người đăng ký có quyền quản lý nhà hàng đó.} \\ \hline
+\end{longtable}
 
 Dữ liệu đầu vào cho use case Duyệt đăng ký nhà hàng:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & RegistrationId & ID của hồ sơ đăng ký & Có & GUID hợp lệ, tồn tại \\ \hline
-        2 & Note & Ghi chú nội bộ của Admin & Không & Tối đa 500 ký tự \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Duyệt đăng ký nhà hàng}
-    \label{tab:input_uc_012}
-\end{table}
+\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Duyệt đăng ký nhà hàng} \label{tab:input_uc_012} \\
+    \endlastfoot
 
+    1 & RegistrationId & ID của hồ sơ đăng ký & Có & GUID hợp lệ, tồn tại \\ \hline
+    2 & Note & Ghi chú nội bộ của Admin & Không & Tối đa 500 ký tự \\ \hline
+\end{longtable}
 
-\subsection{Đặc tả Use Case: Quản lý thực đơn}
-\begin{table}[htbp]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-008 & \textbf{Tên use case} & Quản lý thực đơn \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Chủ nhà hàng (Restaurant Owner/Staff)} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép nhà hàng tạo, cập nhật, xóa danh mục món ăn, món ăn và nhóm tùy chọn (size, topping) để xây dựng thực đơn hoàn chỉnh.} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Chủ nhà hàng truy cập trang quản lý thực đơn và thực hiện các thao tác CRUD.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng đã đăng nhập và có quyền quản lý nhà hàng (Owner hoặc Staff). Nhà hàng đã được duyệt và tồn tại trong hệ thống.} \\ \hline
-        \multirow{9}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Chủ nhà hàng & Chọn chức năng quản lý danh mục/món ăn/nhóm tùy chọn. \\ \cline{2-4} 
-         & 2 & Chủ nhà hàng & Nhập thông tin chi tiết (tên, mô tả, giá, hình ảnh...). \\ \cline{2-4} 
-         & 3 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu đầu vào (không rỗng, giá > 0, định dạng URL...). \\ \cline{2-4} 
-         & 4 & Hệ thống & Kiểm tra quyền sở hữu (danh mục/món phải thuộc nhà hàng đang quản lý). \\ \cline{2-4} 
-         & 5 & Hệ thống & Tạo/cập nhật thực thể trong cơ sở dữ liệu (MenuItem, MenuCategory). \\ \cline{2-4} 
-         & 6 & Hệ thống & Phát sự kiện domain (MenuItemCreated, MenuItemUpdated, MenuItemDeleted...). \\ \cline{2-4} 
-         & 7 & Hệ thống & Cập nhật read model FullMenuView để đồng bộ dữ liệu hiển thị. \\ \cline{2-4} 
-         & 8 & Hệ thống & Thông báo thành công và hiển thị danh sách cập nhật. \\ \hline
-        \multirow{4}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 3a & Hệ thống & Hiển thị lỗi nếu dữ liệu không hợp lệ (tên rỗng, giá âm, URL sai định dạng). \\ \cline{2-4} 
-         & 4a & Hệ thống & Từ chối thao tác nếu món ăn/danh mục không thuộc nhà hàng (ForbiddenAccessException). \\ \cline{2-4} 
-         & 5a & Hệ thống & Báo lỗi nếu danh mục không tồn tại khi tạo món ăn mới. \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Thực đơn được cập nhật thành công. Thay đổi được phản ánh ngay lập tức trên giao diện khách hàng thông qua FullMenuView. Sự kiện domain được ghi lại để audit trail.} \\ \hline
-    \end{tabular}
-    \caption{Đặc tả Use Case Quản lý thực đơn}
-    \label{tab:uc_008}
-\end{table}
 
 \clearpage
+\subsection{Đặc tả Use Case: Quản lý thực đơn}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-008 & \textbf{Tên use case} & Quản lý thực đơn \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Chủ nhà hàng (Restaurant Owner/Staff)} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép nhà hàng tạo, cập nhật, xóa danh mục món ăn, món ăn và nhóm tùy chọn (size, topping) để xây dựng thực đơn hoàn chỉnh.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Chủ nhà hàng truy cập trang quản lý thực đơn và thực hiện các thao tác CRUD.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng đã đăng nhập và có quyền quản lý nhà hàng (Owner hoặc Staff). Nhà hàng đã được duyệt và tồn tại trong hệ thống.} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Đặc tả Use Case Quản lý thực đơn} \label{tab:uc_008} \\
+    \endlastfoot
+
+    \multirow{9}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Chủ nhà hàng & Chọn chức năng quản lý danh mục/món ăn/nhóm tùy chọn. \\ \cline{2-4} 
+     & 2 & Chủ nhà hàng & Nhập thông tin chi tiết (tên, mô tả, giá, hình ảnh...). \\ \cline{2-4} 
+     & 3 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu đầu vào (không rỗng, giá > 0, định dạng URL...). \\ \cline{2-4} 
+     & 4 & Hệ thống & Kiểm tra quyền sở hữu (danh mục/món phải thuộc nhà hàng đang quản lý). \\ \cline{2-4} 
+     & 5 & Hệ thống & Tạo/cập nhật thực thể trong cơ sở dữ liệu (MenuItem, MenuCategory). \\ \cline{2-4} 
+     & 6 & Hệ thống & Phát sự kiện domain (MenuItemCreated, MenuItemUpdated, MenuItemDeleted...). \\ \cline{2-4} 
+     & 7 & Hệ thống & Cập nhật read model FullMenuView để đồng bộ dữ liệu hiển thị. \\ \cline{2-4} 
+     & 8 & Hệ thống & Thông báo thành công và hiển thị danh sách cập nhật. \\ \hline
+    \multirow{4}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 3a & Hệ thống & Hiển thị lỗi nếu dữ liệu không hợp lệ (tên rỗng, giá âm, URL sai định dạng). \\ \cline{2-4} 
+     & 4a & Hệ thống & Từ chối thao tác nếu món ăn/danh mục không thuộc nhà hàng (ForbiddenAccessException). \\ \cline{2-4} 
+     & 5a & Hệ thống & Báo lỗi nếu danh mục không tồn tại khi tạo món ăn mới. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Thực đơn được cập nhật thành công. Thay đổi được phản ánh ngay lập tức trên giao diện khách hàng thông qua FullMenuView. Sự kiện domain được ghi lại phục vụ phân tích.} \\ \hline
+\end{longtable}
+
 Dữ liệu đầu vào cho use case Quản lý thực đơn (Tạo món ăn mới):
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ \\ \hline
-        2 & MenuCategoryId & ID danh mục món ăn & Có & GUID hợp lệ, tồn tại \\ \hline
-        3 & Name & Tên món ăn & Có & Không rỗng, không chỉ khoảng trắng \\ \hline
-        4 & Description & Mô tả chi tiết món & Có & Không rỗng, không chỉ khoảng trắng \\ \hline
-        5 & Price & Giá cơ bản & Có & Số thực > 0 \\ \hline
-        6 & Currency & Đơn vị tiền tệ & Có & Mã tiền tệ hợp lệ (VND, USD...) \\ \hline
-        7 & ImageUrl & Đường dẫn ảnh món & Không & URL hợp lệ hoặc null \\ \hline
-        8 & IsAvailable & Trạng thái còn hàng & Không & Boolean (mặc định: true) \\ \hline
-        9 & DietaryTagIds & Danh sách tag dinh dưỡng & Không & Danh sách GUID (Vegetarian, Spicy...) \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Quản lý thực đơn - Tạo món ăn}
-    \label{tab:input_uc_008}
-\end{table}
+\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Quản lý thực đơn - Tạo món ăn} \label{tab:input_uc_008} \\
+    \endlastfoot
+
+    1 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ \\ \hline
+    2 & MenuCategoryId & ID danh mục món ăn & Có & GUID hợp lệ, tồn tại \\ \hline
+    3 & Name & Tên món ăn & Có & Không rỗng, không chỉ khoảng trắng \\ \hline
+    4 & Description & Mô tả chi tiết món & Có & Không rỗng, không chỉ khoảng trắng \\ \hline
+    5 & Price & Giá cơ bản & Có & Số thực > 0 \\ \hline
+    6 & Currency & Đơn vị tiền tệ & Có & Mã tiền tệ hợp lệ (VND, USD...) \\ \hline
+    7 & ImageUrl & Đường dẫn ảnh món & Không & URL hợp lệ hoặc null \\ \hline
+    8 & IsAvailable & Trạng thái còn hàng & Không & Boolean (mặc định: true) \\ \hline
+    9 & DietaryTagIds & Danh sách tag dinh dưỡng & Không & Danh sách GUID (Vegetarian, Spicy...) \\ \hline
+\end{longtable}
+
 
 \clearpage
-
 \subsection{Đặc tả Use Case: Tìm kiếm nhà hàng}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-002 & \textbf{Tên use case} & Tìm kiếm nhà hàng \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tìm kiếm nhà hàng theo tên, món ăn, loại hình ẩm thực, vị trí địa lý và các bộ lọc khác (đánh giá, tag, khuyến mãi).} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng nhập từ khóa tìm kiếm hoặc chọn bộ lọc trên giao diện.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Không yêu cầu đăng nhập. Hệ thống có dữ liệu nhà hàng đã được duyệt (IsVerified = true).} \\ \hline
-        \multirow{8}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Khách hàng & Nhập từ khóa tìm kiếm (tên nhà hàng/món ăn) hoặc chọn bộ lọc. \\ \cline{2-4} 
-         & 2 & Hệ thống & Validate dữ liệu đầu vào (độ dài, định dạng tọa độ, phạm vi giá trị). \\ \cline{2-4} 
-         & 3 & Hệ thống & Xây dựng câu truy vấn SQL với điều kiện lọc (WHERE clauses). \\ \cline{2-4} 
-         & 4 & Hệ thống & Tính toán khoảng cách (nếu có tọa độ) bằng công thức Haversine. \\ \cline{2-4} 
-         & 5 & Hệ thống & Sắp xếp kết quả theo tiêu chí (rating/distance/popularity/name). \\ \cline{2-4} 
-         & 6 & Hệ thống & Phân trang kết quả (PageNumber, PageSize). \\ \cline{2-4} 
-         & 7 & Hệ thống & Trả về danh sách nhà hàng và facets (nếu yêu cầu). \\ \hline
-        \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 2a & Hệ thống & Trả về lỗi validation nếu tham số không hợp lệ (PageSize > 50, tọa độ ngoài phạm vi...). \\ \cline{2-4} 
-         & 7a & Hệ thống & Trả về danh sách rỗng nếu không tìm thấy kết quả phù hợp. \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Danh sách nhà hàng được hiển thị với thông tin: tên, logo, loại ẩm thực, đánh giá, khoảng cách (nếu có). Facets (bộ lọc động) được cập nhật dựa trên kết quả hiện tại.} \\ \hline
-    \end{tabular}
-    \caption{Đặc tả Use Case Tìm kiếm nhà hàng}
-    \label{tab:uc_002}
-\end{table}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-002 & \textbf{Tên use case} & Tìm kiếm nhà hàng \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tìm kiếm nhà hàng theo tên, món ăn, loại hình ẩm thực, vị trí địa lý và các bộ lọc khác (đánh giá, tag, khuyến mãi).} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng nhập từ khóa tìm kiếm hoặc chọn bộ lọc trên giao diện.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Không yêu cầu đăng nhập. Hệ thống có dữ liệu nhà hàng đã được duyệt (IsVerified = true).} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Đặc tả Use Case Tìm kiếm nhà hàng} \label{tab:uc_002} \\
+    \endlastfoot
+
+    \multirow{8}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Khách hàng & Nhập từ khóa tìm kiếm (tên nhà hàng/món ăn) hoặc chọn bộ lọc. \\ \cline{2-4} 
+     & 2 & Hệ thống & Validate dữ liệu đầu vào (độ dài, định dạng tọa độ, phạm vi giá trị). \\ \cline{2-4} 
+     & 3 & Hệ thống & Xây dựng câu truy vấn SQL với điều kiện lọc (WHERE clauses). \\ \cline{2-4} 
+     & 4 & Hệ thống & Tính toán khoảng cách (nếu có tọa độ) bằng công thức Haversine. \\ \cline{2-4} 
+     & 5 & Hệ thống & Sắp xếp kết quả theo tiêu chí (rating/distance/popularity/name). \\ \cline{2-4} 
+     & 6 & Hệ thống & Phân trang kết quả (PageNumber, PageSize). \\ \cline{2-4} 
+     & 7 & Hệ thống & Trả về danh sách nhà hàng và facets (nếu yêu cầu). \\ \hline
+    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 2a & Hệ thống & Trả về lỗi validation nếu tham số không hợp lệ (PageSize > 50, tọa độ ngoài phạm vi...). \\ \cline{2-4} 
+     & 7a & Hệ thống & Trả về danh sách rỗng nếu không tìm thấy kết quả phù hợp. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Danh sách nhà hàng được hiển thị với thông tin: tên, logo, loại ẩm thực, đánh giá, khoảng cách (nếu có). Facets (bộ lọc động) được cập nhật dựa trên kết quả hiện tại.} \\ \hline
+\end{longtable}
 
 Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{2.5cm}|p{3.5cm}|c|p{3.5cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & Q & Từ khóa tìm kiếm & Không & Tối đa 100 ký tự \\ \hline
-        2 & Cuisine & Loại ẩm thực & Không & Tối đa 50 ký tự \\ \hline
-        3 & Lat & Vĩ độ & Không & -90 đến 90 \\ \hline
-        4 & Lng & Kinh độ & Không & -180 đến 180 \\ \hline
-        5 & MinRating & Đánh giá tối thiểu & Không & 0 đến 5 \\ \hline
-        6 & Sort & Tiêu chí sắp xếp & Không & rating hoặc distance hoặc popularity \\ \hline
-        7 & Bbox & Bounding box (bản đồ) & Không & minLon, minLat, maxLon, maxLat \\ \hline
-        8 & Tags & Danh sách tag (tên) & Không & Tối đa 20 tag, mỗi tag \textless= 100 ký tự \\ \hline
-        9 & TagIds & Danh sách tag (ID) & Không & Tối đa 20 GUID \\ \hline
-        10 & DiscountedOnly & Chỉ nhà hàng có KM & Không & Boolean \\ \hline
-        11 & PageNumber & Số trang & Có & >= 1 \\ \hline
-        12 & PageSize & Kích thước trang & Có & 1 đến 50 \\ \hline
-        13 & IncludeFacets & Bao gồm facets & Không & Boolean (mặc định: false) \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Tìm kiếm nhà hàng}
-    \label{tab:input_uc_002}
-\end{table}
+\begin{longtable}{|c|p{2.5cm}|p{3.5cm}|c|p{3.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Tìm kiếm nhà hàng} \label{tab:input_uc_002} \\
+    \endlastfoot
+
+    1 & Q & Từ khóa tìm kiếm & Không & Tối đa 100 ký tự \\ \hline
+    2 & Cuisine & Loại ẩm thực & Không & Tối đa 50 ký tự \\ \hline
+    3 & Lat & Vĩ độ & Không & -90 đến 90 \\ \hline
+    4 & Lng & Kinh độ & Không & -180 đến 180 \\ \hline
+    5 & MinRating & Đánh giá tối thiểu & Không & 0 đến 5 \\ \hline
+    6 & Sort & Tiêu chí sắp xếp & Không & rating hoặc distance hoặc popularity \\ \hline
+    7 & Bbox & Bounding box (bản đồ) & Không & minLon, minLat, maxLon, maxLat \\ \hline
+    8 & Tags & Danh sách tag (tên) & Không & Tối đa 20 tag, mỗi tag \textless= 100 ký tự \\ \hline
+    9 & TagIds & Danh sách tag (ID) & Không & Tối đa 20 GUID \\ \hline
+    10 & DiscountedOnly & Chỉ nhà hàng có KM & Không & Boolean \\ \hline
+    11 & PageNumber & Số trang & Có & >= 1 \\ \hline
+    12 & PageSize & Kích thước trang & Có & 1 đến 50 \\ \hline
+    13 & IncludeFacets & Bao gồm facets & Không & Boolean (mặc định: false) \\ \hline
+\end{longtable}
+
 
 \clearpage
-
 \subsection{Đặc tả Use Case: Đặt hàng cá nhân}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-    \caption{Đặc tả Use Case Đặt hàng cá nhân} \label{tab:uc_003} \\
     \hline
     \textbf{Mã use case} & UC-003 & \textbf{Tên use case} & Đặt hàng cá nhân \\ \hline
     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng} \\ \hline
@@ -258,6 +345,7 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
+    \caption{Đặc tả Use Case Đặt hàng cá nhân} \label{tab:uc_003} \\
     \endlastfoot
     
     \multirow{13}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
@@ -285,72 +373,97 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
 
 Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{4.0cm}|p{3.0cm}|c|p{3.5cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & CustomerId & ID khách hàng & Có & GUID hợp lệ, trùng với user hiện tại \\ \hline
-        2 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ, nhà hàng tồn tại \\ \hline
-        3 & Items & Danh sách món ăn & Có & Tối thiểu 1, tối đa 50 món \\ \hline
-        4 & Items[].\hspace{0pt}MenuItemId & ID món ăn & Có & GUID hợp lệ, món tồn tại \\ \hline
-        5 & Items[].\hspace{0pt}Quantity & Số lượng & Có & 1 đến 10 \\ \hline
-        6 & Items[].\hspace{0pt}Customizations & Danh sách tùy chỉnh & Không & Phụ thuộc món ăn \\ \hline
-        7 & DeliveryAddress.\hspace{0pt}Street & Số nhà, đường & Có & Tối đa 200 ký tự \\ \hline
-        8 & DeliveryAddress.\hspace{0pt}City & Thành phố & Có & Tối đa 100 ký tự \\ \hline
-        9 & DeliveryAddress.\hspace{0pt}State & Tỉnh/Bang & Có & Tối đa 100 ký tự \\ \hline
-        10 & DeliveryAddress.\hspace{0pt}ZipCode & Mã bưu điện & Có & Tối đa 20 ký tự \\ \hline
-        11 & DeliveryAddress.\hspace{0pt}Country & Quốc gia & Có & Tối đa 100 ký tự \\ \hline
-        12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, PayPal, ApplePay, GooglePay, COD \\ \hline
-        13 & SpecialInstructions & Ghi chú đặc biệt & Không & Tối đa 500 ký tự \\ \hline
-        14 & CouponCode & Mã giảm giá & Không & Tối đa 50 ký tự \\ \hline
-        15 & TipAmount & Tiền tip & Không & >= 0 \\ \hline
-        16 & TeamCartId & ID giỏ hàng nhóm & Không & GUID hợp lệ (nếu từ TeamCart) \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Đặt hàng cá nhân}
-    \label{tab:input_uc_003}
-\end{table}
+\begin{longtable}{|c|p{4.0cm}|p{3.0cm}|c|p{3.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Đặt hàng cá nhân} \label{tab:input_uc_003} \\
+    \endlastfoot
+
+    1 & CustomerId & ID khách hàng & Có & GUID hợp lệ, trùng với user hiện tại \\ \hline
+    2 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ, nhà hàng tồn tại \\ \hline
+    3 & Items & Danh sách món ăn & Có & Tối thiểu 1, tối đa 50 món \\ \hline
+    4 & Items[].\hspace{0pt}MenuItemId & ID món ăn & Có & GUID hợp lệ, món tồn tại \\ \hline
+    5 & Items[].\hspace{0pt}Quantity & Số lượng & Có & 1 đến 10 \\ \hline
+    6 & Items[].\hspace{0pt}Customizations & Danh sách tùy chỉnh & Không & Phụ thuộc món ăn \\ \hline
+    7 & DeliveryAddress.\hspace{0pt}Street & Số nhà, đường & Có & Tối đa 200 ký tự \\ \hline
+    8 & DeliveryAddress.\hspace{0pt}City & Thành phố & Có & Tối đa 100 ký tự \\ \hline
+    9 & DeliveryAddress.\hspace{0pt}State & Tỉnh/Bang & Có & Tối đa 100 ký tự \\ \hline
+    10 & DeliveryAddress.\hspace{0pt}ZipCode & Mã bưu điện & Có & Tối đa 20 ký tự \\ \hline
+    11 & DeliveryAddress.\hspace{0pt}Country & Quốc gia & Có & Tối đa 100 ký tự \\ \hline
+    12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, PayPal, ApplePay, GooglePay, COD \\ \hline
+    13 & SpecialInstructions & Ghi chú đặc biệt & Không & Tối đa 500 ký tự \\ \hline
+    14 & CouponCode & Mã giảm giá & Không & Tối đa 50 ký tự \\ \hline
+    15 & TipAmount & Tiền tip & Không & >= 0 \\ \hline
+    16 & TeamCartId & ID giỏ hàng nhóm & Không & GUID hợp lệ (nếu từ TeamCart) \\ \hline
+\end{longtable}
+
 
 \clearpage
 \subsection{Đặc tả Use Case: Khởi tạo TeamCart}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-        \hline
-        \textbf{Mã use case} & UC-004a & \textbf{Tên use case} & Khởi tạo TeamCart \\ \hline
-        \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Host)} \\ \hline
-        \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tạo một giỏ hàng nhóm (TeamCart) để mời những người khác cùng đặt món từ một nhà hàng cụ thể.} \\ \hline
-        \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng chọn chức năng "Đặt nhóm" (Group Order) trên giao diện chi tiết nhà hàng.} \\ \hline
-        \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. Nhà hàng tồn tại và đang hoạt động.} \\ \hline
-        \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 1 & Khách hàng & Chọn nhà hàng và thiết lập thông tin giỏ nhóm (Tên hiển thị của Host, Thời gian chốt đơn). \\ \cline{2-4} 
-         & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (Tên host không rỗng, thời gian chốt đơn phải ở tương lai nếu có). \\ \cline{2-4} 
-         & 3 & Hệ thống & Tạo mới TeamCart với trạng thái Active. Tạo ShareToken duy nhất. \\ \cline{2-4} 
-         & 4 & Hệ thống & Thêm người tạo vào danh sách thành viên với vai trò Host. \\ \cline{2-4} 
-         & 5 & Hệ thống & Trả về thông tin TeamCart và Link chia sẻ (ShareToken). \\ \hline
-        \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-         & 2a & Hệ thống & Báo lỗi nếu nhà hàng không tồn tại hoặc thời gian chốt đơn không hợp lệ (trong quá khứ). \\ \hline
-        \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{TeamCart được tạo thành công. Host nhận được link chia sẻ để gửi cho các thành viên khác.} \\ \hline
-    \end{tabular}
-    \caption{Đặc tả Use Case Khởi tạo TeamCart}
-    \label{tab:uc_004a}
-\end{table}
+\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+    \hline
+    \textbf{Mã use case} & UC-004a & \textbf{Tên use case} & Khởi tạo TeamCart \\ \hline
+    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Host)} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tạo một giỏ hàng nhóm (TeamCart) để mời những người khác cùng đặt món từ một nhà hàng cụ thể.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng chọn chức năng "Đặt nhóm" (Group Order) trên giao diện chi tiết nhà hàng.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. Nhà hàng tồn tại và đang hoạt động.} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+    
+    \hline
+    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Đặc tả Use Case Khởi tạo TeamCart} \label{tab:uc_004a} \\
+    \endlastfoot
 
-\vfill
+    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 1 & Khách hàng & Chọn nhà hàng và thiết lập thông tin giỏ nhóm (Tên hiển thị của Host, Thời gian chốt đơn). \\ \cline{2-4} 
+     & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (Tên host không rỗng, thời gian chốt đơn phải ở tương lai nếu có). \\ \cline{2-4} 
+     & 3 & Hệ thống & Tạo mới TeamCart với trạng thái Active. Tạo ShareToken duy nhất. \\ \cline{2-4} 
+     & 4 & Hệ thống & Thêm người tạo vào danh sách thành viên với vai trò Host. \\ \cline{2-4} 
+     & 5 & Hệ thống & Trả về thông tin TeamCart và Link chia sẻ (ShareToken). \\ \hline
+    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+     & 2a & Hệ thống & Báo lỗi nếu nhà hàng không tồn tại hoặc thời gian chốt đơn không hợp lệ (trong quá khứ). \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{TeamCart được tạo thành công. Host nhận được link chia sẻ để gửi cho các thành viên khác.} \\ \hline
+\end{longtable}
 
 Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-        \hline
-        \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-        1 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ, nhà hàng tồn tại \\ \hline
-        2 & HostName & Tên hiển thị của Host & Có & Không rỗng, tối đa 200 ký tự \\ \hline
-        3 & DeadlineUtc & Thời gian chốt đơn & Không & Thời gian trong tương lai (nếu có) \\ \hline
-    \end{tabular}
-    \caption{Dữ liệu đầu vào Khởi tạo TeamCart}
-    \label{tab:input_uc_004a}
-\end{table}
+\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+    \endhead
+    
+    \hline
+    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+    
+    \caption{Dữ liệu đầu vào Khởi tạo TeamCart} \label{tab:input_uc_004a} \\
+    \endlastfoot
+
+    1 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ, nhà hàng tồn tại \\ \hline
+    2 & HostName & Tên hiển thị của Host & Có & Không rỗng, tối đa 200 ký tự \\ \hline
+    3 & DeadlineUtc & Thời gian chốt đơn & Không & Thời gian trong tương lai (nếu có) \\ \hline
+\end{longtable}
 
 \end{document}

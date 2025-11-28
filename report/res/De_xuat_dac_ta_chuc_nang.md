@@ -54,7 +54,7 @@ Các use case được lựa chọn dựa trên các tiêu chí sau:
 
 ### Nhóm 3: TeamCart - Tính năng Đột phá (Customer)
 
-#### 6. Khởi tạo TeamCart (Create TeamCart)
+#### 6. Khởi tạo TeamCart (Create TeamCart) ✅
 *   **Mã UC:** UC-004a (Phân rã từ UC-004)
 *   **Tác nhân:** Khách hàng (Host)
 *   **Mô tả:** Tạo giỏ hàng nhóm, thiết lập nhà hàng, thời gian chốt đơn và lấy link chia sẻ.
