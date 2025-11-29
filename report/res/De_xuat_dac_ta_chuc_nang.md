@@ -62,33 +62,37 @@ Các use case được lựa chọn dựa trên các tiêu chí sau:
 *   **Tham chiếu:** `usecase_teamcart_decomposition.puml`
 *   **Trạng thái:** Đã hoàn thành đặc tả (2025-11-24)
 
-#### 7. Tham gia TeamCart (Join TeamCart)
+#### 7. Tham gia TeamCart (Join TeamCart) ✅
 *   **Mã UC:** UC-004b
 *   **Tác nhân:** Khách hàng (Member)
 *   **Mô tả:** Truy cập qua link chia sẻ, nhập tên (nếu là guest) và chọn món vào giỏ chung.
 *   **Lý do chọn:** Thể hiện tính tương tác thời gian thực (Real-time) giữa các người dùng.
 *   **Tham chiếu:** `usecase_teamcart_decomposition.puml`
+*   **Trạng thái:** Đã hoàn thành đặc tả (2025-11-28)
 
-#### 8. Chốt đơn TeamCart (Lock & Checkout TeamCart)
+#### 8. Chốt đơn TeamCart (Lock & Checkout TeamCart) ✅
 *   **Mã UC:** UC-004c
 *   **Tác nhân:** Khách hàng (Host)
 *   **Mô tả:** Host khóa giỏ hàng, các thành viên thanh toán phần của mình, Host chốt đơn cuối cùng để gửi đi.
 *   **Lý do chọn:** Logic phức tạp nhất về xử lý thanh toán phân tán và đồng bộ trạng thái.
 *   **Tham chiếu:** `usecase_teamcart_decomposition.puml`
+*   **Trạng thái:** Đã hoàn thành đặc tả (2025-11-29)
 
 ### Nhóm 4: Vận hành & Phản hồi (Operation)
 
-#### 9. Xử lý đơn hàng (Process Order)
+#### 9. Xử lý đơn hàng (Process Order) ✅
 *   **Mã UC:** UC-009
 *   **Tác nhân:** Nhà hàng
 *   **Mô tả:** Nhà hàng nhận thông báo, chấp nhận đơn, cập nhật trạng thái (Đang chuẩn bị -> Đã giao).
 *   **Lý do chọn:** Hoàn thiện vòng đời của một đơn hàng từ phía cung cấp dịch vụ.
+*   **Trạng thái:** Đã hoàn thành đặc tả (2025-11-29)
 
-#### 10. Đánh giá nhà hàng (Review Restaurant)
+#### 10. Đánh giá nhà hàng (Review Restaurant) ✅
 *   **Mã UC:** UC-006
 *   **Tác nhân:** Khách hàng
 *   **Mô tả:** Viết đánh giá và chấm điểm sau khi đơn hàng hoàn tất.
 *   **Lý do chọn:** Tính năng quan trọng để xây dựng uy tín và dữ liệu cho hệ thống gợi ý.
+*   **Trạng thái:** Đã hoàn thành đặc tả (2025-11-29)
 
 ## Kế hoạch thực hiện
 1.  Sử dụng template bảng đặc tả trong `2_Dac_ta_chuc_nang.tex`.

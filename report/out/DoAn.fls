@@ -96,6 +96,8 @@ INPUT c:/texlive/2025/texmf-dist/tex/latex/type1cm/type1cm.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/type1cm/type1cm.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/array.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/array.sty
+INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/longtable.sty
+INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/longtable.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/subfiles/subfiles.sty
@@ -136,6 +138,8 @@ INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/caption.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/caption.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/caption3.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/caption3.sty
+INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/ltcaption.sty
+INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/ltcaption.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/listings/listings.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/listings/listings.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/listings/lstpatch.sty
@@ -190,8 +194,6 @@ INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
-INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/longtable.sty
-INPUT c:/texlive/2025/texmf-dist/tex/latex/tools/longtable.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/supertabular/supertabular.sty
@@ -342,8 +344,6 @@ INPUT c:/texlive/2025/texmf-dist/tex/latex/grfext/grfext.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT c:/texlive/2025/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT c:/texlive/2025/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
-INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/ltcaption.sty
-INPUT c:/texlive/2025/texmf-dist/tex/latex/caption/ltcaption.sty
 INPUT c:/texlive/2025/texmf-dist/tex/latex/biblatex/lbx/english.lbx
 OUTPUT out/DoAn.bcf
 INPUT out/DoAn.bbl

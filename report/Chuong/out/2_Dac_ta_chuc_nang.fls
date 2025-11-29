@@ -365,11 +365,11 @@ INPUT Chuong/out/2_Dac_ta_chuc_nang.out
 INPUT Chuong/out/2_Dac_ta_chuc_nang.out
 OUTPUT Chuong/out/2_Dac_ta_chuc_nang.out
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmb8v.tfm
+INPUT c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map
+INPUT c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmri8v.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmr8v.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmb8v.tfm
-INPUT c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map
-INPUT c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc
 INPUT Chuong/out/2_Dac_ta_chuc_nang.aux
 INPUT Chuong/out/2_Dac_ta_chuc_nang.out
 INPUT Chuong/out/2_Dac_ta_chuc_nang.out

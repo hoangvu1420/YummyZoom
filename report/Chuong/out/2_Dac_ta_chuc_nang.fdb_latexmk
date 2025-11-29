@@ -1,17 +1,17 @@
 # Fdb version 4
-["biber Chuong/out/2_Dac_ta_chuc_nang"] 1764213916.80986 "Chuong/out/2_Dac_ta_chuc_nang.bcf" "Chuong/out/2_Dac_ta_chuc_nang.bbl" "Chuong/out/2_Dac_ta_chuc_nang" 1764253556.81733 0
-  "Chuong/out/2_Dac_ta_chuc_nang.bcf" 1764253556 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
+["biber Chuong/out/2_Dac_ta_chuc_nang"] 1764213916.80986 "Chuong/out/2_Dac_ta_chuc_nang.bcf" "Chuong/out/2_Dac_ta_chuc_nang.bbl" "Chuong/out/2_Dac_ta_chuc_nang" 1764427863.29421 0
+  "Chuong/out/2_Dac_ta_chuc_nang.bcf" 1764427862 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
   (generated)
   "Chuong/out/2_Dac_ta_chuc_nang.bbl"
   "Chuong/out/2_Dac_ta_chuc_nang.blg"
   (rewritten before read)
-["pdflatex"] 1764253553.66634 "e:/source/repos/CA/YummyZoom/report/Chuong/2_Dac_ta_chuc_nang.tex" "Chuong/out/2_Dac_ta_chuc_nang.pdf" "2_Dac_ta_chuc_nang" 1764253556.8182 0
-  "Chuong/2_Dac_ta_chuc_nang.tex" 1764253552 31015 dc25772d55402c12dfd16949d1f80572 ""
+["pdflatex"] 1764427860.33971 "e:/source/repos/CA/YummyZoom/report/Chuong/2_Dac_ta_chuc_nang.tex" "Chuong/out/2_Dac_ta_chuc_nang.pdf" "2_Dac_ta_chuc_nang" 1764427863.29512 0
+  "Chuong/2_Dac_ta_chuc_nang.tex" 1764427859 45302 9b3db539e7574b2a1c130269dd0095c9 ""
   "Chuong/out/../../DoAn.tex" 1764248572 11928 1ccfd4946766a72273c0826011935213 ""
-  "Chuong/out/2_Dac_ta_chuc_nang.aux" 1764253556 7512 d590ab0186f0e8d0ac255dbe8e1ab434 "pdflatex"
+  "Chuong/out/2_Dac_ta_chuc_nang.aux" 1764427862 10450 0c24c913bdf85ed9043ade9b0e034af1 "pdflatex"
   "Chuong/out/2_Dac_ta_chuc_nang.bbl" 1764213925 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/2_Dac_ta_chuc_nang"
-  "Chuong/out/2_Dac_ta_chuc_nang.out" 1764253556 2008 fad14700230c069eafba769603b789ae "pdflatex"
-  "Chuong/out/2_Dac_ta_chuc_nang.run.xml" 1764253556 2518 afdddb579d8b55b0db1c39923c1ea221 "pdflatex"
+  "Chuong/out/2_Dac_ta_chuc_nang.out" 1764427862 2871 d179dd5659a480013c4cda894f883da4 "pdflatex"
+  "Chuong/out/2_Dac_ta_chuc_nang.run.xml" 1764427862 2518 afdddb579d8b55b0db1c39923c1ea221 "pdflatex"
   "Tu_viet_tat.tex" 1760548346 1138 292d7f642e8880cb42d4356cd1bf7153 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc" 1759742116 7824 21ade6c3c7fd67cb4ace8dbc91c53118 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1759735106 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -173,7 +173,7 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1759742788 5574153 af86687748baf417d9e7d549313527be ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1759742980 3629007 f591f00ca598b3ec52fc9fc6bb645105 ""
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
-  "e:/source/repos/CA/YummyZoom/report/Chuong/2_Dac_ta_chuc_nang.tex" 1764253552 31015 dc25772d55402c12dfd16949d1f80572 ""
+  "e:/source/repos/CA/YummyZoom/report/Chuong/2_Dac_ta_chuc_nang.tex" 1764427859 45302 9b3db539e7574b2a1c130269dd0095c9 ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
   (generated)
   "Chuong/out/2_Dac_ta_chuc_nang.aux"
