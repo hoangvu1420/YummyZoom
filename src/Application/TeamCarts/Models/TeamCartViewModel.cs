@@ -37,6 +37,7 @@ public sealed class TeamCartViewModel
         public decimal CommittedAmount { get; set; }
         public string? OnlineTransactionId { get; set; }
         public decimal QuotedAmount { get; set; }
+        public bool IsReady { get; set; }
     }
 
     public sealed class Item

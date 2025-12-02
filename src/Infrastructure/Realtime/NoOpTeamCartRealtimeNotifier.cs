@@ -13,6 +13,7 @@ public sealed class NoOpTeamCartRealtimeNotifier : ITeamCartRealtimeNotifier
     public Task NotifyPaymentEvent(TeamCartId cartId, Guid userId, string status, CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task NotifyReadyToConfirm(TeamCartId cartId, CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task NotifyConverted(TeamCartId cartId, Guid orderId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task NotifyAllMembersReady(TeamCartId cartId, CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task NotifyExpired(TeamCartId cartId, CancellationToken cancellationToken = default) => Task.CompletedTask;
 }
 

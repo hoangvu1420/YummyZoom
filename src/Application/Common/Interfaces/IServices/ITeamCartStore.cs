@@ -26,4 +26,5 @@ public interface ITeamCartStore
     Task RecordOnlinePaymentAsync(TeamCartId cartId, Guid userId, decimal amount, string currency, string transactionId, CancellationToken ct = default);
     Task RecordOnlinePaymentFailureAsync(TeamCartId cartId, Guid userId, CancellationToken ct = default);
     Task UpdateQuoteAsync(TeamCartId cartId, long quoteVersion, IReadOnlyDictionary<Guid, decimal> memberQuotedAmounts, string currency, CancellationToken ct = default);
+    Task SetMemberReadyAsync(TeamCartId cartId, Guid userId, bool isReady, CancellationToken ct = default);
 }

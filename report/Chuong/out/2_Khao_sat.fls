@@ -354,13 +354,11 @@ OUTPUT Chuong/out/2_Khao_sat.bcf
 INPUT Chuong/out/../2_Khao_sat.bbl
 INPUT Chuong/out/../2_Khao_sat.bbl
 INPUT Chuong/out/../2_Khao_sat.bbl
-INPUT Chuong/out/2_Khao_sat.out
-INPUT Chuong/out/2_Khao_sat.out
-INPUT Chuong/out/2_Khao_sat.out
-INPUT Chuong/out/2_Khao_sat.out
+INPUT Chuong/out/../2_Khao_sat.out
+INPUT Chuong/out/../2_Khao_sat.out
+INPUT Chuong/out/../2_Khao_sat.out
+INPUT Chuong/out/../2_Khao_sat.out
 OUTPUT Chuong/out/2_Khao_sat.pdf
-INPUT Chuong/out/2_Khao_sat.out
-INPUT Chuong/out/2_Khao_sat.out
 OUTPUT Chuong/out/2_Khao_sat.out
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmb8v.tfm
 INPUT c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map

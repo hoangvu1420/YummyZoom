@@ -13,6 +13,7 @@ public interface ITeamCartRealtimeNotifier
     Task NotifyPaymentEvent(TeamCartId cartId, Guid userId, string status, CancellationToken cancellationToken = default);
     Task NotifyReadyToConfirm(TeamCartId cartId, CancellationToken cancellationToken = default);
     Task NotifyConverted(TeamCartId cartId, Guid orderId, CancellationToken cancellationToken = default);
+    Task NotifyAllMembersReady(TeamCartId cartId, CancellationToken cancellationToken = default);
     Task NotifyExpired(TeamCartId cartId, CancellationToken cancellationToken = default);
 }
 

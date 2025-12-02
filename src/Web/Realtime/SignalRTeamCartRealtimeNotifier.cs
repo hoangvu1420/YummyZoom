@@ -44,6 +44,9 @@ public sealed class SignalRTeamCartRealtimeNotifier : ITeamCartRealtimeNotifier
     public Task NotifyConverted(TeamCartId cartId, Guid orderId, CancellationToken cancellationToken = default)
         => SendAsync(cartId, "ReceiveConverted", cancellationToken, orderId);
 
+    public Task NotifyAllMembersReady(TeamCartId cartId, CancellationToken cancellationToken = default)
+        => SendAsync(cartId, "ReceiveAllMembersReady", cancellationToken);
+
     public Task NotifyExpired(TeamCartId cartId, CancellationToken cancellationToken = default)
         => SendAsync(cartId, "ReceiveExpired", cancellationToken);
 

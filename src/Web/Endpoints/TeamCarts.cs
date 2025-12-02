@@ -12,6 +12,7 @@ using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.RemoveItemFromTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.UpdateTeamCartItemQuantity;
+using YummyZoom.Application.TeamCarts.Commands.SetMemberReady;
 using YummyZoom.Application.Coupons.Queries.Common;
 using YummyZoom.Application.TeamCarts.Queries.GetCouponSuggestions;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails;
@@ -321,6 +322,21 @@ public sealed class TeamCarts : EndpointGroupBase
         .RequireAuthorization()
         .WithName("ConvertTeamCartToOrder")
         .WithStandardResults<ConvertTeamCartToOrderResponse>();
+
+        // POST /api/v1/team-carts/{id}/ready
+        group.MapPost("/{id}/ready", async (Guid id, [FromBody] SetMemberReadyRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>
+        {
+            if (!availability.Enabled || !availability.RealTimeReady)
+            {
+                return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+            }
+            var command = new SetMemberReadyCommand(id, body.IsReady);
+            var result = await sender.Send(command);
+            return result.ToIResult();
+        })
+        .RequireAuthorization()
+        .WithName("SetMemberReady")
+        .WithStandardResults();
     }
 }
 
@@ -362,3 +378,5 @@ public sealed record CommitToCodPaymentRequest(
 public sealed record InitiateMemberOnlinePaymentRequest(
     long? QuoteVersion = null
 );
+
+public sealed record SetMemberReadyRequest(bool IsReady);

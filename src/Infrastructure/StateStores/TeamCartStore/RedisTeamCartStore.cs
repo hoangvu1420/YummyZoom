@@ -188,6 +188,14 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             }
         }, "quote_updated");
 
+    public async Task SetMemberReadyAsync(TeamCartId cartId, Guid userId, bool isReady, CancellationToken ct = default)
+        => await MutateAsync(cartId, vm =>
+        {
+            var m = vm.Members.FirstOrDefault(x => x.UserId == userId);
+            if (m is null) return;
+            m.IsReady = isReady;
+        }, "member_ready_status_changed");
+
     private async Task MutateAsync(TeamCartId cartId, Action<TeamCartViewModel> mutate, string updateType)
     {
         var key = Key(cartId);
@@ -306,7 +314,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 PaymentStatus = m.PaymentStatus,
                 CommittedAmount = m.CommittedAmount,
                 OnlineTransactionId = m.OnlineTransactionId,
-                QuotedAmount = m.QuotedAmount
+                QuotedAmount = m.QuotedAmount,
+                IsReady = m.IsReady
             }).ToList(),
             Items = s.Items.Select(i => new TeamCartViewModel.Item
             {
@@ -357,7 +366,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 PaymentStatus = m.PaymentStatus,
                 CommittedAmount = m.CommittedAmount,
                 OnlineTransactionId = m.OnlineTransactionId,
-                QuotedAmount = m.QuotedAmount
+                QuotedAmount = m.QuotedAmount,
+                IsReady = m.IsReady
             }).ToList(),
             Items = v.Items.Select(i => new RedisVm.Item
             {
@@ -410,6 +420,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             public decimal CommittedAmount { get; set; }
             public string? OnlineTransactionId { get; set; }
             public decimal QuotedAmount { get; set; }
+            public bool IsReady { get; set; }
         }
 
         public sealed class Item

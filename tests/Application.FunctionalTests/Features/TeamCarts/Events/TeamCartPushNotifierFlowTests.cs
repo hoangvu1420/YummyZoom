@@ -21,6 +21,7 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         public Task NotifyPaymentEvent(TeamCartId cartId, Guid userId, string status, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
         public Task NotifyReadyToConfirm(TeamCartId cartId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
         public Task NotifyConverted(TeamCartId cartId, Guid orderId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
+        public Task NotifyAllMembersReady(TeamCartId cartId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
         public Task NotifyExpired(TeamCartId cartId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
     }
 

@@ -28,6 +28,16 @@ end fork
 :Cập nhật giỏ hàng chung;
 :Tính toán tạm tính (Subtotal);
 
+|Member (Thành viên)|
+:Xác nhận "Sẵn sàng" (Ready);
+
+|System (Hệ thống)|
+:Ghi nhận trạng thái Ready;
+if (Tất cả thành viên đã Ready?) then (Rồi)
+    :Thông báo cho Host "Tất cả đã sẵn sàng";
+else (Chưa)
+endif
+
 |Host (Trưởng nhóm)|
 :Kiểm tra danh sách món;
 :Khóa giỏ hàng (Lock Cart);

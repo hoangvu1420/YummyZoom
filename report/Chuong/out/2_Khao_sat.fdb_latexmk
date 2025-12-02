@@ -1,17 +1,17 @@
 # Fdb version 4
-["biber Chuong/out/2_Khao_sat"] 0 "Chuong/out/2_Khao_sat.bcf" "Chuong/out/2_Khao_sat.bbl" "Chuong/out/2_Khao_sat" 1764428091.62822 -1
+["biber Chuong/out/2_Khao_sat"] 0 "Chuong/out/2_Khao_sat.bcf" "Chuong/out/2_Khao_sat.bbl" "Chuong/out/2_Khao_sat" 0 -1
   "Chuong/out/2_Khao_sat.bcf" 0 -1 0 "pdflatex"
   "Danh_sach_tai_lieu_tham_khao.bib" 1759730695 1488 c84ec2be0e7384c9343be26b8c6eb7b7 ""
   (generated)
   "Chuong/out/2_Khao_sat.bbl"
   "Chuong/out/2_Khao_sat.blg"
   (rewritten before read)
-["pdflatex"] 1764428088.61513 "e:/source/repos/CA/YummyZoom/report/Chuong/2_Khao_sat.tex" "Chuong/out/2_Khao_sat.pdf" "2_Khao_sat" 1764428091.6286 2
+["pdflatex"] 1764607132.42605 "e:/source/repos/CA/YummyZoom/report/Chuong/2_Khao_sat.tex" "Chuong/out/2_Khao_sat.pdf" "2_Khao_sat" 1764607136.48873 2
   "2_Dac_ta_chuc_nang.tex" 0 -1 0 ""
   "Chuong/2_Khao_sat.tex" 1764428087 30364 1fc3cbc43d396de39f92e72d6ed80a5b ""
   "Chuong/out/../../DoAn.tex" 1764248572 11928 1ccfd4946766a72273c0826011935213 ""
   "Chuong/out/../../Hinhve/activity_order_processing.png" 1763892759 129174 d5fa4e7760ff23282e061325af359e67 ""
-  "Chuong/out/../../Hinhve/activity_teamcart_process.png" 1763902508 122400 2d732356df6d7bc5cfceac03730883d6 ""
+  "Chuong/out/../../Hinhve/activity_teamcart_process.png" 1764606574 52479 1f1b47df22c176c87ae7e3b67dde0904 ""
   "Chuong/out/../../Hinhve/usecase_account_management_decomposition.drawio.png" 1763876460 164310 358c4e0a7636df385aff52c782ca0eb6 ""
   "Chuong/out/../../Hinhve/usecase_individual_order_decomposition.drawio.png" 1763880933 127795 b4abdee3f2174d837bb6f932f4ed73c9 ""
   "Chuong/out/../../Hinhve/usecase_menu_management_decomposition.png" 1763890785 113474 de789280b0ac417a0d29910178a24d84 ""
@@ -19,10 +19,10 @@
   "Chuong/out/../../Hinhve/usecase_restaurant_approval_decomposition.png" 1763891010 114211 29cb44bf72f1b8b207e9d6152db7fefa ""
   "Chuong/out/../../Hinhve/usecase_teamcart_decomposition.drawio.png" 1763883234 136683 9723858e3d853c39ba67973d2040159f ""
   "Chuong/out/../2_Khao_sat.bbl" 1761380595 486 76d65a242ec496c9b4361af646ff12cb ""
+  "Chuong/out/../2_Khao_sat.out" 1761380601 1605 91aacf849666d564b2e7b0d8aab52417 ""
   "Chuong/out/2_Dac_ta_chuc_nang.tex" 0 -1 0 ""
-  "Chuong/out/2_Khao_sat.aux" 1764428091 7963 c7672de6e6f4d3a8f95c97ced79fffe9 "pdflatex"
+  "Chuong/out/2_Khao_sat.aux" 1764607136 7963 c7672de6e6f4d3a8f95c97ced79fffe9 "pdflatex"
   "Chuong/out/2_Khao_sat.bbl" 0 -1 0 "biber Chuong/out/2_Khao_sat"
-  "Chuong/out/2_Khao_sat.out" 1764428091 3223 80902e37626871e0b5a73fa62160b59a "pdflatex"
   "Tu_viet_tat.tex" 1760548346 1138 292d7f642e8880cb42d4356cd1bf7153 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc" 1759742116 7824 21ade6c3c7fd67cb4ace8dbc91c53118 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1759735106 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -183,7 +183,7 @@
   "e:/source/repos/CA/YummyZoom/report/Chuong/2_Khao_sat.tex" 1764428087 30364 1fc3cbc43d396de39f92e72d6ed80a5b ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
   "use ../../Hinhve/activity_order_processing.png" 1763892759 129174 d5fa4e7760ff23282e061325af359e67 ""
-  "use ../../Hinhve/activity_teamcart_process.png" 1763902508 122400 2d732356df6d7bc5cfceac03730883d6 ""
+  "use ../../Hinhve/activity_teamcart_process.png" 1764606574 52479 1f1b47df22c176c87ae7e3b67dde0904 ""
   "use ../../Hinhve/usecase_account_management_decomposition.drawio.png" 1763876460 164310 358c4e0a7636df385aff52c782ca0eb6 ""
   "use ../../Hinhve/usecase_individual_order_decomposition.drawio.png" 1763880933 127795 b4abdee3f2174d837bb6f932f4ed73c9 ""
   "use ../../Hinhve/usecase_menu_management_decomposition.png" 1763890785 113474 de789280b0ac417a0d29910178a24d84 ""
