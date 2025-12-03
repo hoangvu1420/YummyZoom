@@ -175,7 +175,8 @@ Response — 200 OK
         "paymentStatus": "Pending",
         "committedAmount": 0.0,
         "onlineTransactionId": null,
-        "quotedAmount": 0.0
+        "quotedAmount": 0.0,
+        "isReady": false
       }
     ],
     "items": [
@@ -318,7 +319,49 @@ Members can add menu items with optional customizations to the TeamCart.
 
 ---
 
-## Step 4 — Get Live Cart State
+## Step 4 — Set Member Ready Status (Member)
+
+Members can mark themselves as "ready" to indicate they have finished adding items. This helps the host know when to lock the cart.
+
+**`POST /api/v1/team-carts/{teamCartId}/ready`**
+
+- Authorization: Required (TeamCart member)
+- Path Parameter: `teamCartId` (UUID)
+
+#### Request Body
+
+```json
+{
+  "isReady": true
+}
+```
+
+#### Request Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `isReady` | `boolean` | Yes | Whether the member is ready (true) or not (false) |
+
+#### Response
+
+**✅ 204 No Content** - Status updated successfully
+
+#### Business Rules
+
+- Cart must be in `Open` state
+- Caller must be a TeamCart member
+- Setting `isReady` to `true` signals completion of ordering
+- Setting `isReady` to `false` signals still deciding
+
+#### Errors
+
+- **404** `SetMemberReady.TeamCartNotFound` - TeamCart doesn't exist
+- **409** `SetMemberReady.CartNotOpen` - Cart is not in Open state
+- **403** `SetMemberReady.NotMember` - User is not a member of this cart
+
+---
+
+## Step 5 — Get Live Cart State
 
 Retrieve the current state of the TeamCart for real-time updates and member coordination.
 
@@ -397,7 +440,7 @@ connection.invoke("SubscribeToCart", teamCartId);
 
 ---
 
-## Step 5 — Lock Cart for Payment (Host)
+## Step 6 — Lock Cart for Payment (Host)
 
 Freezes items and computes per-member quotes. Notifies members to pay/commit.
 
@@ -432,7 +475,7 @@ Errors
 
 ---
 
-## Step 6 — Discover Coupons (Members)
+## Step 7 — Discover Coupons (Members)
 
 Get real-time coupon suggestions and savings calculations for the current TeamCart items. This helps members and the host discover applicable coupons before applying them.
 
@@ -546,7 +589,7 @@ Get real-time coupon suggestions and savings calculations for the current TeamCa
 
 ---
 
-## Step 7 — Apply Tip and Coupon (Host/Participant)
+## Step 8 — Apply Tip and Coupon (Host/Participant)
 
 Apply tips and coupons to the TeamCart to adjust the final pricing.
 
@@ -654,7 +697,7 @@ Apply tips and coupons to the TeamCart to adjust the final pricing.
 
 ---
 
-## Step 8 — Member Payments
+## Step 9 — Member Payments
 
 Members settle their share via one of:
 
@@ -731,7 +774,7 @@ Errors
 
 ---
 
-## Step 9 — Convert to Order (Host)
+## Step 10 — Convert to Order (Host)
 
 After all members are settled, convert the cart to a standard order.
 

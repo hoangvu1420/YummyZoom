@@ -74,7 +74,7 @@ public sealed class TeamCartConversionService
             subtotal,
             discountAmount,
             deliveryFee,
-            teamCart.TipAmount,
+            teamCart.TipAmount.Copy(), // Use copy to avoid EF Core tracking conflicts
             taxAmount);
 
         // 4. Create Succeeded PaymentTransactions for the Order
@@ -94,7 +94,7 @@ public sealed class TeamCartConversionService
             subtotal,
             discountAmount,
             deliveryFee,
-            teamCart.TipAmount,
+            teamCart.TipAmount.Copy(), // Use copy to avoid EF Core tracking conflicts
             taxAmount,
             totalAmount,
             paymentTransactionsResult.Value,
@@ -205,7 +205,7 @@ public sealed class TeamCartConversionService
                 var customizationResult = OrderItemCustomization.Create(
                     customization.Snapshot_CustomizationGroupName,
                     customization.Snapshot_ChoiceName,
-                    customization.Snapshot_ChoicePriceAdjustmentAtOrder);
+                    customization.Snapshot_ChoicePriceAdjustmentAtOrder.Copy()); // Use copy to avoid EF Core tracking conflicts
 
                 if (customizationResult.IsSuccess)
                 {
@@ -217,7 +217,7 @@ public sealed class TeamCartConversionService
                 cartItem.Snapshot_MenuCategoryId,
                 cartItem.Snapshot_MenuItemId,
                 cartItem.Snapshot_ItemName,
-                cartItem.Snapshot_BasePriceAtOrder,
+                cartItem.Snapshot_BasePriceAtOrder.Copy(), // Use copy to avoid EF Core tracking conflicts
                 cartItem.Quantity,
                 customizations.Any() ? customizations : null);
 

@@ -56,15 +56,22 @@ public sealed class CommitToCodPaymentCommandHandler : IRequestHandler<CommitToC
                 var quoted = cart.GetMemberQuote(userId);
                 if (quoted.IsFailure)
                 {
-                    _logger.LogWarning("No quote available for COD commit. TeamCartId={TeamCartId} UserId={UserId}", request.TeamCartId, userId.Value);
-                    return Result.Failure(quoted.Error);
+                    _logger.LogDebug("No quote available for COD commit (member has no items). TeamCartId={TeamCartId} UserId={UserId}", request.TeamCartId, userId.Value);
+                    // If member has no items/quote, consider it already "paid" (0 amount) and succeed
+                    return Result.Success();
                 }
                 memberTotal = quoted.Value;
             }
             else
             {
+                var memberItems = cart.Items.Where(i => i.AddedByUserId == userId).ToList();
+                if (memberItems.Count == 0)
+                {
+                    _logger.LogDebug("Member has no items to pay for. TeamCartId={TeamCartId} UserId={UserId}", request.TeamCartId, userId.Value);
+                    return Result.Success();
+                }
                 memberTotal = new Money(
-                    cart.Items.Where(i => i.AddedByUserId == userId).Sum(i => i.LineItemTotal.Amount),
+                    memberItems.Sum(i => i.LineItemTotal.Amount),
                     cart.TipAmount.Currency);
             }
 

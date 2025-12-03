@@ -159,7 +159,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                         var custResult = TeamCartItemCustomization.Create(
                             group.GroupName,
                             choice.Name,
-                            choice.PriceAdjustment);
+                            choice.PriceAdjustment.Copy()); // Use copy to avoid EF Core tracking conflicts
 
                         if (custResult.IsFailure)
                         {
@@ -178,7 +178,7 @@ public sealed class AddItemToTeamCartCommandHandler : IRequestHandler<AddItemToT
                 menuItem.Id,
                 menuItem.MenuCategoryId,
                 menuItem.Name,
-                menuItem.BasePrice,
+                menuItem.BasePrice.Copy(), // Use copy to avoid EF Core tracking conflicts
                 request.Quantity,
                 selectedCustomizations);
 

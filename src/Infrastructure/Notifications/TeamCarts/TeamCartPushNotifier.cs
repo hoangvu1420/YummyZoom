@@ -59,6 +59,16 @@ public sealed class TeamCartPushNotifier : ITeamCartPushNotifier
             return Result.Success();
         }
 
+        // Filter out any seed tokens before sending notifications
+        var validTokens = tokens.Where(token => !token.StartsWith("seedToken")).ToList();
+        if (validTokens.Count == 0)
+        {
+            _logger.LogDebug("All tokens are seed tokens; skipping TeamCart FCM push (CartId={CartId})", teamCartId.Value);
+            return Result.Success();
+        }
+        // Update tokens to use only valid ones
+        tokens = validTokens.ToHashSet(StringComparer.Ordinal);
+
         var state = vm.Status.ToString(); // keep source casing
         var (title, body) = LocalizeState(state);
         var route = $"/team-carts/{teamCartId.Value}";

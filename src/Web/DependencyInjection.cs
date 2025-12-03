@@ -19,6 +19,7 @@ using YummyZoom.Web.Realtime;
 using YummyZoom.Web.Services;
 using YummyZoom.Web.Security;
 using YummyZoom.Web.Services.OrderFlowSimulator;
+using YummyZoom.Web.Services.TeamCartFlowSimulator;
 
 namespace YummyZoom.Web;
 
@@ -122,6 +123,7 @@ public static class DependencyInjection
         // Dev/Test simulation services (registered always; gated at endpoint)
         builder.Services.AddSingleton<IDevImpersonationService, DevImpersonationService>();
         builder.Services.AddSingleton<IOrderFlowSimulator, OrderFlowSimulator>();
+        builder.Services.AddSingleton<ITeamCartFlowSimulator, TeamCartFlowSimulator>();
 
         // Ensure domain AggregateRootId<> value objects serialize as their underlying primitive (e.g. Guid) in API responses
         // so contract tests and clients see stable primitive values instead of { "value": "..." } objects.
