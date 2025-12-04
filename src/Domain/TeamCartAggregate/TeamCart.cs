@@ -948,7 +948,42 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     }
 
     /// <summary>
-    /// Checks if all members have committed to payment and transitions to ReadyToConfirm if so.
+    /// Gets members who have items/amounts to pay for and need payment commitments.
+    /// Members with no items are excluded as they don't need to pay.
+    /// </summary>
+    /// <returns>List of member user IDs who need to pay.</returns>
+    private List<UserId> GetMembersWhoNeedPayment()
+    {
+        var membersWithItems = new List<UserId>();
+        
+        foreach (var member in _members)
+        {
+            bool hasItems = false;
+            
+            // Check if member has items in the cart
+            var memberItems = _items.Where(item => item.AddedByUserId == member.UserId).ToList();
+            if (memberItems.Any())
+            {
+                hasItems = true;
+            }
+            // If quote exists, check if member has a non-zero quoted amount
+            else if (QuoteVersion > 0 && _memberTotals.TryGetValue(member.UserId, out var quoted) && quoted.Amount > 0m)
+            {
+                hasItems = true;
+            }
+            
+            if (hasItems)
+            {
+                membersWithItems.Add(member.UserId);
+            }
+        }
+        
+        return membersWithItems;
+    }
+
+    /// <summary>
+    /// Checks if all members who need to pay have committed to payment and transitions to ReadyToConfirm if so.
+    /// Members with no items are excluded from this check as they don't need payment.
     /// </summary>
     private void CheckAndTransitionToReadyToConfirm()
     {
@@ -957,9 +992,12 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
             return;
         }
 
-        // Check if all members have payment commitments
-        var allMembersCommitted = _members.All(member =>
-            _memberPayments.Any(payment => payment.UserId == member.UserId));
+        // Get members who actually need to pay (exclude members with no items)
+        var membersWhoNeedPayment = GetMembersWhoNeedPayment();
+        
+        // Only check if members with items have payment commitments
+        var allMembersCommitted = membersWhoNeedPayment.All(member =>
+            _memberPayments.Any(payment => payment.UserId == member));
 
         if (!allMembersCommitted)
         {
