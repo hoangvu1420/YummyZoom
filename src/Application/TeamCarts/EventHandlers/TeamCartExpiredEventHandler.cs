@@ -13,18 +13,24 @@ namespace YummyZoom.Application.TeamCarts.EventHandlers;
 public sealed class TeamCartExpiredEventHandler : IdempotentNotificationHandler<TeamCartExpired>
 {
     private readonly ITeamCartStore _store;
+    private readonly ITeamCartRepository _teamCartRepository;
     private readonly ITeamCartRealtimeNotifier _notifier;
+    private readonly ITeamCartPushNotifier _pushNotifier;
     private readonly ILogger<TeamCartExpiredEventHandler> _logger;
 
     public TeamCartExpiredEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
         ITeamCartStore store,
+        ITeamCartRepository teamCartRepository,
         ITeamCartRealtimeNotifier notifier,
+        ITeamCartPushNotifier pushNotifier,
         ILogger<TeamCartExpiredEventHandler> logger) : base(uow, inbox)
     {
         _store = store;
+        _teamCartRepository = teamCartRepository;
         _notifier = notifier;
+        _pushNotifier = pushNotifier;
         _logger = logger;
     }
 
@@ -36,8 +42,22 @@ public sealed class TeamCartExpiredEventHandler : IdempotentNotificationHandler<
 
         try
         {
+            // Get version before deletion
+            var vm = await _store.GetVmAsync(cartId, ct);
+            var version = vm?.Version ?? 0;
+            
             await _store.DeleteVmAsync(cartId, ct);
             await _notifier.NotifyExpired(cartId, ct);
+            
+            // Push notification with version from VM (before deletion)
+            if (version > 0)
+            {
+                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, version, ct);
+                if (push.IsFailure)
+                {
+                    throw new InvalidOperationException(push.Error.Description);
+                }
+            }
         }
         catch (Exception ex)
         {

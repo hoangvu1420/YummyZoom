@@ -18,6 +18,7 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
     private readonly ITeamCartRepository _teamCartRepository;
     private readonly ITeamCartStore _store;
     private readonly ITeamCartRealtimeNotifier _notifier;
+    private readonly ITeamCartPushNotifier _pushNotifier;
     private readonly ILogger<TeamCartCreatedEventHandler> _logger;
 
     public TeamCartCreatedEventHandler(
@@ -26,11 +27,13 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
         ITeamCartRepository teamCartRepository,
         ITeamCartStore store,
         ITeamCartRealtimeNotifier notifier,
+        ITeamCartPushNotifier pushNotifier,
         ILogger<TeamCartCreatedEventHandler> logger) : base(uow, inbox)
     {
         _teamCartRepository = teamCartRepository;
         _store = store;
         _notifier = notifier;
+        _pushNotifier = pushNotifier;
         _logger = logger;
     }
 
@@ -88,6 +91,12 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
         {
             await _store.CreateVmAsync(vm, ct);
             await _notifier.NotifyCartUpdated(cart.Id, ct);
+            
+            var push = await _pushNotifier.PushTeamCartDataAsync(cart.Id, vm.Version, ct);
+            if (push.IsFailure)
+            {
+                throw new InvalidOperationException(push.Error.Description);
+            }
         }
         catch (Exception ex)
         {

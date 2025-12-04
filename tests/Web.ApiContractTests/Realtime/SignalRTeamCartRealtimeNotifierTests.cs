@@ -14,14 +14,14 @@ namespace YummyZoom.Web.ApiContractTests.Realtime;
 public class SignalRTeamCartRealtimeNotifierTests
 {
     [Test]
-    public async Task NotifyCartUpdated_EmitsFcmPush()
+    public async Task NotifyCartUpdated_SendsSignalRMessage()
     {
         var cartId = TeamCartId.Create(Guid.NewGuid());
 
-        // Mock SignalR hub context to no-op
-        var clientProxy = new Mock<IClientProxy>(MockBehavior.Loose);
+        // Mock SignalR hub context
+        var clientProxy = new Mock<IClientProxy>(MockBehavior.Strict);
         clientProxy
-            .Setup(p => p.SendCoreAsync(It.IsAny<string>(), It.IsAny<object?[]>(), default))
+            .Setup(p => p.SendCoreAsync("ReceiveCartUpdated", It.IsAny<object?[]>(), default))
             .Returns(Task.CompletedTask);
 
         var hubClients = new Mock<IHubClients>(MockBehavior.Loose);
@@ -30,19 +30,12 @@ public class SignalRTeamCartRealtimeNotifierTests
         var hubContext = new Mock<IHubContext<TeamCartHub>>(MockBehavior.Loose);
         hubContext.SetupGet(h => h.Clients).Returns(hubClients.Object);
 
-        // Build a minimal scoped provider that returns our push mock
-        var push = new Mock<ITeamCartPushNotifier>(MockBehavior.Strict);
-        push.Setup(p => p.PushTeamCartDataAsync(cartId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success());
-        var services = new ServiceCollection();
-        services.AddScoped<ITeamCartPushNotifier>(_ => push.Object);
-        var provider = services.BuildServiceProvider();
-
         var logger = new Mock<ILogger<SignalRTeamCartRealtimeNotifier>>();
-        var notifier = new SignalRTeamCartRealtimeNotifier(hubContext.Object, provider, logger.Object);
+        var notifier = new SignalRTeamCartRealtimeNotifier(hubContext.Object, logger.Object);
 
         await notifier.NotifyCartUpdated(cartId);
 
-        push.Verify(p => p.PushTeamCartDataAsync(cartId, It.IsAny<CancellationToken>()), Times.Once);
+        // Verify SignalR message was sent (FCM push is now handled explicitly in event handlers)
+        clientProxy.Verify(p => p.SendCoreAsync("ReceiveCartUpdated", It.IsAny<object?[]>(), default), Times.Once);
     }
 }

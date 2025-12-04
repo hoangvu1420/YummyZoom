@@ -16,6 +16,7 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
     private readonly ICouponRepository _couponRepository;
     private readonly ITeamCartStore _store;
     private readonly ITeamCartRealtimeNotifier _notifier;
+    private readonly ITeamCartPushNotifier _pushNotifier;
     private readonly ILogger<CouponAppliedToTeamCartEventHandler> _logger;
 
     public CouponAppliedToTeamCartEventHandler(
@@ -25,12 +26,14 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
         ICouponRepository couponRepository,
         ITeamCartStore store,
         ITeamCartRealtimeNotifier notifier,
+        ITeamCartPushNotifier pushNotifier,
         ILogger<CouponAppliedToTeamCartEventHandler> logger) : base(uow, inbox)
     {
         _teamCartRepository = teamCartRepository;
         _couponRepository = couponRepository;
         _store = store;
         _notifier = notifier;
+        _pushNotifier = pushNotifier;
         _logger = logger;
     }
 
@@ -61,6 +64,16 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
         {
             await _store.ApplyCouponAsync(cartId, couponCode, discountAmount, currency, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
+            
+            var vm = await _store.GetVmAsync(cartId, ct);
+            if (vm is not null)
+            {
+                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                if (push.IsFailure)
+                {
+                    throw new InvalidOperationException(push.Error.Description);
+                }
+            }
         }
         catch (Exception ex)
         {

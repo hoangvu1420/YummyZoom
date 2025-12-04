@@ -1,4 +1,5 @@
 using YummyZoom.Application.Common.Authorization;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Security;
 using YummyZoom.Domain.TeamCartAggregate.Errors;
@@ -20,16 +21,22 @@ public sealed record SetMemberReadyCommand(
 public sealed class SetMemberReadyCommandHandler : IRequestHandler<SetMemberReadyCommand, Result>
 {
     private readonly ITeamCartStore _store;
+    private readonly ITeamCartRepository _teamCartRepository;
     private readonly ITeamCartRealtimeNotifier _notifier;
+    private readonly ITeamCartPushNotifier _pushNotifier;
     private readonly IUser _currentUser;
 
     public SetMemberReadyCommandHandler(
         ITeamCartStore store,
+        ITeamCartRepository teamCartRepository,
         ITeamCartRealtimeNotifier notifier,
+        ITeamCartPushNotifier pushNotifier,
         IUser currentUser)
     {
         _store = store;
+        _teamCartRepository = teamCartRepository;
         _notifier = notifier;
+        _pushNotifier = pushNotifier;
         _currentUser = currentUser;
     }
 
@@ -61,6 +68,16 @@ public sealed class SetMemberReadyCommandHandler : IRequestHandler<SetMemberRead
         if (updatedCart is not null && updatedCart.Members.All(m => m.IsReady))
         {
             await _notifier.NotifyAllMembersReady(cartId, cancellationToken);
+        }
+
+        // Push notification for ready status change
+        if (updatedCart is not null)
+        {
+            var push = await _pushNotifier.PushTeamCartDataAsync(cartId, updatedCart.Version, cancellationToken);
+            if (push.IsFailure)
+            {
+                return Result.Failure(push.Error);
+            }
         }
 
         return Result.Success();
