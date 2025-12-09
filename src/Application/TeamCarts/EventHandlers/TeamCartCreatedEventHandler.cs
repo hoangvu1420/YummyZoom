@@ -57,6 +57,7 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
             Deadline = cart.Deadline,
             ExpiresAt = cart.ExpiresAt,
             ShareTokenMasked = cart.ShareToken.Value.Length >= 4 ? $"***{cart.ShareToken.Value[^4..]}" : "***",
+            ShareToken = cart.ShareToken.Value,
             TipAmount = cart.TipAmount.Amount,
             TipCurrency = cart.TipAmount.Currency,
             CouponCode = null,
@@ -91,12 +92,9 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
         {
             await _store.CreateVmAsync(vm, ct);
             await _notifier.NotifyCartUpdated(cart.Id, ct);
-            
-            var push = await _pushNotifier.PushTeamCartDataAsync(cart.Id, vm.Version, ct);
-            if (push.IsFailure)
-            {
-                throw new InvalidOperationException(push.Error.Description);
-            }
+
+            // Suppress push notification for TeamCartCreated (low-value event)
+            // Users are already aware they created the cart
         }
         catch (Exception ex)
         {

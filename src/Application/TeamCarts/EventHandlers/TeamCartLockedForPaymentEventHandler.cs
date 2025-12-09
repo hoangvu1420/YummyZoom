@@ -56,7 +56,22 @@ public sealed class TeamCartLockedForPaymentEventHandler : IdempotentNotificatio
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                // Notify members (host already knows they locked it)
+                var hostMember = vm.Members.FirstOrDefault(m => m.Role == "Host");
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "TeamCartLockedForPayment",
+                    ActorUserId = notification.HostUserId.Value,
+                    ActorName = hostMember?.Name ?? "Chủ giỏ"
+                };
+                
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.Members,
+                    context,
+                    NotificationDeliveryType.Hybrid,
+                    ct);
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

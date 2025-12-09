@@ -113,10 +113,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         {
             moneyBuilder.Property(m => m.Amount)
                 .HasColumnName("TipAmount_Amount")
-                .HasColumnType("decimal(18,2)");
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
             moneyBuilder.Property(m => m.Currency)
                 .HasColumnName("TipAmount_Currency")
-                .HasMaxLength(3);
+                .HasMaxLength(3)
+                .IsRequired();
         });
         builder.OwnsOne(o => o.TaxAmount, moneyBuilder =>
         {

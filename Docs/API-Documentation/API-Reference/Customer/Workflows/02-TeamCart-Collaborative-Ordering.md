@@ -184,6 +184,8 @@ Response — 200 OK
         "itemId": "f1e2d3c4-b5a6-…",
         "addedByUserId": "1e2d3c4b-5a69-…",
         "name": "Burger XL",
+        "imageUrl": "https://example.com/images/burger-xl.jpg",
+        "menuItemId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
         "quantity": 1,
         "basePrice": 10.0,
         "lineTotal": 10.0,

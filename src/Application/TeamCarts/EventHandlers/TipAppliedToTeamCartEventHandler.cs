@@ -57,7 +57,26 @@ public sealed class TipAppliedToTeamCartEventHandler : IdempotentNotificationHan
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                // Host applies tip, notify members
+                var hostMember = vm.Members.FirstOrDefault(m => m.Role == "Host");
+                var hostUserId = hostMember?.UserId;
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "TipApplied",
+                    ActorUserId = hostUserId,
+                    ActorName = hostMember?.Name ?? "Chủ giỏ",
+                    Amount = tip.Amount,
+                    Currency = tip.Currency
+                };
+                
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.Members,
+                    context,
+                    NotificationDeliveryType.DataOnly,
+                    ct);
+                
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

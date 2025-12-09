@@ -54,15 +54,8 @@ public sealed class ItemQuantityUpdatedInTeamCartEventHandler : IdempotentNotifi
             await _store.UpdateItemQuantityAsync(cartId, notification.TeamCartItemId.Value, notification.NewQuantity, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
             
-            var vm = await _store.GetVmAsync(cartId, ct);
-            if (vm is not null)
-            {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
-                if (push.IsFailure)
-                {
-                    throw new InvalidOperationException(push.Error.Description);
-                }
-            }
+            // Suppress push notification for ItemQuantityUpdated (low-value event)
+            // Quantity changes are frequent and don't require immediate push notifications
         }
         catch (Exception ex)
         {

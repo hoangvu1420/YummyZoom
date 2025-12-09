@@ -48,7 +48,20 @@ public sealed class TeamCartConvertedEventHandler : IdempotentNotificationHandle
             // Push notification with version from VM (before deletion)
             if (version > 0)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, version, ct);
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "TeamCartConverted",
+                    OrderId = notification.OrderId.Value
+                };
+                
+                // Notify all members
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    version, 
+                    TeamCartNotificationTarget.All,
+                    context,
+                    NotificationDeliveryType.Hybrid,
+                    ct);
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

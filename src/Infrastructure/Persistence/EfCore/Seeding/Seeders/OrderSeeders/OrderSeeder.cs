@@ -171,6 +171,7 @@ public class OrderSeeder : ISeeder
         CancellationToken cancellationToken)
     {
         var orders = new List<OrderAggregate>();
+        var usedOrderNumbers = new HashSet<string>(); // Track order numbers to prevent duplicates
         
         // Load available menu items for this restaurant
         var availableMenuItems = await _menuItemRepository.GetByRestaurantIdAsync(restaurant.Id, cancellationToken);
@@ -187,13 +188,17 @@ public class OrderSeeder : ISeeder
             try
             {
                 var scenario = GenerateOrderScenario(restaurant, availableItems, dependencies, options);
-                var orderResult = await CreateOrderDirectlyAsync(scenario, cancellationToken);
+                var orderResult = await CreateOrderWithUniquenessCheckAsync(
+                    scenario, 
+                    usedOrderNumbers, 
+                    cancellationToken);
                 
                 if (orderResult.IsSuccess)
                 {
                     TransitionOrderToTargetStatus(orderResult.Value, scenario.TargetStatus, scenario.OrderTimestamp);
 
-                    // orderResult.Value.ClearDomainEvents();
+                    // Track the order number to prevent duplicates
+                    usedOrderNumbers.Add(orderResult.Value.OrderNumber);
                     orders.Add(orderResult.Value);
                 }
                 else
@@ -212,7 +217,72 @@ public class OrderSeeder : ISeeder
         return orders;
     }
 
-    private async Task<Result<OrderAggregate>> CreateOrderDirectlyAsync(OrderScenario scenario, CancellationToken cancellationToken)
+    private async Task<Result<OrderAggregate>> CreateOrderWithUniquenessCheckAsync(
+        OrderScenario scenario, 
+        HashSet<string> usedOrderNumbers,
+        CancellationToken cancellationToken)
+    {
+        const int maxRetries = 5;
+        var originalTimestamp = scenario.OrderTimestamp;
+        
+        for (int attempt = 0; attempt < maxRetries; attempt++)
+        {
+            // Adjust timestamp slightly on retry to ensure different order number
+            if (attempt > 0)
+            {
+                scenario.OrderTimestamp = originalTimestamp.AddMilliseconds(attempt * 10);
+            }
+            
+            // Create order WITHOUT adding to repository yet - we'll add it after uniqueness check
+            var orderResult = await CreateOrderWithoutRepositoryAsync(scenario, cancellationToken);
+            
+            if (orderResult.IsFailure)
+            {
+                return orderResult;
+            }
+            
+            var order = orderResult.Value;
+            
+            // Check if order number already exists:
+            // 1. In our in-memory tracking set (orders being created in this batch)
+            // 2. In the DbContext change tracker (orders added but not yet saved)
+            // 3. In the database (persisted orders)
+            var existsInTracker = _dbContext.Orders.Local
+                .Any(o => o.OrderNumber == order.OrderNumber);
+            var existsInDb = !existsInTracker && await _dbContext.Orders
+                .AnyAsync(o => o.OrderNumber == order.OrderNumber, cancellationToken);
+            
+            if (existsInTracker || existsInDb || usedOrderNumbers.Contains(order.OrderNumber))
+            {
+                if (attempt < maxRetries - 1)
+                {
+                    _logger.LogDebug("[Order] Order number collision detected: {OrderNumber}, retrying with adjusted timestamp", 
+                        order.OrderNumber);
+                    continue;
+                }
+                else
+                {
+                    _logger.LogWarning("[Order] Failed to generate unique order number after {MaxRetries} attempts", maxRetries);
+                    return Result.Failure<OrderAggregate>(
+                        Error.Failure("OrderSeeding.DuplicateOrderNumber", 
+                            $"Could not generate unique order number after {maxRetries} attempts"));
+                }
+            }
+            
+            // Order number is unique - now add to repository
+            await _orderRepository.AddAsync(order, cancellationToken);
+            
+            return Result.Success(order);
+        }
+        
+        return Result.Failure<OrderAggregate>(
+            Error.Failure("OrderSeeding.UniquenessCheckFailed", "Failed to create order with unique order number"));
+    }
+
+    /// <summary>
+    /// Creates an order without adding it to the repository. Used for uniqueness checking.
+    /// </summary>
+    private async Task<Result<OrderAggregate>> CreateOrderWithoutRepositoryAsync(OrderScenario scenario, CancellationToken cancellationToken)
     {
         try
         {
@@ -247,9 +317,14 @@ public class OrderSeeder : ISeeder
             // Calculate other amounts using centralized static pricing
             var pricingConfig = StaticPricingService.GetPricingConfiguration(scenario.Restaurant.Id);
             var deliveryFee = new Money(pricingConfig.DeliveryFee.Amount, pricingConfig.DeliveryFee.Currency);
-            var tipAmount = scenario.TipAmount?.Currency == subtotal.Currency 
-                ? scenario.TipAmount 
-                : new Money(scenario.TipAmount?.Amount ?? 0m, subtotal.Currency); // Ensure same currency
+            
+            // Ensure tipAmount is never null - use Money.Zero() if scenario.TipAmount is null
+            Money tipAmount = scenario.TipAmount ?? Money.Zero(subtotal.Currency);
+            // Ensure currency matches subtotal
+            if (tipAmount.Currency != subtotal.Currency)
+            {
+                tipAmount = new Money(tipAmount.Amount, subtotal.Currency);
+            }
             
             // Calculate tax based on policy
             var taxBase = StaticPricingService.CalculateTaxBase(subtotal, deliveryFee, tipAmount, pricingConfig.TaxBasePolicy);
@@ -302,16 +377,32 @@ public class OrderSeeder : ISeeder
                 return Result.Failure<OrderAggregate>(orderResult.Error);
             }
 
-            // Save to repository
-            await _orderRepository.AddAsync(orderResult.Value, cancellationToken);
-
+            // DO NOT add to repository here - caller will add after uniqueness check
             return Result.Success(orderResult.Value);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Order] Exception occurred while creating order directly");
+            _logger.LogError(ex, "[Order] Exception occurred while creating order");
             return Result.Failure<OrderAggregate>(Error.Failure("OrderCreation.Exception", "Exception occurred during order creation"));
         }
+    }
+
+    /// <summary>
+    /// Creates an order and adds it to the repository. Used by other code paths that don't need uniqueness checking.
+    /// </summary>
+    private async Task<Result<OrderAggregate>> CreateOrderDirectlyAsync(OrderScenario scenario, CancellationToken cancellationToken)
+    {
+        var orderResult = await CreateOrderWithoutRepositoryAsync(scenario, cancellationToken);
+        
+        if (orderResult.IsFailure)
+        {
+            return orderResult;
+        }
+
+        // Add to repository
+        await _orderRepository.AddAsync(orderResult.Value, cancellationToken);
+        
+        return Result.Success(orderResult.Value);
     }
 
     private OrderScenario GenerateOrderScenario(

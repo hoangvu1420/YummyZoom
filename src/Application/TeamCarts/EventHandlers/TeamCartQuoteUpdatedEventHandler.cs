@@ -53,16 +53,6 @@ public sealed class TeamCartQuoteUpdatedEventHandler : IdempotentNotificationHan
 
             await _store.UpdateQuoteAsync(cartId, notification.QuoteVersion, notification.MemberQuotedAmounts, notification.Currency, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
-            
-            var updatedVm = await _store.GetVmAsync(cartId, ct);
-            if (updatedVm is not null)
-            {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, updatedVm.Version, ct);
-                if (push.IsFailure)
-                {
-                    throw new InvalidOperationException(push.Error.Description);
-                }
-            }
         }
         catch (Exception ex)
         {

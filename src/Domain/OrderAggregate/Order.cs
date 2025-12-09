@@ -664,12 +664,15 @@ public sealed class Order : AggregateRoot<OrderId, Guid>, ICreationAuditable
     /// </summary>
     private static string GenerateOrderNumber(DateTime timestamp)
     {
-        // Format: ORD-YYYYMMDD-HHMMSS-XXXX (where XXXX is random)
+        // Format: ORD-YYYYMMDD-HHMMSS-FFF-XXXX 
+        // where FFF is milliseconds (000-999) and XXXX is random (1000-9999)
+        // This provides much better uniqueness, especially for high-volume seeding scenarios
         var datePart = timestamp.ToString("yyyyMMdd");
         var timePart = timestamp.ToString("HHmmss");
+        var millisecondPart = timestamp.ToString("fff");
         var randomPart = Random.Shared.Next(1000, 9999);
 
-        return $"ORD-{datePart}-{timePart}-{randomPart}";
+        return $"ORD-{datePart}-{timePart}-{millisecondPart}-{randomPart}";
     }
 
     #endregion

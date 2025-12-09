@@ -45,14 +45,26 @@ public sealed class TeamCartReadyForConfirmationEventHandler : IdempotentNotific
 
         try
         {
-            // If VM maintains a separate flag, a store method could be added later. For now, just broadcast.
             await _notifier.NotifyReadyToConfirm(cartId, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
             
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "TeamCartReadyForConfirmation"
+                };
+                
+                // Notify all members (data-only, no notification tray)
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.All,
+                    context,
+                    NotificationDeliveryType.DataOnly,
+                    ct);
+                
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

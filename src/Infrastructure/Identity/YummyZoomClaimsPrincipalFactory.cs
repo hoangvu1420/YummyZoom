@@ -12,17 +12,20 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
 {
     private readonly IRoleAssignmentRepository _roleAssignmentRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly ITeamCartRepository _teamCartRepository;
 
     public YummyZoomClaimsPrincipalFactory(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         IOptions<IdentityOptions> optionsAccessor,
         IRoleAssignmentRepository roleAssignmentRepository,
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        ITeamCartRepository teamCartRepository)
         : base(userManager, roleManager, optionsAccessor)
     {
         _roleAssignmentRepository = roleAssignmentRepository;
         _orderRepository = orderRepository;
+        _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
     }
 
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
@@ -60,6 +63,22 @@ public class YummyZoomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applic
         foreach (var orderId in activeOrderIds)
         {
             identity.AddClaim(new Claim("permission", $"{Roles.OrderOwner}:{orderId}"));
+        }
+
+        // Add TeamCart permissions for active TeamCart memberships
+        var activeTeamCartMemberships = await _teamCartRepository.GetActiveTeamCartMembershipsAsync(user.Id);
+        foreach (var membership in activeTeamCartMemberships)
+        {
+            // Map domain role string to authorization role constant
+            // Role is stored as string in DB: "Host" or "Guest"
+            var roleConstant = membership.Role switch
+            {
+                "Host" => Roles.TeamCartHost,
+                "Guest" => Roles.TeamCartMember,
+                _ => Roles.TeamCartMember // Default to member for unknown roles
+            };
+
+            identity.AddClaim(new Claim("permission", $"{roleConstant}:{membership.TeamCartId}"));
         }
 
         return identity;

@@ -108,7 +108,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             
             var createResult = await sender.Send(new CreateTeamCartCommand(
                 restaurantId.Value,
-                $"Host-{hostUserId.Value.ToString()[..8]}",
+                $"Host-{hostUserId.Value.ToString()[^8..]}",
                 null,
                 null), ct);
 
@@ -331,16 +331,16 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 1: Starting members join - {memberUserIds.Count} member(s) to join");
             foreach (var memberId in memberUserIds)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} joining team cart...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} joining team cart...");
                 await AsUserAsync(memberId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     await sender.Send(new JoinTeamCartCommand(
                         run.TeamCartId,
                         shareToken,
-                        $"Member-{memberId.ToString()[..8]}"), ct);
+                        $"Member-{memberId.ToString()[^8..]}"), ct);
                 }, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} joined successfully");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} joined successfully");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 1 complete: All members have joined");
 
@@ -353,9 +353,9 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
 
             foreach (var memberId in allMembers)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} adding items...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} adding items...");
                 await AddRandomItemsForMemberAsync(memberId, run.TeamCartId, restaurantId.Value, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} finished adding items");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} finished adding items");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 2 complete: All members have added items");
 
@@ -365,20 +365,20 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 3: All members marking ready - {allMembers.Count} member(s)");
             foreach (var memberId in allMembers)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} marking as ready...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} marking as ready...");
                 await AsTeamCartMemberAsync(memberId, run.TeamCartId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     await sender.Send(new SetMemberReadyCommand(run.TeamCartId, true), ct);
                 }, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} marked as ready");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} marked as ready");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 3 complete: All members are ready");
 
             // Step 4: Host locks cart
             Console.WriteLine($"[TeamCartSimulator] Step 4: Waiting {delays.AllReadyToLock.TotalMilliseconds}ms before host locks cart...");
             await DelayAsync(delays.AllReadyToLock, ct);
-            Console.WriteLine($"[TeamCartSimulator] Step 4: Host {hostUserId.ToString()[..8]} locking cart for payment...");
+            Console.WriteLine($"[TeamCartSimulator] Step 4: Host {hostUserId.ToString()[^8..]} locking cart for payment...");
             long quoteVersion = 0;
             await AsTeamCartHostAsync(hostUserId, run.TeamCartId, async sp =>
             {
@@ -401,18 +401,18 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 5: All members committing COD payments - {allMembers.Count} member(s), QuoteVersion: {quoteVersion}");
             foreach (var memberId in allMembers)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} committing COD payment...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} committing COD payment...");
                 await AsTeamCartMemberAsync(memberId, run.TeamCartId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     var paymentResult = await sender.Send(new CommitToCodPaymentCommand(run.TeamCartId, quoteVersion), ct);
                     if (paymentResult.IsFailure)
                     {
-                        Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[..8]} payment failed: {paymentResult.Error.Description}");
+                        Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[^8..]} payment failed: {paymentResult.Error.Description}");
                     }
                     else
                     {
-                        Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} payment committed successfully");
+                        Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} payment committed successfully");
                     }
                 }, ct);
             }
@@ -421,7 +421,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             // Step 6: Host converts to order
             Console.WriteLine($"[TeamCartSimulator] Step 6: Waiting {delays.PaymentToConvert.TotalMilliseconds}ms before converting to order...");
             await DelayAsync(delays.PaymentToConvert, ct);
-            Console.WriteLine($"[TeamCartSimulator] Step 6: Host {hostUserId.ToString()[..8]} converting cart to order...");
+            Console.WriteLine($"[TeamCartSimulator] Step 6: Host {hostUserId.ToString()[^8..]} converting cart to order...");
             await AsTeamCartHostAsync(hostUserId, run.TeamCartId, async sp =>
             {
                 var sender = sp.GetRequiredService<ISender>();
@@ -476,16 +476,16 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 1: Starting members join - {memberUserIds.Count} member(s) to join");
             foreach (var memberId in memberUserIds)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} joining team cart...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} joining team cart...");
                 await AsUserAsync(memberId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     await sender.Send(new JoinTeamCartCommand(
                         run.TeamCartId,
                         shareToken,
-                        $"Member-{memberId.ToString()[..8]}"), ct);
+                        $"Member-{memberId.ToString()[^8..]}"), ct);
                 }, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} joined successfully");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} joined successfully");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 1 complete: All members have joined");
 
@@ -495,9 +495,9 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 2: Starting item addition - {memberUserIds.Count} member(s) will add items");
             foreach (var memberId in memberUserIds)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} adding items...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} adding items...");
                 await AddRandomItemsForMemberAsync(memberId, run.TeamCartId, restaurantId, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} finished adding items");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} finished adding items");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 2 complete: All members have added items");
 
@@ -507,13 +507,13 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 3: All members marking ready - {memberUserIds.Count} member(s)");
             foreach (var memberId in memberUserIds)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} marking as ready...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} marking as ready...");
                 await AsTeamCartMemberAsync(memberId, run.TeamCartId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     await sender.Send(new SetMemberReadyCommand(run.TeamCartId, true), ct);
                 }, ct);
-                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} marked as ready");
+                Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} marked as ready");
             }
             Console.WriteLine($"[TeamCartSimulator] ✅ Step 3 complete: All members are ready");
 
@@ -523,18 +523,18 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
             Console.WriteLine($"[TeamCartSimulator] Step 4: All members committing COD payments - {memberUserIds.Count} member(s)");
             foreach (var memberId in memberUserIds)
             {
-                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} committing COD payment...");
+                Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} committing COD payment...");
                 await AsTeamCartMemberAsync(memberId, run.TeamCartId, async sp =>
                 {
                     var sender = sp.GetRequiredService<ISender>();
                     var paymentResult = await sender.Send(new CommitToCodPaymentCommand(run.TeamCartId, null), ct);
                     if (paymentResult.IsFailure)
                     {
-                        Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[..8]} payment failed: {paymentResult.Error.Description}");
+                        Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[^8..]} payment failed: {paymentResult.Error.Description}");
                     }
                     else
                     {
-                        Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} payment committed successfully");
+                        Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} payment committed successfully");
                     }
                 }, ct);
             }
@@ -567,7 +567,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
         // Add 1-2 random items, with retry on failure (e.g., required customizations)
         var random = new Random();
         var itemCount = random.Next(1, 3);
-        Console.WriteLine($"[TeamCartSimulator] Member {userId.ToString()[..8]} will add {itemCount} random item(s)");
+        Console.WriteLine($"[TeamCartSimulator] Member {userId.ToString()[^8..]} will add {itemCount} random item(s)");
         var addedCount = 0;
         var attemptCount = 0;
         var maxAttempts = Math.Min(menuItems.Count, 10); // Try up to 10 different items
@@ -611,11 +611,11 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
         
         if (addedCount < itemCount)
         {
-            Console.WriteLine($"[TeamCartSimulator] WARNING: Only {addedCount}/{itemCount} items were added for member {userId.ToString()[..8]}");
+            Console.WriteLine($"[TeamCartSimulator] WARNING: Only {addedCount}/{itemCount} items were added for member {userId.ToString()[^8..]}");
         }
         else
         {
-            Console.WriteLine($"[TeamCartSimulator] ✅ Member {userId.ToString()[..8]} successfully added {addedCount} item(s)");
+            Console.WriteLine($"[TeamCartSimulator] ✅ Member {userId.ToString()[^8..]} successfully added {addedCount} item(s)");
         }
     }
 
@@ -944,16 +944,16 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
     {
         foreach (var memberId in run.MemberUserIds)
         {
-            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} joining team cart...");
+            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} joining team cart...");
             await AsUserAsync(memberId, async sp =>
             {
                 var sender = sp.GetRequiredService<ISender>();
                 await sender.Send(new JoinTeamCartCommand(
                     run.TeamCartId,
                     shareToken,
-                    $"Member-{memberId.ToString()[..8]}"), ct);
+                    $"Member-{memberId.ToString()[^8..]}"), ct);
             }, ct);
-            Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} joined successfully");
+            Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} joined successfully");
             
             if (memberId != run.MemberUserIds.Last())
             {
@@ -1043,7 +1043,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
     {
         foreach (var memberId in allMembers)
         {
-            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} adding items...");
+            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} adding items...");
             await AddRandomItemsForMemberAsync(memberId, run.TeamCartId, restaurantId, ct);
             
             // Add delay between members (but not after the last one)
@@ -1076,13 +1076,13 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
 
         foreach (var memberId in allMembers)
         {
-            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} marking as ready...");
+            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} marking as ready...");
             await AsTeamCartMemberAsync(memberId, teamCartId, async sp =>
             {
                 var sender = sp.GetRequiredService<ISender>();
                 await sender.Send(new SetMemberReadyCommand(teamCartId, true), ct);
             }, ct);
-            Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} marked as ready");
+            Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} marked as ready");
         }
 
         // Update state
@@ -1118,7 +1118,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
 
         ValidateStateTransition(run, SimulationState.AllMembersReady, "lock");
 
-        Console.WriteLine($"[TeamCartSimulator] Host {run.HostUserId.ToString()[..8]} locking cart for payment...");
+        Console.WriteLine($"[TeamCartSimulator] Host {run.HostUserId.ToString()[^8..]} locking cart for payment...");
 
         long quoteVersion = 0;
 
@@ -1242,18 +1242,18 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
     {
         foreach (var memberId in allMembers)
         {
-            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[..8]} committing COD payment...");
+            Console.WriteLine($"[TeamCartSimulator] Member {memberId.ToString()[^8..]} committing COD payment...");
             await AsTeamCartMemberAsync(memberId, run.TeamCartId, async sp =>
             {
                 var sender = sp.GetRequiredService<ISender>();
                 var paymentResult = await sender.Send(new CommitToCodPaymentCommand(run.TeamCartId, quoteVersion), ct);
                 if (paymentResult.IsFailure)
                 {
-                    Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[..8]} payment failed: {paymentResult.Error.Description}");
+                    Console.WriteLine($"[TeamCartSimulator] ERROR: Member {memberId.ToString()[^8..]} payment failed: {paymentResult.Error.Description}");
                 }
                 else
                 {
-                    Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[..8]} payment committed successfully");
+                    Console.WriteLine($"[TeamCartSimulator] ✅ Member {memberId.ToString()[^8..]} payment committed successfully");
                 }
             }, ct);
             
@@ -1300,7 +1300,7 @@ public sealed class TeamCartFlowSimulator : ITeamCartFlowSimulator
 
         var notes = deliveryNotes ?? "Simulated order";
 
-        Console.WriteLine($"[TeamCartSimulator] Host {run.HostUserId.ToString()[..8]} converting cart to order...");
+        Console.WriteLine($"[TeamCartSimulator] Host {run.HostUserId.ToString()[^8..]} converting cart to order...");
 
         Guid? orderId = null;
 

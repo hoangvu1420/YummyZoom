@@ -15,6 +15,7 @@ namespace YummyZoom.Application.TeamCarts.EventHandlers;
 public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHandler<ItemAddedToTeamCart>
 {
     private readonly ITeamCartRepository _teamCartRepository;
+    private readonly IMenuItemRepository _menuItemRepository;
     private readonly ITeamCartStore _store;
     private readonly ITeamCartRealtimeNotifier _notifier;
     private readonly ITeamCartPushNotifier _pushNotifier;
@@ -24,12 +25,14 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
         IUnitOfWork uow,
         IInboxStore inbox,
         ITeamCartRepository teamCartRepository,
+        IMenuItemRepository menuItemRepository,
         ITeamCartStore store,
         ITeamCartRealtimeNotifier notifier,
         ITeamCartPushNotifier pushNotifier,
         ILogger<ItemAddedToTeamCartEventHandler> logger) : base(uow, inbox)
     {
         _teamCartRepository = teamCartRepository;
+        _menuItemRepository = menuItemRepository;
         _store = store;
         _notifier = notifier;
         _pushNotifier = pushNotifier;
@@ -56,11 +59,21 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
             return;
         }
 
+        // Load MenuItem to get ImageUrl
+        var menuItem = await _menuItemRepository.GetByIdAsync(item.Snapshot_MenuItemId, ct);
+        if (menuItem is null)
+        {
+            _logger.LogWarning("ItemAddedToTeamCart handler could not find MenuItem (CartId={CartId}, ItemId={ItemId}, MenuItemId={MenuItemId}, EventId={EventId})", cartId.Value, notification.TeamCartItemId.Value, item.Snapshot_MenuItemId.Value, notification.EventId);
+            // Continue with null ImageUrl if MenuItem not found (defensive)
+        }
+
         var vmItem = new TeamCartViewModel.Item
         {
             ItemId = item.Id.Value,
             AddedByUserId = item.AddedByUserId.Value,
             Name = item.Snapshot_ItemName,
+            ImageUrl = menuItem?.ImageUrl,
+            MenuItemId = item.Snapshot_MenuItemId.Value,
             Quantity = item.Quantity,
             BasePrice = item.Snapshot_BasePriceAtOrder.Amount,
             LineTotal = item.LineItemTotal.Amount,
@@ -80,7 +93,27 @@ public sealed class ItemAddedToTeamCartEventHandler : IdempotentNotificationHand
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                // Get actor name from VM members
+                var actorMember = vm.Members.FirstOrDefault(m => m.UserId == item.AddedByUserId.Value);
+                var actorName = actorMember?.Name ?? "Ai đó";
+                
+                // Notify others (data-only, no notification tray)
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "ItemAdded",
+                    ActorUserId = item.AddedByUserId.Value,
+                    ActorName = actorName,
+                    ItemName = item.Snapshot_ItemName,
+                    Quantity = item.Quantity
+                };
+                
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.Others,
+                    context,
+                    NotificationDeliveryType.DataOnly,
+                    ct);
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

@@ -1,4 +1,6 @@
+using Dapper;
 using Microsoft.EntityFrameworkCore;
+using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
@@ -10,10 +12,12 @@ namespace YummyZoom.Infrastructure.Persistence.Repositories;
 public sealed class TeamCartRepository : ITeamCartRepository
 {
     private readonly ApplicationDbContext _db;
+    private readonly IDbConnectionFactory _dbConnectionFactory;
 
-    public TeamCartRepository(ApplicationDbContext db)
+    public TeamCartRepository(ApplicationDbContext db, IDbConnectionFactory dbConnectionFactory)
     {
         _db = db;
+        _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
     }
 
     public Task<TeamCart?> GetByIdAsync(TeamCartId id, CancellationToken cancellationToken = default)
@@ -46,5 +50,29 @@ public sealed class TeamCartRepository : ITeamCartRepository
             .Take(take)
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TeamCartMembershipInfo>> GetActiveTeamCartMembershipsAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        using var connection = _dbConnectionFactory.CreateConnection();
+
+        const string sql = """
+            SELECT 
+                tc."Id" AS "TeamCartId",
+                tcm."Role" AS "Role"
+            FROM "TeamCartMembers" tcm
+            INNER JOIN "TeamCarts" tc ON tcm."TeamCartId" = tc."Id"
+            WHERE tcm."UserId" = @UserId
+              AND tc."Status" IN ('Open', 'Locked')
+              AND tc."ExpiresAt" > @NowUtc
+            ORDER BY tc."CreatedAt" DESC
+            """;
+
+        var memberships = await connection.QueryAsync<TeamCartMembershipInfo>(
+            new CommandDefinition(sql,
+                new { UserId = userId, NowUtc = DateTime.UtcNow },
+                cancellationToken: cancellationToken));
+
+        return memberships.ToList();
     }
 }

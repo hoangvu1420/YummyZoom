@@ -56,7 +56,23 @@ public sealed class OnlinePaymentFailedEventHandler : IdempotentNotificationHand
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "OnlinePaymentFailed",
+                    ActorUserId = userId.Value,
+                    Amount = notification.Amount.Amount,
+                    Currency = notification.Amount.Currency
+                };
+                
+                // Notify the payer only (hybrid)
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.SpecificUser,
+                    context,
+                    NotificationDeliveryType.Hybrid,
+                    ct);
+                
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

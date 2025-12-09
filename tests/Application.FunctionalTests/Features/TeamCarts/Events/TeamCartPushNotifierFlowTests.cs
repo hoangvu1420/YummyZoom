@@ -15,7 +15,7 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
     {
         private readonly ITeamCartPushNotifier _push;
         public TestTeamCartRealtimeNotifier(ITeamCartPushNotifier push) => _push = push;
-        private Task FanOut(TeamCartId id, CancellationToken ct) => _push.PushTeamCartDataAsync(id, 1, ct); // Use dummy version for tests
+        private Task FanOut(TeamCartId id, CancellationToken ct) => _push.PushTeamCartDataAsync(id, 1, TeamCartNotificationTarget.All, null, NotificationDeliveryType.Hybrid, ct); // Use dummy version for tests
         public Task NotifyCartUpdated(TeamCartId cartId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
         public Task NotifyLocked(TeamCartId cartId, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
         public Task NotifyPaymentEvent(TeamCartId cartId, Guid userId, string status, CancellationToken cancellationToken = default) => FanOut(cartId, cancellationToken);
@@ -44,7 +44,7 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         // Replace notifier with test wrapper that calls push; mock push to capture calls
         var pushMock = new Moq.Mock<ITeamCartPushNotifier>(MockBehavior.Strict);
         pushMock
-            .Setup(p => p.PushTeamCartDataAsync(It.IsAny<TeamCartId>(), It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .Setup(p => p.PushTeamCartDataAsync(It.IsAny<TeamCartId>(), It.IsAny<long>(), It.IsAny<TeamCartNotificationTarget>(), It.IsAny<TeamCartNotificationContext>(), It.IsAny<NotificationDeliveryType>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(YummyZoom.SharedKernel.Result.Success());
         ReplaceService<ITeamCartPushNotifier>(pushMock.Object);
         ReplaceService<ITeamCartRealtimeNotifier, TestTeamCartRealtimeNotifier>();
@@ -56,7 +56,7 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         await DrainOutboxAsync();
 
         // Assert push was invoked
-        pushMock.Verify(p => p.PushTeamCartDataAsync(It.Is<TeamCartId>(id => id.Value == scenario.TeamCartId), It.IsAny<long>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+        pushMock.Verify(p => p.PushTeamCartDataAsync(It.Is<TeamCartId>(id => id.Value == scenario.TeamCartId), It.IsAny<long>(), It.IsAny<TeamCartNotificationTarget>(), It.IsAny<TeamCartNotificationContext>(), It.IsAny<NotificationDeliveryType>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
     [Test]
@@ -70,7 +70,7 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
 
         var pushMock = new Moq.Mock<ITeamCartPushNotifier>(MockBehavior.Strict);
         pushMock
-            .Setup(p => p.PushTeamCartDataAsync(It.IsAny<TeamCartId>(), It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .Setup(p => p.PushTeamCartDataAsync(It.IsAny<TeamCartId>(), It.IsAny<long>(), It.IsAny<TeamCartNotificationTarget>(), It.IsAny<TeamCartNotificationContext>(), It.IsAny<NotificationDeliveryType>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(YummyZoom.SharedKernel.Result.Success());
         ReplaceService<ITeamCartPushNotifier>(pushMock.Object);
         ReplaceService<ITeamCartRealtimeNotifier, TestTeamCartRealtimeNotifier>();
@@ -82,6 +82,6 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         await DrainOutboxAsync();
 
         // Assert push
-        pushMock.Verify(p => p.PushTeamCartDataAsync(It.Is<TeamCartId>(id => id.Value == scenario.TeamCartId), It.IsAny<long>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+        pushMock.Verify(p => p.PushTeamCartDataAsync(It.Is<TeamCartId>(id => id.Value == scenario.TeamCartId), It.IsAny<long>(), It.IsAny<TeamCartNotificationTarget>(), It.IsAny<TeamCartNotificationContext>(), It.IsAny<NotificationDeliveryType>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 }

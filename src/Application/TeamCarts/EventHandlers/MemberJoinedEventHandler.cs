@@ -66,7 +66,21 @@ public sealed class MemberJoinedEventHandler : IdempotentNotificationHandler<Mem
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                // Notify host only (actor exclusion: don't notify the joining member)
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "MemberJoined",
+                    ActorUserId = notification.UserId.Value,
+                    ActorName = notification.Name
+                };
+                
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.Host,
+                    context,
+                    NotificationDeliveryType.DataOnly,
+                    ct);
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

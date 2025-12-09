@@ -17,4 +17,16 @@ public interface ITeamCartRepository
     /// Intended for background expiration processing.
     /// </summary>
     Task<IReadOnlyList<TeamCart>> GetExpiringCartsAsync(DateTime cutoffUtc, int take, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the active TeamCart memberships for a specific user.
+    /// Active TeamCarts are those in Open or Locked status that have not expired.
+    /// Returns both the TeamCart ID and the user's role (Host or Guest).
+    /// </summary>
+    Task<IReadOnlyList<TeamCartMembershipInfo>> GetActiveTeamCartMembershipsAsync(Guid userId, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Represents a user's membership in an active TeamCart.
+/// </summary>
+public sealed record TeamCartMembershipInfo(Guid TeamCartId, string Role);

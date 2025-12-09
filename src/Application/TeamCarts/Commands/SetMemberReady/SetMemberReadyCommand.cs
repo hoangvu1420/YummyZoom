@@ -68,12 +68,24 @@ public sealed class SetMemberReadyCommandHandler : IRequestHandler<SetMemberRead
         if (updatedCart is not null && updatedCart.Members.All(m => m.IsReady))
         {
             await _notifier.NotifyAllMembersReady(cartId, cancellationToken);
-        }
-
-        // Push notification for ready status change
-        if (updatedCart is not null)
-        {
-            var push = await _pushNotifier.PushTeamCartDataAsync(cartId, updatedCart.Version, cancellationToken);
+            
+            // Only notify host when all members are ready (reduce spam)
+            var actorMember = updatedCart.Members.FirstOrDefault(m => m.UserId == userId.Value);
+            var context = new TeamCartNotificationContext
+            {
+                EventType = "MemberReadyStatusChanged",
+                ActorUserId = userId.Value,
+                ActorName = actorMember?.Name ?? "Thành viên"
+            };
+            
+            var push = await _pushNotifier.PushTeamCartDataAsync(
+                cartId, 
+                updatedCart.Version, 
+                TeamCartNotificationTarget.Host,
+                context,
+                NotificationDeliveryType.Hybrid,
+                cancellationToken);
+                
             if (push.IsFailure)
             {
                 return Result.Failure(push.Error);

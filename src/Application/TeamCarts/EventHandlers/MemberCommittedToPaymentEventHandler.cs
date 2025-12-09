@@ -55,7 +55,25 @@ public sealed class MemberCommittedToPaymentEventHandler : IdempotentNotificatio
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                var member = vm.Members.FirstOrDefault(m => m.UserId == userId.Value);
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "MemberCommittedToPayment",
+                    ActorUserId = userId.Value,
+                    ActorName = member?.Name ?? "Thành viên",
+                    Amount = amount.Amount,
+                    Currency = amount.Currency,
+                    AdditionalInfo = "CODCommitted"
+                };
+                
+                // Only notify the payer (data-only, no notification tray)
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.SpecificUser,
+                    context,
+                    NotificationDeliveryType.DataOnly,
+                    ct);
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

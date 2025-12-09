@@ -293,6 +293,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             Deadline = s.Deadline,
             ExpiresAt = s.ExpiresAt,
             ShareTokenMasked = s.ShareTokenMasked,
+            ShareToken = s.ShareToken,
             TipAmount = s.TipAmount,
             TipCurrency = s.TipCurrency,
             CouponCode = s.CouponCode,
@@ -322,6 +323,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 ItemId = i.ItemId,
                 AddedByUserId = i.AddedByUserId,
                 Name = i.Name,
+                ImageUrl = i.ImageUrl,
+                MenuItemId = i.MenuItemId,
                 Quantity = i.Quantity,
                 BasePrice = i.BasePrice,
                 LineTotal = i.LineTotal,
@@ -345,6 +348,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             Deadline = v.Deadline,
             ExpiresAt = v.ExpiresAt,
             ShareTokenMasked = v.ShareTokenMasked,
+            ShareToken = v.ShareToken,
             TipAmount = v.TipAmount,
             TipCurrency = v.TipCurrency,
             CouponCode = v.CouponCode,
@@ -374,6 +378,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
                 ItemId = i.ItemId,
                 AddedByUserId = i.AddedByUserId,
                 Name = i.Name,
+                ImageUrl = i.ImageUrl,
+                MenuItemId = i.MenuItemId,
                 Quantity = i.Quantity,
                 BasePrice = i.BasePrice,
                 LineTotal = i.LineTotal,
@@ -395,6 +401,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         public DateTime? Deadline { get; set; }
         public DateTime ExpiresAt { get; set; }
         public string? ShareTokenMasked { get; set; }
+        public string? ShareToken { get; set; }
         public decimal TipAmount { get; set; }
         public string TipCurrency { get; set; } = "USD";
         public string? CouponCode { get; set; }
@@ -428,6 +435,8 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             public Guid ItemId { get; set; }
             public Guid AddedByUserId { get; set; }
             public string Name { get; set; } = string.Empty;
+            public string? ImageUrl { get; set; }
+            public Guid MenuItemId { get; set; }
             public int Quantity { get; set; }
             public decimal BasePrice { get; set; }
             public decimal LineTotal { get; set; }

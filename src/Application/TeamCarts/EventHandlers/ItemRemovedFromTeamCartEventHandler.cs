@@ -52,16 +52,6 @@ public sealed class ItemRemovedFromTeamCartEventHandler : IdempotentNotification
         {
             await _store.RemoveItemAsync(cartId, notification.TeamCartItemId.Value, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
-            
-            var vm = await _store.GetVmAsync(cartId, ct);
-            if (vm is not null)
-            {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
-                if (push.IsFailure)
-                {
-                    throw new InvalidOperationException(push.Error.Description);
-                }
-            }
         }
         catch (Exception ex)
         {

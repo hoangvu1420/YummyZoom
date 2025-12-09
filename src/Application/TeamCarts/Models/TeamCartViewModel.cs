@@ -11,6 +11,7 @@ public sealed class TeamCartViewModel
     public DateTime? Deadline { get; set; }
     public DateTime ExpiresAt { get; set; }
     public string? ShareTokenMasked { get; set; }
+    public string? ShareToken { get; set; }
     public decimal TipAmount { get; set; }
     public string TipCurrency { get; set; } = "USD";
     public string? CouponCode { get; set; }
@@ -45,6 +46,8 @@ public sealed class TeamCartViewModel
         public required Guid ItemId { get; init; }
         public required Guid AddedByUserId { get; init; }
         public required string Name { get; init; }
+        public string? ImageUrl { get; init; }
+        public required Guid MenuItemId { get; init; }
         public required int Quantity { get; set; }
         public required decimal BasePrice { get; init; }
         public required decimal LineTotal { get; set; }

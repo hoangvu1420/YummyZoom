@@ -56,7 +56,28 @@ public sealed class OnlinePaymentSucceededEventHandler : IdempotentNotificationH
             var vm = await _store.GetVmAsync(cartId, ct);
             if (vm is not null)
             {
-                var push = await _pushNotifier.PushTeamCartDataAsync(cartId, vm.Version, ct);
+                var member = vm.Members.FirstOrDefault(m => m.UserId == userId.Value);
+                var hostMember = vm.Members.FirstOrDefault(m => m.Role == "Host");
+                var hostUserId = hostMember?.UserId;
+                
+                var context = new TeamCartNotificationContext
+                {
+                    EventType = "OnlinePaymentSucceeded",
+                    ActorUserId = userId.Value,
+                    ActorName = member?.Name ?? "Thành viên",
+                    Amount = amount.Amount,
+                    Currency = amount.Currency
+                };
+                
+                // Notify the payer only (hybrid)
+                var push = await _pushNotifier.PushTeamCartDataAsync(
+                    cartId, 
+                    vm.Version, 
+                    TeamCartNotificationTarget.SpecificUser,
+                    context,
+                    NotificationDeliveryType.Hybrid,
+                    ct);
+
                 if (push.IsFailure)
                 {
                     throw new InvalidOperationException(push.Error.Description);

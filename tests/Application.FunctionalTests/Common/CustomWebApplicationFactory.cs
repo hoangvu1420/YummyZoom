@@ -267,15 +267,16 @@ public class TestUserService : IUser
         // Re-add UserOwner claim
         _additionalClaims.Add(new Claim("permission", $"{Roles.UserOwner}:{_userId.Value}"));
 
-        // Fetch current role assignments from database and add permission claims
         using var scope = serviceProvider.CreateScope();
-        var repository = scope.ServiceProvider.GetService<IRoleAssignmentRepository>();
-        if (repository != null)
+
+        // Fetch current role assignments from database and add permission claims
+        var roleAssignmentRepository = scope.ServiceProvider.GetService<IRoleAssignmentRepository>();
+        if (roleAssignmentRepository != null)
         {
             try
             {
                 var domainUserId = UserId.Create(_userId.Value);
-                var roleAssignments = await repository.GetByUserIdAsync(domainUserId);
+                var roleAssignments = await roleAssignmentRepository.GetByUserIdAsync(domainUserId);
 
                 foreach (var assignment in roleAssignments)
                 {
@@ -287,6 +288,33 @@ public class TestUserService : IUser
                     };
 
                     var claimValue = $"{roleConstant}:{assignment.RestaurantId.Value}";
+                    _additionalClaims.Add(new Claim("permission", claimValue));
+                }
+            }
+            catch
+            {
+                // If we can't refresh from database, continue with existing claims
+            }
+        }
+
+        // Fetch active TeamCart memberships and add permission claims
+        var teamCartRepository = scope.ServiceProvider.GetService<ITeamCartRepository>();
+        if (teamCartRepository != null)
+        {
+            try
+            {
+                var activeMemberships = await teamCartRepository.GetActiveTeamCartMembershipsAsync(_userId.Value);
+
+                foreach (var membership in activeMemberships)
+                {
+                    var roleConstant = membership.Role switch
+                    {
+                        "Host" => Roles.TeamCartHost,
+                        "Guest" => Roles.TeamCartMember,
+                        _ => Roles.TeamCartMember
+                    };
+
+                    var claimValue = $"{roleConstant}:{membership.TeamCartId}";
                     _additionalClaims.Add(new Claim("permission", claimValue));
                 }
             }

@@ -258,4 +258,85 @@ public class AddItemToTeamCartTests : BaseTestFixture
         // Assert: Should fail
         add.IsFailure.Should().BeTrue();
     }
+
+    [Test]
+    public async Task AddItem_AsGuest_AfterJoin_WithClaimsRefresh_ShouldSucceed()
+    {
+        // Arrange: Create team cart as host
+        var hostUserId = await RunAsDefaultUserAsync();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+
+        var createCmd = new YummyZoom.Application.TeamCarts.Commands.CreateTeamCart.CreateTeamCartCommand(restaurantId, "Alice Host");
+        var createResult = await SendAsync(createCmd);
+        createResult.IsSuccess.Should().BeTrue();
+        var teamCartId = createResult.Value.TeamCartId;
+        var shareToken = createResult.Value.ShareToken;
+
+        // Act: Guest joins the TeamCart
+        var guestUserId = await CreateUserAsync("guest@example.com", "Password123!");
+        SetUserId(guestUserId);
+        // Note: We deliberately do NOT manually add TeamCartMember claim here
+        // to simulate the real-world scenario where claims are missing after join
+
+        var joinCmd = new YummyZoom.Application.TeamCarts.Commands.JoinTeamCart.JoinTeamCartCommand(teamCartId, shareToken, "Bob Guest");
+        var joinResult = await SendAsync(joinCmd);
+        joinResult.IsSuccess.Should().BeTrue();
+
+        // Simulate token refresh - claims should now include TeamCart membership
+        await RefreshUserClaimsAsync();
+
+        // Now try to add an item - should succeed because claims were refreshed
+        var burgerId = TestDataFactory.GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
+        var addCmd = new AddItemToTeamCartCommand(
+            TeamCartId: teamCartId,
+            MenuItemId: burgerId,
+            Quantity: 1
+        );
+
+        var addResult = await SendAsync(addCmd);
+
+        // Assert: Should succeed because claims were refreshed
+        addResult.IsSuccess.Should().BeTrue();
+
+        // Verify persisted
+        var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(teamCartId));
+        cart.Should().NotBeNull();
+        cart!.Items.Should().Contain(i => i.AddedByUserId.Value == guestUserId);
+    }
+
+    [Test]
+    public async Task AddItem_AsGuest_AfterJoin_WithoutClaimsRefresh_ShouldFail()
+    {
+        // Arrange: Create team cart as host
+        var hostUserId = await RunAsDefaultUserAsync();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+
+        var createCmd = new YummyZoom.Application.TeamCarts.Commands.CreateTeamCart.CreateTeamCartCommand(restaurantId, "Alice Host");
+        var createResult = await SendAsync(createCmd);
+        createResult.IsSuccess.Should().BeTrue();
+        var teamCartId = createResult.Value.TeamCartId;
+        var shareToken = createResult.Value.ShareToken;
+
+        // Act: Guest joins the TeamCart
+        var guestUserId = await CreateUserAsync("guest2@example.com", "Password123!");
+        SetUserId(guestUserId);
+        // Note: We deliberately do NOT manually add TeamCartMember claim here
+        // and do NOT refresh claims to simulate the bug scenario
+
+        var joinCmd = new YummyZoom.Application.TeamCarts.Commands.JoinTeamCart.JoinTeamCartCommand(teamCartId, shareToken, "Charlie Guest");
+        var joinResult = await SendAsync(joinCmd);
+        joinResult.IsSuccess.Should().BeTrue();
+
+        // Try to add an item WITHOUT refreshing claims - should fail with 403
+        var burgerId = TestDataFactory.GetMenuItemId(DefaultTestData.MenuItems.MainDishes.ClassicBurger.Name);
+        var addCmd = new AddItemToTeamCartCommand(
+            TeamCartId: teamCartId,
+            MenuItemId: burgerId,
+            Quantity: 1
+        );
+
+        // Assert: Should fail with ForbiddenAccessException because claims are missing
+        await FluentActions.Invoking(() => SendAsync(addCmd))
+            .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
+    }
 }
