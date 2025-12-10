@@ -19,6 +19,7 @@ using YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel;
 using YummyZoom.Web.Infrastructure;
 using YummyZoom.Web.Services;
+using YummyZoom.Application.TeamCarts.Queries.GetActiveTeamCart;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -59,6 +60,31 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithSummary("Create a new TeamCart")
         .WithDescription("Creates a collaborative TeamCart for a restaurant and returns identifiers and share token details.")
         .WithStandardCreationResults<CreateTeamCartResponse>();
+
+        // GET /api/v1/team-carts/active
+        group.MapGet("/active", async (ISender sender) =>
+        {
+            var query = new GetActiveTeamCartQuery();
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return result.ToIResult();
+            }
+
+            if (result.Value is null)
+            {
+                return Results.NoContent();
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .RequireAuthorization()
+        .WithName("GetActiveTeamCart")
+        .WithSummary("Get active TeamCart summary")
+        .WithDescription("Returns a lightweight summary of the user's active team cart, if any.")
+        .Produces<GetActiveTeamCartResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status204NoContent);
 
         // GET /api/v1/team-carts/{id}
         group.MapGet("/{id}", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>

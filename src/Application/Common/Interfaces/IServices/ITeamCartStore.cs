@@ -1,4 +1,5 @@
 using YummyZoom.Application.TeamCarts.Models;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 
 namespace YummyZoom.Application.Common.Interfaces.IServices;
@@ -27,4 +28,5 @@ public interface ITeamCartStore
     Task RecordOnlinePaymentFailureAsync(TeamCartId cartId, Guid userId, CancellationToken ct = default);
     Task UpdateQuoteAsync(TeamCartId cartId, long quoteVersion, IReadOnlyDictionary<Guid, decimal> memberQuotedAmounts, string currency, CancellationToken ct = default);
     Task SetMemberReadyAsync(TeamCartId cartId, Guid userId, bool isReady, CancellationToken ct = default);
+    Task SetStatusAsync(TeamCartId cartId, TeamCartStatus status, CancellationToken ct = default);
 }

@@ -20,6 +20,57 @@ All endpoints require `Authorization: Bearer <access_token>` unless stated. Feat
 
 ---
 
+## Active Team Cart Summary
+
+Get a lightweight summary of the user's currently active team cart (if any). Ideally used for widgets or home screen cards.
+
+**`GET /api/v1/team-carts/active`**
+
+- Authorization: Required (Customer)
+- Response: 200 OK (with data) or 204 No Content (if no active cart)
+
+#### Response
+**✅ 200 OK**
+```json
+{
+  "teamCartId": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+  "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "restaurantName": "Burger & Co",
+  "restaurantImage": "https://example.com/logo.png",
+  "state": "Open",
+  "totalItemCount": 5,
+  "myShareTotal": 20.50,
+  "currency": "USD",
+  "isHost": true,
+  "createdAt": "2025-10-27T18:00:00Z"
+}
+```
+
+**✅ 204 No Content**
+(Empty body) - The user is not part of any active TeamCart.
+
+#### Response Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `teamCartId` | `string` | ID of the active cart |
+| `restaurantId` | `string` | ID of the linked restaurant |
+| `restaurantName` | `string` | Name of the restaurant |
+| `restaurantImage` | `string` | URL of the restaurant logo (optional) |
+| `state` | `string` | Current state: `Open`, `Locked`, `ReadyToConfirm` |
+| `totalItemCount` | `integer` | Total number of items in the cart (sum of quantities) |
+| `myShareTotal` | `decimal` | The user's personal share of the cost |
+| `currency` | `string` | Currency code |
+| `isHost` | `boolean` | `true` if the current user is the host |
+| `createdAt` | `string` | ISO 8601 date when cart was created |
+
+#### Business Rules
+- Returns the most relevant active cart if multiple exist (currently prioritized by creation date).
+- Returns 204 if user has no active carts in `Open`, `Locked`, or `ReadyToConfirm` state.
+- `myShareTotal` reflects the quoted amount if locked, or a raw sum of user's items if open.
+
+---
+
 ## Step 1 — Create a TeamCart (Host)
 
 Creates a new collaborative cart for a specific restaurant and returns identifiers and a share token for others to join.

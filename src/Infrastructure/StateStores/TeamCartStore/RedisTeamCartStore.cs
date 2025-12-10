@@ -196,6 +196,9 @@ public sealed class RedisTeamCartStore : ITeamCartStore
             m.IsReady = isReady;
         }, "member_ready_status_changed");
 
+    public async Task SetStatusAsync(TeamCartId cartId, TeamCartStatus status, CancellationToken ct = default)
+        => await MutateAsync(cartId, vm => { vm.Status = status; }, "status_changed");
+
     private async Task MutateAsync(TeamCartId cartId, Action<TeamCartViewModel> mutate, string updateType)
     {
         var key = Key(cartId);

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Notifications;
+using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.Events;
 
 namespace YummyZoom.Application.TeamCarts.EventHandlers;
@@ -33,18 +34,23 @@ public sealed class TeamCartReadyForConfirmationEventHandler : IdempotentNotific
     protected override async Task HandleCore(TeamCartReadyForConfirmation notification, CancellationToken ct)
     {
         var cartId = notification.TeamCartId;
+        
         _logger.LogDebug("Handling TeamCartReadyForConfirmation (EventId={EventId}, CartId={CartId})",
             notification.EventId, cartId.Value);
 
         var cart = await _teamCartRepository.GetByIdAsync(cartId, ct);
         if (cart is null)
         {
-            _logger.LogWarning("TeamCartReadyForConfirmation handler could not find cart (CartId={CartId}, EventId={EventId})", cartId.Value, notification.EventId);
+            _logger.LogWarning("TeamCartReadyForConfirmation handler could not find cart (CartId={CartId}, EventId={EventId})", 
+                cartId.Value, notification.EventId);
             return;
         }
 
         try
         {
+            // Update Redis with the new status
+            await _store.SetStatusAsync(cartId, TeamCartStatus.ReadyToConfirm, ct);
+            
             await _notifier.NotifyReadyToConfirm(cartId, ct);
             await _notifier.NotifyCartUpdated(cartId, ct);
             
