@@ -228,7 +228,7 @@ public class TeamCartPaymentTests
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.CanOnlyPayOnLockedCart);
+        result.Error.Should().Be(TeamCartErrors.CanOnlyPayOnFinalizedCart);
         newCart.MemberPayments.Should().BeEmpty();
     }
 
@@ -357,7 +357,7 @@ public class TeamCartPaymentTests
 
         // Assert
         result.ShouldBeFailure();
-        result.Error.Should().Be(TeamCartErrors.CanOnlyPayOnLockedCart);
+        result.Error.Should().Be(TeamCartErrors.CanOnlyPayOnFinalizedCart);
         newCart.MemberPayments.Should().BeEmpty();
     }
 

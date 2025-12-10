@@ -45,11 +45,11 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
                 return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.TeamCartNotFound);
             }
 
-            // Validate payments can be initiated only when cart is locked
-            if (cart.Status != TeamCartStatus.Locked)
+            // Validate payments can be initiated only when cart is finalized
+            if (cart.Status != TeamCartStatus.Finalized)
             {
-                _logger.LogWarning("Cannot initiate online payment when cart is not locked. CartId={TeamCartId} Status={Status}", request.TeamCartId, cart.Status);
-                return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.CanOnlyPayOnLockedCart);
+                _logger.LogWarning("Cannot initiate online payment when cart is not finalized. CartId={TeamCartId} Status={Status}", request.TeamCartId, cart.Status);
+                return Result.Failure<InitiateMemberOnlinePaymentResponse>(TeamCartErrors.CanOnlyPayOnFinalizedCart);
             }
 
             // Validate user is a member

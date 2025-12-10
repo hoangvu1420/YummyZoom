@@ -13,10 +13,17 @@ public enum TeamCartStatus
 
     /// <summary>
     /// The cart is locked for payment. Item-related changes are forbidden.
-    /// This is the "Settle Up" phase where the Host can apply final financials (tip, coupon)
-    /// and members are notified to pay their share.
+    /// Host is reviewing totals and can apply tip/coupon before finalizing.
+    /// Members wait for pricing to be finalized before they can pay.
     /// </summary>
     Locked,
+
+    /// <summary>
+    /// Pricing is finalized. Tip and coupon are now immutable.
+    /// Members can now commit payments with confidence that amounts won't change.
+    /// This is the "Settle Up" phase where members pay their share.
+    /// </summary>
+    Finalized,
 
     /// <summary>
     /// All payments are complete or committed and the team cart is ready to be converted to an order.

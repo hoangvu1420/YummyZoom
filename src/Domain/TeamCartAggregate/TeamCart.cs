@@ -481,6 +481,29 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     }
 
     /// <summary>
+    /// Finalizes pricing (tip and coupon), making them immutable and enabling payments.
+    /// Only the host can perform this action, and only when cart is in Locked status.
+    /// </summary>
+    /// <param name="requestingUserId">The ID of the user requesting to finalize pricing.</param>
+    /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
+    public Result FinalizePricing(UserId requestingUserId)
+    {
+        if (requestingUserId != HostUserId)
+        {
+            return Result.Failure(TeamCartErrors.OnlyHostCanModifyFinancials);
+        }
+
+        if (Status != TeamCartStatus.Locked)
+        {
+            return Result.Failure(TeamCartErrors.CannotFinalizePricingInCurrentStatus);
+        }
+
+        Status = TeamCartStatus.Finalized;
+        AddDomainEvent(new TeamCartPricingFinalized(Id, HostUserId));
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Marks the team cart as expired.
     /// </summary>
     /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
@@ -549,9 +572,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public Result CommitToCashOnDelivery(UserId userId, Money amount)
     {
         // Validate status
-        if (Status != TeamCartStatus.Locked)
+        if (Status != TeamCartStatus.Finalized)
         {
-            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnFinalizedCart);
         }
 
         // Validate user is a member
@@ -612,9 +635,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)
     {
         // Validate status
-        if (Status != TeamCartStatus.Locked)
+        if (Status != TeamCartStatus.Finalized)
         {
-            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnFinalizedCart);
         }
 
         // Validate user is a member
@@ -678,9 +701,9 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     public Result RecordFailedOnlinePayment(UserId userId, Money amount)
     {
         // Validate status
-        if (Status != TeamCartStatus.Locked)
+        if (Status != TeamCartStatus.Finalized)
         {
-            return Result.Failure(TeamCartErrors.CanOnlyPayOnLockedCart);
+            return Result.Failure(TeamCartErrors.CanOnlyPayOnFinalizedCart);
         }
 
         // Validate user is a member
@@ -987,7 +1010,7 @@ public sealed class TeamCart : AggregateRoot<TeamCartId, Guid>, ICreationAuditab
     /// </summary>
     private void CheckAndTransitionToReadyToConfirm()
     {
-        if (Status != TeamCartStatus.Locked)
+        if (Status != TeamCartStatus.Finalized)
         {
             return;
         }

@@ -236,13 +236,17 @@ public static class TeamCartErrors
         "TeamCart.CannotModifyCartOnceLocked",
         "Cannot modify items or members once the cart is locked");
 
+    public static readonly Error CannotFinalizePricingInCurrentStatus = Error.Validation(
+        "TeamCart.CannotFinalizePricingInCurrentStatus",
+        "Can only finalize pricing when cart is in Locked status");
+
     public static readonly Error CanOnlyApplyFinancialsToLockedCart = Error.Validation(
         "TeamCart.CanOnlyApplyFinancialsToLockedCart",
-        "Financial adjustments can only be applied to a locked cart");
+        "Financial adjustments (tip/coupon) can only be applied before pricing is finalized");
 
-    public static readonly Error CanOnlyPayOnLockedCart = Error.Validation(
-        "TeamCart.CanOnlyPayOnLockedCart",
-        "Payments can only be made on a locked cart");
+    public static readonly Error CanOnlyPayOnFinalizedCart = Error.Validation(
+        "TeamCart.CanOnlyPayOnFinalizedCart",
+        "Payments can only be made after pricing is finalized");
 
     public static readonly Error FinalPaymentMismatch = Error.Validation(
         "TeamCart.FinalPaymentMismatch",

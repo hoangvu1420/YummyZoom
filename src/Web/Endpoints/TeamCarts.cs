@@ -6,6 +6,7 @@ using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
 using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Application.TeamCarts.Commands.CreateTeamCart;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
 using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
@@ -240,6 +241,24 @@ public sealed class TeamCarts : EndpointGroupBase
         .WithSummary("Lock TeamCart for payment")
         .WithDescription("Locks the TeamCart for payment and returns the quote version for concurrency control.")
         .WithStandardResults<LockTeamCartForPaymentResponse>();
+
+        // POST /api/v1/team-carts/{id}/finalize-pricing
+        group.MapPost("/{id}/finalize-pricing", async (Guid id, ISender sender, ITeamCartFeatureAvailability availability) =>
+        {
+            if (!availability.Enabled || !availability.RealTimeReady)
+            {
+                return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+            }
+            
+            var command = new FinalizePricingCommand(id);
+            var result = await sender.Send(command);
+            return result.ToIResult();
+        })
+        .RequireAuthorization()
+        .WithName("FinalizePricing")
+        .WithSummary("Finalize pricing for TeamCart")
+        .WithDescription("Finalizes pricing (tip and coupon), making them immutable and enabling member payments.")
+        .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/tip
         group.MapPost("/{id}/tip", async (Guid id, [FromBody] ApplyTipRequest body, ISender sender, ITeamCartFeatureAvailability availability) =>

@@ -7,7 +7,8 @@ Guide for creating a shared TeamCart, inviting participants, collecting items an
 TeamCart enables group ordering with roles and a lightweight payment flow:
 - Host creates a cart for a specific restaurant and shares a token
 - Members join via share token and add their items
-- Host locks the cart for payment; members commit payments (online or COD)
+- Host locks the cart, applies tips/coupons, then finalizes pricing
+- Once finalized, members commit payments (online or COD)
 - When all members are settled, the host converts the cart to a standard order
 - Real-time updates are available via SignalR
 
@@ -57,7 +58,7 @@ Get a lightweight summary of the user's currently active team cart (if any). Ide
 | `restaurantId` | `string` | ID of the linked restaurant |
 | `restaurantName` | `string` | Name of the restaurant |
 | `restaurantImage` | `string` | URL of the restaurant logo (optional) |
-| `state` | `string` | Current state: `Open`, `Locked`, `ReadyToConfirm` |
+| `state` | `string` | Current state: `Open`, `Locked`, `Finalized`, `ReadyToConfirm` |
 | `totalItemCount` | `integer` | Total number of items in the cart (sum of quantities) |
 | `myShareTotal` | `decimal` | The user's personal share of the cost |
 | `currency` | `string` | Currency code |
@@ -66,8 +67,8 @@ Get a lightweight summary of the user's currently active team cart (if any). Ide
 
 #### Business Rules
 - Returns the most relevant active cart if multiple exist (currently prioritized by creation date).
-- Returns 204 if user has no active carts in `Open`, `Locked`, or `ReadyToConfirm` state.
-- `myShareTotal` reflects the quoted amount if locked, or a raw sum of user's items if open.
+- Returns 204 if user has no active carts in `Open`, `Locked`, `Finalized`, or `ReadyToConfirm` state.
+- `myShareTotal` reflects the quoted amount if finalized/locked, or a raw sum of user's items if open.
 
 ---
 
@@ -472,7 +473,8 @@ connection.invoke("SubscribeToCart", teamCartId);
 | Event | Description | Payload |
 |-------|-------------|---------|
 | `CartUpdated` | Items added/removed/updated | Cart view model |
-| `Locked` | Cart locked for payment | Lock notification |
+| `Locked` | Cart locked for tip/coupon adjustment | Lock notification |
+| `PricingFinalized` | Pricing finalized, payments enabled | Finalization notification |
 | `PaymentEvent` | Member payment status changed | Payment details |
 | `ReadyToConfirm` | All members settled | Ready state |
 | `Converted` | Cart converted to order | Order details |
@@ -495,7 +497,7 @@ connection.invoke("SubscribeToCart", teamCartId);
 
 ## Step 6 — Lock Cart for Payment (Host)
 
-Freezes items and computes per-member quotes. Notifies members to pay/commit.
+Freezes items and enables tip/coupon adjustments. This is the first phase of the two-phase lock pattern.
 
 **`POST /api/v1/team-carts/{teamCartId}/lock`**
 
@@ -516,12 +518,14 @@ Freezes items and computes per-member quotes. Notifies members to pay/commit.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `quoteVersion` | `long` | Quote version for concurrency control. Include this in payment and conversion requests. |
+| `quoteVersion` | `long` | Quote version for concurrency control. Include this in finalize-pricing and conversion requests. |
 
 Rules
 - Only in `Open` state; transitions to `Locked`.
-- Computes quote (member subtotals, fees, tip, tax, discount); updates VM.
+- Freezes the cart items (no more additions/removals allowed).
+- Host can now apply tips and coupons to adjust pricing.
 - Returns quote version for concurrency control in subsequent operations.
+- **Members cannot pay yet** - host must finalize pricing first (Step 9).
 
 Errors
 - 400/409 domain validations; 404 `TeamCartErrors.TeamCartNotFound`
@@ -750,7 +754,46 @@ Apply tips and coupons to the TeamCart to adjust the final pricing.
 
 ---
 
-## Step 9 — Member Payments
+## Step 9 — Finalize Pricing (Host)
+
+After applying tips and coupons, the host finalizes the pricing to enable member payments. This is the second phase of the two-phase lock pattern that prevents race conditions.
+
+**`POST /api/v1/team-carts/{teamCartId}/finalize-pricing`**
+
+- Authorization: Host only
+- Idempotency: Supported via `Idempotency-Key` header
+- Response: 204 No Content
+
+#### Response
+
+**✅ 204 No Content** - Pricing finalized successfully
+
+#### Business Rules
+
+- Cart must be in `Locked` state; transitions to `Finalized`
+- Only the host can finalize pricing
+- Once finalized, pricing is immutable - no more tip/coupon changes allowed
+- Members can now begin making payments
+- Computes final per-member quotes (subtotals, fees, tip, tax, discount)
+- Updates real-time view model and notifies all members
+
+#### Errors
+
+- **404** `FinalizePricing.TeamCartNotFound` - TeamCart doesn't exist
+- **403** `FinalizePricing.NotHost` - User is not the host of this cart
+- **409** `FinalizePricing.CannotFinalizePricingInCurrentStatus` - Cart is not in `Locked` state
+
+#### Why Two-Phase Lock?
+
+The two-phase lock pattern (Lock → Finalize) prevents race conditions where:
+1. Host is still adjusting tips/coupons (which changes member totals)
+2. Members are simultaneously trying to pay (using outdated amounts)
+
+By requiring explicit finalization, we ensure all pricing adjustments are complete before any payments are accepted.
+
+---
+
+## Step 10 — Member Payments
 
 Members settle their share via one of:
 
@@ -775,6 +818,19 @@ Members settle their share via one of:
 |-------|------|----------|-------------|
 | `quoteVersion` | `long` | No | Quote version from lock response. Validates against current quote to prevent stale payments. |
 
+#### Business Rules
+
+- Cart must be in `Finalized` state (host must finalize pricing first)
+- Payment amount is automatically calculated based on member's share
+- Replaces any existing payment for this member
+- When all members have paid, cart transitions to `ReadyToConfirm`
+
+#### Errors
+
+- **404** `CommitToCashOnDelivery.TeamCartNotFound` - TeamCart doesn't exist
+- **403** `CommitToCashOnDelivery.UserNotMember` - User is not a member of this cart
+- **409** `CommitToCashOnDelivery.CanOnlyPayOnFinalizedCart` - Cart pricing has not been finalized yet
+
 ### Online Payment
 
 **`POST /api/v1/team-carts/{teamCartId}/payments/online`**
@@ -795,6 +851,19 @@ Members settle their share via one of:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `quoteVersion` | `long` | No | Quote version from lock response. Validates against current quote to prevent stale payments. |
+
+#### Business Rules
+
+- Cart must be in `Finalized` state (host must finalize pricing first)
+- Initiates Stripe payment intent for member's share
+- Payment must be confirmed by calling the webhook after Stripe processes it
+- When all members have paid, cart transitions to `ReadyToConfirm`
+
+#### Errors
+
+- **404** `InitiateMemberOnlinePayment.TeamCartNotFound` - TeamCart doesn't exist
+- **403** `InitiateMemberOnlinePayment.UserNotMember` - User is not a member of this cart
+- **409** `InitiateMemberOnlinePayment.CanOnlyPayOnFinalizedCart` - Cart pricing has not been finalized yet
 
 #### Response
 
@@ -827,7 +896,7 @@ Errors
 
 ---
 
-## Step 10 — Convert to Order (Host)
+## Step 11 — Convert to Order (Host)
 
 After all members are settled, convert the cart to a standard order.
 

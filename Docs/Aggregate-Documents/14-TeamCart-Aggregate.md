@@ -29,7 +29,7 @@ The `TeamCart` aggregate represents a collaborative shopping cart where multiple
   * `ShareableLinkToken`: Token used for inviting others to join the team cart.
   * `TeamCartItemCustomization`: Represents customization choices for menu items.
 * **Key Enums:**
-  * `TeamCartStatus`: Cart lifecycle states (Open, Locked, ReadyToConfirm, Converted, Expired).
+  * `TeamCartStatus`: Cart lifecycle states (Open, Locked, Finalized, ReadyToConfirm, Converted, Expired).
   * `MemberRole`: Role of a member in the team cart (Host, Guest).
   * `PaymentMethod`: Payment method types (Online, CashOnDelivery).
   * `PaymentStatus`: Status of a payment (Pending, CommittedToCOD, PaidOnline, Failed).
@@ -69,9 +69,10 @@ These methods modify the state of the aggregate. All state changes must go throu
 | `Result AddMember(UserId userId, string name, MemberRole role = MemberRole.Guest)` | Adds a new member to the team cart. | Checks if cart is open and member doesn't already exist. | `TeamCartErrors.MemberNameRequired`, `TeamCartErrors.CannotAddMembersToClosedCart`, `TeamCartErrors.MemberAlreadyExists` |
 | `Result SetDeadline(UserId requestingUserId, DateTime deadline)` | Sets or updates the deadline for the team cart. | Validates that requestor is host and deadline is in future. | `TeamCartErrors.OnlyHostCanSetDeadline`, `TeamCartErrors.CannotModifyClosedCart`, `TeamCartErrors.DeadlineInPast` |
 | `Result AddItem(UserId userId, MenuItemId menuItemId, MenuCategoryId menuCategoryId, string itemName, Money basePrice, int quantity, List<TeamCartItemCustomization>? customizations = null)` | Adds an item to the team cart with optional customizations. | Checks if cart is open and user is a member. | `TeamCartErrors.CannotAddItemsToClosedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidQuantity` |
-| `Result LockForPayment(UserId requestingUserId)` | Locks the team cart, preventing further item modifications and initiating the payment phase. | Validates that requestor is host and cart has items. | `TeamCartErrors.OnlyHostCanLockCart`, `TeamCartErrors.CannotLockCartInCurrentStatus`, `TeamCartErrors.CannotLockEmptyCart` |
-| `Result CommitToCashOnDelivery(UserId userId, Money amount)` | Records a member's firm commitment to pay with Cash on Delivery. | Validates user is member and amount matches their items. | `TeamCartErrors.CanOnlyPayOnLockedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount` |
-| `Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)` | Records a successful online payment after confirmation by payment gateway. | Validates user is member, amount matches their items, and transaction ID is valid. | `TeamCartErrors.CanOnlyPayOnLockedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount`, `TeamCartErrors.InvalidTransactionId` |
+| `Result LockForPayment(UserId requestingUserId)` | Locks the team cart, preventing further item modifications. Host can now adjust tips/coupons. | Validates that requestor is host and cart has items. | `TeamCartErrors.OnlyHostCanLockCart`, `TeamCartErrors.CannotLockCartInCurrentStatus`, `TeamCartErrors.CannotLockEmptyCart` |
+| `Result FinalizePricing()` | Finalizes pricing after tip/coupon adjustments, enabling member payments. Two-phase lock pattern prevents race conditions. | Validates cart is in Locked status. | `TeamCartErrors.CannotFinalizePricingInCurrentStatus` |
+| `Result CommitToCashOnDelivery(UserId userId, Money amount)` | Records a member's firm commitment to pay with Cash on Delivery. | Validates user is member, cart is finalized, and amount matches their items. | `TeamCartErrors.CanOnlyPayOnFinalizedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount` |
+| `Result RecordSuccessfulOnlinePayment(UserId userId, Money amount, string transactionId)` | Records a successful online payment after confirmation by payment gateway. | Validates user is member, cart is finalized, amount matches their items, and transaction ID is valid. | `TeamCartErrors.CanOnlyPayOnFinalizedCart`, `TeamCartErrors.UserNotMember`, `TeamCartErrors.InvalidPaymentAmount`, `TeamCartErrors.InvalidTransactionId` |
 | `Result ApplyTip(UserId requestingUserId, Money tipAmount)` | Adds or updates the tip amount for the team cart. | Validates requestor is host and tip is non-negative. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CanOnlyApplyFinancialsToLockedCart`, `TeamCartErrors.InvalidTip` |
 | `Result ApplyCoupon(UserId requestingUserId, CouponId couponId)` | Applies a coupon to the team cart by storing its ID. | Validates requestor is host and cart is locked. | `TeamCartErrors.OnlyHostCanModifyFinancials`, `TeamCartErrors.CanOnlyApplyFinancialsToLockedCart`, `TeamCartErrors.CouponAlreadyApplied` |
 | `Result RemoveCoupon(UserId requestingUserId)` | Removes the currently applied coupon. | Validates requestor is host. | `TeamCartErrors.OnlyHostCanModifyFinancials` |
@@ -205,24 +206,29 @@ public static Result<MemberPayment> Create(UserId userId, Money amount, PaymentM
 ### 7.2. Status Transitions
 
 * Valid transitions are enforced by business logic:
-  * Open → Locked (via LockForPayment)
-  * Locked → ReadyToConfirm (automatic when all payments complete)
+  * Open → Locked (via LockForPayment) - Items frozen, tip/coupon adjustment enabled
+  * Locked → Finalized (via FinalizePricing) - Pricing locked, payments enabled
+  * Finalized → ReadyToConfirm (automatic when all payments complete)
   * ReadyToConfirm → Converted (via external conversion service)
   * Any status → Expired (via expiration)
+
+* **Two-Phase Lock Pattern:** The Locked → Finalized transition implements a two-phase lock to prevent race conditions where the host adjusts pricing while members are paying. In Locked state, only host can modify tip/coupon. Once Finalized, pricing is immutable and members can pay.
 
 ### 7.3. Payment Rules
 
 * Mixed payment methods are allowed within a single cart
 * Each member can only have one payment commitment at a time
 * Payment amount must match the total of items added by that member
+* Payments can only be made when cart is in Finalized status (after host finalizes pricing)
 * All online payments must be completed before the cart can transition to ReadyToConfirm
 * Host acts as guarantor for all Cash on Delivery payments
 
 ### 7.4. Financial Management
 
 * Only the host can modify financial details (tip, coupons)
-* Financial details can only be modified in Locked or ReadyToConfirm status
-* Only one coupon can be applied at a time, and it's stored by ID without immediate calculation.
+* Financial details can only be modified in Locked status (before finalization)
+* Once pricing is finalized, no more tip/coupon changes are allowed
+* Only one coupon can be applied at a time, and it's stored by ID without immediate calculation
 * Tip amount cannot be negative
 
 ### 7.5. Conversion Rules
