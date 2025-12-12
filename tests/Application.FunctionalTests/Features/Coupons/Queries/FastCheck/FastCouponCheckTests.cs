@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Coupons.Queries.FastCheck;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
@@ -33,8 +34,8 @@ public class FastCouponCheckTests : BaseTestFixture
 
         var items = new List<FastCouponCheckItemDto>
         {
-            new(burger!.Id.Value, burger.MenuCategoryId.Value, 2, burger.BasePrice.Amount),
-            new(wings!.Id.Value, wings.MenuCategoryId.Value, 1, wings.BasePrice.Amount)
+            new(burger!.Id.Value, 2, null),
+            new(wings!.Id.Value, 1, null)
         };
 
         // Create a coupon for the restaurant
@@ -57,9 +58,10 @@ public class FastCouponCheckTests : BaseTestFixture
         resp.Suggestions.Should().NotBeEmpty();
         resp.BestDeal.Should().NotBeNull();
 
-        // Expected subtotal = (15.99 * 2) + (12.99 * 1) = 44.97
-        const decimal expectedSubtotal = 44.97m;
-        // Default coupon in test data is 15% off whole order; allow small rounding tolerance
+        var expectedSubtotal = burger.BasePrice.Amount * 2 + wings.BasePrice.Amount * 1;
+        resp.CartSummary.Subtotal.Should().Be(expectedSubtotal);
+        resp.CartSummary.Currency.Should().Be(burger.BasePrice.Currency);
+
         var expectedSavings = Math.Round(expectedSubtotal * 0.15m, 2);
         resp.BestDeal!.Savings.Should().BeApproximately(expectedSavings, 0.01m);
     }
@@ -68,13 +70,13 @@ public class FastCouponCheckTests : BaseTestFixture
     public async Task FastCheck_WithOtherRestaurant_ShouldReturnNoCandidates()
     {
         // Arrange: create second restaurant and an item belonging to it
-        var (restaurant2Id, menuItemId) = await TestData.TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
+        var (restaurant2Id, menuItemId) = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
         var menuItem = await FindAsync<MenuItem>(MenuItemId.Create(menuItemId));
         menuItem.Should().NotBeNull();
 
         var items = new List<FastCouponCheckItemDto>
         {
-            new(menuItem!.Id.Value, menuItem.MenuCategoryId.Value, 1, menuItem.BasePrice.Amount)
+            new(menuItem!.Id.Value, 1, null)
         };
 
         var q = new FastCouponCheckQuery(restaurant2Id, items);
@@ -90,13 +92,96 @@ public class FastCouponCheckTests : BaseTestFixture
         resp.BestDeal.Should().BeNull();
     }
 
+    [Test]
+    public async Task FastCheck_WithCustomizations_ShouldIncludeCustomizationPrices()
+    {
+        // Arrange: build cart with customizations
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        var burger = await FindAsync<MenuItem>(MenuItemId.Create(burgerId));
+        burger.Should().NotBeNull();
+
+        var items = new List<FastCouponCheckItemDto>
+        {
+            new(
+                burger!.Id.Value,
+                1,
+                new List<FastCouponCheckCustomizationDto>
+                {
+                    new(
+                        TestDataFactory.CustomizationGroup_BurgerAddOnsId,
+                        new List<Guid> { TestDataFactory.CustomizationChoice_ExtraCheeseId }
+                    )
+                }
+            )
+        };
+
+        // Create a coupon for the restaurant
+        await CreateActiveCouponAsync(Testing.TestData.DefaultRestaurantId, "TEST20", 20m);
+
+        // Process outbox events to ensure coupon is persisted
+        await DrainOutboxAsync();
+
+        // Refresh the materialized view to include the new coupon
+        await RefreshMaterializedViewAsync();
+
+        var q = new FastCouponCheckQuery(Testing.TestData.DefaultRestaurantId, items);
+
+        // Act
+        var result = await SendAsync(q);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue(result.Error?.ToString());
+        var resp = result.Value;
+        resp.Suggestions.Should().NotBeEmpty();
+        resp.BestDeal.Should().NotBeNull();
+
+        // Verify that the cart subtotal includes customization prices (should be higher than base price)
+        var basePrice = burger.BasePrice.Amount;
+        resp.CartSummary.Subtotal.Should().BeGreaterThan(basePrice, 
+            "Cart subtotal should include customization price adjustments");
+    }
+
+    [Test]
+    public async Task FastCheck_WithInvalidMenuItem_ShouldSkipAndContinue()
+    {
+        // Arrange: mix valid and invalid menu items
+        var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        var invalidMenuItemId = Guid.NewGuid(); // Non-existent item
+
+        var items = new List<FastCouponCheckItemDto>
+        {
+            new(burgerId, 1, null),
+            new(invalidMenuItemId, 1, null) // Invalid item
+        };
+
+        // Create a coupon for the restaurant
+        await CreateActiveCouponAsync(Testing.TestData.DefaultRestaurantId, "TEST10", 10m);
+
+        // Process outbox events to ensure coupon is persisted
+        await DrainOutboxAsync();
+
+        // Refresh the materialized view to include the new coupon
+        await RefreshMaterializedViewAsync();
+
+        var q = new FastCouponCheckQuery(Testing.TestData.DefaultRestaurantId, items);
+
+        // Act
+        var result = await SendAsync(q);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue(result.Error?.ToString());
+        var resp = result.Value;
+        // Should still return suggestions based on valid items
+        resp.CartSummary.Subtotal.Should().BeGreaterThan(0);
+    }
+
     private static async Task CreateActiveCouponAsync(Guid restaurantId, string code, decimal percentageValue)
     {
-        var restaurantIdVo = YummyZoom.Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(restaurantId);
-        var valueResult = YummyZoom.Domain.CouponAggregate.ValueObjects.CouponValue.CreatePercentage(percentageValue);
-        var appliesToResult = YummyZoom.Domain.CouponAggregate.ValueObjects.AppliesTo.CreateForWholeOrder();
+        var restaurantIdVo = Domain.RestaurantAggregate.ValueObjects.RestaurantId.Create(restaurantId);
+        var valueResult = Domain.CouponAggregate.ValueObjects.CouponValue.CreatePercentage(percentageValue);
+        var appliesToResult = Domain.CouponAggregate.ValueObjects.AppliesTo.CreateForWholeOrder();
 
-        var couponResult = YummyZoom.Domain.CouponAggregate.Coupon.Create(
+        var couponResult = Domain.CouponAggregate.Coupon.Create(
             restaurantIdVo,
             code,
             $"{percentageValue}% off entire order",

@@ -365,6 +365,7 @@ public class TeamCartLifecycleContractTests
         {
             CartId = TeamCartId.Create(cartId),
             RestaurantId = Guid.NewGuid(),
+            RestaurantName = "Sample Restaurant",
             Status = TeamCartStatus.Open,
             Deadline = DateTime.UtcNow.AddHours(2),
             ExpiresAt = DateTime.UtcNow.AddHours(1),

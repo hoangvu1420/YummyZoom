@@ -18,9 +18,7 @@ public class FastCouponCheckTests : BaseTestFixture
             Testing.TestData.DefaultRestaurantId,
             new List<FastCouponCheckItemDto>
             {
-                new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 
-                    Testing.TestData.GetMenuCategoryId("Main Dishes"), 
-                    2, 15.99m, "USD")
+                new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 2)
             });
 
         // Act
@@ -59,7 +57,7 @@ public class FastCouponCheckTests : BaseTestFixture
             Testing.TestData.DefaultRestaurantId,
             new List<FastCouponCheckItemDto>
             {
-                new(Guid.Empty, Guid.Empty, 0, -1m, "")
+                new(Guid.Empty, 0)
             });
 
         // Act & Assert

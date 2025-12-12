@@ -460,12 +460,18 @@ Get real-time coupon suggestions and savings calculations for a cart before plac
   "items": [
     {
       "menuItemId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
-      "menuCategoryId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
       "quantity": 2,
-      "unitPrice": 15.99,
-      "currency": "USD"
+      "customizations": [
+        {
+          "customizationGroupId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
+          "choiceIds": [
+            "d4e5f6g7-h8i9-0123-defg-hi4567890123"
+          ]
+        }
+      ]
     }
-  ]
+  ],
+  "tipAmount": 5.00
 }
 ```
 
@@ -474,17 +480,25 @@ Get real-time coupon suggestions and savings calculations for a cart before plac
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `restaurantId` | `UUID` | Yes | Restaurant identifier |
-| `items` | `CartItem[]` | Yes | Array of cart items for evaluation |
+| `items` | `FastCheckItem[]` | Yes | Array of cart items for evaluation |
+| `tipAmount` | `decimal` | No | Tip amount (≥0, default: null) |
 
-#### Cart Item Schema
+#### Fast Check Item Schema
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `menuItemId` | `UUID` | Yes | Menu item identifier |
-| `menuCategoryId` | `UUID` | Yes | Menu category identifier |
-| `quantity` | `integer` | Yes | Item quantity (≥1) |
-| `unitPrice` | `decimal` | Yes | Price per unit |
-| `currency` | `string` | No | Currency code (default: "USD") |
+| `quantity` | `integer` | Yes | Item quantity (1-99) |
+| `customizations` | `FastCheckCustomization[]` | No | Array of selected customizations |
+
+#### Fast Check Customization Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `customizationGroupId` | `UUID` | Yes | Customization group identifier |
+| `choiceIds` | `UUID[]` | Yes | Array of selected choice identifiers (min 1) |
+
+**Note:** The server calculates prices and categories internally from menu items and customizations. This ensures consistency with pricing preview and eliminates the need for clients to maintain `menuCategoryId` or item-level currency.
 
 #### Response
 

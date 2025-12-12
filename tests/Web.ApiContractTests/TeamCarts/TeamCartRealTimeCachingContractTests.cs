@@ -83,6 +83,7 @@ public class TeamCartRealTimeCachingContractTests
         {
             CartId = TeamCartId.Create(cartId),
             RestaurantId = Guid.NewGuid(),
+            RestaurantName = "Test Restaurant",
             Status = TeamCartStatus.Open,
             Deadline = DateTime.UtcNow.AddHours(1),
             ExpiresAt = DateTime.UtcNow.AddHours(2),

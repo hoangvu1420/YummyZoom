@@ -238,11 +238,27 @@ Evaluate coupon candidates quickly for a cart snapshot.
 {
   "restaurantId": "8b8c...",
   "items": [
-    { "menuItemId": "m1...", "menuCategoryId": "c1...", "qty": 2, "unitPrice": 9.99 },
-    { "menuItemId": "m2...", "menuCategoryId": "c2...", "qty": 1, "unitPrice": 4.50 }
-  ]
+    { 
+      "menuItemId": "m1...", 
+      "quantity": 2,
+      "customizations": [
+        {
+          "customizationGroupId": "g1...",
+          "choiceIds": ["c1..."]
+        }
+      ]
+    },
+    { 
+      "menuItemId": "m2...", 
+      "quantity": 1,
+      "customizations": null
+    }
+  ],
+  "tipAmount": 5.00
 }
 ```
+
+**Note:** The server calculates prices and categories internally from menu items and customizations. This matches the pricing preview endpoint schema for consistency.
 
 #### Response 200
 ```json

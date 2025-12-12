@@ -46,9 +46,10 @@ public class FastCheckContractTests
             RestaurantId: Guid.NewGuid(),
             Items: new List<FastCouponCheckItemDto>
             {
-                new(Guid.NewGuid(), Guid.NewGuid(), 2, 15.99m),
-                new(Guid.NewGuid(), Guid.NewGuid(), 1, 12.99m)
-            }
+                new(Guid.NewGuid(), 2, null),
+                new(Guid.NewGuid(), 1, null)
+            },
+            TipAmount: null
         );
 
         var requestJson = JsonSerializer.Serialize(body, DomainJson.Options);
