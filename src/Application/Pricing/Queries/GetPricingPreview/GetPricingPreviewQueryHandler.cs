@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
+using YummyZoom.Application.Coupons.Queries.Common;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.CustomizationGroupAggregate.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
@@ -19,6 +21,8 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
     private readonly ICouponRepository _couponRepository;
     private readonly IRestaurantRepository _restaurantRepository;
     private readonly OrderFinancialService _orderFinancialService;
+    private readonly IFastCouponCheckService _fastCouponCheckService;
+    private readonly IUser _currentUser;
     private readonly ILogger<GetPricingPreviewQueryHandler> _logger;
 
     public GetPricingPreviewQueryHandler(
@@ -27,6 +31,8 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
         ICouponRepository couponRepository,
         IRestaurantRepository restaurantRepository,
         OrderFinancialService orderFinancialService,
+        IFastCouponCheckService fastCouponCheckService,
+        IUser currentUser,
         ILogger<GetPricingPreviewQueryHandler> logger)
     {
         _menuItemRepository = menuItemRepository;
@@ -34,6 +40,8 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
         _couponRepository = couponRepository;
         _restaurantRepository = restaurantRepository;
         _orderFinancialService = orderFinancialService;
+        _fastCouponCheckService = fastCouponCheckService;
+        _currentUser = currentUser;
         _logger = logger;
     }
 
@@ -58,6 +66,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
         
         var notes = new List<PricingPreviewNoteDto>();
         var validOrderItems = new List<OrderItem>();
+        var cartItems = new List<CartItem>();
 
         // 3. Build temporary OrderItems for pricing calculation
         foreach (var requestItem in request.Items)
@@ -95,7 +104,8 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
             {
                 notes.Add(new PricingPreviewNoteDto("error", "CUSTOMIZATION_INVALID", 
                     "One or more customizations could not be applied"));
-                // Continue processing the item without customizations instead of skipping it
+                // Skip this item entirely to surface validation error via notes and final result
+                continue;
             }
 
             // Create temporary OrderItem for pricing calculation
@@ -114,7 +124,19 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
                 continue;
             }
 
-            validOrderItems.Add(orderItemResult.Value);
+            var orderItem = orderItemResult.Value;
+            validOrderItems.Add(orderItem);
+
+            var unitPrice = requestItem.Quantity > 0
+                ? orderItem.LineItemTotal.Amount / requestItem.Quantity
+                : orderItem.LineItemTotal.Amount;
+
+            cartItems.Add(new CartItem(
+                menuItem.Id.Value,
+                menuItem.MenuCategoryId.Value,
+                requestItem.Quantity,
+                unitPrice,
+                orderItem.LineItemTotal.Currency));
         }
 
         if (!validOrderItems.Any())
@@ -177,6 +199,42 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
             discountAmount ?? Money.Zero(subtotal.Currency), 
             tipAmount);
 
+        CouponSuggestion? bestDeal = null;
+        IReadOnlyList<CouponSuggestion> suggestions = Array.Empty<CouponSuggestion>();
+
+        if (request.IncludeCouponSuggestions)
+        {
+            if (_currentUser.DomainUserId is null)
+            {
+                notes.Add(new PricingPreviewNoteDto(
+                    "warning",
+                    "COUPON_SUGGESTIONS_UNAVAILABLE",
+                    "Coupon suggestions require a signed-in customer account"));
+            }
+            else
+            {
+                try
+                {
+                    var suggestionResponse = await _fastCouponCheckService.GetSuggestionsAsync(
+                        restaurantId,
+                        cartItems,
+                        _currentUser.DomainUserId,
+                        cancellationToken);
+
+                    bestDeal = suggestionResponse.BestDeal;
+                    suggestions = suggestionResponse.Suggestions;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load coupon suggestions for restaurant {RestaurantId}", request.RestaurantId);
+                    notes.Add(new PricingPreviewNoteDto(
+                        "warning",
+                        "COUPON_SUGGESTIONS_UNAVAILABLE",
+                        "Coupon suggestions are temporarily unavailable"));
+                }
+            }
+        }
+
         return Result.Success(new GetPricingPreviewResponse(
             subtotal,
             discountAmount,
@@ -186,7 +244,9 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
             finalTotal,
             subtotal.Currency,
             notes,
-            DateTime.UtcNow
+            DateTime.UtcNow,
+            bestDeal,
+            suggestions
         ));
     }
 

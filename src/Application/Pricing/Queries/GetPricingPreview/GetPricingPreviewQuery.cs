@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using YummyZoom.Application.Common.Caching;
+using YummyZoom.Application.Coupons.Queries.Common;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.SharedKernel;
 
@@ -10,10 +11,13 @@ public record GetPricingPreviewQuery(
     Guid RestaurantId,
     List<PricingPreviewItemDto> Items,
     string? CouponCode = null,
-    decimal? TipAmount = null
+    decimal? TipAmount = null,
+    bool IncludeCouponSuggestions = false
 ) : IRequest<Result<GetPricingPreviewResponse>>, ICacheableQuery<GetPricingPreviewResponse>
 {
-    public string CacheKey => $"pricing:preview:v1:{RestaurantId:N}:{HashItemsAndCustomizations(Items)}";
+    public string CacheKey => IncludeCouponSuggestions
+        ? string.Empty
+        : $"pricing:preview:v1:{RestaurantId:N}:{HashItemsAndCustomizations(Items)}";
 
     public CachePolicy Policy => CachePolicy.WithTtl(
         TimeSpan.FromMinutes(2), 
@@ -50,7 +54,9 @@ public record GetPricingPreviewResponse(
     Money TotalAmount,
     string Currency,
     List<PricingPreviewNoteDto> Notes,
-    DateTime CalculatedAt
+    DateTime CalculatedAt,
+    CouponSuggestion? BestDeal,
+    IReadOnlyList<CouponSuggestion> Suggestions
 );
 
 public record PricingPreviewNoteDto(

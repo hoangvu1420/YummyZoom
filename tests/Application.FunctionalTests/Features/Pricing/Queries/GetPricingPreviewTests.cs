@@ -70,6 +70,11 @@ public class GetPricingPreviewTests : BaseTestFixture
 
         // Verify notes are empty for successful case
         response.Notes.Should().BeEmpty();
+
+        // Suggestions should be empty when not requested
+        response.BestDeal.Should().BeNull();
+        response.Suggestions.Should().NotBeNull();
+        response.Suggestions.Should().BeEmpty();
     }
 
     [Test]
@@ -594,6 +599,65 @@ public class GetPricingPreviewTests : BaseTestFixture
         // Should complete within 2 seconds (reasonable for functional test with database operations)
         // Note: Functional tests involve database queries, dependency injection, and complex pricing calculations
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(2000);
+    }
+
+    #endregion
+
+    #region Coupon Suggestion Tests
+
+    [Test]
+    public async Task GetPricingPreview_WithSuggestionsFlag_ShouldReturnSuggestionEnvelope()
+    {
+        // Arrange
+        var query = new GetPricingPreviewQuery(
+            RestaurantId: Testing.TestData.DefaultRestaurantId,
+            Items: new List<PricingPreviewItemDto>
+            {
+                new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 1)
+            },
+            CouponCode: null,
+            TipAmount: null,
+            IncludeCouponSuggestions: true);
+
+        // Act
+        var result = await SendAsync(query);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        var response = result.Value;
+        response.Suggestions.Should().NotBeNull();
+        response.Notes.Should().NotContain(n => n.Code == "COUPON_SUGGESTIONS_UNAVAILABLE");
+    }
+
+    [Test]
+    public async Task GetPricingPreview_WithSuggestionsFlagAndNoUser_ShouldAddWarningNote()
+    {
+        // Arrange
+        ClearUserId();
+
+        var query = new GetPricingPreviewQuery(
+            RestaurantId: Testing.TestData.DefaultRestaurantId,
+            Items: new List<PricingPreviewItemDto>
+            {
+                new(Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger), 1)
+            },
+            CouponCode: null,
+            TipAmount: null,
+            IncludeCouponSuggestions: true);
+
+        // Act
+        var result = await SendAsync(query);
+
+        // Assert
+        result.ShouldBeSuccessful();
+        var response = result.Value;
+        response.Notes.Should().Contain(n => n.Code == "COUPON_SUGGESTIONS_UNAVAILABLE");
+        response.Suggestions.Should().NotBeNull();
+        response.Suggestions.Should().BeEmpty();
+        response.BestDeal.Should().BeNull();
+
+        // Restore authenticated context for other tests
+        SetUserId(Testing.TestData.DefaultCustomerId);
     }
 
     #endregion

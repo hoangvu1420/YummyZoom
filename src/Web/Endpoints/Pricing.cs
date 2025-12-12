@@ -25,7 +25,8 @@ public class Pricing : EndpointGroupBase
                     )).ToList()
                 )).ToList(),
                 request.CouponCode,
-                request.TipAmount
+                request.TipAmount,
+                request.IncludeCouponSuggestions
             );
 
             var result = await sender.Send(query);
@@ -41,7 +42,8 @@ public sealed record GetPricingPreviewRequest(
     Guid RestaurantId,
     List<PricingPreviewItemRequest> Items,
     string? CouponCode,
-    decimal? TipAmount
+    decimal? TipAmount,
+    bool IncludeCouponSuggestions = false
 );
 
 public sealed record PricingPreviewItemRequest(

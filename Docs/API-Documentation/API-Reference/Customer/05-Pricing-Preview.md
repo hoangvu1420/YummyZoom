@@ -56,7 +56,8 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
     }
   ],
   "couponCode": "SUMMER15",
-  "tipAmount": 5.00
+  "tipAmount": 5.00,
+  "includeCouponSuggestions": true
 }
 ```
 
@@ -68,6 +69,7 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
 | `items` | `PricingPreviewItem[]` | Yes | Array of menu items for pricing calculation |
 | `couponCode` | `string` | No | Coupon code to apply (max 50 characters) |
 | `tipAmount` | `decimal` | No | Tip amount (≥0, default: 0) |
+| `includeCouponSuggestions` | `bool` | No | When `true`, response also returns `bestDeal` and `suggestions[]`. Adds a few milliseconds and bypasses cache. |
 
 ### Pricing Preview Item Schema
 
@@ -125,7 +127,42 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
       }
     }
   ],
-  "calculatedAt": "2023-10-27T14:35:00Z"
+  "calculatedAt": "2023-10-27T14:35:00Z",
+  "bestDeal": {
+    "code": "FIRSTORDER",
+    "label": "15% off",
+    "savings": 4.8,
+    "isEligible": true,
+    "eligibilityReason": null,
+    "minOrderGap": 0,
+    "expiresOn": "2023-11-01T00:00:00Z",
+    "scope": "WholeOrder",
+    "urgency": "ExpiresWithin7Days"
+  },
+  "suggestions": [
+    {
+      "code": "FIRSTORDER",
+      "label": "15% off",
+      "savings": 4.8,
+      "isEligible": true,
+      "eligibilityReason": null,
+      "minOrderGap": 0,
+      "expiresOn": "2023-11-01T00:00:00Z",
+      "scope": "WholeOrder",
+      "urgency": "ExpiresWithin7Days"
+    },
+    {
+      "code": "FREEDESSERT",
+      "label": "Free dessert",
+      "savings": 0,
+      "isEligible": false,
+      "eligibilityReason": "MinAmountNotMet",
+      "minOrderGap": 8.02,
+      "expiresOn": "2023-11-10T00:00:00Z",
+      "scope": "SpecificItems",
+      "urgency": "None"
+    }
+  ]
 }
 ```
 
@@ -142,6 +179,8 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
 | `currency` | `string` | Currency code for all amounts |
 | `notes` | `PricingPreviewNote[]` | Array of informational, warning, or error notes |
 | `calculatedAt` | `string` | ISO 8601 timestamp of calculation |
+| `bestDeal` | `CouponSuggestion?` | Top eligible coupon suggestion when `includeCouponSuggestions=true` |
+| `suggestions` | `CouponSuggestion[]` | Full suggestion list ordered by eligibility and savings |
 
 ### Pricing Preview Note Schema
 
@@ -162,6 +201,7 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
 | `MENU_ITEM_NOT_FOUND` | `error` | Menu item does not exist |
 | `MENU_ITEM_UNAVAILABLE` | `warning` | Menu item is currently unavailable |
 | `CUSTOMIZATION_INVALID` | `error` | Invalid customization selection |
+| `COUPON_SUGGESTIONS_UNAVAILABLE` | `warning` | Coupon suggestions could not be fetched or user not signed in |
 
 ### Error Responses
 
