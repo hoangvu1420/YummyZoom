@@ -1,10 +1,12 @@
+using System.Text.Json;
+using Dapper;
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Notifications;
 using YummyZoom.Application.TeamCarts.Models;
 using YummyZoom.Domain.TeamCartAggregate.Events;
-using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
 
 namespace YummyZoom.Application.TeamCarts.EventHandlers;
 
@@ -15,25 +17,22 @@ namespace YummyZoom.Application.TeamCarts.EventHandlers;
 /// </summary>
 public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<TeamCartCreated>
 {
-    private readonly ITeamCartRepository _teamCartRepository;
+    private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly ITeamCartStore _store;
     private readonly ITeamCartRealtimeNotifier _notifier;
-    private readonly ITeamCartPushNotifier _pushNotifier;
     private readonly ILogger<TeamCartCreatedEventHandler> _logger;
 
     public TeamCartCreatedEventHandler(
         IUnitOfWork uow,
         IInboxStore inbox,
-        ITeamCartRepository teamCartRepository,
+        IDbConnectionFactory dbConnectionFactory,
         ITeamCartStore store,
         ITeamCartRealtimeNotifier notifier,
-        ITeamCartPushNotifier pushNotifier,
         ILogger<TeamCartCreatedEventHandler> logger) : base(uow, inbox)
     {
-        _teamCartRepository = teamCartRepository;
+        _dbConnectionFactory = dbConnectionFactory;
         _store = store;
         _notifier = notifier;
-        _pushNotifier = pushNotifier;
         _logger = logger;
     }
 
@@ -42,65 +41,114 @@ public sealed class TeamCartCreatedEventHandler : IdempotentNotificationHandler<
         var cartId = notification.TeamCartId;
         _logger.LogDebug("Handling TeamCartCreated (EventId={EventId}, CartId={CartId})", notification.EventId, cartId.Value);
 
-        var cart = await _teamCartRepository.GetByIdAsync(cartId, ct);
-        if (cart is null)
+        using var connection = _dbConnectionFactory.CreateConnection();
+
+        // Optimized query to fetch TeamCart, Restaurant, and Members in one go
+        const string sql = """
+            SELECT
+                tc."Id"                     AS "CartId",
+                tc."RestaurantId"           AS "RestaurantId",
+                r."Name"                    AS "RestaurantName",
+                tc."Status"                 AS "Status",
+                tc."Deadline"               AS "Deadline",
+                tc."ExpiresAt"              AS "ExpiresAt",
+                tc."ShareToken_Value"       AS "ShareToken",
+                tc."TipAmount_Amount"       AS "TipAmount",
+                tc."TipAmount_Currency"     AS "TipCurrency",
+                tcm."UserId"                AS "MemberUserId",
+                tcm."Name"                  AS "MemberName",
+                tcm."Role"                  AS "MemberRole"
+            FROM "TeamCarts" tc
+            JOIN "Restaurants" r ON tc."RestaurantId" = r."Id"
+            LEFT JOIN "TeamCartMembers" tcm ON tc."Id" = tcm."TeamCartId"
+            WHERE tc."Id" = @CartId
+            """;
+
+        var rows = await connection.QueryAsync<TeamCartFlatRow>(
+            new CommandDefinition(sql, new { CartId = cartId.Value }, cancellationToken: ct));
+
+        var flatRows = rows.ToList();
+        if (flatRows.Count == 0)
         {
             _logger.LogWarning("TeamCartCreated handler could not find cart (CartId={CartId}, EventId={EventId})", cartId.Value, notification.EventId);
             return;
         }
 
+        // Map flat rows to TeamCartViewModel
+        var firstRow = flatRows[0];
+
         var vm = new TeamCartViewModel
         {
-            CartId = cart.Id,
-            RestaurantId = cart.RestaurantId.Value,
-            Status = cart.Status,
-            Deadline = cart.Deadline,
-            ExpiresAt = cart.ExpiresAt,
-            ShareTokenMasked = cart.ShareToken.Value.Length >= 4 ? $"***{cart.ShareToken.Value[^4..]}" : "***",
-            ShareToken = cart.ShareToken.Value,
-            TipAmount = cart.TipAmount.Amount,
-            TipCurrency = cart.TipAmount.Currency,
+            CartId = notification.TeamCartId,
+            RestaurantId = firstRow.RestaurantId,
+            RestaurantName = firstRow.RestaurantName,
+            Status = Enum.Parse<Domain.TeamCartAggregate.Enums.TeamCartStatus>(firstRow.Status),
+            Deadline = firstRow.Deadline,
+            ExpiresAt = firstRow.ExpiresAt,
+            ShareToken = firstRow.ShareToken,
+            ShareTokenMasked = firstRow.ShareToken.Length >= 4 ? $"***{firstRow.ShareToken[^4..]}" : "***",
+            TipAmount = firstRow.TipAmount,
+            TipCurrency = firstRow.TipCurrency,
+
+            // Financial defaults for new cart
             CouponCode = null,
             DiscountAmount = 0m,
-            DiscountCurrency = cart.TipAmount.Currency,
             Subtotal = 0m,
-            Currency = cart.TipAmount.Currency,
+            Currency = firstRow.TipCurrency, // Assuming base currency matches tip currency logic
             DeliveryFee = 0m,
             TaxAmount = 0m,
             Total = 0m,
             CashOnDeliveryPortion = 0m,
+
             Version = 1,
-            Members = new List<TeamCartViewModel.Member>(),
-            Items = new List<TeamCartViewModel.Item>()
+            Items = new List<TeamCartViewModel.Item>(),
+            Members = new List<TeamCartViewModel.Member>()
         };
 
-        // Best-effort: include host member if available in aggregate without heavy includes
-        foreach (var m in cart.Members)
+        foreach (var row in flatRows)
         {
-            vm.Members.Add(new TeamCartViewModel.Member
+            if (row.MemberUserId != Guid.Empty)
             {
-                UserId = m.UserId.Value,
-                Name = m.Name,
-                Role = m.Role.ToString(),
-                PaymentStatus = "Pending",
-                CommittedAmount = 0m,
-                OnlineTransactionId = null
-            });
+                vm.Members.Add(new TeamCartViewModel.Member
+                {
+                    UserId = row.MemberUserId,
+                    Name = row.MemberName,
+                    Role = row.MemberRole,
+                    PaymentStatus = "Pending",
+                    CommittedAmount = 0m,
+                    OnlineTransactionId = null
+                });
+            }
         }
 
         try
         {
             await _store.CreateVmAsync(vm, ct);
-            await _notifier.NotifyCartUpdated(cart.Id, ct);
+            await _notifier.NotifyCartUpdated(vm.CartId, ct);
 
-            // Suppress push notification for TeamCartCreated (low-value event)
-            // Users are already aware they created the cart
+            // Suppress push notification for TeamCartCreated as users are already aware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create VM or notify for TeamCartId={CartId} (EventId={EventId})", cart.Id.Value, notification.EventId);
-            throw; // allow outbox retry
+            _logger.LogError(ex, "Failed to create VM or notify for TeamCartId={CartId} (EventId={EventId})", cartId.Value, notification.EventId);
+            throw;
         }
     }
+
+    // Private DTO class for Dapper result mapping
+    private sealed record TeamCartFlatRow(
+        Guid CartId,
+        Guid RestaurantId,
+        string RestaurantName,
+        string Status,
+        DateTime? Deadline,
+        DateTime ExpiresAt,
+        string ShareToken,
+        decimal TipAmount,
+        string TipCurrency,
+        Guid MemberUserId,
+        string MemberName,
+        string MemberRole
+    );
 }
 

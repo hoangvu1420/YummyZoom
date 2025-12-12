@@ -272,7 +272,9 @@ public sealed class TeamCarts : EndpointGroupBase
             return result.ToIResult();
         })
         .RequireAuthorization()
-        .WithName("ApplyTipToTeamCart")
+        .WithName("SetTeamCartTip")
+        .WithSummary("Set tip amount for TeamCart")
+        .WithDescription("Sets the tip amount for the cart. Use 0 to remove tip. Can only be set in Locked state before pricing is finalized.")
         .WithStandardResults();
 
         // POST /api/v1/team-carts/{id}/coupon

@@ -7,6 +7,7 @@ public sealed class TeamCartViewModel
 {
     public required TeamCartId CartId { get; init; }
     public required Guid RestaurantId { get; init; }
+    public required string RestaurantName { get; init; }
     public required TeamCartStatus Status { get; set; }
     public DateTime? Deadline { get; set; }
     public DateTime ExpiresAt { get; set; }

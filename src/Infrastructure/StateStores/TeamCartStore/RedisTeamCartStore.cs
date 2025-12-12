@@ -6,6 +6,9 @@ using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.TeamCarts.Models;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Domain.Services;
+using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.Common.ValueObjects;
 
 namespace YummyZoom.Infrastructure.StateStores.TeamCartStore;
 
@@ -277,8 +280,21 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         // Calculate subtotal from all items
         viewModel.Subtotal = viewModel.Items.Sum(item => item.LineTotal);
 
-        // Calculate total: subtotal + tip - discount
-        viewModel.Total = viewModel.Subtotal + viewModel.TipAmount - viewModel.DiscountAmount;
+        // Get Pricing Config via Domain Service to match Member Quotes
+        var pricing = StaticPricingService.GetPricingConfiguration(RestaurantId.Create(viewModel.RestaurantId));
+
+        viewModel.DeliveryFee = pricing.DeliveryFee.Amount;
+
+        // Calculate Tax based on policy
+        var subtotalMoney = new Money(viewModel.Subtotal, viewModel.Currency);
+        var deliveryFeeMoney = new Money(viewModel.DeliveryFee, viewModel.Currency); // Assume currency match for MVP
+        var tipMoney = new Money(viewModel.TipAmount, viewModel.TipCurrency);
+
+        var taxBase = StaticPricingService.CalculateTaxBase(subtotalMoney, deliveryFeeMoney, tipMoney, pricing.TaxBasePolicy);
+        viewModel.TaxAmount = taxBase.Amount * pricing.TaxRate;
+
+        // Calculate total: subtotal + fees + tax + tip - discount
+        viewModel.Total = viewModel.Subtotal + viewModel.DeliveryFee + viewModel.TaxAmount + viewModel.TipAmount - viewModel.DiscountAmount;
 
         // Ensure total is not negative
         if (viewModel.Total < 0)
@@ -292,6 +308,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             CartId = TeamCartId.Create(s.CartId),
             RestaurantId = s.RestaurantId,
+            RestaurantName = s.RestaurantName,
             Status = s.Status,
             Deadline = s.Deadline,
             ExpiresAt = s.ExpiresAt,
@@ -347,6 +364,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             CartId = v.CartId.Value,
             RestaurantId = v.RestaurantId,
+            RestaurantName = v.RestaurantName,
             Status = v.Status,
             Deadline = v.Deadline,
             ExpiresAt = v.ExpiresAt,
@@ -400,6 +418,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
     {
         public Guid CartId { get; set; }
         public Guid RestaurantId { get; set; }
+        public string RestaurantName { get; set; } = string.Empty;
         public TeamCartStatus Status { get; set; }
         public DateTime? Deadline { get; set; }
         public DateTime ExpiresAt { get; set; }

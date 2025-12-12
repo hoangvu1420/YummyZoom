@@ -202,6 +202,7 @@ Response — 200 OK
   "teamCart": {
     "cartId": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
     "restaurantId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "restaurantName": "Burger & Co",
     "status": "Open",
     "deadline": "2025-10-27T19:30:00Z",
     "expiresAt": "2025-10-27T20:00:00Z",
@@ -650,7 +651,7 @@ Get real-time coupon suggestions and savings calculations for the current TeamCa
 
 Apply tips and coupons to the TeamCart to adjust the final pricing.
 
-### Apply Tip
+### Set Tip Amount
 
 **`POST /api/v1/team-carts/{teamCartId}/tip`**
 
@@ -669,24 +670,26 @@ Apply tips and coupons to the TeamCart to adjust the final pricing.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `tipAmount` | `decimal` | Yes | Tip amount in cart currency (0.00 - 999.99) |
+| `tipAmount` | `decimal` | Yes | Tip amount in cart currency (0.00 - 999.99). Set to 0 to remove tip. |
 
 #### Response
 
-**✅ 204 No Content** - Tip applied successfully
+**✅ 204 No Content** - Tip amount set successfully
 
 #### Business Rules
 
-- Cart must be in `Open` or `Locked` state
+- Cart must be in `Locked` state (after locking, before finalizing pricing)
 - Caller must be a TeamCart participant (member or host)
-- Tip amount must be non-negative
+- Tip amount must be non-negative (0 or greater)
+- Setting to 0 effectively removes the tip
 - Tip is distributed proportionally among all members
+- Once pricing is finalized, tip cannot be changed
 
 #### Errors
 
 - **400** `ApplyTipToTeamCart.InvalidTipAmount` - Tip amount is negative or invalid
 - **404** `ApplyTipToTeamCart.TeamCartNotFound` - TeamCart doesn't exist
-- **409** `ApplyTipToTeamCart.CartNotOpenOrLocked` - Cart is not in valid state for tip application
+- **409** `ApplyTipToTeamCart.CartNotOpenOrLocked` - Cart is not in `Locked` state
 - **403** `ApplyTipToTeamCart.NotParticipant` - User is not a participant in this cart
 
 ### Apply Coupon
