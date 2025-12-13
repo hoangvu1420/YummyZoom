@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Notifications;
+using YummyZoom.Domain.Services;
 using YummyZoom.Domain.TeamCartAggregate.Events;
 
 namespace YummyZoom.Application.TeamCarts.EventHandlers;
@@ -17,6 +18,7 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
     private readonly ITeamCartStore _store;
     private readonly ITeamCartRealtimeNotifier _notifier;
     private readonly ITeamCartPushNotifier _pushNotifier;
+    private readonly OrderFinancialService _orderFinancialService;
     private readonly ILogger<CouponAppliedToTeamCartEventHandler> _logger;
 
     public CouponAppliedToTeamCartEventHandler(
@@ -27,6 +29,7 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
         ITeamCartStore store,
         ITeamCartRealtimeNotifier notifier,
         ITeamCartPushNotifier pushNotifier,
+        OrderFinancialService orderFinancialService,
         ILogger<CouponAppliedToTeamCartEventHandler> logger) : base(uow, inbox)
     {
         _teamCartRepository = teamCartRepository;
@@ -34,6 +37,7 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
         _store = store;
         _notifier = notifier;
         _pushNotifier = pushNotifier;
+        _orderFinancialService = orderFinancialService;
         _logger = logger;
     }
 
@@ -56,9 +60,22 @@ public sealed class CouponAppliedToTeamCartEventHandler : IdempotentNotification
         var coupon = await _couponRepository.GetByIdAsync(notification.CouponId, ct);
         var couponCode = coupon?.Code ?? $"#{notification.CouponId.Value.ToString()[..8]}";
 
-        // For MVP, discountAmount is 0 and currency comes from cart context
+        // Calculate discount
         var discountAmount = 0m;
         var currency = cart.TipAmount.Currency; // consistent domain currency
+
+        if (coupon is not null)
+        {
+            var discountResult = _orderFinancialService.ValidateAndCalculateDiscountForTeamCartItems(coupon, cart.Items);
+            if (discountResult.IsSuccess)
+            {
+                discountAmount = discountResult.Value.Amount;
+            }
+            else
+            {
+                _logger.LogWarning("Failed to calculate discount for coupon {CouponCode} in event handler: {Error}", couponCode, discountResult.Error.Code);
+            }
+        }
 
         try
         {

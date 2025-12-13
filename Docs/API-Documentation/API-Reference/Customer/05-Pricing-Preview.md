@@ -69,7 +69,7 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
 | `items` | `PricingPreviewItem[]` | Yes | Array of menu items for pricing calculation |
 | `couponCode` | `string` | No | Coupon code to apply (max 50 characters) |
 | `tipAmount` | `decimal` | No | Tip amount (≥0, default: 0) |
-| `includeCouponSuggestions` | `bool` | No | When `true`, response also returns `bestDeal` and `suggestions[]`. Adds a few milliseconds and bypasses cache. |
+| `includeCouponSuggestions` | `bool` | No | When `true`, response includes the same `couponSuggestions` object used by TeamCart (cart summary, `bestDeal`, `suggestions[]`). Adds a few milliseconds and bypasses cache. |
 
 ### Pricing Preview Item Schema
 
@@ -128,19 +128,13 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
     }
   ],
   "calculatedAt": "2023-10-27T14:35:00Z",
-  "bestDeal": {
-    "code": "FIRSTORDER",
-    "label": "15% off",
-    "savings": 4.8,
-    "isEligible": true,
-    "eligibilityReason": null,
-    "minOrderGap": 0,
-    "expiresOn": "2023-11-01T00:00:00Z",
-    "scope": "WholeOrder",
-    "urgency": "ExpiresWithin7Days"
-  },
-  "suggestions": [
-    {
+  "couponSuggestions": {
+    "cartSummary": {
+      "subtotal": 31.98,
+      "currency": "USD",
+      "itemCount": 3
+    },
+    "bestDeal": {
       "code": "FIRSTORDER",
       "label": "15% off",
       "savings": 4.8,
@@ -151,18 +145,31 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
       "scope": "WholeOrder",
       "urgency": "ExpiresWithin7Days"
     },
-    {
-      "code": "FREEDESSERT",
-      "label": "Free dessert",
-      "savings": 0,
-      "isEligible": false,
-      "eligibilityReason": "MinAmountNotMet",
-      "minOrderGap": 8.02,
-      "expiresOn": "2023-11-10T00:00:00Z",
-      "scope": "SpecificItems",
-      "urgency": "None"
-    }
-  ]
+    "suggestions": [
+      {
+        "code": "FIRSTORDER",
+        "label": "15% off",
+        "savings": 4.8,
+        "isEligible": true,
+        "eligibilityReason": null,
+        "minOrderGap": 0,
+        "expiresOn": "2023-11-01T00:00:00Z",
+        "scope": "WholeOrder",
+        "urgency": "ExpiresWithin7Days"
+      },
+      {
+        "code": "FREEDESSERT",
+        "label": "Free dessert",
+        "savings": 0,
+        "isEligible": false,
+        "eligibilityReason": "MinAmountNotMet",
+        "minOrderGap": 8.02,
+        "expiresOn": "2023-11-10T00:00:00Z",
+        "scope": "SpecificItems",
+        "urgency": "None"
+      }
+    ]
+  }
 }
 ```
 
@@ -179,8 +186,7 @@ Calculates the complete pricing breakdown for a set of menu items, including sub
 | `currency` | `string` | Currency code for all amounts |
 | `notes` | `PricingPreviewNote[]` | Array of informational, warning, or error notes |
 | `calculatedAt` | `string` | ISO 8601 timestamp of calculation |
-| `bestDeal` | `CouponSuggestion?` | Top eligible coupon suggestion when `includeCouponSuggestions=true` |
-| `suggestions` | `CouponSuggestion[]` | Full suggestion list ordered by eligibility and savings |
+| `couponSuggestions` | `CouponSuggestionsResponse?` | Present when `includeCouponSuggestions=true`. Matches the TeamCart coupon suggestions shape (`cartSummary`, `bestDeal`, `suggestions`). |
 
 ### Pricing Preview Note Schema
 

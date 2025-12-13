@@ -94,8 +94,8 @@ public sealed class CreateReviewCommandHandler : IRequestHandler<CreateReviewCom
                 return Result.Failure<CreateReviewResponse>(CreateReviewErrors.InvalidOrderStatusForReview);
             }
 
-            // Enforce single active review per user+restaurant
-            var existing = await _reviews.GetByCustomerAndRestaurantAsync(_user.DomainUserId.Value, request.RestaurantId, cancellationToken);
+            // Enforce single review per completed order
+            var existing = await _reviews.GetByOrderIdAsync(request.OrderId, cancellationToken);
             if (existing is not null)
             {
                 return Result.Failure<CreateReviewResponse>(CreateReviewErrors.ReviewAlreadyExists);

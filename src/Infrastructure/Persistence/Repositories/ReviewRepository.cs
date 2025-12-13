@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
-using YummyZoom.Domain.RestaurantAggregate.ValueObjects;
+using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.ReviewAggregate;
 using YummyZoom.Domain.ReviewAggregate.ValueObjects;
-using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 
 namespace YummyZoom.Infrastructure.Persistence.Repositories;
@@ -27,13 +26,10 @@ public class ReviewRepository : IReviewRepository
         return await _db.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId, cancellationToken);
     }
 
-    public async Task<Review?> GetByCustomerAndRestaurantAsync(Guid customerId, Guid restaurantId, CancellationToken cancellationToken = default)
+    public async Task<Review?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken = default)
     {
-        // Global query filter already excludes soft-deleted rows; avoid redundant IsDeleted predicate to keep translation simple.
-        var uid = UserId.Create(customerId);
-        var rid = RestaurantId.Create(restaurantId);
-        return await _db.Reviews
-            .FirstOrDefaultAsync(r => r.CustomerId == uid && r.RestaurantId == rid, cancellationToken);
+        var oid = OrderId.Create(orderId);
+        return await _db.Reviews.FirstOrDefaultAsync(r => r.OrderId == oid, cancellationToken);
     }
 
     public Task UpdateAsync(Review review, CancellationToken cancellationToken = default)

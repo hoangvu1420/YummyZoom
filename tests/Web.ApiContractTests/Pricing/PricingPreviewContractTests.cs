@@ -34,6 +34,12 @@ public class PricingPreviewContractTests
             Scope: "WholeOrder",
             Urgency: CouponUrgency.ExpiresWithin7Days);
 
+        var expectedCouponSuggestions = new CouponSuggestionsResponse(
+            new CartSummary(30m, "USD", 2),
+            expectedSuggestion,
+            new List<CouponSuggestion> { expectedSuggestion }
+        );
+
         var expectedResponse = new GetPricingPreviewResponse(
             Subtotal: new Money(30m, "USD"),
             DiscountAmount: new Money(4.5m, "USD"),
@@ -44,8 +50,7 @@ public class PricingPreviewContractTests
             Currency: "USD",
             Notes: new List<PricingPreviewNoteDto>(),
             CalculatedAt: DateTime.UtcNow,
-            BestDeal: expectedSuggestion,
-            Suggestions: new List<CouponSuggestion> { expectedSuggestion }
+            CouponSuggestions: expectedCouponSuggestions
         );
 
         factory.Sender.RespondWith(req =>
@@ -92,8 +97,9 @@ public class PricingPreviewContractTests
 
         var dto = JsonSerializer.Deserialize<GetPricingPreviewResponse>(raw, DomainJson.Options);
         dto.Should().NotBeNull();
-        dto!.BestDeal.Should().NotBeNull();
-        dto.Suggestions.Should().HaveCount(1);
-        dto.Suggestions[0].Code.Should().Be("SAVE15");
+        dto!.CouponSuggestions.Should().NotBeNull();
+        dto.CouponSuggestions!.BestDeal.Should().NotBeNull();
+        dto.CouponSuggestions.Suggestions.Should().HaveCount(1);
+        dto.CouponSuggestions.Suggestions[0].Code.Should().Be("SAVE15");
     }
 }

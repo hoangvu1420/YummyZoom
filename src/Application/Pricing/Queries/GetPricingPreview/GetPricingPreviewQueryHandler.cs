@@ -199,8 +199,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
             discountAmount ?? Money.Zero(subtotal.Currency), 
             tipAmount);
 
-        CouponSuggestion? bestDeal = null;
-        IReadOnlyList<CouponSuggestion> suggestions = Array.Empty<CouponSuggestion>();
+        CouponSuggestionsResponse? couponSuggestions = null;
 
         if (request.IncludeCouponSuggestions)
         {
@@ -210,6 +209,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
                     "warning",
                     "COUPON_SUGGESTIONS_UNAVAILABLE",
                     "Coupon suggestions require a signed-in customer account"));
+                couponSuggestions = CouponSuggestionsResponse.Empty();
             }
             else
             {
@@ -221,8 +221,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
                         _currentUser.DomainUserId,
                         cancellationToken);
 
-                    bestDeal = suggestionResponse.BestDeal;
-                    suggestions = suggestionResponse.Suggestions;
+                    couponSuggestions = suggestionResponse;
                 }
                 catch (Exception ex)
                 {
@@ -231,6 +230,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
                         "warning",
                         "COUPON_SUGGESTIONS_UNAVAILABLE",
                         "Coupon suggestions are temporarily unavailable"));
+                    couponSuggestions = CouponSuggestionsResponse.Empty();
                 }
             }
         }
@@ -245,8 +245,7 @@ public class GetPricingPreviewQueryHandler : IRequestHandler<GetPricingPreviewQu
             subtotal.Currency,
             notes,
             DateTime.UtcNow,
-            bestDeal,
-            suggestions
+            couponSuggestions
         ));
     }
 

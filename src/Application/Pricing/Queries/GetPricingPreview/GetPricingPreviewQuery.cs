@@ -55,8 +55,7 @@ public record GetPricingPreviewResponse(
     string Currency,
     List<PricingPreviewNoteDto> Notes,
     DateTime CalculatedAt,
-    CouponSuggestion? BestDeal,
-    IReadOnlyList<CouponSuggestion> Suggestions
+    CouponSuggestionsResponse? CouponSuggestions
 );
 
 public record PricingPreviewNoteDto(
