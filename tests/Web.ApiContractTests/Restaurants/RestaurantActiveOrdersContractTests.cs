@@ -14,7 +14,7 @@ namespace YummyZoom.Web.ApiContractTests.Restaurants;
 public class RestaurantActiveOrdersContractTests
 {
     private static OrderSummaryDto CreateSummary(Guid orderId)
-        => new(orderId, "ORD-A1", "Accepted", DateTime.UtcNow.AddMinutes(-15), Guid.NewGuid(), Guid.NewGuid(), 22m, "USD", 3);
+        => new(orderId, "ORD-A1", "Accepted", DateTime.UtcNow.AddMinutes(-15), Guid.NewGuid(), "Test Restaurant", null, Guid.NewGuid(), 22m, "USD", 3);
 
     [Test]
     public async Task GetRestaurantActiveOrders_WhenNonEmpty_Returns200WithItems()

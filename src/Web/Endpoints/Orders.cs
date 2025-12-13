@@ -183,13 +183,13 @@ public class Orders : EndpointGroupBase
         .WithStandardResults<OrderStatusDto>();
 
         // GET /api/v1/orders/my?pageNumber=1&pageSize=20
-        group.MapGet("/my", async (int? pageNumber, int? pageSize, ISender sender) =>
+        group.MapGet("/my", async (int? pageNumber, int? pageSize, string? keyword, string? status, ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
             var page = pageNumber ?? 1;
             var size = pageSize ?? 10;
 
-            var query = new GetCustomerRecentOrdersQuery(page, size);
+            var query = new GetCustomerRecentOrdersQuery(page, size, keyword, status);
             var result = await sender.Send(query);
             return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
         })

@@ -318,6 +318,8 @@ Retrieves paginated list of orders for the authenticated customer.
 |-----------|------|----------|-------------|---------|
 | `pageNumber` | `number` | No | Page number for pagination | `1` |
 | `pageSize` | `number` | No | Number of orders per page | `10` |
+| `keyword` | `string` | No | Search by order number or restaurant name | `null` |
+| `status` | `string` | No | Filter by order status (e.g., "Delivered") | `null` |
 
 #### Response
 
@@ -331,6 +333,8 @@ Retrieves paginated list of orders for the authenticated customer.
       "status": "Delivered",
       "placementTimestamp": "2023-10-27T14:30:00Z",
       "restaurantId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
+      "restaurantName": "Burger King",
+      "restaurantImageUrl": "https://example.com/images/bk.jpg",
       "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "totalAmount": 34.43,
       "totalCurrency": "USD",
@@ -342,6 +346,8 @@ Retrieves paginated list of orders for the authenticated customer.
       "status": "Cancelled",
       "placementTimestamp": "2023-10-26T19:15:00Z",
       "restaurantId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
+      "restaurantName": "Pizza Hut",
+      "restaurantImageUrl": null,
       "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "totalAmount": 18.75,
       "totalCurrency": "USD",

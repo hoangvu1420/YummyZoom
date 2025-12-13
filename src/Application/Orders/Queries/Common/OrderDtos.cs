@@ -13,6 +13,8 @@ public record OrderSummaryDto(
     string Status,
     DateTime PlacementTimestamp,
     Guid RestaurantId,
+    string RestaurantName,
+    string? RestaurantImageUrl,
     Guid CustomerId,
     decimal TotalAmount,
     string TotalCurrency,

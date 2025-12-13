@@ -14,7 +14,7 @@ namespace YummyZoom.Web.ApiContractTests.Orders;
 public class GetCustomerRecentOrdersContractTests
 {
     private static OrderSummaryDto CreateSummary(Guid orderId)
-        => new(orderId, "ORD-1", "Placed", DateTime.UtcNow.AddMinutes(-10), Guid.NewGuid(), Guid.NewGuid(), 15m, "USD", 2);
+        => new(orderId, "ORD-1", "Placed", DateTime.UtcNow.AddMinutes(-10), Guid.NewGuid(), "Test Restaurant", "http://example.com/img.jpg", Guid.NewGuid(), 15m, "USD", 2);
 
     [Test]
     public async Task GetCustomerRecentOrders_WhenNonEmpty_Returns200WithItems()
@@ -73,5 +73,25 @@ public class GetCustomerRecentOrdersContractTests
         TestContext.WriteLine($"REQUEST GET {path}");
         var resp = await client.GetAsync(path);
         resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task GetCustomerRecentOrders_WithStatusFilter_PassesFilterToQuery()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetCustomerRecentOrdersQuery>();
+            var q = (GetCustomerRecentOrdersQuery)req;
+            q.Status.Should().Be("Delivered,Cancelled");
+            var list = new PaginatedList<OrderSummaryDto>(Array.Empty<OrderSummaryDto>(), count: 0, pageNumber: 1, pageSize: 10);
+            return YummyZoom.SharedKernel.Result.Success(list);
+        });
+        var path = "/api/v1/orders/my?pageNumber=1&pageSize=10&status=Delivered%2CCancelled";
+        TestContext.WriteLine($"REQUEST GET {path}");
+        var resp = await client.GetAsync(path);
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

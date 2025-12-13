@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Text;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces;
 using YummyZoom.Application.Common.Interfaces.IServices;
@@ -54,6 +56,8 @@ public sealed class GetCustomerRecentOrdersQueryHandler : IRequestHandler<GetCus
             o."Status"              AS Status,
             o."PlacementTimestamp"  AS PlacementTimestamp,
             o."RestaurantId"        AS RestaurantId,
+            r."Name"                AS RestaurantName,
+            r."LogoUrl"             AS RestaurantImageUrl,
             o."CustomerId"          AS CustomerId,
             o."TotalAmount_Amount"   AS TotalAmount,
             o."TotalAmount_Currency" AS TotalCurrency,
@@ -62,10 +66,30 @@ public sealed class GetCustomerRecentOrdersQueryHandler : IRequestHandler<GetCus
             WHERE oi."OrderId" = o."Id") AS int) AS ItemCount
             """;
 
-        const string fromAndWhere = """
+        var fromAndWhere = new StringBuilder("""
             FROM "Orders" o
+            JOIN "Restaurants" r ON o."RestaurantId" = r."Id"
             WHERE o."CustomerId" = @CustomerId
-            """;
+            """);
+
+        var parameters = new DynamicParameters();
+        parameters.Add("CustomerId", userId);
+
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
+        {
+            fromAndWhere.Append(@" AND (o.""OrderNumber"" ILIKE @Keyword OR r.""Name"" ILIKE @Keyword)");
+            parameters.Add("Keyword", $"%{request.Keyword}%");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Status))
+        {
+            var statuses = request.Status.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (statuses.Length > 0)
+            {
+                fromAndWhere.Append(@" AND o.""Status"" = ANY(@Statuses)");
+                parameters.Add("Statuses", statuses);
+            }
+        }
 
         const string orderByClause = """
             o."PlacementTimestamp" DESC,
@@ -74,12 +98,10 @@ public sealed class GetCustomerRecentOrdersQueryHandler : IRequestHandler<GetCus
 
         var (countSql, pageSql) = DapperPagination.BuildPagedSql(
             selectColumns,
-            fromAndWhere,
+            fromAndWhere.ToString(),
             orderByClause,
             request.PageNumber,
             request.PageSize);
-
-        var parameters = new { CustomerId = userId };
 
         var page = await connection.QueryPageAsync<OrderSummaryDto>(
             countSql,
@@ -89,7 +111,7 @@ public sealed class GetCustomerRecentOrdersQueryHandler : IRequestHandler<GetCus
             request.PageSize,
             cancellationToken);
 
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Retrieved {Returned} of {Total} recent orders for customer {CustomerId} (page {Page}/{Size})",
             page.Items.Count,
             page.TotalCount,

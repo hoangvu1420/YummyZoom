@@ -9,5 +9,5 @@ namespace YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 /// The customer context is inferred from the current user principal; no explicit CustomerId parameter is accepted
 /// to avoid accidental information disclosure. Empty result sets are valid and do not constitute an error.
 /// </summary>
-public sealed record GetCustomerRecentOrdersQuery(int PageNumber, int PageSize)
+public sealed record GetCustomerRecentOrdersQuery(int PageNumber, int PageSize, string? Keyword = null, string? Status = null)
     : IRequest<Result<PaginatedList<OrderSummaryDto>>>;
