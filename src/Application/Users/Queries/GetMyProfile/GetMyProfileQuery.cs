@@ -3,6 +3,7 @@ using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.UserAggregate.Errors;
 using YummyZoom.SharedKernel;
+using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Application.Users.Queries.GetMyProfile;
 
@@ -14,7 +15,11 @@ public record GetMyProfileResponse(
     string Email,
     string? PhoneNumber,
     MyProfileAddress? Address,
-    DateTime? LastLoginAt);
+    DateTime? LastLoginAt,
+    IEnumerable<string> Roles,
+    IEnumerable<ClaimDto> Claims);
+
+public record ClaimDto(string Type, string Value);
 
 public record MyProfileAddress(
     Guid AddressId,
@@ -51,10 +56,33 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, Resul
             return Result.Failure<GetMyProfileResponse>(Unauthorized);
         }
 
+        // Common claim extraction
+        var claims = _currentUser.Principal?.Claims.Select(c => new ClaimDto(c.Type, c.Value)).ToList() ?? new List<ClaimDto>();
+        var roles = _currentUser.Principal?.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToList()
+                    ?? new List<string>();
+
         var userId = _currentUser.DomainUserId;
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+
         if (user is null)
         {
+            // If user is Admin, they might not have a domain user profile.
+            // Return a minimal profile based on Identity info.
+            if (roles.Contains(Roles.Administrator))
+            {
+                var response = new GetMyProfileResponse(
+                    userId.Value,
+                    _currentUser.Principal?.Identity?.Name ?? "Administrator",
+                    _currentUser.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@localhost",
+                    null,
+                    null,
+                    DateTime.UtcNow, // Or null if strictly unknown
+                    roles,
+                    claims);
+
+                return Result.Success(response);
+            }
+
             return Result.Failure<GetMyProfileResponse>(UserErrors.UserNotFound(userId.Value));
         }
 
@@ -76,14 +104,16 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, Resul
         // Last login is recorded per device session; expose the latest across sessions
         var lastLogin = await _sessionRepository.GetLastLoginAsync(user.Id.Value, cancellationToken);
 
-        var response = new GetMyProfileResponse(
+        var fullResponse = new GetMyProfileResponse(
             user.Id.Value,
             user.Name,
             user.Email,
             user.PhoneNumber,
             view,
-            lastLogin);
+            lastLogin,
+            roles,
+            claims);
 
-        return Result.Success(response);
+        return Result.Success(fullResponse);
     }
 }

@@ -459,7 +459,16 @@ Retrieves the authenticated user's profile information.
     "label": "Home",
     "deliveryInstructions": "Leave at front door"
   },
-  "lastLoginAt": "2023-03-15T12:34:56Z"
+  "lastLoginAt": "2023-03-15T12:34:56Z",
+  "roles": [
+    "Customer"
+  ],
+  "claims": [
+    {
+      "type": "sub",
+      "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    }
+  ]
 }
 ```
 
@@ -471,6 +480,8 @@ Retrieves the authenticated user's profile information.
 | `phoneNumber` | `string` | User's phone number in E.164 format |
 | `address` | `object\|null` | Primary address information (null if not set) |
 | `lastLoginAt` | `string\|null` | Timestamp of the user's last login (ISO 8601 format) |
+| `roles` | `string[]` | List of roles assigned to the user |
+| `claims` | `object[]` | List of claims associated with the user |
 
 #### Address Object
 

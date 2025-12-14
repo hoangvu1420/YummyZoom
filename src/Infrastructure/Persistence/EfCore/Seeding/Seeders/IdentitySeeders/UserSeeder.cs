@@ -61,8 +61,8 @@ public class UserSeeder : ISeeder
             context.SharedData["SeededUsers"] = seededDomainUsers;
         }
 
-        context.Logger.LogInformation("[User] Seeding completed: {AdminCount} admin user(s), {UserCount} domain user(s) seeded", 
-            adminCreated ? 1 : 0, 
+        context.Logger.LogInformation("[User] Seeding completed: {AdminCount} admin user(s), {UserCount} domain user(s) seeded",
+            adminCreated ? 1 : 0,
             seededDomainUsers.Count);
 
         return Result.Success();

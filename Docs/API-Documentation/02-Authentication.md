@@ -13,6 +13,38 @@ This guide explains how clients authenticate with the YummyZoom API and obtain/r
 Authorization: Bearer <access_token>
 ```
 
+### Authentication Status Check
+
+Before initiating a login flow, you can check if a phone number exists and what methods are available.
+
+**`POST /api/v1/auth/status`**
+
+- **Authorization:** Public
+- **Content-Type:** `application/json`
+
+**Request Body**
+```json
+{
+  "phone": "+1234567890",
+  "country_code": "US"
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "success": true,
+  "data": {
+    "user_status": "existing_with_password",
+    "user_exists": true,
+    "has_password": true,
+    "profile_complete": true,
+    "user_info": { "user_id": "...", "first_name": "..." },
+    "security_info": { "phone_verified": true, "account_locked": false }
+  }
+}
+```
+
 ### Phone OTP Authentication
 
 Two public endpoints handle OTP-based sign-in. In development, the OTP code is returned in the response for convenience; in production, it is delivered via SMS and the API returns `202 Accepted`.
@@ -146,7 +178,41 @@ After first OTP sign-in, the user may need to complete onboarding to create the 
 ```
 - **Success**: `200 OK`
 
-You can check whether onboarding is required:
+### Get Current User Profile
+
+Retrieves the authenticated user's profile, including assigned roles and claims.
+
+**`GET /api/v1/users/me`**
+
+- **Authorization**: Authenticated (Bearer)
+- **Response**
+```json
+{
+  "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "phoneNumber": "+15551234567",
+  "address": {
+    "addressId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "street": "123 Main Street",
+    "city": "San Francisco",
+    "country": "USA"
+  },
+  "lastLoginAt": "2023-03-15T12:34:56Z",
+  "roles": [
+    "Customer",
+    "Admin"
+  ],
+  "claims": [
+    {
+      "type": "sub",
+      "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    }
+  ]
+}
+```
+
+You can check whether onboarding is required (lighter check):
 
 - **Method/Path**: `GET /api/v1/users/auth/status`
 - **Authorization**: Authenticated
@@ -154,6 +220,22 @@ You can check whether onboarding is required:
 ```json
 { "isNewUser": true, "requiresOnboarding": true }
 ```
+
+### Update Current User Profile
+
+Updates the authenticated user's display name and email.
+
+**`PUT /api/v1/users/me/profile`**
+
+- **Authorization**: Authenticated (Bearer)
+- **Body**
+```json
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com"
+}
+```
+- **Success**: `204 No Content`
 
 ### Set Password (OTP Users)
 

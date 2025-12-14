@@ -27,4 +27,8 @@ public static class ReviewErrors
     public static Error ReviewAlreadyReplied => Error.Conflict(
         "Review.ReviewAlreadyReplied",
         "Review has already been replied to");
+
+    public static Error NotFound => Error.NotFound(
+        "Review.NotFound",
+        "Review not found");
 }

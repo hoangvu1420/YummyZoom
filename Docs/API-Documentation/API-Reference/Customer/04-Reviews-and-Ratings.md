@@ -155,6 +155,53 @@ Returns the authenticated user’s reviews, newest first.
 
 ---
 
+## Get Order Review
+
+Retrieves the authenticated user's review for a specific order.
+
+**`GET /api/v1/orders/{orderId}/review`**
+
+- **Authorization:** Required (Customer; must be the order owner)
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `orderId` | `UUID` | Yes | The unique identifier of the order. |
+
+#### Response
+
+**✓ 200 OK**
+```json
+{
+  "reviewId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "restaurantId": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
+  "rating": 5,
+  "title": "Great dinner!",
+  "comment": "Delicious pasta and friendly staff.",
+  "createdAt": "2023-10-28T10:00:00Z"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reviewId` | `UUID` | Unique identifier for the review. |
+| `orderId` | `UUID` | Unique identifier for the order. |
+| `restaurantId` | `UUID` | Unique identifier for the restaurant. |
+| `rating` | `integer` | 1-5 star rating. |
+| `title` | `string` | Review title/headline (nullable). |
+| `comment` | `string` | Review body text (nullable). |
+| `createdAt` | `ISO8601` | Timestamp when the review was created. |
+
+#### Error Responses
+
+- 404 Not Found
+  - `Review.NotFound` — No review exists for this order (Client should show "Write Review" button).
+- 401 Unauthorized — Missing or invalid authentication.
+
+---
+
 ## Browse Restaurant Reviews (Public)
 
 Public endpoints for reading reviews and rating summaries are documented in `Docs/API-Documentation/API-Reference/Customer/02-Restaurant-Discovery.md` under “Restaurant Reviews.” Summary below for quick reference.

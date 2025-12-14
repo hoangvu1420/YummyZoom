@@ -12,6 +12,7 @@ using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Orders.Queries.GetCustomerRecentOrders;
 using YummyZoom.Application.Orders.Queries.GetOrderById;
 using YummyZoom.Application.Orders.Queries.GetOrderStatus;
+using YummyZoom.Application.Reviews.Queries.GetOrderReview;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -181,6 +182,16 @@ public class Orders : EndpointGroupBase
         })
         .WithName("GetOrderStatus")
         .WithStandardResults<OrderStatusDto>();
+
+        // GET /api/v1/orders/{orderId}/review
+        group.MapGet("/{orderId:guid}/review", async (Guid orderId, ISender sender) =>
+        {
+            var query = new GetOrderReviewQuery(orderId);
+            var result = await sender.Send(query);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetOrderReview")
+        .WithStandardResults<OrderReviewDto>();
 
         // GET /api/v1/orders/my?pageNumber=1&pageSize=20
         group.MapGet("/my", async (int? pageNumber, int? pageSize, string? keyword, string? status, ISender sender) =>
