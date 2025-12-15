@@ -15,6 +15,7 @@ public partial class Restaurants : EndpointGroupBase
             .MapGroup(this)
             .RequireAuthorization();
 
+        MapMedia(group);
         MapMenuManagement(group);
         MapMenuItemsManagement(group);
         MapCoupons(group);

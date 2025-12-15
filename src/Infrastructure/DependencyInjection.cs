@@ -28,6 +28,8 @@ using YummyZoom.Infrastructure.Identity;
 using YummyZoom.Infrastructure.Identity.PhoneOtp;
 using YummyZoom.Infrastructure.Messaging.Invalidation;
 using YummyZoom.Infrastructure.Messaging.Outbox;
+using YummyZoom.Infrastructure.Media.Cloudinary;
+using YummyZoom.Infrastructure.Media.Fakes;
 using YummyZoom.Infrastructure.Notifications.Firebase;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using YummyZoom.Infrastructure.Persistence;
@@ -221,6 +223,23 @@ public static class DependencyInjection
         // Firebase and Caching
         builder.AddFirebaseIfConfigured();
         builder.AddCachingIfConfigured();
+
+        // Media (Cloudinary)
+        builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection(CloudinaryOptions.SectionName));
+        var cloudinaryOptions = builder.Configuration.GetSection(CloudinaryOptions.SectionName).Get<CloudinaryOptions>();
+        var hasCloudinaryCreds = cloudinaryOptions is not null
+            && !string.IsNullOrWhiteSpace(cloudinaryOptions.CloudName)
+            && !string.IsNullOrWhiteSpace(cloudinaryOptions.ApiKey)
+            && !string.IsNullOrWhiteSpace(cloudinaryOptions.ApiSecret);
+
+        if (cloudinaryOptions?.Enabled is true && hasCloudinaryCreds)
+        {
+            builder.Services.AddSingleton<IMediaStorageService, CloudinaryMediaService>();
+        }
+        else
+        {
+            builder.Services.AddSingleton<IMediaStorageService, FakeMediaStorageService>();
+        }
 
         // Stripe configuration
         builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection(StripeOptions.SectionName));

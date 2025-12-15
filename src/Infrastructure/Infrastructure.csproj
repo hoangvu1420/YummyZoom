@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="CloudinaryDotNet" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="FirebaseAdmin" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
