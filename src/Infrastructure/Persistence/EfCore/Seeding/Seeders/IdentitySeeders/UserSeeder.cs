@@ -70,7 +70,7 @@ public class UserSeeder : ISeeder
 
     private async Task<bool> EnsureAdminUserAsync(SeedingContext context, CancellationToken cancellationToken)
     {
-        const string adminEmail = "administrator@localhost";
+        const string adminEmail = "administrator@yummyzoom.vn";
         var admin = await _userManager.FindByEmailAsync(adminEmail);
         if (admin is not null)
         {

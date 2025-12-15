@@ -98,6 +98,7 @@ public static class DependencyInjection
         // Identity seeders
         builder.Services.AddScoped<ISeeder, RoleSeeder>();
         builder.Services.AddScoped<ISeeder, UserSeeder>();
+        builder.Services.AddScoped<ISeeder, RestaurantRoleSeeder>();
         
         // Restaurant seeders
         builder.Services.AddScoped<ISeeder, TagSeeder>();

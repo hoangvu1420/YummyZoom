@@ -369,6 +369,52 @@ Change item price only.
 
 ---
 
+### POST /restaurants/{restaurantId}/menu-items/batch-update
+
+Bulk update availability or price for multiple items in one request. Executes best-effort: continues after individual failures and reports them in the response.
+
+- Authorization: MustBeRestaurantStaff
+
+#### Request Body
+
+```json
+{
+  "operations": [
+    { "itemId": "9a8b...", "field": "isAvailable", "value": false },
+    { "itemId": "c0c1...", "field": "price", "value": 199000 }
+  ]
+}
+```
+
+Rules
+
+- Up to 50 operations per call; `operations` is required and non-empty.
+- `field` must be `isAvailable` (expects boolean) or `price` (expects numeric in the item’s currency).
+- Each `itemId` must belong to `restaurantId`; cross-restaurant items return 403.
+- Processing continues after per-item failures; failures are reported in the response.
+
+#### Response 200
+
+```json
+{
+  "successCount": 1,
+  "failedCount": 2,
+  "errors": [
+    { "itemId": "deadbeef-...", "field": "isAvailable", "message": "Menu item 'deadbeef-...' was not found." },
+    { "itemId": "9a8b...", "field": "price", "message": "MenuItem.InvalidPriceValue" }
+  ]
+}
+```
+
+- `errors` entries contain human-readable `message` values (domain/validation descriptions). Successful operations are applied transactionally per item.
+
+#### Errors
+
+- 400 Validation — invalid payload (missing operations, unsupported field, wrong value type)
+- 403 Forbidden — item does not belong to `restaurantId`
+
+---
+
 ### PUT /restaurants/{restaurantId}/menu-items/{itemId}/availability
 
 Toggle availability.
