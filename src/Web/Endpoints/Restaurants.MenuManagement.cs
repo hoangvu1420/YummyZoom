@@ -2,11 +2,14 @@ using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
 using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
 using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
+using YummyZoom.Application.MenuCategories.Commands.ReorderMenuCategories;
 using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
 using YummyZoom.Application.Menus.Commands.UpdateMenuDetails;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoriesForMenu;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuItemsByCategory;
+using YummyZoom.Application.Restaurants.Queries.Management.SearchMenuItems;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenusForManagement;
 
 namespace YummyZoom.Web.Endpoints;
@@ -25,6 +28,20 @@ public partial class Restaurants
         .WithSummary("List menus for management")
         .WithDescription("Returns all menus for a restaurant with counts of categories and items. Requires restaurant staff authorization.")
         .Produces<IReadOnlyList<MenuSummaryDto>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/menus/{menuId}/categories
+        group.MapGet("/{restaurantId:guid}/menus/{menuId:guid}/categories", async (Guid restaurantId, Guid menuId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetMenuCategoriesForMenuQuery(restaurantId, menuId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetMenuCategoriesForMenu")
+        .WithSummary("List menu categories for a menu")
+        .WithDescription("Returns categories for a menu with display order and item counts. Requires restaurant staff authorization.")
+        .Produces<IReadOnlyList<MenuCategorySummaryDto>>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // GET /api/v1/restaurants/{restaurantId}/categories/{categoryId}
@@ -58,6 +75,31 @@ public partial class Restaurants
         .WithSummary("List menu items by category")
         .WithDescription("Returns paginated menu items within a specific category for a restaurant. Supports name and availability filters.")
         .Produces<PaginatedList<MenuItemSummaryDto>>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // GET /api/v1/restaurants/{restaurantId}/menu-items/search
+        group.MapGet("/{restaurantId:guid}/menu-items/search", async (
+            Guid restaurantId,
+            string? q,
+            Guid? categoryId,
+            bool? isAvailable,
+            int? pageNumber,
+            int? pageSize,
+            ISender sender) =>
+        {
+            var page = pageNumber ?? 1;
+            var size = pageSize ?? 20;
+
+            var query = new SearchMenuItemsQuery(restaurantId, categoryId, q, isAvailable, page, size);
+            var result = await sender.Send(query);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("SearchMenuItems")
+        .WithSummary("Search menu items across categories")
+        .WithDescription("Returns paginated menu items for a restaurant filtered by optional name query, category, and availability. Defaults pageNumber=1 and pageSize=20.")
+        .Produces<PaginatedList<MenuItemSearchResultDto>>(StatusCodes.Status200OK)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -159,6 +201,25 @@ public partial class Restaurants
         .WithSummary("Remove a menu category")
         .WithDescription("Permanently removes a menu category. Cannot be deleted if it contains menu items. Requires restaurant staff authorization.")
         .WithStandardResults();
+
+        // PUT /api/v1/restaurants/{restaurantId}/categories/reorder
+        group.MapPut("/{restaurantId:guid}/categories/reorder", async (Guid restaurantId, ReorderMenuCategoriesRequestDto body, ISender sender) =>
+        {
+            var orders = body.CategoryOrders?.Select(o => new CategoryOrderDto(o.CategoryId, o.DisplayOrder)).ToList()
+                ?? new List<CategoryOrderDto>();
+
+            var cmd = new ReorderMenuCategoriesCommand(restaurantId, orders);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("ReorderMenuCategories")
+        .WithSummary("Reorder menu categories for a restaurant")
+        .WithDescription("Bulk update of category display orders. Validates all provided categories belong to the restaurant before applying changes.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError)
+        .WithStandardResults();
     }
 
     #region DTOs for Menu Management
@@ -172,5 +233,7 @@ public partial class Restaurants
     public sealed record AddMenuCategoryRequestDto(string Name);
     public sealed record AddMenuCategoryResponseDto(Guid MenuCategoryId);
     public sealed record UpdateMenuCategoryDetailsRequestDto(string Name, int DisplayOrder);
+    public sealed record ReorderMenuCategoriesRequestDto(List<CategoryOrderRequestDto>? CategoryOrders);
+    public sealed record CategoryOrderRequestDto(Guid CategoryId, int DisplayOrder);
     #endregion
 }

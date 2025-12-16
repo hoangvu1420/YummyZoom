@@ -6,6 +6,7 @@ using NUnit.Framework;
 using YummyZoom.Application.MenuCategories.Commands.AddMenuCategory;
 using YummyZoom.Application.MenuCategories.Commands.RemoveMenuCategory;
 using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
+using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoriesForMenu;
 using YummyZoom.Infrastructure.Serialization;
 using YummyZoom.Infrastructure.Serialization.JsonOptions;
 using YummyZoom.SharedKernel;
@@ -17,6 +18,74 @@ namespace YummyZoom.Web.ApiContractTests.Restaurants;
 
 public class MenuCategoryManagementContractTests
 {
+    #region GET menu categories
+
+    [Test]
+    public async Task GetMenuCategoriesForMenu_WhenValid_Returns200_AndMapsQuery()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var restaurantId = Guid.NewGuid();
+        var menuId = Guid.NewGuid();
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetMenuCategoriesForMenuQuery>();
+            var query = (GetMenuCategoriesForMenuQuery)req;
+            query.RestaurantId.Should().Be(restaurantId);
+            query.MenuId.Should().Be(menuId);
+
+            IReadOnlyList<MenuCategorySummaryDto> dto = new List<MenuCategorySummaryDto>
+            {
+                new(Guid.NewGuid(), "Starters", 1, 2),
+                new(Guid.NewGuid(), "Mains", 2, 5)
+            };
+            return Result.Success(dto);
+        });
+
+        var path = $"/api/v1/restaurants/{restaurantId}/menus/{menuId}/categories";
+        var resp = await client.GetAsync(path);
+
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var raw = await resp.Content.ReadAsStringAsync();
+        TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
+        var categories = JsonSerializer.Deserialize<List<MenuCategorySummaryDto>>(raw, DomainJson.Options);
+        categories.Should().NotBeNull();
+        categories ??= [];
+        categories.Should().HaveCount(2);
+        categories[0].Name.Should().Be("Starters");
+    }
+
+    [Test]
+    public async Task GetMenuCategoriesForMenu_WhenNotFound_Returns404()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        factory.Sender.RespondWith(_ => Result.Failure<IReadOnlyList<MenuCategorySummaryDto>>(Error.NotFound("Menu.InvalidMenuId", "Menu not found")));
+        var path = $"/api/v1/restaurants/{Guid.NewGuid()}/menus/{Guid.NewGuid()}/categories";
+        var resp = await client.GetAsync(path);
+
+        resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Test]
+    public async Task GetMenuCategoriesForMenu_WithoutAuth_Returns401()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+
+        var path = $"/api/v1/restaurants/{Guid.NewGuid()}/menus/{Guid.NewGuid()}/categories";
+        var resp = await client.GetAsync(path);
+
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    #endregion
+
     #region POST menu categories
 
     [Test]

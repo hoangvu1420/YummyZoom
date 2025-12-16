@@ -124,6 +124,49 @@ Enable or disable a menu.
 
 ## Categories
 
+### GET /restaurants/{restaurantId}/menus/{menuId}/categories
+
+List categories in a menu for management (sidebar/backoffice views).
+
+- Authorization: MustBeRestaurantStaff
+
+#### Notes
+
+- Returns only non-deleted categories for the menu.
+- `itemCount` excludes soft-deleted menu items.
+- Sorted by `displayOrder` ascending, then by `categoryId` for stability. Empty array when none exist.
+
+#### Path Parameters
+
+- `restaurantId` (UUID)
+- `menuId` (UUID)
+
+#### Response 200
+
+```json
+[
+  {
+    "categoryId": "c1",
+    "name": "Appetizers",
+    "displayOrder": 1,
+    "itemCount": 5
+  },
+  {
+    "categoryId": "c2",
+    "name": "Mains",
+    "displayOrder": 2,
+    "itemCount": 12
+  }
+]
+```
+
+#### Errors
+
+- 400 Validation — missing/invalid `restaurantId` or `menuId`
+- 404 Not Found — `Menu.InvalidMenuId`
+
+---
+
 ### GET /restaurants/{restaurantId}/categories/{categoryId}
 
 Get menu category details.
@@ -219,6 +262,41 @@ Update category name and/or display order.
 
 ---
 
+### PUT /restaurants/{restaurantId}/categories/reorder
+
+Bulk-update category display orders (e.g., after drag-and-drop).
+
+- Authorization: MustBeRestaurantStaff
+
+#### Request Body
+
+```json
+{
+  "categoryOrders": [
+    { "categoryId": "c1", "displayOrder": 1 },
+    { "categoryId": "c2", "displayOrder": 2 }
+  ]
+}
+```
+
+Rules
+
+- `categoryOrders` required and non-empty; must include every category in the restaurant (no omissions).
+- `categoryId` must belong to `restaurantId` and not be deleted; all provided IDs are validated before any update is applied.
+- `displayOrder` must be a unique, gapless sequence starting at 1 (i.e., 1..N for N categories); categoryIds and displayOrders must be unique within the request.
+
+#### Response
+
+- 204 No Content
+
+#### Errors
+
+- 400 Validation — missing/duplicate IDs, duplicate displayOrder, invalid displayOrder
+- 404 Not Found — `Menu.Reorder.CategoryNotFound` (any provided category not in the restaurant)
+- 400 Validation — `Menu.Reorder.IncompleteCategoryList`, `Menu.Reorder.InvalidDisplayOrderRange`
+
+---
+
 ### DELETE /restaurants/{restaurantId}/categories/{categoryId}
 
 Remove (soft-delete) a category.
@@ -270,6 +348,53 @@ Get full item details (management).
 > Note
 >
 > The management details route has a distinct path (`/management`) to avoid ambiguity with the public menu item details endpoint used by customers.
+
+---
+
+### GET /restaurants/{restaurantId}/menu-items/search?q=pho&categoryId=&isAvailable=true&pageNumber=1&pageSize=20
+
+Search menu items across all categories for a restaurant (paginated).
+
+- Authorization: MustBeRestaurantStaff
+
+Query parameters
+
+- `q` (string, optional) — case-insensitive name contains search
+- `categoryId` (UUID, optional) — restrict to a specific category; must belong to `restaurantId`
+- `isAvailable` (bool, optional) — filter by availability flag
+- `pageNumber` (int, optional, default 1, >= 1)
+- `pageSize` (int, optional, default 20, >= 1)
+
+#### Response 200
+
+Paginated list of `MenuItemSearchResultDto`:
+
+```json
+{
+  "items": [
+    {
+      "itemId": "9a8b...",
+      "menuCategoryId": "c1d2...",
+      "categoryName": "Beverages",
+      "name": "Iced Coffee",
+      "priceAmount": 39000,
+      "priceCurrency": "VND",
+      "isAvailable": true,
+      "imageUrl": "https://...",
+      "lastModified": "2025-09-14T10:22:10Z"
+    }
+  ],
+  "totalCount": 12,
+  "pageNumber": 1,
+  "pageSize": 20
+}
+```
+
+Sorting: Name ASC then ItemId ASC (deterministic). When `categoryId` is provided and the category is missing/soft-deleted or belongs to another restaurant, returns 404.
+
+#### Errors
+
+- 404 Not Found — `Management.SearchMenuItems.CategoryNotFound`
 
 ---
 
