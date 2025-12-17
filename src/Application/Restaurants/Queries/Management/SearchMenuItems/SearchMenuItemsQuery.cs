@@ -27,6 +27,7 @@ public sealed record MenuItemSearchResultDto(
     Guid MenuCategoryId,
     string CategoryName,
     string Name,
+    string Description,
     decimal PriceAmount,
     string PriceCurrency,
     bool IsAvailable,

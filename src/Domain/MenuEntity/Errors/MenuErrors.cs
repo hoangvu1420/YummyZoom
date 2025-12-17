@@ -35,4 +35,8 @@ public static class MenuErrors
     public static Error NoEnabledMenuFound(Guid restaurantId) => Error.NotFound(
         "Menu.NoEnabledMenuFound",
         $"No enabled menu found for restaurant '{restaurantId}'.");
+
+    public static readonly Error MenuNotFound = Error.NotFound(
+        "Menu.MenuNotFound",
+        "The requested menu was not found.");
 }

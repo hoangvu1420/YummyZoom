@@ -68,6 +68,7 @@ public sealed class GetMenuItemsByCategoryQueryHandler
         const string selectCols = """
             mi."Id"                 AS "ItemId",
             mi."Name"               AS "Name",
+            mi."Description"        AS "Description",
             mi."BasePrice_Amount"   AS "PriceAmount",
             mi."BasePrice_Currency" AS "PriceCurrency",
             mi."IsAvailable"        AS "IsAvailable",
@@ -97,6 +98,7 @@ public sealed class GetMenuItemsByCategoryQueryHandler
             return new MenuItemSummaryDto(
                 r.ItemId,
                 r.Name,
+                r.Description,
                 r.PriceAmount,
                 r.PriceCurrency,
                 r.IsAvailable,
@@ -113,6 +115,7 @@ file sealed class MenuItemRow
 {
     public Guid ItemId { get; init; }
     public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
     public decimal PriceAmount { get; init; }
     public string PriceCurrency { get; init; } = string.Empty;
     public bool IsAvailable { get; init; }

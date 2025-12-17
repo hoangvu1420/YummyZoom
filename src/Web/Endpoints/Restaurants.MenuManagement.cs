@@ -5,6 +5,7 @@ using YummyZoom.Application.MenuCategories.Commands.UpdateMenuCategoryDetails;
 using YummyZoom.Application.MenuCategories.Commands.ReorderMenuCategories;
 using YummyZoom.Application.Menus.Commands.ChangeMenuAvailability;
 using YummyZoom.Application.Menus.Commands.CreateMenu;
+using YummyZoom.Application.Menus.Commands.RemoveMenu;
 using YummyZoom.Application.Menus.Commands.UpdateMenuDetails;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoriesForMenu;
 using YummyZoom.Application.Restaurants.Queries.Management.GetMenuCategoryDetails;
@@ -152,6 +153,18 @@ public partial class Restaurants
         .WithName("ChangeMenuAvailability")
         .WithSummary("Change menu availability")
         .WithDescription("Enables or disables a menu for customer ordering. Requires restaurant staff authorization.")
+        .WithStandardResults();
+
+        // DELETE /api/v1/restaurants/{restaurantId}/menus/{menuId}
+        group.MapDelete("/{restaurantId:guid}/menus/{menuId:guid}", async (Guid restaurantId, Guid menuId, ISender sender) =>
+        {
+            var cmd = new RemoveMenuCommand(restaurantId, menuId);
+            var result = await sender.Send(cmd);
+            return result.ToIResult();
+        })
+        .WithName("RemoveMenu")
+        .WithSummary("Remove a menu")
+        .WithDescription("Permanently removes (soft deletes) a menu. Requires restaurant staff authorization.")
         .WithStandardResults();
 
         // Menu Category Management - Restaurant staff can manage categories within menus

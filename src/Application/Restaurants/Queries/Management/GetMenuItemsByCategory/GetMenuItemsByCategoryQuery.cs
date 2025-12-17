@@ -25,6 +25,7 @@ public sealed record GetMenuItemsByCategoryQuery(
 public sealed record MenuItemSummaryDto(
     Guid ItemId,
     string Name,
+    string Description,
     decimal PriceAmount,
     string PriceCurrency,
     bool IsAvailable,

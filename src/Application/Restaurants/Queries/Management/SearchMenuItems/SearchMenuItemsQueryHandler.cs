@@ -23,6 +23,7 @@ public sealed class SearchMenuItemsQueryHandler
         public Guid MenuCategoryId { get; init; }
         public string CategoryName { get; init; } = string.Empty;
         public string Name { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
         public decimal PriceAmount { get; init; }
         public string PriceCurrency { get; init; } = string.Empty;
         public bool IsAvailable { get; init; }
@@ -92,6 +93,7 @@ public sealed class SearchMenuItemsQueryHandler
             mi."MenuCategoryId"     AS "MenuCategoryId",
             mc."Name"               AS "CategoryName",
             mi."Name"               AS "Name",
+            mi."Description"        AS "Description",
             mi."BasePrice_Amount"   AS "PriceAmount",
             mi."BasePrice_Currency" AS "PriceCurrency",
             mi."IsAvailable"        AS "IsAvailable",
@@ -135,6 +137,7 @@ public sealed class SearchMenuItemsQueryHandler
                 r.MenuCategoryId,
                 r.CategoryName,
                 r.Name,
+                r.Description,
                 r.PriceAmount,
                 r.PriceCurrency,
                 r.IsAvailable,

@@ -19,8 +19,8 @@ public sealed class UpdateMenuItemDetailsCommandValidator : AbstractValidator<Up
             .MaximumLength(1000).WithMessage("Description must not exceed 1000 characters.");
 
         RuleFor(v => v.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than zero.")
-            .LessThanOrEqualTo(9999.99m).WithMessage("Price must not exceed $9,999.99.");
+            .GreaterThanOrEqualTo(0m)
+            .WithMessage("Price must be greater than or equal to zero.");
 
         RuleFor(v => v.Currency)
             .NotEmpty().WithMessage("Currency is required.")

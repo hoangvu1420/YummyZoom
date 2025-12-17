@@ -8,6 +8,35 @@ Authorization: Unless stated otherwise, all endpoints require the caller to sati
 
 ---
 
+## System Data
+
+### GET /dietary-tags
+
+Retrieve the list of available dietary tags (e.g., Vegan, Spicy, Gluten-Free). These tags are used by the Frontend to populate multi-select dropdowns in the Menu Item form.
+
+- Authorization: Public
+
+#### Response 200
+
+```json
+[
+  {
+    "tagId": "vegan",
+    "name": "Vegan"
+  },
+  {
+    "tagId": "vegetarian",
+    "name": "Vegetarian"
+  },
+  {
+    "tagId": "gluten-free",
+    "name": "Gluten Free"
+  }
+]
+```
+
+---
+
 ## Menus
 
 ### GET /restaurants/{restaurantId}/menus
@@ -122,6 +151,22 @@ Enable or disable a menu.
 
 ---
 
+### DELETE /restaurants/{restaurantId}/menus/{menuId}
+
+Remove (soft-delete) a menu.
+
+- Authorization: MustBeRestaurantStaff
+
+#### Response
+
+- 204 No Content
+
+#### Errors
+
+- 404 Not Found — `Menu.MenuNotFound`
+
+---
+
 ## Categories
 
 ### GET /restaurants/{restaurantId}/menus/{menuId}/categories
@@ -201,7 +246,26 @@ List items in a category (paginated, with optional filters).
 
 #### Response 200
 
-Paginated list of `MenuItemSummaryDto` (id, name, price, currency, isAvailable, imageUrl, lastModified).
+Paginated list of `MenuItemSummaryDto`.
+```json
+{
+  "items": [
+    {
+      "itemId": "9a8b...",
+      "name": "Cheeseburger",
+      "price": 9.99,
+      "currency": "USD",
+      "description": "100% beef, cheddar",
+      "isAvailable": true,
+      "imageUrl": "https://...",
+      "lastModified": "2025-09-14T10:22:10Z"
+    }
+  ],
+  "totalCount": 12,
+  "pageNumber": 1,
+  "pageSize": 20
+}
+```
 
 #### Errors
 
@@ -377,6 +441,7 @@ Paginated list of `MenuItemSearchResultDto`:
       "menuCategoryId": "c1d2...",
       "categoryName": "Beverages",
       "name": "Iced Coffee",
+      "description": "Smooth and refreshing iced coffee",
       "priceAmount": 39000,
       "priceCurrency": "VND",
       "isAvailable": true,
