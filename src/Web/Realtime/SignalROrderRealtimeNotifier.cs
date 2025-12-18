@@ -85,7 +85,9 @@ public sealed class SignalROrderRealtimeNotifier : IOrderRealtimeNotifier
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to broadcast {Method} for OrderId={OrderId} to restaurant group {Group}", signalRMethod, dto.OrderId, RestaurantGroup(dto));
-            // Don't rethrow to avoid breaking customer notifications
+            // Re-throw so the outbox-driven domain event can be retried.
+            // Restaurant dashboards are operationally sensitive; missing updates causes workflow inconsistency.
+            throw;
         }
     }
 
@@ -99,7 +101,7 @@ public sealed class SignalROrderRealtimeNotifier : IOrderRealtimeNotifier
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to broadcast {Method} for OrderId={OrderId} to customer group {Group}", signalRMethod, dto.OrderId, CustomerGroup(dto));
-            // Don't rethrow to avoid breaking restaurant notifications
+            // Best-effort: do not rethrow so restaurant notifications (and processing) aren't blocked by customer delivery issues.
         }
     }
 }

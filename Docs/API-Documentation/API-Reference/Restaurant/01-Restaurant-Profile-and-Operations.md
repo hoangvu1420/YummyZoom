@@ -180,6 +180,7 @@ If only address is provided, geocoordinates remain unchanged. If both `latitude`
 Toggle whether the restaurant is currently accepting orders.
 
 - Authorization: `MustBeRestaurantStaff`.
+- Full path: `PUT /api/v1/restaurants/{restaurantId}/accepting-orders`.
 
 ### Request
 
@@ -196,6 +197,14 @@ Toggle whether the restaurant is currently accepting orders.
   "isAccepting": true
 }
 ```
+
+Field notes
+
+| Field         | Type    | Required | Description |
+| ------------- | ------- | -------- | ----------- |
+| `isAccepting` | boolean | Yes      | `true` to accept new orders; `false` to stop accepting new orders. |
+
+Note: This endpoint only toggles the accepting-orders switch. To update address/geolocation, use `PUT /restaurants/{restaurantId}/location`.
 
 ### Response
 
@@ -225,4 +234,3 @@ Toggle whether the restaurant is currently accepting orders.
 - Rate limiting and error envelope: see platform conventions and Appendices/01-Error-Codes (to be populated) for standard error object structure and codes.
 - Versioning: All examples use `/api/v1/` as the base path.
 - Security: All endpoints above require a valid bearer token and restaurant membership with role Owner or Staff to satisfy `MustBeRestaurantStaff`.
-

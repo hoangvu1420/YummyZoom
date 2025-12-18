@@ -32,6 +32,23 @@ app.UseCors();
 
 app.UseRateLimiter();
 
+// SignalR browser clients send the access token via the query string for WebSockets/SSE.
+// Identity's bearer token handler reads the Authorization header, so bridge it for hub requests.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/hubs") &&
+        !context.Request.Headers.ContainsKey("Authorization"))
+    {
+        var accessToken = context.Request.Query["access_token"].ToString();
+        if (!string.IsNullOrWhiteSpace(accessToken))
+        {
+            context.Request.Headers["Authorization"] = $"Bearer {accessToken}";
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

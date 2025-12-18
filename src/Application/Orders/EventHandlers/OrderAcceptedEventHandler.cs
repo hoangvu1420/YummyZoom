@@ -50,8 +50,8 @@ public sealed class OrderAcceptedEventHandler : IdempotentNotificationHandler<Or
 
         try
         {
-            // Notify customer via SignalR
-            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Customer, ct);
+            // Notify both restaurant (multi-device staff dashboards) and customer tracking UI via SignalR
+            await _notifier.NotifyOrderStatusChanged(dto, NotificationTarget.Both, ct);
 
             var push = await _orderPushNotifier.PushOrderDataAsync(order.Id.Value, order.CustomerId.Value, order.Version, ct);
             if (push.IsFailure)
