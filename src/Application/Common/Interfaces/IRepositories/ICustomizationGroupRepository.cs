@@ -6,6 +6,9 @@ namespace YummyZoom.Application.Common.Interfaces.IRepositories;
 
 public interface ICustomizationGroupRepository
 {
+    Task<CustomizationGroup?> GetByIdAsync(CustomizationGroupId id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CustomizationGroup>> GetByIdsAsync(IEnumerable<CustomizationGroupId> ids, CancellationToken cancellationToken = default);
     Task<RestaurantId?> GetRestaurantIdByIdIncludingDeletedAsync(CustomizationGroupId id, CancellationToken cancellationToken = default);
+    Task AddAsync(CustomizationGroup group, CancellationToken cancellationToken = default);
+    void Update(CustomizationGroup group);
 }

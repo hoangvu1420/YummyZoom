@@ -48,4 +48,9 @@ public static class CustomizationGroupErrors
         "CustomizationGroup.ChoiceNotFoundForReordering",
         "One or more choice IDs are invalid for reordering.",
         ErrorType.Validation);
+
+    public static readonly Error NotFound = new(
+        "CustomizationGroup.NotFound",
+        "The customization group was not found.",
+        ErrorType.NotFound);
 }

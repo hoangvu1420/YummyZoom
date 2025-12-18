@@ -80,28 +80,28 @@ public sealed class CustomizationGroup : AggregateRoot<CustomizationGroupId, Gui
         return Result.Success(group);
     }
 
-    public Result AddChoice(string name, Money priceAdjustment, bool isDefault, int displayOrder)
+    public Result<CustomizationChoice> AddChoice(string name, Money priceAdjustment, bool isDefault, int displayOrder)
     {
         if (_choices.Any(c => c.Name == name))
         {
-            return Result.Failure(CustomizationGroupErrors.ChoiceNameNotUnique);
+            return Result.Failure<CustomizationChoice>(CustomizationGroupErrors.ChoiceNameNotUnique);
         }
 
         // Create the choice entity (this handles primitive validation)
         var choiceResult = CustomizationChoice.Create(name, priceAdjustment, isDefault, displayOrder);
         if (choiceResult.IsFailure)
         {
-            return Result.Failure(choiceResult.Error);
+            return Result.Failure<CustomizationChoice>(choiceResult.Error);
         }
 
         // Note: We allow duplicate display orders - items with same order will be sorted by name
         _choices.Add(choiceResult.Value);
         var groupId = Id;
         AddDomainEvent(new Events.CustomizationChoiceAdded(groupId, choiceResult.Value.Id, name));
-        return Result.Success();
+        return Result.Success(choiceResult.Value);
     }
 
-    public Result AddChoiceWithAutoOrder(string name, Money priceAdjustment, bool isDefault = false)
+    public Result<CustomizationChoice> AddChoiceWithAutoOrder(string name, Money priceAdjustment, bool isDefault = false)
     {
         // Automatically assign the next available display order
         var nextDisplayOrder = _choices.Any() ? _choices.Max(c => c.DisplayOrder) + 1 : 1;

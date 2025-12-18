@@ -43,4 +43,21 @@ public class CustomizationGroupRepository : ICustomizationGroupRepository
 
         return restaurantGuid == default ? null : RestaurantId.Create(restaurantGuid);
     }
+
+    public async Task<CustomizationGroup?> GetByIdAsync(CustomizationGroupId id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.CustomizationGroups
+            .Include(g => g.Choices)
+            .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
+    }
+
+    public async Task AddAsync(CustomizationGroup group, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.CustomizationGroups.AddAsync(group, cancellationToken);
+    }
+
+    public void Update(CustomizationGroup group)
+    {
+        _dbContext.CustomizationGroups.Update(group);
+    }
 }
