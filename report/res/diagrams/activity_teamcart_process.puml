@@ -43,14 +43,16 @@ endif
 :Khóa giỏ hàng (Lock Cart);
 
 |System (Hệ thống)|
-:Chuyển trạng thái sang "Chờ thanh toán";
-:Ngăn chặn thêm/sửa/xóa món;
+:Chuyển trạng thái sang "Locked";
+:Ngăn chặn thêm/sửa/xóa món; giữ quyền chỉnh Tip/Coupon cho Host;
 
 |Host (Trưởng nhóm)|
 :Áp dụng Mã giảm giá / Tip (Tùy chọn);
+:Chốt giá cuối (Finalize Pricing);
 
 |System (Hệ thống)|
-:Phân bổ chi phí cho từng thành viên;
+:Cố định Tip/Coupon, tăng phiên bản báo giá (Quote);
+:Chuyển trạng thái sang "Finalized", thông báo cho thành viên có thể thanh toán;
 
 |Member (Thành viên)|
 :Xem số tiền cần trả;
@@ -66,6 +68,7 @@ if (Tất cả thành viên đã hoàn tất?) then (Chưa)
     :Chờ thành viên khác;
     detach
 else (Rồi)
+    :Chuyển trạng thái sang "ReadyToConfirm";
     :Kích hoạt nút "Đặt hàng" cho Host;
 endif
 
