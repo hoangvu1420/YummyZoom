@@ -34,6 +34,8 @@ public sealed class GetRestaurantNewOrdersQueryHandler : IRequestHandler<GetRest
             o."Status"              AS Status,
             o."PlacementTimestamp"  AS PlacementTimestamp,
             o."RestaurantId"        AS RestaurantId,
+            (SELECT r."Name" FROM "Restaurants" r WHERE r."Id" = o."RestaurantId") AS RestaurantName,
+            (SELECT r."LogoUrl" FROM "Restaurants" r WHERE r."Id" = o."RestaurantId") AS RestaurantImageUrl,
             o."CustomerId"          AS CustomerId,
             o."TotalAmount_Amount"   AS TotalAmount,
             o."TotalAmount_Currency" AS TotalCurrency,
