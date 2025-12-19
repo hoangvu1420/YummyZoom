@@ -33,6 +33,7 @@ public record OrderDetailsDto(
     DateTime LastUpdateTimestamp,
     DateTime? EstimatedDeliveryTime,
     DateTime? ActualDeliveryTime,
+    string? Note,
     // Monetary breakdown
     string Currency, // All monetary values below share this currency
     decimal SubtotalAmount,

@@ -1,40 +1,35 @@
-using System.Security.Claims;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces;
-using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.SharedKernel;
-using YummyZoom.SharedKernel.Constants;
+using Result = YummyZoom.SharedKernel.Result;
 
-namespace YummyZoom.Application.Orders.Queries.GetOrderById;
+namespace YummyZoom.Application.Orders.Queries.GetRestaurantOrderById;
 
 /// <summary>
-/// Handler that loads an order with its line items + customizations using two SQL queries
-/// to keep logic simple and predictable. JSON customizations are parsed in-process.
+/// Loads order details for a restaurant-scoped staff view.
+/// Uses restaurantId + orderId in SQL to avoid leaking order existence across tenants.
 /// </summary>
-public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Result<GetOrderByIdResponse>>
+public sealed class GetRestaurantOrderByIdQueryHandler : IRequestHandler<GetRestaurantOrderByIdQuery, Result<OrderDetailsDto>>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
-    private readonly IUser _currentUser;
-    private readonly ILogger<GetOrderByIdQueryHandler> _logger;
+    private readonly ILogger<GetRestaurantOrderByIdQueryHandler> _logger;
 
-    public GetOrderByIdQueryHandler(
+    public GetRestaurantOrderByIdQueryHandler(
         IDbConnectionFactory dbConnectionFactory,
-        IUser currentUser,
-        ILogger<GetOrderByIdQueryHandler> logger)
+        ILogger<GetRestaurantOrderByIdQueryHandler> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
-        _currentUser = currentUser;
         _logger = logger;
     }
 
-    public async Task<Result<GetOrderByIdResponse>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailsDto>> Handle(GetRestaurantOrderByIdQuery request, CancellationToken cancellationToken)
     {
         using var connection = _dbConnectionFactory.CreateConnection();
 
-        // 1. Load order base row
-        const string orderSql = """
+        // Use QueryMultiple to reduce DB round-trips (single command: order + items + payment).
+        const string sql = """
             SELECT
                 o."Id"                      AS OrderId,
                 o."OrderNumber"             AS OrderNumber,
@@ -70,41 +65,8 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 r."Geo_Longitude"            AS RestaurantLon
             FROM "Orders" o
             LEFT JOIN "Restaurants" r ON r."Id" = o."RestaurantId"
-            WHERE o."Id" = @OrderId
-            """;
+            WHERE o."Id" = @OrderId AND o."RestaurantId" = @RestaurantId;
 
-        var orderRow = await connection.QuerySingleOrDefaultAsync<OrderDetailsRow>(
-            new CommandDefinition(orderSql, new { OrderId = request.OrderIdGuid }, cancellationToken: cancellationToken));
-
-        if (orderRow == null)
-        {
-            _logger.LogInformation("Order {OrderId} not found", request.OrderIdGuid);
-            return Result.Failure<GetOrderByIdResponse>(GetOrderByIdErrors.NotFound);
-        }
-
-        // 2. Authorization check (customer or restaurant staff). If user not authenticated, pipeline would already block.
-        var principal = _currentUser.Principal;
-        // Support multiple possible claim types for user id: OIDC (sub), custom (uid), and NameIdentifier (used in test infrastructure)
-        var userIdClaim = principal?.FindFirst("sub")?.Value
-                  ?? principal?.FindFirst("uid")?.Value
-                  ?? principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value; // fallback for tests / generic
-        var isCustomer = userIdClaim != null && Guid.TryParse(userIdClaim, out var userGuid) && userGuid == orderRow.CustomerId;
-
-        // Check for restaurant staff/owner permission using permission claims
-        var restaurantIdString = orderRow.RestaurantId.ToString();
-        var isRestaurantStaff = principal?.HasClaim("permission", $"{Roles.RestaurantStaff}:{restaurantIdString}") == true
-                                || principal?.HasClaim("permission", $"{Roles.RestaurantOwner}:{restaurantIdString}") == true
-                                || principal?.IsInRole(Roles.Administrator) == true;
-
-        if (!isCustomer && !isRestaurantStaff)
-        {
-            _logger.LogWarning("Unauthorized access attempt to order {OrderId} by user {User}", request.OrderIdGuid, userIdClaim);
-            // Return NotFound to avoid leaking existence
-            return Result.Failure<GetOrderByIdResponse>(GetOrderByIdErrors.NotFound);
-        }
-
-        // 3. Load items
-        const string itemsSql = """
             SELECT
                 i."OrderItemId"              AS OrderItemId,
                 i."Snapshot_MenuItemId"      AS MenuItemId,
@@ -117,11 +79,33 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             FROM "OrderItems" i
             LEFT JOIN "MenuItems" mi ON mi."Id" = i."Snapshot_MenuItemId"
             WHERE i."OrderId" = @OrderId
-            ORDER BY i."OrderItemId"
+            ORDER BY i."OrderItemId";
+
+            SELECT pt."PaymentMethodType" AS PaymentMethod
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = @OrderId AND pt."Type" = 'Payment'
+            ORDER BY pt."Timestamp" ASC
+            LIMIT 1;
             """;
 
-        var itemRows = await connection.QueryAsync<OrderItemRow>(
-            new CommandDefinition(itemsSql, new { OrderId = request.OrderIdGuid }, cancellationToken: cancellationToken));
+        using var multi = await connection.QueryMultipleAsync(
+            new CommandDefinition(
+                sql,
+                new { OrderId = request.OrderIdGuid, RestaurantId = request.RestaurantGuid },
+                cancellationToken: cancellationToken));
+
+        var orderRow = await multi.ReadSingleOrDefaultAsync<OrderDetailsRow>();
+
+        if (orderRow == null)
+        {
+            _logger.LogInformation(
+                "Order {OrderId} not found for restaurant {RestaurantId}",
+                request.OrderIdGuid,
+                request.RestaurantGuid);
+            return Result.Failure<OrderDetailsDto>(GetRestaurantOrderByIdErrors.NotFound);
+        }
+
+        var itemRows = await multi.ReadAsync<OrderItemRow>();
 
         var itemDtos = itemRows
             .Select(r => new OrderItemDto(
@@ -135,19 +119,8 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
                 r.ImageUrl))
             .ToList();
 
-        // 4. Payment method: pick the earliest Payment transaction for this order (if any)
-        const string paymentSql = """
-            SELECT pt."PaymentMethodType" AS PaymentMethod
-            FROM "PaymentTransactions" pt
-            WHERE pt."OrderId" = @OrderId AND pt."Type" = 'Payment'
-            ORDER BY pt."Timestamp" ASC
-            LIMIT 1
-        """;
+        var paymentMethod = await multi.ReadSingleOrDefaultAsync<string?>();
 
-        var paymentMethod = await connection.ExecuteScalarAsync<string?>(
-            new CommandDefinition(paymentSql, new { OrderId = request.OrderIdGuid }, cancellationToken: cancellationToken));
-
-        // 5. Cancellation: simple policy (AwaitingPayment, Placed)
         bool cancellable = false;
         try
         {
@@ -201,11 +174,9 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             paymentMethod,
             cancellable);
 
-        _logger.LogInformation("Order {OrderId} retrieved with {ItemCount} items", request.OrderIdGuid, itemDtos.Count);
-        return Result.Success(new GetOrderByIdResponse(details));
+        return Result.Success(details);
     }
 
-    // Internal row-shaping types for Dapper materialization (avoid leaking into public API)
     private sealed record OrderDetailsRow(
         Guid OrderId,
         string OrderNumber,

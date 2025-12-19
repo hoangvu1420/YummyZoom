@@ -2,6 +2,7 @@ using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.Orders.Queries.Common;
 using YummyZoom.Application.Orders.Queries.GetRestaurantActiveOrders;
 using YummyZoom.Application.Orders.Queries.GetRestaurantNewOrders;
+using YummyZoom.Application.Orders.Queries.GetRestaurantOrderById;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -36,5 +37,15 @@ public partial class Restaurants
         })
         .WithName("GetRestaurantActiveOrders")
         .WithStandardResults<PaginatedList<OrderSummaryDto>>();
+
+        // GET /api/v1/restaurants/{restaurantId}/orders/{orderId}
+        group.MapGet("/{restaurantId:guid}/orders/{orderId:guid}", async (Guid restaurantId, Guid orderId, ISender sender) =>
+        {
+            var query = new GetRestaurantOrderByIdQuery(restaurantId, orderId);
+            var result = await sender.Send(query);
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetRestaurantOrderById")
+        .WithStandardResults<OrderDetailsDto>();
     }
 }

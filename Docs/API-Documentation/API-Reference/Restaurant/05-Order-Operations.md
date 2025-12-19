@@ -30,6 +30,59 @@ Returns orders with Status in {`Accepted`, `Preparing`, `ReadyForDelivery`}.
 
 ---
 
+## Order Detail (Live Orders)
+
+### GET /restaurants/{restaurantId}/orders/{orderId}
+
+Returns a detailed view of a single order for kitchen/ops screens (line items + selected customizations + monetary breakdown).
+
+- Authorization: `MustBeRestaurantStaff`
+- Tenancy: `orderId` must belong to `restaurantId`; otherwise returns 404 (not found).
+
+#### Response 200 (OrderDetailsDto)
+
+```json
+{
+  "orderId": "f47ac10b-...",
+  "orderNumber": "ORD-20250914-102210-1234",
+  "customerId": "c1d2...",
+  "restaurantId": "b1c2...",
+  "status": "Placed",
+  "placementTimestamp": "2025-09-14T10:20:00Z",
+  "lastUpdateTimestamp": "2025-09-14T10:22:10Z",
+  "estimatedDeliveryTime": "2025-09-14T11:00:00Z",
+  "actualDeliveryTime": null,
+  "note": "Giao trước cổng, gọi trước 5 phút",
+  "currency": "VND",
+  "subtotalAmount": 170000,
+  "discountAmount": 0,
+  "deliveryFeeAmount": 0,
+  "tipAmount": 0,
+  "taxAmount": 0,
+  "totalAmount": 170000,
+  "items": [
+    {
+      "orderItemId": "d7c9...",
+      "menuItemId": "m1...",
+      "name": "Burger bò",
+      "quantity": 2,
+      "unitPriceAmount": 65000,
+      "lineItemTotalAmount": 130000,
+      "customizations": [
+        { "groupName": "Topping", "choiceName": "Thêm phô mai", "priceAdjustmentAmount": 10000 }
+      ],
+      "imageUrl": "https://cdn.example.com/menu/burger.jpg"
+    }
+  ]
+}
+```
+
+Notes
+- `note` is the customer’s order-level special instructions (optional).
+- Per-item notes are not supported in v1; use item customizations for “no onions / less spicy” style preferences.
+
+---
+
 ## Lifecycle Actions
 
 Common behavior
