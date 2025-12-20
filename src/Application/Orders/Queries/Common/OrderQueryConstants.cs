@@ -18,6 +18,16 @@ public static class OrderQueryConstants
     };
 
     /// <summary>
+    /// Statuses considered "history" for restaurant order history lists.
+    /// </summary>
+    public static readonly string[] HistoryStatuses =
+    {
+        "Delivered",
+        "Cancelled",
+        "Rejected"
+    };
+
+    /// <summary>
     /// Status priority for ordering in active lists (lower number = higher priority).
     /// </summary>
     public static readonly IReadOnlyDictionary<string, int> StatusPriority = new Dictionary<string, int>

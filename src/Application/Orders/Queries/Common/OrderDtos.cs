@@ -21,6 +21,23 @@ public record OrderSummaryDto(
     int ItemCount);
 
 /// <summary>
+/// Compact projection for restaurant order history screens.
+/// </summary>
+public record OrderHistorySummaryDto(
+    Guid OrderId,
+    string OrderNumber,
+    string Status,
+    DateTime PlacementTimestamp,
+    DateTime? CompletedTimestamp,
+    decimal TotalAmount,
+    string TotalCurrency,
+    int ItemCount,
+    string? CustomerName,
+    string? CustomerPhone,
+    string? PaymentStatus,
+    string? PaymentMethod);
+
+/// <summary>
 /// Detailed order representation including monetary breakdown and line items.
 /// </summary>
 public record OrderDetailsDto(

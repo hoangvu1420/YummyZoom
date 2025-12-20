@@ -28,6 +28,43 @@ Returns orders with Status in {`Accepted`, `Preparing`, `ReadyForDelivery`}.
 - Authorization: MustBeRestaurantStaff
 - Response 200: Paginated list of `OrderSummaryDto`.
 
+### GET /restaurants/{restaurantId}/orders/history?pageNumber=1&pageSize=10&from=&to=&statuses=&keyword=
+
+Returns historical orders (terminal statuses) for reporting and customer support.
+
+- Authorization: MustBeRestaurantStaff
+- Filters (all optional):
+  - `from`, `to` — ISO 8601 timestamps, filter by `placementTimestamp` range.
+  - `statuses` — CSV of statuses (e.g., `Delivered,Cancelled,Rejected`).
+  - `keyword` — order number or customer name/phone.
+- Response 200: Paginated list of `OrderHistorySummaryDto` objects.
+
+`OrderHistorySummaryDto` fields
+- `orderId`, `orderNumber`, `status`, `placementTimestamp`, `completedTimestamp`
+- `totalAmount`, `totalCurrency`, `itemCount`
+- `customerName`, `customerPhone`
+- `paymentStatus` (e.g., `Paid`, `Pending`, `Failed`)
+- `paymentMethod` (e.g., `CashOnDelivery`, `CreditCard`)
+
+Example response item
+
+```json
+{
+  "orderId": "f47ac10b-...",
+  "orderNumber": "ORD-20250914-102210-1234",
+  "status": "Delivered",
+  "placementTimestamp": "2025-09-14T10:20:00Z",
+  "completedTimestamp": "2025-09-14T11:25:10Z",
+  "totalAmount": 170000,
+  "totalCurrency": "VND",
+  "itemCount": 3,
+  "customerName": "Nguyen Van A",
+  "customerPhone": "09xxxx",
+  "paymentStatus": "Paid",
+  "paymentMethod": "CashOnDelivery"
+}
+```
+
 ---
 
 ## Order Detail (Live Orders)
