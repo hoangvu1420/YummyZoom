@@ -114,12 +114,7 @@ public class RestaurantRoleSeeder : ISeeder
                 // Assign basic User role so they can login
                 await _userManager.AddToRoleAsync(identityUser, Roles.User);
                 
-                // Assign specific restaurant role
-                var identityRole = role == RestaurantRole.Owner ? Roles.RestaurantOwner : Roles.RestaurantStaff;
-                if (!await _userManager.IsInRoleAsync(identityUser, identityRole))
-                {
-                    await _userManager.AddToRoleAsync(identityUser, identityRole);
-                }
+                // Do not assign scoped restaurant roles as Identity roles.
             }
 
             Guid identityUserId = identityUser.Id;

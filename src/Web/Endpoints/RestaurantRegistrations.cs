@@ -6,6 +6,7 @@ using YummyZoom.Application.RestaurantRegistrations.Commands.RejectRestaurantReg
 using YummyZoom.Application.RestaurantRegistrations.Commands.SubmitRestaurantRegistration;
 using YummyZoom.Application.RestaurantRegistrations.Queries.Common;
 using YummyZoom.Application.RestaurantRegistrations.Queries.GetMyRestaurantRegistrations;
+using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrationDetailForAdmin;
 using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrations;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Web.Infrastructure;
@@ -64,6 +65,16 @@ public sealed class RestaurantRegistrations : EndpointGroupBase
         // Admin endpoints
         var admin = group.MapGroup("/admin").RequireAuthorization(new AuthorizeAttribute { Roles = "Administrator" });
 
+        admin.MapGet("/{registrationId:guid}", async (Guid registrationId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetPendingRestaurantRegistrationDetailForAdminQuery(registrationId));
+            return result.IsSuccess ? Results.Ok(result.Value) : result.ToIResult();
+        })
+        .WithName("GetPendingRestaurantRegistrationDetailForAdmin")
+        .WithSummary("Get pending restaurant registration detail (admin)")
+        .WithDescription("Admin-only: returns full registration details for a pending restaurant registration.")
+        .WithStandardResults<RegistrationDetailForAdminDto>();
+
         admin.MapGet("/pending", async (int? pageNumber, int? pageSize, ISender sender) =>
         {
             // Apply defaults after binding to avoid Minimal API early 400s for missing value-type properties
@@ -121,4 +132,3 @@ public sealed class RestaurantRegistrations : EndpointGroupBase
     public sealed record ApproveRequest(string? Note);
     public sealed record RejectRequest(string Reason);
 }
-
