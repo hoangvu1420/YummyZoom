@@ -23,6 +23,7 @@ public partial class Restaurants : EndpointGroupBase
         MapOrders(group);
         MapCustomizationGroups(group);
         MapReviews(group);
+        MapDashboard(group);
 
         var publicGroup = app.MapGroup(this);
         MapPublic(publicGroup);

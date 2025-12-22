@@ -229,6 +229,86 @@ Note: This endpoint only toggles the accepting-orders switch. To update address/
 
 ---
 
+## GET /restaurants/{restaurantId}/dashboard/summary
+
+Returns a consolidated operational snapshot for a single restaurant, used by owner/staff dashboards.
+
+- Authorization: Must be authenticated and satisfy policy `MustBeRestaurantStaff` for the specified `restaurantId`.
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type | Description |
+| -------------- | ---- | ----------- |
+| `restaurantId` | UUID | Target restaurant. |
+
+#### Query Parameters
+
+| Parameter       | Type | Description |
+| --------------- | ---- | ----------- |
+| `topItemsLimit` | int  | Optional. Number of top items to return (default 5, min 1, max 25). |
+
+### Response
+
+- 200 OK — returns `RestaurantDashboardSummaryDto`.
+
+Example response:
+
+```json
+{
+  "restaurant": {
+    "id": "b1c2d3e4-0000-0000-0000-000000000000",
+    "name": "Pasta Palace",
+    "logoUrl": "https://cdn.example.com/pasta/logo.png",
+    "isVerified": true,
+    "isAcceptingOrders": true
+  },
+  "orders": {
+    "newCount": 3,
+    "activeCount": 7,
+    "lastOrderAtUtc": "2025-02-14T08:12:00Z"
+  },
+  "sales": {
+    "ordersLast7Days": 42,
+    "ordersLast30Days": 180,
+    "revenueLast7Days": 1250000.00,
+    "revenueLast30Days": 4200000.00
+  },
+  "reviews": {
+    "averageRating": 4.6,
+    "totalReviews": 120,
+    "lastReviewAtUtc": "2025-02-13T18:05:00Z"
+  },
+  "topItems": [
+    {
+      "menuItemId": "9f9c5bb1-0000-0000-0000-000000000000",
+      "name": "Truffle Pasta",
+      "rolling7DayQuantity": 18,
+      "rolling30DayQuantity": 65
+    }
+  ],
+  "balance": {
+    "currentBalance": 250000.00,
+    "currency": "VND"
+  },
+  "updatedAtUtc": "2025-02-14T08:12:00Z"
+}
+```
+
+#### Error Responses
+
+- 401 Unauthorized — missing/invalid JWT.
+- 403 Forbidden — caller is not staff/owner of `restaurantId`.
+- 404 Not Found — `Management.RestaurantDashboard.NotFound`.
+
+### Notes
+
+- Revenue is calculated from delivered orders within the last 7/30 days.
+- Counts and totals are scoped to the specified restaurant only.
+
+---
+
 ## Common Notes
 
 - Rate limiting and error envelope: see platform conventions and Appendices/01-Error-Codes (to be populated) for standard error object structure and codes.
