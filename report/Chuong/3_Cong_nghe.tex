@@ -41,6 +41,17 @@ Khi so sánh với các nền tảng phổ biến khác:
     \item \textbf{So với Java (Spring Boot):} Mặc dù Spring Boot rất mạnh mẽ, nhưng hệ sinh thái Java thường tiêu tốn nhiều tài nguyên bộ nhớ (RAM) hơn và có thời gian khởi động (Startup time) lâu hơn so với .NET Core hiện đại. Với yêu cầu triển khai linh hoạt và tiết kiệm tài nguyên trên môi trường Cloud hoặc VPS sinh viên, .NET 9 là lựa chọn kinh tế và hiệu quả hơn.
 \end{itemize}
 
+\subsection{Điều phối hệ thống và Khả năng quan sát: .NET Aspire}
+
+Để giải quyết bài toán phức tạp trong việc quản lý, kết nối và vận hành các thành phần phân tán (Web API, Worker Service, Database, Redis) ngay từ môi trường phát triển (Local Development), dự án áp dụng stack công nghệ \textbf{.NET Aspire} \cite{Aspire}.
+
+Vai trò của .NET Aspire trong hệ thống YummyZoom:
+\begin{itemize}
+    \item \textbf{Điều phối tài nguyên (Orchestration):} Thay vì phải cấu hình thủ công từng container Docker hoặc chạy nhiều cửa sổ dòng lệnh rời rạc, .NET Aspire cho phép định nghĩa toàn bộ hạ tầng (Infrastructure as Code) bằng C\#. Chỉ với một nút nhấn "Start", toàn bộ hệ sinh thái bao gồm Backend, Database PostgreSQL container, và Redis container sẽ được khởi tạo và kết nối tự động thông qua cơ chế Service Discovery.
+    \item \textbf{Khả năng quan sát (Observability):} Tích hợp sẵn Dashboard tập trung hiển thị Logs (Nhật ký), Metrics (Thông số hiệu năng) và Traces (Truy vết) theo chuẩn OpenTelemetry. Điều này giúp đội ngũ phát triển dễ dàng nhìn thấy luồng đi của một request từ khi vào API đến khi truy xuất Database, giúp việc gỡ lỗi (Debugging) và tối ưu hiệu năng trở nên trực quan hơn bao giờ hết.
+\end{itemize}
+
+
 \section{Cơ sở dữ liệu và Lưu trữ}
 
 Việc lưu trữ và quản lý dữ liệu đóng vai trò then chốt trong việc đảm bảo tính chính xác của các giao dịch thương mại điện tử cũng như tốc độ phản hồi của ứng dụng. Để giải quyết các yêu cầu về \textbf{Tính toàn vẹn dữ liệu} (Data Integrity) và \textbf{Hiệu năng truy xuất} (Performance) đã được đề ra tại Mục 2.4, hệ thống sử dụng chiến lược lưu trữ kết hợp giữa Cơ sở dữ liệu quan hệ (RDBMS) và Bộ nhớ đệm (Caching).
@@ -76,7 +87,20 @@ Cụ thể, Redis được ứng dụng trong hai kịch bản trọng yếu:
     \item \textbf{Quản lý trạng thái TeamCart (Write-heavy):} Đây là ứng dụng quan trọng nhất của Redis trong hệ thống. Đối với các Giỏ hàng nhóm đang hoạt động (Active TeamCarts), toàn bộ dữ liệu hiển thị (View Model) được lưu trữ trực tiếp trên RAM của Redis. Khi các thành viên trong nhóm thao tác thêm/bớt món dồn dập, hệ thống đọc/ghi trực tiếp vào Redis thay vì Database. Cơ chế này loại bỏ hoàn toàn độ trễ I/O đĩa cứng, đảm bảo trải nghiệm người dùng mượt mà ngay cả khi cart có lưu lượng hoạt động cao. Dữ liệu chỉ được đồng bộ xuống PostgreSQL để lưu trữ bền vững (Persistence) khi đơn hàng được chốt hoặc kết thúc phiên.
 \end{enumerate}
 
+
 Việc lựa chọn Redis thay vì sử dụng bộ nhớ cục bộ (In-Memory Cache) của server cho phép hệ thống dễ dàng mở rộng nhiều server (Scale-out) mà vẫn đảm bảo tính nhất quán dữ liệu giữa các phiên làm việc.
+
+\subsection{Quản lý và Phân phối đa phương tiện: Cloudinary}
+
+Đặc thù của ứng dụng giao đồ ăn là yêu cầu lưu trữ và hiển thị lượng lớn hình ảnh chất lượng cao (Avatar người dùng, Ảnh món ăn, Banner nhà hàng). Việc lưu trữ trực tiếp các file này trên Server hoặc trong Database sẽ gây áp lực lớn lên băng thông và dung lượng lưu trữ của hệ thống máy chủ.
+
+Giải pháp được lựa chọn là nền tảng quản lý media dựa trên đám mây \textbf{Cloudinary} (SaaS) \cite{Cloudinary}, với các ưu điểm kỹ thuật:
+\begin{itemize}
+    \item \textbf{Tối ưu hóa tự động:} Cloudinary tự động nén và chuyển đổi định dạng ảnh phù hợp với thiết bị của người dùng (ví dụ: tự động chuyển sang định dạng WebP hoặc AVIF giúp giảm 30-50\% dung lượng tải so với JPEG/PNG thông thường mà không giảm chất lượng hiển thị).
+    \item \textbf{Mạng phân phối nội dung (CDN):} Hình ảnh được phân phối từ hệ thống Server toàn cầu của Cloudinary thay vì tải trực tiếp từ Backend của ứng dụng. Điều này giúp giảm đáng kể độ trễ hiển thị ảnh trên Mobile App, mang lại trải nghiệm lướt thực đơn mượt mà (Mục 2.1.3).
+    \item \textbf{Quản lý tập trung:} Cung cấp API mạnh mẽ để upload và xóa ảnh an toàn từ Backend, tách biệt hoàn toàn tầng lưu trữ file (File Storage Layer) khỏi tầng xử lý nghiệp vụ.
+\end{itemize}
+
 
 \section{Xác thực và Phân quyền (Authentication \& Authorization)}
 
@@ -197,7 +221,8 @@ Lý do lựa chọn SignalR so với các giải pháp khác:
 
 \subsection{Thông báo đẩy tới thiết bị di động: Firebase Cloud Messaging (FCM)}
 
-Bên cạnh kết nối thời gian thực bằng SignalR, hệ thống tích hợp dịch vụ \textbf{Firebase Cloud Messaging (FCM)} để giải quyết bài toán gửi thông báo đến người dùng ngay cả khi ứng dụng đang chạy nền (Background) hoặc đã tắt hoàn toàn.
+Bên cạnh kết nối thời gian thực bằng SignalR, hệ thống tích hợp dịch vụ \textbf{Firebase Cloud Messaging (FCM)} \cite{FCM} để giải quyết bài toán gửi thông báo đến người dùng ngay cả khi ứng dụng đang chạy nền (Background) hoặc đã tắt hoàn toàn.
+
 
 Vai trò của FCM trong hệ thống:
 \begin{itemize}

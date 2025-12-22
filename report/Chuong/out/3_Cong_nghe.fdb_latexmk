@@ -1,18 +1,18 @@
 # Fdb version 4
-["biber Chuong/out/3_Cong_nghe"] 1766329872.71642 "Chuong/out/3_Cong_nghe.bcf" "Chuong/out/3_Cong_nghe.bbl" "Chuong/out/3_Cong_nghe" 1766330511.60811 0
-  "Chuong/out/3_Cong_nghe.bcf" 1766330511 107978 18c3a174666d919776ef4795cd440bfe "pdflatex"
-  "Danh_sach_tai_lieu_tham_khao.bib" 1766309745 3682 3c543ebc4746aabbae6d010b4efb4617 ""
+["biber Chuong/out/3_Cong_nghe"] 1766387659.5803 "Chuong/out/3_Cong_nghe.bcf" "Chuong/out/3_Cong_nghe.bbl" "Chuong/out/3_Cong_nghe" 1766387668.25195 0
+  "Chuong/out/3_Cong_nghe.bcf" 1766387667 108164 88f13ce608ae9e4b831ee84a803f139a "pdflatex"
+  "Danh_sach_tai_lieu_tham_khao.bib" 1766387608 4264 e75838f615e796fde359ae784b6b058b ""
   (generated)
   "Chuong/out/3_Cong_nghe.bbl"
   "Chuong/out/3_Cong_nghe.blg"
   (rewritten before read)
-["pdflatex"] 1766330508.49153 "e:/source/repos/CA/YummyZoom/report/Chuong/3_Cong_nghe.tex" "Chuong/out/3_Cong_nghe.pdf" "3_Cong_nghe" 1766330511.6092 0
-  "Chuong/3_Cong_nghe.tex" 1766330503 29828 fc8f92c358817cfe337d8d0dacb9dd3b ""
+["pdflatex"] 1766387665.23642 "e:/source/repos/CA/YummyZoom/report/Chuong/3_Cong_nghe.tex" "Chuong/out/3_Cong_nghe.pdf" "3_Cong_nghe" 1766387668.25303 0
+  "Chuong/3_Cong_nghe.tex" 1766387621 32936 68c1e3e5a96005f9045c2105c068cb45 ""
   "Chuong/out/../../DoAn.tex" 1764248572 11928 1ccfd4946766a72273c0826011935213 ""
-  "Chuong/out/3_Cong_nghe.aux" 1766330511 4032 d37a3397f086972d36f29bedcee28939 "pdflatex"
-  "Chuong/out/3_Cong_nghe.bbl" 1766329883 8245 cabd278020b9df0d8313b5ac39c7aa65 "biber Chuong/out/3_Cong_nghe"
-  "Chuong/out/3_Cong_nghe.out" 1766330511 5734 0cba56b0b210168ca7956d82e84607fd "pdflatex"
-  "Chuong/out/3_Cong_nghe.run.xml" 1766330511 2469 a04d6c940e18604e2ed84ce62f8a438e "pdflatex"
+  "Chuong/out/3_Cong_nghe.aux" 1766387667 4520 3bad0ebac15d0ee557b580a97bdabdd9 "pdflatex"
+  "Chuong/out/3_Cong_nghe.bbl" 1766387662 15451 86e2d45de798eb1c34c8dcecd878302b "biber Chuong/out/3_Cong_nghe"
+  "Chuong/out/3_Cong_nghe.out" 1766387667 6461 004aa807cf173ccf6f13caa0e7b1ae89 "pdflatex"
+  "Chuong/out/3_Cong_nghe.run.xml" 1766387667 2469 e6715df521ec5fc308fd3bdbd5a80277 "pdflatex"
   "Tu_viet_tat.tex" 1760548346 1138 292d7f642e8880cb42d4356cd1bf7153 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1759734204 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/vntex/t5.enc" 1759742116 7824 21ade6c3c7fd67cb4ace8dbc91c53118 ""
@@ -183,7 +183,7 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1759742788 5574153 af86687748baf417d9e7d549313527be ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1759742980 3629007 f591f00ca598b3ec52fc9fc6bb645105 ""
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
-  "e:/source/repos/CA/YummyZoom/report/Chuong/3_Cong_nghe.tex" 1766330503 29828 fc8f92c358817cfe337d8d0dacb9dd3b ""
+  "e:/source/repos/CA/YummyZoom/report/Chuong/3_Cong_nghe.tex" 1766387621 32936 68c1e3e5a96005f9045c2105c068cb45 ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
   (generated)
   "Chuong/out/3_Cong_nghe.aux"

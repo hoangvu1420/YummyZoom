@@ -107,6 +107,36 @@
       \verb https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/overview
       \endverb
     \endentry
+    \entry{Aspire}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=140864078aeca1c7c35b4beb33c53c34}{%
+           family={Microsoft},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{bibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorbibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authornamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \field{extraname}{2}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{5}
+      \field{note}{Microsoft Learn}
+      \field{title}{.NET Aspire documentation}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/dotnet/aspire/
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/dotnet/aspire/
+      \endverb
+    \endentry
     \entry{Postgres}{misc}{}{}
       \name{author}{1}{}{%
         {{hash=36423acfb135ffe286ea438eafcb0bc6}{%
@@ -121,8 +151,8 @@
       \strng{authornamehash}{36423acfb135ffe286ea438eafcb0bc6}
       \strng{authorfullhash}{36423acfb135ffe286ea438eafcb0bc6}
       \strng{authorfullhashraw}{36423acfb135ffe286ea438eafcb0bc6}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{PostgreSQL 16.0 Documentation}
@@ -132,6 +162,34 @@
       \endverb
       \verb{url}
       \verb https://www.postgresql.org/docs/16/index.html
+      \endverb
+    \endentry
+    \entry{Cloudinary}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=2420d93729403f55a9cf8f6d70dbad81}{%
+           family={Cloudinary},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{fullhash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{fullhashraw}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{bibnamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorbibnamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authornamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorfullhash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorfullhashraw}{2420d93729403f55a9cf8f6d70dbad81}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Cloudinary.com}
+      \field{title}{Cloudinary Documentation}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://cloudinary.com/documentation
+      \endverb
+      \verb{url}
+      \verb https://cloudinary.com/documentation
       \endverb
     \endentry
     \entry{JWT}{misc}{}{}
@@ -160,8 +218,8 @@
       \strng{authornamehash}{8c74f36d6695ec51f419b547a3316502}
       \strng{authorfullhash}{48d544cafb60a3ced64569d686a33135}
       \strng{authorfullhashraw}{48d544cafb60a3ced64569d686a33135}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{howpublished}{RFC 7519, Internet Engineering Task Force}
@@ -190,8 +248,8 @@
       \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
       \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
       \field{extraname}{1}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{note}{Flutter.dev}
@@ -218,8 +276,8 @@
       \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
       \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
       \field{extraname}{2}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{note}{Angular.io}
@@ -245,8 +303,8 @@
       \strng{authornamehash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
       \strng{authorfullhash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
       \strng{authorfullhashraw}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
-      \field{sortinit}{7}
-      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{note}{PrimeFaces.org}
@@ -272,9 +330,9 @@
       \strng{authornamehash}{140864078aeca1c7c35b4beb33c53c34}
       \strng{authorfullhash}{140864078aeca1c7c35b4beb33c53c34}
       \strng{authorfullhashraw}{140864078aeca1c7c35b4beb33c53c34}
-      \field{extraname}{2}
-      \field{sortinit}{8}
-      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{note}{Microsoft Learn}
@@ -285,6 +343,35 @@
       \endverb
       \verb{url}
       \verb https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction
+      \endverb
+    \endentry
+    \entry{FCM}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=8b36e9207c24c76e6719268e49201d94}{%
+           family={Google},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \strng{bibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorbibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authornamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Firebase.google.com}
+      \field{title}{Firebase Cloud Messaging}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://firebase.google.com/docs/cloud-messaging
+      \endverb
+      \verb{url}
+      \verb https://firebase.google.com/docs/cloud-messaging
       \endverb
     \endentry
     \entry{hovy1993automated}{article}{}{}
@@ -306,8 +393,8 @@
       \strng{authornamehash}{e9c17b6ae8ef050baf956c768a3f59c0}
       \strng{authorfullhash}{e9c17b6ae8ef050baf956c768a3f59c0}
       \strng{authorfullhashraw}{e9c17b6ae8ef050baf956c768a3f59c0}
-      \field{sortinit}{9}
-      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{Artificial intelligence}

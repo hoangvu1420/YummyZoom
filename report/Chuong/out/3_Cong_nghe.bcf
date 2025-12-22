@@ -2377,12 +2377,15 @@
     <bcf:citekey order="1" intorder="1">CleanArch</bcf:citekey>
     <bcf:citekey order="1" intorder="2">DDD</bcf:citekey>
     <bcf:citekey order="2" intorder="1">Net9</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">Postgres</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">JWT</bcf:citekey>
-    <bcf:citekey order="5" intorder="1">FlutterArch</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">AngularArch</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">PrimeNG</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">SignalRIntro</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">Aspire</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">Postgres</bcf:citekey>
+    <bcf:citekey order="5" intorder="1">Cloudinary</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">JWT</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">FlutterArch</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">AngularArch</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">PrimeNG</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">SignalRIntro</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">FCM</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
