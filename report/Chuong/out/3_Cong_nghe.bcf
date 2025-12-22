@@ -2374,3 +2374,24 @@
     <bcf:datasource type="file" datatype="bibtex" glob="false">Danh_sach_tai_lieu_tham_khao.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
+    <bcf:citekey order="1" intorder="1">CleanArch</bcf:citekey>
+    <bcf:citekey order="1" intorder="2">DDD</bcf:citekey>
+    <bcf:citekey order="2" intorder="1">Net9</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">Postgres</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">JWT</bcf:citekey>
+    <bcf:citekey order="5" intorder="1">FlutterArch</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">AngularArch</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">PrimeNG</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">SignalRIntro</bcf:citekey>
+  </bcf:section>
+  <!-- SORTING TEMPLATES -->
+  <bcf:sortingtemplate name="none">
+    <bcf:sort order="1">
+      <bcf:sortitem order="1">citeorder</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="2">
+      <bcf:sortitem order="1">intciteorder</bcf:sortitem>
+    </bcf:sort>
+  </bcf:sortingtemplate>
+  <!-- DATALISTS -->
+</bcf:controlfile>

@@ -41,13 +41,13 @@
   >
 ]>
 <requests version="1.0">
-  <internal package="biblatex" priority="9" active="0">
+  <internal package="biblatex" priority="9" active="1">
     <generic>latex</generic>
     <provides type="dynamic">
-      <file>2.3_Dac_ta_chuc_nang.bcf</file>
+      <file>3_Cong_nghe.bcf</file>
     </provides>
     <requires type="dynamic">
-      <file>2.3_Dac_ta_chuc_nang.bbl</file>
+      <file>3_Cong_nghe.bbl</file>
     </requires>
     <requires type="static">
       <file>blx-dm.def</file>
@@ -63,23 +63,23 @@
       <file>english.lbx</file>
     </requires>
   </internal>
-  <external package="biblatex" priority="5" active="0">
+  <external package="biblatex" priority="5" active="1">
     <generic>biber</generic>
     <cmdline>
       <binary>biber</binary>
-      <infile>2.3_Dac_ta_chuc_nang</infile>
+      <infile>3_Cong_nghe</infile>
     </cmdline>
     <input>
-      <file>2.3_Dac_ta_chuc_nang.bcf</file>
+      <file>3_Cong_nghe.bcf</file>
     </input>
     <output>
-      <file>2.3_Dac_ta_chuc_nang.bbl</file>
+      <file>3_Cong_nghe.bbl</file>
     </output>
     <provides type="dynamic">
-      <file>2.3_Dac_ta_chuc_nang.bbl</file>
+      <file>3_Cong_nghe.bbl</file>
     </provides>
     <requires type="dynamic">
-      <file>2.3_Dac_ta_chuc_nang.bcf</file>
+      <file>3_Cong_nghe.bcf</file>
     </requires>
     <requires type="editable">
       <file>Danh_sach_tai_lieu_tham_khao.bib</file>

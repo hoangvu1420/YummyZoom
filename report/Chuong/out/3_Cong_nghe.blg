@@ -1,0 +1,18 @@
+[0] Config.pm:328> INFO - This is Biber 2.21
+[0] Config.pm:331> INFO - Logfile is 'Chuong/out/3_Cong_nghe.blg'
+[393] biber-MSWIN64:342> INFO - === 
+[567] Biber.pm:421> INFO - Reading 'Chuong/out/3_Cong_nghe.bcf'
+[734] Biber.pm:1002> INFO - Found 6 citekeys in bib section 0
+[758] Biber.pm:4487> INFO - Processing section 0
+[806] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
+[900] bibtex.pm:1713> INFO - LaTeX decoding ...
+[932] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
+[1064] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[1064] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[1065] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+[1065] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[1147] bbl.pm:676> INFO - Writing 'Chuong/out/3_Cong_nghe.bbl' with encoding 'UTF-8'
+[1150] bbl.pm:779> INFO - Output to Chuong/out/3_Cong_nghe.bbl
+[1150] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
+[1150] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
+[1150] Biber.pm:134> INFO - WARNINGS: 2

@@ -1,18 +1,20 @@
-[0] Config.pm:328> INFO - This is Biber 2.21
-[0] Config.pm:331> INFO - Logfile is 'out/DoAn.blg'
-[110] biber-MSWIN64:342> INFO - === 
-[150] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
-[256] Biber.pm:1002> INFO - Found 9 citekeys in bib section 0
-[271] Biber.pm:4487> INFO - Processing section 0
-[287] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
-[363] bibtex.pm:1713> INFO - LaTeX decoding ...
-[388] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
-[467] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[467] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[469] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
-[469] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
-[485] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
-[491] bbl.pm:779> INFO - Output to out/DoAn.bbl
-[491] Biber.pm:132> WARN - I didn't find a database entry for 'scott2013sdn' (section 0)
-[491] Biber.pm:132> WARN - I didn't find a database entry for 'ashton2009internet' (section 0)
-[491] Biber.pm:134> INFO - WARNINGS: 2
+[1] Config.pm:328> INFO - This is Biber 2.21
+[4] Config.pm:331> INFO - Logfile is 'out/DoAn.blg'
+[168] biber-MSWIN64:342> INFO - === 
+[239] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
+[399] Biber.pm:1002> INFO - Found 18 citekeys in bib section 0
+[417] Biber.pm:4487> INFO - Processing section 0
+[436] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
+[505] bibtex.pm:1713> INFO - LaTeX decoding ...
+[522] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
+[635] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[636] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[636] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+[637] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[688] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
+[696] bbl.pm:779> INFO - Output to out/DoAn.bbl
+[697] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
+[697] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
+[697] Biber.pm:132> WARN - I didn't find a database entry for 'scott2013sdn' (section 0)
+[697] Biber.pm:132> WARN - I didn't find a database entry for 'ashton2009internet' (section 0)
+[697] Biber.pm:134> INFO - WARNINGS: 4
