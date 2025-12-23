@@ -3,8 +3,81 @@
 
 \section{Thiết kế kiến trúc}
 \subsection{Lựa chọn kiến trúc phần mềm}
-Mục này có độ dài từ một đến ba trang. Sinh viên cần lựa chọn kiến trúc phần mềm cho ứng dụng của mình như: kiến trúc ba lớp MVC, MVP, SOA, Microservice, v.v. rồi giải thích sơ bộ về kiến trúc đó (không giải thích chi tiết/dài dòng).
-Sử dụng kiến trúc phần mềm đã chọn ở trên, sinh viên mô tả kiến trúc cụ thể cho ứng dụng của mình. Gợi ý: sinh viên áp dụng lý thuyết chung vào hệ thống/sản phẩm của mình như thế nào, có thay đổi, bổ sung hoặc cải tiến gì không. Ví dụ, thành phần M trong kiến trúc lý thuyết MVC sẽ là những thành phần cụ thể nào (ví dụ: là interface I + class C1 + class C2, v.v.) trong kiến trúc phần mềm của sinh viên.
+\label{subsec:4.1.1}
+
+Dựa trên các yêu cầu nghiệp vụ phức tạp của hệ thống YummyZoom, đặc biệt là tính năng đặt hàng nhóm (TeamCart) với yêu cầu về tính nhất quán dữ liệu cao và khả năng xử lý đồng thời, đồ án lựa chọn áp dụng kiến trúc \textbf{Clean Architecture} (Kiến trúc Sạch) kết hợp với tư duy thiết kế \textbf{Domain-Driven Design (DDD)}. Về mặt triển khai, hệ thống được xây dựng theo mô hình \textbf{Monolithic Modular} (Đơn khối module hóa).
+
+\subsubsection{Mô hình kiến trúc tổng thể}
+Thay vì lựa chọn kiến trúc Microservices ngay từ đầu - vốn đòi hỏi chi phí vận hành và quản lý hạ tầng lớn, hay kiến trúc Layered (3 lớp) truyền thống dễ gây ra sự phụ thuộc chặt chẽ vào cơ sở dữ liệu, nhóm phát triển quyết định sử dụng mô hình Monolithic Modular.
+
+Mô hình này giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng:
+\begin{itemize}
+    \item \textbf{Phát triển nhanh và nhất quán:} Toàn bộ mã nguồn nằm trong một Solution thống nhất, giúp việc gỡ lỗi (debug), kiểm thử và tái cấu trúc (refactor) trở nên dễ dàng hơn.
+    \item \textbf{Ranh giới nghiệp vụ rõ ràng (Modular Boundaries):} Các module được tổ chức độc lập về mặt logic dựa trên các Bounded Contexts. Điều này tạo tiền đề vững chắc để tách thành các Microservices riêng biệt khi hệ thống cần mở rộng quy mô trong tương lai mà không làm phá vỡ cấu trúc hiện tại.
+    \item \textbf{Tập trung vào nghiệp vụ cốt lõi:} Clean Architecture giúp cô lập logic nghiệp vụ (Domain) khỏi các yếu tố thay đổi thường xuyên như giao diện người dùng (UI) hay công nghệ lưu trữ (Database).
+\end{itemize}
+
+\subsubsection{Tổ chức các tầng kiến trúc (Layered Architecture)}
+Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule) của Clean Architecture: "Mọi sự phụ thuộc của mã nguồn chỉ được hướng vào bên trong". Cấu trúc dự án được ánh xạ từ lý thuyết vào thực tế như sau:
+
+\begin{enumerate}
+    \item \textbf{Tầng Miền (Domain Layer) - \textit{Project: YummyZoom.Domain}}
+    \newline Đây là lõi trung tâm của hệ thống, nơi chứa các quy tắc nghiệp vụ bất biến của doanh nghiệp. Tầng này hoàn toàn không phụ thuộc vào bất kỳ thư viện bên ngoài hay công nghệ cơ sở dữ liệu nào.
+    \begin{itemize}
+        \item \textbf{Thành phần:} Entities (Thực thể), Value Objects (Đối tượng giá trị), Aggregates (Hợp nhất), Domain Events.
+        \item \textbf{Ví dụ thực tế:} Aggregate \texttt{TeamCart} đóng gói logic nghiệp vụ của giỏ hàng nhóm, đảm bảo các quy tắc như: một giỏ hàng chỉ có một chủ phòng (Host), và chỉ Host mới có quyền chốt đơn hoặc khóa giỏ hàng.
+    \end{itemize}
+
+    \item \textbf{Tầng Ứng dụng (Application Layer) - \textit{Project: YummyZoom.Application}}
+    \newline Đóng vai trò lớp vỏ bao quanh Domain, điều phối các yêu cầu từ người dùng và chuyển đổi chúng thành các thao tác nghiệp vụ.
+    \begin{itemize}
+        \item \textbf{Thành phần:} Use Cases (được triển khai dưới dạng Command/Query Handlers), Validators (Kiểm tra dữ liệu), Interfaces cho Infrastructure.
+        \item \textbf{Ví dụ thực tế:} \texttt{AddItemToTeamCartCommand} là một Use Case nhận yêu cầu thêm món, kích hoạt phương thức \texttt{AddItem} trong Domain Entity, và sau đó lưu thay đổi thông qua \texttt{ITeamCartRepository}.
+    \end{itemize}
+
+    \item \textbf{Tầng Hạ tầng (Infrastructure Layer) - \textit{Project: YummyZoom.Infrastructure}}
+    \newline Nơi chưa các thực thi của các interfaces kỹ thuật được định nghĩa ở tầng Application. Đây là nơi các công nghệ cụ thể được "cắm" vào hệ thống.
+    \begin{itemize}
+        \item \textbf{Thành phần:} DbContext (Entity Framework Core), Repositories Implementation, Services giao tiếp bên ngoài (EmailService, CloudinaryService, StripeService, FCMService).
+        \item \textbf{Chức năng:} Truy xuất dữ liệu từ SQL Server/PostgreSQL, tương tác với hệ thống file, gửi email xác nhận, xử lý thanh toán qua Stripe, gửi thông báo đẩy với FCM.
+    \end{itemize}
+
+    \item \textbf{Tầng Giao diện/Trình bày (Web/Presentation Layer) - \textit{Project: YummyZoom.Web}}
+    \newline Lớp vỏ ngoài cùng, chịu trách nhiệm giao tiếp với Client (Mobile App, Web Admin).
+    \begin{itemize}
+        \item \textbf{Thành phần:} Minimal APIs, SignalR Hubs, Middlewares.
+        \item \textbf{Nhiệm vụ:} Nhận HTTP Request, xác thực token, gọi xuống Application Layer để xử lý và trả về HTTP Response chuẩn (JSON).
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Thiết kế chiến lược (Strategic Design)}
+Áp dụng chiến lược của DDD, hệ thống được chia nhỏ thành các \textbf{Bounded Contexts} (Ngữ cảnh giới hạn), mỗi context giải quyết một vấn đề nghiệp vụ cụ thể và có Ubiquitous Language (Ngôn ngữ chung) riêng:
+\begin{itemize}
+    \item \textbf{Identity Context:} Quản lý người dùng, phân quyền và xác thực (Authentication/Authorization).
+    \item \textbf{Catalog Context:} Quản lý thực đơn, danh mục, thông tin nhà hàng, món ăn và các tùy chọn (Toppings).
+    \item \textbf{TeamCart Context:} Ngữ cảnh quan trọng và phức tạp nhất, xử lý logic chia sẻ giỏ hàng, đồng bộ trạng thái thời gian thực và phân chia hóa đơn.
+    \item \textbf{Ordering Context:} Xử lý quy trình đặt hàng, thanh toán và vòng đời của đơn hàng sau khi được chốt.
+\end{itemize}
+
+\subsubsection{Các mẫu kỹ thuật chủ đạo (Tactical Patterns)}
+Để tối ưu hóa hiệu năng và khả năng bảo trì, hệ thống áp dụng các mẫu thiết kế kỹ thuật nâng cao:
+
+\paragraph{CQRS (Command Query Responsibility Segregation):}
+Hệ thống tách biệt rõ ràng luồng Đọc (Query) và Ghi (Command) dữ liệu:
+\begin{itemize}
+    \item \textbf{Phần Ghi (Write Side):} Sử dụng \textbf{Entity Framework Core} kết hợp với Domain Model để đảm bảo tính toàn vẹn và nhất quán dữ liệu (Data Consistency) khi thực hiện các thay đổi nghiệp vụ.
+    \item \textbf{Phần Đọc (Read Side):} Sử dụng \textbf{Dapper} với SQL để truy vấn dữ liệu trực tiếp và trả về các DTO phẳng. Đồng thời, hệ thống kết hợp sử dụng các \textbf{Read Models} được cập nhật song song với các bảng ghi, giúp tránh việc thực hiện các phép JOIN bảng quá mức. Cách tiếp cận này đảm bảo khả năng phục vụ hiệu quả các yêu cầu dữ liệu phức tạp từ ứng dụng người dùng với tốc độ phản hồi tối ưu.
+\end{itemize}
+
+\paragraph{Domain Events \& Outbox Pattern:}
+Giải quyết bài toán về tính nhất quán cuối cùng (Eventual Consistency) và xử lý bất đồng bộ:
+\begin{itemize}
+    \item \textbf{Cơ chế:} Khi một nghiệp vụ quan trọng hoàn tất (ví dụ: \texttt{OrderCreated}), hệ thống không gọi trực tiếp các dịch vụ bên thứ ba (như gửi email) mà sinh ra một \texttt{Domain Event}. Event này được lưu vào bảng \texttt{OutboxMessages} trong cùng một transaction database với dữ liệu chính.
+    \item \textbf{Tác dụng:} Một tiến trình nền (Background Worker) sẽ đọc bảng Outbox và thực hiện các tác vụ phụ sau đó. Điều này đảm bảo rằng giao dịch chính luôn nhanh và an toàn; nếu việc gửi email thất bại, nó sẽ được thử lại (Retry) mà không làm mất đơn hàng.
+\end{itemize}
+
+\subsubsection{Kết luận}
+Việc lựa chọn kiến trúc Clean Architecture kết hợp DDD và CQRS mang lại nền tảng vững chắc cho hệ thống YummyZoom. Kiến trúc này không chỉ giải quyết tốt các bài toán nghiệp vụ phức tạp hiện tại về đặt hàng nhóm mà còn đảm bảo các tiêu chí phi chức năng quan trọng: dễ dàng kiểm thử (Testability), dễ bảo trì (Maintainability) và sẵn sàng mở rộng (Scalability) trong tương lai.
 
 \subsection{Thiết kế tổng quan}
 Sinh viên vẽ biểu đồ gói UML (UML package diagram), nêu rõ sự phụ thuộc giữa các gói (package). SV cần vẽ các gói sao cho chúng được phân theo các tầng rõ ràng, không được sắp đặt package lộn xộn trong hình vẽ. Sinh viên chú ý các quy tắc thiết kế (Các gói không phụ thuộc lẫn nhau, gói tầng dưới không phụ thuộc gói tầng trên, không phụ thuộc bỏ qua tầng, v.v.) và cần giải thích sơ lược về mục đích/nhiệm vụ của từng package. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig1}
@@ -65,6 +138,7 @@ Sinh viên lựa chọn và đưa ra màn hình cho các chức năng chính, qu
 \section{Kiểm thử}
 Phần này có độ dài từ hai đến ba trang. Sinh viên thiết kế các trường hợp kiểm thử cho hai đến ba chức năng quan trọng nhất. Sinh viên cần chỉ rõ các kỹ thuật kiểm thử đã sử dụng. Chi tiết các trường hợp kiểm thử khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
 Sinh viên sau cùng tổng kết về số lượng các trường hợp kiểm thử và kết quả kiểm thử. Sinh viên cần phân tích lý do nếu kết quả kiểm thử không đạt.
+
 \section{Triển khai}
 Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)
 
