@@ -1,0 +1,160 @@
+@startuml YummyZoom_Package_Identity_Access
+!theme plain
+left to right direction
+
+title YummyZoom - Biểu đồ gói chi tiết: Identity & Access
+
+package "Web/Presentation" as Web {
+  package "Endpoints" as WebEndpoints {
+    class Users
+  }
+  package "Services" as WebServices {
+    class CurrentUser
+  }
+}
+
+package "Application" as App {
+  package "Auth" as AppAuth {
+    class CheckAuthStatusCommand
+    class RequestPhoneOtpCommand
+    class VerifyPhoneOtpCommand
+    class CompleteSignupCommand
+  }
+
+  package "Users" as AppUsers {
+    class CompleteProfileCommand
+    class GetMyProfileQuery
+  }
+
+  package "RoleAssignments" as AppRoles {
+    class CreateRoleAssignmentCommand
+    class GetUserRoleAssignmentsQuery
+  }
+
+  package "Common/Interfaces" as AppInterfaces {
+    interface IUser
+    interface IIdentityService
+    interface IPhoneOtpService
+    interface IPhoneNumberNormalizer
+    interface ISmsSender
+    interface IOtpThrottleStore
+    interface IUserAggregateRepository
+    interface IRoleAssignmentRepository
+    interface IUnitOfWork
+    interface IDbConnectionFactory
+  }
+}
+
+package "Domain" as Domain {
+  package "Identity & Access" as CtxIdentity {
+    class User
+    class Address
+    class PaymentMethod
+    class UserId
+    class RoleAssignment
+    class RoleAssignmentId
+    enum RestaurantRole
+  }
+}
+
+package "Infrastructure" as Infra {
+  package "Identity" as InfraIdentity {
+    class ApplicationUser
+    class IdentityService
+  }
+
+  package "Identity/PhoneOtp" as InfraPhoneOtp {
+    class IdentityPhoneOtpService
+  }
+
+  package "Caching" as InfraCaching {
+    class OtpThrottleStore
+  }
+
+  package "Phone" as InfraPhone {
+    class DefaultPhoneNumberNormalizer
+  }
+
+  package "Notifications/Sms" as InfraSms {
+    class LoggingSmsSender
+  }
+
+  package "Persistence/Repositories" as InfraRepos {
+    class UserAggregateRepository
+    class RoleAssignmentRepository
+  }
+
+  package "Persistence" as InfraPersistence {
+    class ApplicationDbContext
+    class DbConnectionFactory
+  }
+}
+
+package "External" as External <<external>> {
+  class IdentityUser
+}
+
+' Web -> Application
+Users ..> RequestPhoneOtpCommand
+Users ..> VerifyPhoneOtpCommand
+Users ..> CheckAuthStatusCommand
+Users ..> CompleteSignupCommand
+Users ..> CompleteProfileCommand
+Users ..> GetMyProfileQuery
+Users ..> CreateRoleAssignmentCommand
+
+CurrentUser ..|> IUser
+
+' Application use cases -> interfaces/services (rút gọn)
+CheckAuthStatusCommand ..> IPhoneNumberNormalizer
+CheckAuthStatusCommand ..> IIdentityService
+CheckAuthStatusCommand ..> IUserAggregateRepository
+CheckAuthStatusCommand ..> IOtpThrottleStore
+
+CompleteSignupCommand ..> IUser
+CompleteSignupCommand ..> IUserAggregateRepository
+CompleteSignupCommand ..> IIdentityService
+CompleteSignupCommand ..> IUnitOfWork
+CompleteSignupCommand ..> User
+CompleteSignupCommand ..> UserId
+
+CompleteProfileCommand ..> IUser
+CompleteProfileCommand ..> IUserAggregateRepository
+CompleteProfileCommand ..> IUnitOfWork
+CompleteProfileCommand ..> User
+
+GetMyProfileQuery ..> IUser
+GetMyProfileQuery ..> IUserAggregateRepository
+
+CreateRoleAssignmentCommand ..> IRoleAssignmentRepository
+CreateRoleAssignmentCommand ..> IIdentityService
+CreateRoleAssignmentCommand ..> IUnitOfWork
+CreateRoleAssignmentCommand ..> RoleAssignment
+CreateRoleAssignmentCommand ..> RestaurantRole
+
+GetUserRoleAssignmentsQuery ..> IDbConnectionFactory
+
+' Domain relationships
+User *-- Address
+User *-- PaymentMethod
+User *-- UserId
+RoleAssignment *-- RoleAssignmentId
+RoleAssignment --> RestaurantRole
+
+' Infrastructure implementations
+IdentityService ..|> IIdentityService
+IdentityPhoneOtpService ..|> IPhoneOtpService
+DefaultPhoneNumberNormalizer ..|> IPhoneNumberNormalizer
+LoggingSmsSender ..|> ISmsSender
+OtpThrottleStore ..|> IOtpThrottleStore
+UserAggregateRepository ..|> IUserAggregateRepository
+RoleAssignmentRepository ..|> IRoleAssignmentRepository
+DbConnectionFactory ..|> IDbConnectionFactory
+ApplicationDbContext ..|> IUnitOfWork
+
+' Infrastructure dependencies
+IdentityService ..> IUserAggregateRepository
+IdentityService ..> IUnitOfWork
+ApplicationUser --|> IdentityUser
+
+@enduml

@@ -32,7 +32,7 @@ Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule
     \newline Đóng vai trò lớp vỏ bao quanh Domain, điều phối các yêu cầu từ người dùng và chuyển đổi chúng thành các thao tác nghiệp vụ.
     \begin{itemize}
         \item \textbf{Thành phần:} Use Cases (được triển khai dưới dạng Command/Query Handlers), Validators (Kiểm tra dữ liệu), Interfaces cho Infrastructure.
-        \item \textbf{Ví dụ thực tế:} \texttt{AddItemToTeamCartCommand} là một Use Case nhận yêu cầu thêm món, kích hoạt phương thức \texttt{AddItem} trong Domain Entity, và sau đó lưu thay đổi thông qua \texttt{ITeamCartRepository}.
+        \item \textbf{Ví dụ thực tế:} AddItemToTeamCartCommand là một Use Case nhận yêu cầu thêm món, kích hoạt phương thức AddItem trong Domain Entity, và sau đó lưu thay đổi thông qua ITeamCartRepository.
     \end{itemize}
 
     \item \textbf{Tầng Hạ tầng (Infrastructure Layer) - \textit{Project: YummyZoom.Infrastructure}}
@@ -80,26 +80,57 @@ Giải quyết bài toán về tính nhất quán cuối cùng (Eventual Consist
 Việc lựa chọn kiến trúc Clean Architecture kết hợp DDD và CQRS mang lại nền tảng vững chắc cho hệ thống YummyZoom. Kiến trúc này không chỉ giải quyết tốt các bài toán nghiệp vụ phức tạp hiện tại về đặt hàng nhóm mà còn đảm bảo các tiêu chí phi chức năng quan trọng: dễ dàng kiểm thử (Testability), dễ bảo trì (Maintainability) và sẵn sàng mở rộng (Scalability) trong tương lai.
 
 \subsection{Thiết kế tổng quan}
-Sinh viên vẽ biểu đồ gói UML (UML package diagram), nêu rõ sự phụ thuộc giữa các gói (package). SV cần vẽ các gói sao cho chúng được phân theo các tầng rõ ràng, không được sắp đặt package lộn xộn trong hình vẽ. Sinh viên chú ý các quy tắc thiết kế (Các gói không phụ thuộc lẫn nhau, gói tầng dưới không phụ thuộc gói tầng trên, không phụ thuộc bỏ qua tầng, v.v.) và cần giải thích sơ lược về mục đích/nhiệm vụ của từng package. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig1}
+Biểu đồ gói tổng quan của hệ thống YummyZoom thể hiện sự phân tầng rõ ràng và các ràng buộc phụ thuộc tuân thủ quy tắc Clean Architecture. 
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture1.png}
-    \caption{Ví dụ biểu đồ phụ thuộc gói}
-    \label{fig:Fig1}
+    \includegraphics[width=\textwidth]{Hinhve/package_overview.png}
+    \caption{Biểu đồ phụ thuộc gói tổng quan YummyZoom (Backend)}
+    \label{fig:FigPackageOverview}
 \end{figure}
+
 \subsection{Thiết kế chi tiết gói}
-Sinh viên thiết kế và lần lượt vẽ biểu đồ thiết kế cho từng package, hoặc một nhóm các package liên quan để giải quyết một vấn đề gì đó. Khi vẽ thiết kế gói, sinh viên chỉ cần đưa tên lớp, không cần chỉ ra các thành viên phương thức và thuộc tính. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig2}.
+Mục tiêu của phần này là minh họa chi tiết cách tổ chức mã nguồn và hiện thực hóa kiến trúc Clean Architecture thông qua các biểu đồ gói (Package Diagrams). Tôi đã lựa chọn 2 luồng nghiệp vụ tiêu biểu đại diện cho hai phân hệ quan trọng nhất: Restaurant (Nhà hàng) và Order (Đơn hàng) để phân tích.
 
-Sinh viên cần vẽ rõ ràng quan hệ giữa các lớp trong biểu đồ. Các quan hệ bao gồm: phụ thuộc (dependency), kết hợp (association), kết tập (aggregation), hợp thành (composition), kế thừa (inheritance), và thực thi (implementation). Các quan hệ này đều đã được minh họa trong \ref{fig:Fig2}.
+Các biểu đồ được xây dựng dựa trên các quy tắc sau nhằm đảm bảo tính trực quan và tránh sự quá tải thông tin do số lượng lớp lớn của hệ thống:
+\begin{itemize}
+    \item \textbf{Phạm vi:} Mỗi biểu đồ tập trung vào một luồng nghiệp vụ cụ thể (bao gồm 1 Command và 1 Query), không bao gồm toàn bộ các lớp trong mã nguồn.
+    \item \textbf{Cấu trúc:} Các thành phần được vẽ và sắp xếp dọc theo 4 tầng của Clean Architecture (Web, Application, Domain, Infrastructure).
+    \item \textbf{Chi tiết:} Chỉ thể hiện tên lớp và các mối quan hệ chính, lược bỏ các phương thức và thuộc tính chi tiết.
+\end{itemize}
 
-Sau khi vẽ hình minh họa, sinh viên cần giải thích ngắn gọn về thiết kế của mình. 
+\subsubsection{Biểu đồ 1: Restaurant (Create Restaurant + Search Restaurants)}
+Biểu đồ này minh họa luồng xử lý cho hai chức năng: Phê duyệt đăng ký nhà hàng (Create) và Tìm kiếm nhà hàng (Search).
 
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture2.png}
-    \caption{Ví dụ thiết kế gói}
-    \label{fig:Fig2}
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{Hinhve/package_restaurant_create_search.png}
+    \caption{Biểu đồ gói chi tiết phân hệ Restaurant (Create \& Search)}
+    \label{fig:PkgRestaurant}
 \end{figure}
+
+\noindent \textbf{Mô tả luồng logic:}
+Biểu đồ thể hiện cách các tầng phối hợp để xử lý yêu cầu:
+\begin{itemize}
+    \item \textbf{Luồng Ghi (Command):} Bắt đầu từ yêu cầu POST đến Endpoints/RestaurantRegistrations để phê duyệt đăng ký nhà hàng, yêu cầu phê duyệt được chuyển đến ApproveRestaurantRegistrationCommandHandler (Application). Handler này tương tác với Domain (RestaurantAggregate, RestaurantRegistration) để đảm bảo quy tắc nghiệp vụ, rồi một đối tượng Restaurant được tạo và lưu trữ qua RestaurantRepository (Infrastructure) xuống database. Khi thành công, sự kiện RestaurantCreated được phát ra và được xử lý bởi RestaurantCreatedSearchHandler (Application) để cập nhật bảng SearchIndex trong database để phục phụ cho thao tác tìm kiếm sau này.
+    \item \textbf{Luồng Đọc (Query):} Khi yêu cầu GET đến Restaurants để tìm kiếm nhà hàng theo các tiêu chí, SearchRestaurantsQueryHandler (Application) thực hiện truy vấn tối ưu bằng SQL vào bảng SearchIndex là một Read Model tối ưu hóa để phục vụ tìm kiếm. Dữ liệu phục vụ tìm kiếm được cập nhật bất đồng bộ bởi SearchIndexMaintainer (Infrastructure) ngay khi nhận được sự kiện RestaurantCreated, minh họa cho mô hình CQRS tách biệt Ghi và Đọc.
+\end{itemize}
+
+\subsubsection{Biểu đồ 2: Order (Initiate Order + Get Order Status)}
+Biểu đồ này mô tả quy trình khởi tạo đơn hàng mới và truy vấn trạng thái đơn hàng, đóng vai trò cốt lõi trong giao dịch thương mại của hệ thống.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{Hinhve/package_order_initiate_status.png}
+    \caption{Biểu đồ gói chi tiết phân hệ Order (Initiate \& Status)}
+    \label{fig:PkgOrder}
+\end{figure}
+
+\noindent \textbf{Mô tả luồng logic:}
+Biểu đồ minh họa sự phối hợp chặt chẽ giữa các thành phần để xử lý đơn hàng:
+\begin{itemize}
+    \item \textbf{Luồng Ghi (Command):} Yêu cầu đặt hàng từ người dùng (Web Endpoints) được đóng gói thành InitiateOrderCommand. InitiateOrderCommandHandler đóng vai trò điều phối chính: nó sử dụng OrderFinancialService (một Domain Service) để tính toán chi phí, xác thực qua IPaymentGatewayService, và tương tác với các repositories (IOrderRepository, ICouponRepository) để lưu trữ Aggregate Order. Thành công kích hoạt sự kiện OrderPlaced, dẫn đến việc OrderPlacedEventHandler gọi các dịch vụ thông báo (IOrderRealtimeNotifier, IOrderPushNotifier).
+    \item \textbf{Luồng Đọc (Query):} GetOrderStatusQueryHandler tiếp nhận yêu cầu truy vấn và trả về thông tin trạng thái đơn hàng, đảm bảo tính cập nhật cho phía người dùng.
+\end{itemize}
 
 \section{Thiết kế chi tiết}
 \subsection{Thiết kế giao diện}

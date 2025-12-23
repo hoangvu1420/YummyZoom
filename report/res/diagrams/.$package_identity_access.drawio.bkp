@@ -1,0 +1,152 @@
+<mxfile host="Electron" modified="2025-12-23T06:15:00.000Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="identity-access" version="24.0.4" type="device">
+  <diagram name="Page-1" id="identity-access">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="&lt;b style=&quot;font-size: 16px;&quot;&gt;YummyZoom - Identity &amp;amp; Access Package Diagram&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="140" y="10" width="520" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="web-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=140;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="320" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="web-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;Web/Presentation&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="55" y="60" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="web-auth-endpoints" value="Auth Endpoints" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="105" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="web-security" value="Security Middleware" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="210" y="105" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="web-users-endpoints" value="Users Endpoints" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="175" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=140;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="60" width="420" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="app-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;Application&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="415" y="60" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="app-common-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=100;tabHeight=24;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="415" y="105" width="180" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="app-common-label" value="&lt;b style=&quot;font-size: 12px; text-wrap: wrap;&quot;&gt;Common&lt;/b&gt;" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=none;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;labelPosition=center;verticalLabelPosition=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="415" y="105" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="app-common-authorization" value="Authorization" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="430" y="135" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="app-common-behaviours" value="Behaviours (Pipeline)" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="430" y="195" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="app-common-caching" value="Caching" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="430" y="255" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="app-features-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=120;tabHeight=24;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="605" y="105" width="200" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="app-features-label" value="&lt;b style=&quot;font-size: 12px; text-wrap: wrap;&quot;&gt;Features&lt;/b&gt;" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=none;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;labelPosition=center;verticalLabelPosition=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="605" y="105" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="app-auth" value="Auth" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="135" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="app-users" value="Users" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="195" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="app-roleassignments" value="RoleAssignments" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="255" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="domain-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=140;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="360" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;Domain&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="55" y="300" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-identity-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=160;tabHeight=24;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="340" width="320" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-identity-label" value="&lt;b style=&quot;font-size: 12px; text-wrap: wrap;&quot;&gt;Identity &amp;amp; Access&lt;/b&gt;" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=none;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;labelPosition=center;verticalLabelPosition=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="55" y="340" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-user-aggregate" value="User Aggregate" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="75" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-roleassignment-aggregate" value="Role Assignment Aggregate" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="230" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="infra-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=140;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="380" width="420" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="infra-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;Infrastructure&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="415" y="380" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="infra-identity" value="Identity" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="425" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="infra-persistence" value="Persistence" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="575" y="425" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="infra-caching" value="Caching" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="505" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="infra-messaging" value="Messaging/Outbox" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="575" y="505" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="shared-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=140;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="shared-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;SharedKernel&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="55" y="590" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="external-folder" value="" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=160;tabHeight=30;tabPosition=left;html=1;whiteSpace=wrap;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="680" width="420" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="external-label" value="&lt;span style=&quot;font-weight: 700; text-wrap: wrap; font-size: 14px;&quot;&gt;External Systems&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="415" y="680" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="external-postgres" value="PostgreSQL" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="725" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="external-redis" value="Redis" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="575" y="725" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="external-sms" value="SMS Gateway" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="795" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge-web-app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="web-folder" target="app-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-app-domain" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="app-folder" target="domain-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-infra-app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="infra-folder" target="app-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-domain-shared" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="domain-folder" target="shared-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-app-shared" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="app-folder" target="shared-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-infra-shared" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="infra-folder" target="shared-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-web-shared" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="web-folder" target="shared-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-infra-external" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="infra-folder" target="external-folder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

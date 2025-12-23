@@ -1,0 +1,91 @@
+### Dàn ý biểu đồ gói chi tiết (backend YummyZoom)
+
+- **Mục tiêu**: từ sơ đồ tổng quan (package\_overview.drawio) chọn ra 3 biểu đồ tiêu biểu (Restaurant, Order, TeamCart) để minh hoạ kiến trúc và cách tổ chức mã nguồn theo từng luồng nghiệp vụ quan trọng, bám sát cấu trúc code hiện có.
+
+- **Quy tắc**: 
+  - Mỗi biểu đồ tập trung vào một luồng nghiệp vụ cụ thể (1 command + 1 query), thể hiện đầy đủ các thành phần tham gia trong luồng đó theo các tầng Clean Architecture: Web/Presentation, Application, Domain, Infrastructure.
+  - Application thể hiện command/query theo dạng 2 lớp: `...Command + Validator` và `...Handler` (tương tự cho query).
+  - Domain giữ đầy đủ chi tiết (aggregate, entity, value object, enum, errors, domain services), nhưng chỉ liệt kê domain event liên quan trực tiếp đến command trong biểu đồ (thường 1 event).
+  - Application chỉ liệt kê event handler của event liên quan trực tiếp.
+  - Infrastructure thể hiện các implementation tương ứng với interface dùng trong luồng (repository, service, store, notifier, payment, read-model maintainer).
+  - Chỉ đưa tên lớp, không cần phương thức/thuộc tính; thể hiện quan hệ UML rõ ràng (dependency, association, aggregation, composition, inheritance, implementation).
+  - Mỗi biểu đồ cần nêu rõ phần lược bỏ để tránh quá tải (các flow khác, các feature không nằm trong luồng).
+
+- **Biểu đồ 1: Restaurant (Create Restaurant + Search Restaurants)**
+  - **Luồng chính**: `ApproveRestaurantRegistrationCommand` (tạo Restaurant từ hồ sơ đăng ký) + `SearchRestaurantsQuery`.
+  - **Web/Presentation**:
+    - `Endpoints/RestaurantRegistrations` (admin approve registration).
+    - `Endpoints/Restaurants.Public` (search restaurants).
+  - **Application**:
+    - Command: `ApproveRestaurantRegistrationCommand + Validator`, `ApproveRestaurantRegistrationCommandHandler`.
+    - Query: `SearchRestaurantsQuery + Validator`, `SearchRestaurantsQueryHandler`.
+    - Domain event: `RestaurantCreated`.
+    - Event handler: `RestaurantCreatedSearchHandler`.
+    - Interfaces: `IRestaurantRegistrationRepository`, `IRestaurantProvisioningService`, `IRoleAssignmentRepository`, `IRestaurantRepository`, `IUnitOfWork`, `IUser`, `IDbConnectionFactory`, `IInboxStore`, `ISearchReadModelMaintainer`.
+  - **Domain**:
+    - **RestaurantAggregate (đầy đủ)**: `Restaurant`, `RestaurantId`, `Address`, `ContactInfo`, `GeoCoordinates`, `BusinessHours`, `RestaurantErrors`, event `RestaurantCreated`.
+    - **RestaurantRegistrationAggregate (đầy đủ)**: `RestaurantRegistration`, `RestaurantRegistrationId`, `RestaurantRegistrationStatus`, `RestaurantRegistrationErrors`, event `RegistrationApproved`.
+    - **RoleAssignmentAggregate (đầy đủ)**: `RoleAssignment`, `RoleAssignmentId`, `RestaurantRole`.
+  - **Infrastructure**:
+    - Repositories: `RestaurantRepository`, `RestaurantRegistrationRepository`, `RoleAssignmentRepository`.
+    - Services: `RestaurantProvisioningService`.
+    - Read side: `DbConnectionFactory`.
+    - Read model maintainer: `SearchIndexMaintainer`.
+    - Inbox: `InboxStore`.
+    - DbContext/UoW: `ApplicationDbContext`.
+  - **Lược bỏ**:
+    - `Menus`, `MenuItems`, `CustomizationGroups`, `Tags` và các query/command quản lý thực đơn.
+    - Các search use case khác ngoài `SearchRestaurantsQuery`.
+
+- **Biểu đồ 2: Order (Initiate Order + Get Order Status)**
+  - **Luồng chính**: `InitiateOrderCommand` + `GetOrderStatusQuery`.
+  - **Web/Presentation**:
+    - `Endpoints/Orders` (initiate + get status).
+  - **Application**:
+    - Command: `InitiateOrderCommand + Validator`, `InitiateOrderCommandHandler`.
+    - Query: `GetOrderStatusQuery + Validator`, `GetOrderStatusQueryHandler`.
+    - Domain event: `OrderPlaced`.
+    - Event handler: `OrderPlacedEventHandler`.
+    - Interfaces: `IOrderRepository`, `IRestaurantRepository`, `IMenuItemRepository`, `ICustomizationGroupRepository`, `ICouponRepository`, `IPaymentGatewayService`, `IOrderRealtimeNotifier`, `IOrderPushNotifier`, `IUnitOfWork`, `IDbConnectionFactory`, `IUser`.
+  - **Domain (đầy đủ OrderAggregate)**:
+    - Aggregate/Entity: `Order`, `OrderItem`, `PaymentTransaction`.
+    - Value Objects: `OrderId`, `OrderItemId`, `OrderItemCustomization`, `DeliveryAddress`, `PaymentTransactionId`.
+    - Enums: `OrderStatus`, `OrderStatusExtensions`, `PaymentStatus`, `PaymentMethodType`, `PaymentTransactionType`.
+    - Event: `OrderPlaced`.
+    - Errors: `OrderErrors`.
+    - Domain Service: `OrderFinancialService`.
+  - **Infrastructure**:
+    - Repositories: `OrderRepository`, `RestaurantRepository`, `MenuItemRepository`, `CustomizationGroupRepository`, `CouponRepository`.
+    - Payments: `StripeService`.
+    - Notifications/Realtime: `OrderPushNotifier`, `NoOpOrderRealtimeNotifier`.
+    - Read side: `DbConnectionFactory`.
+    - DbContext/UoW: `ApplicationDbContext`.
+  - **Lược bỏ**:
+    - Các flow hậu kỳ như review/coupon moderation, admin dashboards.
+
+- **Biểu đồ 3: TeamCart (Create TeamCart + Get TeamCart Details)**
+  - **Luồng chính**: `CreateTeamCartCommand` + `GetTeamCartDetailsQuery`.
+  - **Web/Presentation**:
+    - `Endpoints/TeamCarts` (create + details).
+  - **Application**:
+    - Command: `CreateTeamCartCommand + Validator`, `CreateTeamCartCommandHandler`.
+    - Query: `GetTeamCartDetailsQuery + Validator`, `GetTeamCartDetailsQueryHandler`.
+    - Domain event: `TeamCartCreated`.
+    - Event handler: `TeamCartCreatedEventHandler`.
+    - Interfaces: `ITeamCartRepository`, `IRestaurantRepository`, `IUnitOfWork`, `IDbConnectionFactory`, `IUser`, `ITeamCartStore`, `ITeamCartRealtimeNotifier`, `IInboxStore`.
+  - **Domain (đầy đủ TeamCartAggregate)**:
+    - Aggregate/Entity: `TeamCart`, `TeamCartMember`, `TeamCartItem`, `MemberPayment`.
+    - Value Objects: `TeamCartId`, `TeamCartMemberId`, `TeamCartItemId`, `TeamCartItemCustomization`, `ShareableLinkToken`, `MemberPaymentId`, `MemberTotalRow`.
+    - Enums: `TeamCartStatus`, `PaymentStatus`, `PaymentMethod`, `MemberRole`.
+    - Event: `TeamCartCreated`.
+    - Errors: `TeamCartErrors`.
+  - **Infrastructure**:
+    - Repositories: `TeamCartRepository`, `RestaurantRepository`.
+    - Read side: `DbConnectionFactory`.
+    - State store/Realtime: `RedisTeamCartStore`, `NoOpTeamCartRealtimeNotifier`, `TeamCartPushNotifier`.
+    - Inbox: `InboxStore`.
+    - DbContext/UoW: `ApplicationDbContext`.
+  - **Lược bỏ**:
+    - Các command/query TeamCart khác (coupon suggestions, pricing preview, payment webhooks) không thuộc luồng create + details.
+
+> Ghi chú: ưu tiên giữ trục tầng (Web → Application → Domain → Infrastructure → External) và tên gói khớp thư mục code để tránh lệch nhãn khi xuất biểu đồ. 

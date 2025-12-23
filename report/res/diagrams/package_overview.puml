@@ -1,0 +1,113 @@
+@startuml YummyZoom_Backend_Package_Overview
+!theme plain
+
+left to right direction
+
+title YummyZoom - Sơ đồ package tổng quan (Backend)
+
+package "Web/Presentation" as Web {
+  [Endpoints]
+  [Security]
+  [Middlewares]
+  [Realtime]
+  [Configuration]
+}
+
+package "Application" as App {
+  package "Common" as AppCommon
+  package "Features" as AppFeatures {
+    [Users]
+    [Restaurants]
+    [Menus]
+    [MenuItems]
+    [Orders]
+    [TeamCarts]
+    [Coupons]
+    [Reviews]
+    [RestaurantRegistrations]
+  }
+}
+
+package "Domain" as Domain {
+  package "Identity & Access" as CtxIdentity {
+    [UserAggregate]
+    [RoleAssignmentAggregate]
+  }
+  package "Restaurant Catalog" as CtxCatalog {
+    [RestaurantAggregate]
+    [MenuEntity]
+    [MenuItemAggregate]
+    [CustomizationGroupAggregate]
+    [TagEntity]
+  }
+  package "Order & Fulfillment" as CtxOrder {
+    [OrderAggregate]
+    [TeamCartAggregate]
+    [CouponAggregate]
+    [ReviewAggregate]
+  }
+  package "Payouts & Monetization" as CtxPayouts {
+    [RestaurantAccountAggregate]
+    [AccountTransactionEntity]
+  }
+  package "Support & Governance" as CtxSupport {
+    [SupportTicketAggregate]
+  }
+  package "Onboarding" as CtxOnboarding {
+    [RestaurantRegistrationAggregate]
+  }
+  [Common]
+  [Services]
+}
+
+package "Infrastructure" as Infra {
+  [Persistence]
+  [Identity]
+  [Payments]
+  [Notifications]
+  [Messaging]
+  [Caching]
+  [BackgroundServices]
+  [Realtime]
+  [Services]
+}
+
+package "SharedKernel" as Shared
+
+package "External Systems" as External <<external>> {
+  [PostgreSQL]
+  [Redis]
+  [Cloudinary]
+  [Stripe]
+  [FCM]
+}
+
+' Dependency rules (Clean Architecture)
+Web --> App
+Web --> Infra
+App --> Domain
+Infra --> App
+Domain --> Shared
+App --> Shared
+Infra --> Shared
+Web --> Shared
+
+' Infrastructure integrates external services
+Infra --> External
+
+note right of Web
+  Lớp trình bày mỏng:
+  nhận HTTP request và chuyển use case
+end note
+
+note right of Domain
+  Lõi nghiệp vụ:
+  Aggregate, Entity, Value Object, Domain Event
+end note
+
+note bottom of Infra
+  Hiện thực kỹ thuật:
+  DB, cache, messaging, payment
+end note
+
+@enduml

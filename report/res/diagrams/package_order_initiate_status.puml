@@ -1,0 +1,143 @@
+@startuml YummyZoom_Package_Order_Initiate_Status
+!theme plain
+left to right direction
+
+title YummyZoom - Biểu đồ gói: Order (Initiate + Status)
+
+package "Web/Presentation" as Web {
+  package "Endpoints" as WebEndpoints {
+    class OrdersEndpoints
+  }
+}
+
+package "Application" as App {
+  package "Orders" as AppOrders {
+    class "InitiateOrderCommand + Validator" as InitiateOrderCommand
+    class InitiateOrderCommandHandler
+
+    class "GetOrderStatusQuery + Validator" as GetOrderStatusQuery
+    class GetOrderStatusQueryHandler
+  }
+
+  package "Orders/Broadcasting" as AppBroadcasting {
+    class OrderStatusBroadcastDto
+  }
+
+  package "Orders/EventHandlers" as AppOrderEvents {
+    class OrderPlacedEventHandler
+  }
+
+  package "Common/Interfaces" as AppInterfaces {
+    interface IOrderRepository
+    interface IRestaurantRepository
+    interface IMenuItemRepository
+    interface ICustomizationGroupRepository
+    interface ICouponRepository
+    interface IPaymentGatewayService
+    interface IOrderRealtimeNotifier
+    interface IOrderPushNotifier
+  }
+}
+
+package "Domain" as Domain {
+  package "OrderAggregate" as DomainOrder {
+    class Order
+    class OrderItem
+    class PaymentTransaction
+
+    class OrderId
+    class OrderItemId
+    class OrderItemCustomization
+    class DeliveryAddress
+    class PaymentTransactionId
+
+    enum OrderStatus
+    enum PaymentStatus
+    enum PaymentMethodType
+    enum PaymentTransactionType
+
+    class OrderErrors
+    class OrderPlaced
+  }
+
+  package "Services" as DomainServices {
+    class OrderFinancialService
+  }
+}
+
+package "Infrastructure" as Infra {
+  package "Persistence/Repositories" as InfraRepos {
+    class OrderRepository
+    class RestaurantRepository
+    class MenuItemRepository
+    class CustomizationGroupRepository
+    class CouponRepository
+  }
+
+  package "Payments/Stripe" as InfraPayments {
+    class StripeService
+  }
+
+  package "Notifications/Orders" as InfraNotifications {
+    class OrderPushNotifier
+  }
+
+  package "Realtime" as InfraRealtime {
+    class OrderRealtimeNotifier
+  }
+}
+
+' Web -> Application
+OrdersEndpoints ..> InitiateOrderCommand
+OrdersEndpoints ..> GetOrderStatusQuery
+
+' Command/query -> handler
+InitiateOrderCommandHandler ..> InitiateOrderCommand
+GetOrderStatusQueryHandler ..> GetOrderStatusQuery
+
+' Handler dependencies
+InitiateOrderCommandHandler ..> IOrderRepository
+InitiateOrderCommandHandler ..> IRestaurantRepository
+InitiateOrderCommandHandler ..> IMenuItemRepository
+InitiateOrderCommandHandler ..> ICustomizationGroupRepository
+InitiateOrderCommandHandler ..> ICouponRepository
+InitiateOrderCommandHandler ..> IPaymentGatewayService
+InitiateOrderCommandHandler ..> Order
+InitiateOrderCommandHandler ..> OrderItem
+InitiateOrderCommandHandler ..> DeliveryAddress
+InitiateOrderCommandHandler ..> OrderFinancialService
+
+OrderPlacedEventHandler ..> OrderPlaced
+OrderPlacedEventHandler ..> IOrderRepository
+OrderPlacedEventHandler ..> IOrderRealtimeNotifier
+OrderPlacedEventHandler ..> IOrderPushNotifier
+OrderPlacedEventHandler ..> OrderStatusBroadcastDto
+
+' Domain relationships
+Order *-- OrderId
+Order *-- OrderItem
+Order *-- DeliveryAddress
+Order ..> OrderStatus
+Order *-- PaymentTransaction
+Order ..> OrderErrors
+Order ..> OrderPlaced
+
+OrderItem *-- OrderItemId
+OrderItem *-- OrderItemCustomization
+
+PaymentTransaction *-- PaymentTransactionId
+PaymentTransaction ..> PaymentStatus
+PaymentTransaction ..> PaymentMethodType
+PaymentTransaction ..> PaymentTransactionType
+
+' Infrastructure implements interfaces
+OrderRepository ..|> IOrderRepository
+RestaurantRepository ..|> IRestaurantRepository
+MenuItemRepository ..|> IMenuItemRepository
+CustomizationGroupRepository ..|> ICustomizationGroupRepository
+CouponRepository ..|> ICouponRepository
+StripeService ..|> IPaymentGatewayService
+OrderPushNotifier ..|> IOrderPushNotifier
+OrderRealtimeNotifier ..|> IOrderRealtimeNotifier
+
+@enduml

@@ -1,21 +1,21 @@
-[1] Config.pm:328> INFO - This is Biber 2.21
-[2] Config.pm:331> INFO - Logfile is 'out/DoAn.blg'
-[414] biber-MSWIN64:342> INFO - === 
-[525] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
-[757] Biber.pm:1002> INFO - Found 21 citekeys in bib section 0
-[811] Biber.pm:4487> INFO - Processing section 0
-[917] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
-[1049] bibtex.pm:1713> INFO - LaTeX decoding ...
-[1099] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
-[1442] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[1443] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[1447] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
-[1448] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
-[1660] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
-[1683] bbl.pm:779> INFO - Output to out/DoAn.bbl
-[1684] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
-[1684] Biber.pm:132> WARN - legacy month field 'May' in entry 'Aspire' is not an integer - this will probably not sort properly.
-[1684] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
-[1685] Biber.pm:132> WARN - I didn't find a database entry for 'scott2013sdn' (section 0)
-[1685] Biber.pm:132> WARN - I didn't find a database entry for 'ashton2009internet' (section 0)
-[1685] Biber.pm:134> INFO - WARNINGS: 5
+[0] Config.pm:328> INFO - This is Biber 2.21
+[0] Config.pm:331> INFO - Logfile is 'out/DoAn.blg'
+[131] biber-MSWIN64:342> INFO - === 
+[172] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
+[294] Biber.pm:1002> INFO - Found 21 citekeys in bib section 0
+[311] Biber.pm:4487> INFO - Processing section 0
+[355] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
+[434] bibtex.pm:1713> INFO - LaTeX decoding ...
+[468] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
+[656] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[656] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[657] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+[657] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[783] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
+[793] bbl.pm:779> INFO - Output to out/DoAn.bbl
+[793] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
+[793] Biber.pm:132> WARN - legacy month field 'May' in entry 'Aspire' is not an integer - this will probably not sort properly.
+[793] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
+[793] Biber.pm:132> WARN - I didn't find a database entry for 'scott2013sdn' (section 0)
+[793] Biber.pm:132> WARN - I didn't find a database entry for 'ashton2009internet' (section 0)
+[794] Biber.pm:134> INFO - WARNINGS: 5

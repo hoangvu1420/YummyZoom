@@ -1,0 +1,111 @@
+@startuml YummyZoom_Package_Restaurant_Create_Search
+!theme plain
+left to right direction
+
+title YummyZoom - Biểu đồ gói: Restaurant (Create + Search)
+
+package "Web/Presentation" as Web {
+  package "Endpoints" as WebEndpoints {
+    class RestaurantRegistrationsEndpoints
+    class RestaurantsPublicEndpoints
+  }
+}
+
+package "Application" as App {
+  package "RestaurantRegistrations" as AppRegs {
+    class "ApproveRestaurantRegistrationCommand + Validator" as ApproveRegCommand
+    class ApproveRestaurantRegistrationCommandHandler
+  }
+
+  package "Restaurants" as AppRestaurants {
+    class "SearchRestaurantsQuery + Validator" as SearchRestaurantsQuery
+    class SearchRestaurantsQueryHandler
+  }
+
+  package "Search" as AppSearch {
+    class RestaurantCreatedSearchHandler
+  }
+
+  package "Common/Interfaces" as AppInterfaces {
+    interface IRestaurantProvisioningService
+    interface IRoleAssignmentRepository
+    interface IRestaurantRepository
+    interface IDbConnectionFactory
+    interface ISearchReadModelMaintainer
+  }
+}
+
+package "Domain" as Domain {
+  package "RestaurantAggregate" as DomainRestaurant {
+    class Restaurant
+    class RestaurantId
+    class Address
+    class ContactInfo
+    class BusinessHours
+    class RestaurantCreated
+  }
+
+  class RestaurantRegistration
+
+  class RoleAssignment
+}
+
+package "Infrastructure" as Infra {
+  package "Persistence/Repositories" as InfraRepos {
+    class RestaurantRepository
+    class RoleAssignmentRepository
+  }
+
+  package "Persistence" as InfraPersistence {
+    class ApplicationDbContext
+    class DbConnectionFactory
+  }
+
+  package "Persistence/ReadModels" as InfraReadModels {
+    class SearchIndexMaintainer
+  }
+
+  package "Services" as InfraServices {
+    class RestaurantProvisioningService
+  }
+}
+
+' Web -> Application
+RestaurantRegistrationsEndpoints ..> ApproveRegCommand
+RestaurantsPublicEndpoints ..> SearchRestaurantsQuery
+
+' Command/query -> handler
+ApproveRestaurantRegistrationCommandHandler ..> ApproveRegCommand
+SearchRestaurantsQueryHandler ..> SearchRestaurantsQuery
+
+' Handler dependencies
+ApproveRestaurantRegistrationCommandHandler ..> IRestaurantProvisioningService
+ApproveRestaurantRegistrationCommandHandler ..> IRoleAssignmentRepository
+ApproveRestaurantRegistrationCommandHandler ..> RestaurantRegistration
+ApproveRestaurantRegistrationCommandHandler ..> RoleAssignment
+ApproveRestaurantRegistrationCommandHandler ..> Restaurant
+
+SearchRestaurantsQueryHandler ..> IDbConnectionFactory
+
+RestaurantCreatedSearchHandler ..> RestaurantCreated
+RestaurantCreatedSearchHandler ..> ISearchReadModelMaintainer
+
+' Domain relationships
+Restaurant *-- RestaurantId
+Restaurant *-- Address
+Restaurant *-- ContactInfo
+Restaurant *-- BusinessHours
+Restaurant ..> RestaurantCreated
+
+' Infrastructure implements interfaces
+RestaurantRepository ..|> IRestaurantRepository
+RoleAssignmentRepository ..|> IRoleAssignmentRepository
+RestaurantProvisioningService ..|> IRestaurantProvisioningService
+SearchIndexMaintainer ..|> ISearchReadModelMaintainer
+DbConnectionFactory ..|> IDbConnectionFactory
+
+' Infrastructure dependencies
+RestaurantProvisioningService ..> IRestaurantRepository
+SearchIndexMaintainer ..> IDbConnectionFactory
+
+@enduml
