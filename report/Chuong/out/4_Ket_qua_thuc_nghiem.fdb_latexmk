@@ -1,18 +1,25 @@
 # Fdb version 4
-["biber Chuong/out/4_Ket_qua_thuc_nghiem"] 1766580070.24949 "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" "Chuong/out/4_Ket_qua_thuc_nghiem" 1766580809.45731 0
-  "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" 1766580809 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
+["biber Chuong/out/4_Ket_qua_thuc_nghiem"] 1766591533.0497 "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" "Chuong/out/4_Ket_qua_thuc_nghiem" 1766592062.0357 0
+  "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" 1766592061 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
   (generated)
   "Chuong/out/4_Ket_qua_thuc_nghiem.bbl"
   "Chuong/out/4_Ket_qua_thuc_nghiem.blg"
   (rewritten before read)
-["pdflatex"] 1766580804.7326 "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" "Chuong/out/4_Ket_qua_thuc_nghiem.pdf" "4_Ket_qua_thuc_nghiem" 1766580809.45894 0
-  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1766580799 23144 08951d3268fdc3429c011172e5dad38a ""
+["pdflatex"] 1766592056.09655 "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" "Chuong/out/4_Ket_qua_thuc_nghiem.pdf" "4_Ket_qua_thuc_nghiem" 1766592062.03658 0
+  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1766592054 27646 0a42c05e04c3f467eff1b8fb45448c00 ""
   "Chuong/out/../../DoAn.tex" 1764248572 11928 1ccfd4946766a72273c0826011935213 ""
-  "Chuong/out/4_Ket_qua_thuc_nghiem.aux" 1766580809 7659 da8bbdf74ad8b9e59202090744a78035 "pdflatex"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" 1766580072 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/4_Ket_qua_thuc_nghiem"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.out" 1766580809 2389 ebd170b6d15bcfd8b0dd4d41e2b96115 "pdflatex"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.run.xml" 1766580809 2539 6107592f35ea264f427ff550f85ddf6b "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.aux" 1766592061 9735 ae8fe95f16dbca8470d59b21efb4f103 "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" 1766591540 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/4_Ket_qua_thuc_nghiem"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.out" 1766592061 2389 ebd170b6d15bcfd8b0dd4d41e2b96115 "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.run.xml" 1766592061 2539 6107592f35ea264f427ff550f85ddf6b "pdflatex"
   "Hinhve/admin-restaurant-registrations-desktop.png" 1766575802 252495 a90287db0ba3f1c632da2e1b4ed9e3a1 ""
+  "Hinhve/class-MenuItem.png" 1766590766 224988 d80e01d79a658e1d99be836d60471cd9 ""
+  "Hinhve/class-Order.png" 1766590837 270671 7c7879c085a8f3e6f8da70364cfc2b9c ""
+  "Hinhve/class-Restaurant.png" 1766590794 295268 a0f7542ae73919738f5617d713a57e85 ""
+  "Hinhve/class-TeamCart.png" 1766590817 382281 3b7f4a9094a1e974bbf65e632d614a6b ""
+  "Hinhve/flow-ConvertTeamCart.png" 1766591936 217871 292c85efecfdd16bfba08dfee1462a75 ""
+  "Hinhve/flow-InitiateOrder.png" 1766591879 271858 fa5b192860eeb2a394b22f7109f7ffb0 ""
+  "Hinhve/flow-UpdateOrderStatus.png" 1766590719 173270 d3a620129c312698f9f30802be51f324 ""
   "Hinhve/mobile-checkout_payment.png" 1766579280 89376 c3e30501fdcc595d6c033c759483829c ""
   "Hinhve/mobile-home.png" 1766579129 49720 d9f038d58340b1bbd0f636014b8c2223 ""
   "Hinhve/mobile-restaurant_detail.png" 1766579170 56040 c21a249d9bf671a2c4937eb92ccbac00 ""
@@ -52,12 +59,14 @@
   "c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmb8v.tfm" 1759742116 9152 6eaf55be4c040a59ad35102d0af7daf8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmbi8v.tfm" 1759742116 9232 d188c1846fdbd7ca0b8cd68799721241 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmr8v.tfm" 1759742116 9148 527b0537918dbea3d17ce87083d502f6 ""
+  "c:/texlive/2025/texmf-dist/fonts/tfm/vntex/urwvn/utmri8v.tfm" 1759742116 9008 675f1fda1424847c1472fe17c01a2c25 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/vntex/vnr/vnr12.tfm" 1759742116 3984 be7b630197255361b12d153ce5e1bc5b ""
   "c:/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb" 1759740519 46026 687528a208fbfc1f00832bb96cccebbb ""
   "c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/ucrr8v.pfb" 1759742116 76747 7661890fb8ab67318f6d2b38f38e368f ""
   "c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/utmb8v.pfb" 1759742116 72608 04a6dd2cf0a046ace7cda60190a4e864 ""
   "c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/utmbi8v.pfb" 1759742116 72494 cf825f19d8ec4210c2772fe32c09927e ""
   "c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/utmr8v.pfb" 1759742116 74601 af4f6d57b2187e967dc73a57a6dbee86 ""
+  "c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/utmri8v.pfb" 1759742116 74127 d6f34be4a9a064416728f1ae622f3a22 ""
   "c:/texlive/2025/texmf-dist/fonts/vf/adobe/times/ptmr8c.vf" 1759740519 3556 8a9a6dcbcd146ef985683f677f4758a6 ""
   "c:/texlive/2025/texmf-dist/tex/context/base/mkii/supp-pdf.mkii" 1759737954 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "c:/texlive/2025/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty" 1759732335 40635 c40361e206be584d448876bba8a64a3b ""
@@ -211,7 +220,7 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1759742788 5574153 af86687748baf417d9e7d549313527be ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1759742980 3629007 f591f00ca598b3ec52fc9fc6bb645105 ""
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
-  "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" 1766580799 23144 08951d3268fdc3429c011172e5dad38a ""
+  "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" 1766592054 27646 0a42c05e04c3f467eff1b8fb45448c00 ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
   (generated)
   "Chuong/out/4_Ket_qua_thuc_nghiem.aux"

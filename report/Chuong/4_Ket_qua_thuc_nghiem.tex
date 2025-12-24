@@ -191,9 +191,64 @@ Các màn hình minh họa tập trung vào những chức năng cốt lõi củ
 \end{figure}
 
 \subsection{Thiết kế lớp}
-Phần này có độ dài từ ba đến bốn trang. Sinh viên trình bày thiết kế chi tiết các thuộc tính và phương thức cho một số lớp chủ đạo/quan trọng nhất của ứng dụng (từ 2-4 lớp). Thiết kế chi tiết cho các lớp khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
+Trong dự án YummyZoom, phần lớn quy tắc nghiệp vụ được đóng gói tại lớp miền (Domain layer) theo Clean Architecture, do đó phần thiết kế lớp tập trung vào các aggregate root tiêu biểu. Bốn lớp được lựa chọn gồm Order, TeamCart, Restaurant và MenuItem vì đây là các lớp chịu trách nhiệm quản lý vòng đời, trạng thái và các bất biến nghiệp vụ quan trọng của hệ thống. Đối với các lớp ở lớp ứng dụng (Application layer), nội dung chỉ trình bày ở mức vai trò điều phối luồng, bởi đa số các handler chỉ thực hiện một phương thức \textit{Handle} với logic mỏng.
 
-Để minh họa thiết kế lớp, sinh viên thiết kế luồng truyền thông điệp giữa các đối tượng tham gia cho 2 đến 3 use case quan trọng nào đó bằng biểu đồ trình tự (hoặc biểu đồ giao tiếp).
+Lớp Order đại diện cho đơn hàng, quản lý dữ liệu tài chính, danh sách món đã đặt và các mốc trạng thái trong vòng đời xử lý. Thiết kế của lớp thể hiện rõ các thuộc tính tài chính (Subtotal, DiscountAmount, DeliveryFee, TipAmount, TaxAmount, TotalAmount) cùng các phương thức chuyển trạng thái như Accept, Reject, MarkAsPreparing, MarkAsReadyForDelivery và MarkAsDelivered, đồng thời phát sinh các sự kiện miền tương ứng phục vụ đồng bộ trạng thái theo thời gian thực. Hình \ref{fig:class-order} mô tả cấu trúc lớp Order và các mối quan hệ chính.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/class-Order.png}
+    \caption{Biểu đồ lớp của Order (Aggregate root)}
+    \label{fig:class-order}
+\end{figure}
+
+Lớp TeamCart mô hình hóa giỏ hàng nhóm, cho phép nhiều người cùng đặt món và phối hợp thanh toán. Các thuộc tính cốt lõi gồm thông tin thành viên, danh sách món, trạng thái giỏ và các cấu phần tài chính như TipAmount và QuoteVersion. Các phương thức như AddItem, LockForPayment, FinalizePricing và RecordSuccessfulOnlinePayment giúp đảm bảo tính nhất quán của luồng thanh toán nhóm. Hình \ref{fig:class-teamcart} trình bày thiết kế lớp TeamCart.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/class-TeamCart.png}
+    \caption{Biểu đồ lớp của TeamCart (Aggregate root)}
+    \label{fig:class-teamcart}
+\end{figure}
+
+Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh và trạng thái hoạt động như đã xác thực hay đang nhận đơn. Thiết kế này đảm bảo các ràng buộc nghiệp vụ khi thay đổi thông tin thương hiệu, địa điểm, khung giờ hoạt động và trạng thái xác thực. Lớp MenuItem quản lý món ăn của nhà hàng, hỗ trợ các thao tác cập nhật mô tả, giá, khả dụng và cấu hình nhóm tùy chọn. Hai lớp này lần lượt được minh họa tại Hình \ref{fig:class-restaurant} và Hình \ref{fig:class-menuitem}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/class-Restaurant.png}
+    \caption{Biểu đồ lớp của Restaurant (Aggregate root)}
+    \label{fig:class-restaurant}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/class-MenuItem.png}
+    \caption{Biểu đồ lớp của MenuItem (Aggregate root)}
+    \label{fig:class-menuitem}
+\end{figure}
+
+Để minh họa cách các lớp phối hợp trong các ca sử dụng quan trọng, ba luồng chính được lựa chọn gồm khởi tạo đơn hàng, chuyển TeamCart thành Order và cập nhật trạng thái đơn hàng. Luồng khởi tạo đơn hàng thể hiện kiểm tra nhà hàng, món ăn, tính phí và tạo thanh toán, sau đó sinh Order ở lớp miền. Luồng chuyển TeamCart thành Order nhấn mạnh vai trò của Domain Service trong việc ánh xạ dữ liệu và tính toán tài chính trước khi tạo Order và cập nhật TeamCart. Luồng cập nhật trạng thái đơn hàng thể hiện các chuyển trạng thái hợp lệ trong Order và phát sinh sự kiện miền để phục vụ cập nhật thời gian thực. Các luồng này được trình bày lần lượt tại Hình \ref{fig:flow-initiate-order}, Hình \ref{fig:flow-convert-teamcart} và Hình \ref{fig:flow-update-order-status}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight]{Hinhve/flow-InitiateOrder.png}
+    \caption{Biểu đồ trình tự khởi tạo đơn hàng}
+    \label{fig:flow-initiate-order}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight]{Hinhve/flow-ConvertTeamCart.png}
+    \caption{Biểu đồ trình tự chuyển TeamCart thành Order}
+    \label{fig:flow-convert-teamcart}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{Hinhve/flow-UpdateOrderStatus.png}
+    \caption{Biểu đồ trình tự cập nhật trạng thái đơn hàng}
+    \label{fig:flow-update-order-status}
+\end{figure}
 
 \subsection{Thiết kế cơ sở dữ liệu}
 Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế, vẽ và giải thích biểu đồ thực thể liên kết (E-R diagram). Từ đó, sinh viên thiết kế cơ sở dữ liệu tùy theo hệ quản trị cơ sở dữ liệu mà mình sử dụng (SQL, NoSQL, Firebase, v.v.)
