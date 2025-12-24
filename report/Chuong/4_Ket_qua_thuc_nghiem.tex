@@ -129,16 +129,72 @@ Biểu đồ này mô tả quy trình khởi tạo đơn hàng mới và truy v�
 Biểu đồ minh họa sự phối hợp chặt chẽ giữa các thành phần để xử lý đơn hàng:
 \begin{itemize}
     \item \textbf{Luồng Ghi (Command):} Yêu cầu đặt hàng từ người dùng (Web Endpoints) được đóng gói thành InitiateOrderCommand. InitiateOrderCommandHandler đóng vai trò điều phối chính: nó sử dụng OrderFinancialService (một Domain Service) để tính toán chi phí, xác thực qua IPaymentGatewayService, và tương tác với các repositories (IOrderRepository, ICouponRepository) để lưu trữ Aggregate Order. Thành công kích hoạt sự kiện OrderPlaced, dẫn đến việc OrderPlacedEventHandler gọi các dịch vụ thông báo (IOrderRealtimeNotifier, IOrderPushNotifier).
-    \item \textbf{Luồng Đọc (Query):} GetOrderStatusQueryHandler tiếp nhận yêu cầu truy vấn và trả về thông tin trạng thái đơn hàng, đảm bảo tính cập nhật cho phía người dùng.
+    \item \textbf{Luồng Đọc (Query):} GetOrderStatusQueryHandler nhận truy vấn qua IDbConnectionFactory (Dapper) để lấy projection gọn của đơn hàng (OrderStatusDto). Handler kiểm tra quyền truy cập dựa trên IUser/claims (khách hàng hoặc nhân viên/owner nhà hàng), sau đó trả về trạng thái và mốc thời gian cập nhật, giúp client theo dõi tiến trình đơn hàng theo thời gian thực mà không tải dư dữ liệu.
 \end{itemize}
 
 \section{Thiết kế chi tiết}
 \subsection{Thiết kế giao diện}
-Phần này có độ dài từ hai đến ba trang. Sinh viên đặc tả thông tin về màn hình mà ứng dụng của mình hướng tới, bao gồm độ phân giải màn hình, kích thước màn hình, số lượng màu sắc hỗ trợ, v.v. Tiếp đến, sinh viên đưa ra các thống nhất/chuẩn hóa của mình khi thiết kế giao diện như thiết kế nút, điều khiển, vị trí hiển thị thông điệp phản hồi, phối màu, v.v. Sau cùng sinh viên đưa ra một số hình ảnh minh họa thiết kế giao diện cho các chức năng quan trọng nhất. Lưu ý, sinh viên không nhầm lẫn giao diện thiết kế với giao diện của sản phẩm sau cùng.
+\subsubsection{Thiết kế giao diện ứng dụng di động dành cho khách hàng}
+Ứng dụng di động được thiết kế hướng tới thiết bị 384x854 để đảm bảo tỷ lệ hiển thị thống nhất với cấu hình thiết kế, ưu tiên trải nghiệm đặt món nhanh và rõ ràng. Bố cục được tổ chức theo thứ bậc thông tin, tiêu đề và dữ liệu chính đặt ở vùng nhìn đầu tiên, các hành động quan trọng giữ vị trí nổi bật nhằm giảm thao tác thừa. Hệ thống kiểu chữ và kích thước chữ được quy đổi theo thang sp để bảo toàn độ đọc trên nhiều thiết bị, trong khi các thành phần nhập liệu và nút bấm thống nhất bán kính bo góc và khoảng đệm để tạo cảm giác thân thiện. Màu sắc thương hiệu (màu chính, màu phụ và màu nhấn) được chuẩn hóa trong ứng dụng, tuy nhiên bộ mockup được thể hiện theo tông đen trắng để tập trung vào cấu trúc và luồng thao tác, đồng thời phản hồi người dùng chủ yếu thông qua thông báo dạng thanh trượt ngắn gọn ở cuối màn hình.
+
+Các màn hình tiêu biểu được lựa chọn nhằm phản ánh đầy đủ hành trình người dùng từ khám phá đến thanh toán, bao gồm trang Home/Menu và Restaurant Detail (Hình \ref{fig:mobile-home-restaurant}), cùng với trang TeamCart Lobby và Checkout/Payment (Hình \ref{fig:mobile-teamcart-checkout}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-home.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-restaurant_detail.png}
+    \caption{Minh hoạ màn hình Home/Menu (trái) và Restaurant Detail (phải) trên ứng dụng di động}
+    \label{fig:mobile-home-restaurant}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-teamcart_lobby.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-checkout_payment.png}
+    \caption{Minh hoạ màn hình TeamCart Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}
+    \label{fig:mobile-teamcart-checkout}
+\end{figure}
+
+\subsubsection{Thiết kế giao diện hệ thống quản trị trên web}
+Hệ thống quản trị hướng tới màn hình desktop 1440x900 với mật độ thông tin cao, đồng thời đảm bảo khả năng hiển thị trên tablet ngang. Bố cục ưu tiên khả năng quét nhanh dữ liệu với lưới khoảng cách theo bước nhỏ, các khối thông tin và bảng dữ liệu được sắp xếp gọn để phục vụ tác vụ điều hành. Kiểu chữ được phân cấp rõ ràng từ nhãn điều hướng đến tiêu đề trang, kết hợp các mức đậm khác nhau để nhấn mạnh số liệu quan trọng. Hệ màu thương hiệu được sử dụng cho hành động chính và trạng thái tương tác, trong khi phiên bản nền tối được hỗ trợ để cải thiện khả năng đọc ở môi trường ánh sáng yếu. Các thành phần nhập liệu, nút bấm và thông báo hệ thống được chuẩn hóa về viền, trạng thái tập trung và hiển thị lỗi nhằm giữ tính nhất quán trong các luồng nghiệp vụ.
+
+Các màn hình minh họa tập trung vào những chức năng cốt lõi của quản trị, gồm trang Restaurant Dashboard (Hình \ref{fig:web-dashboard}), trang Live Orders (Hình \ref{fig:web-live-orders}), trang Quản lý thực đơn (Hình \ref{fig:web-menu-management}) và trang Duyệt đăng ký nhà hàng (Hình \ref{fig:web-approval}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/restaurant-dashboard-desktop.png}
+    \caption{Minh hoạ màn hình Restaurant Dashboard trên hệ thống quản trị}
+    \label{fig:web-dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/restaurant-live-orders-desktop.png}
+    \caption{Minh hoạ màn hình Live Orders trên hệ thống quản trị}
+    \label{fig:web-live-orders}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/restaurant-menu-management-desktop.png}
+    \caption{Minh hoạ màn hình Quản lý thực đơn trên hệ thống quản trị}
+    \label{fig:web-menu-management}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/admin-restaurant-registrations-desktop.png}
+    \caption{Minh hoạ màn hình Duyệt đăng ký nhà hàng trên hệ thống quản trị}
+    \label{fig:web-approval}
+\end{figure}
+
 \subsection{Thiết kế lớp}
 Phần này có độ dài từ ba đến bốn trang. Sinh viên trình bày thiết kế chi tiết các thuộc tính và phương thức cho một số lớp chủ đạo/quan trọng nhất của ứng dụng (từ 2-4 lớp). Thiết kế chi tiết cho các lớp khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
 
 Để minh họa thiết kế lớp, sinh viên thiết kế luồng truyền thông điệp giữa các đối tượng tham gia cho 2 đến 3 use case quan trọng nào đó bằng biểu đồ trình tự (hoặc biểu đồ giao tiếp).
+
 \subsection{Thiết kế cơ sở dữ liệu}
 Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế, vẽ và giải thích biểu đồ thực thể liên kết (E-R diagram). Từ đó, sinh viên thiết kế cơ sở dữ liệu tùy theo hệ quản trị cơ sở dữ liệu mà mình sử dụng (SQL, NoSQL, Firebase, v.v.)
 
