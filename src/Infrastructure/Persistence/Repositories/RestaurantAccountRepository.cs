@@ -47,8 +47,8 @@ public class RestaurantAccountRepository : IRestaurantAccountRepository
         // Use PostgreSQL's UPSERT to handle race conditions atomically
         var sql = """
             INSERT INTO "RestaurantAccounts" ("Id", "RestaurantId", "CurrentBalance_Amount", 
-            "CurrentBalance_Currency", "Created")
-            VALUES ({0}, {1}, 0.00, {2}, {3})
+            "CurrentBalance_Currency", "PendingPayoutTotal_Amount", "PendingPayoutTotal_Currency", "Created")
+            VALUES ({0}, {1}, 0.00, {2}, 0.00, {2}, {3})
             ON CONFLICT ("RestaurantId") DO NOTHING;
             """;
 

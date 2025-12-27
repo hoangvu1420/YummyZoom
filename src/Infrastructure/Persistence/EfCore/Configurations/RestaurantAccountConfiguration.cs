@@ -35,6 +35,17 @@ public class RestaurantAccountConfiguration : IEntityTypeConfiguration<Restauran
                 .HasMaxLength(3);
         });
 
+        // Money VO for pending payout total
+        builder.OwnsOne(a => a.PendingPayoutTotal, moneyBuilder =>
+        {
+            moneyBuilder.Property(m => m.Amount)
+                .HasColumnName("PendingPayoutTotal_Amount")
+                .HasColumnType("decimal(18,2)");
+            moneyBuilder.Property(m => m.Currency)
+                .HasColumnName("PendingPayoutTotal_Currency")
+                .HasMaxLength(3);
+        });
+
         // Optional payout method details VO
         builder.OwnsOne(a => a.PayoutMethodDetails, payoutBuilder =>
         {

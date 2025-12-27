@@ -11,6 +11,7 @@ using YummyZoom.Domain.CustomizationGroupAggregate;
 using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.OrderAggregate;
+using YummyZoom.Domain.PayoutAggregate;
 using YummyZoom.Domain.RestaurantAccountAggregate;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.ReviewAggregate;
@@ -69,6 +70,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<RestaurantAccount> RestaurantAccounts => Set<RestaurantAccount>();
     public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
+    public DbSet<Payout> Payouts => Set<Payout>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<TeamCart> TeamCarts => Set<TeamCart>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();

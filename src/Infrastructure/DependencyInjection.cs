@@ -32,6 +32,7 @@ using YummyZoom.Infrastructure.Media.Cloudinary;
 using YummyZoom.Infrastructure.Media.Fakes;
 using YummyZoom.Infrastructure.Notifications.Firebase;
 using YummyZoom.Infrastructure.Payments.Stripe;
+using YummyZoom.Infrastructure.Payments.Mock;
 using YummyZoom.Infrastructure.Persistence;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Persistence.EfCore.Seeding;
@@ -199,6 +200,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<IInboxStore, InboxStore>();
         builder.Services.AddScoped<ITeamCartRepository, TeamCartRepository>();
         builder.Services.AddScoped<IRestaurantAccountRepository, RestaurantAccountRepository>();
+        builder.Services.AddScoped<IAccountTransactionRepository, AccountTransactionRepository>();
+        builder.Services.AddScoped<IPayoutRepository, PayoutRepository>();
         builder.Services.AddScoped<IRestaurantRegistrationRepository, RestaurantRegistrationRepository>();
         builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
@@ -251,6 +254,11 @@ public static class DependencyInjection
         }
 
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();
+
+        // Mock payout provider (demo)
+        builder.Services.Configure<MockPayoutProviderOptions>(
+            builder.Configuration.GetSection(MockPayoutProviderOptions.SectionName));
+        builder.Services.AddScoped<IPayoutProvider, MockPayoutProvider>();
 
         // Image Proxy
         builder.Services.Configure<Application.Common.Configuration.ImageProxyOptions>(

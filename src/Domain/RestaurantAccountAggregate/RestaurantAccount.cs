@@ -14,6 +14,7 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
 {
     public RestaurantId RestaurantId { get; private set; }
     public Money CurrentBalance { get; private set; }
+    public Money PendingPayoutTotal { get; private set; }
     public PayoutMethodDetails? PayoutMethodDetails { get; private set; }
 
     // Creation audit properties (immutable aggregate)
@@ -24,22 +25,26 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
         RestaurantAccountId id,
         RestaurantId restaurantId,
         Money currentBalance,
+        Money pendingPayoutTotal,
         PayoutMethodDetails? payoutMethodDetails)
         : base(id)
     {
         RestaurantId = restaurantId;
         CurrentBalance = currentBalance;
+        PendingPayoutTotal = pendingPayoutTotal;
         PayoutMethodDetails = payoutMethodDetails;
     }
 
     public static Result<RestaurantAccount> Create(RestaurantId restaurantId)
     {
         var zeroBalance = new Money(0, Currencies.Default);
+        var zeroPendingPayout = new Money(0, Currencies.Default);
 
         var account = new RestaurantAccount(
             RestaurantAccountId.CreateUnique(),
             restaurantId,
             zeroBalance,
+            zeroPendingPayout,
             payoutMethodDetails: null);
 
         account.AddDomainEvent(new RestaurantAccountCreated(
@@ -47,6 +52,54 @@ public sealed class RestaurantAccount : AggregateRoot<RestaurantAccountId, Guid>
             restaurantId));
 
         return Result.Success(account);
+    }
+
+    public Money GetAvailableBalance()
+    {
+        return CurrentBalance - PendingPayoutTotal;
+    }
+
+    public Result ReservePayout(Money holdAmount)
+    {
+        if (holdAmount.Amount <= 0)
+        {
+            return Result.Failure(RestaurantAccountErrors.PayoutHoldMustBePositive(holdAmount));
+        }
+
+        if (holdAmount.Currency != CurrentBalance.Currency)
+        {
+            return Result.Failure(RestaurantAccountErrors.PayoutCurrencyMismatch(CurrentBalance.Currency, holdAmount.Currency));
+        }
+
+        var availableBalance = GetAvailableBalance();
+        if (holdAmount.Amount > availableBalance.Amount)
+        {
+            return Result.Failure(RestaurantAccountErrors.InsufficientAvailableBalance(availableBalance, holdAmount));
+        }
+
+        PendingPayoutTotal += holdAmount;
+        return Result.Success();
+    }
+
+    public Result ReleasePayoutHold(Money releaseAmount)
+    {
+        if (releaseAmount.Amount <= 0)
+        {
+            return Result.Failure(RestaurantAccountErrors.PayoutHoldMustBePositive(releaseAmount));
+        }
+
+        if (releaseAmount.Currency != PendingPayoutTotal.Currency)
+        {
+            return Result.Failure(RestaurantAccountErrors.PayoutCurrencyMismatch(PendingPayoutTotal.Currency, releaseAmount.Currency));
+        }
+
+        if (releaseAmount.Amount > PendingPayoutTotal.Amount)
+        {
+            return Result.Failure(RestaurantAccountErrors.InsufficientPayoutHold(PendingPayoutTotal, releaseAmount));
+        }
+
+        PendingPayoutTotal -= releaseAmount;
+        return Result.Success();
     }
 
     public Result RecordRevenue(Money amount, OrderId orderId)

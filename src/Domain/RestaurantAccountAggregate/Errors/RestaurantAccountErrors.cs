@@ -23,6 +23,18 @@ public static class RestaurantAccountErrors
     public static Error PayoutAmountMustBePositive(Money amount) => Error.Validation(
         "RestaurantAccount.PayoutAmountMustBePositive", $"Payout settlement amount '{amount}' must be positive.");
 
+    public static Error PayoutHoldMustBePositive(Money amount) => Error.Validation(
+        "RestaurantAccount.PayoutHoldMustBePositive", $"Payout hold amount '{amount}' must be positive.");
+
+    public static Error InsufficientAvailableBalance(Money availableBalance, Money holdAmount) => Error.Validation(
+        "RestaurantAccount.InsufficientAvailableBalance", $"Available balance '{availableBalance}' is insufficient for payout hold of '{holdAmount}'.");
+
+    public static Error InsufficientPayoutHold(Money pendingHold, Money releaseAmount) => Error.Validation(
+        "RestaurantAccount.InsufficientPayoutHold", $"Pending payout hold '{pendingHold}' is insufficient to release '{releaseAmount}'.");
+
+    public static Error PayoutCurrencyMismatch(string accountCurrency, string payoutCurrency) => Error.Validation(
+        "RestaurantAccount.PayoutCurrencyMismatch", $"Payout currency '{payoutCurrency}' does not match account currency '{accountCurrency}'.");
+
     public static Error InsufficientBalance(Money currentBalance, Money payoutAmount) => Error.Validation(
         "RestaurantAccount.InsufficientBalance", $"Insufficient balance '{currentBalance}' for payout settlement of '{payoutAmount}'.");
 
