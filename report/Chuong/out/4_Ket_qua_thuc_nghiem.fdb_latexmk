@@ -1,17 +1,17 @@
 # Fdb version 4
-["biber Chuong/out/4_Ket_qua_thuc_nghiem"] 1766681366.51309 "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" "Chuong/out/4_Ket_qua_thuc_nghiem" 1766681630.98801 0
-  "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" 1766681630 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
+["biber Chuong/out/4_Ket_qua_thuc_nghiem"] 1766809967.25036 "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" "Chuong/out/4_Ket_qua_thuc_nghiem" 1766811867.02406 0
+  "Chuong/out/4_Ket_qua_thuc_nghiem.bcf" 1766811866 107415 70803008da0ec2d78e340d6ad7bbeda8 "pdflatex"
   (generated)
   "Chuong/out/4_Ket_qua_thuc_nghiem.bbl"
   "Chuong/out/4_Ket_qua_thuc_nghiem.blg"
   (rewritten before read)
-["pdflatex"] 1766681624.24307 "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" "Chuong/out/4_Ket_qua_thuc_nghiem.pdf" "4_Ket_qua_thuc_nghiem" 1766681630.98876 0
-  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1766681617 34690 8af6d4f52c98a4141b0a1cf186ce9e52 ""
+["pdflatex"] 1766811860.29328 "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" "Chuong/out/4_Ket_qua_thuc_nghiem.pdf" "4_Ket_qua_thuc_nghiem" 1766811867.02494 0
+  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1766811851 36063 e95f2c7cc5962439ce9d8305f84b404b ""
   "Chuong/out/../../DoAn.tex" 1764248572 11928 1ccfd4946766a72273c0826011935213 ""
-  "Chuong/out/4_Ket_qua_thuc_nghiem.aux" 1766681630 10971 23457ebf9307a40f940a05646c46dca4 "pdflatex"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" 1766681439 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/4_Ket_qua_thuc_nghiem"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.out" 1766681630 2389 ebd170b6d15bcfd8b0dd4d41e2b96115 "pdflatex"
-  "Chuong/out/4_Ket_qua_thuc_nghiem.run.xml" 1766681630 2539 6107592f35ea264f427ff550f85ddf6b "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.aux" 1766811866 11718 7f405122ed00f82aced69f01e96243e6 "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.bbl" 1766809969 486 76d65a242ec496c9b4361af646ff12cb "biber Chuong/out/4_Ket_qua_thuc_nghiem"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.out" 1766811866 2389 ebd170b6d15bcfd8b0dd4d41e2b96115 "pdflatex"
+  "Chuong/out/4_Ket_qua_thuc_nghiem.run.xml" 1766811866 2539 6107592f35ea264f427ff550f85ddf6b "pdflatex"
   "Hinhve/admin-restaurant-registrations-desktop.png" 1766575802 252495 a90287db0ba3f1c632da2e1b4ed9e3a1 ""
   "Hinhve/class-MenuItem.png" 1766590766 224988 d80e01d79a658e1d99be836d60471cd9 ""
   "Hinhve/class-Order.png" 1766590837 270671 7c7879c085a8f3e6f8da70364cfc2b9c ""
@@ -224,7 +224,7 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1759742788 5574153 af86687748baf417d9e7d549313527be ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1759742980 3629007 f591f00ca598b3ec52fc9fc6bb645105 ""
   "c:/texlive/2025/texmf.cnf" 1759742755 713 e69b156964470283e0530f5060668171 ""
-  "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" 1766681617 34690 8af6d4f52c98a4141b0a1cf186ce9e52 ""
+  "e:/source/repos/CA/YummyZoom/report/Chuong/4_Ket_qua_thuc_nghiem.tex" 1766811851 36063 e95f2c7cc5962439ce9d8305f84b404b ""
   "lstlisting.tex" 1760548347 1214 943a97e5a33d3c9f2406865fc400a858 ""
   (generated)
   "Chuong/out/4_Ket_qua_thuc_nghiem.aux"

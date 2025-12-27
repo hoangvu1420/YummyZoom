@@ -342,9 +342,43 @@ Trong quá trình phát triển hệ thống YummyZoom, nhóm phát triển đã
 \end{longtable}
 
 \subsection{Kết quả đạt được}
-Sinh viên trước tiên mô tả kết quả đạt được của mình là gì, ví dụ như các sản phẩm được đóng gói là gì, bao gồm những thành phần nào, ý nghĩa, vai trò?
 
-Sinh viên cần thống kê các thông tin về ứng dụng của mình như: số dòng code, số lớp, số gói, dung lượng toàn bộ mã nguồn, dung lượng của từng sản phẩm đóng gói, v.v. Tương tự như phần liệt kê về công cụ sử dụng, sinh viên cũng nên dùng bảng để mô tả phần thông tin thống kê này.
+\subsubsection{Backend}
+Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Core Web API. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:backend-stats}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{6.2cm}|p{3.2cm}|p{5.6cm}|}
+        \hline
+        \textbf{Chỉ tiêu} & \textbf{Giá trị} & \textbf{Ghi chú} \\ \hline
+        Tổng số dòng code & 185{,}965 & Bao gồm comment và dòng trống \\ \hline
+        Số file \texttt{.cs} & 1{,}348 & Toàn bộ backend \\ \hline
+        Số lớp C\# & 1{,}301 & Thống kê theo source code \\ \hline
+        Số bảng CSDL & 49 & Đếm theo \texttt{schema.sql} \\ \hline
+        Dung lượng mã nguồn \texttt{src/} & 103 MB & Sau khi \texttt{dotnet clean} \\ \hline
+        Dung lượng mã nguồn \texttt{tests/} & 179 MB & Sau khi \texttt{dotnet clean} \\ \hline
+        Dung lượng gói publish Release & 34 MB & \texttt{dotnet publish} \\ \hline
+    \end{tabular}
+    \caption{Thống kê kết quả backend}
+    \label{tab:backend-stats}
+\end{table}
+
+\subsubsection{Mobile (Flutter/Dart)}
+Ứng dụng di động dành cho khách hàng được phát triển bằng Flutter/Dart. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:mobile-stats}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{6.2cm}|p{3.2cm}|p{5.6cm}|}
+        \hline
+        \textbf{Chỉ tiêu} & \textbf{Giá trị} & \textbf{Ghi chú} \\ \hline
+        Tổng số dòng code & 45{,}791 & Bao gồm comment và dòng trống \\ \hline
+        Số file \texttt{.dart} & 325 & Toàn bộ ứng dụng mobile \\ \hline
+        Dung lượng mã nguồn & 2.0 MB & Tổng thư mục mã nguồn \texttt{lib/} \\ \hline
+        Dung lượng APK Release & 117.5 MB & Bản build APK \\ \hline
+    \end{tabular}
+    \caption{Thống kê kết quả mobile}
+    \label{tab:mobile-stats}
+\end{table}
 
 \subsection{Minh họa các chức năng chính}
 Sinh viên lựa chọn và đưa ra màn hình cho các chức năng chính, quan trọng, và thú vị nhất. Mỗi giao diện cần phải có lời giải thích ngắn gọn. Khi giải thích, sinh viên có thể kết hợp với các chú thích ở trong hình ảnh giao diện.
