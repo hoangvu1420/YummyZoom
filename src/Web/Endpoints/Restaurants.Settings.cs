@@ -2,6 +2,7 @@ using YummyZoom.Application.Restaurants.Commands.SetRestaurantAcceptingOrders;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantBusinessHours;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantLocation;
 using YummyZoom.Application.Restaurants.Commands.UpdateRestaurantProfile;
+using YummyZoom.Application.Restaurants.Queries.Management.GetRestaurantProfile;
 
 namespace YummyZoom.Web.Endpoints;
 
@@ -9,6 +10,17 @@ public partial class Restaurants
 {
     private static void MapSettings(IEndpointRouteBuilder group)
     {
+        // GET /api/v1/restaurants/{restaurantId}/profile
+        group.MapGet("/{restaurantId:guid}/profile", async (Guid restaurantId, ISender sender) =>
+        {
+            var result = await sender.Send(new GetRestaurantProfileQuery(restaurantId));
+            return result.ToIResult();
+        })
+        .WithName("GetRestaurantProfile")
+        .WithSummary("Get restaurant profile")
+        .WithDescription("Returns the restaurant profile including contact info, business hours, address, and geo coordinates. Requires restaurant staff authorization.")
+        .WithStandardResults<RestaurantProfileDto>();
+
         // PUT /api/v1/restaurants/{restaurantId}/profile
         group.MapPut("/{restaurantId:guid}/profile", async (Guid restaurantId, UpdateProfileRequestDto body, ISender sender) =>
         {

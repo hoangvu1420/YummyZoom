@@ -8,6 +8,61 @@ Cross‑refs: See Authentication (Docs/API-Documentation/02-Authentication.md) f
 
 ---
 
+## GET /restaurants/{restaurantId}/profile
+
+Retrieve the full restaurant profile in a single call (profile basics, contact info, business hours, address, and geo).
+
+- Authorization: Must be authenticated and satisfy policy `MustBeRestaurantStaff` for the specified `restaurantId`.
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type | Description |
+| -------------- | ---- | ----------- |
+| `restaurantId` | UUID | Target restaurant. |
+
+### Response
+
+- 200 OK — returns the restaurant profile.
+
+Example response:
+
+```json
+{
+  "restaurantId": "b1c2d3e4-0000-0000-0000-000000000000",
+  "name": "Pasta Palace",
+  "description": "Fresh handmade pasta.",
+  "logoUrl": "https://cdn.example.com/pasta/logo.png",
+  "phone": "+1 (415) 555-2121",
+  "email": "contact@pastapalace.example",
+  "businessHours": "09:00-17:30",
+  "address": {
+    "street": "123 Market St",
+    "city": "San Francisco",
+    "state": "CA",
+    "zipCode": "94105",
+    "country": "USA"
+  },
+  "latitude": 37.7936,
+  "longitude": -122.3965,
+  "isAcceptingOrders": true,
+  "isVerified": true
+}
+```
+
+#### Error Responses
+
+- 401 Unauthorized — missing/invalid JWT.
+- 403 Forbidden — caller is not staff/owner of `restaurantId`.
+- 404 Not Found — `Management.RestaurantProfile.NotFound`.
+
+### Notes
+
+- This endpoint consolidates profile, contact, hours, address, and geo to reduce client round-trips.
+
+---
+
 ## PUT /restaurants/{restaurantId}/profile
 
 Update basic profile attributes: name, description, logo URL, and/or contact info (phone, email).
