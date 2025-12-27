@@ -251,23 +251,95 @@ Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh v�
 \end{figure}
 
 \subsection{Thiết kế cơ sở dữ liệu}
-Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế, vẽ và giải thích biểu đồ thực thể liên kết (E-R diagram). Từ đó, sinh viên thiết kế cơ sở dữ liệu tùy theo hệ quản trị cơ sở dữ liệu mà mình sử dụng (SQL, NoSQL, Firebase, v.v.)
+Trong dự án YummyZoom, cơ sở dữ liệu được triển khai trên PostgreSQL. Phần thiết kế dữ liệu được trình bày theo hai tầng: mô hình khái niệm bằng ERD kiểu Chen để mô tả thế giới thực và các thực thể nghiệp vụ, và mô hình quan hệ chi tiết phản ánh cấu trúc bảng sau khi ánh xạ vào cơ sở dữ liệu. Nguồn lược đồ tổng hợp được đối chiếu từ tài liệu kiến trúc, nhằm đảm bảo tính nhất quán giữa mô hình miền và dữ liệu lưu trữ.
+
+Biểu đồ ERD khái niệm theo Chen tập trung vào các thực thể cốt lõi như Người dùng, Nhà hàng, Thực đơn, Món ăn, Đơn hàng và Giỏ nhóm, cùng các quan hệ nghiệp vụ giữa chúng. Mỗi thực thể chỉ giữ lại một số thuộc tính chính như định danh, trạng thái, thông tin mô tả và giá trị tiền tệ, giúp làm rõ bức tranh nghiệp vụ mà chưa bị ràng buộc bởi chi tiết triển khai. Hình \ref{fig:erd-chen} mô tả toàn bộ ERD khái niệm, trong đó các quan hệ chính như Nhà hàng–Thực đơn, Người dùng–Đơn hàng, Đơn hàng–Mục đơn hàng và Giỏ nhóm–Thành viên được biểu diễn rõ ràng theo bội số.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/erd.png}
+    \caption{ERD khái niệm theo mô hình Chen cho YummyZoom}
+    \label{fig:erd-chen}
+\end{figure}
+
+Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mapping) từ mô hình miền (domain model) sang cơ sở dữ liệu quan hệ. Mỗi aggregate root được ánh xạ thành một bảng chính, ví dụ Order tương ứng bảng Orders, Restaurant tương ứng bảng Restaurants, TeamCart tương ứng bảng TeamCarts. Các thực thể có danh tính trong một aggregate được tách thành bảng con và liên kết bằng khóa ngoại về bảng gốc, chẳng hạn OrderItems và PaymentTransactions phụ thuộc Orders, TeamCartItems và TeamCartMembers phụ thuộc TeamCarts. Các giá trị bất biến dạng đối tượng giá trị (value object) được ánh xạ thành các cột trong bảng chính với tiền tố tên thuộc tính, ví dụ DeliveryAddress\_Street hoặc TipAmount\_Amount; với các giá trị phức tạp hoặc danh sách linh hoạt thì lưu dưới dạng JSONB để giảm độ phức tạp lược đồ. Quy tắc này được hiện thực nhất quán thông qua cấu hình EF Core (Fluent API) trong các lớp Configuration thuộc tầng Infrastructure, đồng thời các trạng thái dạng enum được lưu dưới dạng chuỗi để dễ đọc và theo dõi. 
+
+Ở mức triển khai vật lý, số lượng bảng lớn được chia nhỏ theo từng nhóm chức năng để trình bày rõ ràng. Hình \ref{fig:erd-catalog} mô tả nhóm Restaurant Catalog, gồm Restaurants, Menus, MenuCategories, MenuItems và các bảng tùy chọn món; nhóm này phản ánh cấu trúc dữ liệu phục vụ duyệt thực đơn và quản trị nội dung. Hình \ref{fig:erd-order-teamcart} trình bày nhóm Order \& TeamCart, làm rõ cấu trúc lưu trữ đơn hàng, mục đơn hàng, thanh toán, giỏ nhóm và thành viên. Hình \ref{fig:erd-identity} thể hiện nhóm Identity \& Access, bao gồm các bảng nhận thực người dùng, bảng người dùng miền và bảng phân quyền nhà hàng. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/erd-restaurant-calatog.png}
+    \caption{ERD hiện đại cho nhóm Restaurant Catalog}
+    \label{fig:erd-catalog}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/erd-order-teamcart.png}
+    \caption{ERD hiện đại cho nhóm Order và TeamCart}
+    \label{fig:erd-order-teamcart}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/erd-identity.png}
+    \caption{ERD hiện đại cho nhóm Identity và RoleAssignment}
+    \label{fig:erd-identity}
+\end{figure}
 
 \section{Xây dựng ứng dụng}
 \subsection{Thư viện và công cụ sử dụng}
-Sinh viên liệt kê các công cụ, ngôn ngữ lập trình, API, thư viện, IDE, công cụ kiểm thử, v.v. mà mình sử dụng để phát triển ứng dụng. Mỗi công cụ phải được chỉ rõ phiên bản sử dụng. SV nên kẻ bảng mô tả tương tự như Bảng \ref{table:my_label}. Nếu có nhiều nội dung trình bày, sinh viên cần xoay ngang bảng.
+Trong quá trình phát triển hệ thống YummyZoom, nhóm phát triển đã lựa chọn và sử dụng một loạt các thư viện và công cụ nhằm tối ưu hóa quy trình làm việc, nâng cao chất lượng mã nguồn và đảm bảo hiệu suất của ứng dụng. Bảng dưới đây liệt kê các công cụ chính cùng với mục đích sử dụng và địa chỉ URL tham khảo.
 
-\begin{table}[H]
-\centering{}
-    \begin{tabular}{lll}
-        \hline
-        \textbf{Mục đích} & \textbf{Công cụ}       & \textbf{Địa chỉ URL}    \\ \hline
-        IDE lập trình     & Eclipse Oxygen a64 bit & http://www.eclipse.org/ \\ \hline
-        v.v.              & v.v.                   & v.v.                    \\ \hline
-        \end{tabular}
+\begin{longtable}{|p{0.27\textwidth}|p{0.2\textwidth}|p{0.45\textwidth}|}
+    \hline
+    \textbf{Mục đích} & \textbf{Công cụ}       & \textbf{Địa chỉ URL}    \\ \hline
+    \endfirsthead
+
+    \multicolumn{3}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+    \hline
+    \endhead
+
+    \hline
+    \multicolumn{3}{r}{\textit{(Tiếp tục trang sau)}} \\
+    \endfoot
+
     \caption{Danh sách thư viện và công cụ sử dụng}
-    \label{table:my_label}
-\end{table}
+    \label{table:my_label} \\
+    \endlastfoot
+
+    IDE lập trình     & Visual Studio Code     & \url{https://code.visualstudio.com/} \\ \hline
+    IDE lập trình cho .NET & JetBrains Rider    & \url{https://www.jetbrains.com/rider/} \\ \hline
+    IDE lập trình cho Android & Android Studio & \url{https://developer.android.com/studio} \\ \hline
+    Quản lý mã nguồn  & Git                    & \url{https://git-scm.com/} \\ \hline
+    Quản lý mã nguồn và CI/CD & GitHub         & \url{https://github.com/} \\ \hline
+    AI hỗ trợ lập trình & GitHub Copilot       & \url{https://github.com/features/copilot} \\ \hline
+    AI hỗ trợ lập trình & Cursor              & \url{https://www.cursor.com/} \\ \hline
+    Backend nền tảng  & .NET 9.0               & \url{https://dotnet.microsoft.com/} \\ \hline
+    Backend framework & ASP.NET Core           & \url{https://learn.microsoft.com/aspnet/core/} \\ \hline
+    ORM/DAL           & Entity Framework Core  & \url{https://learn.microsoft.com/ef/core/} \\ \hline
+    Backend kiểm thử  & NUnit                  & \url{https://nunit.org/} \\ \hline
+    Backend kiểm thử  & Testcontainers         & \url{https://testcontainers.com/} \\ \hline
+    Công cụ quản lý runtime & .NET Aspire     & \url{https://learn.microsoft.com/dotnet/aspire/} \\ \hline
+    Cơ sở dữ liệu     & PostgreSQL             & \url{https://www.postgresql.org/} \\ \hline
+    Bộ nhớ đệm        & Redis                  & \url{https://redis.io/} \\ \hline
+    Mobile framework  & Flutter                & \url{https://flutter.dev/} \\ \hline
+    Mobile ngôn ngữ   & Dart                   & \url{https://dart.dev/} \\ \hline
+    Mobile UI/UX      & Flutter Material       & \url{https://docs.flutter.dev/ui/widgets/material} \\ \hline
+    Mobile quản lý trạng thái      & Provider               & \url{https://pub.dev/packages/provider} \\ \hline
+    Mobile lưu trữ    & Hive                   & \url{https://pub.dev/packages/hive} \\ \hline
+    Mobile bản đồ        & Mapbox                 & \url{https://www.mapbox.com/} \\ \hline
+    Mobile thông báo đẩy & Firebase Messaging & \url{https://firebase.google.com/docs/cloud-messaging} \\ \hline
+    Mobile payment    & flutter\_stripe        & \url{https://pub.dev/packages/flutter_stripe} \\ \hline
+    Web admin framework & Angular             & \url{https://angular.dev/} \\ \hline
+    Web admin ngôn ngữ & TypeScript           & \url{https://www.typescriptlang.org/} \\ \hline
+    Web admin UI      & PrimeNG + PrimeIcons   & \url{https://primeng.org/} \\ \hline
+    Web admin UI      & Tailwind CSS           & \url{https://tailwindcss.com/} \\ \hline
+    Web admin cộng tác thời gian thực & SignalR JS Client & \url{https://learn.microsoft.com/aspnet/core/signalr/javascript-client} \\ \hline
+    Dịch vụ bản đồ    & Mapbox API             & \url{https://docs.mapbox.com/} \\ \hline
+    Dịch vụ thông báo & Firebase Messaging                    & \url{https://firebase.google.com/} \\ \hline
+    Dịch vụ thanh toán & Stripe                & \url{https://stripe.com/} \\ \hline
+\end{longtable}
 
 \subsection{Kết quả đạt được}
 Sinh viên trước tiên mô tả kết quả đạt được của mình là gì, ví dụ như các sản phẩm được đóng gói là gì, bao gồm những thành phần nào, ý nghĩa, vai trò?
