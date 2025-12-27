@@ -7,6 +7,8 @@ using YummyZoom.Domain.MenuEntity;
 using YummyZoom.Domain.MenuEntity.ValueObjects;
 using YummyZoom.Domain.MenuItemAggregate;
 using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
+using YummyZoom.Domain.RestaurantAccountAggregate;
+using YummyZoom.Domain.RestaurantAccountAggregate.ValueObjects;
 using YummyZoom.Domain.RestaurantAggregate;
 using YummyZoom.Domain.TagEntity;
 using YummyZoom.Domain.TagEntity.Enums;
@@ -162,6 +164,41 @@ public class RestaurantBundleSeeder : ISeeder
                 }
 
                 skipped.Restaurants++;
+            }
+
+            if (!opts.ReportOnly && restaurant is not null)
+            {
+                var account = await context.DbContext.RestaurantAccounts
+                    .FirstOrDefaultAsync(a => a.RestaurantId == restaurant.Id, cancellationToken);
+
+                if (account is null)
+                {
+                    var accountResult = RestaurantAccount.Create(restaurant.Id);
+                    if (accountResult.IsFailure)
+                    {
+                        logger.LogWarning("Failed to create restaurant account for {Restaurant}: {Error}", restaurant.Name, accountResult.Error.Description);
+                    }
+                    else
+                    {
+                        account = accountResult.Value;
+                        account.ClearDomainEvents();
+                        context.DbContext.RestaurantAccounts.Add(account);
+                    }
+                }
+
+                if (account is not null && account.PayoutMethodDetails is null)
+                {
+                    var payoutMethodResult = PayoutMethodDetails.Create("Seeded demo bank: ****1234");
+                    if (payoutMethodResult.IsFailure)
+                    {
+                        logger.LogWarning("Failed to set payout method for {Restaurant}: {Error}", restaurant.Name, payoutMethodResult.Error.Description);
+                    }
+                    else
+                    {
+                        account.UpdatePayoutMethod(payoutMethodResult.Value);
+                        account.ClearDomainEvents();
+                    }
+                }
             }
 
             // Store slug-to-ID mapping in SharedData for other seeders (e.g., CouponBundleSeeder)

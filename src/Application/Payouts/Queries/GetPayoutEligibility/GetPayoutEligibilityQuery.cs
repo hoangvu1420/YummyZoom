@@ -71,11 +71,12 @@ public sealed class GetPayoutEligibilityQueryHandler
             WHERE "RestaurantId" = @RestaurantId
             """;
 
-        var latestCompletedAt = await connection.ExecuteScalarAsync<DateTimeOffset?>(
+        var latestCompletedAt = await connection.ExecuteScalarAsync<DateTime?>(
             new CommandDefinition(latestCompletedSql, new { RestaurantId = request.RestaurantGuid }, cancellationToken: cancellationToken));
 
-        var cadenceAnchor = latestCompletedAt ?? await connection.ExecuteScalarAsync<DateTimeOffset?>(
-            new CommandDefinition(latestRequestedSql, new { RestaurantId = request.RestaurantGuid }, cancellationToken: cancellationToken));
+        var cadenceAnchor = ToUtcOffset(latestCompletedAt) ?? ToUtcOffset(
+            await connection.ExecuteScalarAsync<DateTime?>(
+                new CommandDefinition(latestRequestedSql, new { RestaurantId = request.RestaurantGuid }, cancellationToken: cancellationToken)));
 
         var now = DateTimeOffset.UtcNow;
         DateTimeOffset? nextEligibleAt = null;
@@ -113,6 +114,20 @@ public sealed class GetPayoutEligibilityQueryHandler
             account.Currency);
 
         return Result.Success(dto);
+    }
+
+    private static DateTimeOffset? ToUtcOffset(DateTime? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var utcValue = value.Value.Kind == DateTimeKind.Utc
+            ? value.Value
+            : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
+
+        return new DateTimeOffset(utcValue);
     }
 
     private sealed record AccountRow(

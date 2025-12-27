@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Payouts.Commands.CompletePayout;
 using YummyZoom.Application.Payouts.Commands.FailPayout;
@@ -10,16 +11,16 @@ namespace YummyZoom.Infrastructure.Payments.Mock;
 
 public sealed class MockPayoutProvider : IPayoutProvider
 {
-    private readonly IMediator _mediator;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly MockPayoutProviderOptions _options;
     private readonly ILogger<MockPayoutProvider> _logger;
 
     public MockPayoutProvider(
-        IMediator mediator,
+        IServiceScopeFactory scopeFactory,
         IOptions<MockPayoutProviderOptions> options,
         ILogger<MockPayoutProvider> logger)
     {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -42,14 +43,17 @@ public sealed class MockPayoutProvider : IPayoutProvider
             {
                 await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, _options.ProcessingDelaySeconds)), CancellationToken.None);
 
+                using var scope = _scopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
                 if (_options.ForceFailure)
                 {
-                    await _mediator.Send(new FailPayoutCommand(request.PayoutId, _options.FailureReason));
+                    await mediator.Send(new FailPayoutCommand(request.PayoutId, _options.FailureReason));
                     _logger.LogInformation("Mock payout failed for {PayoutId}", request.PayoutId);
                 }
                 else
                 {
-                    await _mediator.Send(new CompletePayoutCommand(request.PayoutId, providerReferenceId));
+                    await mediator.Send(new CompletePayoutCommand(request.PayoutId, providerReferenceId));
                     _logger.LogInformation("Mock payout completed for {PayoutId}", request.PayoutId);
                 }
             }
