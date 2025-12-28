@@ -13,8 +13,10 @@ public class LookupDto
     {
         public Mapping()
         {
-            CreateMap<TodoList, LookupDto>();
-            CreateMap<TodoItem, LookupDto>();
+            CreateMap<TodoList, LookupDto>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id.Value.GetHashCode()));
+            CreateMap<TodoItem, LookupDto>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id.Value.GetHashCode()));
         }
     }
 }

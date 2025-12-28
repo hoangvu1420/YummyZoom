@@ -82,7 +82,9 @@ public class MenuManagementContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        raw.Should().Contain("\"status\":400").And.Contain("\"title\":\"Menu\"");
+        var problem = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
+        problem!.Status.Should().Be(400);
+        problem.Title.Should().Be("Menu.InvalidName");
     }
 
     [Test]

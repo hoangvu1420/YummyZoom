@@ -99,7 +99,7 @@ public class TeamCartConversionContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotReadyToConfirm");
     }
 
     [Test]
@@ -137,7 +137,7 @@ public class TeamCartConversionContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("ConvertTeamCartToOrder");
+        problem.Title.Should().Be("ConvertTeamCartToOrder.InvalidAddress");
     }
 
     [Test]
@@ -175,7 +175,7 @@ public class TeamCartConversionContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotFound");
     }
 
     [Test]
@@ -213,7 +213,7 @@ public class TeamCartConversionContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotHost");
     }
 
     [Test]
@@ -302,4 +302,3 @@ public class TeamCartConversionContractTests
 
     #endregion
 }
-

@@ -96,7 +96,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("MenuItem");
+        problem.Title.Should().Be("MenuItem.NotFound");
     }
 
     [Test]
@@ -131,7 +131,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("AddItemToTeamCart");
+        problem.Title.Should().Be("AddItemToTeamCart.InvalidQuantity");
     }
 
     [Test]
@@ -228,7 +228,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("UpdateTeamCartItemQuantity");
+        problem.Title.Should().Be("UpdateTeamCartItemQuantity.InvalidQuantity");
     }
 
     [Test]
@@ -268,7 +268,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("TeamCartItem");
+        problem.Title.Should().Be("TeamCartItem.NotFound");
     }
 
     #endregion
@@ -329,7 +329,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("TeamCartItem");
+        problem.Title.Should().Be("TeamCartItem.NotFound");
     }
 
     [Test]
@@ -356,7 +356,7 @@ public class TeamCartItemsContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCartItem");
+        problem.Title.Should().Be("TeamCartItem.NotOwner");
     }
 
     [Test]
@@ -379,4 +379,3 @@ public class TeamCartItemsContractTests
 
     #endregion
 }
-

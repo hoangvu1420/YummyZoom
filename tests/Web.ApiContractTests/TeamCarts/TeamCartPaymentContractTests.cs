@@ -33,7 +33,7 @@ public class TeamCartPaymentContractTests
             req.Should().BeOfType<LockTeamCartForPaymentCommand>();
             var cmd = (LockTeamCartForPaymentCommand)req;
             cmd.TeamCartId.Should().Be(cartId);
-            return Result.Success();
+            return Result.Success(new LockTeamCartForPaymentResponse(1));
         });
 
         var path = $"/api/v1/team-carts/{cartId}/lock";
@@ -45,7 +45,9 @@ public class TeamCartPaymentContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}");
         TestContext.WriteLine(rawResponse);
 
-        resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var doc = JsonDocument.Parse(rawResponse);
+        doc.RootElement.GetProperty("quoteVersion").GetInt64().Should().Be(1);
     }
 
     [Test]
@@ -56,7 +58,7 @@ public class TeamCartPaymentContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "host-user");
 
         var cartId = Guid.NewGuid();
-        factory.Sender.RespondWith(_ => Result.Failure(
+        factory.Sender.RespondWith(_ => Result.Failure<LockTeamCartForPaymentResponse>(
             Error.Validation("TeamCart.EmptyCart", "Cannot lock empty cart for payment")));
 
         var path = $"/api/v1/team-carts/{cartId}/lock";
@@ -71,7 +73,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.EmptyCart");
     }
 
     [Test]
@@ -82,7 +84,7 @@ public class TeamCartPaymentContractTests
         client.DefaultRequestHeaders.Add("x-test-user-id", "not-host-user");
 
         var cartId = Guid.NewGuid();
-        factory.Sender.RespondWith(_ => Result.Failure(
+        factory.Sender.RespondWith(_ => Result.Failure<LockTeamCartForPaymentResponse>(
             Error.Failure("TeamCart.NotHost", "Only the host can lock the cart")));
 
         var path = $"/api/v1/team-carts/{cartId}/lock";
@@ -97,7 +99,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotHost");
     }
 
     #endregion
@@ -164,7 +166,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("ApplyTipToTeamCart");
+        problem.Title.Should().Be("ApplyTipToTeamCart.InvalidAmount");
     }
 
     [Test]
@@ -194,7 +196,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.InvalidStatus");
     }
 
     #endregion
@@ -261,7 +263,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("Coupon");
+        problem.Title.Should().Be("Coupon.NotFound");
     }
 
     #endregion
@@ -319,7 +321,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NoCouponApplied");
     }
 
     #endregion
@@ -377,7 +379,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.InvalidStatus");
     }
 
     #endregion
@@ -441,7 +443,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("PaymentGateway");
+        problem.Title.Should().Be("PaymentGateway.ServiceError");
     }
 
     [Test]
@@ -467,7 +469,7 @@ public class TeamCartPaymentContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(409);
-        problem.Title.Should().Be("MemberPayment");
+        problem.Title.Should().Be("MemberPayment.AlreadyCommitted");
     }
 
     [Test]
@@ -490,4 +492,3 @@ public class TeamCartPaymentContractTests
 
     #endregion
 }
-

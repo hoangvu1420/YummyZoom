@@ -20,7 +20,8 @@ public class TodoItemDto
         {
             CreateMap<TodoItem, TodoItemDto>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id.Value))
-                .ForMember(d => d.Priority, opt => opt.MapFrom(s => (int)s.Priority));
+                .ForMember(d => d.Priority, opt => opt.MapFrom(s => (int)s.Priority))
+                .ForMember(d => d.Done, opt => opt.MapFrom(s => s.IsDone));
         }
     }
 }

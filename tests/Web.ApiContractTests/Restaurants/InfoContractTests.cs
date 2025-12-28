@@ -77,7 +77,7 @@ public class InfoContractTests
         root.GetProperty("name").GetString().Should().Be("Test Restaurant");
         root.GetProperty("logoUrl").GetString().Should().Be("https://example.com/logo.png");
         root.GetProperty("isAcceptingOrders").GetBoolean().Should().BeTrue();
-        root.GetProperty("city").GetString().Should().Be("Metro City");
+        root.GetProperty("address").GetProperty("city").GetString().Should().Be("Metro City");
 
         // Assert cuisineTags is an array
         var cuisineTags = root.GetProperty("cuisineTags");

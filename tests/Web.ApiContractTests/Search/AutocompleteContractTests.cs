@@ -75,7 +75,7 @@ public class AutocompleteContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Search");
+        prob.Title.Should().Be("Search.Autocomplete.Invalid");
     }
 
     [Test]
@@ -103,4 +103,3 @@ public class AutocompleteContractTests
         doc.RootElement.GetArrayLength().Should().Be(0);
     }
 }
-

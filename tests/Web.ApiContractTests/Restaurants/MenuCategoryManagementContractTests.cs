@@ -149,7 +149,9 @@ public class MenuCategoryManagementContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        raw.Should().Contain("\"status\":400").And.Contain("\"title\":\"MenuCategory\"");
+        var problem = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
+        problem!.Status.Should().Be(400);
+        problem.Title.Should().Be("MenuCategory.InvalidName");
     }
 
     [Test]
@@ -327,7 +329,9 @@ public class MenuCategoryManagementContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        raw.Should().Contain("\"status\":409").And.Contain("\"title\":\"MenuCategory\"");
+        var problem = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
+        problem!.Status.Should().Be(409);
+        problem.Title.Should().Be("MenuCategory.HasMenuItems");
     }
 
     #endregion

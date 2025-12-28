@@ -44,7 +44,7 @@ public class TeamCartReadyContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}");
         TestContext.WriteLine(rawResponse);
 
-        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Test]
@@ -74,6 +74,6 @@ public class TeamCartReadyContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.UserNotMember");
     }
 }

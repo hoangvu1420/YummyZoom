@@ -78,7 +78,8 @@ public class MenuItemPriceContractTests
         var resp = await client.PutAsJsonAsync(path, body, DomainJson.Options);
         var raw = await resp.Content.ReadAsStringAsync();
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        raw.Should().Contain("\"status\":400").And.Contain("\"title\":\"MenuItem\"");
+        var problem = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
+        problem!.Status.Should().Be(400);
+        problem.Title.Should().Be("MenuItem.Invalid");
     }
 }
-

@@ -6,6 +6,16 @@ This document captures recurring issues seen in functional test failures, along 
 ## Notable Issues
 - Assertions relied on hardcoded amounts or counts that no longer match seeded data.
 - Contract tests assumed ProblemDetails Title used a short resource name ("Order"), but API now returns full error codes (e.g., "Order.NotFound").
+- Menu/menu item contract tests used short ProblemDetails titles; API now emits full error codes (e.g., "Menu.InvalidName", "MenuItem.Invalid").
+- Search contract tests used short ProblemDetails titles; API now emits full error codes (e.g., "Search.Invalid", "Search.Autocomplete.Invalid").
+- SearchRestaurantsQuery contract stubs must return SearchRestaurantsResult (e.g., RestaurantSearchPageResult) rather than a raw PaginatedList.
+- Team cart conversion contract tests used short ProblemDetails titles; API now emits full error codes (e.g., "TeamCart.NotReadyToConfirm", "ConvertTeamCartToOrder.InvalidAddress").
+- Team cart items contract tests used short ProblemDetails titles; API now emits full error codes (e.g., "MenuItem.NotFound", "TeamCartItem.NotOwner", "UpdateTeamCartItemQuantity.InvalidQuantity").
+- Team cart payment contract tests used short ProblemDetails titles; API now emits full error codes (e.g., "TeamCart.EmptyCart", "ApplyTipToTeamCart.InvalidAmount", "PaymentGateway.ServiceError").
+- LockTeamCartForPayment contract tests must return Result<LockTeamCartForPaymentResponse> and expect 200 with `quoteVersion`.
+- Team cart ready contract tests used 200 OK and short ProblemDetails titles; API now returns 204 NoContent and full error code (e.g., "TeamCart.UserNotMember").
+- AutoMapper config can fail when mapping TodoList/TodoItem to LookupDto because Id is Guid; map to `Id.Value.GetHashCode()` or adjust DTO type to avoid unmapped Id.
+- Restaurant info contract tests assumed `city` was a top-level field; DTO now nests it under `address`.
 - Functional tests created orders with mismatched currencies (USD vs VND) leading to Money addition exceptions.
 - MenuTestDataFactory defaults to USD when PriceCurrency is omitted, which can break order creation under VND pricing.
 - Team cart COD payment tests assumed payments are allowed on Locked carts and that empty carts fail, but the domain now requires Finalized status and returns success for members with no items.
@@ -47,6 +57,8 @@ This document captures recurring issues seen in functional test failures, along 
 ## Solutions Applied
 - Replace hardcoded totals with values derived from seeded entities (menu item prices, currency).
 - Update ProblemDetails title assertions to match the full error code when APIs return Error.Code in Title.
+- Wrap restaurant search results in RestaurantSearchPageResult when stubbing SearchRestaurantsQuery.
+- Read restaurant location fields from `address` in contract tests instead of top-level properties.
 - Use default restaurant/menu items to keep currency aligned with VND pricing.
 - Set PriceCurrency explicitly for MenuTestDataFactory items or normalize item currency before ordering.
 - Batch service replacements in functional tests using `Testing.ReplaceServices(...)` to rebuild the host once per test instead of per mock, cutting startup/seed time while preserving behavior and logs.

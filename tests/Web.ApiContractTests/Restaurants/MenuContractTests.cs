@@ -147,6 +147,6 @@ public class MenuContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(404);
-        prob.Title.Should().Be("Public");
+        prob.Title.Should().Be("Public.GetFullMenu.NotFound");
     }
 }

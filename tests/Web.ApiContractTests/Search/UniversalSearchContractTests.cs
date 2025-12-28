@@ -240,6 +240,6 @@ public class UniversalSearchContractTests
 
         var prob = JsonSerializer.Deserialize<ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Search");
+        prob.Title.Should().Be("Search.Invalid");
     }
 }
