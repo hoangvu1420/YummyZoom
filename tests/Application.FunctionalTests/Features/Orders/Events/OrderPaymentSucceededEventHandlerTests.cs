@@ -19,8 +19,6 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
     public async Task SetUpUserAndPaymentGateway()
     {
         SetUserId(Testing.TestData.DefaultCustomerId);
-        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(paymentGatewayMock.Object);
         await Task.CompletedTask;
     }
 
@@ -57,7 +55,7 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<NotificationTarget>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
+        ReplaceOrderDependencies(notifierMock);
 
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
         var response = await SendAndUnwrapAsync(cmd);
@@ -181,7 +179,7 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<NotificationTarget>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
+        ReplaceOrderDependencies(notifierMock);
 
         var response = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard));
         targetOrderId = response.OrderId.Value;
@@ -256,5 +254,15 @@ public class OrderPaymentSucceededEventHandlerTests : BaseTestFixture
             .ToList();
         outbox.Should().HaveCount(2);
         outbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+    }
+
+    private static void ReplaceOrderDependencies(Mock<IOrderRealtimeNotifier> notifierMock)
+    {
+        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = paymentGatewayMock.Object;
+            replacements[typeof(IOrderRealtimeNotifier)] = notifierMock.Object;
+        });
     }
 }

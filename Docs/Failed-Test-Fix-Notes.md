@@ -5,6 +5,7 @@ This document captures recurring issues seen in functional test failures, along 
 
 ## Notable Issues
 - Assertions relied on hardcoded amounts or counts that no longer match seeded data.
+- Contract tests assumed ProblemDetails Title used a short resource name ("Order"), but API now returns full error codes (e.g., "Order.NotFound").
 - Functional tests created orders with mismatched currencies (USD vs VND) leading to Money addition exceptions.
 - MenuTestDataFactory defaults to USD when PriceCurrency is omitted, which can break order creation under VND pricing.
 - Team cart COD payment tests assumed payments are allowed on Locked carts and that empty carts fail, but the domain now requires Finalized status and returns success for members with no items.
@@ -45,8 +46,10 @@ This document captures recurring issues seen in functional test failures, along 
 
 ## Solutions Applied
 - Replace hardcoded totals with values derived from seeded entities (menu item prices, currency).
+- Update ProblemDetails title assertions to match the full error code when APIs return Error.Code in Title.
 - Use default restaurant/menu items to keep currency aligned with VND pricing.
 - Set PriceCurrency explicitly for MenuTestDataFactory items or normalize item currency before ordering.
+- Batch service replacements in functional tests using `Testing.ReplaceServices(...)` to rebuild the host once per test instead of per mock, cutting startup/seed time while preserving behavior and logs.
 - Finalize team cart pricing before COD commits and ensure the open-cart failure path includes member items; assert `CanOnlyPayOnFinalizedCart`.
 - Finalize pricing before committing COD in conversion scenarios so the cart reaches ReadyToConfirm prior to Convert.
 - Finalize pricing before initiating online payment in Stripe webhook tests.
@@ -71,3 +74,12 @@ This document captures recurring issues seen in functional test failures, along 
 - If MenuTestDataFactory is used, always set PriceCurrency to match StaticPricingService.
 - If EF Core warnings are configured to throw, avoid query paths that implicitly include multiple collections.
 - When asserting outbox processing, ensure the table is clean or the drain timeout is sufficient.
+- For long-running order event handler tests that replace multiple services, refactor to a single `ReplaceServices` call to avoid multiple WebApplicationFactory rebuilds. Example pattern:
+```csharp
+ReplaceServices(replacements =>
+{
+    replacements[typeof(IPaymentGatewayService)] = paymentGatewayMock.Object;
+    replacements[typeof(IOrderRealtimeNotifier)] = notifierMock.Object;
+    replacements[typeof(IFcmService)] = fcmMock.Object;
+});
+```

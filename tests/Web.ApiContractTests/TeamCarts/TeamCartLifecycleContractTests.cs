@@ -98,7 +98,7 @@ public class TeamCartLifecycleContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("CreateTeamCart");
+        problem.Title.Should().Be("CreateTeamCart.RestaurantNotFound");
     }
 
     [Test]
@@ -179,7 +179,7 @@ public class TeamCartLifecycleContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotFound");
     }
 
     [Test]
@@ -259,7 +259,7 @@ public class TeamCartLifecycleContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.NotFound");
     }
 
     #endregion
@@ -327,7 +327,7 @@ public class TeamCartLifecycleContractTests
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = JsonSerializer.Deserialize<ProblemDetails>(rawResponse);
         problem!.Status.Should().Be(400);
-        problem.Title.Should().Be("TeamCart");
+        problem.Title.Should().Be("TeamCart.InvalidShareToken");
     }
 
     #endregion
@@ -387,4 +387,3 @@ public class TeamCartLifecycleContractTests
 
     #endregion
 }
-

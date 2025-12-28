@@ -27,10 +27,6 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Authenticate as default customer (authorization pipeline requires a user)
         SetUserId(Testing.TestData.DefaultCustomerId);
 
-        // Mock payment gateway (order initiation uses payment service for non-COD methods)
-        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(paymentGatewayMock.Object);
-
         await Task.CompletedTask;
     }
 
@@ -71,8 +67,6 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             })
             .Returns(Task.CompletedTask);
 
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
-
         // FCM mock to verify data push
         var fcmMock = new Mock<IFcmService>(MockBehavior.Strict);
         fcmMock.Setup(m => m.SendMulticastDataAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<Dictionary<string, string>>()))
@@ -84,7 +78,8 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             .ReturnsAsync(Result.Success());
         fcmMock.Setup(m => m.SendDataMessageAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
             .ReturnsAsync(Result.Success());
-        ReplaceService<IFcmService>(fcmMock.Object);
+
+        ReplaceOrderDependencies(notifierMock, fcmMock);
 
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
@@ -206,8 +201,6 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             })
             .Returns(Task.CompletedTask);
 
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
-
         // Create placed order
         var initResponse = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
         targetOrderId = initResponse.OrderId.Value;
@@ -219,6 +212,8 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
                 "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
                 $"%{targetOrderId}%");
         }
+
+        ReplaceOrderDependencies(notifierMock);
 
         await DrainOutboxAsync(); // Process OrderPlaced
 
@@ -273,5 +268,19 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             .ToList();
         outboxMessages.Should().ContainSingle();
         outboxMessages.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+    }
+
+    private static void ReplaceOrderDependencies(Mock<IOrderRealtimeNotifier> notifierMock, Mock<IFcmService>? fcmMock = null)
+    {
+        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = paymentGatewayMock.Object;
+            replacements[typeof(IOrderRealtimeNotifier)] = notifierMock.Object;
+            if (fcmMock != null)
+            {
+                replacements[typeof(IFcmService)] = fcmMock.Object;
+            }
+        });
     }
 }

@@ -22,8 +22,6 @@ public class OrderCancelledEventHandlerTests : BaseTestFixture
     public async Task SetUpUserAndPaymentGateway()
     {
         SetUserId(Testing.TestData.DefaultCustomerId);
-        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(paymentGatewayMock.Object);
         await Task.CompletedTask;
     }
 
@@ -53,7 +51,7 @@ public class OrderCancelledEventHandlerTests : BaseTestFixture
                 }
             })
             .Returns(Task.CompletedTask);
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
+        ReplaceOrderDependencies(notifierMock);
 
         // Create placed order (COD) and drain OrderPlaced
         var init = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
@@ -157,7 +155,7 @@ public class OrderCancelledEventHandlerTests : BaseTestFixture
                 }
             })
             .Returns(Task.CompletedTask);
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
+        ReplaceOrderDependencies(notifierMock);
 
         var init = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
         targetOrderId = init.OrderId.Value;
@@ -217,5 +215,15 @@ public class OrderCancelledEventHandlerTests : BaseTestFixture
             .ToList();
         outbox.Should().ContainSingle();
         outbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
+    }
+
+    private static void ReplaceOrderDependencies(Mock<IOrderRealtimeNotifier> notifierMock)
+    {
+        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = paymentGatewayMock.Object;
+            replacements[typeof(IOrderRealtimeNotifier)] = notifierMock.Object;
+        });
     }
 }

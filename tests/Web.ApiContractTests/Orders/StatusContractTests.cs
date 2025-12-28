@@ -31,6 +31,6 @@ public class StatusContractTests
         TestContext.WriteLine(raw);
         var problem = System.Text.Json.JsonSerializer.Deserialize<ProblemDetails>(raw);
         problem!.Status.Should().Be(404);
-        problem.Title.Should().Be("Order");
+        problem.Title.Should().Be("Order.NotFound");
     }
 }

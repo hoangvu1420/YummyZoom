@@ -169,6 +169,14 @@ public partial class Testing
     }
 
     /// <summary>
+    /// Replaces multiple services in a single container rebuild.
+    /// </summary>
+    public static void ReplaceServices(Action<IDictionary<Type, object>> configure)
+    {
+        TestInfrastructure.ReplaceServices(configure);
+    }
+
+    /// <summary>
     /// Clears all service replacements and resets to original factory.
     /// </summary>
     public static async Task ResetServiceReplacements()

@@ -25,10 +25,6 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
         // Authenticate as default customer (authorization pipeline requires a user)
         SetUserId(Testing.TestData.DefaultCustomerId);
 
-        // Mock payment gateway (order initiation uses payment service for non-COD methods)
-        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(paymentGatewayMock.Object);
-
         await Task.CompletedTask;
     }
 
@@ -69,8 +65,6 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
             })
             .Returns(Task.CompletedTask);
 
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
-
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
@@ -83,6 +77,8 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
                 "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
                 $"%{targetOrderId}%");
         }
+
+        ReplaceOrderDependencies(notifierMock);
 
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
@@ -263,8 +259,6 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
             })
             .Returns(Task.CompletedTask);
 
-        ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
-
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
@@ -277,6 +271,8 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
                 "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
                 $"%{targetOrderId}%");
         }
+
+        ReplaceOrderDependencies(notifierMock);
 
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
@@ -395,5 +391,15 @@ public class OrderReadyForDeliveryEventHandlerTests : BaseTestFixture
             processedOutbox.Should().ContainSingle();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
+    }
+
+    private static void ReplaceOrderDependencies(Mock<IOrderRealtimeNotifier> notifierMock)
+    {
+        var paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = paymentGatewayMock.Object;
+            replacements[typeof(IOrderRealtimeNotifier)] = notifierMock.Object;
+        });
     }
 }

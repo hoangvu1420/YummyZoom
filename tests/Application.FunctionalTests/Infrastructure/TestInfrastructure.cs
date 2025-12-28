@@ -164,6 +164,17 @@ public static class TestInfrastructure
     }
 
     /// <summary>
+    /// Applies multiple service replacements in a single container rebuild.
+    /// </summary>
+    public static void ReplaceServices(Action<IDictionary<Type, object>> configure)
+    {
+        if (configure == null) throw new ArgumentNullException(nameof(configure));
+
+        configure(_serviceReplacements);
+        RebuildContainerWithReplacements();
+    }
+
+    /// <summary>
     /// Clears all service replacements and resets to original factory.
     /// </summary>
     public static async Task ResetServiceReplacements()

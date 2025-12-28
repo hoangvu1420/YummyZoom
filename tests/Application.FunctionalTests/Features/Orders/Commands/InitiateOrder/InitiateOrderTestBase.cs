@@ -30,7 +30,10 @@ public abstract class InitiateOrderTestBase : BaseTestFixture
         PaymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
 
         // Replace the payment gateway service with our mock
-        ReplaceService(PaymentGatewayMock.Object);
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = PaymentGatewayMock.Object;
+        });
 
         await Task.CompletedTask; // Placeholder for any async setup logic
     }

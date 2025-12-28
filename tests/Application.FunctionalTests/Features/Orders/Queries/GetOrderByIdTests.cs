@@ -24,7 +24,10 @@ public class GetOrderByIdTests : BaseTestFixture
 
         // Mock payment gateway to avoid external calls during order creation
         _paymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(_paymentGatewayMock.Object);
+        ReplaceServices(replacements =>
+        {
+            replacements[typeof(IPaymentGatewayService)] = _paymentGatewayMock.Object;
+        });
 
         await Task.CompletedTask;
     }

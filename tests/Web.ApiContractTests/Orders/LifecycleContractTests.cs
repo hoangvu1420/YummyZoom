@@ -236,7 +236,7 @@ public class LifecycleContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
         prob!.Status.Should().Be(404);
-        prob.Title.Should().Be("Order");
+        prob.Title.Should().Be("Order.NotFound");
     }
 
     [Test]
@@ -256,7 +256,7 @@ public class LifecycleContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
-        prob!.Title.Should().Be("Order");
+        prob!.Title.Should().Be("Order.NotFound");
     }
 
     [Test]
@@ -275,7 +275,7 @@ public class LifecycleContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
         prob!.Status.Should().Be(404);
-        prob.Title.Should().Be("Order");
+        prob.Title.Should().Be("Order.NotFound");
     }
 
     #endregion
@@ -300,7 +300,7 @@ public class LifecycleContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
         prob!.Status.Should().Be(409);
-        prob.Title.Should().Be("Order");
+        prob.Title.Should().Be("Order.InvalidState");
     }
 
     [Test]
@@ -320,7 +320,7 @@ public class LifecycleContractTests
         var raw = await resp.Content.ReadAsStringAsync();
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
-        prob!.Title.Should().Be("Order");
+        prob!.Title.Should().Be("Order.InvalidState");
     }
 
     #endregion
@@ -345,7 +345,7 @@ public class LifecycleContractTests
         TestContext.WriteLine($"RESPONSE {(int)resp.StatusCode} {resp.StatusCode}\n{raw}");
         var prob = JsonSerializer.Deserialize<Microsoft.AspNetCore.Mvc.ProblemDetails>(raw);
         prob!.Status.Should().Be(400);
-        prob.Title.Should().Be("Order");
+        prob.Title.Should().Be("Order.InvalidEstimatedDeliveryTime");
     }
 
     #endregion
