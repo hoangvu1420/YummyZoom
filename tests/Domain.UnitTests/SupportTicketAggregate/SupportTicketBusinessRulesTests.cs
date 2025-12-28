@@ -175,8 +175,11 @@ public class SupportTicketBusinessRulesTests
         ticket.UpdatePriority(newPriority, adminId);
 
         // Assert
-        ticket.DomainEvents.Should().ContainSingle(e => e is SupportTicketPriorityChanged)
-            .Which.Should().BeEquivalentTo(new SupportTicketPriorityChanged((SupportTicketId)ticket.Id, DefaultPriority, newPriority, adminId));
+        var domainEvent = ticket.DomainEvents.OfType<SupportTicketPriorityChanged>().Single();
+        domainEvent.SupportTicketId.Should().Be((SupportTicketId)ticket.Id);
+        domainEvent.PreviousPriority.Should().Be(DefaultPriority);
+        domainEvent.NewPriority.Should().Be(newPriority);
+        domainEvent.ChangedByAdminId.Should().Be(adminId);
     }
 
     [Test]

@@ -78,14 +78,15 @@ public class BusinessHoursTests
     public void Create_WithMaxLengthHours_ShouldSucceed()
     {
         // Arrange
-        var maxLengthHours = new string('A', 200); // Exactly 200 characters
+        var paddingLength = 200 - ValidBusinessHours.Length;
+        var maxLengthHours = ValidBusinessHours + new string(' ', paddingLength); // Exactly 200 characters
 
         // Act
         var result = BusinessHours.Create(maxLengthHours);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Hours.Should().Be(maxLengthHours);
+        result.Value.Hours.Should().Be(ValidBusinessHours);
     }
 
     [Test]

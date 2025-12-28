@@ -64,6 +64,7 @@ public class TeamCartPaymentTests
 
         // Lock the cart for payment
         _teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        _teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
     }
 
     #region LockForPayment Tests
@@ -426,6 +427,7 @@ public class TeamCartPaymentTests
         AddItemToCart(teamCart, DefaultGuestUserId1, 15.00m);
         AddItemToCart(teamCart, DefaultGuestUserId2, 20.00m);
         teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
         teamCart.ClearDomainEvents();
 
         // Act - Complete all online payments
@@ -456,6 +458,7 @@ public class TeamCartPaymentTests
         AddItemToCart(teamCart, DefaultGuestUserId1, 15.00m);
         AddItemToCart(teamCart, DefaultGuestUserId2, 20.00m);
         teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
         teamCart.ClearDomainEvents();
 
         // Act - Commit all to COD
@@ -486,6 +489,7 @@ public class TeamCartPaymentTests
         AddItemToCart(teamCart, DefaultGuestUserId1, 15.00m);
         AddItemToCart(teamCart, DefaultGuestUserId2, 20.00m);
         teamCart.LockForPayment(DefaultHostUserId).ShouldBeSuccessful();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
         teamCart.ClearDomainEvents();
 
         // Act - One online, two COD

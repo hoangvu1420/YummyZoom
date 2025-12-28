@@ -140,6 +140,7 @@ public class TeamCartConversionServiceFailureTests : TeamCartConversionServiceTe
         // Apply the expired coupon (this should succeed at the TeamCart level since it doesn't validate expiry)
         var applyCouponResult = teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)expiredCoupon.Id);
         applyCouponResult.ShouldBeSuccessful();
+        teamCart.FinalizePricing(teamCart.HostUserId).ShouldBeSuccessful();
 
         // Complete payments to transition to ReadyToConfirm
         teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");

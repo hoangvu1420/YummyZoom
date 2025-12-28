@@ -81,8 +81,10 @@ public class SupportTicketAssignmentTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        ticket.DomainEvents.Should().ContainSingle(e => e is SupportTicketAssigned)
-            .Which.Should().BeEquivalentTo(new SupportTicketAssigned((SupportTicketId)ticket.Id, adminId, null));
+        var domainEvent = ticket.DomainEvents.OfType<SupportTicketAssigned>().Single();
+        domainEvent.SupportTicketId.Should().Be((SupportTicketId)ticket.Id);
+        domainEvent.AssignedToAdminId.Should().Be(adminId);
+        domainEvent.PreviousAdminId.Should().BeNull();
     }
 
     [Test]
@@ -115,8 +117,10 @@ public class SupportTicketAssignmentTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         ticket.AssignedToAdminId.Should().Be(newAdminId);
-        ticket.DomainEvents.Should().ContainSingle(e => e is SupportTicketAssigned)
-            .Which.Should().BeEquivalentTo(new SupportTicketAssigned((SupportTicketId)ticket.Id, newAdminId, initialAdminId));
+        var domainEvent = ticket.DomainEvents.OfType<SupportTicketAssigned>().Single();
+        domainEvent.SupportTicketId.Should().Be((SupportTicketId)ticket.Id);
+        domainEvent.AssignedToAdminId.Should().Be(newAdminId);
+        domainEvent.PreviousAdminId.Should().Be(initialAdminId);
     }
 
     #endregion
@@ -155,8 +159,10 @@ public class SupportTicketAssignmentTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        ticket.DomainEvents.Should().ContainSingle(e => e is SupportTicketAssigned)
-            .Which.Should().BeEquivalentTo(new SupportTicketAssigned((SupportTicketId)ticket.Id, adminId, adminId));
+        var domainEvent = ticket.DomainEvents.OfType<SupportTicketAssigned>().Single();
+        domainEvent.SupportTicketId.Should().Be((SupportTicketId)ticket.Id);
+        domainEvent.AssignedToAdminId.Should().Be(adminId);
+        domainEvent.PreviousAdminId.Should().Be(adminId);
     }
 
     [Test]

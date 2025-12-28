@@ -83,7 +83,7 @@ public class TeamCartConversionTests
         // Assert
         result.ShouldBeFailure();
         result.Error.Should().Be(TeamCartErrors.InvalidStatusForConversion);
-        teamCart.Status.Should().Be(TeamCartStatus.Locked); // Ensure status remains Locked
+        teamCart.Status.Should().Be(TeamCartStatus.Finalized); // Ensure status remains Finalized
     }
 
     [Test]

@@ -108,6 +108,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
         var guestId = teamCart.Members.First(m => m.Role == MemberRole.Guest).UserId;
 
         teamCart.LockForPayment(hostId);
+        teamCart.FinalizePricing(hostId);
         teamCart.RecordSuccessfulOnlinePayment(hostId, new Money(50m, Currencies.Default), "txn_123");
         teamCart.CommitToCashOnDelivery(guestId, new Money(40m, Currencies.Default));
 
@@ -167,6 +168,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Apply coupon while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
+        teamCart.FinalizePricing(teamCart.HostUserId);
 
         // Record payments to move cart to ReadyToConfirm status
         teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
@@ -232,6 +234,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
 
         // Apply tip while cart is in Locked status
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);
+        teamCart.FinalizePricing(teamCart.HostUserId);
 
         // Record payments to move cart to ReadyToConfirm status
         teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");
@@ -293,6 +296,7 @@ public class TeamCartConversionServiceSuccessTests : TeamCartConversionServiceTe
         // Apply coupon and tip while cart is in Locked status
         teamCart.ApplyCoupon(teamCart.HostUserId, (CouponId)coupon.Id);
         teamCart.ApplyTip(teamCart.HostUserId, tipAmount);
+        teamCart.FinalizePricing(teamCart.HostUserId);
 
         // Record payments to move cart to ReadyToConfirm status
         teamCart.RecordSuccessfulOnlinePayment(teamCart.HostUserId, new Money(25.00m, Currencies.Default), "txn_host_123");

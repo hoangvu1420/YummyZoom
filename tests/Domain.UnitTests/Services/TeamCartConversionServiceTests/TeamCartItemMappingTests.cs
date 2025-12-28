@@ -21,12 +21,13 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
         // Arrange
         var teamCart = TeamCartTestHelpers.CreateTeamCartWithMultipleItems();
         teamCart.LockForPayment(teamCart.HostUserId);
+        teamCart.FinalizePricing(teamCart.HostUserId);
         foreach (var member in teamCart.Members)
         {
             var memberTotal = teamCart.Items
                 .Where(i => i.AddedByUserId == member.UserId)
                 .Sum(i => i.LineItemTotal.Amount);
-            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, "USD"));
+            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, Currencies.Default));
         }
 
         var deliveryAddress = DeliveryAddress.Create(
@@ -39,9 +40,9 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            Money.Zero("USD"),
-            new Money(5, "USD"),
-            new Money(2, "USD")
+            Money.Zero(Currencies.Default),
+            new Money(5, Currencies.Default),
+            new Money(2, Currencies.Default)
         );
 
         // Assert
@@ -112,12 +113,13 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
         teamCart.AddItem(guestUserId, menuItemId2, menuCategoryId, "Custom Burger", new Money(15.00m, Currencies.Default), 1, guestCustomizations);
 
         teamCart.LockForPayment(teamCart.HostUserId);
+        teamCart.FinalizePricing(teamCart.HostUserId);
         foreach (var member in teamCart.Members)
         {
             var memberTotal = teamCart.Items
                 .Where(i => i.AddedByUserId == member.UserId)
                 .Sum(i => i.LineItemTotal.Amount);
-            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, "USD"));
+            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, Currencies.Default));
         }
 
         var deliveryAddress = DeliveryAddress.Create(
@@ -130,9 +132,9 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            Money.Zero("USD"),
-            new Money(5, "USD"),
-            new Money(2, "USD")
+            Money.Zero(Currencies.Default),
+            new Money(5, Currencies.Default),
+            new Money(2, Currencies.Default)
         );
 
         // Assert
@@ -171,12 +173,13 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
         // Arrange
         var teamCart = TeamCartTestHelpers.CreateTeamCartWithMultipleItems();
         teamCart.LockForPayment(teamCart.HostUserId);
+        teamCart.FinalizePricing(teamCart.HostUserId);
         foreach (var member in teamCart.Members)
         {
             var memberTotal = teamCart.Items
                 .Where(i => i.AddedByUserId == member.UserId)
                 .Sum(i => i.LineItemTotal.Amount);
-            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, "USD"));
+            teamCart.CommitToCashOnDelivery(member.UserId, new Money(memberTotal, Currencies.Default));
         }
 
         var deliveryAddress = DeliveryAddress.Create(
@@ -189,9 +192,9 @@ public class TeamCartItemMappingTests : TeamCartConversionServiceTestsBase
             deliveryAddress,
             "No special instructions",
             null,
-            Money.Zero("USD"),
-            new Money(5, "USD"),
-            new Money(2, "USD")
+            Money.Zero(Currencies.Default),
+            new Money(5, Currencies.Default),
+            new Money(2, Currencies.Default)
         );
 
         // Assert

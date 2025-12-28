@@ -215,7 +215,7 @@ public class CouponValueTests
         var displayValue = couponValue.GetDisplayValue();
 
         // Assert
-        displayValue.Should().Be("25.00 USD off");
+        displayValue.Should().Be("25.00 VND off");
     }
 
     [Test]

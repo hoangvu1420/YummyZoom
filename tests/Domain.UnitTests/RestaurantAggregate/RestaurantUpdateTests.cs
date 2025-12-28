@@ -547,7 +547,7 @@ public class RestaurantUpdateTests
         const string newCountry = "New Country";
         const string newPhoneNumber = "987-654-3210";
         const string newEmail = "new@example.com";
-        const string newBusinessHours = "Sat-Sun: 10am-4pm";
+        const string newBusinessHours = "09:00-17:00";
 
         // Act
         var result = restaurant.UpdateCompleteProfile(

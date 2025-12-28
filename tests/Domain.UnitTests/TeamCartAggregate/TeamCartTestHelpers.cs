@@ -68,6 +68,7 @@ public static class TeamCartTestHelpers
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
 
         var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
         hostResult.IsSuccess.Should().BeTrue();
@@ -93,6 +94,7 @@ public static class TeamCartTestHelpers
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
 
         var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
         hostResult.IsSuccess.Should().BeTrue();
@@ -114,6 +116,7 @@ public static class TeamCartTestHelpers
 
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
 
         var hostResult = teamCart.CommitToCashOnDelivery(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency));
         hostResult.IsSuccess.Should().BeTrue();
@@ -233,6 +236,7 @@ public static class TeamCartTestHelpers
         // Lock the cart for payment
         var lockResult = teamCart.LockForPayment(DefaultHostUserId);
         lockResult.IsSuccess.Should().BeTrue();
+        teamCart.FinalizePricing(DefaultHostUserId).ShouldBeSuccessful();
 
         // Set up payments for both members (amounts must match their item totals)
         var hostResult = teamCart.RecordSuccessfulOnlinePayment(DefaultHostUserId, new Money(25.00m, StaticPricingService.DefaultDeliveryFee.Currency), "txn_host_123");
