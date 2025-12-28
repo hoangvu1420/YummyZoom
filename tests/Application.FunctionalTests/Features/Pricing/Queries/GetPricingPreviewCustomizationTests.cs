@@ -171,13 +171,7 @@ public class GetPricingPreviewCustomizationTests : BaseTestFixture
         var result = await SendAsync(query);
 
         // Assert
-        result.ShouldBeSuccessful();
-        var response = result.Value;
-
-        // Verify error note about invalid customization
-        response.Notes.Should().Contain(n => 
-            n.Type == "error" && 
-            n.Code == "CUSTOMIZATION_INVALID");
+        result.ShouldBeFailure("PricingPreview.NoValidItems");
     }
 
     [Test]
@@ -208,13 +202,7 @@ public class GetPricingPreviewCustomizationTests : BaseTestFixture
         var result = await SendAsync(query);
 
         // Assert
-        result.ShouldBeSuccessful();
-        var response = result.Value;
-
-        // Verify error note about invalid customization
-        response.Notes.Should().Contain(n => 
-            n.Type == "error" && 
-            n.Code == "CUSTOMIZATION_INVALID");
+        result.ShouldBeFailure("PricingPreview.NoValidItems");
     }
 
     [Test]
@@ -278,13 +266,7 @@ public class GetPricingPreviewCustomizationTests : BaseTestFixture
         var result = await SendAsync(query);
 
         // Assert
-        result.ShouldBeSuccessful();
-        var response = result.Value;
-
-        // Verify error note about invalid customization
-        response.Notes.Should().Contain(n => 
-            n.Type == "error" && 
-            n.Code == "CUSTOMIZATION_INVALID");
+        result.ShouldBeFailure("PricingPreview.NoValidItems");
     }
 
     [Test]
@@ -315,13 +297,7 @@ public class GetPricingPreviewCustomizationTests : BaseTestFixture
         var result = await SendAsync(query);
 
         // Assert
-        result.ShouldBeSuccessful();
-        var response = result.Value;
-
-        // Verify error note about invalid customization
-        response.Notes.Should().Contain(n => 
-            n.Type == "error" && 
-            n.Code == "CUSTOMIZATION_INVALID");
+        result.ShouldBeFailure("PricingPreview.NoValidItems");
     }
 
     [Test]

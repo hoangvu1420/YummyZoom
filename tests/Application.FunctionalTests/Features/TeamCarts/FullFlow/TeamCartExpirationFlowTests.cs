@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Stripe;
 using YummyZoom.Application.FunctionalTests.Authorization;
@@ -10,10 +12,12 @@ using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Application.TeamCarts.Commands.ExpireTeamCarts;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.Infrastructure.Payments.Stripe;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -86,6 +90,7 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
         initiate.IsSuccess.Should().BeTrue();
@@ -94,8 +99,19 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
         // Confirm payment on Stripe (external) but do not deliver webhook yet
         await PaymentTestHelper.ConfirmPaymentAsync(paymentIntentId, TestConfiguration.Payment.TestPaymentMethods.VisaSuccess);
 
+        // Revert status to Locked and force expiration window so ExpireTeamCarts can pick it up.
+        using (var scope = CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var expiredAt = DateTime.UtcNow.AddMinutes(-5);
+            await db.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""TeamCarts""
+                SET ""Status"" = {"Locked"}, ""ExpiresAt"" = {expiredAt}
+                WHERE ""Id"" = {scenario.TeamCartId}");
+        }
+
         // Expire the cart
-        var cutoff = DateTime.UtcNow.AddYears(5);
+        var cutoff = DateTime.UtcNow;
         var expiredCount = await SendAsync(new ExpireTeamCartsCommand(cutoff, BatchSize: 100));
         expiredCount.Should().BeGreaterOrEqualTo(1);
         await DrainOutboxAsync();
@@ -121,4 +137,3 @@ public class TeamCartExpirationFlowTests : BaseTestFixture
         cart!.Status.Should().Be(TeamCartStatus.Expired);
     }
 }
-

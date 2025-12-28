@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
@@ -5,6 +7,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
@@ -34,10 +37,24 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
     [Test]
     public async Task MemberJoined_Should_Emit_Push()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange minimal scenario: host only
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host")
             .BuildAsync();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         await DrainOutboxAsync(); // process TeamCartCreated -> VM created
 
@@ -53,6 +70,13 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         var guestUserId = await CreateUserAsync("guest@example.com", "Password123!");
         SetUserId(guestUserId);
         (await SendAsync(new JoinTeamCartCommand(scenario.TeamCartId, scenario.ShareToken, "Guest"))).IsSuccess.Should().BeTrue();
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
         await DrainOutboxAsync();
 
         // Assert push was invoked
@@ -62,9 +86,23 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
     [Test]
     public async Task ItemAdded_Should_Emit_Push()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host")
             .BuildAsync();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         await DrainOutboxAsync();
 
@@ -79,6 +117,13 @@ public class TeamCartPushNotifierFlowTests : BaseTestFixture
         await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1, null))).IsSuccess.Should().BeTrue();
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
         await DrainOutboxAsync();
 
         // Assert push

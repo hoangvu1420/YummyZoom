@@ -22,10 +22,24 @@ public class ItemRemovedFromTeamCartEventHandlerTests : BaseTestFixture
     [Test]
     public async Task RemoveItem_Should_RemoveFromStore_And_Notify()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange: Create team cart scenario with host using builder
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
             .BuildAsync();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         await DrainOutboxAsync(); // process TeamCartCreated -> create VM
 
@@ -33,6 +47,13 @@ public class ItemRemovedFromTeamCartEventHandlerTests : BaseTestFixture
         await scenario.ActAsHost();
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
         await DrainOutboxAsync();
 
         // Get the item id
@@ -55,6 +76,13 @@ public class ItemRemovedFromTeamCartEventHandlerTests : BaseTestFixture
         // Act: Remove the item (as host)
         (await SendAsync(new RemoveItemFromTeamCartCommand(scenario.TeamCartId, itemId))).IsSuccess.Should().BeTrue();
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
         await DrainOutboxAsync();
 
         // Assert: VM should have no items
@@ -69,4 +97,3 @@ public class ItemRemovedFromTeamCartEventHandlerTests : BaseTestFixture
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
-

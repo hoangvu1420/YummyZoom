@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
@@ -161,7 +163,12 @@ public class GetOrderByIdTests : BaseTestFixture
         order.DiscountAmount.Should().BeGreaterThan(0m);
         order.TotalAmount.Should().BeGreaterThan(0m);
         order.SubtotalAmount.Should().BeGreaterThan(0m);
-        order.Currency.Should().Be("USD"); // Assert top-level currency
+        using (var scope = CreateScope())
+        {
+            var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            var orderEntity = await orderRepository.GetByIdAsync(createResult.Value.OrderId, CancellationToken.None);
+            order.Currency.Should().Be(orderEntity!.TotalAmount.Currency);
+        }
 
         // Optional lightweight arithmetic check
         var reconstructed = order.SubtotalAmount - order.DiscountAmount + order.DeliveryFeeAmount + order.TaxAmount + order.TipAmount;

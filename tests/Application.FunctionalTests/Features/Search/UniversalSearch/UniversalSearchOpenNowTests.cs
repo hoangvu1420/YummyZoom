@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
+using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Search.Queries.UniversalSearch;
 using YummyZoom.Domain.RestaurantAggregate;
@@ -20,7 +21,7 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
 
         // Create a restaurant with simple hours "09:00-17:00" and accept orders
         var restaurantId = await CreateRestaurantAsync("Open Test", "Cafe", null, null);
-        await DrainOutboxAsync();
+        await UpsertSearchIndexAsync(restaurantId);
 
         // Query open-now; should include the restaurant at noon
         var res1 = await SendAsync(new UniversalSearchQuery(
@@ -46,7 +47,7 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
             await UpdateAsync(agg);
         }
 
-        await DrainOutboxAsync();
+        await UpsertSearchIndexAsync(restaurantId);
 
         var res2 = await SendAsync(new UniversalSearchQuery(
             Term: null,
@@ -59,6 +60,14 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
 
         res2.ShouldBeSuccessful();
         res2.Value!.Page.Items.Select(i => i.Id).Should().NotContain(restaurantId);
+    }
+
+    private static async Task UpsertSearchIndexAsync(Guid restaurantId)
+    {
+        using var scope = CreateScope();
+        var maintainer = scope.ServiceProvider.GetRequiredService<ISearchReadModelMaintainer>();
+        var timeProvider = scope.ServiceProvider.GetRequiredService<TimeProvider>();
+        await maintainer.UpsertRestaurantByIdAsync(restaurantId, timeProvider.GetUtcNow().Ticks);
     }
 
     private static async Task<Guid> CreateRestaurantAsync(string name, string cuisine, double? lat, double? lon)
@@ -81,4 +90,3 @@ public class UniversalSearchOpenNowTests : BaseTestFixture
         return entity.Id.Value;
     }
 }
-

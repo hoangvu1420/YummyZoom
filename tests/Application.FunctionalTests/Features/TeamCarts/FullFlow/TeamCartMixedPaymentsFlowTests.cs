@@ -9,6 +9,7 @@ using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
 using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
@@ -71,6 +72,7 @@ public class TeamCartMixedPaymentsFlowTests : BaseTestFixture
         await scenario.ActAsHost();
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Online payments: Host + Guest A
         var hostUserId = scenario.HostUserId;
@@ -149,4 +151,3 @@ public class TeamCartMixedPaymentsFlowTests : BaseTestFixture
         cart!.Status.Should().Be(TeamCartStatus.Converted);
     }
 }
-

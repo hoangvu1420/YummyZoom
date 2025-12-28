@@ -4,6 +4,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartRealTimeViewModel;
@@ -118,6 +119,10 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         await SendAsync(new ApplyTipToTeamCartCommand(scenario.TeamCartId, 5.00m));
         await DrainOutboxAsync();
 
+        // Finalize pricing before payment
+        await SendAsync(new FinalizePricingCommand(scenario.TeamCartId));
+        await DrainOutboxAsync();
+
         // Commit COD payment as host
         await SendAsync(new CommitToCodPaymentCommand(scenario.TeamCartId));
         await DrainOutboxAsync();
@@ -129,7 +134,7 @@ public class GetTeamCartRealTimeViewModelQueryTests : BaseTestFixture
         result.IsSuccess.Should().BeTrue();
         var vm = result.Value.TeamCart;
 
-        vm.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
+        vm.Status.Should().BeOneOf(TeamCartStatus.Finalized, TeamCartStatus.ReadyToConfirm);
         vm.TipAmount.Should().Be(5.00m);
         vm.Total.Should().BeGreaterThan(vm.Subtotal); // Should include tip
 

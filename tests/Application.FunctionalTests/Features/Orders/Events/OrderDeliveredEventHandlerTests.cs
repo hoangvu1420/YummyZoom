@@ -38,6 +38,8 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         // Arrange: setup mocks
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? deliveredDto = null;
+        Guid? targetOrderId = null;
+        var matchingDeliveredCount = 0;
 
         notifierMock.Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -54,7 +56,14 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         notifierMock.Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => deliveredDto = dto)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Delivered")
+                {
+                    deliveredDto = dto;
+                    matchingDeliveredCount++;
+                }
+            })
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -62,6 +71,7 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         // Create and complete order through delivery
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
         var initiateResponse = await SendAndUnwrapAsync(cmd);
+        targetOrderId = initiateResponse.OrderId.Value;
 
         // Process payment success
         await SimulatePaymentSuccessAsync(initiateResponse.OrderId);
@@ -107,10 +117,21 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
             var pending = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains(nameof(OrderDelivered)) && m.ProcessedOnUtc == null)
                 .ToListAsync();
+            pending = pending
+                .Where(m => m.Content.Contains(initiateResponse.OrderId.Value.ToString()))
+                .ToList();
             pending.Should().NotBeEmpty("OrderDelivered event should be in outbox");
         }
 
         // Drain outbox to trigger event handler
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         await DrainOutboxAsync();
 
         // Assert: verify revenue was recorded
@@ -141,9 +162,11 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         }
 
         // Assert: verify broadcast was called
-        notifierMock.Verify(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+        notifierMock.Verify(n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Delivered"),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+        matchingDeliveredCount.Should().BeGreaterOrEqualTo(1);
         deliveredDto.Should().NotBeNull("Delivered broadcast should have been called");
         deliveredDto!.OrderId.Should().Be(initiateResponse.OrderId.Value);
         deliveredDto.Status.Should().Be("Delivered");
@@ -154,8 +177,19 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(OrderDeliveredEventHandler).FullName!;
-            var inboxEntries = await db.Set<InboxMessage>().Where(x => x.Handler == handlerName).ToListAsync();
-            inboxEntries.Should().HaveCount(1, "Should have exactly one inbox entry for OrderDeliveredEventHandler");
+            var inboxEntries = await db.Set<InboxMessage>()
+                .Where(x => x.Handler == handlerName && x.EventId == deliveredDto!.EventId)
+                .ToListAsync();
+            inboxEntries.Should().ContainSingle();
+
+            var processedOutbox = await db.Set<OutboxMessage>()
+                .Where(m => m.Type.Contains(nameof(OrderDelivered)))
+                .ToListAsync();
+            processedOutbox = processedOutbox
+                .Where(m => m.Content.Contains(deliveredDto.EventId.ToString()))
+                .ToList();
+            processedOutbox.Should().ContainSingle();
+            processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
     }
 
@@ -237,6 +271,14 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         await SendAndUnwrapAsync(deliveredCommand);
 
         // Drain outbox
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{initiateResponse.OrderId.Value}%");
+        }
+
         await DrainOutboxAsync();
 
         // Assert: restaurant account should be auto-created with correct balance
@@ -295,6 +337,14 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         await SendAndUnwrapAsync(deliveredCommand);
 
         // Drain outbox twice - this should not duplicate revenue recording
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{initiateResponse.OrderId.Value}%");
+        }
+
         await DrainOutboxAsync();
         await DrainOutboxAsync();
 
@@ -302,13 +352,15 @@ public class OrderDeliveredEventHandlerTests : BaseTestFixture
         using (var scope = CreateScope())
         {
             var restaurantAccountRepo = scope.ServiceProvider.GetRequiredService<IRestaurantAccountRepository>();
+            var orderRepo = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
             var restaurantId = RestaurantId.Create(Testing.TestData.DefaultRestaurantId);
             var account = await restaurantAccountRepo.GetByRestaurantIdAsync(restaurantId, CancellationToken.None);
+            var order = await orderRepo.GetByIdAsync(initiateResponse.OrderId, CancellationToken.None);
 
             account.Should().NotBeNull("Restaurant account should exist after revenue recording");
 
             // The revenue should be recorded exactly once, regardless of how many times outbox is drained
-            var expectedBalance = initialBalance + 34.29m; // Order total is $34.29 based on the logs
+            var expectedBalance = initialBalance + order!.TotalAmount.Amount;
             account!.CurrentBalance.Amount.Should().Be(expectedBalance,
                 "Revenue should only be recorded once even after draining outbox twice");
         }

@@ -48,6 +48,8 @@ public class TeamCartCouponAndTipFlowTests : BaseTestFixture
         (await SendAsync(new ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+
         // Commit COD for host to reach ReadyToConfirm
         (await SendAsync(new CommitToCodPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();

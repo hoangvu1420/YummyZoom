@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.JoinTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
@@ -18,10 +21,24 @@ public class MemberJoinedEventHandlerTests : BaseTestFixture
     [Test]
     public async Task JoinTeamCart_Should_AddMember_ToStore_And_Notify()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange: Create team cart scenario with host using builder
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
             .BuildAsync();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         // Drain outbox to process TeamCartCreated using default notifier (not under test)
         await DrainOutboxAsync();
@@ -38,6 +55,14 @@ public class MemberJoinedEventHandlerTests : BaseTestFixture
         SetUserId(guestUserId);
         var join = await SendAsync(new JoinTeamCartCommand(scenario.TeamCartId, scenario.ShareToken, "Bob Guest"));
         join.IsSuccess.Should().BeTrue();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         // Drain outbox to process MemberJoined
         await DrainOutboxAsync();
@@ -56,4 +81,3 @@ public class MemberJoinedEventHandlerTests : BaseTestFixture
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
-

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using YummyZoom.Application.Common.Caching;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.Restaurants.Queries.GetRestaurantPublicInfo;
@@ -524,7 +525,8 @@ public class GetRestaurantPublicInfoQueryTests : BaseTestFixture
 
         // Add menu items with cuisine tags
         await CreateMenuItemWithTagsAsync(restaurant.Id.Value, [tagIds["Italian"]]);
-        await ResetState(); // Clear cache to ensure fresh read
+        var cache = GetService<ICacheService>();
+        await cache.InvalidateByTagAsync($"restaurant:{restaurant.Id.Value:N}:public-info");
 
         // Second call - should now have cuisine tags
         var secondResult = await SendAsync(new GetRestaurantPublicInfoQuery(restaurant.Id.Value));

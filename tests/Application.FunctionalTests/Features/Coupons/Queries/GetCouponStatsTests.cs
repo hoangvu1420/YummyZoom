@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
+
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.Coupons.Queries.GetCouponStats;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrder;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Domain.CouponAggregate;
 using YummyZoom.Domain.CouponAggregate.ValueObjects;
@@ -23,7 +21,8 @@ public class GetCouponStatsTests : BaseTestFixture
     [Test]
     public async Task GetCouponStats_ReturnsAggregateValues()
     {
-        var (restaurantId, menuItemId) = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
+        var restaurantId = Testing.TestData.DefaultRestaurantId;
+        var menuItemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         var restaurant = RestaurantId.Create(restaurantId);
         var coupon = await CreateCouponAsync(restaurant, "STAT10");
 
@@ -115,8 +114,14 @@ public class GetCouponStatsTests : BaseTestFixture
         var response = await SendAsync(command);
         response.IsSuccess.Should().BeTrue(response.Error?.ToString());
 
-        var order = await FindAsync<Order>(OrderId.Create(response.Value.OrderId.Value));
-        order.Should().NotBeNull();
-        return order!.PlacementTimestamp;
+        var orderId = OrderId.Create(response.Value.OrderId.Value);
+        var placementTimestamp = await TestDatabaseManager.ExecuteInScopeAsync(async db =>
+            await db.Orders
+                .AsNoTracking()
+                .Where(o => o.Id == orderId)
+                .Select(o => o.PlacementTimestamp)
+                .SingleAsync());
+
+        return placementTimestamp;
     }
 }

@@ -8,7 +8,9 @@ using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ConvertTeamCartToOrder;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
+using YummyZoom.Application.Common.Currency;
 using YummyZoom.Domain.OrderAggregate.Enums;
 using YummyZoom.Domain.OrderAggregate.ValueObjects;
 using YummyZoom.Domain.TeamCartAggregate;
@@ -65,6 +67,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         await scenario.ActAsHost();
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).ShouldBeSuccessful();
 
         // Inspect VM for quote fields
         var vm = await GetTeamCartVmAsync(scenario.TeamCartId);
@@ -121,6 +124,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         await scenario.ActAsHost();
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).ShouldBeSuccessful();
 
         // Initiate online payments for each member (as themselves)
         var hostUserId = scenario.HostUserId;
@@ -150,7 +154,7 @@ public class TeamCartOnlinePaymentFlowTests : BaseTestFixture
         {
             var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
             var quoted = cart!.MemberTotals.First(kv => kv.Key.Value == memberUserId).Value.Amount;
-            var quotedCents = (long)Math.Round(quoted * 100m, 0, MidpointRounding.AwayFromZero);
+            var quotedCents = CurrencyMinorUnitConverter.ToMinorUnits(quoted, "vnd");
             var payload = PaymentTestHelper.GenerateWebhookPayload(
                 TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
                 paymentIntentId,

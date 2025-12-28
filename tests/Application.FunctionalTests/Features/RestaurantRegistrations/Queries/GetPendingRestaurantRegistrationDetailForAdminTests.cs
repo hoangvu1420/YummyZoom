@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.FunctionalTests.Features.RestaurantRegistrations.Utilities;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.RestaurantRegistrations.Commands.RejectRestaurantRegistration;
 using YummyZoom.Application.RestaurantRegistrations.Queries.GetPendingRestaurantRegistrationDetailForAdmin;
+using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.RestaurantRegistrationAggregate.Errors;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
@@ -16,6 +19,7 @@ public class GetPendingRestaurantRegistrationDetailForAdminTests : BaseTestFixtu
     {
         var submitterId = await RunAsDefaultUserAsync();
         var submit = RestaurantRegistrationTestHelper.BuildValidSubmitCommand(UserId.Create(submitterId), name: "Pasta Palace");
+        await EnsureDomainUserAsync(submitterId, submit.Email);
         var submitResult = await SendAsync(submit);
         var registrationId = submitResult.Value.RegistrationId;
 
@@ -46,6 +50,7 @@ public class GetPendingRestaurantRegistrationDetailForAdminTests : BaseTestFixtu
     {
         var submitterId = await RunAsDefaultUserAsync();
         var submit = RestaurantRegistrationTestHelper.BuildValidSubmitCommand(UserId.Create(submitterId));
+        await EnsureDomainUserAsync(submitterId, submit.Email);
         var submitResult = await SendAsync(submit);
 
         await RunAsAdministratorAsync();
@@ -54,5 +59,28 @@ public class GetPendingRestaurantRegistrationDetailForAdminTests : BaseTestFixtu
 
         var result = await SendAsync(new GetPendingRestaurantRegistrationDetailForAdminQuery(submitResult.Value.RegistrationId));
         result.ShouldBeFailure(RestaurantRegistrationErrors.NotPending.Code);
+    }
+
+    private static Task EnsureDomainUserAsync(Guid submitterId, string email)
+    {
+        return TestDatabaseManager.ExecuteInScopeAsync(async db =>
+        {
+            var domainUserId = UserId.Create(submitterId);
+            var exists = await db.DomainUsers.AnyAsync(u => u.Id == domainUserId);
+            if (exists)
+            {
+                return;
+            }
+
+            var userResult = User.Create(
+                domainUserId,
+                name: "Test User",
+                email: email,
+                phoneNumber: null,
+                isActive: true);
+
+            db.DomainUsers.Add(userResult.Value);
+            await db.SaveChangesAsync();
+        });
     }
 }

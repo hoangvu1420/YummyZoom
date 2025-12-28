@@ -6,6 +6,7 @@ using YummyZoom.Application.FunctionalTests.Features.Orders.PaymentIntegration;
 using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
@@ -64,6 +65,7 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
         await scenario.ActAsHost();
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).ShouldBeSuccessful();
 
         // Initiate online payment as Guest A
         await scenario.ActAsGuest("Guest A");
@@ -91,10 +93,10 @@ public class TeamCartOnlinePaymentFailureTests : BaseTestFixture
         result.ShouldBeSuccessful();
         await DrainOutboxAsync();
 
-        // Assert: domain records a payment entry and remains Locked
+        // Assert: domain records a payment entry and remains Finalized
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
-        cart!.Status.Should().Be(TeamCartStatus.Locked);
+        cart!.Status.Should().Be(TeamCartStatus.Finalized);
         cart.MemberPayments.Should().NotBeEmpty();
         cart.MemberPayments.Should().Contain(p => p.UserId.Value == scenario.GetGuestUserId("Guest A") && p.Method == TeamCartPaymentMethod.Online && p.Status == TeamCartPaymentStatus.Failed);
 

@@ -30,6 +30,7 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
 
         // Lock cart as host
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Act: Initiate payment as host (who is a member)
         var result = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
@@ -55,7 +56,7 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("TeamCart.CanOnlyPayOnLockedCart");
+        result.Error.Code.Should().Be("TeamCart.CanOnlyPayOnFinalizedCart");
     }
 
     [Test]
@@ -72,6 +73,7 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Act: Try to initiate payment as non-member (authorization should fail at pipeline level)
         await scenario.ActAsNonMember();
@@ -103,6 +105,7 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
         // Lock cart as host
         await scenario.ActAsHost();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Act: Initiate payment as guest (who is a member)
         await scenario.ActAsGuest("Guest User");
@@ -114,5 +117,4 @@ public class InitiateMemberOnlinePaymentCommandTests : BaseTestFixture
         result.Value.ClientSecret.Should().NotBeNullOrWhiteSpace();
     }
 }
-
 

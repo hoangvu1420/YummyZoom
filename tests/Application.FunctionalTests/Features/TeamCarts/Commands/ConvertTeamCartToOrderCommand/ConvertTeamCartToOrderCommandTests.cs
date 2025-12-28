@@ -25,6 +25,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
@@ -87,6 +88,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario.TeamCartId, Testing.TestData.DefaultCouponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
         (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
@@ -128,6 +130,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         (await SendAsync(new AddItemToTeamCartCommand(scenario1.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario1.TeamCartId))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario1.TeamCartId, limitedCouponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario1.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
         (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario1.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
@@ -150,6 +153,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         (await SendAsync(new AddItemToTeamCartCommand(scenario2.TeamCartId, burgerId, 2))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario2.TeamCartId))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.ApplyCouponToTeamCart.ApplyCouponToTeamCartCommand(scenario2.TeamCartId, limitedCouponCode))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario2.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
         (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario2.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
@@ -204,6 +208,7 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
         var burgerId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, burgerId, 1))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
@@ -220,4 +225,3 @@ public class ConvertTeamCartToOrderCommandTests : BaseTestFixture
             .Should().ThrowAsync<ForbiddenAccessException>();
     }
 }
-

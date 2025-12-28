@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
 using YummyZoom.Application.FunctionalTests.Common;
@@ -7,6 +9,7 @@ using YummyZoom.Application.TeamCarts.Commands.ApplyCouponToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Commands.RemoveCouponFromTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
@@ -22,6 +25,12 @@ public class CouponRemovedFromTeamCartEventHandlerTests : BaseTestFixture
     [Test]
     public async Task RemoveCoupon_Should_UpdateStore_And_Notify()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange: Create team cart scenario with host using builder
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
@@ -53,6 +62,14 @@ public class CouponRemovedFromTeamCartEventHandlerTests : BaseTestFixture
         // Act: remove coupon (as host)
         (await SendAsync(new RemoveCouponFromTeamCartCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
+
         await DrainOutboxAsync(); // process CouponRemovedFromTeamCart
 
         // Assert: VM reflects removal
@@ -66,4 +83,3 @@ public class CouponRemovedFromTeamCartEventHandlerTests : BaseTestFixture
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }
-

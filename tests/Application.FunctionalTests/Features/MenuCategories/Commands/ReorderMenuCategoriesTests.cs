@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.MenuCategories.Commands.ReorderMenuCategories;
 using YummyZoom.Domain.MenuEntity;
@@ -15,16 +17,22 @@ public class ReorderMenuCategoriesTests : BaseTestFixture
     {
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
 
+        var categories = await GetDefaultMenuCategoriesAsync();
+        categories.Should().NotBeEmpty();
+
         var appetizersId = Testing.TestData.GetMenuCategoryId("Appetizers");
         var mainsId = Testing.TestData.GetMenuCategoryId("Main Dishes");
+        var appetizersCategory = categories.SingleOrDefault(c => c.Id == MenuCategoryId.Create(appetizersId));
+        var mainsCategory = categories.SingleOrDefault(c => c.Id == MenuCategoryId.Create(mainsId));
+        appetizersCategory.Should().NotBeNull();
+        mainsCategory.Should().NotBeNull();
+
+        var reordered = new List<MenuCategory> { mainsCategory!, appetizersCategory! };
+        reordered.AddRange(categories.Where(c => c.Id != mainsCategory!.Id && c.Id != appetizersCategory!.Id));
 
         var command = new ReorderMenuCategoriesCommand(
             Testing.TestData.DefaultRestaurantId,
-            new List<CategoryOrderDto>
-            {
-                new(appetizersId, 2),
-                new(mainsId, 1)
-            });
+            reordered.Select((category, index) => new CategoryOrderDto(category.Id.Value, index + 1)).ToList());
 
         var result = await SendAsync(command);
 
@@ -42,13 +50,17 @@ public class ReorderMenuCategoriesTests : BaseTestFixture
     {
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
 
+        var categories = await GetDefaultMenuCategoriesAsync();
+        categories.Should().NotBeEmpty();
+
+        var orders = categories
+            .Select((category, index) => new CategoryOrderDto(category.Id.Value, index + 1))
+            .ToList();
+        orders[0] = orders[0] with { CategoryId = Guid.NewGuid() };
+
         var command = new ReorderMenuCategoriesCommand(
             Testing.TestData.DefaultRestaurantId,
-            new List<CategoryOrderDto>
-            {
-                new(Testing.TestData.GetMenuCategoryId("Appetizers"), 1),
-                new(Guid.NewGuid(), 2)
-            });
+            orders);
 
         var result = await SendAsync(command);
 
@@ -114,13 +126,18 @@ public class ReorderMenuCategoriesTests : BaseTestFixture
     {
         await RunAsRestaurantStaffAsync("staff@restaurant.com", Testing.TestData.DefaultRestaurantId);
 
+        var categories = await GetDefaultMenuCategoriesAsync();
+        categories.Should().NotBeEmpty();
+
+        var orders = categories
+            .Select((category, index) => new CategoryOrderDto(category.Id.Value, index + 1))
+            .ToList();
+        var lastIndex = orders.Count - 1;
+        orders[lastIndex] = orders[lastIndex] with { DisplayOrder = orders.Count + 1 };
+
         var command = new ReorderMenuCategoriesCommand(
             Testing.TestData.DefaultRestaurantId,
-            new List<CategoryOrderDto>
-            {
-                new(Testing.TestData.GetMenuCategoryId("Appetizers"), 1),
-                new(Testing.TestData.GetMenuCategoryId("Main Dishes"), 3)
-            });
+            orders);
 
         var result = await SendAsync(command);
 
@@ -168,5 +185,16 @@ public class ReorderMenuCategoriesTests : BaseTestFixture
 
         var act = async () => await SendAsync(command);
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    private static async Task<List<MenuCategory>> GetDefaultMenuCategoriesAsync()
+    {
+        var menuId = MenuId.Create(Testing.TestData.DefaultMenuId);
+        return await TestDatabaseManager.ExecuteInScopeAsync(async db =>
+            await db.MenuCategories
+                .AsNoTracking()
+                .Where(c => c.MenuId == menuId && !c.IsDeleted)
+                .OrderBy(c => c.DisplayOrder)
+                .ToListAsync());
     }
 }

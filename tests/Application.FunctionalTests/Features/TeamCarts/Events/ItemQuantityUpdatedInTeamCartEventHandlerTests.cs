@@ -22,6 +22,12 @@ public class ItemQuantityUpdatedInTeamCartEventHandlerTests : BaseTestFixture
     [Test]
     public async Task UpdateQuantity_Should_UpdateStore_And_Notify()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange: Create team cart scenario with host using builder
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
@@ -56,6 +62,14 @@ public class ItemQuantityUpdatedInTeamCartEventHandlerTests : BaseTestFixture
         // Act: Update quantity (as host)
         (await SendAsync(new UpdateTeamCartItemQuantityCommand(scenario.TeamCartId, itemId, 3))).IsSuccess.Should().BeTrue();
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
+
         await DrainOutboxAsync(); // process quantity updated
 
         // Assert: VM reflects updated quantity
@@ -73,4 +87,3 @@ public class ItemQuantityUpdatedInTeamCartEventHandlerTests : BaseTestFixture
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
-

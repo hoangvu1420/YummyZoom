@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.FunctionalTests.Authorization;
@@ -6,6 +8,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.TeamCarts.Events;
@@ -21,10 +24,24 @@ public class TipAppliedToTeamCartEventHandlerTests : BaseTestFixture
     [Test]
     public async Task ApplyTip_Should_UpdateStore_And_Notify()
     {
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         // Arrange: Create team cart scenario with host using builder
         var scenario = await TeamCartTestBuilder.Create(Testing.TestData.DefaultRestaurantId)
             .WithHost("Host User")
             .BuildAsync();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         await DrainOutboxAsync(); // process TeamCartCreated -> create VM
 
@@ -35,6 +52,13 @@ public class TipAppliedToTeamCartEventHandlerTests : BaseTestFixture
 
         // Lock the cart for payment (as host)
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
         await DrainOutboxAsync(); // process lock -> VM status update when handler exists
 
         // Mock notifier to verify a single notification
@@ -47,6 +71,14 @@ public class TipAppliedToTeamCartEventHandlerTests : BaseTestFixture
         // Act: Apply a tip of 5.00 (as host)
         const decimal tipAmount = 5.00m;
         (await SendAsync(new ApplyTipToTeamCartCommand(scenario.TeamCartId, tipAmount))).IsSuccess.Should().BeTrue();
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{scenario.TeamCartId}%");
+        }
 
         await DrainOutboxAsync(); // process TipAppliedToTeamCart -> update VM
 
@@ -61,4 +93,3 @@ public class TipAppliedToTeamCartEventHandlerTests : BaseTestFixture
         notifierMock.Verify(n => n.NotifyCartUpdated(It.IsAny<TeamCartId>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }
-

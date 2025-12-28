@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using YummyZoom.Application.Common.Exceptions;
 using YummyZoom.Application.FunctionalTests.Common;
@@ -8,6 +9,7 @@ using YummyZoom.Domain.UserAggregate;
 using YummyZoom.Domain.UserAggregate.Errors;
 using YummyZoom.Domain.UserAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Identity;
+using YummyZoom.Infrastructure.Persistence.EfCore;
 using YummyZoom.SharedKernel.Constants;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Users;
@@ -42,7 +44,12 @@ public class RegisterUserTests : BaseTestFixture
         returnedUserId.Should().NotBeEmpty();
 
         // Verify ApplicationUser created
-        var appUser = await FindAsync<ApplicationUser>(returnedUserId);
+        ApplicationUser? appUser;
+        using (var scope = CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            appUser = await userManager.FindByIdAsync(returnedUserId.ToString());
+        }
         appUser.Should().NotBeNull();
         appUser!.UserName.Should().Be(command.Email); // Username is always email
         appUser.Email.Should().Be(command.Email);
@@ -50,7 +57,16 @@ public class RegisterUserTests : BaseTestFixture
 
         // Verify Domain UserAggregate created
         var domainUserId = UserId.Create(returnedUserId);
-        var domainUser = await FindAsync<User>(domainUserId);
+        DomainUserSnapshot? domainUser;
+        using (var scope = CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            domainUser = await dbContext.DomainUsers
+                .AsNoTracking()
+                .Where(u => u.Id == domainUserId)
+                .Select(u => new DomainUserSnapshot(u.Id, u.Name, u.Email, u.CreatedBy))
+                .FirstOrDefaultAsync();
+        }
         domainUser.Should().NotBeNull();
         domainUser!.Id.Should().Be(domainUserId);
         // Assert the Name property
@@ -172,4 +188,6 @@ public class RegisterUserTests : BaseTestFixture
         // Assert
         await act.Should().ThrowAsync<ValidationException>();
     }
+
+    private sealed record DomainUserSnapshot(UserId Id, string Name, string Email, string? CreatedBy);
 }

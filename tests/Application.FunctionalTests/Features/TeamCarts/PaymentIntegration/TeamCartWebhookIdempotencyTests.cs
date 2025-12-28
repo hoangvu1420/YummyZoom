@@ -10,7 +10,9 @@ using YummyZoom.Application.TeamCarts.Commands.ApplyCouponToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.HandleTeamCartStripeWebhook;
 using YummyZoom.Application.TeamCarts.Commands.InitiateMemberOnlinePayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
+using YummyZoom.Application.Common.Currency;
 using YummyZoom.Domain.TeamCartAggregate;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
 using YummyZoom.Domain.TeamCartAggregate.ValueObjects;
@@ -55,6 +57,7 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
 
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).ShouldBeSuccessful();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).ShouldBeSuccessful();
 
         // Initiate and confirm online payment for host
         var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
@@ -111,6 +114,7 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
 
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Initiate
         var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
@@ -119,7 +123,7 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         // Find quoted cents from cart state
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         var quotedAmount = cart!.MemberTotals.First().Value.Amount;
-        var quotedCents = (long)Math.Round(quotedAmount * 100m, 0, MidpointRounding.AwayFromZero);
+        var quotedCents = CurrencyMinorUnitConverter.ToMinorUnits(quotedAmount, "vnd");
 
         var payload = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
@@ -155,13 +159,14 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
 
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
         initiate.IsSuccess.Should().BeTrue();
 
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         var quotedAmount = cart!.MemberTotals.First().Value.Amount;
-        var quotedCents = (long)Math.Round(quotedAmount * 100m, 0, MidpointRounding.AwayFromZero);
+        var quotedCents = CurrencyMinorUnitConverter.ToMinorUnits(quotedAmount, "vnd");
 
         // Simulate a re-quote by locking again (or applying tip) would be ideal; here we bump version by applying no-op tip 0
         // In real tests, apply tip/coupon to bump version; we keep it simple for structure.
@@ -202,13 +207,14 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
 
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         var initiate = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
         initiate.IsSuccess.Should().BeTrue();
 
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         var quotedAmount = cart!.MemberTotals.First().Value.Amount;
-        var quotedCents = (long)Math.Round(quotedAmount * 100m, 0, MidpointRounding.AwayFromZero);
+        var quotedCents = CurrencyMinorUnitConverter.ToMinorUnits(quotedAmount, "vnd");
 
         // Use mismatched cents
         var payload = PaymentTestHelper.GenerateWebhookPayload(
@@ -272,23 +278,28 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
-        // Initiate first intent
-        var init1 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
-        init1.IsSuccess.Should().BeTrue();
-
-        // Capture v1 + cents
+        // Capture v1 + cents before tip change
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         var v1 = cart!.QuoteVersion;
-        var cents1 = (long)Math.Round(cart.MemberTotals.First().Value.Amount * 100m, 0, MidpointRounding.AwayFromZero);
+        var cents1 = CurrencyMinorUnitConverter.ToMinorUnits(cart.MemberTotals.First().Value.Amount, "vnd");
 
-        // Change tip to trigger re-quote
+        // Change tip to trigger re-quote while still locked
         (await SendAsync(new ApplyTipToTeamCartCommand(scenario.TeamCartId, 1.23m))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
+
+        // Finalize pricing before initiating payments
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+
+        var init2 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
+        init2.IsSuccess.Should().BeTrue();
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
+        var v2 = cart!.QuoteVersion;
+        var cents2 = CurrencyMinorUnitConverter.ToMinorUnits(cart.MemberTotals.First().Value.Amount, "vnd");
 
         // Send webhook for old intent (stale version) — should ack no-op
         var payloadOld = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
-            init1.Value.PaymentIntentId!,
+            init2.Value.PaymentIntentId!,
             amount: cents1,
             currency: "vnd",
             metadata: new Dictionary<string, string>
@@ -302,13 +313,6 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         var sigOld = PaymentTestHelper.GenerateWebhookSignature(payloadOld, _stripeOptions.WebhookSecret);
         (await SendAsync(new HandleTeamCartStripeWebhookCommand(payloadOld, sigOld))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
-
-        // Initiate new intent and process with updated version
-        var init2 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
-        init2.IsSuccess.Should().BeTrue();
-        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
-        var v2 = cart!.QuoteVersion;
-        var cents2 = (long)Math.Round(cart.MemberTotals.First().Value.Amount * 100m, 0, MidpointRounding.AwayFromZero);
         var payloadNew = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             init2.Value.PaymentIntentId!,
@@ -347,11 +351,9 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         (await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
-        var init1 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
-        init1.IsSuccess.Should().BeTrue();
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         var v1 = cart!.QuoteVersion;
-        var cents1 = (long)Math.Round(cart.MemberTotals.First().Value.Amount * 100m, 0, MidpointRounding.AwayFromZero);
+        var cents1 = CurrencyMinorUnitConverter.ToMinorUnits(cart.MemberTotals.First().Value.Amount, "vnd");
 
         // Apply a guaranteed-valid test coupon to bump quote version
         await scenario.ActAsHost();
@@ -363,10 +365,18 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         (await SendAsync(new ApplyCouponToTeamCartCommand(scenario.TeamCartId, couponCode))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
+        (await SendAsync(new FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+
+        var init2 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
+        init2.IsSuccess.Should().BeTrue();
+        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
+        var v2 = cart!.QuoteVersion;
+        var cents2 = CurrencyMinorUnitConverter.ToMinorUnits(cart.MemberTotals.First().Value.Amount, "vnd");
+
         // Old intent webhook is stale → no-op
         var payloadOld = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
-            init1.Value.PaymentIntentId!,
+            init2.Value.PaymentIntentId!,
             amount: cents1,
             currency: "vnd",
             metadata: new Dictionary<string, string>
@@ -381,12 +391,7 @@ public class TeamCartWebhookIdempotencyTests : BaseTestFixture
         (await SendAsync(new HandleTeamCartStripeWebhookCommand(payloadOld, sigOld))).IsSuccess.Should().BeTrue();
         await DrainOutboxAsync();
 
-        // New intent
-        var init2 = await SendAsync(new InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
-        init2.IsSuccess.Should().BeTrue();
-        cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
-        var v2 = cart!.QuoteVersion;
-        var cents2 = (long)Math.Round(cart.MemberTotals.First().Value.Amount * 100m, 0, MidpointRounding.AwayFromZero);
+        // Process with updated version
         var payloadNew = PaymentTestHelper.GenerateWebhookPayload(
             TestConfiguration.Payment.WebhookEvents.PaymentIntentSucceeded,
             init2.Value.PaymentIntentId!,

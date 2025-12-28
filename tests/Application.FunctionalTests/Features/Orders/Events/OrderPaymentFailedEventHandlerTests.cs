@@ -36,14 +36,31 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? failureDto = null;
         OrderStatusBroadcastDto? cancelledStatusDto = null;
+        Guid? targetOrderId = null;
+        var failureMatchCount = 0;
+        var statusMatchCount = 0;
 
         notifierMock.Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(), It.IsAny<NotificationTarget>(), It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => failureDto = dto)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value)
+                {
+                    failureDto = dto;
+                    failureMatchCount++;
+                }
+            })
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => cancelledStatusDto = dto)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Cancelled")
+                {
+                    cancelledStatusDto = dto;
+                    statusMatchCount++;
+                }
+            })
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -58,6 +75,15 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
 
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
         var response = await SendAndUnwrapAsync(cmd);
+        targetOrderId = response.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
 
         // Simulate payment failure (what the Stripe webhook would do)
         using (var scope = CreateScope())
@@ -83,27 +109,27 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
-        // Pre-drain: ensure outbox has both OrderPaymentFailed & OrderCancelled unprocessed
         using (var scope = CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var pending = await db.Set<OutboxMessage>()
-                .Where(m => (m.Type.Contains(nameof(OrderPaymentFailed)) || m.Type.Contains(nameof(OrderCancelled))) && m.ProcessedOnUtc == null)
-                .ToListAsync();
-            pending.Should().NotBeEmpty();
-            pending.Any(m => m.Type.Contains(nameof(OrderPaymentFailed))).Should().BeTrue();
-            pending.Any(m => m.Type.Contains(nameof(OrderCancelled))).Should().BeTrue();
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
         }
 
         await DrainOutboxAsync();
 
         // Assert: both notifications fired exactly once
-        notifierMock.Verify(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(),
+        notifierMock.Verify(n => n.NotifyOrderPaymentFailed(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
-        notifierMock.Verify(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+        notifierMock.Verify(n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Cancelled"),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
+        failureMatchCount.Should().Be(1);
+        statusMatchCount.Should().Be(1);
 
         failureDto.Should().NotBeNull();
         failureDto!.OrderId.Should().Be(response.OrderId.Value);
@@ -120,9 +146,9 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
             var failureHandlerName = typeof(OrderPaymentFailedEventHandler).FullName!;
 
             var failureInboxEntries = await db.Set<InboxMessage>()
-                .Where(x => x.Handler == failureHandlerName)
+                .Where(x => x.Handler == failureHandlerName && x.EventId == failureDto.EventId)
                 .ToListAsync();
-            failureInboxEntries.Should().HaveCount(1);
+            failureInboxEntries.Should().ContainSingle();
         }
 
         // Outbox processed
@@ -132,7 +158,10 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains(nameof(OrderPaymentFailed)))
                 .ToListAsync();
-            processedOutbox.Should().NotBeEmpty();
+            processedOutbox = processedOutbox
+                .Where(m => m.Content.Contains(failureDto.EventId.ToString()))
+                .ToList();
+            processedOutbox.Should().ContainSingle();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
     }
@@ -144,16 +173,33 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         int failureCallCount = 0;
         int statusCallCount = 0;
+        Guid? targetOrderId = null;
+        Guid? failureEventId = null;
+        Guid? cancelledEventId = null;
 
         notifierMock.Setup(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback(() => failureCallCount++)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value)
+                {
+                    failureCallCount++;
+                    failureEventId ??= dto.EventId;
+                }
+            })
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback(() => statusCallCount++)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Cancelled")
+                {
+                    statusCallCount++;
+                    cancelledEventId ??= dto.EventId;
+                }
+            })
             .Returns(Task.CompletedTask);
         notifierMock.Setup(n => n.NotifyOrderPaymentSucceeded(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -168,6 +214,15 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
 
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
         var response = await SendAndUnwrapAsync(cmd);
+        targetOrderId = response.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
 
         // Simulate payment failure
         using (var scope = CreateScope())
@@ -181,15 +236,25 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
             await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().SaveChangesAsync();
         }
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         await DrainOutboxAsync();
         await DrainOutboxAsync(); // second drain should be idempotent
 
         failureCallCount.Should().Be(1);
-        notifierMock.Verify(n => n.NotifyOrderPaymentFailed(It.IsAny<OrderStatusBroadcastDto>(),
+        notifierMock.Verify(n => n.NotifyOrderPaymentFailed(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         statusCallCount.Should().Be(1);
-        notifierMock.Verify(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+        notifierMock.Verify(n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Cancelled"),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
 
@@ -197,16 +262,20 @@ public class OrderPaymentFailedEventHandlerTests : BaseTestFixture
         using var finalScope = CreateScope();
         var db = finalScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var handlerName = typeof(OrderPaymentFailedEventHandler).FullName!;
+        failureEventId.Should().NotBeNull();
         var inboxEntries = await db.Set<InboxMessage>()
-            .Where(x => x.Handler == handlerName)
+            .Where(x => x.Handler == handlerName && x.EventId == failureEventId)
             .ToListAsync();
-        inboxEntries.Should().HaveCount(1);
+        inboxEntries.Should().ContainSingle();
 
         // Ensure outbox processed once
         var outboxMessages = await db.Set<OutboxMessage>()
             .Where(m => m.Type.Contains(nameof(OrderPaymentFailed)))
             .ToListAsync();
-        outboxMessages.Should().NotBeEmpty();
+        outboxMessages = outboxMessages
+            .Where(m => m.Content.Contains(failureEventId!.Value.ToString()))
+            .ToList();
+        outboxMessages.Should().ContainSingle();
         outboxMessages.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
     }
 }

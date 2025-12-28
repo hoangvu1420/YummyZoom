@@ -41,8 +41,7 @@ public abstract class InitiateOrderTestBase : BaseTestFixture
     /// </summary>
     protected async Task ConfigureSuccessfulPaymentGatewayAsync()
     {
-        PaymentGatewayMock = InitiateOrderTestHelper.SetupSuccessfulPaymentGatewayMock();
-        ReplaceService<IPaymentGatewayService>(PaymentGatewayMock.Object);
+        InitiateOrderTestHelper.ConfigurePaymentGatewayMockToSucceed(PaymentGatewayMock);
         await Task.CompletedTask;
     }
 
@@ -52,8 +51,7 @@ public abstract class InitiateOrderTestBase : BaseTestFixture
     /// <param name="errorMessage">The error message to return from the payment gateway</param>
     protected async Task ConfigureFailingPaymentGatewayAsync(string errorMessage = "Payment gateway error")
     {
-        PaymentGatewayMock = InitiateOrderTestHelper.SetupFailingPaymentGatewayMock(errorMessage);
-        ReplaceService<IPaymentGatewayService>(PaymentGatewayMock.Object);
+        InitiateOrderTestHelper.ConfigurePaymentGatewayMockToFail(PaymentGatewayMock, errorMessage: errorMessage);
         await Task.CompletedTask;
     }
 
@@ -64,8 +62,7 @@ public abstract class InitiateOrderTestBase : BaseTestFixture
     /// <param name="clientSecret">Custom client secret</param>
     protected async Task ConfigureCustomPaymentGatewayAsync(string paymentIntentId, string clientSecret)
     {
-        PaymentGatewayMock = InitiateOrderTestHelper.SetupPaymentGatewayMockWithCustomResponse(paymentIntentId, clientSecret);
-        ReplaceService<IPaymentGatewayService>(PaymentGatewayMock.Object);
+        InitiateOrderTestHelper.ConfigurePaymentGatewayMockToSucceed(PaymentGatewayMock, paymentIntentId, clientSecret);
         await Task.CompletedTask;
     }
 }

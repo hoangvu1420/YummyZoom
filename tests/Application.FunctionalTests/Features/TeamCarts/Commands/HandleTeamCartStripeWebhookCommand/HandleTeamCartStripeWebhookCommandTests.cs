@@ -32,6 +32,7 @@ public class HandleTeamCartStripeWebhookCommandTests : BaseTestFixture
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Initiate payment (as host)
         var initiate = await SendAsync(new Application.TeamCarts.Commands.InitiateMemberOnlinePayment.InitiateMemberOnlinePaymentCommand(scenario.TeamCartId));
@@ -74,5 +75,4 @@ public class HandleTeamCartStripeWebhookCommandTests : BaseTestFixture
         result.IsSuccess.Should().BeTrue();
     }
 }
-
 

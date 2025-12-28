@@ -4,6 +4,7 @@ using YummyZoom.Application.FunctionalTests.Common;
 using YummyZoom.Application.TeamCarts.Commands.AddItemToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.ApplyTipToTeamCart;
 using YummyZoom.Application.TeamCarts.Commands.CommitToCodPayment;
+using YummyZoom.Application.TeamCarts.Commands.FinalizePricing;
 using YummyZoom.Application.TeamCarts.Commands.LockTeamCartForPayment;
 using YummyZoom.Application.TeamCarts.Queries.GetTeamCartDetails;
 using YummyZoom.Domain.TeamCartAggregate.Enums;
@@ -90,6 +91,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
         await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1));
         await SendAsync(new LockTeamCartForPaymentCommand(scenario.TeamCartId));
+        await SendAsync(new FinalizePricingCommand(scenario.TeamCartId));
         await SendAsync(new CommitToCodPaymentCommand(scenario.TeamCartId));
 
         // Act: Query as host (who is a member)
@@ -99,7 +101,7 @@ public class GetTeamCartDetailsQueryTests : BaseTestFixture
         result.ShouldBeSuccessful();
         var teamCart = result.Value.TeamCart;
 
-        teamCart.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
+        teamCart.Status.Should().BeOneOf(TeamCartStatus.Finalized, TeamCartStatus.ReadyToConfirm);
         teamCart.MemberPayments.Should().ContainSingle();
 
         var payment = teamCart.MemberPayments.First();

@@ -40,6 +40,8 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Arrange
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? capturedDto = null;
+        Guid? targetOrderId = null;
+        var matchingRejectedCount = 0;
         notifierMock
             .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
             It.IsAny<NotificationTarget>(),
@@ -59,7 +61,14 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => capturedDto = dto)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Rejected")
+                {
+                    capturedDto = dto;
+                    matchingRejectedCount++;
+                }
+            })
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -80,6 +89,15 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
+        targetOrderId = initResponse.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
 
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
@@ -100,28 +118,23 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
-        // Pre-drain assertions: outbox message exists; capture handler inbox baseline count
-        int preCount;
         using (var scope = CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var pendingOutbox = await db.Set<OutboxMessage>()
-                .Where(m => m.Type.Contains(nameof(OrderRejected)) && m.ProcessedOnUtc == null)
-                .ToListAsync();
-            pendingOutbox.Should().NotBeEmpty();
-
-            var handlerName = typeof(OrderRejectedEventHandler).FullName!;
-            preCount = await db.Set<InboxMessage>()
-                .CountAsync(x => x.Handler == handlerName);
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
         }
 
         await DrainOutboxAsync();
 
         // Assert broadcast invoked once with expected dto
         notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+            n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Rejected"),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
+        matchingRejectedCount.Should().Be(1);
         capturedDto.Should().NotBeNull();
         capturedDto!.OrderId.Should().Be(initResponse.OrderId.Value);
         capturedDto.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
@@ -134,14 +147,18 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(OrderRejectedEventHandler).FullName!;
-            var postCount = await db.Set<InboxMessage>()
-                .CountAsync(x => x.Handler == handlerName);
-            postCount.Should().Be(preCount + 1);
+            var inboxEntries = await db.Set<InboxMessage>()
+                .Where(x => x.Handler == handlerName && x.EventId == capturedDto.EventId)
+                .ToListAsync();
+            inboxEntries.Should().ContainSingle();
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains(nameof(OrderRejected)))
                 .ToListAsync();
-            processedOutbox.Should().NotBeEmpty();
+            processedOutbox = processedOutbox
+                .Where(m => m.Content.Contains(capturedDto.EventId.ToString()))
+                .ToList();
+            processedOutbox.Should().ContainSingle();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
 
@@ -158,6 +175,8 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         // Arrange
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         int callCount = 0;
+        Guid? targetOrderId = null;
+        Guid? rejectedEventId = null;
         notifierMock
             .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -177,13 +196,30 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback(() => callCount++)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Rejected")
+                {
+                    callCount++;
+                    rejectedEventId ??= dto.EventId;
+                }
+            })
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
 
         // Create placed order
         var initResponse = await SendAndUnwrapAsync(InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery));
+        targetOrderId = initResponse.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         await DrainOutboxAsync(); // Process OrderPlaced
 
         // Reject the order
@@ -200,12 +236,21 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
             await dbContext.SaveChangesAsync(CancellationToken.None);
         }
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         await DrainOutboxAsync();
         await DrainOutboxAsync(); // second drain should be idempotent
 
         callCount.Should().Be(1);
         notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+            n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Rejected"),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()), Times.Once);
 
@@ -213,16 +258,20 @@ public class OrderRejectedEventHandlerTests : BaseTestFixture
         using var finalScope = CreateScope();
         var db = finalScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var handlerName = typeof(OrderRejectedEventHandler).FullName!;
+        rejectedEventId.Should().NotBeNull();
         var inboxEntries = await db.Set<InboxMessage>()
-            .Where(x => x.Handler == handlerName)
+            .Where(x => x.Handler == handlerName && x.EventId == rejectedEventId)
             .ToListAsync();
-        inboxEntries.Should().HaveCount(1);
+        inboxEntries.Should().ContainSingle();
 
         // Ensure outbox processed once
         var outboxMessages = await db.Set<OutboxMessage>()
             .Where(m => m.Type.Contains(nameof(OrderRejected)))
             .ToListAsync();
-        outboxMessages.Should().NotBeEmpty();
+        outboxMessages = outboxMessages
+            .Where(m => m.Content.Contains(rejectedEventId!.Value.ToString()))
+            .ToList();
+        outboxMessages.Should().ContainSingle();
         outboxMessages.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
     }
 }

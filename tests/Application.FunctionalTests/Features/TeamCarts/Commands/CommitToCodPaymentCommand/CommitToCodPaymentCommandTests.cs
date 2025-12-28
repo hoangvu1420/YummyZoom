@@ -25,6 +25,7 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
 
         // Lock cart
         (await SendAsync(new Application.TeamCarts.Commands.LockTeamCartForPayment.LockTeamCartForPaymentCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
+        (await SendAsync(new Application.TeamCarts.Commands.FinalizePricing.FinalizePricingCommand(scenario.TeamCartId))).IsSuccess.Should().BeTrue();
 
         // Act: Commit COD payment as host (member)
         var result = await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId));
@@ -34,7 +35,7 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
 
         var cart = await Testing.FindTeamCartAsync(TeamCartId.Create(scenario.TeamCartId));
         cart.Should().NotBeNull();
-        cart!.Status.Should().BeOneOf(TeamCartStatus.Locked, TeamCartStatus.ReadyToConfirm);
+        cart!.Status.Should().BeOneOf(TeamCartStatus.Finalized, TeamCartStatus.ReadyToConfirm);
         cart.MemberPayments.Should().ContainSingle(p => p.UserId == Domain.UserAggregate.ValueObjects.UserId.Create(scenario.HostUserId) && p.Method == PaymentMethod.CashOnDelivery);
     }
 
@@ -49,11 +50,13 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
 
         // Act: Try to commit COD payment on open cart as host
         await scenario.ActAsHost();
+        var itemId = Testing.TestData.GetMenuItemId(Testing.TestData.MenuItems.ClassicBurger);
+        (await SendAsync(new AddItemToTeamCartCommand(scenario.TeamCartId, itemId, 1))).IsSuccess.Should().BeTrue();
         var result = await SendAsync(new Application.TeamCarts.Commands.CommitToCodPayment.CommitToCodPaymentCommand(scenario.TeamCartId));
 
         // Assert: Should fail because cart is not locked
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("TeamCart.CanOnlyPayOnLockedCart");
+        result.Error.Code.Should().Be("TeamCart.CanOnlyPayOnFinalizedCart");
     }
 
     [Test]
@@ -79,5 +82,4 @@ public class CommitToCodPaymentCommandTests : BaseTestFixture
             .Should().ThrowAsync<YummyZoom.Application.Common.Exceptions.ForbiddenAccessException>();
     }
 }
-
 

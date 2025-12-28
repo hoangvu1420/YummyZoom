@@ -3,6 +3,7 @@ using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrd
 using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.Lifecycle;
 using YummyZoom.Application.Reviews.Commands.CreateReview;
 using YummyZoom.Application.Reviews.Queries.GetMyReviews;
+using YummyZoom.Domain.Common.ValueObjects;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
 namespace YummyZoom.Application.FunctionalTests.Features.Reviews.Queries;
@@ -35,6 +36,10 @@ public class GetMyReviewsTests : BaseTestFixture
 
         // Create a second restaurant and order there to avoid duplicate-per-restaurant restriction
         var (restaurant2Id, menuItemId) = await TestData.TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
+        var secondMenuItem = await FindAsync<Domain.MenuItemAggregate.MenuItem>(YummyZoom.Domain.MenuItemAggregate.ValueObjects.MenuItemId.Create(menuItemId));
+        secondMenuItem!.UpdatePrice(new Money(18000m, "VND"));
+        secondMenuItem.ClearDomainEvents();
+        await UpdateAsync(secondMenuItem);
         await Task.Delay(10);
         // Place and deliver order at the second restaurant
         SetUserId(userId);

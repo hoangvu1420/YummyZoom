@@ -121,6 +121,21 @@ public static class InitiateOrderTestHelper
     public static Mock<IPaymentGatewayService> SetupSuccessfulPaymentGatewayMock()
     {
         var mock = new Mock<IPaymentGatewayService>();
+        ConfigurePaymentGatewayMockToSucceed(mock);
+
+        return mock;
+    }
+
+    /// <summary>
+    /// Configures an existing IPaymentGatewayService mock for successful payment intent creation.
+    /// </summary>
+    public static void ConfigurePaymentGatewayMockToSucceed(
+        Mock<IPaymentGatewayService> mock,
+        string? paymentIntentId = null,
+        string? clientSecret = null)
+    {
+        var resolvedPaymentIntentId = paymentIntentId ?? $"pi_test_{Guid.NewGuid().ToString("N")[..16]}";
+        var resolvedClientSecret = clientSecret ?? $"pi_test_{Guid.NewGuid().ToString("N")[..16]}_secret_{Guid.NewGuid().ToString("N")[..16]}";
 
         mock.Setup(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
@@ -128,11 +143,9 @@ public static class InitiateOrderTestHelper
                 It.IsAny<IDictionary<string, string>>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(SharedKernel.Result.Success(new PaymentIntentResult(
-                PaymentIntentId: $"pi_test_{Guid.NewGuid().ToString("N")[..16]}",
-                ClientSecret: $"pi_test_{Guid.NewGuid().ToString("N")[..16]}_secret_{Guid.NewGuid().ToString("N")[..16]}"
+                PaymentIntentId: resolvedPaymentIntentId,
+                ClientSecret: resolvedClientSecret
             ))));
-
-        return mock;
     }
 
     /// <summary>
@@ -142,14 +155,26 @@ public static class InitiateOrderTestHelper
     {
         var mock = new Mock<IPaymentGatewayService>();
 
+        ConfigurePaymentGatewayMockToFail(mock, errorMessage: errorMessage);
+
+        return mock;
+    }
+
+    /// <summary>
+    /// Configures an existing IPaymentGatewayService mock to return failure.
+    /// </summary>
+    public static void ConfigurePaymentGatewayMockToFail(
+        Mock<IPaymentGatewayService> mock,
+        string errorCode = "PaymentGateway.Error",
+        string errorMessage = "Payment gateway error")
+    {
         mock.Setup(x => x.CreatePaymentIntentAsync(
                 It.IsAny<Money>(),
                 It.IsAny<string>(),
                 It.IsAny<IDictionary<string, string>>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(SharedKernel.Result.Failure<PaymentIntentResult>(Error.Failure("PaymentGateway.Error", errorMessage))));
-
-        return mock;
+            .Returns(Task.FromResult(SharedKernel.Result.Failure<PaymentIntentResult>(
+                Error.Failure(errorCode, errorMessage))));
     }
 
     /// <summary>
@@ -158,13 +183,7 @@ public static class InitiateOrderTestHelper
     public static Mock<IPaymentGatewayService> SetupPaymentGatewayMockWithCustomResponse(string paymentIntentId, string clientSecret)
     {
         var mock = new Mock<IPaymentGatewayService>();
-
-        mock.Setup(x => x.CreatePaymentIntentAsync(
-                It.IsAny<Money>(),
-                It.IsAny<string>(),
-                It.IsAny<IDictionary<string, string>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(SharedKernel.Result.Success(new PaymentIntentResult(paymentIntentId, clientSecret))));
+        ConfigurePaymentGatewayMockToSucceed(mock, paymentIntentId, clientSecret);
 
         return mock;
     }

@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Application.Common.Models;
 using YummyZoom.Application.FunctionalTests.Common;
+using YummyZoom.Application.FunctionalTests.Infrastructure;
 using YummyZoom.Domain.Common.ValueObjects;
 using YummyZoom.Domain.OrderAggregate;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -128,6 +130,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
     public async Task InitiateOrder_WhenPaymentGatewayFails_ShouldFailWithPaymentError()
     {
         // Arrange
+        var initialOrderCount = await CountAsync<Order>();
         var paymentErrorMessage = "Payment gateway service unavailable";
         await ConfigureFailingPaymentGatewayAsync(paymentErrorMessage);
 
@@ -144,7 +147,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Verify order was not created in database
         var orderCount = await CountAsync<Order>();
-        orderCount.Should().Be(0);
+        orderCount.Should().Be(initialOrderCount);
 
         // Verify payment gateway was called
         InitiateOrderTestHelper.ValidatePaymentIntentCreation(PaymentGatewayMock, shouldBeCalled: true);
@@ -154,16 +157,11 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
     public async Task InitiateOrder_WhenPaymentGatewayReturnsInvalidResponse_ShouldFailGracefully()
     {
         // Arrange
-        var mock = new Mock<IPaymentGatewayService>();
-        mock.Setup(x => x.CreatePaymentIntentAsync(
-                It.IsAny<Money>(),
-                It.IsAny<string>(),
-                It.IsAny<IDictionary<string, string>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(SharedKernel.Result.Failure<PaymentIntentResult>(
-                Error.Failure("PaymentGateway.InvalidResponse", "Invalid response from payment gateway"))));
-
-        ReplaceService(mock.Object);
+        var initialOrderCount = await CountAsync<Order>();
+        InitiateOrderTestHelper.ConfigurePaymentGatewayMockToFail(
+            PaymentGatewayMock,
+            errorCode: "PaymentGateway.InvalidResponse",
+            errorMessage: "Invalid response from payment gateway");
 
         var command = InitiateOrderTestHelper.BuildValidCommand(
             paymentMethod: InitiateOrderTestHelper.PaymentMethods.CreditCard);
@@ -177,7 +175,7 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
 
         // Verify transaction was rolled back
         var orderCount = await CountAsync<Order>();
-        orderCount.Should().Be(0);
+        orderCount.Should().Be(initialOrderCount);
     }
 
     #endregion
@@ -430,8 +428,8 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
         finalOrderCount.Should().Be(initialOrderCount);
 
         // Verify transaction was properly rolled back
-        var orders = await FindAllOrdersAsync();
-        orders.Should().BeEmpty();
+        var orders = await FindAllOrderIdsAsync();
+        orders.Should().HaveCount(initialOrderCount);
     }
 
     [Test]
@@ -473,12 +471,12 @@ public class InitiateOrderPaymentTests : InitiateOrderTestBase
     /// <summary>
     /// Helper method to find all orders in the database.
     /// </summary>
-    private static Task<List<Order>> FindAllOrdersAsync()
+    private static async Task<List<Guid>> FindAllOrderIdsAsync()
     {
-        var allOrders = new List<Order>();
-        // For simplicity in this test, we'll just return an empty list
-        // since we mainly use this to verify no orders exist after rollback
-        return Task.FromResult(allOrders);
+        return await TestDatabaseManager.ExecuteInScopeAsync(async db =>
+            await db.Orders.AsNoTracking()
+                .Select(o => o.Id.Value)
+                .ToListAsync());
     }
 
     #endregion

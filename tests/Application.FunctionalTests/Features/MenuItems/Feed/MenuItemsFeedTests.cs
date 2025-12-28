@@ -7,6 +7,9 @@ using YummyZoom.Application.FunctionalTests.Features.Orders.Commands.InitiateOrd
 using YummyZoom.Application.FunctionalTests.TestData;
 using YummyZoom.Application.MenuItems.Queries.Feed;
 using YummyZoom.Application.Orders.Commands.InitiateOrder;
+using YummyZoom.Domain.Common.ValueObjects;
+using YummyZoom.Domain.MenuItemAggregate;
+using YummyZoom.Domain.MenuItemAggregate.ValueObjects;
 using YummyZoom.Infrastructure.Persistence.EfCore;
 using static YummyZoom.Application.FunctionalTests.Testing;
 
@@ -24,6 +27,7 @@ public class MenuItemsFeedTests : BaseTestFixture
         // Create additional restaurants for the test
         var (alphaRestaurantId, alphaMenuItemId) = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
         var (betaRestaurantId, _) = await TestDataFactory.CreateSecondRestaurantWithMenuItemsAsync();
+        await EnsureMenuItemCurrencyAsync(alphaMenuItemId, InitiateOrderTestHelper.TestAmounts.Currency);
         
         // Create menu items for the beta restaurant
         var betaMenuScenario = await MenuTestDataFactory.CreateRestaurantWithMenuAsync(new MenuScenarioOptions
@@ -34,8 +38,8 @@ public class MenuItemsFeedTests : BaseTestFixture
             CategoryGenerator = i => ("Thai Dishes", 1),
             ItemGenerator = (categoryId, index) => new[]
             {
-                new ItemOptions { Name = "Pad Thai", PriceAmount = 11.00m },
-                new ItemOptions { Name = "Spring Rolls", PriceAmount = 6.00m }
+                new ItemOptions { Name = "Pad Thai", PriceAmount = 11.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency },
+                new ItemOptions { Name = "Spring Rolls", PriceAmount = 6.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency }
             }
         });
 
@@ -100,8 +104,8 @@ public class MenuItemsFeedTests : BaseTestFixture
             CategoryGenerator = i => ("Test Category", 1),
             ItemGenerator = (categoryId, index) => new[]
             {
-                new ItemOptions { Name = "Available Item", PriceAmount = 12.00m, IsAvailable = true },
-                new ItemOptions { Name = "Unavailable Item", PriceAmount = 15.00m, IsAvailable = false }
+                new ItemOptions { Name = "Available Item", PriceAmount = 12.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency, IsAvailable = true },
+                new ItemOptions { Name = "Unavailable Item", PriceAmount = 15.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency, IsAvailable = false }
             }
         });
 
@@ -139,8 +143,8 @@ public class MenuItemsFeedTests : BaseTestFixture
             CategoryGenerator = i => ("Test Category", 1),
             ItemGenerator = (categoryId, index) => new[]
             {
-                new ItemOptions { Name = "Active Item", PriceAmount = 12.00m },
-                new ItemOptions { Name = "To Be Deleted Item", PriceAmount = 15.00m }
+                new ItemOptions { Name = "Active Item", PriceAmount = 12.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency },
+                new ItemOptions { Name = "To Be Deleted Item", PriceAmount = 15.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency }
             },
             SoftDeleteItemIndexes = new[] { 1 } // Soft delete the second item
         });
@@ -182,7 +186,7 @@ public class MenuItemsFeedTests : BaseTestFixture
             CategoryGenerator = i => ("Test Category", 1),
             ItemGenerator = (categoryId, index) => new[]
             {
-                new ItemOptions { Name = "Item from Restaurant to be Deleted", PriceAmount = 10.00m }
+                new ItemOptions { Name = "Item from Restaurant to be Deleted", PriceAmount = 10.00m, PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency }
             }
         });
 
@@ -216,7 +220,12 @@ public class MenuItemsFeedTests : BaseTestFixture
             CategoryCount = 1,
             CategoryGenerator = i => ("Large Category", 1),
             ItemGenerator = (categoryId, index) => Enumerable.Range(1, 15).Select(i => 
-                new ItemOptions { Name = $"Item {i:D2}", PriceAmount = 10.00m + i }).ToArray()
+                new ItemOptions
+                {
+                    Name = $"Item {i:D2}",
+                    PriceAmount = 10.00m + i,
+                    PriceCurrency = InitiateOrderTestHelper.TestAmounts.Currency
+                }).ToArray()
         });
 
         // Act - Test first page
@@ -516,5 +525,20 @@ public class MenuItemsFeedTests : BaseTestFixture
                 ""LastUpdatedAt"" = {now},
                 ""SourceVersion"" = {now.UtcTicks};
         ");
+    }
+
+    private static async Task EnsureMenuItemCurrencyAsync(Guid menuItemId, string currency)
+    {
+        var item = await FindAsync<MenuItem>(MenuItemId.Create(menuItemId));
+        item.Should().NotBeNull();
+        if (item!.BasePrice.Currency == currency)
+        {
+            return;
+        }
+
+        var updateResult = item.UpdatePrice(new Money(item.BasePrice.Amount, currency));
+        updateResult.IsSuccess.Should().BeTrue(updateResult.Error?.ToString());
+        item.ClearDomainEvents();
+        await UpdateAsync(item);
     }
 }

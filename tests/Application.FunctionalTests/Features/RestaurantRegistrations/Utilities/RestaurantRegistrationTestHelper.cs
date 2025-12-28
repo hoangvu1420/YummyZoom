@@ -22,11 +22,10 @@ internal static class RestaurantRegistrationTestHelper
             Country: "US",
             PhoneNumber: "+12065550123",
             Email: "owner@example.com",
-            BusinessHours: "Mon-Fri 9-5",
+            BusinessHours: "09:00-17:00",
             LogoUrl: "https://example.com/logo.png",
             Latitude: 47.61,
             Longitude: -122.33)
         { UserId = userId };
     }
 }
-

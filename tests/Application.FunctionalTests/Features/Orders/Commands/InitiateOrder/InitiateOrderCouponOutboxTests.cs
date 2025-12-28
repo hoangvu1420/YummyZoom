@@ -14,6 +14,12 @@ public class InitiateOrderCouponOutboxTests : InitiateOrderTestBase
     public async Task InitiateOrder_WithCoupon_Should_EnqueueAndProcess_CouponUsed_OutboxEvent()
     {
         // Arrange
+        using (var preScope = CreateScope())
+        {
+            var preDb = preScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await preDb.Database.ExecuteSqlRawAsync("DELETE FROM \"OutboxMessages\";");
+        }
+
         var command = InitiateOrderTestHelper.BuildValidCommandWithCoupon(Testing.TestData.DefaultCouponCode);
 
         // Act
@@ -33,4 +39,3 @@ public class InitiateOrderCouponOutboxTests : InitiateOrderTestBase
         couponUsedOutbox.Should().NotBeEmpty();
     }
 }
-

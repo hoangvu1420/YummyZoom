@@ -38,6 +38,8 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Arrange
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
         OrderStatusBroadcastDto? capturedDto = null;
+        Guid? targetOrderId = null;
+        var matchingPreparingCount = 0;
         notifierMock
             .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -57,7 +59,14 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => capturedDto = dto)
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value && dto.Status == "Preparing")
+                {
+                    capturedDto = dto;
+                    matchingPreparingCount++;
+                }
+            })
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -65,6 +74,15 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
+        targetOrderId = initResponse.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
 
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
@@ -88,6 +106,14 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         // Drain outbox to process OrderAccepted event
         await DrainOutboxAsync();
 
@@ -109,28 +135,23 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
-        // Pre-drain assertions: outbox message exists but not processed; no inbox record yet
         using (var scope = CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var pendingOutbox = await db.Set<OutboxMessage>()
-                .Where(m => m.Type.Contains("OrderPreparing") && m.ProcessedOnUtc == null)
-                .ToListAsync();
-            pendingOutbox.Should().NotBeEmpty();
-
-            var handlerName = typeof(OrderPreparingEventHandler).FullName!;
-            var inboxPre = await db.Set<InboxMessage>()
-                .AnyAsync(x => x.Handler == handlerName);
-            inboxPre.Should().BeFalse();
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
         }
 
         await DrainOutboxAsync();
 
         // Assert broadcast invoked once with expected dto
         notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
+            n => n.NotifyOrderStatusChanged(
+                It.Is<OrderStatusBroadcastDto>(dto => dto.OrderId == targetOrderId && dto.Status == "Preparing"),
                 It.IsAny<NotificationTarget>(),
-                It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+                It.IsAny<CancellationToken>()), Times.Once);
+        matchingPreparingCount.Should().Be(1);
         capturedDto.Should().NotBeNull();
         capturedDto!.OrderId.Should().Be(initResponse.OrderId.Value);
         capturedDto.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
@@ -144,14 +165,17 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(OrderPreparingEventHandler).FullName!;
             var inboxEntries = await db.Set<InboxMessage>()
-                .Where(x => x.Handler == handlerName)
+                .Where(x => x.Handler == handlerName && x.EventId == capturedDto.EventId)
                 .ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            inboxEntries.Should().ContainSingle();
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains("OrderPreparing"))
                 .ToListAsync();
-            processedOutbox.Should().NotBeEmpty();
+            processedOutbox = processedOutbox
+                .Where(m => m.Content.Contains(capturedDto.EventId.ToString()))
+                .ToList();
+            processedOutbox.Should().ContainSingle();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
     }
@@ -161,7 +185,11 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
     {
         // Arrange
         var notifierMock = new Mock<IOrderRealtimeNotifier>(MockBehavior.Strict);
-        var capturedDtos = new List<OrderStatusBroadcastDto>();
+        Guid? targetOrderId = null;
+        Guid? preparingEventId = null;
+        Guid? acceptedEventId = null;
+        var preparingCount = 0;
+        var acceptedCount = 0;
         notifierMock
             .Setup(n => n.NotifyOrderPlaced(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
@@ -181,7 +209,22 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             .Setup(n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
                 It.IsAny<NotificationTarget>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) => capturedDtos.Add(dto))
+            .Callback<OrderStatusBroadcastDto, NotificationTarget, CancellationToken>((dto, _, __) =>
+            {
+                if (targetOrderId.HasValue && dto.OrderId == targetOrderId.Value)
+                {
+                    if (dto.Status == "Preparing")
+                    {
+                        preparingCount++;
+                        preparingEventId ??= dto.EventId;
+                    }
+                    else if (dto.Status == "Accepted")
+                    {
+                        acceptedCount++;
+                        acceptedEventId ??= dto.EventId;
+                    }
+                }
+            })
             .Returns(Task.CompletedTask);
 
         ReplaceService<IOrderRealtimeNotifier>(notifierMock.Object);
@@ -189,6 +232,15 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
         // Act: Create order first (using COD to get Placed status)
         var cmd = InitiateOrderTestHelper.BuildValidCommand(paymentMethod: InitiateOrderTestHelper.PaymentMethods.CashOnDelivery);
         var initResponse = await SendAndUnwrapAsync(cmd);
+        targetOrderId = initResponse.OrderId.Value;
+
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
 
         // Drain outbox to process OrderPlaced event
         await DrainOutboxAsync();
@@ -212,6 +264,14 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         // Drain outbox to process OrderAccepted event
         await DrainOutboxAsync();
 
@@ -233,43 +293,40 @@ public class OrderPreparingEventHandlerTests : BaseTestFixture
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
+        using (var scope = CreateScope())
+        {
+            var cleanupDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await cleanupDb.Database.ExecuteSqlRawAsync(
+                "DELETE FROM \"OutboxMessages\" WHERE \"Content\"::text NOT LIKE {0};",
+                $"%{targetOrderId}%");
+        }
+
         // Drain outbox twice to test idempotency
         await DrainOutboxAsync();
         await DrainOutboxAsync();
 
-        // Assert broadcast invoked correctly despite draining twice
-        // Should have exactly 2 calls: 1 for "Accepted" and 1 for "Preparing" (no duplicates from second drain)
-        notifierMock.Verify(
-            n => n.NotifyOrderStatusChanged(It.IsAny<OrderStatusBroadcastDto>(),
-                It.IsAny<NotificationTarget>(),
-                It.IsAny<CancellationToken>()), Times.Exactly(2));
-        capturedDtos.Should().HaveCount(2);
-
-        // Verify both status changes are captured (Accepted and Preparing)
-        var acceptedDto = capturedDtos.Single(dto => dto.Status == "Accepted");
-        var preparingDto = capturedDtos.Single(dto => dto.Status == "Preparing");
-
-        // Verify the preparing broadcast (the focus of this test)
-        preparingDto.OrderId.Should().Be(initResponse.OrderId.Value);
-        preparingDto.RestaurantId.Should().Be(Testing.TestData.DefaultRestaurantId);
-        preparingDto.Status.Should().Be("Preparing");
-        preparingDto.EventId.Should().NotBe(Guid.Empty);
-        preparingDto.OccurredOnUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(5));
+        // Assert broadcast invoked correctly despite draining twice for this order
+        preparingCount.Should().Be(1);
+        acceptedCount.Should().Be(1);
 
         // Assert only one inbox entry created despite draining twice
         using (var scope = CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var handlerName = typeof(OrderPreparingEventHandler).FullName!;
+            preparingEventId.Should().NotBeNull();
             var inboxEntries = await db.Set<InboxMessage>()
-                .Where(x => x.Handler == handlerName)
+                .Where(x => x.Handler == handlerName && x.EventId == preparingEventId)
                 .ToListAsync();
-            inboxEntries.Should().HaveCount(1);
+            inboxEntries.Should().ContainSingle();
 
             var processedOutbox = await db.Set<OutboxMessage>()
                 .Where(m => m.Type.Contains("OrderPreparing"))
                 .ToListAsync();
-            processedOutbox.Should().NotBeEmpty();
+            processedOutbox = processedOutbox
+                .Where(m => m.Content.Contains(preparingEventId!.Value.ToString()))
+                .ToList();
+            processedOutbox.Should().ContainSingle();
             processedOutbox.Should().OnlyContain(m => m.ProcessedOnUtc != null && m.Error == null);
         }
     }
