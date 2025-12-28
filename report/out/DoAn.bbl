@@ -1,0 +1,590 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{CleanArch}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=6f41df64eb0dc4855be70172368604c2}{%
+           family={Martin},
+           familyi={M\bibinitperiod},
+           given={Robert\bibnamedelima C},
+           giveni={R\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Upper Saddle River, NJ}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall}%
+      }
+      \strng{namehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{fullhash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{fullhashraw}{6f41df64eb0dc4855be70172368604c2}
+      \strng{bibnamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authorbibnamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authornamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authorfullhash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authorfullhashraw}{6f41df64eb0dc4855be70172368604c2}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Clean Architecture: A Craftsman's Guide to Software Structure and Design}
+      \field{year}{2017}
+    \endentry
+    \entry{DDD}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=a8034da9731f447121ee0dbad3354a82}{%
+           family={Evans},
+           familyi={E\bibinitperiod},
+           given={Eric},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston, MA}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{fullhash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{fullhashraw}{a8034da9731f447121ee0dbad3354a82}
+      \strng{bibnamehash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{authorbibnamehash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{authornamehash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{authorfullhash}{a8034da9731f447121ee0dbad3354a82}
+      \strng{authorfullhashraw}{a8034da9731f447121ee0dbad3354a82}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Domain-Driven Design: Tackling Complexity in the Heart of Software}
+      \field{year}{2003}
+    \endentry
+    \entry{Net9}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=140864078aeca1c7c35b4beb33c53c34}{%
+           family={Microsoft},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{bibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorbibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authornamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \field{extraname}{1}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{11}
+      \field{note}{Microsoft Learn}
+      \field{title}{What's new in .NET 9}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/overview
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/overview
+      \endverb
+    \endentry
+    \entry{Aspire}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=140864078aeca1c7c35b4beb33c53c34}{%
+           family={Microsoft},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{bibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorbibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authornamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \field{extraname}{2}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{5}
+      \field{note}{Microsoft Learn}
+      \field{title}{.NET Aspire documentation}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/dotnet/aspire/
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/dotnet/aspire/
+      \endverb
+    \endentry
+    \entry{Postgres}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=36423acfb135ffe286ea438eafcb0bc6}{%
+           family={{PostgreSQL Global Development Group}},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{fullhash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{fullhashraw}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{bibnamehash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{authorbibnamehash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{authornamehash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{authorfullhash}{36423acfb135ffe286ea438eafcb0bc6}
+      \strng{authorfullhashraw}{36423acfb135ffe286ea438eafcb0bc6}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{PostgreSQL 16.0 Documentation}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://www.postgresql.org/docs/16/index.html
+      \endverb
+      \verb{url}
+      \verb https://www.postgresql.org/docs/16/index.html
+      \endverb
+    \endentry
+    \entry{Cloudinary}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=2420d93729403f55a9cf8f6d70dbad81}{%
+           family={Cloudinary},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{fullhash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{fullhashraw}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{bibnamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorbibnamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authornamehash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorfullhash}{2420d93729403f55a9cf8f6d70dbad81}
+      \strng{authorfullhashraw}{2420d93729403f55a9cf8f6d70dbad81}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Cloudinary.com}
+      \field{title}{Cloudinary Documentation}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://cloudinary.com/documentation
+      \endverb
+      \verb{url}
+      \verb https://cloudinary.com/documentation
+      \endverb
+    \endentry
+    \entry{JWT}{misc}{}{}
+      \name{author}{3}{}{%
+        {{hash=5a25bc91f524ca6dfc2ecf9f4a13903c}{%
+           family={Jones},
+           familyi={J\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=81e40ae87af997090fa9a9696e364c65}{%
+           family={Bradley},
+           familyi={B\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+        {{hash=34e6848475fd66697bfcb80787f2aef0}{%
+           family={Sakimura},
+           familyi={S\bibinitperiod},
+           given={Nat},
+           giveni={N\bibinitperiod}}}%
+      }
+      \strng{namehash}{8c74f36d6695ec51f419b547a3316502}
+      \strng{fullhash}{48d544cafb60a3ced64569d686a33135}
+      \strng{fullhashraw}{48d544cafb60a3ced64569d686a33135}
+      \strng{bibnamehash}{48d544cafb60a3ced64569d686a33135}
+      \strng{authorbibnamehash}{48d544cafb60a3ced64569d686a33135}
+      \strng{authornamehash}{8c74f36d6695ec51f419b547a3316502}
+      \strng{authorfullhash}{48d544cafb60a3ced64569d686a33135}
+      \strng{authorfullhashraw}{48d544cafb60a3ced64569d686a33135}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{RFC 7519, Internet Engineering Task Force}
+      \field{month}{5}
+      \field{title}{JSON Web Token (JWT)}
+      \field{year}{2015}
+      \verb{urlraw}
+      \verb https://www.rfc-editor.org/rfc/rfc7519
+      \endverb
+      \verb{url}
+      \verb https://www.rfc-editor.org/rfc/rfc7519
+      \endverb
+    \endentry
+    \entry{FlutterArch}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=8b36e9207c24c76e6719268e49201d94}{%
+           family={Google},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \strng{bibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorbibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authornamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \field{extraname}{1}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Flutter.dev}
+      \field{title}{Flutter Architectural Overview}
+      \verb{urlraw}
+      \verb https://docs.flutter.dev/resources/architectural-overview
+      \endverb
+      \verb{url}
+      \verb https://docs.flutter.dev/resources/architectural-overview
+      \endverb
+    \endentry
+    \entry{AngularArch}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=8b36e9207c24c76e6719268e49201d94}{%
+           family={Google},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \strng{bibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorbibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authornamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \field{extraname}{2}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Angular.io}
+      \field{title}{Angular Documentation: Architecture Overview}
+      \verb{urlraw}
+      \verb https://angular.io/guide/architecture
+      \endverb
+      \verb{url}
+      \verb https://angular.io/guide/architecture
+      \endverb
+    \endentry
+    \entry{PrimeNG}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=d5a4c2fb9d5fb0723a66e2e5cfb0abc3}{%
+           family={PrimeTek},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{fullhash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{fullhashraw}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{bibnamehash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{authorbibnamehash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{authornamehash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{authorfullhash}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \strng{authorfullhashraw}{d5a4c2fb9d5fb0723a66e2e5cfb0abc3}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{PrimeFaces.org}
+      \field{title}{PrimeNG Documentation}
+      \verb{urlraw}
+      \verb https://primeng.org/installation
+      \endverb
+      \verb{url}
+      \verb https://primeng.org/installation
+      \endverb
+    \endentry
+    \entry{SignalRIntro}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=140864078aeca1c7c35b4beb33c53c34}{%
+           family={Microsoft},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{fullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{bibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorbibnamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authornamehash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhash}{140864078aeca1c7c35b4beb33c53c34}
+      \strng{authorfullhashraw}{140864078aeca1c7c35b4beb33c53c34}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Microsoft Learn}
+      \field{title}{Introduction to ASP.NET Core SignalR}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction
+      \endverb
+    \endentry
+    \entry{FCM}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=8b36e9207c24c76e6719268e49201d94}{%
+           family={Google},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \strng{bibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorbibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authornamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Firebase.google.com}
+      \field{title}{Firebase Cloud Messaging}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://firebase.google.com/docs/cloud-messaging
+      \endverb
+      \verb{url}
+      \verb https://firebase.google.com/docs/cloud-messaging
+      \endverb
+    \endentry
+    \entry{hovy1993automated}{article}{}{}
+      \name{author}{1}{}{%
+        {{hash=e9c17b6ae8ef050baf956c768a3f59c0}{%
+           family={Hovy},
+           familyi={H\bibinitperiod},
+           given={Eduard\bibnamedelima H},
+           giveni={E\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier Science Publishers}%
+      }
+      \strng{namehash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{fullhash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{fullhashraw}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{bibnamehash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{authorbibnamehash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{authornamehash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{authorfullhash}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \strng{authorfullhashraw}{e9c17b6ae8ef050baf956c768a3f59c0}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Artificial intelligence}
+      \field{number}{1-2}
+      \field{title}{Automated discourse generation using discourse structure relations}
+      \field{volume}{63}
+      \field{year}{1993}
+      \field{pages}{341\bibrangedash 385}
+      \range{pages}{45}
+    \endentry
+    \entry{peterson2007computer}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=81db4747e24dc12e1ad797ddcba83045}{%
+           family={Peterson},
+           familyi={P\bibinitperiod},
+           given={Larry\bibnamedelima L},
+           giveni={L\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+        {{hash=8a578ef241a9de47e6f38a2b825fba8d}{%
+           family={Davie},
+           familyi={D\bibinitperiod},
+           given={Bruce\bibnamedelima S},
+           giveni={B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{fullhash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{fullhashraw}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{bibnamehash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{authorbibnamehash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{authornamehash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{authorfullhash}{37a62308e9421abec940ea8aa6b08f60}
+      \strng{authorfullhashraw}{37a62308e9421abec940ea8aa6b08f60}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Computer networks: a systems approach}
+      \field{year}{2007}
+    \endentry
+    \entry{NguyenThucHai}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=cd7bac74d4bf6412b58c8607a166b7f6}{%
+           family={Hải},
+           familyi={H\bibinitperiod},
+           given={Nguyễn\bibnamedelima Thúc},
+           giveni={N\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Nhà xuất bản giáo dục}%
+      }
+      \strng{namehash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{fullhash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{fullhashraw}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{bibnamehash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{authorbibnamehash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{authornamehash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{authorfullhash}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \strng{authorfullhashraw}{cd7bac74d4bf6412b58c8607a166b7f6}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Mạng máy tính và các hệ thống mở}
+      \field{year}{1999}
+    \endentry
+    \entry{poesio2001discourse}{inproceedings}{}{}
+      \name{author}{2}{}{%
+        {{hash=a18d390058dfaa1a918b1cb85cde6539}{%
+           family={Poesio},
+           familyi={P\bibinitperiod},
+           given={Massimo},
+           giveni={M\bibinitperiod}}}%
+        {{hash=a69b753f080ea9548fcebc3190a1b564}{%
+           family={Di\bibnamedelima Eugenio},
+           familyi={D\bibinitperiod\bibinitdelim E\bibinitperiod},
+           given={Barbara},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{fullhash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{fullhashraw}{06245927d76700915d36acd70f6c7b6e}
+      \strng{bibnamehash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{authorbibnamehash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{authornamehash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{authorfullhash}{06245927d76700915d36acd70f6c7b6e}
+      \strng{authorfullhashraw}{06245927d76700915d36acd70f6c7b6e}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{{ESSLLI} workshop on information structure, discourse structure and discourse semantics, Copenhagen, Denmark}
+      \field{title}{Discourse structure and anaphoric accessibility}
+      \field{year}{2001}
+      \field{pages}{129\bibrangedash 143}
+      \range{pages}{15}
+    \endentry
+    \entry{knott1996data}{thesis}{}{}
+      \name{author}{1}{}{%
+        {{hash=d2875f44afa230457debf42c2a378115}{%
+           family={Knott},
+           familyi={K\bibinitperiod},
+           given={Alistair},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {The University of Edinburgh, {UK}}%
+      }
+      \strng{namehash}{d2875f44afa230457debf42c2a378115}
+      \strng{fullhash}{d2875f44afa230457debf42c2a378115}
+      \strng{fullhashraw}{d2875f44afa230457debf42c2a378115}
+      \strng{bibnamehash}{d2875f44afa230457debf42c2a378115}
+      \strng{authorbibnamehash}{d2875f44afa230457debf42c2a378115}
+      \strng{authornamehash}{d2875f44afa230457debf42c2a378115}
+      \strng{authorfullhash}{d2875f44afa230457debf42c2a378115}
+      \strng{authorfullhashraw}{d2875f44afa230457debf42c2a378115}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A data-driven methodology for motivating a set of coherence relations}
+      \field{type}{phdthesis}
+      \field{year}{1996}
+    \endentry
+    \entry{BernersTim}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=d469e0df304c98f67b55d087ea6187a1}{%
+           family={Berners-Lee},
+           familyi={B\bibinithyphendelim L\bibinitperiod},
+           given={Tim},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{fullhash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{fullhashraw}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{bibnamehash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{authorbibnamehash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{authornamehash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{authorfullhash}{d469e0df304c98f67b55d087ea6187a1}
+      \strng{authorfullhashraw}{d469e0df304c98f67b55d087ea6187a1}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Hypertext Transfer Protocol ({HTTP})}
+      \field{urlday}{30}
+      \field{urlmonth}{9}
+      \field{urlyear}{2010}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb ftp:/info.cern.ch/pub/www/doc/http-spec.txt.Z
+      \endverb
+      \verb{url}
+      \verb ftp:/info.cern.ch/pub/www/doc/http-spec.txt.Z
+      \endverb
+    \endentry
+    \entry{LectureA}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=e20d410aa145d29bd63e7f5054800775}{%
+           family={{Princeton University}},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{fullhash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{fullhashraw}{e20d410aa145d29bd63e7f5054800775}
+      \strng{bibnamehash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{authorbibnamehash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{authornamehash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{authorfullhash}{e20d410aa145d29bd63e7f5054800775}
+      \strng{authorfullhashraw}{e20d410aa145d29bd63e7f5054800775}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{WordNet}
+      \field{urlday}{30}
+      \field{urlmonth}{9}
+      \field{urlyear}{2010}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.cogsci.princeton.edu/~wn/index.shtml
+      \endverb
+      \verb{url}
+      \verb http://www.cogsci.princeton.edu/~wn/index.shtml
+      \endverb
+    \endentry
+  \enddatalist
+  \missing{ashton2009internet}
+  \missing{scott2013sdn}
+\endrefsection
+\endinput
+

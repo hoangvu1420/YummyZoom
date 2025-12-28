@@ -1,0 +1,122 @@
+\ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } CHƯƠNG \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {chapter}{}{}{}\relax 
+\ttl@change@i {\@ne }{section}{0.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {section}{}{}{}\relax 
+\ttl@change@i {\@ne }{subsection}{1.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {subsection}{}{}{}\relax 
+\thispagestyle {empty}
+\contentsline {chapter}{\numberline {1}GIỚI THIỆU ĐỀ TÀI}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Đặt vấn đề}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Mục tiêu và phạm vi đề tài}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Định hướng giải pháp}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Bố cục đồ án}{5}{section.1.4}%
+\contentsline {chapter}{\numberline {2}KHẢO SÁT VÀ PHÂN TÍCH YÊU CẦU}{10}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Khảo sát hiện trạng}{10}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Bối cảnh và xu hướng thị trường}{10}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Phân tích các ứng dụng giao đồ ăn hiện có}{11}{subsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {a}GrabFood - Sức mạnh từ hệ sinh thái siêu ứng dụng}{11}{subsubsection.2.1.2.1}%
+\contentsline {subsubsection}{\numberline {b}ShopeeFood - Thống lĩnh bằng văn hóa săn khuyến mãi}{12}{subsubsection.2.1.2.2}%
+\contentsline {subsubsection}{\numberline {c}Phân tích so sánh và nhận định tổng quan}{13}{subsubsection.2.1.2.3}%
+\contentsline {subsection}{\numberline {2.1.3}Nhu cầu và thách thức của người dùng}{13}{subsection.2.1.3}%
+\contentsline {subsubsection}{\numberline {a}Nhu cầu cốt lõi của người dùng cuối}{13}{subsubsection.2.1.3.1}%
+\contentsline {subsubsection}{\numberline {b}Nhu cầu của nhà hàng đối tác}{14}{subsubsection.2.1.3.2}%
+\contentsline {subsubsection}{\numberline {c}Những thách thức chưa được giải quyết tốt}{14}{subsubsection.2.1.3.3}%
+\contentsline {subsubsection}{\numberline {d}Định hướng phát triển cho YummyZoom}{15}{subsubsection.2.1.3.4}%
+\contentsline {section}{\numberline {2.2}Tổng quan chức năng}{15}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Biểu đồ use case tổng quát}{16}{subsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {a}Các tác nhân chính trong hệ thống}{16}{subsubsection.2.2.1.1}%
+\contentsline {subsubsection}{\numberline {b}Các use case chính và mô tả chức năng}{16}{subsubsection.2.2.1.2}%
+\contentsline {paragraph}{Nhóm chức năng của Khách hàng}{17}{paragraph*.8}%
+\contentsline {paragraph}{Nhóm chức năng của Nhà hàng}{17}{paragraph*.9}%
+\contentsline {paragraph}{Nhóm chức năng của Quản trị viên}{17}{paragraph*.10}%
+\contentsline {subsection}{\numberline {2.2.2}Biểu đồ use case phân rã "Quản lý tài khoản"}{18}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Biểu đồ use case phân rã "Đặt hàng cá nhân"}{19}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Biểu đồ use case phân rã "TeamCart"}{20}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Biểu đồ use case phân rã "Quản lý thực đơn"}{21}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}Biểu đồ use case phân rã "Duyệt đăng ký nhà hàng"}{22}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.7}Quy trình nghiệp vụ}{22}{subsection.2.2.7}%
+\contentsline {section}{\numberline {2.3}Đặc tả chức năng}{25}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Đặc tả Use Case: Đăng ký nhà hàng}{25}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Đặc tả Use Case: Duyệt đăng ký nhà hàng}{27}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Đặc tả Use Case: Quản lý thực đơn}{29}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Đặc tả Use Case: Tìm kiếm nhà hàng}{31}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Đặc tả Use Case: Đặt hàng cá nhân}{33}{subsection.2.3.5}%
+\contentsline {subsection}{\numberline {2.3.6}Đặc tả Use Case: Khởi tạo TeamCart}{36}{subsection.2.3.6}%
+\contentsline {subsection}{\numberline {2.3.7}Đặc tả Use Case: Tham gia TeamCart}{38}{subsection.2.3.7}%
+\contentsline {subsection}{\numberline {2.3.8}Đặc tả Use Case: Chốt đơn TeamCart}{40}{subsection.2.3.8}%
+\contentsline {subsection}{\numberline {2.3.9}Đặc tả Use Case: Xử lý đơn hàng}{44}{subsection.2.3.9}%
+\contentsline {subsection}{\numberline {2.3.10}Đặc tả Use Case: Đánh giá nhà hàng}{46}{subsection.2.3.10}%
+\contentsline {section}{\numberline {2.4}Yêu cầu phi chức năng}{47}{section.2.4}%
+\contentsline {chapter}{\numberline {3}CÔNG NGHỆ SỬ DỤNG}{50}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Kiến trúc hệ thống và Ứng dụng Backend}{50}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Kiến trúc Clean Architecture và Domain-Driven Design (DDD)}{50}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Nền tảng phát triển: .NET 9 và ASP.NET Core}{51}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Điều phối hệ thống và Khả năng quan sát: .NET Aspire}{52}{subsection.3.1.3}%
+\contentsline {section}{\numberline {3.2}Cơ sở dữ liệu và Lưu trữ}{52}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Hệ quản trị cơ sở dữ liệu quan hệ: PostgreSQL}{52}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Bộ nhớ đệm (Caching): Redis}{54}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Quản lý và Phân phối đa phương tiện: Cloudinary}{54}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Xác thực và Phân quyền (Authentication \& Authorization)}{55}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Cơ chế xác thực: JSON Web Token (JWT)}{55}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Quản lý định danh và Phân quyền: ASP.NET Core Identity}{55}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}Ứng dụng dành cho khách hàng (Mobile App)}{56}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Nền tảng phát triển: Flutter \& Dart}{56}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Quản lý trạng thái và Tương tác API}{57}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Tích hợp bản đồ và Thanh toán}{57}{subsection.3.4.3}%
+\contentsline {section}{\numberline {3.5}Ứng dụng Web quản trị (Admin \& Restaurant Portal)}{58}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Nền tảng Frontend: Angular}{58}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Thư viện giao diện: PrimeNG và Tailwind CSS}{59}{subsection.3.5.2}%
+\contentsline {section}{\numberline {3.6}Cộng tác thời gian thực (Realtime Collaboration)}{59}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Giao thức và Framework: SignalR}{59}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Thông báo đẩy tới thiết bị di động: Firebase Cloud Messaging (FCM)}{60}{subsection.3.6.2}%
+\contentsline {chapter}{\numberline {4}THIẾT KẾ, TRIỂN KHAI VÀ ĐÁNH GIÁ HỆ THỐNG}{61}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Thiết kế kiến trúc}{61}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Lựa chọn kiến trúc phần mềm}{61}{subsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {a}Mô hình kiến trúc tổng thể}{61}{subsubsection.4.1.1.1}%
+\contentsline {subsubsection}{\numberline {b}Tổ chức các tầng kiến trúc (Layered Architecture)}{61}{subsubsection.4.1.1.2}%
+\contentsline {subsubsection}{\numberline {c}Thiết kế chiến lược (Strategic Design)}{62}{subsubsection.4.1.1.3}%
+\contentsline {subsubsection}{\numberline {d}Các mẫu kỹ thuật chủ đạo (Tactical Patterns)}{63}{subsubsection.4.1.1.4}%
+\contentsline {paragraph}{CQRS (Command Query Responsibility Segregation):}{63}{paragraph*.18}%
+\contentsline {paragraph}{Domain Events \& Outbox Pattern:}{63}{paragraph*.19}%
+\contentsline {subsubsection}{\numberline {e}Kết luận}{64}{subsubsection.4.1.1.5}%
+\contentsline {subsection}{\numberline {4.1.2}Thiết kế tổng quan}{64}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Thiết kế chi tiết gói}{65}{subsection.4.1.3}%
+\contentsline {subsubsection}{\numberline {a}Biểu đồ 1: Restaurant (Create Restaurant + Search Restaurants)}{66}{subsubsection.4.1.3.1}%
+\contentsline {subsubsection}{\numberline {b}Biểu đồ 2: Order (Initiate Order + Get Order Status)}{68}{subsubsection.4.1.3.2}%
+\contentsline {section}{\numberline {4.2}Thiết kế chi tiết}{70}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Thiết kế giao diện}{70}{subsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {a}Thiết kế giao diện ứng dụng di động dành cho khách hàng}{70}{subsubsection.4.2.1.1}%
+\contentsline {subsubsection}{\numberline {b}Thiết kế giao diện hệ thống quản trị trên web}{72}{subsubsection.4.2.1.2}%
+\contentsline {subsection}{\numberline {4.2.2}Thiết kế lớp}{74}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Thiết kế cơ sở dữ liệu}{81}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}Xây dựng ứng dụng}{84}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Thư viện và công cụ sử dụng}{84}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Kết quả đạt được}{86}{subsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {a}Backend (ASP.NET Core/C\#)}{86}{subsubsection.4.3.2.1}%
+\contentsline {subsubsection}{\numberline {b}Mobile (Flutter/Dart)}{86}{subsubsection.4.3.2.2}%
+\contentsline {subsubsection}{\numberline {c}Web Admin (Angular/TypeScript)}{87}{subsubsection.4.3.2.3}%
+\contentsline {subsection}{\numberline {4.3.3}Minh họa các chức năng chính}{87}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Kiểm thử}{87}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Triển khai}{87}{section.4.5}%
+\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{88}{chapter.5}%
+\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{89}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Kết luận}{89}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Hướng phát triển}{89}{section.6.2}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{93}{section*.45}%
+\contentsline {chapter}{PHỤ LỤC}{95}{section*.46}%
+\ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {chapter}{}{}{}\relax 
+\contentsline {chapter}{\numberline {A}HƯỚNG DẪN VIẾT ĐỒ ÁN TỐT NGHIỆP}{95}{appendix.1.A}%
+\contentsline {section}{\numberline {A.1}Ngành học}{96}{section.1.A.1}%
+\contentsline {section}{\numberline {A.2}Đánh dấu (bullet) và đánh số (numering)}{96}{section.1.A.2}%
+\contentsline {section}{\numberline {A.3}Cách thêm bảng}{97}{section.1.A.3}%
+\contentsline {section}{\numberline {A.4}Chèn hình ảnh}{97}{section.1.A.4}%
+\contentsline {section}{\numberline {A.5}Tài liệu tham khảo}{98}{section.1.A.5}%
+\contentsline {paragraph}{Cách liệt kê}{98}{paragraph*.49}%
+\contentsline {paragraph}{Các loại tài liệu tham khảo}{98}{paragraph*.50}%
+\contentsline {section}{\numberline {A.6}Cách viết phương trình và công thức toán học}{98}{section.1.A.6}%
+\contentsline {section}{\numberline {A.7}Qui cách đóng quyển}{98}{section.1.A.7}%
+\contentsline {chapter}{\numberline {B}ĐẶC TẢ USE CASE}{100}{appendix.1.B}%
+\contentsline {section}{\numberline {B.1}Đặc tả use case ``Thống kê tình hình mượn sách''}{100}{section.1.B.1}%
+\contentsline {section}{\numberline {B.2}Đặc tả use case ``Đăng ký làm thẻ mượn''}{100}{section.1.B.2}%
+\contentsfinish 
