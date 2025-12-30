@@ -1,0 +1,39 @@
+@startuml YummyZoom_Package_Order_Initiate_Domain
+!theme plain
+left to right direction
+
+title YummyZoom - Thiết kế Domain: Order Initiation Flow
+
+package "Domain Layer" as Domain {
+  package "OrderAggregate" as DomainOrder {
+    class Order <<Aggregate Root>>
+    class OrderItem <<Entity>>
+    class DeliveryAddress <<Value Object>>
+    class PaymentTransaction <<Entity>>
+    class OrderId <<Value Object>>
+    
+    enum OrderStatus
+    enum PaymentStatus
+    
+    class OrderPlaced <<Domain Event>>
+  }
+
+  package "Domain Services" as DomainServices {
+    class OrderFinancialService
+  }
+}
+
+' Relationships
+Order "1" *-- "many" OrderItem
+Order "1" *-- "1" DeliveryAddress
+Order "1" *-- "1" PaymentTransaction
+Order "1" *-- "1" OrderId
+
+Order ..> OrderStatus
+Order ..> PaymentStatus
+Order ..> OrderPlaced
+
+' Domain Service depends on Order
+OrderFinancialService ..> Order : Calculates pricing for >
+
+@enduml

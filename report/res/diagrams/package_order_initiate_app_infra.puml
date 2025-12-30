@@ -1,0 +1,59 @@
+@startuml YummyZoom_Package_Order_Initiate_App_Infra
+!theme plain
+left to right direction
+
+title YummyZoom - Thiết kế App & Infra: Order Initiation Flow
+
+package "Web/Presentation Layer" as Web {
+    class OrdersEndpoints
+}
+
+package "Application Layer" as App {
+  package "Use Cases" as AppUseCases {
+    class InitiateOrderCommand
+    class InitiateOrderCommandHandler
+  }
+
+  package "Interfaces" as AppInterfaces {
+    interface IOrderRepository
+    interface IRestaurantRepository
+    interface IPaymentGatewayService
+    interface ICouponRepository
+  }
+}
+
+package "Infrastructure Layer" as Infra {
+  package "Persistence" as InfraPersistence {
+    class OrderRepository
+    class RestaurantRepository
+    class CouponRepository
+  }
+
+  package "External Services" as InfraExternal {
+    class StripeService
+  }
+}
+
+' Layout Enforcement
+OrdersEndpoints -[hidden]-> InitiateOrderCommand
+InitiateOrderCommand -[hidden]-> IOrderRepository
+
+' Web to App
+OrdersEndpoints ..> InitiateOrderCommand : Sends >
+
+' App Internal
+InitiateOrderCommandHandler ..> InitiateOrderCommand : Handles >
+
+' App to Interfaces
+InitiateOrderCommandHandler ..> IOrderRepository : Uses >
+InitiateOrderCommandHandler ..> IRestaurantRepository : Checks >
+InitiateOrderCommandHandler ..> IPaymentGatewayService : Charges >
+InitiateOrderCommandHandler ..> ICouponRepository : Validates >
+
+' Infra Implementation (Reversed arrow for visual L->R flow)
+IOrderRepository <|.. OrderRepository
+IRestaurantRepository <|.. RestaurantRepository
+IPaymentGatewayService <|.. StripeService
+ICouponRepository <|.. CouponRepository
+
+@enduml

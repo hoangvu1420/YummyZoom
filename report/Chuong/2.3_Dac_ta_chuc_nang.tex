@@ -28,12 +28,12 @@
     \caption{Đặc tả Use Case Đăng ký nhà hàng} \label{tab:uc_007} \\
     \endlastfoot
 
-    \multirow{4}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Nhập thông tin nhà hàng (Tên, địa chỉ, liên hệ, giờ mở cửa...). \\ \cline{2-4} 
      & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu nhập vào. \\ \cline{2-4} 
      & 3 & Hệ thống & Tạo hồ sơ đăng ký với trạng thái "Đã nộp" (Submitted). \\ \cline{2-4} 
      & 4 & Hệ thống & Thông báo đăng ký thành công và chờ duyệt. \\ \hline
-    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 2a & Hệ thống & Hiển thị thông báo lỗi nếu dữ liệu thiếu hoặc sai định dạng. \\ \hline
     \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Hồ sơ đăng ký được lưu vào hệ thống, chờ Admin phê duyệt.} \\ \hline
 \end{longtable}
@@ -74,64 +74,62 @@ Dữ liệu đầu vào cho use case Đăng ký nhà hàng:
 \end{longtable}
 
 
-\clearpage
-\subsection{Đặc tả Use Case: Duyệt đăng ký nhà hàng}
-\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-    \hline
-    \textbf{Mã use case} & UC-012 & \textbf{Tên use case} & Duyệt đăng ký nhà hàng \\ \hline
-    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Quản trị viên (Admin)} \\ \hline
-    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Admin xem xét và phê duyệt yêu cầu đăng ký nhà hàng, đồng thời khởi tạo nhà hàng mới trên hệ thống.} \\ \hline
-    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Admin nhấn nút "Duyệt" (Approve) trên chi tiết hồ sơ đăng ký.} \\ \hline
-    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Admin đã đăng nhập. Hồ sơ đăng ký tồn tại và đang ở trạng thái chờ duyệt (Submitted/UnderReview).} \\ \hline
-    \endfirsthead
+% \subsection{Đặc tả Use Case: Duyệt đăng ký nhà hàng}
+% \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+%     \hline
+%     \textbf{Mã use case} & UC-012 & \textbf{Tên use case} & Duyệt đăng ký nhà hàng \\ \hline
+%     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Quản trị viên (Admin)} \\ \hline
+%     \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Admin xem xét và phê duyệt yêu cầu đăng ký nhà hàng, đồng thời khởi tạo nhà hàng mới trên hệ thống.} \\ \hline
+%     \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Admin nhấn nút "Duyệt" (Approve) trên chi tiết hồ sơ đăng ký.} \\ \hline
+%     \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Admin đã đăng nhập. Hồ sơ đăng ký tồn tại và đang ở trạng thái chờ duyệt (Submitted/UnderReview).} \\ \hline
+%     \endfirsthead
     
-    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
-    \hline
-    \endhead
+%     \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+%     \hline
+%     \endhead
     
-    \hline
-    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
-    \endfoot
+%     \hline
+%     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+%     \endfoot
     
-    \caption{Đặc tả Use Case Duyệt đăng ký nhà hàng} \label{tab:uc_012} \\
-    \endlastfoot
+%     \caption{Đặc tả Use Case Duyệt đăng ký nhà hàng} \label{tab:uc_012} \\
+%     \endlastfoot
 
-    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 1 & Admin & Nhập ghi chú (tùy chọn) và xác nhận duyệt. \\ \cline{2-4} 
-     & 2 & Hệ thống & Tạo mới thực thể Nhà hàng (Restaurant) từ thông tin đăng ký. \\ \cline{2-4} 
-     & 3 & Hệ thống & Gán quyền Chủ sở hữu (Owner) cho tài khoản người đăng ký. \\ \cline{2-4} 
-     & 4 & Hệ thống & Cập nhật trạng thái hồ sơ thành "Đã duyệt" (Approved). \\ \cline{2-4} 
-     & 5 & Hệ thống & Gửi thông báo thành công cho Admin và người đăng ký. \\ \hline
-    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 2a & Hệ thống & Báo lỗi nếu quá trình tạo nhà hàng hoặc gán quyền thất bại. \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Nhà hàng mới được tạo và hiển thị trên hệ thống. Người đăng ký có quyền quản lý nhà hàng đó.} \\ \hline
-\end{longtable}
+%     \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+%      & 1 & Admin & Nhập ghi chú (tùy chọn) và xác nhận duyệt. \\ \cline{2-4} 
+%      & 2 & Hệ thống & Tạo mới thực thể Nhà hàng (Restaurant) từ thông tin đăng ký. \\ \cline{2-4} 
+%      & 3 & Hệ thống & Gán quyền Chủ sở hữu (Owner) cho tài khoản người đăng ký. \\ \cline{2-4} 
+%      & 4 & Hệ thống & Cập nhật trạng thái hồ sơ thành "Đã duyệt" (Approved). \\ \cline{2-4} 
+%      & 5 & Hệ thống & Gửi thông báo thành công cho Admin và người đăng ký. \\ \hline
+%     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+%      & 2a & Hệ thống & Báo lỗi nếu quá trình tạo nhà hàng hoặc gán quyền thất bại. \\ \hline
+%     \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Nhà hàng mới được tạo và hiển thị trên hệ thống. Người đăng ký có quyền quản lý nhà hàng đó.} \\ \hline
+% \end{longtable}
 
-Dữ liệu đầu vào cho use case Duyệt đăng ký nhà hàng:
+% Dữ liệu đầu vào cho use case Duyệt đăng ký nhà hàng:
 
-\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-    \hline
-    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-    \endfirsthead
+% \begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+%     \hline
+%     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+%     \endfirsthead
     
-    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
-    \hline
-    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-    \endhead
+%     \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+%     \hline
+%     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+%     \endhead
     
-    \hline
-    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
-    \endfoot
+%     \hline
+%     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+%     \endfoot
     
-    \caption{Dữ liệu đầu vào Duyệt đăng ký nhà hàng} \label{tab:input_uc_012} \\
-    \endlastfoot
+%     \caption{Dữ liệu đầu vào Duyệt đăng ký nhà hàng} \label{tab:input_uc_012} \\
+%     \endlastfoot
 
-    1 & RegistrationId & ID của hồ sơ đăng ký & Có & GUID hợp lệ, tồn tại \\ \hline
-    2 & Note & Ghi chú nội bộ của Admin & Không & Tối đa 500 ký tự \\ \hline
-\end{longtable}
+%     1 & RegistrationId & ID của hồ sơ đăng ký & Có & GUID hợp lệ, tồn tại \\ \hline
+%     2 & Note & Ghi chú nội bộ của Admin & Không & Tối đa 500 ký tự \\ \hline
+% \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Quản lý thực đơn}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -153,7 +151,7 @@ Dữ liệu đầu vào cho use case Duyệt đăng ký nhà hàng:
     \caption{Đặc tả Use Case Quản lý thực đơn} \label{tab:uc_008} \\
     \endlastfoot
 
-    \multirow{9}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Chủ nhà hàng & Chọn chức năng quản lý danh mục/món ăn/nhóm tùy chọn. \\ \cline{2-4} 
      & 2 & Chủ nhà hàng & Nhập thông tin chi tiết (tên, mô tả, giá, hình ảnh...). \\ \cline{2-4} 
      & 3 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu đầu vào (không rỗng, giá > 0, định dạng URL...). \\ \cline{2-4} 
@@ -162,7 +160,7 @@ Dữ liệu đầu vào cho use case Duyệt đăng ký nhà hàng:
      & 6 & Hệ thống & Phát sự kiện domain (MenuItemCreated, MenuItemUpdated, MenuItemDeleted...). \\ \cline{2-4} 
      & 7 & Hệ thống & Cập nhật read model FullMenuView để đồng bộ dữ liệu hiển thị. \\ \cline{2-4} 
      & 8 & Hệ thống & Thông báo thành công và hiển thị danh sách cập nhật. \\ \hline
-    \multirow{4}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 3a & Hệ thống & Hiển thị lỗi nếu dữ liệu không hợp lệ (tên rỗng, giá âm, URL sai định dạng). \\ \cline{2-4} 
      & 4a & Hệ thống & Từ chối thao tác nếu món ăn/danh mục không thuộc nhà hàng (ForbiddenAccessException). \\ \cline{2-4} 
      & 5a & Hệ thống & Báo lỗi nếu danh mục không tồn tại khi tạo món ăn mới. \\ \hline
@@ -200,7 +198,6 @@ Dữ liệu đầu vào cho use case Quản lý thực đơn (Tạo món ăn m�
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Tìm kiếm nhà hàng}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -222,7 +219,7 @@ Dữ liệu đầu vào cho use case Quản lý thực đơn (Tạo món ăn m�
     \caption{Đặc tả Use Case Tìm kiếm nhà hàng} \label{tab:uc_002} \\
     \endlastfoot
 
-    \multirow{8}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Nhập từ khóa tìm kiếm (tên nhà hàng/món ăn) hoặc chọn bộ lọc. \\ \cline{2-4} 
      & 2 & Hệ thống & Validate dữ liệu đầu vào (độ dài, định dạng tọa độ, phạm vi giá trị). \\ \cline{2-4} 
      & 3 & Hệ thống & Xây dựng câu truy vấn SQL với điều kiện lọc (WHERE clauses). \\ \cline{2-4} 
@@ -230,7 +227,7 @@ Dữ liệu đầu vào cho use case Quản lý thực đơn (Tạo món ăn m�
      & 5 & Hệ thống & Sắp xếp kết quả theo tiêu chí (rating/distance/popularity/name). \\ \cline{2-4} 
      & 6 & Hệ thống & Phân trang kết quả (PageNumber, PageSize). \\ \cline{2-4} 
      & 7 & Hệ thống & Trả về danh sách nhà hàng và facets (nếu yêu cầu). \\ \hline
-    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 2a & Hệ thống & Trả về lỗi validation nếu tham số không hợp lệ (PageSize > 50, tọa độ ngoài phạm vi...). \\ \cline{2-4} 
      & 7a & Hệ thống & Trả về danh sách rỗng nếu không tìm thấy kết quả phù hợp. \\ \hline
     \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Danh sách nhà hàng được hiển thị với thông tin: tên, logo, loại ẩm thực, đánh giá, khoảng cách (nếu có). Facets (bộ lọc động) được cập nhật dựa trên kết quả hiện tại.} \\ \hline
@@ -271,7 +268,6 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Đặt hàng cá nhân}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -293,7 +289,7 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
     \caption{Đặc tả Use Case Đặt hàng cá nhân} \label{tab:uc_003} \\
     \endlastfoot
     
-    \multirow{13}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Chọn món ăn từ thực đơn, tùy chỉnh (size, topping) nếu có. \\ \cline{2-4} 
      & 2 & Khách hàng & Thêm món vào giỏ hàng (tối đa 50 món, mỗi món tối đa 10 phần). \\ \cline{2-4} 
      & 3 & Khách hàng & Chọn địa chỉ giao hàng từ danh sách hoặc nhập mới. \\ \cline{2-4} 
@@ -307,7 +303,7 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
      & 11 & Hệ thống & Tạo Order với trạng thái PendingPayment (online) hoặc Placed (COD). \\ \cline{2-4} 
      & 12 & Hệ thống & Lưu Order vào database, phát sự kiện OrderPlaced. \\ \cline{2-4} 
      & 13 & Hệ thống & Trả về OrderId, OrderNumber, TotalAmount và ClientSecret (nếu online). \\ \hline
-    \multirow{6}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 5a & Hệ thống & Báo lỗi nếu nhà hàng không tồn tại hoặc không hoạt động. \\ \cline{2-4} 
      & 5b & Hệ thống & Báo lỗi nếu món ăn không tồn tại, không còn hàng hoặc không thuộc nhà hàng. \\ \cline{2-4} 
      & 6a & Hệ thống & Báo lỗi nếu nhóm tùy chỉnh không được gán cho món hoặc số lượng lựa chọn sai. \\ \cline{2-4} 
@@ -354,7 +350,6 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Khởi tạo TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -376,13 +371,13 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
     \caption{Đặc tả Use Case Khởi tạo TeamCart} \label{tab:uc_004a} \\
     \endlastfoot
 
-    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Chọn nhà hàng và thiết lập thông tin giỏ nhóm (Tên hiển thị của Host, Thời gian chốt đơn). \\ \cline{2-4} 
      & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (Tên host không rỗng, thời gian chốt đơn phải ở tương lai nếu có). \\ \cline{2-4} 
      & 3 & Hệ thống & Tạo mới TeamCart với trạng thái Active. Tạo ShareToken duy nhất. \\ \cline{2-4} 
      & 4 & Hệ thống & Thêm người tạo vào danh sách thành viên với vai trò Host. \\ \cline{2-4} 
      & 5 & Hệ thống & Trả về thông tin TeamCart và Link chia sẻ (ShareToken). \\ \hline
-    \multirow{2}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 2a & Hệ thống & Báo lỗi nếu nhà hàng không tồn tại hoặc thời gian chốt đơn không hợp lệ (trong quá khứ). \\ \hline
     \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{TeamCart được tạo thành công. Host nhận được link chia sẻ để gửi cho các thành viên khác.} \\ \hline
 \end{longtable}
@@ -412,7 +407,6 @@ Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Tham gia TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -434,14 +428,14 @@ Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
     \caption{Đặc tả Use Case Tham gia TeamCart} \label{tab:uc_004b} \\
     \endlastfoot
 
-    \multirow{6}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Nhập tên hiển thị (GuestName) để tham gia nhóm. \\ \cline{2-4} 
      & 2 & Hệ thống & Kiểm tra sự tồn tại của TeamCart. \\ \cline{2-4} 
      & 3 & Hệ thống & Xác thực mã chia sẻ (ShareToken). \\ \cline{2-4} 
      & 4 & Hệ thống & Kiểm tra trạng thái TeamCart (phải là Active) và quyền tham gia (chưa tham gia trước đó). \\ \cline{2-4} 
      & 5 & Hệ thống & Thêm người dùng vào danh sách thành viên với vai trò Guest. \\ \cline{2-4} 
      & 6 & Hệ thống & Thông báo thành công và chuyển hướng đến giao diện chi tiết TeamCart. \\ \hline
-    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 2a & Hệ thống & Báo lỗi nếu TeamCart không tồn tại. \\ \cline{2-4} 
      & 3a & Hệ thống & Báo lỗi nếu mã chia sẻ không hợp lệ hoặc đã hết hạn. \\ \cline{2-4} 
      & 4a & Hệ thống & Báo lỗi nếu TeamCart đã bị khóa, đã chốt đơn hoặc người dùng đã là thành viên. \\ \hline
@@ -473,7 +467,6 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Chốt đơn TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -495,7 +488,7 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
     \caption{Đặc tả Use Case Chốt đơn TeamCart} \label{tab:uc_004c} \\
     \endlastfoot
 
-    \multirow{10}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Host & Chọn chức năng "Khóa đơn" để ngăn chặn việc thêm/bớt món. \\ \cline{2-4} 
      & 2 & Hệ thống & Tính toán chi phí (Tổng tiền, Thuế, Phí vận chuyển), chia tiền cho từng thành viên và chuyển trạng thái sang "Locked". \\ \cline{2-4} 
      & 3 & Host & Áp dụng/điều chỉnh Mã giảm giá hoặc Tip (tùy chọn) khi giỏ đang Locked. \\ \cline{2-4} 
@@ -506,7 +499,7 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
      & 8 & Host & Nhập thông tin giao hàng và xác nhận đặt hàng cuối cùng. \\ \cline{2-4} 
      & 9 & Hệ thống & Kiểm tra tính nhất quán (Quote Version, trạng thái ReadyToConfirm, tổng tiền đã đóng). \\ \cline{2-4} 
      & 10 & Hệ thống & Chốt hạn mức Coupon (nếu có), tạo Order và chuyển trạng thái TeamCart sang "Converted". Thông báo đặt hàng thành công cho tất cả thành viên. \\ \hline
-    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 4a & Hệ thống & Từ chối chốt giá nếu TeamCart không ở trạng thái Locked (CannotFinalizePricingInCurrentStatus). \\ \cline{2-4} 
      & 6a & Hệ thống & Từ chối thanh toán nếu TeamCart chưa ở trạng thái Finalized (CanOnlyPayOnFinalizedCart). \\ \cline{2-4} 
      & 9a & Hệ thống & Báo lỗi nếu thông tin báo giá (Quote) đã thay đổi hoặc không khớp (xung đột Quote Version). \\ \cline{2-4} 
@@ -568,7 +561,6 @@ Dữ liệu đầu vào cho use case Chốt đơn TeamCart (Bước xác nhận 
 \end{longtable}
 
 
-\clearpage
 \subsection{Đặc tả Use Case: Xử lý đơn hàng}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
@@ -590,7 +582,7 @@ Dữ liệu đầu vào cho use case Chốt đơn TeamCart (Bước xác nhận 
     \caption{Đặc tả Use Case Xử lý đơn hàng} \label{tab:uc_009} \\
     \endlastfoot
 
-    \multirow{9}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Nhà hàng & Xem chi tiết đơn hàng mới và chọn "Chấp nhận" (Accept). \\ \cline{2-4} 
      & 2 & Nhà hàng & Nhập thời gian giao hàng dự kiến (Estimated Delivery Time). \\ \cline{2-4} 
      & 3 & Hệ thống & Kiểm tra trạng thái đơn hàng, cập nhật sang "Accepted" và thông báo cho khách hàng. \\ \cline{2-4} 
@@ -600,7 +592,7 @@ Dữ liệu đầu vào cho use case Chốt đơn TeamCart (Bước xác nhận 
      & 7 & Hệ thống & Cập nhật trạng thái sang "ReadyForDelivery", thông báo cho tài xế hoặc khách hàng đến lấy. \\ \cline{2-4} 
      & 8 & Nhà hàng & Xác nhận "Đã giao" (Delivered) khi đơn hàng được giao thành công cho khách. \\ \cline{2-4} 
      & 9 & Hệ thống & Cập nhật trạng thái sang "Delivered", ghi nhận doanh thu và hoàn tất đơn hàng. \\ \hline
-    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+    \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1a & Nhà hàng & Chọn "Từ chối" (Reject) đơn hàng. \\ \cline{2-4} 
      & 1b & Nhà hàng & Nhập lý do từ chối (hết món, quá tải...). \\ \cline{2-4} 
      & 3a & Hệ thống & Cập nhật trạng thái sang "Rejected", hoàn tiền cho khách (nếu đã thanh toán) và gửi thông báo hủy. \\ \hline
@@ -633,65 +625,64 @@ Dữ liệu đầu vào cho use case Xử lý đơn hàng (Các thao tác chính
 \end{longtable}
 
 
-\clearpage
-\subsection{Đặc tả Use Case: Đánh giá nhà hàng}
-\begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
-    \hline
-    \textbf{Mã use case} & UC-006 & \textbf{Tên use case} & Đánh giá nhà hàng \\ \hline
-    \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng} \\ \hline
-    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng đánh giá chất lượng dịch vụ và món ăn của nhà hàng sau khi hoàn tất đơn hàng.} \\ \hline
-    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng chọn chức năng "Đánh giá" trên lịch sử đơn hàng đã giao thành công.} \\ \hline
-    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. Đơn hàng đã hoàn tất (Delivered). Khách hàng chưa từng đánh giá nhà hàng này trước đó (hoặc hệ thống cho phép đánh giá lại).} \\ \hline
-    \endfirsthead
+% \subsection{Đặc tả Use Case: Đánh giá nhà hàng}
+% \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
+%     \hline
+%     \textbf{Mã use case} & UC-006 & \textbf{Tên use case} & Đánh giá nhà hàng \\ \hline
+%     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng} \\ \hline
+%     \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng đánh giá chất lượng dịch vụ và món ăn của nhà hàng sau khi hoàn tất đơn hàng.} \\ \hline
+%     \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng chọn chức năng "Đánh giá" trên lịch sử đơn hàng đã giao thành công.} \\ \hline
+%     \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. Đơn hàng đã hoàn tất (Delivered). Khách hàng chưa từng đánh giá nhà hàng này trước đó (hoặc hệ thống cho phép đánh giá lại).} \\ \hline
+%     \endfirsthead
     
-    \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
-    \hline
-    \endhead
+%     \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
+%     \hline
+%     \endhead
     
-    \hline
-    \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
-    \endfoot
+%     \hline
+%     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
+%     \endfoot
     
-    \caption{Đặc tả Use Case Đánh giá nhà hàng} \label{tab:uc_006} \\
-    \endlastfoot
+%     \caption{Đặc tả Use Case Đánh giá nhà hàng} \label{tab:uc_006} \\
+%     \endlastfoot
 
-    \multirow{5}{2.5cm}{\textbf{Luồng sự kiện chính}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 1 & Khách hàng & Chọn mức đánh giá (số sao từ 1 đến 5) và nhập nội dung bình luận (tùy chọn). \\ \cline{2-4} 
-     & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (số sao trong phạm vi, độ dài bình luận). \\ \cline{2-4} 
-     & 3 & Hệ thống & Kiểm tra điều kiện nghiệp vụ: Đơn hàng phải thuộc về khách hàng và đã giao thành công. \\ \cline{2-4} 
-     & 4 & Hệ thống & Kiểm tra trùng lặp: Đảm bảo khách hàng chưa đánh giá đơn hàng này (hoặc nhà hàng này) trước đó. \\ \cline{2-4} 
-     & 5 & Hệ thống & Lưu đánh giá vào hệ thống, cập nhật điểm đánh giá trung bình của nhà hàng và hiển thị thông báo thành công. \\ \hline
-    \multirow{3}{2.5cm}{\textbf{Luồng sự kiện thay thế}} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 2a & Hệ thống & Báo lỗi nếu số sao không hợp lệ hoặc nội dung quá dài. \\ \cline{2-4} 
-     & 3a & Hệ thống & Báo lỗi nếu đơn hàng chưa hoàn tất hoặc không tồn tại. \\ \cline{2-4} 
-     & 4a & Hệ thống & Báo lỗi nếu khách hàng đã đánh giá trước đó (ReviewAlreadyExists). \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đánh giá được hiển thị công khai trên trang chi tiết nhà hàng. Điểm số trung bình của nhà hàng được tính toán lại.} \\ \hline
-\end{longtable}
+%     \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+%      & 1 & Khách hàng & Chọn mức đánh giá (số sao từ 1 đến 5) và nhập nội dung bình luận (tùy chọn). \\ \cline{2-4} 
+%      & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (số sao trong phạm vi, độ dài bình luận). \\ \cline{2-4} 
+%      & 3 & Hệ thống & Kiểm tra điều kiện nghiệp vụ: Đơn hàng phải thuộc về khách hàng và đã giao thành công. \\ \cline{2-4} 
+%      & 4 & Hệ thống & Kiểm tra trùng lặp: Đảm bảo khách hàng chưa đánh giá đơn hàng này (hoặc nhà hàng này) trước đó. \\ \cline{2-4} 
+%      & 5 & Hệ thống & Lưu đánh giá vào hệ thống, cập nhật điểm đánh giá trung bình của nhà hàng và hiển thị thông báo thành công. \\ \hline
+%     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
+%      & 2a & Hệ thống & Báo lỗi nếu số sao không hợp lệ hoặc nội dung quá dài. \\ \cline{2-4} 
+%      & 3a & Hệ thống & Báo lỗi nếu đơn hàng chưa hoàn tất hoặc không tồn tại. \\ \cline{2-4} 
+%      & 4a & Hệ thống & Báo lỗi nếu khách hàng đã đánh giá trước đó (ReviewAlreadyExists). \\ \hline
+%     \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đánh giá được hiển thị công khai trên trang chi tiết nhà hàng. Điểm số trung bình của nhà hàng được tính toán lại.} \\ \hline
+% \end{longtable}
 
-Dữ liệu đầu vào cho use case Đánh giá nhà hàng:
+% Dữ liệu đầu vào cho use case Đánh giá nhà hàng:
 
-\begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
-    \hline
-    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-    \endfirsthead
+% \begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
+%     \hline
+%     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+%     \endfirsthead
     
-    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
-    \hline
-    \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
-    \endhead
+%     \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+%     \hline
+%     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
+%     \endhead
     
-    \hline
-    \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
-    \endfoot
+%     \hline
+%     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
+%     \endfoot
     
-    \caption{Dữ liệu đầu vào Đánh giá nhà hàng} \label{tab:input_uc_006} \\
-    \endlastfoot
+%     \caption{Dữ liệu đầu vào Đánh giá nhà hàng} \label{tab:input_uc_006} \\
+%     \endlastfoot
 
-    1 & OrderId & ID đơn hàng & Có & GUID hợp lệ, đã giao \\ \hline
-    2 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ \\ \hline
-    3 & Rating & Điểm đánh giá & Có & Số nguyên từ 1 đến 5 \\ \hline
-    4 & Title & Tiêu đề đánh giá & Không & Tối đa 100 ký tự \\ \hline
-    5 & Comment & Nội dung chi tiết & Không & Tối đa 1000 ký tự \\ \hline
-\end{longtable}
+%     1 & OrderId & ID đơn hàng & Có & GUID hợp lệ, đã giao \\ \hline
+%     2 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ \\ \hline
+%     3 & Rating & Điểm đánh giá & Có & Số nguyên từ 1 đến 5 \\ \hline
+%     4 & Title & Tiêu đề đánh giá & Không & Tối đa 100 ký tự \\ \hline
+%     5 & Comment & Nội dung chi tiết & Không & Tối đa 1000 ký tự \\ \hline
+% \end{longtable}
 
 \end{document}

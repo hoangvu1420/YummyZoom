@@ -1,41 +1,36 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Biểu đồ use case tổng quát của hệ thống YummyZoom}}{16}{figure.caption.7}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Biểu đồ use case phân rã - Quản lý tài khoản}}{18}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Biểu đồ use case phân rã - Đặt hàng cá nhân}}{19}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Biểu đồ use case phân rã - TeamCart}}{20}{figure.caption.13}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Biểu đồ use case phân rã - Quản lý thực đơn}}{21}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Biểu đồ use case phân rã - Duyệt đăng ký nhà hàng}}{22}{figure.caption.15}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Biểu đồ hoạt động - Quy trình xử lý đặt hàng}}{23}{figure.caption.16}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Biểu đồ hoạt động - Quy trình đặt hàng nhóm}}{24}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Biểu đồ use case tổng quát của hệ thống YummyZoom}}{12}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Biểu đồ use case phân rã - Quản lý tài khoản}}{14}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Biểu đồ use case phân rã - Đặt hàng cá nhân}}{15}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Biểu đồ use case phân rã - TeamCart}}{16}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Biểu đồ use case phân rã - Quản lý thực đơn}}{17}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Biểu đồ use case phân rã - Duyệt đăng ký nhà hàng}}{18}{figure.caption.15}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Biểu đồ hoạt động - Quy trình xử lý đặt hàng}}{19}{figure.caption.16}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Biểu đồ hoạt động - Quy trình đặt hàng nhóm}}{20}{figure.caption.17}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Biểu đồ phụ thuộc gói tổng quan YummyZoom (Backend)}}{65}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Biểu đồ gói chi tiết phân hệ Restaurant (Create \& Search)}}{67}{figure.caption.21}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Biểu đồ gói chi tiết phân hệ Order (Initiate \& Status)}}{69}{figure.caption.22}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Minh hoạ màn hình Home/Menu (trái) và Restaurant Detail (phải) trên ứng dụng di động}}{71}{figure.caption.23}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Minh hoạ màn hình TeamCart Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}}{72}{figure.caption.24}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh hoạ màn hình Restaurant Dashboard trên hệ thống quản trị}}{73}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Minh hoạ màn hình Live Orders trên hệ thống quản trị}}{73}{figure.caption.26}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Minh hoạ màn hình Quản lý thực đơn trên hệ thống quản trị}}{74}{figure.caption.27}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Minh hoạ màn hình Duyệt đăng ký nhà hàng trên hệ thống quản trị}}{74}{figure.caption.28}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Biểu đồ lớp của Order (Aggregate root)}}{75}{figure.caption.29}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Biểu đồ lớp của TeamCart (Aggregate root)}}{76}{figure.caption.30}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Biểu đồ lớp của Restaurant (Aggregate root)}}{77}{figure.caption.31}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Biểu đồ lớp của MenuItem (Aggregate root)}}{78}{figure.caption.32}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Biểu đồ trình tự khởi tạo đơn hàng}}{79}{figure.caption.33}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Biểu đồ trình tự chuyển TeamCart thành Order}}{80}{figure.caption.34}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Biểu đồ trình tự cập nhật trạng thái đơn hàng}}{81}{figure.caption.35}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces ERD khái niệm theo mô hình Chen cho YummyZoom}}{82}{figure.caption.36}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces ERD hiện đại cho nhóm Restaurant Catalog}}{83}{figure.caption.37}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces ERD hiện đại cho nhóm Order và TeamCart}}{84}{figure.caption.38}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces ERD hiện đại cho nhóm Identity và RoleAssignment}}{84}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Biểu đồ phụ thuộc gói tổng quan YummyZoom (Backend)}}{50}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Thiết kế gói lớp miền cho luồng Khởi tạo Đơn hàng}}{51}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Thiết kế gói lớp ứng dụng và hạ tầng cho luồng Khởi tạo Đơn hàng}}{52}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Minh hoạ màn hình Home/Menu (trái) và Restaurant Detail (phải) trên ứng dụng di động}}{54}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Minh hoạ màn hình Restaurant Dashboard trên hệ thống quản trị}}{55}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh hoạ màn hình Live Orders trên hệ thống quản trị}}{55}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Biểu đồ lớp của Order (Aggregate root)}}{56}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Biểu đồ lớp của TeamCart (Aggregate root)}}{57}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Biểu đồ lớp của Restaurant (Aggregate root)}}{58}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Biểu đồ trình tự chuyển TeamCart thành Order}}{59}{figure.caption.27}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Biểu đồ trình tự cập nhật trạng thái đơn hàng}}{60}{figure.caption.28}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces ERD khái niệm theo mô hình Chen cho YummyZoom}}{61}{figure.caption.29}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces ERD hiện đại cho nhóm Restaurant Catalog}}{62}{figure.caption.30}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces ERD hiện đại cho nhóm Order và TeamCart}}{63}{figure.caption.31}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Màn hình Trang chủ (Trái) và Chi tiết nhà hàng (Phải)}}{67}{figure.caption.35}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Giao diện TeamCart: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}}{68}{figure.caption.36}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Quy trình Checkout: Giai đoạn Chốt giá (Trái) và Thanh toán (Phải)}}{69}{figure.caption.37}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Giao diện Quản lý Menu và Thư viện tùy chọn}}{70}{figure.caption.38}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Trung tâm xử lý đơn hàng trực tiếp (Live Orders Dashboard)}}{70}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Giao diện Quản lý Mã giảm giá và Chương trình khuyến mãi}}{71}{figure.caption.40}%
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {A.1}{\ignorespaces Internet vạn vật}}{97}{figure.caption.48}%
-\contentsline {figure}{\numberline {A.2}{\ignorespaces Qui cách đóng quyển đồ án}}{99}{figure.caption.51}%
-\contentsline {figure}{\numberline {A.3}{\ignorespaces Qui cách đóng quyển đồ án}}{99}{figure.caption.52}%
 \addvspace {10\p@ }
 \contentsfinish 
 \contentsfinish 

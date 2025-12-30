@@ -1,9 +1,9 @@
 [0] Config.pm:328> INFO - This is Biber 2.21
 [0] Config.pm:331> INFO - Logfile is 'Chuong/out/4_Ket_qua_thuc_nghiem.blg'
-[174] biber-MSWIN64:342> INFO - === 
-[238] Biber.pm:421> INFO - Reading 'Chuong/out/4_Ket_qua_thuc_nghiem.bcf'
-[496] Biber.pm:1002> INFO - Found 0 citekeys in bib section 0
-[527] bbl.pm:676> INFO - Writing 'Chuong/out/4_Ket_qua_thuc_nghiem.bbl' with encoding 'UTF-8'
-[528] bbl.pm:779> INFO - Output to Chuong/out/4_Ket_qua_thuc_nghiem.bbl
-[529] Biber.pm:132> WARN - The file 'Chuong/out/4_Ket_qua_thuc_nghiem.bcf' does not contain any citations!
-[529] Biber.pm:134> INFO - WARNINGS: 1
+[175] biber-MSWIN64:342> INFO - === 
+[232] Biber.pm:421> INFO - Reading 'Chuong/out/4_Ket_qua_thuc_nghiem.bcf'
+[349] Biber.pm:1002> INFO - Found 0 citekeys in bib section 0
+[365] bbl.pm:676> INFO - Writing 'Chuong/out/4_Ket_qua_thuc_nghiem.bbl' with encoding 'UTF-8'
+[365] bbl.pm:779> INFO - Output to Chuong/out/4_Ket_qua_thuc_nghiem.bbl
+[366] Biber.pm:132> WARN - The file 'Chuong/out/4_Ket_qua_thuc_nghiem.bcf' does not contain any citations!
+[366] Biber.pm:134> INFO - WARNINGS: 1

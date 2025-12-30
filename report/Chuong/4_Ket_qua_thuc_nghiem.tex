@@ -5,76 +5,33 @@
 \subsection{Lựa chọn kiến trúc phần mềm}
 \label{subsec:4.1.1}
 
-Dựa trên các yêu cầu nghiệp vụ phức tạp của hệ thống YummyZoom, đặc biệt là tính năng đặt hàng nhóm (TeamCart) với yêu cầu về tính nhất quán dữ liệu cao và khả năng xử lý đồng thời, đồ án lựa chọn áp dụng kiến trúc \textbf{Clean Architecture} (Kiến trúc Sạch) kết hợp với tư duy thiết kế \textbf{Domain-Driven Design (DDD)}. Về mặt triển khai, hệ thống được xây dựng theo mô hình \textbf{Monolithic Modular} (Đơn khối module hóa).
+Dựa trên các yêu cầu nghiệp vụ phức tạp của hệ thống YummyZoom, đặc biệt là tính năng đặt hàng nhóm (TeamCart) với yêu cầu về tính nhất quán dữ liệu cao và khả năng xử lý đồng thời, đồ án lựa chọn áp dụng kiến trúc Clean Architecture (Kiến trúc Sạch) kết hợp với tư duy thiết kế Domain-Driven Design (DDD). Về mặt triển khai, hệ thống được xây dựng theo mô hình Monolithic Modular (Đơn khối module hóa).
 
 \subsubsection{Mô hình kiến trúc tổng thể}
-Thay vì lựa chọn kiến trúc Microservices ngay từ đầu - vốn đòi hỏi chi phí vận hành và quản lý hạ tầng lớn, hay kiến trúc Layered (3 lớp) truyền thống dễ gây ra sự phụ thuộc chặt chẽ vào cơ sở dữ liệu, nhóm phát triển quyết định sử dụng mô hình Monolithic Modular.
-
-Mô hình này giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng:
-\begin{itemize}
-    \item \textbf{Phát triển nhanh và nhất quán:} Toàn bộ mã nguồn nằm trong một Solution thống nhất, giúp việc gỡ lỗi (debug), kiểm thử và tái cấu trúc (refactor) trở nên dễ dàng hơn.
-    \item \textbf{Ranh giới nghiệp vụ rõ ràng (Modular Boundaries):} Các module được tổ chức độc lập về mặt logic dựa trên các Bounded Contexts. Điều này tạo tiền đề vững chắc để tách thành các Microservices riêng biệt khi hệ thống cần mở rộng quy mô trong tương lai mà không làm phá vỡ cấu trúc hiện tại.
-    \item \textbf{Tập trung vào nghiệp vụ cốt lõi:} Clean Architecture giúp cô lập logic nghiệp vụ (Domain) khỏi các yếu tố thay đổi thường xuyên như giao diện người dùng (UI) hay công nghệ lưu trữ (Database).
-\end{itemize}
+Thay vì lựa chọn kiến trúc Microservices ngay từ đầu - vốn đòi hỏi chi phí vận hành và quản lý hạ tầng lớn, hay kiến trúc Layered (3 lớp) truyền thống dễ gây ra sự phụ thuộc chặt chẽ vào cơ sở dữ liệu, nhóm phát triển quyết định sử dụng mô hình Monolithic Modular. Mô hình này giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng. Toàn bộ mã nguồn nằm trong một giải pháp (Solution) thống nhất, giúp việc gỡ lỗi (debug), kiểm thử và tái cấu trúc (refactor) trở nên dễ dàng hơn. Đồng thời, các ranh giới nghiệp vụ (Modular Boundaries) được tổ chức độc lập về mặt logic dựa trên các Ngữ cảnh giới hạn (Bounded Contexts). Điều này tạo tiền đề vững chắc để tách thành các Microservices riêng biệt khi hệ thống cần mở rộng quy mô trong tương lai mà không làm phá vỡ cấu trúc hiện tại. Hơn nữa, Clean Architecture giúp cô lập logic nghiệp vụ (Domain) khỏi các yếu tố thay đổi thường xuyên như giao diện người dùng (UI) hay công nghệ lưu trữ (Database).
 
 \subsubsection{Tổ chức các tầng kiến trúc (Layered Architecture)}
-Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule) của Clean Architecture: "Mọi sự phụ thuộc của mã nguồn chỉ được hướng vào bên trong". Cấu trúc dự án được ánh xạ từ lý thuyết vào thực tế như sau:
+Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule) của Clean Architecture: "Mọi sự phụ thuộc của mã nguồn chỉ được hướng vào bên trong". Cấu trúc dự án được phân chia thành bốn lớp chính với vai trò và trách nhiệm rõ ràng.
 
-\begin{enumerate}
-    \item \textbf{Tầng Miền (Domain Layer) - \textit{Project: YummyZoom.Domain}}
-    \newline Đây là lõi trung tâm của hệ thống, nơi chứa các quy tắc nghiệp vụ bất biến của doanh nghiệp. Tầng này hoàn toàn không phụ thuộc vào bất kỳ thư viện bên ngoài hay công nghệ cơ sở dữ liệu nào.
-    \begin{itemize}
-        \item \textbf{Thành phần:} Entities (Thực thể), Value Objects (Đối tượng giá trị), Aggregates (Hợp nhất), Domain Events.
-        \item \textbf{Ví dụ thực tế:} Aggregate \texttt{TeamCart} đóng gói logic nghiệp vụ của giỏ hàng nhóm, đảm bảo các quy tắc như: một giỏ hàng chỉ có một chủ phòng (Host), và chỉ Host mới có quyền chốt đơn hoặc khóa giỏ hàng.
-    \end{itemize}
+Lớp trong cùng và quan trọng nhất là Lớp Miền (Domain Layer). Đây là lõi trung tâm của hệ thống, nơi chứa các quy tắc nghiệp vụ bất biến của doanh nghiệp, bao gồm các Thực thể (Entities), Đối tượng giá trị (Value Objects), và các Sự kiện miền (Domain Events). Lớp này hoàn toàn không phụ thuộc vào bất kỳ thư viện bên ngoài, framework hay công nghệ cơ sở dữ liệu nào, đảm bảo logic nghiệp vụ luôn trong sáng và dễ dàng kiểm thử.
 
-    \item \textbf{Tầng Ứng dụng (Application Layer) - \textit{Project: YummyZoom.Application}}
-    \newline Đóng vai trò lớp vỏ bao quanh Domain, điều phối các yêu cầu từ người dùng và chuyển đổi chúng thành các thao tác nghiệp vụ.
-    \begin{itemize}
-        \item \textbf{Thành phần:} Use Cases (được triển khai dưới dạng Command/Query Handlers), Validators (Kiểm tra dữ liệu), Interfaces cho Infrastructure.
-        \item \textbf{Ví dụ thực tế:} AddItemToTeamCartCommand là một Use Case nhận yêu cầu thêm món, kích hoạt phương thức AddItem trong Domain Entity, và sau đó lưu thay đổi thông qua ITeamCartRepository.
-    \end{itemize}
+Bao bọc bên ngoài lớp miền là Lớp Ứng dụng (Application Layer). Lớp này đóng vai trò điều phối các ca sử dụng (Use Cases) của hệ thống. Nhiệm vụ chính của nó là nhận yêu cầu từ các lớp bên ngoài, điều phối các đối tượng trong lớp miền thực hiện các tác vụ nghiệp vụ và trả về kết quả. Lớp ứng dụng định nghĩa các giao diện (Interfaces) cho các dịch vụ hạ tầng nhưng không trực tiếp thực thi chúng.
 
-    \item \textbf{Tầng Hạ tầng (Infrastructure Layer) - \textit{Project: YummyZoom.Infrastructure}}
-    \newline Nơi chưa các thực thi của các interfaces kỹ thuật được định nghĩa ở tầng Application. Đây là nơi các công nghệ cụ thể được "cắm" vào hệ thống.
-    \begin{itemize}
-        \item \textbf{Thành phần:} DbContext (Entity Framework Core), Repositories Implementation, Services giao tiếp bên ngoài (EmailService, CloudinaryService, StripeService, FCMService).
-        \item \textbf{Chức năng:} Truy xuất dữ liệu từ SQL Server/PostgreSQL, tương tác với hệ thống file, gửi email xác nhận, xử lý thanh toán qua Stripe, gửi thông báo đẩy với FCM.
-    \end{itemize}
+Tiếp theo là Lớp Hạ tầng (Infrastructure Layer), nơi cung cấp các triển khai cụ thể cho các giao diện kỹ thuật được định nghĩa ở lớp ứng dụng. Đây là nơi các công nghệ cụ thể như Entity Framework Core để truy xuất dữ liệu, các dịch vụ gửi email, thanh toán hay thông báo đẩy được tích hợp vào hệ thống. Lớp này phụ thuộc vào lớp ứng dụng và lớp miền, đóng vai trò như một bộ chuyển đổi (adapter) kết nối hệ thống với các công cụ bên ngoài.
 
-    \item \textbf{Tầng Giao diện/Trình bày (Web/Presentation Layer) - \textit{Project: YummyZoom.Web}}
-    \newline Lớp vỏ ngoài cùng, chịu trách nhiệm giao tiếp với Client (Mobile App, Web Admin).
-    \begin{itemize}
-        \item \textbf{Thành phần:} Minimal APIs, SignalR Hubs, Middlewares.
-        \item \textbf{Nhiệm vụ:} Nhận HTTP Request, xác thực token, gọi xuống Application Layer để xử lý và trả về HTTP Response chuẩn (JSON).
-    \end{itemize}
-\end{enumerate}
+Lớp ngoài cùng là Lớp Giao diện (Web/Presentation Layer). Đây là điểm tiếp xúc với người dùng hoặc các hệ thống khác, chịu trách nhiệm tiếp nhận các yêu cầu HTTP, xác thực người dùng, gọi xuống lớp ứng dụng để xử lý và trả về phản hồi thích hợp (thường là định dạng JSON).
+
+Trong thực tế triển khai của dự án YummyZoom, các lý thuyết trên được hiện thực hóa thông qua cấu trúc dự án cụ thể. YummyZoom.Domain đóng gói toàn bộ logic cốt lõi, ví dụ như Aggregate TeamCart đảm bảo quy tắc chỉ chủ phòng mới có quyền chốt đơn. YummyZoom.Application chứa các Command và Query Handlers, chẳng hạn như AddItemToTeamCartCommand sẽ kích hoạt phương thức thêm món trong Domain. YummyZoom.Infrastructure chịu trách nhiệm thực thi việc lưu trữ xuống PostgreSQL hay giao tiếp với Stripe. Cuối cùng, YummyZoom.Web cung cấp các API Endpoints và SignalR Hubs để phục vụ ứng dụng di động và web quản trị.
 
 \subsubsection{Thiết kế chiến lược (Strategic Design)}
-Áp dụng chiến lược của DDD, hệ thống được chia nhỏ thành các \textbf{Bounded Contexts} (Ngữ cảnh giới hạn), mỗi context giải quyết một vấn đề nghiệp vụ cụ thể và có Ubiquitous Language (Ngôn ngữ chung) riêng:
-\begin{itemize}
-    \item \textbf{Identity Context:} Quản lý người dùng, phân quyền và xác thực (Authentication/Authorization).
-    \item \textbf{Catalog Context:} Quản lý thực đơn, danh mục, thông tin nhà hàng, món ăn và các tùy chọn (Toppings).
-    \item \textbf{TeamCart Context:} Ngữ cảnh quan trọng và phức tạp nhất, xử lý logic chia sẻ giỏ hàng, đồng bộ trạng thái thời gian thực và phân chia hóa đơn.
-    \item \textbf{Ordering Context:} Xử lý quy trình đặt hàng, thanh toán và vòng đời của đơn hàng sau khi được chốt.
-\end{itemize}
+Áp dụng chiến lược của DDD, hệ thống được chia nhỏ thành các Ngữ cảnh giới hạn (Bounded Contexts), mỗi ngữ cảnh giải quyết một vấn đề nghiệp vụ cụ thể và có Ngôn ngữ chung (Ubiquitous Language) riêng. Đầu tiên là Identity Context, chịu trách nhiệm quản lý người dùng, phân quyền và xác thực. Tiếp đến là Catalog Context, quản lý thực đơn, danh mục, thông tin nhà hàng, món ăn và các tùy chọn. Quan trọng nhất là TeamCart Context, xử lý logic chia sẻ giỏ hàng, đồng bộ trạng thái thời gian thực và phân chia hóa đơn. Cuối cùng là Ordering Context, xử lý quy trình đặt hàng, thanh toán và vòng đời của đơn hàng sau khi được chốt.
 
 \subsubsection{Các mẫu kỹ thuật chủ đạo (Tactical Patterns)}
-Để tối ưu hóa hiệu năng và khả năng bảo trì, hệ thống áp dụng các mẫu thiết kế kỹ thuật nâng cao:
+Để tối ưu hóa hiệu năng và khả năng bảo trì, hệ thống áp dụng các mẫu thiết kế kỹ thuật nâng cao, tiêu biểu là CQRS (Command Query Responsibility Segregation) và Domain Events.
 
-\paragraph{CQRS (Command Query Responsibility Segregation):}
-Hệ thống tách biệt rõ ràng luồng Đọc (Query) và Ghi (Command) dữ liệu:
-\begin{itemize}
-    \item \textbf{Phần Ghi (Write Side):} Sử dụng \textbf{Entity Framework Core} kết hợp với Domain Model để đảm bảo tính toàn vẹn và nhất quán dữ liệu (Data Consistency) khi thực hiện các thay đổi nghiệp vụ.
-    \item \textbf{Phần Đọc (Read Side):} Sử dụng \textbf{Dapper} với SQL để truy vấn dữ liệu trực tiếp và trả về các DTO phẳng. Đồng thời, hệ thống kết hợp sử dụng các \textbf{Read Models} được cập nhật song song với các bảng ghi, giúp tránh việc thực hiện các phép JOIN bảng quá mức. Cách tiếp cận này đảm bảo khả năng phục vụ hiệu quả các yêu cầu dữ liệu phức tạp từ ứng dụng người dùng với tốc độ phản hồi tối ưu.
-\end{itemize}
+Mẫu CQRS giúp hệ thống tách biệt rõ ràng luồng Đọc (Query) và Ghi (Command) dữ liệu. Phần Ghi sử dụng Entity Framework Core kết hợp với Domain Model để đảm bảo tính toàn vẹn dữ liệu khi thực hiện các thay đổi nghiệp vụ. Trong khi đó, Phần Đọc sử dụng Dapper với SQL để truy vấn dữ liệu trực tiếp và trả về các DTO phẳng, tối ưu hóa tốc độ phản hồi cho người dùng.
 
-\paragraph{Domain Events \& Outbox Pattern:}
-Giải quyết bài toán về tính nhất quán cuối cùng (Eventual Consistency) và xử lý bất đồng bộ:
-\begin{itemize}
-    \item \textbf{Cơ chế:} Khi một nghiệp vụ quan trọng hoàn tất (ví dụ: \texttt{OrderCreated}), hệ thống không gọi trực tiếp các dịch vụ bên thứ ba (như gửi email) mà sinh ra một \texttt{Domain Event}. Event này được lưu vào bảng \texttt{OutboxMessages} trong cùng một transaction database với dữ liệu chính.
-    \item \textbf{Tác dụng:} Một tiến trình nền (Background Worker) sẽ đọc bảng Outbox và thực hiện các tác vụ phụ sau đó. Điều này đảm bảo rằng giao dịch chính luôn nhanh và an toàn; nếu việc gửi email thất bại, nó sẽ được thử lại (Retry) mà không làm mất đơn hàng.
-\end{itemize}
+Bên cạnh đó, mẫu Domain Events kết hợp với Outbox Pattern được sử dụng để giải quyết bài toán về tính nhất quán cuối cùng (Eventual Consistency). Khi một nghiệp vụ quan trọng hoàn tất, hệ thống sinh ra một sự kiện miền và lưu vào bảng Outbox trong cùng một giao dịch cơ sở dữ liệu. Một tiến trình nền sẽ đọc bảng này và thực hiện các tác vụ phụ như gửi email hay thông báo, đảm bảo rằng các tác vụ bên lề không làm ảnh hưởng đến hiệu năng của luồng nghiệp vụ chính.
 
 \subsubsection{Kết luận}
 Việc lựa chọn kiến trúc Clean Architecture kết hợp DDD và CQRS mang lại nền tảng vững chắc cho hệ thống YummyZoom. Kiến trúc này không chỉ giải quyết tốt các bài toán nghiệp vụ phức tạp hiện tại về đặt hàng nhóm mà còn đảm bảo các tiêu chí phi chức năng quan trọng: dễ dàng kiểm thử (Testability), dễ bảo trì (Maintainability) và sẵn sàng mở rộng (Scalability) trong tương lai.
@@ -83,61 +40,51 @@ Việc lựa chọn kiến trúc Clean Architecture kết hợp DDD và CQRS man
 Biểu đồ gói tổng quan của hệ thống YummyZoom thể hiện sự phân tầng rõ ràng và các ràng buộc phụ thuộc tuân thủ quy tắc Clean Architecture. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Hinhve/package_overview.png}
+    \includegraphics[width=\textwidth, height=0.70\textheight, keepaspectratio]{Hinhve/package_overview.png}
     \caption{Biểu đồ phụ thuộc gói tổng quan YummyZoom (Backend)}
     \label{fig:FigPackageOverview}
 \end{figure}
 
 \subsection{Thiết kế chi tiết gói}
-Mục tiêu của phần này là minh họa chi tiết cách tổ chức mã nguồn và hiện thực hóa kiến trúc Clean Architecture thông qua các biểu đồ gói (Package Diagrams). Tôi đã lựa chọn 2 luồng nghiệp vụ tiêu biểu đại diện cho hai phân hệ quan trọng nhất: Restaurant (Nhà hàng) và Order (Đơn hàng) để phân tích.
+Mục tiêu của phần này là minh họa cách tổ chức mã nguồn và hiện thực hóa kiến trúc Clean Architecture thông qua các biểu đồ gói (Package Diagrams). Do số lượng gói trong các lớp miền (Domain), lớp ứng dụng (Application) và lớp hạ tầng (Infrastructure) của hệ thống tương đối lớn, đồ án lựa chọn luồng nghiệp vụ \textbf{Khởi tạo đơn hàng} là luồng tiêu biểu nhất để phân tích chi tiết. Thiết kế được trình bày thành hai phần riêng biệt bao gồm: thiết kế cho lớp miền và thiết kế cho lớp ứng dụng kết hợp hạ tầng.
 
-Các biểu đồ được xây dựng dựa trên các quy tắc sau nhằm đảm bảo tính trực quan và tránh sự quá tải thông tin do số lượng lớp lớn của hệ thống:
-\begin{itemize}
-    \item \textbf{Phạm vi:} Mỗi biểu đồ tập trung vào một luồng nghiệp vụ cụ thể (bao gồm 1 Command và 1 Query), không bao gồm toàn bộ các lớp trong mã nguồn.
-    \item \textbf{Cấu trúc:} Các thành phần được vẽ và sắp xếp dọc theo 4 tầng của Clean Architecture (Web, Application, Domain, Infrastructure).
-    \item \textbf{Chi tiết:} Chỉ thể hiện tên lớp và các mối quan hệ chính, lược bỏ các phương thức và thuộc tính chi tiết.
-\end{itemize}
-
-\subsubsection{Biểu đồ 1: Restaurant (Create Restaurant + Search Restaurants)}
-Biểu đồ này minh họa luồng xử lý cho hai chức năng: Phê duyệt đăng ký nhà hàng (Create) và Tìm kiếm nhà hàng (Search).
+\subsubsection{Thiết kế lớp miền (Domain Layer)}
+Biểu đồ tại Hình \ref{fig:PkgOrderDomain} minh họa các thành phần cốt lõi trong lớp miền phục vụ cho nghiệp vụ khởi tạo đơn hàng. Tại đây, lớp \texttt{Order} đóng vai trò là gốc tập hợp (Aggregate Root), trung tâm quản lý mọi thay đổi và đảm bảo tính nhất quán của dữ liệu.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{Hinhve/package_restaurant_create_search.png}
-    \caption{Biểu đồ gói chi tiết phân hệ Restaurant (Create \& Search)}
-    \label{fig:PkgRestaurant}
+    \includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{Hinhve/package_order_initiate_domain.png}
+    \caption{Thiết kế gói lớp miền cho luồng Khởi tạo Đơn hàng}
+    \label{fig:PkgOrderDomain}
 \end{figure}
 
-\noindent \textbf{Mô tả luồng logic:}
-Biểu đồ thể hiện cách các tầng phối hợp để xử lý yêu cầu:
-\begin{itemize}
-    \item \textbf{Luồng Ghi (Command):} Bắt đầu từ yêu cầu POST đến Endpoints/RestaurantRegistrations để phê duyệt đăng ký nhà hàng, yêu cầu phê duyệt được chuyển đến ApproveRestaurantRegistrationCommandHandler (Application). Handler này tương tác với Domain (RestaurantAggregate, RestaurantRegistration) để đảm bảo quy tắc nghiệp vụ, rồi một đối tượng Restaurant được tạo và lưu trữ qua RestaurantRepository (Infrastructure) xuống database. Khi thành công, sự kiện RestaurantCreated được phát ra và được xử lý bởi RestaurantCreatedSearchHandler (Application) để cập nhật bảng SearchIndex trong database để phục phụ cho thao tác tìm kiếm sau này.
-    \item \textbf{Luồng Đọc (Query):} Khi yêu cầu GET đến Restaurants để tìm kiếm nhà hàng theo các tiêu chí, SearchRestaurantsQueryHandler (Application) thực hiện truy vấn tối ưu bằng SQL vào bảng SearchIndex là một Read Model tối ưu hóa để phục vụ tìm kiếm. Dữ liệu phục vụ tìm kiếm được cập nhật bất đồng bộ bởi SearchIndexMaintainer (Infrastructure) ngay khi nhận được sự kiện RestaurantCreated, minh họa cho mô hình CQRS tách biệt Ghi và Đọc.
-\end{itemize}
+Trong thiết kế này, tính đóng gói (Encapsulation) được tuân thủ nghiêm ngặt. Lớp \texttt{Order} bao bọc các thực thể con như \texttt{OrderItem} (món trong đơn) và \texttt{PaymentTransaction} (giao dịch thanh toán), cũng như các đối tượng giá trị (Value Objects) như \texttt{DeliveryAddress} (địa chỉ giao hàng). Các logic tính toán phức tạp liên quan đến giá cả, khuyến mãi và thuế được tách biệt vào ranh giới của dịch vụ miền (Domain Service), cụ thể là lớp \texttt{OrderFinancialService}, giúp giữ cho các thực thể tinh gọn. Bên cạnh đó, cơ chế sự kiện miền (Domain Events) với đại diện là \texttt{OrderPlaced} giúp tách biệt logic nghiệp vụ chính khỏi các tác vụ phụ trợ, đảm bảo nguyên lý đơn trách nhiệm.
 
-\subsubsection{Biểu đồ 2: Order (Initiate Order + Get Order Status)}
-Biểu đồ này mô tả quy trình khởi tạo đơn hàng mới và truy vấn trạng thái đơn hàng, đóng vai trò cốt lõi trong giao dịch thương mại của hệ thống.
+\subsubsection{Thiết kế lớp ứng dụng và hạ tầng (Application \& Infrastructure Layers)}
+Sự tương tác giữa các tầng còn lại để hiện thực hóa luồng nghiệp vụ được trình bày chi tiết tại Hình \ref{fig:PkgOrderAppInfra}. Biểu đồ này thể hiện rõ vai trò điều phối của lớp ứng dụng và sự tách biệt về công nghệ của lớp hạ tầng.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{Hinhve/package_order_initiate_status.png}
-    \caption{Biểu đồ gói chi tiết phân hệ Order (Initiate \& Status)}
-    \label{fig:PkgOrder}
+    \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{Hinhve/package_order_initiate_app_infra.png}
+    \caption{Thiết kế gói lớp ứng dụng và hạ tầng cho luồng Khởi tạo Đơn hàng}
+    \label{fig:PkgOrderAppInfra}
 \end{figure}
 
-\noindent \textbf{Mô tả luồng logic:}
-Biểu đồ minh họa sự phối hợp chặt chẽ giữa các thành phần để xử lý đơn hàng:
-\begin{itemize}
-    \item \textbf{Luồng Ghi (Command):} Yêu cầu đặt hàng từ người dùng (Web Endpoints) được đóng gói thành InitiateOrderCommand. InitiateOrderCommandHandler đóng vai trò điều phối chính: nó sử dụng OrderFinancialService (một Domain Service) để tính toán chi phí, xác thực qua IPaymentGatewayService, và tương tác với các repositories (IOrderRepository, ICouponRepository) để lưu trữ Aggregate Order. Thành công kích hoạt sự kiện OrderPlaced, dẫn đến việc OrderPlacedEventHandler gọi các dịch vụ thông báo (IOrderRealtimeNotifier, IOrderPushNotifier).
-    \item \textbf{Luồng Đọc (Query):} GetOrderStatusQueryHandler nhận truy vấn qua IDbConnectionFactory (Dapper) để lấy projection gọn của đơn hàng (OrderStatusDto). Handler kiểm tra quyền truy cập dựa trên IUser/claims (khách hàng hoặc nhân viên/owner nhà hàng), sau đó trả về trạng thái và mốc thời gian cập nhật, giúp client theo dõi tiến trình đơn hàng theo thời gian thực mà không tải dư dữ liệu.
-\end{itemize}
+Tại lớp giao diện (Web layer), \texttt{OrdersEndpoints} đóng vai trò tiếp nhận các yêu cầu HTTP từ phía người dùng, chuyển đổi dữ liệu và gửi mệnh lệnh xuống lớp ứng dụng. Lớp ứng dụng (Application layer) chứa các ca sử dụng dự án, tiêu biểu là \texttt{InitiateOrderCommandHandler}. Thành phần này chịu trách nhiệm điều phối luồng xử lý: gọi xuống lớp miền để khởi tạo đối tượng nghiệp vụ, sau đó tương tác với các giao diện (Interfaces) trừu tượng như \texttt{IPaymentGatewayService} hay \texttt{IOrderRepository}.
+
+Điểm quan trọng trong thiết kế này là việc áp dụng nguyên lý đảo ngược sự phụ thuộc (Dependency Inversion Principle). Lớp ứng dụng chỉ phụ thuộc vào các giao diện do chính nó định nghĩa. Việc hiện thực hóa các giao diện này bằng các công nghệ cụ thể như Entity Framework Core hay Stripe được đặt hoàn toàn tại lớp hạ tầng (Infrastructure layer). Cách tổ chức này giúp hệ thống linh hoạt, dễ dàng thay thế công nghệ hoặc thư viện bên thứ ba mà không làm ảnh hưởng đến logic nghiệp vụ cốt lõi.
+
+\subsubsection{Luồng thực thi tổng thể}
+Quy trình khởi tạo đơn hàng bắt đầu khi yêu cầu từ người dùng được gửi đến lớp giao diện và chuyển thành mệnh lệnh (Command) tại lớp ứng dụng. Bộ xử lý (Handler) tại lớp ứng dụng sẽ sử dụng các dịch vụ miền để tính toán và khởi tạo đơn hàng hợp lệ. Sau đó, thông qua các giao diện trừu tượng, hệ thống thực hiện xử lý thanh toán và lưu trữ dữ liệu bền vững xuống cơ sở dữ liệu. Cuối cùng, các sự kiện miền được phát ra để kích hoạt các quy trình hậu xử lý như gửi thông báo hoặc gửi email xác nhận, hoàn tất chu trình nghiệp vụ một cách toàn vẹn và an toàn.
+
+
 
 \section{Thiết kế chi tiết}
 \subsection{Thiết kế giao diện}
 \subsubsection{Thiết kế giao diện ứng dụng di động dành cho khách hàng}
-Ứng dụng di động được thiết kế hướng tới thiết bị 384x854 để đảm bảo tỷ lệ hiển thị thống nhất với cấu hình thiết kế, ưu tiên trải nghiệm đặt món nhanh và rõ ràng. Bố cục được tổ chức theo thứ bậc thông tin, tiêu đề và dữ liệu chính đặt ở vùng nhìn đầu tiên, các hành động quan trọng giữ vị trí nổi bật nhằm giảm thao tác thừa. Hệ thống kiểu chữ và kích thước chữ được quy đổi theo thang sp để bảo toàn độ đọc trên nhiều thiết bị, trong khi các thành phần nhập liệu và nút bấm thống nhất bán kính bo góc và khoảng đệm để tạo cảm giác thân thiện. Màu sắc thương hiệu (màu chính, màu phụ và màu nhấn) được chuẩn hóa trong ứng dụng, tuy nhiên bộ mockup được thể hiện theo tông đen trắng để tập trung vào cấu trúc và luồng thao tác, đồng thời phản hồi người dùng chủ yếu thông qua thông báo dạng thanh trượt ngắn gọn ở cuối màn hình.
+Ứng dụng di động được tối ưu cho khung máy 384x854 nhằm giữ tỷ lệ hiển thị đồng nhất và hỗ trợ thao tác đặt món nhanh. Bố cục ưu tiên thông tin quan trọng ở vùng nhìn đầu và làm nổi bật các hành động chính để giảm thao tác thừa. Kiểu chữ quy đổi theo thang sp, các nút và trường nhập liệu dùng chung bán kính bo góc và khoảng đệm để tạo cảm giác thân thiện. Màu thương hiệu được chuẩn hóa, còn bộ mockup giữ tông đen trắng để làm rõ cấu trúc và luồng thao tác. Phản hồi người dùng được hiển thị bằng các thanh thông báo ngắn ở cuối màn hình.
 
-Các màn hình tiêu biểu được lựa chọn nhằm phản ánh đầy đủ hành trình người dùng từ khám phá đến thanh toán, bao gồm trang Home/Menu và Restaurant Detail (Hình \ref{fig:mobile-home-restaurant}), cùng với trang TeamCart Lobby và Checkout/Payment (Hình \ref{fig:mobile-teamcart-checkout}).
+Các màn hình tiêu biểu được lựa chọn nhằm phản ánh đầy đủ hành trình người dùng từ khám phá đến thanh toán, bao gồm trang Home/Menu và Restaurant Detail (Hình \ref{fig:mobile-home-restaurant}).
 
 \begin{figure}[H]
     \centering
@@ -148,19 +95,19 @@ Các màn hình tiêu biểu được lựa chọn nhằm phản ánh đầy đ�
     \label{fig:mobile-home-restaurant}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-teamcart_lobby.png}
-    \hfill
-    \includegraphics[width=0.48\textwidth]{Hinhve/mobile-checkout_payment.png}
-    \caption{Minh hoạ màn hình TeamCart Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}
-    \label{fig:mobile-teamcart-checkout}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.48\textwidth]{Hinhve/mobile-teamcart_lobby.png}
+%     \hfill
+%     \includegraphics[width=0.48\textwidth]{Hinhve/mobile-checkout_payment.png}
+%     \caption{Minh hoạ màn hình TeamCart Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}
+%     \label{fig:mobile-teamcart-checkout}
+% \end{figure}
 
 \subsubsection{Thiết kế giao diện hệ thống quản trị trên web}
-Hệ thống quản trị hướng tới màn hình desktop 1440x900 với mật độ thông tin cao, đồng thời đảm bảo khả năng hiển thị trên tablet ngang. Bố cục ưu tiên khả năng quét nhanh dữ liệu với lưới khoảng cách theo bước nhỏ, các khối thông tin và bảng dữ liệu được sắp xếp gọn để phục vụ tác vụ điều hành. Kiểu chữ được phân cấp rõ ràng từ nhãn điều hướng đến tiêu đề trang, kết hợp các mức đậm khác nhau để nhấn mạnh số liệu quan trọng. Hệ màu thương hiệu được sử dụng cho hành động chính và trạng thái tương tác, trong khi phiên bản nền tối được hỗ trợ để cải thiện khả năng đọc ở môi trường ánh sáng yếu. Các thành phần nhập liệu, nút bấm và thông báo hệ thống được chuẩn hóa về viền, trạng thái tập trung và hiển thị lỗi nhằm giữ tính nhất quán trong các luồng nghiệp vụ.
+Hệ thống quản trị tối ưu cho màn hình desktop 1440x900 và vẫn hiển thị tốt trên tablet ngang. Bố cục dùng lưới bước nhỏ để quét dữ liệu nhanh, bảng và khối thông tin gọn phục vụ điều hành. Kiểu chữ phân cấp rõ, nhấn mạnh số liệu bằng độ đậm. Màu thương hiệu làm nổi bật hành động chính, hỗ trợ chế độ nền tối cho môi trường ánh sáng yếu. Thành phần nhập liệu, nút bấm và thông báo được chuẩn hóa về viền, trạng thái tập trung và hiển thị lỗi để giữ trải nghiệm nhất quán.
 
-Các màn hình minh họa tập trung vào những chức năng cốt lõi của quản trị, gồm trang Restaurant Dashboard (Hình \ref{fig:web-dashboard}), trang Live Orders (Hình \ref{fig:web-live-orders}), trang Quản lý thực đơn (Hình \ref{fig:web-menu-management}) và trang Duyệt đăng ký nhà hàng (Hình \ref{fig:web-approval}).
+Các màn hình minh họa tập trung vào những chức năng cốt lõi của quản trị, gồm trang Restaurant Dashboard (Hình \ref{fig:web-dashboard}) và trang Live Orders (Hình \ref{fig:web-live-orders}).
 
 \begin{figure}[H]
     \centering
@@ -176,28 +123,28 @@ Các màn hình minh họa tập trung vào những chức năng cốt lõi củ
     \label{fig:web-live-orders}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Hinhve/restaurant-menu-management-desktop.png}
-    \caption{Minh hoạ màn hình Quản lý thực đơn trên hệ thống quản trị}
-    \label{fig:web-menu-management}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\textwidth]{Hinhve/restaurant-menu-management-desktop.png}
+%     \caption{Minh hoạ màn hình Quản lý thực đơn trên hệ thống quản trị}
+%     \label{fig:web-menu-management}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Hinhve/admin-restaurant-registrations-desktop.png}
-    \caption{Minh hoạ màn hình Duyệt đăng ký nhà hàng trên hệ thống quản trị}
-    \label{fig:web-approval}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\textwidth]{Hinhve/admin-restaurant-registrations-desktop.png}
+%     \caption{Minh hoạ màn hình Duyệt đăng ký nhà hàng trên hệ thống quản trị}
+%     \label{fig:web-approval}
+% \end{figure}
 
 \subsection{Thiết kế lớp}
-Trong dự án YummyZoom, phần lớn quy tắc nghiệp vụ được đóng gói tại lớp miền (Domain layer) theo Clean Architecture, do đó phần thiết kế lớp tập trung vào các aggregate root tiêu biểu. Bốn lớp được lựa chọn gồm Order, TeamCart, Restaurant và MenuItem vì đây là các lớp chịu trách nhiệm quản lý vòng đời, trạng thái và các bất biến nghiệp vụ quan trọng của hệ thống. Đối với các lớp ở lớp ứng dụng (Application layer), nội dung chỉ trình bày ở mức vai trò điều phối luồng, bởi đa số các handler chỉ thực hiện một phương thức \textit{Handle} với logic mỏng.
+Trong dự án YummyZoom, phần lớn quy tắc nghiệp vụ được đóng gói tại lớp miền (Domain layer) theo Clean Architecture, do đó phần thiết kế lớp tập trung vào các aggregate root tiêu biểu. Ba lớp được lựa chọn gồm Order, TeamCart và Restaurant vì đây là các lớp chịu trách nhiệm quản lý vòng đời, trạng thái và các bất biến nghiệp vụ quan trọng của hệ thống. Đối với các lớp ở lớp ứng dụng (Application layer), nội dung chỉ trình bày ở mức vai trò điều phối luồng, bởi đa số các handler chỉ thực hiện một phương thức \textit{Handle} với logic mỏng.
 
 Lớp Order đại diện cho đơn hàng, quản lý dữ liệu tài chính, danh sách món đã đặt và các mốc trạng thái trong vòng đời xử lý. Thiết kế của lớp thể hiện rõ các thuộc tính tài chính (Subtotal, DiscountAmount, DeliveryFee, TipAmount, TaxAmount, TotalAmount) cùng các phương thức chuyển trạng thái như Accept, Reject, MarkAsPreparing, MarkAsReadyForDelivery và MarkAsDelivered, đồng thời phát sinh các sự kiện miền tương ứng phục vụ đồng bộ trạng thái theo thời gian thực. Hình \ref{fig:class-order} mô tả cấu trúc lớp Order và các mối quan hệ chính.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Hinhve/class-Order.png}
+    \includegraphics[width=0.8\textwidth]{Hinhve/class-Order.png}
     \caption{Biểu đồ lớp của Order (Aggregate root)}
     \label{fig:class-order}
 \end{figure}
@@ -206,35 +153,28 @@ Lớp TeamCart mô hình hóa giỏ hàng nhóm, cho phép nhiều người cùn
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Hinhve/class-TeamCart.png}
+    \includegraphics[width=0.8\textwidth]{Hinhve/class-TeamCart.png}
     \caption{Biểu đồ lớp của TeamCart (Aggregate root)}
     \label{fig:class-teamcart}
 \end{figure}
 
-Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh và trạng thái hoạt động như đã xác thực hay đang nhận đơn. Thiết kế này đảm bảo các ràng buộc nghiệp vụ khi thay đổi thông tin thương hiệu, địa điểm, khung giờ hoạt động và trạng thái xác thực. Lớp MenuItem quản lý món ăn của nhà hàng, hỗ trợ các thao tác cập nhật mô tả, giá, khả dụng và cấu hình nhóm tùy chọn. Hai lớp này lần lượt được minh họa tại Hình \ref{fig:class-restaurant} và Hình \ref{fig:class-menuitem}.
+Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh và trạng thái hoạt động như đã xác thực hay đang nhận đơn. Thiết kế này đảm bảo các ràng buộc nghiệp vụ khi thay đổi thông tin thương hiệu, địa điểm, khung giờ hoạt động và trạng thái xác thực. Lớp này lần lượt được minh họa tại Hình \ref{fig:class-restaurant}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Hinhve/class-Restaurant.png}
+    \includegraphics[width=0.8\textwidth]{Hinhve/class-Restaurant.png}
     \caption{Biểu đồ lớp của Restaurant (Aggregate root)}
     \label{fig:class-restaurant}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Hinhve/class-MenuItem.png}
-    \caption{Biểu đồ lớp của MenuItem (Aggregate root)}
-    \label{fig:class-menuitem}
-\end{figure}
+Để minh họa cách các lớp phối hợp trong các ca sử dụng quan trọng, hai luồng chính được lựa chọn gồm chuyển TeamCart thành Order và cập nhật trạng thái đơn hàng. Luồng chuyển TeamCart thành Order nhấn mạnh vai trò của Domain Service trong việc ánh xạ dữ liệu và tính toán tài chính trước khi tạo Order và cập nhật TeamCart. Luồng cập nhật trạng thái đơn hàng thể hiện các chuyển trạng thái hợp lệ trong Order và phát sinh sự kiện miền để phục vụ cập nhật thời gian thực. Các luồng này được trình bày lần lượt tại Hình \ref{fig:flow-convert-teamcart} và Hình \ref{fig:flow-update-order-status}.
 
-Để minh họa cách các lớp phối hợp trong các ca sử dụng quan trọng, ba luồng chính được lựa chọn gồm khởi tạo đơn hàng, chuyển TeamCart thành Order và cập nhật trạng thái đơn hàng. Luồng khởi tạo đơn hàng thể hiện kiểm tra nhà hàng, món ăn, tính phí và tạo thanh toán, sau đó sinh Order ở lớp miền. Luồng chuyển TeamCart thành Order nhấn mạnh vai trò của Domain Service trong việc ánh xạ dữ liệu và tính toán tài chính trước khi tạo Order và cập nhật TeamCart. Luồng cập nhật trạng thái đơn hàng thể hiện các chuyển trạng thái hợp lệ trong Order và phát sinh sự kiện miền để phục vụ cập nhật thời gian thực. Các luồng này được trình bày lần lượt tại Hình \ref{fig:flow-initiate-order}, Hình \ref{fig:flow-convert-teamcart} và Hình \ref{fig:flow-update-order-status}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth,height=0.95\textheight]{Hinhve/flow-InitiateOrder.png}
-    \caption{Biểu đồ trình tự khởi tạo đơn hàng}
-    \label{fig:flow-initiate-order}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\textwidth,height=0.95\textheight]{Hinhve/flow-InitiateOrder.png}
+%     \caption{Biểu đồ trình tự khởi tạo đơn hàng}
+%     \label{fig:flow-initiate-order}
+% \end{figure}
 
 \begin{figure}[H]
     \centering
@@ -264,11 +204,11 @@ Biểu đồ ERD khái niệm theo Chen tập trung vào các thực thể cốt
 
 Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mapping) từ mô hình miền (domain model) sang cơ sở dữ liệu quan hệ. Mỗi aggregate root được ánh xạ thành một bảng chính, ví dụ Order tương ứng bảng Orders, Restaurant tương ứng bảng Restaurants, TeamCart tương ứng bảng TeamCarts. Các thực thể có danh tính trong một aggregate được tách thành bảng con và liên kết bằng khóa ngoại về bảng gốc, chẳng hạn OrderItems và PaymentTransactions phụ thuộc Orders, TeamCartItems và TeamCartMembers phụ thuộc TeamCarts. Các giá trị bất biến dạng đối tượng giá trị (value object) được ánh xạ thành các cột trong bảng chính với tiền tố tên thuộc tính, ví dụ DeliveryAddress\_Street hoặc TipAmount\_Amount; với các giá trị phức tạp hoặc danh sách linh hoạt thì lưu dưới dạng JSONB để giảm độ phức tạp lược đồ. Quy tắc này được hiện thực nhất quán thông qua cấu hình EF Core (Fluent API) trong các lớp Configuration thuộc tầng Infrastructure, đồng thời các trạng thái dạng enum được lưu dưới dạng chuỗi để dễ đọc và theo dõi. 
 
-Ở mức triển khai vật lý, số lượng bảng lớn được chia nhỏ theo từng nhóm chức năng để trình bày rõ ràng. Hình \ref{fig:erd-catalog} mô tả nhóm Restaurant Catalog, gồm Restaurants, Menus, MenuCategories, MenuItems và các bảng tùy chọn món; nhóm này phản ánh cấu trúc dữ liệu phục vụ duyệt thực đơn và quản trị nội dung. Hình \ref{fig:erd-order-teamcart} trình bày nhóm Order \& TeamCart, làm rõ cấu trúc lưu trữ đơn hàng, mục đơn hàng, thanh toán, giỏ nhóm và thành viên. Hình \ref{fig:erd-identity} thể hiện nhóm Identity \& Access, bao gồm các bảng nhận thực người dùng, bảng người dùng miền và bảng phân quyền nhà hàng. 
+Ở mức triển khai vật lý, số lượng bảng lớn được chia nhỏ theo từng nhóm chức năng để trình bày rõ ràng. Hình \ref{fig:erd-catalog} mô tả nhóm Restaurant Catalog, gồm Restaurants, Menus, MenuCategories, MenuItems và các bảng tùy chọn món; nhóm này phản ánh cấu trúc dữ liệu phục vụ duyệt thực đơn và quản trị nội dung. Hình \ref{fig:erd-order-teamcart} trình bày nhóm Order \& TeamCart, làm rõ cấu trúc lưu trữ đơn hàng, mục đơn hàng, thanh toán, giỏ nhóm và thành viên. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Hinhve/erd-restaurant-calatog.png}
+    \includegraphics[width=\textwidth, height=0.7\textheight, keepaspectratio]{Hinhve/erd-restaurant-calatog.png}
     \caption{ERD hiện đại cho nhóm Restaurant Catalog}
     \label{fig:erd-catalog}
 \end{figure}
@@ -280,12 +220,12 @@ Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mappin
     \label{fig:erd-order-teamcart}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Hinhve/erd-identity.png}
-    \caption{ERD hiện đại cho nhóm Identity và RoleAssignment}
-    \label{fig:erd-identity}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\textwidth]{Hinhve/erd-identity.png}
+%     \caption{ERD hiện đại cho nhóm Identity và RoleAssignment}
+%     \label{fig:erd-identity}
+% \end{figure}
 
 \section{Xây dựng ứng dụng}
 \subsection{Thư viện và công cụ sử dụng}
@@ -354,6 +294,7 @@ Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Cor
         Tổng số dòng code & 185{,}965 & Bao gồm comment và dòng trống \\ \hline
         Số file \texttt{.cs} & 1{,}348 & Toàn bộ backend \\ \hline
         Số lớp C\# & 1{,}301 & Thống kê theo source code \\ \hline
+        Số endpoint API & 158 & Tổng số endpoint API được sử dụng bởi frontend \\ \hline
         Số bảng CSDL & 49 & Đếm theo \texttt{schema.sql} \\ \hline
         Dung lượng mã nguồn \texttt{src/} & 103 MB & Sau khi \texttt{dotnet clean} \\ \hline
         Dung lượng mã nguồn \texttt{tests/} & 179 MB & Sau khi \texttt{dotnet clean} \\ \hline
@@ -399,7 +340,85 @@ Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Cor
 \end{table}
 
 \subsection{Minh họa các chức năng chính}
-Sinh viên lựa chọn và đưa ra màn hình cho các chức năng chính, quan trọng, và thú vị nhất. Mỗi giao diện cần phải có lời giải thích ngắn gọn. Khi giải thích, sinh viên có thể kết hợp với các chú thích ở trong hình ảnh giao diện.
+
+Phần này trình bày kết quả hiện thực của các chức năng trọng tâm trên cả ứng dụng di động dành cho khách hàng và hệ thống quản trị dành cho nhà hàng. Các giao diện được thiết kế để tối ưu hóa trải nghiệm người dùng cuối đồng thời phản ánh độ phức tạp của các quy trình nghiệp vụ phía sau.
+
+\subsubsection{Ứng dụng di động}
+
+\noindent
+\begin{minipage}{\linewidth}
+Giao diện trang chủ (Home) và chi tiết nhà hàng (Restaurant Detail) là điểm chạm đầu tiên của người dùng. Hình \ref{fig:demo-mobile-home-restaurant} minh họa cách bố trí thông tin trực quan, giúp người dùng nhanh chóng tiếp cận danh sách nhà hàng và khám phá thực đơn. Màn hình chi tiết nhà hàng hiển thị đầy đủ thông tin, đánh giá và danh sách món ăn được phân nhóm khoa học, hỗ trợ thao tác thêm món nhanh chóng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-home.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-restaurant_details.png}
+    \caption{Màn hình Trang chủ (Trái) và Chi tiết nhà hàng (Phải)}
+    \label{fig:demo-mobile-home-restaurant}
+\end{figure}
+\end{minipage}
+
+\vspace{1em}
+
+\noindent
+\begin{minipage}{\linewidth}
+Tính năng Đặt hàng nhóm (TeamCart) là điểm nhấn công nghệ của dự án, cho phép nhiều người dùng cùng thao tác trên một giỏ hàng trong thời gian thực. Hình \ref{fig:demo-mobile-teamcart-lobby} thể hiện sự đồng bộ trạng thái giữa màn hình của chủ phòng (Host) và thành viên (Member). Khi bất kỳ ai thêm hoặc bớt món, danh sách món ăn và tổng tiền sẽ được cập nhật tức thì trên tất cả thiết bị nhờ công nghệ SignalR, tạo cảm giác cộng tác mượt mà như đang ngồi cùng nhau.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_lobby_host.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_lobby_member.png}
+    \caption{Giao diện TeamCart: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}
+    \label{fig:demo-mobile-teamcart-lobby}
+\end{figure}
+\end{minipage}
+
+\vspace{1em}
+
+\noindent
+\begin{minipage}{\linewidth}
+Quy trình thanh toán cho đơn hàng nhóm được chia thành hai giai đoạn rõ ràng: chốt giá và thanh toán. Hình \ref{fig:demo-mobile-teamcart-checkout} minh họa màn hình Chốt giá nơi chủ phòng xem lại tổng kết đơn hàng, bao gồm các khoản phí và tiền tip. Sau khi chủ phòng xác nhận, tất cả thành viên trong nhóm được chuyển sang màn hình thanh toán để thanh toàn phần của mình an toàn bằng chọn thanh toán bằng tiền mặt hoặc thanh toán qua ví điện tử, tích hợp Stripe để xử lý giao dịch thẻ tín dụng, đảm bảo tính toàn vẹn của dữ liệu tài chính.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_checkout_finalizing.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_checkout_payment.png}
+    \caption{Quy trình Checkout: Giai đoạn Chốt giá (Trái) và Thanh toán (Phải)}
+    \label{fig:demo-mobile-teamcart-checkout}
+\end{figure}
+\end{minipage}
+
+\subsubsection{Hệ thống quản trị}
+
+Đối với đối tác nhà hàng, hệ thống cung cấp các công cụ quản lý mạnh mẽ và chuyên sâu. Hình \ref{fig:demo-desktop-menu} minh họa giao diện Quản lý thực đơn với thiết kế phân tách giữa danh sách món ăn và thư viện tùy chọn (Modifiers). Người quản lý có thể dễ dàng cấu hình các nhóm tùy chọn (ví dụ: Mức đường, Mức đá, Topping) và gán chúng vào từng món ăn cụ thể, đáp ứng nhu cầu tùy biến đa dạng của thực khách.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/demo-desktop-menu_management.png}
+    \caption{Giao diện Quản lý Menu và Thư viện tùy chọn}
+    \label{fig:demo-desktop-menu}
+\end{figure}
+
+Trung tâm vận hành của nhà hàng là màn hình "Live Orders" (Đơn hàng trực tiếp), được thiết kế theo phong cách Kanban trực quan như Hình \ref{fig:demo-desktop-live-orders}. Giao diện này chia làm ba làn: Đơn mới, Đang chế biến, và Sẵn sàng giao, giúp nhân viên bếp và thu ngân dễ dàng điều phối trạng thái đơn hàng chỉ bằng thao tác kéo thả hoặc nhấn nút. Thiết kế Responsive đảm bảo tính năng này hoạt động hiệu quả trên cả máy tính bảng và điện thoại di động của nhân viên đứng quầy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/demo-desktop-live_orders.png}
+    \caption{Trung tâm xử lý đơn hàng trực tiếp (Live Orders Dashboard)}
+    \label{fig:demo-desktop-live-orders}
+\end{figure}
+
+Cuối cùng, tính năng Quản lý khuyến mãi (Coupon Management) cho phép nhà hàng chủ động tạo các chiến dịch marketing. Hình \ref{fig:demo-desktop-coupon} hiển thị danh sách các mã giảm giá cùng trạng thái hoạt động. Hệ thống hỗ trợ thiết lập chi tiết các loại ưu đãi (giảm tiền, giảm phần trăm, tặng món), điều kiện áp dụng (giá trị tối thiểu, thời gian hiệu lực) và phạm vi áp dụng (theo danh mục hoặc món cụ thể), giúp nhà hàng linh hoạt trong chiến lược kinh doanh.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/demo-desktop-coupon_management.png}
+    \caption{Giao diện Quản lý Mã giảm giá và Chương trình khuyến mãi}
+    \label{fig:demo-desktop-coupon}
+\end{figure}
 
 \section{Kiểm thử}
 Phần này có độ dài từ hai đến ba trang. Sinh viên thiết kế các trường hợp kiểm thử cho hai đến ba chức năng quan trọng nhất. Sinh viên cần chỉ rõ các kỹ thuật kiểm thử đã sử dụng. Chi tiết các trường hợp kiểm thử khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
