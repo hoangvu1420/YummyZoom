@@ -657,6 +657,8 @@ INPUT out/DoAn.out
 INPUT out/DoAn.out
 INPUT out/DoAn.run.xml
 OUTPUT out/DoAn.run.xml
+INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb
+INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/ucrr8v.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/vntex/urwvn/utmb8v.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb

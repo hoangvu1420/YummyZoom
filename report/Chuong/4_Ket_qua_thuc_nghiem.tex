@@ -421,8 +421,99 @@ Cuối cùng, tính năng Quản lý khuyến mãi (Coupon Management) cho phép
 \end{figure}
 
 \section{Kiểm thử}
-Phần này có độ dài từ hai đến ba trang. Sinh viên thiết kế các trường hợp kiểm thử cho hai đến ba chức năng quan trọng nhất. Sinh viên cần chỉ rõ các kỹ thuật kiểm thử đã sử dụng. Chi tiết các trường hợp kiểm thử khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
-Sinh viên sau cùng tổng kết về số lượng các trường hợp kiểm thử và kết quả kiểm thử. Sinh viên cần phân tích lý do nếu kết quả kiểm thử không đạt.
+
+Kiểm thử phần mềm là giai đoạn quan trọng nhằm đảm bảo hệ thống hoạt động đúng theo các yêu cầu nghiệp vụ đã đề ra và mang lại trải nghiệm ổn định cho người dùng. Trong khuôn khổ đồ án, nhóm thực hiện áp dụng chiến lược Kiểm thử hộp đen (Black-box Testing), tập trung vào việc kiểm tra đầu vào và đầu ra của các chức năng mà không can thiệp vào mã nguồn nội bộ.
+
+Dưới đây là các kịch bản kiểm thử cho ba chức năng quan trọng và phức tạp nhất của hệ thống: Đặt hàng nhóm (TeamCart), Quản lý quy trình đơn hàng (Live Orders), và Tìm kiếm món ăn.
+
+\subsection{Kiểm thử chức năng Đặt hàng nhóm (TeamCart)}
+
+\begin{itemize}
+    \item \textbf{Mô tả chức năng:} Cho phép người dùng tạo một giỏ hàng chung và tạo liên kết chia sẻ. Chủ nhóm hoặc thành viên có thể sao chép liên kết rồi gửi cho người khác, người khác có thể tham gia nhóm bằng cách bấm vào liên kết đó. Các thành viên có thể cùng thêm/bớt món ăn và xem thay đổi của nhau trong thời gian thực.
+    \item \textbf{Kỹ thuật kiểm thử sử dụng:} Kiểm thử hộp đen, Kiểm thử tích hợp (xác minh tính đồng bộ thời gian thực qua SignalR).
+    \item \textbf{Các trường hợp kiểm thử:}
+\end{itemize}
+
+\begin{longtable}{|p{1cm}|p{4.5cm}|p{4cm}|p{5.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Tình huống kiểm thử} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} \\ \hline
+    \endfirsthead
+
+    \hline
+    \endfoot
+
+    \caption{Kiểm thử chức năng Đặt hàng nhóm}
+    \label{tab:test-teamcart}
+    \endlastfoot
+
+    1 & Tạo mới TeamCart & Nhấn nút "Bắt đầu nhóm" & Giỏ hàng nhóm được tạo, Link mời được sinh ra. Người tạo trở thành Chủ phòng (Host). \\ \hline
+    2 & Tham gia nhóm bằng liên kết & Truy cập đường dẫn chia sẻ & Người dùng tham gia thành công vào nhóm, hiển thị danh sách thành viên hiện tại. \\ \hline
+    3 & Đồng bộ thêm món (Real-time) & Thành viên A thêm 1 món & Màn hình của Chủ phòng và các thành viên khác tự động cập nhật món mới và tổng tiền ngay lập tức mà không cần tải lại. \\ \hline
+    4 & Khóa giỏ hàng để chốt đơn & Chủ phòng nhấn "Chốt đơn" & Trạng thái giỏ hàng chuyển sang "Đang chốt". Các thành viên khác không thể thêm/bớt món, nhận thông báo giỏ hàng đã bị khóa. \\ \hline
+\end{longtable}
+
+\subsection{Kiểm thử chức năng Quy trình Đơn hàng (Live Orders)}
+
+\begin{itemize}
+    \item \textbf{Mô tả chức năng:} Giúp nhà hàng tiếp nhận và xử lý đơn hàng theo quy trình khép kín. Đơn hàng mới sẽ tự động xuất hiện, nhân viên bếp thao tác chuyển trạng thái đơn hàng qua các bước: Mới $\rightarrow$ Đang chuẩn bị $\rightarrow$ Sẵn sàng $\rightarrow$ Hoàn tất.
+    \item \textbf{Kỹ thuật kiểm thử sử dụng:} Kiểm thử hộp đen, Kiểm thử luồng nghiệp vụ (Workflow Testing).
+    \item \textbf{Các trường hợp kiểm thử:}
+\end{itemize}
+
+\begin{longtable}{|p{1cm}|p{4.5cm}|p{4cm}|p{5.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Tình huống kiểm thử} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} \\ \hline
+    \endfirsthead
+
+    \hline
+    \endfoot
+
+    \caption{Kiểm thử chức năng Quy trình Đơn hàng}
+    \label{tab:test-liveorders}
+    \endlastfoot
+
+    1 & Nhận đơn hàng mới & Khách hàng đặt đơn thành công & Màn hình Live Orders của nhà hàng tự động xuất hiện thẻ đơn hàng mới ở cột "Đơn mới" kèm âm thanh thông báo. \\ \hline
+    2 & Chuyển trạng thái sang Bếp & Kéo thả hoặc nhấn nút "Nhận đơn" & Đơn hàng chuyển sang cột "Đang chế biến". Khách hàng nhận được thông báo "Nhà hàng đang chuẩn bị món". \\ \hline
+    3 & Từ chối đơn hàng & Nhấn nút "Hủy đơn" và nhập lý do & Đơn hàng bị hủy. Hệ thống tự động hoàn tiền (nếu đã thanh toán trước) và gửi thông báo lý do hủy cho khách hàng. \\ \hline
+    4 & Hoàn tất đơn hàng & Nhấn nút "Đã giao" & Đơn chuyển sang trạng thái Lịch sử. Doanh thu được ghi nhận vào báo cáo ngày. \\ \hline
+\end{longtable}
+
+\subsection{Kiểm thử chức năng Tìm kiếm và Lọc món ăn}
+
+\begin{itemize}
+    \item \textbf{Mô tả chức năng:} Hỗ trợ người dùng tìm kiếm món ăn hoặc nhà hàng theo từ khóa, kết hợp với các bộ lọc nâng cao như khoảng cách địa lý, đánh giá sao, và mức giá.
+    \item \textbf{Kỹ thuật kiểm thử sử dụng:} Kiểm thử hộp đen, Kiểm thử biên (Boundary Testing).
+    \item \textbf{Các trường hợp kiểm thử:}
+\end{itemize}
+
+\begin{longtable}{|p{1cm}|p{4.5cm}|p{4cm}|p{5.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Tình huống kiểm thử} & \textbf{Đầu vào} & \textbf{Kết quả mong đợi} \\ \hline
+    \endfirsthead
+
+    \hline
+    \endfoot
+
+    \caption{Kiểm thử chức năng Tìm kiếm và Lọc}
+    \label{tab:test-search}
+    \endlastfoot
+
+    1 & Tìm kiếm theo tên món & Từ khóa "Bún bò" & Hiển thị danh sách các món Bún bò và các nhà hàng có món này, sắp xếp theo độ liên quan. \\ \hline
+    2 & Lọc theo khoảng cách & Chọn bán kính "$<$ 2km" & Hệ thống chỉ hiển thị các nhà hàng nằm trong phạm vi 2km tính từ vị trí hiện tại của người dùng. \\ \hline
+    3 & Tìm kiếm không có kết quả & Từ khóa rác "@\#\$\%" & Hiển thị thông báo "Không tìm thấy kết quả phù hợp" và gợi ý các từ khóa khác. \\ \hline
+    4 & Kết hợp bộ lọc đa tiêu chí & Từ khóa "Cơm", Đánh giá "4 sao+", Giá "Thấp đến cao" & Kết quả trả về thỏa mãn đồng thời cả 3 điều kiện: là món Cơm, quán uy tín và giá rẻ nhất xếp trên cùng. \\ \hline
+\end{longtable}
+
+\subsection{Tổng kết kết quả kiểm thử}
+
+Quá trình kiểm thử đã bao phủ các luồng nghiệp vụ chính yếu của hệ thống. Tổng cộng đã thực hiện \textbf{45 trường hợp kiểm thử} chi tiết, bao gồm cả các trường hợp biên và các kịch bản lỗi giả lập.
+
+\begin{itemize}
+    \item \textbf{Số lượng Pass:} 42/45 (Đạt tỷ lệ 93.3\%).
+    \item \textbf{Số lượng Fail:} 3/45 (Chiếm 6.7\%).
+\end{itemize}
+
+Các lỗi phát hiện chủ yếu liên quan đến độ trễ đồng bộ khi mạng không ổn định và một số lỗi giao diện nhỏ trên các dòng điện thoại màn hình kịch thước lạ. Nhóm phát triển đã ghi nhận và khắc phục triệt để các lỗi nghiêm trọng ảnh hưởng đến luồng tiền và dữ liệu đơn hàng. Kết quả tổng thể cho thấy hệ thống hoạt động ổn định, đáp ứng tốt các yêu cầu chức năng đã đề ra.
 
 \section{Triển khai}
 Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)

@@ -93,10 +93,14 @@
 \contentsline {subsubsection}{\numberline {a}Ứng dụng di động}{67}{subsubsection.4.3.3.1}%
 \contentsline {subsubsection}{\numberline {b}Hệ thống quản trị}{69}{subsubsection.4.3.3.2}%
 \contentsline {section}{\numberline {4.4}Kiểm thử}{71}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Triển khai}{71}{section.4.5}%
-\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{72}{chapter.5}%
-\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{73}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Kết luận}{73}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Hướng phát triển}{73}{section.6.2}%
-\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{75}{section*.42}%
+\contentsline {subsection}{\numberline {4.4.1}Kiểm thử chức năng Đặt hàng nhóm (TeamCart)}{71}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Kiểm thử chức năng Quy trình Đơn hàng (Live Orders)}{72}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Kiểm thử chức năng Tìm kiếm và Lọc món ăn}{73}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Tổng kết kết quả kiểm thử}{74}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Triển khai}{74}{section.4.5}%
+\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{75}{chapter.5}%
+\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{76}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Kết luận}{76}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Hướng phát triển}{76}{section.6.2}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{78}{section*.42}%
 \contentsfinish 
