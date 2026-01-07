@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Domain.OrderAggregate.Enums;
@@ -32,18 +33,28 @@ public class ReviewSeeder : ISeeder
     public string Name => "Review";
     public int Order => 125; // After Orders (120)
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {
+        if (await _dbContext.Reviews.AnyAsync(cancellationToken))
+        {
+            return false;
+        }
+
         // Check if we have seeded orders to base reviews on
         var hasSeededOrders = context.SharedData.ContainsKey("SeededOrders");
         
         if (!hasSeededOrders)
         {
-            _logger.LogWarning("Cannot seed reviews: no seeded orders found in SharedData");
-            return Task.FromResult(false);
+            var hasDeliveredOrders = _dbContext.Orders
+                .Any(o => o.Status == OrderStatus.Delivered && o.ActualDeliveryTime.HasValue);
+            if (!hasDeliveredOrders)
+            {
+                _logger.LogWarning("Cannot seed reviews: no delivered orders found");
+                return false;
+            }
         }
 
-        return Task.FromResult(true);
+        return true;
     }
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
@@ -52,8 +63,7 @@ public class ReviewSeeder : ISeeder
 
         try
         {
-            // Load seeded orders from SharedData
-            var deliveredOrders = GetDeliveredOrders(context.SharedData);
+            var deliveredOrders = await GetDeliveredOrdersAsync(context, cancellationToken);
             if (deliveredOrders.Count == 0)
             {
                 _logger.LogWarning("[Review] No delivered orders found - skipping review seeding");
@@ -72,6 +82,13 @@ public class ReviewSeeder : ISeeder
             {
                 try
                 {
+                    var alreadyReviewed = await _dbContext.Reviews
+                        .AnyAsync(r => r.OrderId == order.Id, cancellationToken);
+                    if (alreadyReviewed)
+                    {
+                        continue;
+                    }
+
                     var review = GenerateReview(order, options);
                     if (review.IsSuccess)
                     {
@@ -120,6 +137,21 @@ public class ReviewSeeder : ISeeder
 
         // Only delivered orders are eligible for reviews
         return allOrders.Where(o => o.Status == OrderStatus.Delivered && o.ActualDeliveryTime.HasValue).ToList();
+    }
+
+    private async Task<List<OrderAggregate>> GetDeliveredOrdersAsync(SeedingContext context, CancellationToken cancellationToken)
+    {
+        var fromSeed = GetDeliveredOrders(context.SharedData);
+        if (fromSeed.Count > 0)
+        {
+            return fromSeed;
+        }
+
+        return await _dbContext.Orders
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(o => o.Status == OrderStatus.Delivered && o.ActualDeliveryTime.HasValue)
+            .ToListAsync(cancellationToken);
     }
 
     private List<OrderAggregate> SelectOrdersForReview(List<OrderAggregate> deliveredOrders, decimal coveragePercentage)

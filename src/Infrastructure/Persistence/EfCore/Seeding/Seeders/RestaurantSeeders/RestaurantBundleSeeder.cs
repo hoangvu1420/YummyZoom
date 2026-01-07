@@ -23,11 +23,8 @@ public class RestaurantBundleSeeder : ISeeder
     public string Name => "RestaurantBundle";
     public int Order => 112; // After Tags (105) and Restaurants (100) if still enabled
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-    {
-        // Always attempt; idempotency inside
-        return Task.FromResult(true);
-    }
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+        => !await context.DbContext.Restaurants.AnyAsync(cancellationToken);
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {

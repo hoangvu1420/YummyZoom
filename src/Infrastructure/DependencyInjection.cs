@@ -223,6 +223,8 @@ public static class DependencyInjection
 
     private static void AddExternalServices(this IHostApplicationBuilder builder)
     {
+        var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Infrastructure.ExternalServices");
+
         // Firebase and Caching
         builder.AddFirebaseIfConfigured();
         builder.AddCachingIfConfigured();
@@ -238,10 +240,12 @@ public static class DependencyInjection
         if (cloudinaryOptions?.Enabled is true && hasCloudinaryCreds)
         {
             builder.Services.AddSingleton<IMediaStorageService, CloudinaryMediaService>();
+            logger.LogInformation("Cloudinary credentials found. CloudinaryMediaService registered as IMediaStorageService.");
         }
         else
         {
             builder.Services.AddSingleton<IMediaStorageService, FakeMediaStorageService>();
+            logger.LogWarning("Cloudinary credentials not found or incomplete. Using FakeMediaStorageService as IMediaStorageService.");
         }
 
         // Stripe configuration
@@ -251,6 +255,7 @@ public static class DependencyInjection
         if (stripeOptions is not null)
         {
             StripeConfiguration.ApiKey = stripeOptions.SecretKey;
+            logger.LogInformation("Stripe API key configured.");
         }
 
         builder.Services.AddScoped<IPaymentGatewayService, StripeService>();

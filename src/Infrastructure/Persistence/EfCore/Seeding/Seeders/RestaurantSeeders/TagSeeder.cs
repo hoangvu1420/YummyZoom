@@ -12,8 +12,8 @@ public class TagSeeder : ISeeder
     public string Name => "Tag";
     public int Order => 105; // After restaurants, before menus
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-        => Task.FromResult(true);
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+        => !await context.DbContext.Tags.AnyAsync(cancellationToken);
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {

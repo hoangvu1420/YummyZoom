@@ -18,6 +18,15 @@ public static class InitialiserExtensions
 
         await initialiser.SeedAsync();
     }
+
+    public static async Task SeedDatabaseAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+
+        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+
+        await initialiser.SeedAsync();
+    }
 }
 
 public class ApplicationDbContextInitialiser

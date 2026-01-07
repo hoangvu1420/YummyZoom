@@ -1,25 +1,37 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var databaseName = "YummyZoomDb";
+var isPublishMode = builder.ExecutionContext.IsPublishMode;
 
-var postgres = builder
-    .AddPostgres("postgres")
-    // Use a PostGIS-enabled image so spatial types and functions are available.
-    .WithImage("postgis/postgis", "16-3.4")
-    .WithImageRegistry("docker.io")
-    .WithPgAdmin()
-    // Set the name of the default database to auto-create on container startup.
-    .WithEnvironment("POSTGRES_DB", databaseName);
+var redis = isPublishMode
+    ? builder.AddAzureRedis("redis")
+    : builder.AddAzureRedis("redis").RunAsContainer();
 
-var database = postgres.AddDatabase(databaseName);
+var web = builder.AddProject<Projects.Web>("web")
+    .WithExternalHttpEndpoints();
 
-// Add Redis cache resource
-var redis = builder.AddRedis("redis");
+if (isPublishMode)
+{
+    var postgres = builder.AddAzurePostgresFlexibleServer("postgres");
+    var database = postgres.AddDatabase(databaseName);
+    web.WithReference(database)
+        .WaitFor(database);
+}
+else
+{
+    var postgres = builder.AddPostgres("postgres")
+        // Use a PostGIS-enabled image so spatial types and functions are available.
+        .WithImage("postgis/postgis", "16-3.4")
+        .WithImageRegistry("docker.io")
+        .WithPgAdmin()
+        // Set the name of the default database to auto-create on container startup.
+        .WithEnvironment("POSTGRES_DB", databaseName);
+    var database = postgres.AddDatabase(databaseName);
+    web.WithReference(database)
+        .WaitFor(database);
+}
 
-builder.AddProject<Projects.Web>("web")
-    .WithReference(database)
-    .WithReference(redis)
-    .WaitFor(database)
+web.WithReference(redis)
     .WaitFor(redis);
 
 builder.Build().Run();

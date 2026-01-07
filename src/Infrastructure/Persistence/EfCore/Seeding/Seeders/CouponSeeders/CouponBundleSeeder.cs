@@ -21,11 +21,8 @@ public class CouponBundleSeeder : ISeeder
     public string Name => "CouponBundle";
     public int Order => 115; // After RestaurantBundle (112), before Orders (120)
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-    {
-        // Always attempt; idempotency is handled inside SeedAsync
-        return Task.FromResult(true);
-    }
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+        => !await context.DbContext.Coupons.AnyAsync(cancellationToken);
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {

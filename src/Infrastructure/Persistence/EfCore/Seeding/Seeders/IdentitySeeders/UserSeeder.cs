@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
@@ -39,8 +40,15 @@ public class UserSeeder : ISeeder
     public string Name => "User";
     public int Order => 20;
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-        => Task.FromResult(true);
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+    {
+        if (await context.DbContext.DomainUsers.AnyAsync(cancellationToken))
+        {
+            return false;
+        }
+
+        return !await _userManager.Users.AnyAsync(cancellationToken);
+    }
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {
@@ -139,7 +147,7 @@ public class UserSeeder : ISeeder
 
             if (!scenario.CompleteSignup)
             {
-                context.Logger.LogInformation("Seeded OTP-only identity {Phone} (new: {IsNew})", scenario.PhoneE164, isNewIdentity);
+                context.Logger.LogDebug("Seeded OTP-only identity {Phone} (new: {IsNew})", scenario.PhoneE164, isNewIdentity);
                 return PhoneScenarioResult.Create(identityUserId, null, false);
             }
 

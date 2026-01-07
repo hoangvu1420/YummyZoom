@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YummyZoom.SharedKernel;
 using YummyZoom.SharedKernel.Constants;
@@ -17,8 +18,8 @@ public class RoleSeeder : ISeeder
     public string Name => "Role";
     public int Order => 10;
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-        => Task.FromResult(true);
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+        => !await _roleManager.Roles.AnyAsync(cancellationToken);
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {

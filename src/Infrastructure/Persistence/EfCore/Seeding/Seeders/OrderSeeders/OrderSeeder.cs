@@ -60,6 +60,11 @@ public class OrderSeeder : ISeeder
 
     public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {
+        if (await _dbContext.Orders.AnyAsync(cancellationToken))
+        {
+            return false;
+        }
+
         // Check if we have the required dependencies
         var hasUsers = await _dbContext.DomainUsers.AnyAsync(cancellationToken);
         var hasRestaurants = await _dbContext.Restaurants.AnyAsync(cancellationToken);
@@ -94,10 +99,26 @@ public class OrderSeeder : ISeeder
 
             foreach (var restaurant in dependencies.Restaurants)
             {   
+                var ordersToCreate = options.OrdersPerRestaurant;
+                if (context.Configuration.EnableIdempotentSeeding)
+                {
+                    var existingCount = await _dbContext.Orders
+                        .CountAsync(o => o.RestaurantId == restaurant.Id, cancellationToken);
+                    ordersToCreate = Math.Max(0, options.OrdersPerRestaurant - existingCount);
+                }
+
+                if (ordersToCreate == 0)
+                {
+                    _logger.LogInformation("[Order] Restaurant {RestaurantName} already has {OrderCount} orders. Skipping.",
+                        restaurant.Name, options.OrdersPerRestaurant);
+                    continue;
+                }
+
                 var restaurantOrders = await CreateOrdersForRestaurantAsync(
-                    restaurant, 
-                    dependencies, 
-                    options, 
+                    restaurant,
+                    dependencies,
+                    options,
+                    ordersToCreate,
                     cancellationToken);
 
                 seededOrders.AddRange(restaurantOrders);
@@ -168,6 +189,7 @@ public class OrderSeeder : ISeeder
         Restaurant restaurant,
         SeedingDependencies dependencies,
         OrderSeedingOptions options,
+        int ordersToCreate,
         CancellationToken cancellationToken)
     {
         var orders = new List<OrderAggregate>();
@@ -183,7 +205,7 @@ public class OrderSeeder : ISeeder
             return orders;
         }
 
-        for (int i = 0; i < options.OrdersPerRestaurant; i++)
+        for (int i = 0; i < ordersToCreate; i++)
         {
             try
             {
@@ -670,4 +692,3 @@ public class DeliveryAddressData
     public required string ZipCode { get; set; }
     public required string Country { get; set; }
 }
-

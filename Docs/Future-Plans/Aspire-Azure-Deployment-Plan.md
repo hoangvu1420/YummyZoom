@@ -17,6 +17,7 @@ Initialize azd + Aspire infrastructure (Bicep + Container Apps) using the proven
 - Reference uses two services (`apiservice`, `webfrontend`); YummyZoom uses one service (`web`).
 - Secret mappings should target `YummyZoomDb` and `redis` connection string keys.
 - YummyZoom relies on PostGIS extensions (Postgres 16 + `postgis`, `pg_trgm`, `unaccent`).
+- The generated infra from `azd infra gen` currently uses containerized Postgres/Redis, not managed Azure services.
 
 ## Plan and steps
 
@@ -33,6 +34,12 @@ Suggested choices when prompted:
 - Service name: `web` (or keep `app` if you prefer the default; just keep it consistent with the infra template tags).
 
 This should generate `azure.yaml`, `infra/`, and `.azure/` under `src/AppHost`.
+
+If `infra/` is missing after `azd init`, run:
+
+```bat
+cmd.exe /c "cd /d E:\source\repos\CA\YummyZoom\src\AppHost && azd infra gen"
+```
 
 ### 2) Replace/align the generated infra with the reference
 Copy the structure from `ref/infra/` into `src/AppHost/infra/`, then update names and secrets to match YummyZoom:
@@ -95,6 +102,68 @@ Use `azd provision` for infra-only and `azd deploy` for app updates.
 - If you want the app to read secrets directly from Key Vault (beyond the connection strings), store them in the same vault and keep `AZURE_KEY_VAULT_ENDPOINT` set.
 - Subscription-scope deployments require permissions to create resource groups.
 - The root-level `azure.yaml` should be removed or replaced to avoid conflicting azd configs; keep only the AppHost-based template.
+
+## Generated vs reference comparison (current state)
+
+### Generated (`src/AppHost/infra`)
+- `main.bicep` only provisions shared resources (RG, ACR, Log Analytics, Container Apps environment). No managed Postgres/Redis or Key Vault.
+- `postgres.tmpl.yaml` defines a containerized Postgres inside ACA:
+  - Uses `POSTGRES_USER=postgres` and a generated secret `postgres_password`.
+  - Exposes TCP 5432 internally.
+- `redis.tmpl.yaml` defines a containerized Redis inside ACA:
+  - Uses a generated secret `redis_password` and `redis-server --requirepass`.
+  - Exposes TCP 6379 internally.
+- `web.tmpl.yaml` wires connection strings to internal container hostnames:
+  - `Host=postgres;Port=5432;...`
+  - `redis:6379,password=...`
+  - `ingress.external: false` (no public endpoint by default).
+
+### Reference (`ref/infra`)
+- `main.bicep` provisions managed Azure services:
+  - PostgreSQL Flexible Server (PG 16) and Azure Cache for Redis.
+  - Key Vault with secrets `LMSdb-Conn` and `Cache-Conn`.
+  - Role assignments for managed identity.
+- Container App templates map Key Vault secrets to connection strings.
+- `webfrontend` ingress is external; `apiservice` ingress is external.
+
+## Detailed changes to align generated infra with the reference
+
+### 1) Bicep structure
+- Replace `src/AppHost/infra/main.bicep` with reference-style orchestration:
+  - Add modules for `cache`, `postgres`, `keyvault`, and role assignments.
+  - Add secure params `postgresUser`, `postgresPassword`.
+  - Output `KEYVAULT_URI`, `CACHE_CONNECTIONSTRING`, `POSTGRES_CONNECTIONSTRING`.
+- Add module files from `ref/infra` into `src/AppHost/infra/`:
+  - `cache/cache.module.bicep`
+  - `cache-roles/cache-roles.module.bicep`
+  - `postgres/postgres.module.bicep`
+  - `postgres-roles/postgres-roles.module.bicep`
+  - `keyvault/keyvault.module.bicep`
+  - `keyvault/keyvault-secrets.module.bicep`
+
+### 2) Remove containerized database/cache templates
+- Delete or ignore `postgres.tmpl.yaml` and `redis.tmpl.yaml`.
+- The app should target managed services via Key Vault secrets instead.
+
+### 3) Web container app template
+- Update `src/AppHost/infra/web.tmpl.yaml`:
+  - Set `ingress.external: true` for a public endpoint.
+  - Add Key Vault-backed secrets:
+    - `YummyZoomDb-Conn` → `ConnectionStrings__YummyZoomDb`
+    - `Redis-Conn` → `ConnectionStrings__redis`
+  - Add `AZURE_KEY_VAULT_ENDPOINT={{ .Env.KEYVAULT_URI }}`.
+  - Remove any inline connection strings that reference `postgres` or `redis` hostnames.
+
+### 4) Secret naming
+- In `keyvault-secrets.module.bicep`, use:
+  - `YummyZoomDb-Conn` (Postgres connection string)
+  - `Redis-Conn` (Redis connection string)
+- Make sure `web.tmpl.yaml` uses the same names.
+
+### 5) azure.yaml alignment
+- Ensure the service name matches the template tag (`web`).
+- Keep `host: containerapp` and point `project` to `./AppHost.csproj`.
+- Add secure parameters `postgresUser`, `postgresPassword`.
 
 ## References
 - Aspire + azd deployment: https://learn.microsoft.com/dotnet/aspire/deployment/azure/azure-dev-cli

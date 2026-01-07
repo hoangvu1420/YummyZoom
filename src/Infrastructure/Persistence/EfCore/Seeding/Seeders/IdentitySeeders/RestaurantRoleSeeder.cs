@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using YummyZoom.SharedKernel;
 using Microsoft.Extensions.Logging;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
@@ -35,8 +36,8 @@ public class RestaurantRoleSeeder : ISeeder
     public string Name => "RestaurantRole";
     public int Order => 200; // Must run after RestaurantBundleSeeder (112)
 
-    public Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
-        => Task.FromResult(true);
+    public async Task<bool> CanSeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
+        => !await context.DbContext.RoleAssignments.AnyAsync(cancellationToken);
 
     public async Task<Result> SeedAsync(SeedingContext context, CancellationToken cancellationToken = default)
     {
