@@ -1,14 +1,43 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này có độ dài tối thiểu 5 trang, tối đa không giới hạn.\footnote{Trong trường hợp phần này dưới 5 trang thì sinh viên nên gộp vào phần kết luận, không tách ra một chương riêng rẽ nữa.} Sinh viên cần trình bày tất cả những nội dung đóng góp mà mình thấy tâm đắc nhất trong suốt quá trình làm ĐATN. Đó có thể là một loạt các vấn đề khó khăn mà sinh viên đã từng bước giải quyết được, là giải thuật cho một bài toán cụ thể, là giải pháp tổng quát cho một lớp bài toán, hoặc là mô hình/kiến trúc hữu hiệu nào đó được sinh viên thiết kế.
+Chương này trình bày các giải pháp kỹ thuật chuyên sâu và những đóng góp nổi bật nhất của đồ án trong việc giải quyết các thách thức của bài toán ứng dụng giao đồ ăn, đặc biệt là tính năng đặt hàng nhóm (TeamCart). Ba đóng góp chính được phân tích bao gồm: (i) việc áp dụng kiến trúc Clean Architecture kết hợp Domain-Driven Design để quản lý nghiệp vụ phức tạp, (ii) giải pháp xử lý đồng thời lạc quan (Optimistic Concurrency Control) giúp đảm bảo tính nhất quán dữ liệu, và (iii) kiến trúc đồng bộ hóa thời gian thực tối ưu hiệu năng. Các nội dung ở Chương 4 chỉ mô tả tổng quan, còn chi tiết giải pháp được trình bày tại đây.
 
-Chương này \textbf{là cơ sở quan trọng} để các thầy cô đánh giá sinh viên. Vì vậy, sinh viên cần phát huy tính sáng tạo, khả năng phân tích, phản biện, lập luận, tổng quát hóa vấn đề và tập trung viết cho thật tốt.
-Mỗi giải pháp hoặc đóng góp của sinh viên cần được trình bày trong một mục độc lập bao gồm ba mục con: (i) dẫn dắt/giới thiệu về bài toán/vấn đề, (ii) giải pháp, và (iii) kết quả đạt được (nếu có).
+\section{Ứng dụng Clean Architecture và Domain-Driven Design trong quản lý nghiệp vụ phức tạp}
 
-Sinh viên lưu ý \textbf{không trình bày lặp lại nội dung}. Những nội dung đã trình bày chi tiết trong các chương trước không được trình bày lại trong chương này. Vì vậy, với nội dung hay, mang tính đóng góp/giải pháp, sinh viên chỉ nên tóm lược/mô tả sơ bộ trong các chương trước, đồng thời tạo tham chiếu chéo tới đề mục tương ứng trong Chương 5 này. Chi tiết thông tin về đóng góp/giải pháp được trình bày trong mục đó.
+\subsection*{Vấn đề}
+Trong quá trình phát triển các hệ thống thương mại điện tử hiện đại, đặc biệt là các tính năng đòi hỏi sự cộng tác cao như Giỏ hàng nhóm, logic nghiệp vụ thường trở nên phức tạp với hàng loạt các quy tắc về tính toán giá, chia sẻ chi phí và quản lý trạng thái. Nếu logic nghiệp vụ bị trộn lẫn với mã xử lý hạ tầng (cơ sở dữ liệu, API, giao diện), mã nguồn khó kiểm soát tính toàn vẹn dữ liệu và khó kiểm thử, đặc biệt ở các luồng tài chính nhạy cảm.
 
-Ví dụ, trong Chương 4, sinh viên có thiết kế được kiến trúc đáng lưu ý gì đó, là sự kết hợp của các kiến trúc MVC, MVP, SOA, v.v. Khi đó, sinh viên sẽ chỉ mô tả ngắn gọn kiến trúc đó ở Chương 4, rồi thêm các câu có dạng: ``Chi tiết về kiến trúc này sẽ được trình bày trong phần 5.1". 
+\subsection*{Giải pháp}
+Đồ án áp dụng kiến trúc Clean Architecture kết hợp với DDD nhằm tách biệt triệt để logic nghiệp vụ khỏi hạ tầng. Lớp miền được tổ chức theo mô hình giàu hành vi, trong đó các aggregate như \texttt{TeamCart} tự quản lý các thao tác nghiệp vụ quan trọng (ví dụ \texttt{LockForPayment}, \texttt{AddItem}) và các bất biến dữ liệu. Các Value Object như \texttt{Money} và \texttt{TeamCartId} giúp đóng gói quy tắc xác thực ở mức nhỏ, hạn chế lỗi dữ liệu ngay tại biên của miền nghiệp vụ. Những quyết định này được hiện thực hóa rõ nhất ở các aggregate và dịch vụ miền được mô tả trong Chương 4, và được sử dụng trực tiếp trong các ca sử dụng TeamCart.
 
+\subsection*{Kết quả}
+Giải pháp giúp giảm sự phụ thuộc chặt giữa nghiệp vụ và hạ tầng, từ đó tăng khả năng kiểm thử độc lập cho các kịch bản tính toán giá, phân bổ phí và chuyển trạng thái. Mã nguồn bám sát ngôn ngữ chung của nghiệp vụ, giúp đội ngũ dễ bảo trì và giảm rủi ro khi thay đổi quy tắc trong tương lai.
+
+\section{Giải pháp xử lý cạnh tranh dữ liệu với Optimistic Concurrency Control}
+
+\subsection*{Vấn đề}
+Một trong những thách thức lớn của TeamCart là xử lý đồng thời khi nhiều thành viên cùng thao tác trên một giỏ hàng tại cùng thời điểm. Các xung đột như cập nhật số lượng và xóa món có thể gây mất cập nhật hoặc tạo trạng thái không nhất quán nếu không được kiểm soát. Cơ chế khóa bi quan ở cấp cơ sở dữ liệu tuy an toàn nhưng dễ làm giảm hiệu năng và gây độ trễ lớn cho trải nghiệm cộng tác.
+
+\subsection*{Giải pháp}
+Giải pháp được lựa chọn là sử dụng Redis làm kho lưu trữ trạng thái thời gian thực, kết hợp cơ chế Optimistic Concurrency Control. Mỗi bản ghi TeamCart trong Redis mang một trường \texttt{Version}. Khi cập nhật, hệ thống đọc trạng thái hiện tại, áp dụng thay đổi, tăng \texttt{Version}, sau đó ghi lại bằng giao dịch có điều kiện (Check-And-Set) để đảm bảo dữ liệu chỉ được ghi khi trạng thái gốc chưa bị thay đổi. Nếu phát hiện xung đột, hệ thống tự động thử lại với khoảng trễ ngẫu nhiên (jittered backoff) nhằm giảm va chạm ở các thời điểm cao điểm.
+
+\subsection*{Kết quả}
+Giải pháp giúp giảm nguy cơ mất cập nhật khi nhiều người dùng cùng thao tác, đồng thời hạn chế độ trễ do không cần khóa cứng tài nguyên. Việc tự động thử lại giúp duy trì trải nghiệm mượt mà và giảm tỷ lệ lỗi hiển thị ở các thao tác cộng tác.
+
+\section{Kiến trúc đồng bộ hóa thời gian thực hiệu năng cao}
+
+\subsection*{Vấn đề}
+Tính năng Giỏ hàng nhóm yêu cầu đồng bộ trạng thái tức thì giữa các thiết bị của thành viên. Mô hình hỏi vòng (polling) truyền thống gây lãng phí băng thông, tăng tải máy chủ và khó đạt độ trễ thấp khi nhiều người dùng thao tác đồng thời. Ngoài ra, khi triển khai trên nhiều máy chủ, hệ thống cần cơ chế để các kết nối ở các nút khác nhau vẫn nhận được cùng một sự kiện.
+
+\subsection*{Giải pháp}
+Đồ án triển khai giao tiếp thời gian thực dựa trên SignalR với WebSockets để thiết lập kênh kết nối hai chiều ổn định. Các thành viên được gắn vào nhóm theo \texttt{TeamCartId}, từ đó mọi sự kiện thay đổi đều được phát đến đúng nhóm. Trạng thái TeamCart thời gian thực được lưu ở Redis; khi dữ liệu thay đổi, hệ thống phát thông báo nhẹ để máy khách đồng bộ lại trạng thái. Redis cũng được sử dụng để phát tán sự kiện cập nhật giữa các nút, giúp hệ thống hoạt động ổn định khi mở rộng nhiều máy chủ.
+
+\subsection*{Kết quả}
+Giải pháp giúp giảm độ trễ trong cập nhật giỏ hàng nhóm, tăng tính nhất quán giữa các thiết bị và hỗ trợ mở rộng theo chiều ngang. Nhờ cơ chế thông báo nhẹ và lưu trạng thái tập trung, hệ thống giảm tải truy vấn lặp và cải thiện trải nghiệm cộng tác so với polling.
+
+\section{Kết chương}
+
+Chương này đã trình bày chi tiết ba giải pháp kỹ thuật và đóng góp quan trọng nhất của đồ án. Việc áp dụng thành công kiến trúc Clean Architecture kết hợp DDD đã tạo nên nền tảng vững chắc cho việc quản lý nghiệp vụ phức tạp. Giải pháp Optimistic Concurrency Control với Redis giải quyết triệt để bài toán cạnh tranh dữ liệu trong môi trường đa người dùng. Cuối cùng, kiến trúc đồng bộ hóa thời gian thực tối ưu đã mang lại trải nghiệm người dùng mượt mà và khả năng mở rộng hệ thống linh hoạt. Những giải pháp này không chỉ giải quyết các vấn đề hiện tại của dự án mà còn đặt nền móng cho việc phát triển các tính năng nâng cao trong tương lai, được tóm tắt và thảo luận trong Chương 6 kế tiếp.
 
 \end{document}
