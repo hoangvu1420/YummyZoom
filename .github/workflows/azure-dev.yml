@@ -36,6 +36,15 @@ jobs:
             9.x
             10.x
 
+      - name: Detect infra changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            infra:
+              - 'src/AppHost/infra/**'
+              - 'src/AppHost/azure.yaml'
+
       - name: Log in with Azure (Federated Credentials)
         run: |
           azd auth login `
@@ -48,6 +57,7 @@ jobs:
 
       - name: Provision Infrastructure
         run: azd provision --no-prompt
+        if: steps.changes.outputs.infra == 'true'
         env:
           AZURE_POSTGRES_USER: ${{ secrets.AZURE_POSTGRES_USER }}
           AZURE_POSTGRES_PASSWORD: ${{ secrets.AZURE_POSTGRES_PASSWORD }}
