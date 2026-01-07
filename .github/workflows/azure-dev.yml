@@ -31,19 +31,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: | 
-            8.x
-            9.x
-            10.x
-
-      - name: Detect infra changes
-        id: changes
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            infra:
-              - 'src/AppHost/infra/**'
-              - 'src/AppHost/azure.yaml'
+          dotnet-version: 9.x
 
       - name: Log in with Azure (Federated Credentials)
         run: |
@@ -54,17 +42,9 @@ jobs:
         shell: pwsh
         working-directory: ./src/AppHost
 
-      - name: Resolve ACR endpoint
-        shell: bash
-        run: |
-          RG="${{ vars.AZURE_RESOURCE_GROUP }}" 
-          ACR_NAME=$(az resource list -g "$RG" --resource-type Microsoft.ContainerRegistry/registries --query "[0].name" -o tsv)
-          ACR_LOGIN_SERVER=$(az acr show -n "$ACR_NAME" -g "$RG" --query loginServer -o tsv)
-          echo "AZURE_CONTAINER_REGISTRY_ENDPOINT=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
 
       - name: Provision Infrastructure
         run: azd provision --no-prompt
-        if: steps.changes.outputs.infra == 'true'
         env:
           AZURE_POSTGRES_USER: ${{ secrets.AZURE_POSTGRES_USER }}
           AZURE_POSTGRES_PASSWORD: ${{ secrets.AZURE_POSTGRES_PASSWORD }}
