@@ -44,8 +44,6 @@ jobs:
             infra:
               - 'src/AppHost/infra/**'
               - 'src/AppHost/azure.yaml'
-              - '.github/workflows/azure-dev.yml'
-              - 'Directory.Packages.props'
 
       - name: Log in with Azure (Federated Credentials)
         run: |
@@ -56,6 +54,13 @@ jobs:
         shell: pwsh
         working-directory: ./src/AppHost
 
+      - name: Resolve ACR endpoint
+        shell: bash
+        run: |
+          RG="${{ vars.AZURE_RESOURCE_GROUP }}" 
+          ACR_NAME=$(az resource list -g "$RG" --resource-type Microsoft.ContainerRegistry/registries --query "[0].name" -o tsv)
+          ACR_LOGIN_SERVER=$(az acr show -n "$ACR_NAME" -g "$RG" --query loginServer -o tsv)
+          echo "AZURE_CONTAINER_REGISTRY_ENDPOINT=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
 
       - name: Provision Infrastructure
         run: azd provision --no-prompt
