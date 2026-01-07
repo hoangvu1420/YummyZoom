@@ -44,6 +44,8 @@ jobs:
             infra:
               - 'src/AppHost/infra/**'
               - 'src/AppHost/azure.yaml'
+              - '.github/workflows/azure-dev.yml'
+              - 'Directory.Packages.props'
 
       - name: Log in with Azure (Federated Credentials)
         run: |
