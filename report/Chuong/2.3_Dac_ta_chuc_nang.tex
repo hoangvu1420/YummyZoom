@@ -298,7 +298,7 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
      & 6 & Hệ thống & Kiểm tra tùy chỉnh: nhóm tùy chỉnh được gán cho món, số lượng lựa chọn hợp lệ (min-max). \\ \cline{2-4} 
      & 7 & Hệ thống & Tính toán tài chính: Subtotal, Discount (nếu có coupon), DeliveryFee, Tax, Tip, TotalAmount. \\ \cline{2-4} 
      & 8 & Hệ thống & Kiểm tra và tăng số lần sử dụng coupon (nếu có) trong cùng transaction. \\ \cline{2-4} 
-     & 9 & Khách hàng & Chọn phương thức thanh toán (CreditCard, PayPal, ApplePay, GooglePay, \gls{cod}). \\ \cline{2-4} 
+     & 9 & Khách hàng & Chọn phương thức thanh toán (CreditCard, \gls{cod}). \\ \cline{2-4} 
      & 10 & Hệ thống & Tạo \gls{paymentintent} (Stripe) nếu thanh toán online, lưu PaymentIntentId vào Order. \\ \cline{2-4} 
      & 11 & Hệ thống & Tạo Order với trạng thái PendingPayment (online) hoặc Placed (\gls{cod}). \\ \cline{2-4} 
      & 12 & Hệ thống & Lưu Order vào database, phát sự kiện OrderPlaced. \\ \cline{2-4} 
@@ -342,7 +342,7 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
     9 & DeliveryAddress.\newline State & Tỉnh/Bang & Có & Tối đa 100 ký tự \\ \hline
     10 & DeliveryAddress.\newline ZipCode & Mã bưu điện & Có & Tối đa 20 ký tự \\ \hline
     11 & DeliveryAddress.\newline Country & Quốc gia & Có & Tối đa 100 ký tự \\ \hline
-    12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, PayPal, ApplePay, GooglePay, \gls{cod} \\ \hline
+    12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, \gls{cod} \\ \hline
     13 & Special\newline Instructions & Ghi chú đặc biệt & Không & Tối đa 500 ký tự \\ \hline
     14 & CouponCode & Mã giảm giá & Không & Tối đa 50 ký tự \\ \hline
     15 & TipAmount & Tiền tip & Không & >= 0 \\ \hline
