@@ -8,7 +8,7 @@ resource cache 'Microsoft.Cache/redis@2024-03-01' = {
     sku: {
       name: 'Basic'
       family: 'C'
-      capacity: 1
+      capacity: 0
     }
     enableNonSslPort: false
     disableAccessKeyAuthentication: false
