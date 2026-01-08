@@ -2,33 +2,239 @@
 \makenoidxglossaries
 
 % Danh mục thuật ngữ và từ viết tắt
-\newglossaryentry{iaas}{
+
+% --- Dự án / tính năng ---
+\newglossaryentry{yummyzoom}{
     type=\acronymtype,
-    name={IaaS},
-    description={Dịch vụ hạ tầng},
-    first={Dịch vụ hạ tầng (Infrastructure  as  a  Service - IaaS)}
+    name={YummyZoom},
+    description={Hệ thống giao đồ ăn với điểm nhấn đặt hàng nhóm},
+    first={YummyZoom}
 }
-\newglossaryentry{API}{
+\newglossaryentry{teamcart}{
+    type=\acronymtype,
+    name={TeamCart},
+    description={Tính năng giỏ hàng nhóm cho phép nhiều người cùng chọn món và thanh toán tách biệt},
+    first={Giỏ hàng nhóm (TeamCart)}
+}
+\newglossaryentry{mvp}{
+    type=\acronymtype,
+    name={MVP},
+    description={Sản phẩm khả dụng tối thiểu (Minimum Viable Product)},
+    first={Sản phẩm khả dụng tối thiểu (Minimum Viable Product - MVP)}
+}
+
+% --- Kiến trúc / thiết kế ---
+\newglossaryentry{cleanarchitecture}{
+    type=\acronymtype,
+    name={Clean Architecture},
+    description={Phong cách kiến trúc phần mềm tách biệt logic nghiệp vụ khỏi hạ tầng},
+    first={Kiến trúc sạch (Clean Architecture)}
+}
+\newglossaryentry{ddd}{
+    type=\acronymtype,
+    name={DDD},
+    description={Thiết kế hướng tên miền (Domain-Driven Design)},
+    first={Thiết kế hướng tên miền (Domain-Driven Design - DDD)}
+}
+\newglossaryentry{cqrs}{
+    type=\acronymtype,
+    name={CQRS},
+    description={Tách biệt trách nhiệm đọc/ghi (Command Query Responsibility Segregation)},
+    first={Tách biệt đọc/ghi (Command Query Responsibility Segregation - CQRS)}
+}
+\newglossaryentry{optimisticconcurrency}{
+    type=\acronymtype,
+    name={Optimistic Concurrency Control},
+    description={Cơ chế kiểm soát đồng thời lạc quan dựa trên phiên bản dữ liệu},
+    first={Kiểm soát đồng thời lạc quan (Optimistic Concurrency Control)}
+}
+
+% --- Nền tảng / framework ---
+\newglossaryentry{dotnet}{
+    type=\acronymtype,
+    name={.NET},
+    description={Nền tảng phát triển ứng dụng của Microsoft},
+    first={.NET}
+}
+\newglossaryentry{aspnetcore}{
+    type=\acronymtype,
+    name={ASP.NET Core},
+    description={Framework phát triển web/API trên nền tảng .NET},
+    first={ASP.NET Core}
+}
+\newglossaryentry{flutter}{
+    type=\acronymtype,
+    name={Flutter},
+    description={Framework phát triển ứng dụng đa nền tảng (mobile)},
+    first={Flutter}
+}
+\newglossaryentry{angular}{
+    type=\acronymtype,
+    name={Angular},
+    description={Framework phát triển ứng dụng web},
+    first={Angular}
+}
+
+% --- API / bảo mật ---
+\newglossaryentry{api}{
     type=\acronymtype,
     name={API},
     description={Giao diện lập trình ứng dụng (Application Programming Interface)},
-    first={API}
+    first={Giao diện lập trình ứng dụng (Application Programming Interface - API)}
 }
-\newglossaryentry{EUD}{
+\newglossaryentry{jwt}{
     type=\acronymtype,
-    name={EUD},
-    description={Phát triển ứng dụng người dùng cuối(End-User Development)},
-    first={End-User Development}
+    name={JWT},
+    description={Chuẩn token xác thực (JSON Web Token)},
+    first={JSON Web Token (JWT)}
 }
-\newglossaryentry{GWT}{
+\newglossaryentry{rbac}{
     type=\acronymtype,
-    name={GWT},
-    description={Công cụ lập trình Javascript bằng Java của Google (Google Web Toolkit)},
-    first={Công cụ lập trình Javascript bằng Java của Google (Google Web Toolkit)}
+    name={RBAC},
+    description={Phân quyền dựa trên vai trò (Role-Based Access Control)},
+    first={Role-Based Access Control (RBAC)}
 }
-\newglossaryentry{HTML}{
+\newglossaryentry{oidc}{
     type=\acronymtype,
-    name={HTML},
-    description={Ngôn ngữ đánh dấu siêu văn bản (HyperText Markup Language)},
-    first={Ngôn ngữ đánh dấu siêu văn bản (HyperText Markup Language - HTML)}
+    name={OIDC},
+    description={Chuẩn xác thực OpenID Connect},
+    first={OpenID Connect (OIDC)}
+}
+\newglossaryentry{idempotency}{
+    type=\acronymtype,
+    name={Idempotency},
+    description={Tính chất gọi lặp nhiều lần nhưng kết quả không đổi},
+    first={Idempotency}
+}
+
+% --- Đồng bộ thời gian thực ---
+\newglossaryentry{signalr}{
+    type=\acronymtype,
+    name={SignalR},
+    description={Thư viện giao tiếp thời gian thực cho ứng dụng .NET},
+    first={SignalR}
+}
+\newglossaryentry{websockets}{
+    type=\acronymtype,
+    name={WebSockets},
+    description={Giao thức kết nối hai chiều lâu dài giữa client và server},
+    first={WebSockets}
+}
+\newglossaryentry{fcm}{
+    type=\acronymtype,
+    name={FCM},
+    description={Firebase Cloud Messaging (dịch vụ thông báo đẩy)},
+    first={Firebase Cloud Messaging (FCM)}
+}
+
+% --- Dữ liệu / CSDL ---
+\newglossaryentry{postgresql}{
+    type=\acronymtype,
+    name={PostgreSQL},
+    description={Hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở},
+    first={PostgreSQL}
+}
+\newglossaryentry{redis}{
+    type=\acronymtype,
+    name={Redis},
+    description={Kho lưu trữ key-value trong bộ nhớ, thường dùng làm cache},
+    first={Redis}
+}
+\newglossaryentry{acid}{
+    type=\acronymtype,
+    name={ACID},
+    description={Tập tính chất giao dịch: Atomicity, Consistency, Isolation, Durability},
+    first={ACID (Atomicity, Consistency, Isolation, Durability)}
+}
+\newglossaryentry{jsonb}{
+    type=\acronymtype,
+    name={JSONB},
+    description={Kiểu dữ liệu JSON dạng nhị phân trong PostgreSQL},
+    first={JSONB}
+}
+\newglossaryentry{postgis}{
+    type=\acronymtype,
+    name={PostGIS},
+    description={Phần mở rộng không gian địa lý cho PostgreSQL},
+    first={PostGIS}
+}
+\newglossaryentry{orm}{
+    type=\acronymtype,
+    name={ORM},
+    description={Ánh xạ đối tượng--quan hệ (Object-Relational Mapping)},
+    first={Object-Relational Mapping (ORM)}
+}
+\newglossaryentry{dto}{
+    type=\acronymtype,
+    name={DTO},
+    description={Đối tượng truyền dữ liệu (Data Transfer Object)},
+    first={Data Transfer Object (DTO)}
+}
+\newglossaryentry{efcore}{
+    type=\acronymtype,
+    name={EF Core},
+    description={Entity Framework Core (ORM cho .NET)},
+    first={Entity Framework Core (EF Core)}
+}
+
+% --- DevOps / triển khai ---
+\newglossaryentry{cicd}{
+    type=\acronymtype,
+    name={CI/CD},
+    description={Tích hợp liên tục/triển khai liên tục (Continuous Integration/Continuous Delivery)},
+    first={Continuous Integration/Continuous Delivery (CI/CD)}
+}
+\newglossaryentry{iac}{
+    type=\acronymtype,
+    name={IaC},
+    description={Hạ tầng dưới dạng mã (Infrastructure as Code)},
+    first={Infrastructure as Code (IaC)}
+}
+\newglossaryentry{azd}{
+    type=\acronymtype,
+    name={azd},
+    description={Azure Developer CLI},
+    first={Azure Developer CLI (azd)}
+}
+\newglossaryentry{bicep}{
+    type=\acronymtype,
+    name={Bicep},
+    description={Ngôn ngữ hạ tầng dưới dạng mã cho Azure},
+    first={Bicep}
+}
+\newglossaryentry{azurecontainerapps}{
+    type=\acronymtype,
+    name={Azure Container Apps},
+    description={Dịch vụ chạy ứng dụng container trên Azure},
+    first={Azure Container Apps}
+}
+
+% --- Quan sát / vận hành ---
+\newglossaryentry{opentelemetry}{
+    type=\acronymtype,
+    name={OpenTelemetry},
+    description={Chuẩn thu thập telemetry (logs, metrics, traces) cho quan sát hệ thống},
+    first={OpenTelemetry}
+}
+
+% --- Thanh toán ---
+\newglossaryentry{paymentintent}{
+    type=\acronymtype,
+    name={PaymentIntent},
+    description={Đối tượng giao dịch thanh toán trong hệ thống cổng thanh toán},
+    first={PaymentIntent}
+}
+\newglossaryentry{cod}{
+    type=\acronymtype,
+    name={COD},
+    description={Thanh toán khi nhận hàng (Cash On Delivery)},
+    first={Cash On Delivery (COD)}
+}
+
+% --- Khác ---
+\newglossaryentry{sdk}{
+    type=\acronymtype,
+    name={SDK},
+    description={Bộ công cụ phát triển phần mềm (Software Development Kit)},
+    first={Software Development Kit (SDK)}
 }

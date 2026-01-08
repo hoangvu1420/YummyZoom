@@ -56,12 +56,12 @@
 \contentsline {subsection}{\numberline {3.3.2}Quản lý định danh và Phân quyền: ASP.NET Core Identity}{38}{subsection.3.3.2}%
 \contentsline {section}{\numberline {3.4}Ứng dụng dành cho khách hàng (Mobile App)}{38}{section.3.4}%
 \contentsline {subsection}{\numberline {3.4.1}Nền tảng phát triển: Flutter \& Dart}{38}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Quản lý trạng thái và Tương tác API}{38}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.2}Quản lý trạng thái và Tương tác API}{39}{subsection.3.4.2}%
 \contentsline {subsection}{\numberline {3.4.3}Tích hợp bản đồ và Thanh toán}{39}{subsection.3.4.3}%
 \contentsline {section}{\numberline {3.5}Ứng dụng Web quản trị (Admin \& Restaurant Portal)}{39}{section.3.5}%
 \contentsline {subsection}{\numberline {3.5.1}Nền tảng Frontend: Angular}{39}{subsection.3.5.1}%
 \contentsline {subsection}{\numberline {3.5.2}Thư viện giao diện: PrimeNG và Tailwind CSS}{39}{subsection.3.5.2}%
-\contentsline {section}{\numberline {3.6}Cộng tác thời gian thực (Realtime Collaboration)}{39}{section.3.6}%
+\contentsline {section}{\numberline {3.6}Cộng tác thời gian thực (Realtime Collaboration)}{40}{section.3.6}%
 \contentsline {subsection}{\numberline {3.6.1}Giao thức và Framework: SignalR}{40}{subsection.3.6.1}%
 \contentsline {subsection}{\numberline {3.6.2}Thông báo đẩy tới thiết bị di động: Firebase Cloud Messaging (FCM)}{40}{subsection.3.6.2}%
 \contentsline {section}{\numberline {3.7}Nền tảng triển khai và phân phối hệ thống}{40}{section.3.7}%

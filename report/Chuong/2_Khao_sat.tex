@@ -1,7 +1,7 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Trong chương này, nghiên cứu tiến hành khảo sát và phân tích toàn diện về hiện trạng của ngành giao đồ ăn trực tuyến, từ đó xác định được các yêu cầu cần thiết cho việc phát triển hệ thống YummyZoom. Chương bao gồm bốn phần chính: khảo sát hiện trạng thị trường và các ứng dụng tương tự hiện có, tổng quan về các chức năng cần thiết của hệ thống thông qua biểu đồ ca sử dụng (use case) và quy trình nghiệp vụ, đặc tả chi tiết các ca sử dụng quan trọng nhất, và cuối cùng là xác định các yêu cầu phi chức năng của hệ thống. Thông qua việc phân tích các ứng dụng như GrabFood, ShopeeFood cùng với khảo sát nhu cầu thực tế của người dùng và nhà hàng, chương này sẽ làm rõ những khoảng trống còn tồn tại trong thị trường hiện tại và định hướng các tính năng độc đáo mà YummyZoom cần phát triển để tạo ra lợi thế cạnh tranh.
+Trong chương này, nghiên cứu tiến hành khảo sát và phân tích toàn diện về hiện trạng của ngành giao đồ ăn trực tuyến, từ đó xác định được các yêu cầu cần thiết cho việc phát triển hệ thống \gls{yummyzoom}. Chương bao gồm bốn phần chính: khảo sát hiện trạng thị trường và các ứng dụng tương tự hiện có, tổng quan về các chức năng cần thiết của hệ thống thông qua biểu đồ ca sử dụng (use case) và quy trình nghiệp vụ, đặc tả chi tiết các ca sử dụng quan trọng nhất, và cuối cùng là xác định các yêu cầu phi chức năng của hệ thống. Thông qua việc phân tích các ứng dụng như GrabFood, ShopeeFood cùng với khảo sát nhu cầu thực tế của người dùng và nhà hàng, chương này sẽ làm rõ những khoảng trống còn tồn tại trong thị trường hiện tại và định hướng các tính năng độc đáo mà \gls{yummyzoom} cần phát triển để tạo ra lợi thế cạnh tranh.
 
 \section{Khảo sát hiện trạng}
 \label{section:2.1}
@@ -24,7 +24,7 @@ Ngược lại, ShopeeFood cạnh tranh bằng chiến lược giá và khuyến
 
 \subsubsection{Cơ hội cho YummyZoom}
 
-Cả hai nền tảng lớn đều chưa giải quyết triệt để vấn đề trong quy trình đặt hàng nhóm, nơi một người vẫn phải đứng ra thanh toán cho toàn bộ đơn hàng. Đây là khe hổng thị trường mà YummyZoom nhắm tới với tính năng TeamCart, cho phép tách biệt thanh toán cho từng thành viên. Đồng thời, việc tối ưu hóa giao diện đơn giản, tập trung vào trải nghiệm đặt món nhanh chóng sẽ là lợi thế cạnh tranh đối với nhóm khách hàng mục tiêu là nhân viên văn phòng và sinh viên.
+Cả hai nền tảng lớn đều chưa giải quyết triệt để vấn đề trong quy trình đặt hàng nhóm, nơi một người vẫn phải đứng ra thanh toán cho toàn bộ đơn hàng. Đây là khe hổng thị trường mà \gls{yummyzoom} nhắm tới với tính năng \gls{teamcart}, cho phép tách biệt thanh toán cho từng thành viên. Đồng thời, việc tối ưu hóa giao diện đơn giản, tập trung vào trải nghiệm đặt món nhanh chóng sẽ là lợi thế cạnh tranh đối với nhóm khách hàng mục tiêu là nhân viên văn phòng và sinh viên.
 
 \subsection{Nhu cầu và thách thức của người dùng}
 \label{subsection:2.1.3}
@@ -35,9 +35,9 @@ Người dùng cuối, đặc biệt là giới văn phòng và sinh viên, ưu 
 
 \subsubsection{Thách thức và Định hướng phát triển}
 
-Thách thức lớn nhất hiện nay là quy trình thanh toán nhóm phức tạp và giao diện ứng dụng ngày càng rườm rà. YummyZoom được định hướng phát triển để giải quyết các vấn đề này thông qua:
+Thách thức lớn nhất hiện nay là quy trình thanh toán nhóm phức tạp và giao diện ứng dụng ngày càng rườm rà. \gls{yummyzoom} được định hướng phát triển để giải quyết các vấn đề này thông qua:
 \begin{itemize}
-    \item \textbf{Tính năng TeamCart:} Cho phép mỗi thành viên trong nhóm tự chọn món và thanh toán riêng biệt.
+    \item \textbf{Tính năng \gls{teamcart}:} Cho phép mỗi thành viên trong nhóm tự chọn món và thanh toán riêng biệt.
     \item \textbf{Giao diện tối giản:} Tập trung vào hiệu quả và tốc độ đặt hàng.
     \item \textbf{Tối ưu cho khách hàng mục tiêu:} Phục vụ nhu cầu cụ thể của nhóm người dùng có thời gian hạn chế và thói quen đặt hàng chung.
 \end{itemize}
@@ -45,25 +45,25 @@ Thách thức lớn nhất hiện nay là quy trình thanh toán nhóm phức t�
 \section{Tổng quan chức năng}
 \label{section:2.2}
 
-Trên cơ sở các yêu cầu đã được xác định từ quá trình khảo sát, phần này cung cấp cái nhìn tổng quan về các chức năng của hệ thống YummyZoom. Hệ thống được mô hình hóa thông qua biểu đồ ca sử dụng (Use Case), bao gồm biểu đồ tổng quát và các biểu đồ phân rã cho những chức năng phức tạp. Việc phân chia này giúp làm rõ vai trò của các tác nhân cũng như phạm vi nghiệp vụ của hệ thống trước khi đi vào đặc tả chi tiết trong phần \ref{section:2.3}.
+Trên cơ sở các yêu cầu đã được xác định từ quá trình khảo sát, phần này cung cấp cái nhìn tổng quan về các chức năng của hệ thống \gls{yummyzoom}. Hệ thống được mô hình hóa thông qua biểu đồ ca sử dụng (Use Case), bao gồm biểu đồ tổng quát và các biểu đồ phân rã cho những chức năng phức tạp. Việc phân chia này giúp làm rõ vai trò của các tác nhân cũng như phạm vi nghiệp vụ của hệ thống trước khi đi vào đặc tả chi tiết trong phần \ref{section:2.3}.
 
 \subsection{Biểu đồ use case tổng quát}
 \label{subsection:2.2.1}
 
-Hình \ref{fig:usecase_overview} minh họa biểu đồ use case tổng quát của hệ thống YummyZoom, thể hiện tất cả các tác nhân (actors) chính và các chức năng cốt lõi mà họ có thể thực hiện trên nền tảng. Biểu đồ được thiết kế theo nguyên tắc phân nhóm rõ ràng các use case theo từng đối tượng người dùng, giúp dễ dàng nhận diện phạm vi và ranh giới trách nhiệm của từng thành phần trong hệ thống.
+Hình \ref{fig:usecase_overview} minh họa biểu đồ use case tổng quát của hệ thống \gls{yummyzoom}, thể hiện tất cả các tác nhân (actors) chính và các chức năng cốt lõi mà họ có thể thực hiện trên nền tảng. Biểu đồ được thiết kế theo nguyên tắc phân nhóm rõ ràng các use case theo từng đối tượng người dùng, giúp dễ dàng nhận diện phạm vi và ranh giới trách nhiệm của từng thành phần trong hệ thống.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_overview.drawio.png}
-    \caption{Biểu đồ use case tổng quát của hệ thống YummyZoom}
+    \caption{Biểu đồ use case tổng quát của hệ thống \gls{yummyzoom}}
     \label{fig:usecase_overview}
 \end{figure}
 
 \subsubsection{Các tác nhân chính trong hệ thống}
 
-Hệ thống YummyZoom bao gồm các tác nhân chính tương tác với phần mềm:
+Hệ thống \gls{yummyzoom} bao gồm các tác nhân chính tương tác với phần mềm:
 
-\textbf{Khách hàng (Customer):} Người dùng cuối sử dụng ứng dụng để tìm kiếm, đặt món và thanh toán. Khách hàng có thể là cá nhân đặt món riêng lẻ hoặc thành viên tham gia đặt hàng nhóm (TeamCart).
+\textbf{Khách hàng (Customer):} Người dùng cuối sử dụng ứng dụng để tìm kiếm, đặt món và thanh toán. Khách hàng có thể là cá nhân đặt món riêng lẻ hoặc thành viên tham gia đặt hàng nhóm (\gls{teamcart}).
 
 \textbf{Nhà hàng (Restaurant):} Đối tác kinh doanh cung cấp món ăn. Họ sử dụng hệ thống để quản lý thực đơn, cập nhật thông tin cửa hàng, thiết lập khuyến mãi và xử lý đơn hàng.
 
@@ -77,7 +77,7 @@ Dựa trên phân tích yêu cầu, các chức năng cốt lõi của hệ th�
 \begin{description}
     \item[Quản lý tài khoản:] Đăng ký, đăng nhập, cập nhật thông tin cá nhân và sổ địa chỉ.
     \item[Tìm kiếm nhà hàng:] Tra cứu nhà hàng và món ăn theo tên, danh mục hoặc vị trí.
-    \item[Đặt hàng (Cá nhân \& TeamCart):] Thực hiện quy trình chọn món và tạo đơn hàng. Tính năng TeamCart cho phép nhiều người dùng cùng tham gia một đơn hàng và thanh toán riêng biệt.
+    \item[Đặt hàng (Cá nhân \& \gls{teamcart}):] Thực hiện quy trình chọn món và tạo đơn hàng. Tính năng \gls{teamcart} cho phép nhiều người dùng cùng tham gia một đơn hàng và thanh toán riêng biệt.
     \item[Thanh toán:] Xử lý giao dịch tài chính cho đơn hàng.
     \item[Theo dõi đơn hàng:] Cập nhật trạng thái đơn hàng từ lúc đặt đến khi giao thành công.
     \item[Đánh giá:] Gửi phản hồi và chấm điểm chất lượng dịch vụ của nhà hàng.
@@ -136,11 +136,11 @@ Biểu đồ này làm rõ các chức năng con như tìm kiếm món ăn, xem 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{../Hinhve/usecase_teamcart_decomposition.drawio.png}
-    \caption{Biểu đồ use case phân rã - TeamCart}
+    \caption{Biểu đồ use case phân rã - \gls{teamcart}}
     \label{fig:usecase_teamcart_decomposition}
 \end{figure}
 
-Thông qua biểu đồ, quy trình nghiệp vụ của TeamCart được thể hiện rõ ràng, bao gồm các chức năng như khởi tạo nhóm, chia sẻ liên kết mời, quản lý thành viên trong nhóm, và cơ chế tách biệt thanh toán cho từng thành viên. Đây là cơ sở quan trọng để xây dựng logic xử lý đồng bộ và đảm bảo tính chính xác trong các giao dịch nhóm, giải quyết triệt để vấn đề "ai trả tiền" trong các ứng dụng hiện tại. 
+Thông qua biểu đồ, quy trình nghiệp vụ của \gls{teamcart} được thể hiện rõ ràng, bao gồm các chức năng như khởi tạo nhóm, chia sẻ liên kết mời, quản lý thành viên trong nhóm, và cơ chế tách biệt thanh toán cho từng thành viên. Đây là cơ sở quan trọng để xây dựng logic xử lý đồng bộ và đảm bảo tính chính xác trong các giao dịch nhóm, giải quyết triệt để vấn đề "ai trả tiền" trong các ứng dụng hiện tại. 
 
 \vfill
 
@@ -175,7 +175,7 @@ Quy trình này bao gồm các bước kiểm tra tính pháp lý (giấy phép 
 \subsection{Quy trình nghiệp vụ}
 \label{subsection:2.2.7}
 
-Hệ thống YummyZoom có nhiều quy trình nghiệp vụ, trong đó quy trình Xử lý Đặt hàng (Order Processing) là quan trọng và phức tạp nhất. Quy trình này đảm bảo tính chính xác về mặt dữ liệu (tồn kho, giá cả), tuân thủ các quy tắc kinh doanh (khuyến mãi, giờ hoạt động) và an toàn trong giao dịch tài chính.
+Hệ thống \gls{yummyzoom} có nhiều quy trình nghiệp vụ, trong đó quy trình Xử lý Đặt hàng (Order Processing) là quan trọng và phức tạp nhất. Quy trình này đảm bảo tính chính xác về mặt dữ liệu (tồn kho, giá cả), tuân thủ các quy tắc kinh doanh (khuyến mãi, giờ hoạt động) và an toàn trong giao dịch tài chính.
 
 Hình \ref{fig:activity_order_processing} dưới đây mô tả chi tiết các bước trong quy trình xử lý đặt hàng, từ lúc tiếp nhận yêu cầu, xác thực, tính toán tài chính cho đến khi hoàn tất đơn hàng.
 
@@ -202,15 +202,15 @@ Ngoài ra, hình \ref{fig:activity_teamcart_process} minh họa luồng hoạt �
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}
 
-Bên cạnh các yêu cầu chức năng đã được mô tả chi tiết, hệ thống YummyZoom cần phải đáp ứng các yêu cầu phi chức năng nghiêm ngặt để đảm bảo chất lượng phần mềm, trải nghiệm người dùng và khả năng vận hành ổn định. Các yêu cầu này bao gồm hiệu năng, bảo mật, khả năng sử dụng, độ tin cậy và khả năng bảo trì.
+Bên cạnh các yêu cầu chức năng đã được mô tả chi tiết, hệ thống \gls{yummyzoom} cần phải đáp ứng các yêu cầu phi chức năng nghiêm ngặt để đảm bảo chất lượng phần mềm, trải nghiệm người dùng và khả năng vận hành ổn định. Các yêu cầu này bao gồm hiệu năng, bảo mật, khả năng sử dụng, độ tin cậy và khả năng bảo trì.
 
     \subsection*{Hiệu năng}
     
-    Hiệu năng là yếu tố then chốt ảnh hưởng trực tiếp đến trải nghiệm người dùng, đặc biệt đối với một ứng dụng giao đồ ăn có tính năng cộng tác thời gian thực. Về thời gian phản hồi, hệ thống được yêu cầu xử lý các thao tác đọc dữ liệu thông thường như xem danh sách nhà hàng hay chi tiết món ăn với độ trễ dưới 1 giây. Đối với các nghiệp vụ phức tạp hơn như tạo đơn hàng hoặc xử lý thanh toán, thời gian phản hồi chấp nhận được là dưới 3 giây. Đặc biệt, đối với tính năng TeamCart, sự đồng bộ hóa trạng thái giữa các thành viên (như thêm món, thay đổi số lượng) phải diễn ra gần như tức thời với độ trễ dưới 500 mili-giây để đảm bảo trải nghiệm cộng tác mượt mà. Trong phạm vi của một đồ án tốt nghiệp, hệ thống được thiết kế để chịu tải ổn định với khoảng 50 đến 100 người dùng truy cập đồng thời (CCU) mà không gặp phải sự cố tắc nghẽn hay suy giảm hiệu năng đáng kể. Mặc dù chưa thực hiện kiểm thử tải (load testing) quy mô lớn, các chỉ số này được coi là phù hợp và đủ để chứng minh tính khả thi của giải pháp trong môi trường thực tế quy mô nhỏ.
+    Hiệu năng là yếu tố then chốt ảnh hưởng trực tiếp đến trải nghiệm người dùng, đặc biệt đối với một ứng dụng giao đồ ăn có tính năng cộng tác thời gian thực. Về thời gian phản hồi, hệ thống được yêu cầu xử lý các thao tác đọc dữ liệu thông thường như xem danh sách nhà hàng hay chi tiết món ăn với độ trễ dưới 1 giây. Đối với các nghiệp vụ phức tạp hơn như tạo đơn hàng hoặc xử lý thanh toán, thời gian phản hồi chấp nhận được là dưới 3 giây. Đặc biệt, đối với tính năng \gls{teamcart}, sự đồng bộ hóa trạng thái giữa các thành viên (như thêm món, thay đổi số lượng) phải diễn ra gần như tức thời với độ trễ dưới 500 mili-giây để đảm bảo trải nghiệm cộng tác mượt mà. Trong phạm vi của một đồ án tốt nghiệp, hệ thống được thiết kế để chịu tải ổn định với khoảng 50 đến 100 người dùng truy cập đồng thời (CCU) mà không gặp phải sự cố tắc nghẽn hay suy giảm hiệu năng đáng kể. Mặc dù chưa thực hiện kiểm thử tải (load testing) quy mô lớn, các chỉ số này được coi là phù hợp và đủ để chứng minh tính khả thi của giải pháp trong môi trường thực tế quy mô nhỏ.
 
     \subsection*{Bảo mật}
     
-    Bảo mật thông tin người dùng và dữ liệu giao dịch là ưu tiên hàng đầu của hệ thống. Cơ chế xác thực và phân quyền được xây dựng dựa trên nền tảng ASP.NET Identity, một giải pháp bảo mật mạnh mẽ và chuẩn hóa của Microsoft. Các thông tin nhạy cảm như mật khẩu người dùng được hệ thống tự động xử lý băm (hashing) và thêm muối (salting) trước khi lưu trữ, đảm bảo an toàn tuyệt đối ngay cả khi cơ sở dữ liệu bị xâm nhập. Quá trình xác thực phiên làm việc sử dụng chuẩn JSON Web Token (JWT), cho phép xác thực không trạng thái (stateless) và tăng cường khả năng mở rộng của hệ thống. Về phân quyền, hệ thống áp dụng cơ chế phân quyền dựa trên vai trò (Role-Based Access Control - RBAC) và chính sách (Policy-Based Authorization), đảm bảo người dùng chỉ có thể truy cập vào các tài nguyên và chức năng phù hợp với vai trò của mình như Khách hàng, Chủ nhà hàng hoặc Quản trị viên. Ngoài ra, mọi giao tiếp giữa ứng dụng khách và máy chủ đều được mã hóa thông qua giao thức HTTPS để ngăn chặn các cuộc tấn công nghe lén.
+    Bảo mật thông tin người dùng và dữ liệu giao dịch là ưu tiên hàng đầu của hệ thống. Cơ chế xác thực và phân quyền được xây dựng dựa trên nền tảng ASP\gls{dotnet} Identity, một giải pháp bảo mật mạnh mẽ và chuẩn hóa của Microsoft. Các thông tin nhạy cảm như mật khẩu người dùng được hệ thống tự động xử lý băm (hashing) và thêm muối (salting) trước khi lưu trữ, đảm bảo an toàn tuyệt đối ngay cả khi cơ sở dữ liệu bị xâm nhập. Quá trình xác thực phiên làm việc sử dụng chuẩn JSON Web Token (\gls{jwt}), cho phép xác thực không trạng thái (stateless) và tăng cường khả năng mở rộng của hệ thống. Về phân quyền, hệ thống áp dụng cơ chế phân quyền dựa trên vai trò (Role-Based Access Control - \gls{rbac}) và chính sách (Policy-Based Authorization), đảm bảo người dùng chỉ có thể truy cập vào các tài nguyên và chức năng phù hợp với vai trò của mình như Khách hàng, Chủ nhà hàng hoặc Quản trị viên. Ngoài ra, mọi giao tiếp giữa ứng dụng khách và máy chủ đều được mã hóa thông qua giao thức HTTPS để ngăn chặn các cuộc tấn công nghe lén.
 
     \subsection*{Khả năng sử dụng}
     
@@ -218,15 +218,15 @@ Bên cạnh các yêu cầu chức năng đã được mô tả chi tiết, hệ
 
     \subsection*{Độ tin cậy và Tính toàn vẹn dữ liệu}
     
-    Hệ thống phải đảm bảo tính chính xác và nhất quán của dữ liệu trong mọi tình huống, đặc biệt là trong các giao dịch tài chính và đặt hàng. Tính chất nguyên tử (Atomicity) và nhất quán (Consistency) của các giao dịch cơ sở dữ liệu (ACID) được tuân thủ nghiêm ngặt, đảm bảo rằng một đơn hàng chỉ được tạo ra khi tất cả các bước xử lý liên quan đều thành công. Điều này đặc biệt quan trọng đối với tính năng TeamCart, nơi quy trình thanh toán phân tán yêu cầu sự phối hợp chính xác trạng thái thanh toán của nhiều thành viên trước khi chốt đơn. Hệ thống cũng được trang bị cơ chế xử lý lỗi toàn cục và ghi nhật ký (logging) chi tiết, giúp phát hiện sớm các bất thường và hỗ trợ đội ngũ phát triển trong việc chẩn đoán và khắc phục sự cố mà không làm gián đoạn trải nghiệm của người dùng cuối.
+    Hệ thống phải đảm bảo tính chính xác và nhất quán của dữ liệu trong mọi tình huống, đặc biệt là trong các giao dịch tài chính và đặt hàng. Tính chất nguyên tử (Atomicity) và nhất quán (Consistency) của các giao dịch cơ sở dữ liệu (\gls{acid}) được tuân thủ nghiêm ngặt, đảm bảo rằng một đơn hàng chỉ được tạo ra khi tất cả các bước xử lý liên quan đều thành công. Điều này đặc biệt quan trọng đối với tính năng \gls{teamcart}, nơi quy trình thanh toán phân tán yêu cầu sự phối hợp chính xác trạng thái thanh toán của nhiều thành viên trước khi chốt đơn. Hệ thống cũng được trang bị cơ chế xử lý lỗi toàn cục và ghi nhật ký (logging) chi tiết, giúp phát hiện sớm các bất thường và hỗ trợ đội ngũ phát triển trong việc chẩn đoán và khắc phục sự cố mà không làm gián đoạn trải nghiệm của người dùng cuối.
 
     \subsection*{Khả năng bảo trì}
     
-    Để đảm bảo khả năng phát triển lâu dài và dễ dàng nâng cấp, mã nguồn hệ thống được tổ chức khoa học theo kiến trúc Clean Architecture kết hợp với các nguyên lý của Domain-Driven Design (DDD). Việc phân chia rõ ràng các lớp trách nhiệm giúp tách biệt logic nghiệp vụ cốt lõi khỏi các chi tiết kỹ thuật hạ tầng, cho phép thay đổi công nghệ hoặc cơ sở dữ liệu mà không ảnh hưởng đến toàn bộ hệ thống. Mã nguồn tuân thủ các quy tắc Clean Code và các nguyên lý thiết kế hướng đối tượng (SOLID), giúp mã dễ đọc, dễ hiểu và dễ kiểm thử. Ngoài ra, việc sử dụng nền tảng công nghệ .NET 9 hiện đại cũng mang lại lợi thế về hiệu năng và sự hỗ trợ lâu dài từ cộng đồng phát triển.
+    Để đảm bảo khả năng phát triển lâu dài và dễ dàng nâng cấp, mã nguồn hệ thống được tổ chức khoa học theo kiến trúc \gls{cleanarchitecture} kết hợp với các nguyên lý của Domain-Driven Design (\gls{ddd}). Việc phân chia rõ ràng các lớp trách nhiệm giúp tách biệt logic nghiệp vụ cốt lõi khỏi các chi tiết kỹ thuật hạ tầng, cho phép thay đổi công nghệ hoặc cơ sở dữ liệu mà không ảnh hưởng đến toàn bộ hệ thống. Mã nguồn tuân thủ các quy tắc Clean Code và các nguyên lý thiết kế hướng đối tượng (SOLID), giúp mã dễ đọc, dễ hiểu và dễ kiểm thử. Ngoài ra, việc sử dụng nền tảng công nghệ \gls{dotnet} 9 hiện đại cũng mang lại lợi thế về hiệu năng và sự hỗ trợ lâu dài từ cộng đồng phát triển.
 
 \section*{Kết chương}
 
-Chương 2 đã trình bày chi tiết về quá trình khảo sát và phân tích yêu cầu hệ thống YummyZoom. Từ việc nghiên cứu bối cảnh thị trường và phân tích các đối thủ cạnh tranh như GrabFood và ShopeeFood, đồ án đã xác định được nhu cầu cấp thiết về một giải pháp đặt hàng nhóm với cơ chế thanh toán phân tán. Các yêu cầu chức năng đã được mô hình hóa rõ ràng thông qua hệ thống biểu đồ use case và đặc tả quy trình nghiệp vụ. Đồng thời, các yêu cầu phi chức năng về hiệu năng, bảo mật và khả năng sử dụng cũng được thiết lập làm cơ sở cho việc phát triển hệ thống.
+Chương 2 đã trình bày chi tiết về quá trình khảo sát và phân tích yêu cầu hệ thống \gls{yummyzoom}. Từ việc nghiên cứu bối cảnh thị trường và phân tích các đối thủ cạnh tranh như GrabFood và ShopeeFood, đồ án đã xác định được nhu cầu cấp thiết về một giải pháp đặt hàng nhóm với cơ chế thanh toán phân tán. Các yêu cầu chức năng đã được mô hình hóa rõ ràng thông qua hệ thống biểu đồ use case và đặc tả quy trình nghiệp vụ. Đồng thời, các yêu cầu phi chức năng về hiệu năng, bảo mật và khả năng sử dụng cũng được thiết lập làm cơ sở cho việc phát triển hệ thống.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
