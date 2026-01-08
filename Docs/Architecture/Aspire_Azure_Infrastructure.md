@@ -355,6 +355,9 @@ When spinning up a **fresh** Azure environment (old resources deleted/clean) you
   - In Stripe test dashboard, edit the existing webhook endpoint destination and update its **Endpoint URL** to the new Container App public URL:
     - `https://<your-web-containerapp-fqdn>/api/stripe-webhooks`
   - No need to recreate the destination; just update the URL so Stripe sends events to the new deployment.
+- [ ] **Update backend URL in frontend configuration (if applicable)**
+  - If you have a separate frontend deployment (e.g., static web app, SPA), ensure its configuration points to the new backend URL.
+  - This may involve updating environment variables, config files, or redeploying the frontend with the new API base URL.
 
 ## Notable points and operational notes
 
