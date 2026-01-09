@@ -26,8 +26,8 @@ AppHost is located at `src/AppHost` and is the orchestration entrypoint for both
 In `src/AppHost/Program.cs`, the graph is:
 
 - `redis` (resource name: `redis`)
-  - **Publish mode**: `AddAzureRedis("redis")` (managed Azure Cache for Redis)
-  - **Local/dev mode**: `AddAzureRedis("redis").RunAsContainer()` (local container)
+  - **Publish mode**: `AddConnectionString("redis")` (external Redis provided by infra)
+  - **Local/dev mode**: `AddRedis("redis")` (local container)
 - `postgres` (resource name: `postgres`) and database `YummyZoomDb`
   - **Publish mode**: `AddAzurePostgresFlexibleServer("postgres")` + `.AddDatabase("YummyZoomDb")` (managed Azure Database for PostgreSQL Flexible Server)
   - **Local/dev mode**: `AddPostgres("postgres")` as a container using `postgis/postgis:16-3.4`, plus:
@@ -40,7 +40,7 @@ In `src/AppHost/Program.cs`, the graph is:
 Resource dependencies are explicit:
 
 - `web` references and waits for the database.
-- `web` references and waits for Redis.
+- `web` references and waits for Redis in local/dev mode.
 
 ### Service defaults (health + OpenTelemetry)
 
@@ -105,7 +105,7 @@ All Bicep is under `src/AppHost/infra/`. The entrypoint is subscription-scoped: 
 - Creates a resource group: `rg-${environmentName}` with tag `azd-env-name=${environmentName}`
 - Deploys the following modules into that RG:
   - `resources.bicep` (shared platform resources)
-  - `cache/cache.module.bicep` + `cache-roles/cache-roles.module.bicep`
+  - `redis/redis-containerapp.module.bicep` (Redis container app in Azure Container Apps)
   - `postgres/postgres.module.bicep` + `postgres-roles/postgres-roles.module.bicep`
   - `keyvault/keyvault.module.bicep` + `keyvault/keyvault-secrets.module.bicep`
 
@@ -130,7 +130,7 @@ This identity is used for:
 
 - Pulling images from ACR
 - Accessing Key Vault secrets
-- Being granted data-plane roles for Redis and Postgres (via the `*-roles` modules)
+- Being granted data-plane roles for Postgres (via the `postgres-roles` module)
 
 2) **Azure Container Registry (ACR)**
 
@@ -171,30 +171,21 @@ The template assigns Contributor on the Container Apps environment to `principal
 - Role: `Contributor` (`b24988ac-6180-42a0-ab88-20f7382dd24c`)
 - Scope: the Container Apps managed environment
 
-### Redis (Azure Cache for Redis)
+### Redis (Container App)
 
-#### `cache/cache.module.bicep`
+#### `redis/redis-containerapp.module.bicep`
 
-`src/AppHost/infra/cache/cache.module.bicep` provisions Redis:
+`src/AppHost/infra/redis/redis-containerapp.module.bicep` provisions Redis as a dedicated Container App in the same ACA environment:
 
-- Type: `Microsoft.Cache/redis@2024-03-01`
-- SKU: `Basic` / `C1`
-- TLS: minimum `1.2`; `enableNonSslPort: false`
-- Access keys enabled (`disableAccessKeyAuthentication: false`)
-- Redis config includes `aad-enabled: true`
+- Type: `Microsoft.App/containerApps@2024-02-02-preview`
+- Image: `docker.io/redis:7-alpine`
+- Ingress: internal-only, TCP, port `6379`
+- Scale: `minReplicas: 1`, `maxReplicas: 1`
 - Tag: `aspire-resource-name=redis` (matches AppHost resource name)
 
 Output:
 
-- `connectionString`: `${hostName}:${sslPort},password=${primaryKey}`
-
-#### `cache-roles/cache-roles.module.bicep`
-
-`src/AppHost/infra/cache-roles/cache-roles.module.bicep` grants the app identity Redis data-plane permissions:
-
-- Type: `Microsoft.Cache/redis/accessPolicyAssignments@2024-03-01`
-- Policy: `Data Contributor`
-- Assigned to the managed identity principal ID from `resources.bicep`
+- `connectionString`: `<containerAppName>:6379,abortConnect=false`
 
 ### PostgreSQL (Flexible Server) + extensions
 
@@ -259,7 +250,7 @@ Outputs:
 - `YummyZoomDb-Conn` (Postgres connection string)
 - `Redis-Conn` (Redis connection string)
 
-These values are sourced from the module outputs of Postgres and Redis.
+These values are sourced from the module outputs of Postgres and the Redis container app.
 
 ## Container App definition for `web`
 

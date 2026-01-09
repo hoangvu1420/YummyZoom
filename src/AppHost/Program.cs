@@ -4,8 +4,8 @@ var databaseName = "YummyZoomDb";
 var isPublishMode = builder.ExecutionContext.IsPublishMode;
 
 var redis = isPublishMode
-    ? builder.AddAzureRedis("redis")
-    : builder.AddAzureRedis("redis").RunAsContainer();
+    ? builder.AddConnectionString("redis")
+    : builder.AddRedis("redis");
 
 var web = builder.AddProject<Projects.Web>("web")
     .WithExternalHttpEndpoints();
@@ -31,7 +31,14 @@ else
         .WaitFor(database);
 }
 
-web.WithReference(redis)
-    .WaitFor(redis);
+if (isPublishMode)
+{
+    web.WithReference(redis);
+}
+else
+{
+    web.WithReference(redis)
+        .WaitFor(redis);
+}
 
 builder.Build().Run();
