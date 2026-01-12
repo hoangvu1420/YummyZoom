@@ -284,14 +284,9 @@ public static class DependencyInjection
 
     private static void AddBackgroundServices(this IHostApplicationBuilder builder)
     {
-        // Outbox publisher options and hosted service (enabled here; can be toggled by env later)
-        builder.Services.Configure<OutboxPublisherOptions>(opt =>
-        {
-            opt.BatchSize = 50;
-            opt.PollInterval = TimeSpan.FromMilliseconds(250);
-            opt.MaxBackoff = TimeSpan.FromMinutes(5);
-            opt.MaxAttempts = 10;
-        });
+        // Outbox publisher options and hosted service
+        builder.Services.Configure<OutboxPublisherOptions>(
+            builder.Configuration.GetSection(OutboxPublisherOptions.SectionName));
 
         builder.Services.AddSingleton<IOutboxProcessor, OutboxProcessor>();
         builder.Services.AddHostedService<OutboxPublisherHostedService>();
