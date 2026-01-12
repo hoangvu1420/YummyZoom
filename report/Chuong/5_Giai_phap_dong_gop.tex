@@ -1,43 +1,71 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này trình bày các giải pháp kỹ thuật chuyên sâu và những đóng góp nổi bật nhất của đồ án trong việc giải quyết các thách thức của bài toán ứng dụng giao đồ ăn, đặc biệt là tính năng đặt hàng nhóm (TeamCart). Ba đóng góp chính được phân tích bao gồm: (i) việc áp dụng kiến trúc Clean Architecture kết hợp Domain-Driven Design để quản lý nghiệp vụ phức tạp, (ii) giải pháp xử lý đồng thời lạc quan (Optimistic Concurrency Control) giúp đảm bảo tính nhất quán dữ liệu, và (iii) kiến trúc đồng bộ hóa thời gian thực tối ưu hiệu năng. Các nội dung ở Chương 4 chỉ mô tả tổng quan, còn chi tiết giải pháp được trình bày tại đây.
+Chương này tổng hợp các giải pháp kỹ thuật và đóng góp nổi bật của đồ án, đồng thời đưa ra kết luận và định hướng phát triển cho dự án \gls{yummyzoom}. Trọng tâm của chương là phân tích ba giải pháp kỹ thuật cốt lõi phục vụ bài toán đặt hàng nhóm (\gls{teamcart}), sau đó đánh giá sản phẩm theo mục tiêu đề tài, so sánh với các nền tảng phổ biến trên thị trường và xác định các hạn chế cũng như hướng phát triển trong tương lai.
 
-\section{Ứng dụng Clean Architecture và Domain-Driven Design trong quản lý nghiệp vụ phức tạp}
+\section{Giải pháp đóng góp}
 
-\subsection*{Vấn đề}
-Trong quá trình phát triển các hệ thống thương mại điện tử hiện đại, đặc biệt là các tính năng đòi hỏi sự cộng tác cao như Giỏ hàng nhóm, logic nghiệp vụ thường trở nên phức tạp với hàng loạt các quy tắc về tính toán giá, chia sẻ chi phí và quản lý trạng thái. Nếu logic nghiệp vụ bị trộn lẫn với mã xử lý hạ tầng (cơ sở dữ liệu, API, giao diện), mã nguồn khó kiểm soát tính toàn vẹn dữ liệu và khó kiểm thử, đặc biệt ở các luồng tài chính nhạy cảm.
+\subsection{Ứng dụng Clean Architecture và Domain-Driven Design trong quản lý nghiệp vụ phức tạp}
 
-\subsection*{Giải pháp}
-Đồ án áp dụng kiến trúc Clean Architecture kết hợp với DDD nhằm tách biệt triệt để logic nghiệp vụ khỏi hạ tầng. Lớp miền được tổ chức theo mô hình giàu hành vi, trong đó các aggregate như \texttt{TeamCart} tự quản lý các thao tác nghiệp vụ quan trọng (ví dụ \texttt{LockForPayment}, \texttt{AddItem}) và các bất biến dữ liệu. Các Value Object như \texttt{Money} và \texttt{TeamCartId} giúp đóng gói quy tắc xác thực ở mức nhỏ, hạn chế lỗi dữ liệu ngay tại biên của miền nghiệp vụ. Những quyết định này được hiện thực hóa rõ nhất ở các aggregate và dịch vụ miền được mô tả trong Chương 4, và được sử dụng trực tiếp trong các ca sử dụng TeamCart.
+\subsubsection*{Vấn đề}
+Trong quá trình phát triển các hệ thống thương mại điện tử hiện đại, đặc biệt là các tính năng đòi hỏi sự cộng tác cao như Giỏ hàng nhóm, logic nghiệp vụ thường trở nên phức tạp với hàng loạt các quy tắc về tính toán giá, chia sẻ chi phí và quản lý trạng thái. Nếu logic nghiệp vụ bị trộn lẫn với mã xử lý hạ tầng (cơ sở dữ liệu, \gls{api}, giao diện), mã nguồn khó kiểm soát tính toàn vẹn dữ liệu và khó kiểm thử, đặc biệt ở các luồng tài chính nhạy cảm.
 
-\subsection*{Kết quả}
+\subsubsection*{Giải pháp}
+Đồ án áp dụng kiến trúc \gls{cleanarchitecture} kết hợp với \gls{ddd} nhằm tách biệt triệt để logic nghiệp vụ khỏi hạ tầng. Lớp miền được tổ chức theo mô hình giàu hành vi, trong đó các aggregate như \texttt{TeamCart} tự quản lý các thao tác nghiệp vụ quan trọng (ví dụ \texttt{LockForPayment}, \texttt{AddItem}) và các bất biến dữ liệu. Các Value Object như \texttt{Money} và \texttt{TeamCartId} giúp đóng gói quy tắc xác thực ở mức nhỏ, hạn chế lỗi dữ liệu ngay tại biên của miền nghiệp vụ. Những quyết định này được hiện thực hóa rõ nhất ở các aggregate và dịch vụ miền được mô tả trong Chương 4, và được sử dụng trực tiếp trong các ca sử dụng \gls{teamcart}.
+
+\subsubsection*{Kết quả}
 Giải pháp giúp giảm sự phụ thuộc chặt giữa nghiệp vụ và hạ tầng, từ đó tăng khả năng kiểm thử độc lập cho các kịch bản tính toán giá, phân bổ phí và chuyển trạng thái. Mã nguồn bám sát ngôn ngữ chung của nghiệp vụ, giúp đội ngũ dễ bảo trì và giảm rủi ro khi thay đổi quy tắc trong tương lai.
 
-\section{Giải pháp xử lý cạnh tranh dữ liệu với Optimistic Concurrency Control}
+\subsection{Giải pháp xử lý cạnh tranh dữ liệu với Optimistic Concurrency Control}
 
-\subsection*{Vấn đề}
-Một trong những thách thức lớn của TeamCart là xử lý đồng thời khi nhiều thành viên cùng thao tác trên một giỏ hàng tại cùng thời điểm. Các xung đột như cập nhật số lượng và xóa món có thể gây mất cập nhật hoặc tạo trạng thái không nhất quán nếu không được kiểm soát. Cơ chế khóa bi quan ở cấp cơ sở dữ liệu tuy an toàn nhưng dễ làm giảm hiệu năng và gây độ trễ lớn cho trải nghiệm cộng tác.
+\subsubsection*{Vấn đề}
+Một trong những thách thức lớn của \gls{teamcart} là xử lý đồng thời khi nhiều thành viên cùng thao tác trên một giỏ hàng tại cùng thời điểm. Các xung đột như cập nhật số lượng và xóa món có thể gây mất cập nhật hoặc tạo trạng thái không nhất quán nếu không được kiểm soát. Cơ chế khóa bi quan ở cấp cơ sở dữ liệu tuy an toàn nhưng dễ làm giảm hiệu năng và gây độ trễ lớn cho trải nghiệm cộng tác.
 
-\subsection*{Giải pháp}
-Giải pháp được lựa chọn là sử dụng Redis làm kho lưu trữ trạng thái thời gian thực, kết hợp cơ chế Optimistic Concurrency Control. Mỗi bản ghi TeamCart trong Redis mang một trường \texttt{Version}. Khi cập nhật, hệ thống đọc trạng thái hiện tại, áp dụng thay đổi, tăng \texttt{Version}, sau đó ghi lại bằng giao dịch có điều kiện (Check-And-Set) để đảm bảo dữ liệu chỉ được ghi khi trạng thái gốc chưa bị thay đổi. Nếu phát hiện xung đột, hệ thống tự động thử lại với khoảng trễ ngẫu nhiên (jittered backoff) nhằm giảm va chạm ở các thời điểm cao điểm.
+\subsubsection*{Giải pháp}
+Giải pháp được lựa chọn là sử dụng \gls{redis} làm kho lưu trữ trạng thái thời gian thực, kết hợp cơ chế \gls{optimisticconcurrency}. Mỗi bản ghi \gls{teamcart} trong \gls{redis} mang một trường \texttt{Version}. Khi cập nhật, hệ thống đọc trạng thái hiện tại, áp dụng thay đổi, tăng \texttt{Version}, sau đó ghi lại bằng giao dịch có điều kiện (Check-And-Set) để đảm bảo dữ liệu chỉ được ghi khi trạng thái gốc chưa bị thay đổi. Nếu phát hiện xung đột, hệ thống tự động thử lại với khoảng trễ ngẫu nhiên (jittered backoff) nhằm giảm va chạm ở các thời điểm cao điểm.
 
-\subsection*{Kết quả}
+\subsubsection*{Kết quả}
 Giải pháp giúp giảm nguy cơ mất cập nhật khi nhiều người dùng cùng thao tác, đồng thời hạn chế độ trễ do không cần khóa cứng tài nguyên. Việc tự động thử lại giúp duy trì trải nghiệm mượt mà và giảm tỷ lệ lỗi hiển thị ở các thao tác cộng tác.
 
-\section{Kiến trúc đồng bộ hóa thời gian thực hiệu năng cao}
+\subsection{Kiến trúc đồng bộ hóa thời gian thực hiệu năng cao}
 
-\subsection*{Vấn đề}
+\subsubsection*{Vấn đề}
 Tính năng Giỏ hàng nhóm yêu cầu đồng bộ trạng thái tức thì giữa các thiết bị của thành viên. Mô hình hỏi vòng (polling) truyền thống gây lãng phí băng thông, tăng tải máy chủ và khó đạt độ trễ thấp khi nhiều người dùng thao tác đồng thời. Ngoài ra, khi triển khai trên nhiều máy chủ, hệ thống cần cơ chế để các kết nối ở các nút khác nhau vẫn nhận được cùng một sự kiện.
 
-\subsection*{Giải pháp}
-Đồ án triển khai giao tiếp thời gian thực dựa trên SignalR với WebSockets để thiết lập kênh kết nối hai chiều ổn định. Các thành viên được gắn vào nhóm theo \texttt{TeamCartId}, từ đó mọi sự kiện thay đổi đều được phát đến đúng nhóm. Trạng thái TeamCart thời gian thực được lưu ở Redis; khi dữ liệu thay đổi, hệ thống phát thông báo nhẹ để máy khách đồng bộ lại trạng thái. Redis cũng được sử dụng để phát tán sự kiện cập nhật giữa các nút, giúp hệ thống hoạt động ổn định khi mở rộng nhiều máy chủ.
+\subsubsection*{Giải pháp}
+Đồ án triển khai giao tiếp thời gian thực dựa trên \gls{signalr} với \gls{websockets} để thiết lập kênh kết nối hai chiều ổn định. Các thành viên được gắn vào nhóm theo \texttt{TeamCartId}, từ đó mọi sự kiện thay đổi đều được phát đến đúng nhóm. Trạng thái \gls{teamcart} thời gian thực được lưu ở \gls{redis}; khi dữ liệu thay đổi, hệ thống phát thông báo nhẹ để máy khách đồng bộ lại trạng thái. \gls{redis} cũng được sử dụng để phát tán sự kiện cập nhật giữa các nút, giúp hệ thống hoạt động ổn định khi mở rộng nhiều máy chủ.
 
-\subsection*{Kết quả}
+\subsubsection*{Kết quả}
 Giải pháp giúp giảm độ trễ trong cập nhật giỏ hàng nhóm, tăng tính nhất quán giữa các thiết bị và hỗ trợ mở rộng theo chiều ngang. Nhờ cơ chế thông báo nhẹ và lưu trạng thái tập trung, hệ thống giảm tải truy vấn lặp và cải thiện trải nghiệm cộng tác so với polling.
 
-\section{Kết chương}
+\section{Kết luận và đánh giá tổng quan}
 
-Chương này đã trình bày chi tiết ba giải pháp kỹ thuật và đóng góp quan trọng nhất của đồ án. Việc áp dụng thành công kiến trúc Clean Architecture kết hợp DDD đã tạo nên nền tảng vững chắc cho việc quản lý nghiệp vụ phức tạp. Giải pháp Optimistic Concurrency Control với Redis giải quyết triệt để bài toán cạnh tranh dữ liệu trong môi trường đa người dùng. Cuối cùng, kiến trúc đồng bộ hóa thời gian thực tối ưu đã mang lại trải nghiệm người dùng mượt mà và khả năng mở rộng hệ thống linh hoạt. Những giải pháp này không chỉ giải quyết các vấn đề hiện tại của dự án mà còn đặt nền móng cho việc phát triển các tính năng nâng cao trong tương lai, được tóm tắt và thảo luận trong Chương 6 kế tiếp.
+\subsection*{So sánh với GrabFood và ShopeeFood}
+Trong bối cảnh thị trường giao đồ ăn trực tuyến tại Việt Nam bị thống lĩnh bởi GrabFood và ShopeeFood, \gls{yummyzoom} tập trung giải quyết một ``nỗi đau'' cụ thể liên quan đến trải nghiệm đặt hàng theo nhóm. Mặc dù các nền tảng lớn đã có tính năng đặt hàng nhóm, quy trình thường vẫn phụ thuộc vào một người đứng ra thanh toán và thu lại tiền từ các thành viên, gây bất tiện trong môi trường sinh viên và văn phòng.
+
+Điểm khác biệt nổi bật của \gls{yummyzoom} nằm ở trải nghiệm \gls{teamcart}: các thành viên có thể tham gia cùng một giỏ hàng, thao tác chọn món đồng thời và nhận cập nhật tức thời, đồng thời cơ chế thanh toán được thiết kế theo hướng tách bạch trách nhiệm của từng thành viên. Nhờ đó, việc đặt món theo nhóm trở nên tự nhiên và ít ``ma sát'' hơn, giảm đáng kể các bước trao đổi thủ công ngoài ứng dụng. Bên cạnh điểm nhấn \gls{teamcart}, \gls{yummyzoom} vẫn đảm bảo các luồng cốt lõi của một hệ thống giao đồ ăn để người dùng có thể thực hiện trọn vẹn hành trình đặt món.
+
+\subsection*{Mức độ đáp ứng các chức năng cốt lõi của hệ thống}
+Trong phạm vi đồ án, hệ thống đã hiện thực đầy đủ các phân hệ chính theo thiết kế tính năng đã xác định, bao gồm: ứng dụng khách hàng (tìm kiếm/duyệt nhà hàng và thực đơn, thêm món, đặt đơn, theo dõi trạng thái, đánh giá), cổng quản trị nhà hàng (quản lý thực đơn, vận hành đơn hàng theo vòng đời, theo dõi thông tin vận hành), và phân hệ quản trị nền tảng (quản lý dữ liệu và giám sát các hoạt động chính). Các cơ chế cộng tác thời gian thực được áp dụng cho \gls{teamcart} và một phần các luồng cập nhật trạng thái nhằm đảm bảo trải nghiệm phản hồi nhanh và nhất quán giữa nhiều thiết bị.
+
+\subsection*{Hạn chế và phần chưa hoàn thiện}
+Bên cạnh các mục tiêu đã đạt được, dự án vẫn còn một số hạn chế do phạm vi và thời gian triển khai của đồ án. Thứ nhất, hệ thống chưa có các tính năng nâng cao như gợi ý món ăn/cá nhân hóa trải nghiệm, hoặc tìm kiếm dựa trên AI/ML theo hướng ngữ nghĩa. Hiện tại, cơ chế tìm kiếm và lọc mới tập trung vào các tiêu chí phổ biến và chưa khai thác các mô hình học máy.
+
+Thứ hai, phần thanh toán mới dừng ở mức tích hợp và mô phỏng theo kịch bản thử nghiệm, chưa hoàn thiện quy trình vận hành sản xuất với cổng thanh toán thật (bao gồm các yêu cầu về đối soát, xử lý sự cố, tranh chấp và vận hành an toàn ở quy mô lớn). Thứ ba, hệ thống chưa có module dành cho tài xế giao hàng; luồng giao nhận hiện được giả lập để phục vụ mục tiêu mô tả vòng đời đơn hàng và kiểm thử trải nghiệm theo dõi trạng thái. Cuối cùng, hệ thống chưa tích hợp một module tài chính chuẩn cho phía nhà hàng (ví dụ sổ cái doanh thu, đối soát, rút tiền/payout, chính sách phí và báo cáo theo kỳ), nên giá trị vận hành ở góc độ quản trị tài chính vẫn còn hạn chế.
+
+\subsection*{Bài học kinh nghiệm}
+Về mặt kỹ thuật, việc áp dụng \gls{cleanarchitecture} kết hợp \gls{ddd} giúp dự án phát triển kiểm soát độ phức tạp của nghiệp vụ, đặc biệt với các quy tắc nhạy cảm như trạng thái \gls{teamcart} và các bước thanh toán/chốt đơn. Bài toán cộng tác thời gian thực cũng cho thấy tầm quan trọng của việc thiết kế dữ liệu trạng thái trung gian và cơ chế xử lý đồng thời (phiên bản hoá, kiểm soát xung đột, thử lại) để hệ thống vừa nhất quán vừa giữ được trải nghiệm mượt.
+
+Về quy trình, tôi rút ra rằng việc chốt phạm vi và tiêu chí ``hoàn thành'' cho từng luồng nghiệp vụ ngay từ đầu giúp giảm rủi ro lan rộng yêu cầu ở giai đoạn cuối. Ngoài ra, việc duy trì tài liệu thiết kế và tài liệu \gls{api} đồng bộ với mã nguồn, kết hợp với kiểm thử theo kịch bản quan trọng, giúp phát hiện sớm sai khác giữa thiết kế và triển khai, đồng thời hỗ trợ quá trình bàn giao và mở rộng về sau.
+
+\section{Hướng phát triển}
+Định hướng phát triển trong tương lai được đề xuất bám sát các hạn chế hiện tại của hệ thống, nhằm đưa \gls{yummyzoom} tiến gần hơn tới một sản phẩm có thể vận hành ổn định trong bối cảnh thực tế. Trước hết, dự án cần tập trung hoàn thiện các chức năng đã có theo hướng ``sẵn sàng sản xuất'', đặc biệt là các luồng liên quan đến giao dịch và phối hợp nhiều người dùng. Cụ thể, hệ thống cần được hoàn thiện tích hợp cổng thanh toán thật, bổ sung đầy đủ cơ chế tiếp nhận sự kiện từ nhà cung cấp thông qua webhook, đảm bảo tính bất biến và an toàn khi xử lý lặp (\gls{idempotency}), đồng thời chuẩn hóa các luồng hoàn tiền và xử lý tình huống lỗi để phù hợp với yêu cầu vận hành và đối soát.
+
+Tiếp theo, để giảm mức ``giả lập'' trong vòng đời đơn hàng, hệ thống cần phát triển thêm phân hệ dành cho tài xế giao hàng, bao gồm ứng dụng hoặc cổng vận hành cho tài xế, cơ chế nhận nhiệm vụ, theo dõi vị trí và cập nhật trạng thái giao nhận. Song song với đó, một hướng phát triển quan trọng ở phía nhà hàng là xây dựng module tài chính chuẩn, trong đó mô hình hóa sổ cái doanh thu, đối soát theo kỳ, luồng rút tiền và các báo cáo phục vụ quản trị. Việc bổ sung lớp tài chính này không chỉ giúp tăng giá trị vận hành cho nhà hàng mà còn tạo nền tảng để mở rộng các chính sách phí, khuyến mãi và kiểm soát rủi ro giao dịch trong tương lai.
+
+Cuối cùng, các hướng đi mới nhằm nâng trải nghiệm người dùng có thể tập trung vào khả năng khám phá và cá nhân hóa, bao gồm gợi ý món ăn và nhà hàng dựa trên hành vi, cùng với tìm kiếm nâng cao dựa trên học máy theo hướng ngữ nghĩa. Đồng thời, để đảm bảo hệ thống hoạt động bền vững khi quy mô người dùng tăng, cần bổ sung các kịch bản kiểm thử tải, hoàn thiện cơ chế đồng bộ lại trạng thái sau khi mất kết nối ở các luồng thời gian thực, và chuẩn bị phương án triển khai đa nút cho \gls{signalr} nhằm duy trì tính nhất quán của trải nghiệm \gls{teamcart} trong các điều kiện mạng và hạ tầng khác nhau.
+
+\section*{Kết chương}
+Chương này đã tổng hợp các giải pháp kỹ thuật nổi bật của đồ án, làm rõ giá trị khác biệt của trải nghiệm \gls{teamcart} so với các nền tảng phổ biến, đồng thời đánh giá mức độ đáp ứng các chức năng cốt lõi của một hệ thống giao đồ ăn. Trên cơ sở các hạn chế còn tồn tại, chương cũng đề xuất các hướng phát triển trọng tâm nhằm nâng mức hoàn thiện và khả năng vận hành thực tế của \gls{yummyzoom} trong tương lai.
 
 \end{document}

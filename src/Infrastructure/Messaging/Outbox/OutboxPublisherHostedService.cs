@@ -5,6 +5,8 @@ namespace YummyZoom.Infrastructure.Messaging.Outbox;
 
 public sealed class OutboxPublisherOptions
 {
+    public const string SectionName = "OutboxPublisher";
+
     public int BatchSize { get; set; } = 50;
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromMilliseconds(250);
     public TimeSpan MaxBackoff { get; set; } = TimeSpan.FromMinutes(5);
@@ -26,11 +28,19 @@ public sealed class OutboxPublisherHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var currentDelay = _options.PollInterval;
         while (!stoppingToken.IsCancellationRequested)
         {
             var n = await _processor.ProcessOnceAsync(stoppingToken);
-            if (n == 0)
-                await Task.Delay(_options.PollInterval, stoppingToken);
+            if (n > 0)
+            {
+                currentDelay = _options.PollInterval;
+                continue;
+            }
+
+            await Task.Delay(currentDelay, stoppingToken);
+            currentDelay = TimeSpan.FromMilliseconds(
+                Math.Min(currentDelay.TotalMilliseconds * 2, _options.MaxBackoff.TotalMilliseconds));
         }
     }
 }

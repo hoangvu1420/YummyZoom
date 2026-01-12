@@ -298,9 +298,9 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
      & 6 & Hệ thống & Kiểm tra tùy chỉnh: nhóm tùy chỉnh được gán cho món, số lượng lựa chọn hợp lệ (min-max). \\ \cline{2-4} 
      & 7 & Hệ thống & Tính toán tài chính: Subtotal, Discount (nếu có coupon), DeliveryFee, Tax, Tip, TotalAmount. \\ \cline{2-4} 
      & 8 & Hệ thống & Kiểm tra và tăng số lần sử dụng coupon (nếu có) trong cùng transaction. \\ \cline{2-4} 
-     & 9 & Khách hàng & Chọn phương thức thanh toán (CreditCard, PayPal, ApplePay, GooglePay, COD). \\ \cline{2-4} 
-     & 10 & Hệ thống & Tạo PaymentIntent (Stripe) nếu thanh toán online, lưu PaymentIntentId vào Order. \\ \cline{2-4} 
-     & 11 & Hệ thống & Tạo Order với trạng thái PendingPayment (online) hoặc Placed (COD). \\ \cline{2-4} 
+     & 9 & Khách hàng & Chọn phương thức thanh toán (CreditCard, \gls{cod}). \\ \cline{2-4} 
+     & 10 & Hệ thống & Tạo \gls{paymentintent} (Stripe) nếu thanh toán online, lưu PaymentIntentId vào Order. \\ \cline{2-4} 
+     & 11 & Hệ thống & Tạo Order với trạng thái PendingPayment (online) hoặc Placed (\gls{cod}). \\ \cline{2-4} 
      & 12 & Hệ thống & Lưu Order vào database, phát sự kiện OrderPlaced. \\ \cline{2-4} 
      & 13 & Hệ thống & Trả về OrderId, OrderNumber, TotalAmount và ClientSecret (nếu online). \\ \hline
     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
@@ -308,8 +308,8 @@ Dữ liệu đầu vào cho use case Tìm kiếm nhà hàng:
      & 5b & Hệ thống & Báo lỗi nếu món ăn không tồn tại, không còn hàng hoặc không thuộc nhà hàng. \\ \cline{2-4} 
      & 6a & Hệ thống & Báo lỗi nếu nhóm tùy chỉnh không được gán cho món hoặc số lượng lựa chọn sai. \\ \cline{2-4} 
      & 8a & Hệ thống & Báo lỗi nếu coupon không hợp lệ, hết hạn hoặc đã hết lượt sử dụng. \\ \cline{2-4} 
-     & 10a & Hệ thống & Báo lỗi nếu không tạo được PaymentIntent (lỗi Stripe API). \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đơn hàng được tạo thành công với trạng thái phù hợp. Sự kiện OrderPlaced được phát ra để thông báo cho nhà hàng. Nếu thanh toán online, khách hàng được chuyển đến trang thanh toán Stripe. Nếu COD, đơn hàng chuyển trạng thái Placed ngay lập tức.} \\ \hline
+     & 10a & Hệ thống & Báo lỗi nếu không tạo được \gls{paymentintent} (lỗi Stripe \gls{api}). \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đơn hàng được tạo thành công với trạng thái phù hợp. Sự kiện OrderPlaced được phát ra để thông báo cho nhà hàng. Nếu thanh toán online, khách hàng được chuyển đến trang thanh toán Stripe. Nếu \gls{cod}, đơn hàng chuyển trạng thái Placed ngay lập tức.} \\ \hline
 \end{longtable}
 
 Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
@@ -319,7 +319,7 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
     \endfirsthead
     
-    \multicolumn{5}{c}{\textit{(Tiếp theo từ trang trước)}} \\
+    \multicolumn{5}{r}{\textit{(Tiếp theo từ trang trước)}} \\
     \hline
     \textbf{STT} & \textbf{Trường dữ liệu} & \textbf{Mô tả} & \textbf{Bắt buộc?} & \textbf{Điều kiện hợp lệ} \\ \hline
     \endhead
@@ -342,20 +342,20 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
     9 & DeliveryAddress.\newline State & Tỉnh/Bang & Có & Tối đa 100 ký tự \\ \hline
     10 & DeliveryAddress.\newline ZipCode & Mã bưu điện & Có & Tối đa 20 ký tự \\ \hline
     11 & DeliveryAddress.\newline Country & Quốc gia & Có & Tối đa 100 ký tự \\ \hline
-    12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, PayPal, ApplePay, GooglePay, COD \\ \hline
+    12 & PaymentMethod & Phương thức thanh toán & Có & CreditCard, \gls{cod} \\ \hline
     13 & Special\newline Instructions & Ghi chú đặc biệt & Không & Tối đa 500 ký tự \\ \hline
     14 & CouponCode & Mã giảm giá & Không & Tối đa 50 ký tự \\ \hline
     15 & TipAmount & Tiền tip & Không & >= 0 \\ \hline
-    16 & TeamCartId & ID giỏ hàng nhóm & Không & GUID hợp lệ (nếu từ TeamCart) \\ \hline
+    16 & TeamCartId & ID giỏ hàng nhóm & Không & GUID hợp lệ (nếu từ \gls{teamcart}) \\ \hline
 \end{longtable}
 
 
 \subsection{Đặc tả Use Case: Khởi tạo TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
-    \textbf{Mã use case} & UC-004a & \textbf{Tên use case} & Khởi tạo TeamCart \\ \hline
+    \textbf{Mã use case} & UC-004a & \textbf{Tên use case} & Khởi tạo \gls{teamcart} \\ \hline
     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Host)} \\ \hline
-    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tạo một giỏ hàng nhóm (TeamCart) để mời những người khác cùng đặt món từ một nhà hàng cụ thể.} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tạo một giỏ hàng nhóm (\gls{teamcart}) để mời những người khác cùng đặt món từ một nhà hàng cụ thể.} \\ \hline
     \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng chọn chức năng "Đặt nhóm" (Group Order) trên giao diện chi tiết nhà hàng.} \\ \hline
     \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. Nhà hàng tồn tại và đang hoạt động.} \\ \hline
     \endfirsthead
@@ -368,21 +368,21 @@ Dữ liệu đầu vào cho use case Đặt hàng cá nhân:
     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Đặc tả Use Case Khởi tạo TeamCart} \label{tab:uc_004a} \\
+    \caption{Đặc tả Use Case Khởi tạo \gls{teamcart}} \label{tab:uc_004a} \\
     \endlastfoot
 
     \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Chọn nhà hàng và thiết lập thông tin giỏ nhóm (Tên hiển thị của Host, Thời gian chốt đơn). \\ \cline{2-4} 
      & 2 & Hệ thống & Kiểm tra tính hợp lệ của dữ liệu (Tên host không rỗng, thời gian chốt đơn phải ở tương lai nếu có). \\ \cline{2-4} 
-     & 3 & Hệ thống & Tạo mới TeamCart với trạng thái Active. Tạo ShareToken duy nhất. \\ \cline{2-4} 
+     & 3 & Hệ thống & Tạo mới \gls{teamcart} với trạng thái Active. Tạo ShareToken duy nhất. \\ \cline{2-4} 
      & 4 & Hệ thống & Thêm người tạo vào danh sách thành viên với vai trò Host. \\ \cline{2-4} 
-     & 5 & Hệ thống & Trả về thông tin TeamCart và Link chia sẻ (ShareToken). \\ \hline
+     & 5 & Hệ thống & Trả về thông tin \gls{teamcart} và Link chia sẻ (ShareToken). \\ \hline
     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 2a & Hệ thống & Báo lỗi nếu nhà hàng không tồn tại hoặc thời gian chốt đơn không hợp lệ (trong quá khứ). \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{TeamCart được tạo thành công. Host nhận được link chia sẻ để gửi cho các thành viên khác.} \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{\gls{teamcart} được tạo thành công. Host nhận được link chia sẻ để gửi cho các thành viên khác.} \\ \hline
 \end{longtable}
 
-Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
+Dữ liệu đầu vào cho use case Khởi tạo \gls{teamcart}:
 
 \begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
     \hline
@@ -398,7 +398,7 @@ Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Dữ liệu đầu vào Khởi tạo TeamCart} \label{tab:input_uc_004a} \\
+    \caption{Dữ liệu đầu vào Khởi tạo \gls{teamcart}} \label{tab:input_uc_004a} \\
     \endlastfoot
 
     1 & RestaurantId & ID nhà hàng & Có & GUID hợp lệ, nhà hàng tồn tại \\ \hline
@@ -410,11 +410,11 @@ Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
 \subsection{Đặc tả Use Case: Tham gia TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
-    \textbf{Mã use case} & UC-004b & \textbf{Tên use case} & Tham gia TeamCart \\ \hline
+    \textbf{Mã use case} & UC-004b & \textbf{Tên use case} & Tham gia \gls{teamcart} \\ \hline
     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Member)} \\ \hline
     \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép khách hàng tham gia vào một giỏ hàng nhóm thông qua liên kết chia sẻ để cùng đặt món.} \\ \hline
-    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng truy cập vào đường dẫn chia sẻ (Share Link) của TeamCart.} \\ \hline
-    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. TeamCart tồn tại, đang hoạt động (Active) và chưa bị khóa. Mã chia sẻ (ShareToken) hợp lệ.} \\ \hline
+    \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Khách hàng truy cập vào đường dẫn chia sẻ (Share Link) của \gls{teamcart}.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{Khách hàng đã đăng nhập. \gls{teamcart} tồn tại, đang hoạt động (Active) và chưa bị khóa. Mã chia sẻ (ShareToken) hợp lệ.} \\ \hline
     \endfirsthead
     
     \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
@@ -425,24 +425,24 @@ Dữ liệu đầu vào cho use case Khởi tạo TeamCart:
     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Đặc tả Use Case Tham gia TeamCart} \label{tab:uc_004b} \\
+    \caption{Đặc tả Use Case Tham gia \gls{teamcart}} \label{tab:uc_004b} \\
     \endlastfoot
 
     \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
      & 1 & Khách hàng & Nhập tên hiển thị (GuestName) để tham gia nhóm. \\ \cline{2-4} 
-     & 2 & Hệ thống & Kiểm tra sự tồn tại của TeamCart. \\ \cline{2-4} 
+     & 2 & Hệ thống & Kiểm tra sự tồn tại của \gls{teamcart}. \\ \cline{2-4} 
      & 3 & Hệ thống & Xác thực mã chia sẻ (ShareToken). \\ \cline{2-4} 
-     & 4 & Hệ thống & Kiểm tra trạng thái TeamCart (phải là Active) và quyền tham gia (chưa tham gia trước đó). \\ \cline{2-4} 
+     & 4 & Hệ thống & Kiểm tra trạng thái \gls{teamcart} (phải là Active) và quyền tham gia (chưa tham gia trước đó). \\ \cline{2-4} 
      & 5 & Hệ thống & Thêm người dùng vào danh sách thành viên với vai trò Guest. \\ \cline{2-4} 
-     & 6 & Hệ thống & Thông báo thành công và chuyển hướng đến giao diện chi tiết TeamCart. \\ \hline
+     & 6 & Hệ thống & Thông báo thành công và chuyển hướng đến giao diện chi tiết \gls{teamcart}. \\ \hline
     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 2a & Hệ thống & Báo lỗi nếu TeamCart không tồn tại. \\ \cline{2-4} 
+     & 2a & Hệ thống & Báo lỗi nếu \gls{teamcart} không tồn tại. \\ \cline{2-4} 
      & 3a & Hệ thống & Báo lỗi nếu mã chia sẻ không hợp lệ hoặc đã hết hạn. \\ \cline{2-4} 
-     & 4a & Hệ thống & Báo lỗi nếu TeamCart đã bị khóa, đã chốt đơn hoặc người dùng đã là thành viên. \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng trở thành thành viên của TeamCart, có quyền thêm món ăn vào giỏ chung.} \\ \hline
+     & 4a & Hệ thống & Báo lỗi nếu \gls{teamcart} đã bị khóa, đã chốt đơn hoặc người dùng đã là thành viên. \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Người dùng trở thành thành viên của \gls{teamcart}, có quyền thêm món ăn vào giỏ chung.} \\ \hline
 \end{longtable}
 
-Dữ liệu đầu vào cho use case Tham gia TeamCart:
+Dữ liệu đầu vào cho use case Tham gia \gls{teamcart}:
 
 \begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
     \hline
@@ -458,11 +458,11 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Dữ liệu đầu vào Tham gia TeamCart} \label{tab:input_uc_004b} \\
+    \caption{Dữ liệu đầu vào Tham gia \gls{teamcart}} \label{tab:input_uc_004b} \\
     \endlastfoot
 
     1 & TeamCartId & ID giỏ hàng nhóm & Có & GUID hợp lệ, tồn tại \\ \hline
-    2 & ShareToken & Mã chia sẻ & Có & Tối đa 100 ký tự, khớp với TeamCart \\ \hline
+    2 & ShareToken & Mã chia sẻ & Có & Tối đa 100 ký tự, khớp với \gls{teamcart} \\ \hline
     3 & GuestName & Tên hiển thị & Có & Không rỗng, tối đa 200 ký tự \\ \hline
 \end{longtable}
 
@@ -470,11 +470,11 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
 \subsection{Đặc tả Use Case: Chốt đơn TeamCart}
 \begin{longtable}{|p{2.5cm}|p{1.5cm}|p{3cm}|p{5.5cm}|}
     \hline
-    \textbf{Mã use case} & UC-004c & \textbf{Tên use case} & Chốt đơn TeamCart \\ \hline
+    \textbf{Mã use case} & UC-004c & \textbf{Tên use case} & Chốt đơn \gls{teamcart} \\ \hline
     \textbf{Tác nhân} & \multicolumn{3}{p{11.5cm}|}{Khách hàng (Host)} \\ \hline
-    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Host khóa giỏ hàng, chờ các thành viên thanh toán và hoàn tất việc chuyển đổi TeamCart thành đơn hàng chính thức.} \\ \hline
+    \textbf{Mục đích sử dụng} & \multicolumn{3}{p{11.5cm}|}{Cho phép Host khóa giỏ hàng, chờ các thành viên thanh toán và hoàn tất việc chuyển đổi \gls{teamcart} thành đơn hàng chính thức.} \\ \hline
     \textbf{Sự kiện kích hoạt} & \multicolumn{3}{p{11.5cm}|}{Host nhấn nút "Đặt hàng" sau khi đã đủ điều kiện.} \\ \hline
-    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{TeamCart đang hoạt động (Active) và có món ăn. Host đã đăng nhập. Để thanh toán, giỏ phải được khóa và đang ở trạng thái Finalized. Để đặt hàng, giỏ phải ở trạng thái ReadyToConfirm.} \\ \hline
+    \textbf{Tiền điều kiện} & \multicolumn{3}{p{11.5cm}|}{\gls{teamcart} đang hoạt động (Active) và có món ăn. Host đã đăng nhập. Để thanh toán, giỏ phải được khóa và đang ở trạng thái Finalized. Để đặt hàng, giỏ phải ở trạng thái ReadyToConfirm.} \\ \hline
     \endfirsthead
     
     \multicolumn{4}{r}{\textit{(Tiếp theo từ trang trước)}} \\
@@ -485,7 +485,7 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
     \multicolumn{4}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Đặc tả Use Case Chốt đơn TeamCart} \label{tab:uc_004c} \\
+    \caption{Đặc tả Use Case Chốt đơn \gls{teamcart}} \label{tab:uc_004c} \\
     \endlastfoot
 
     \textbf{Luồng sự kiện chính} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
@@ -494,18 +494,18 @@ Dữ liệu đầu vào cho use case Tham gia TeamCart:
      & 3 & Host & Áp dụng/điều chỉnh Mã giảm giá hoặc Tip (tùy chọn) khi giỏ đang Locked. \\ \cline{2-4} 
      & 4 & Host & Nhấn "Chốt giá" (Finalize Pricing) để cố định tip/coupon. \\ \cline{2-4} 
      & 5 & Hệ thống & Kiểm tra trạng thái Locked, cố định Tip/Coupon, tăng Quote Version, chuyển trạng thái sang "Finalized" và thông báo thành viên có thể thanh toán. \\ \cline{2-4} 
-     & 6 & Thành viên & Chọn phương thức thanh toán (Online hoặc COD) và thanh toán/commit phần của mình. \\ \cline{2-4} 
-     & 7 & Hệ thống & Ghi nhận thanh toán; nếu chưa đủ thì chờ các thành viên khác. Khi đủ, chuyển trạng thái TeamCart sang "ReadyToConfirm" và kích hoạt nút "Đặt hàng" cho Host. \\ \cline{2-4} 
+     & 6 & Thành viên & Chọn phương thức thanh toán (Online hoặc \gls{cod}) và thanh toán/commit phần của mình. \\ \cline{2-4} 
+     & 7 & Hệ thống & Ghi nhận thanh toán; nếu chưa đủ thì chờ các thành viên khác. Khi đủ, chuyển trạng thái \gls{teamcart} sang "ReadyToConfirm" và kích hoạt nút "Đặt hàng" cho Host. \\ \cline{2-4} 
      & 8 & Host & Nhập thông tin giao hàng và xác nhận đặt hàng cuối cùng. \\ \cline{2-4} 
      & 9 & Hệ thống & Kiểm tra tính nhất quán (Quote Version, trạng thái ReadyToConfirm, tổng tiền đã đóng). \\ \cline{2-4} 
-     & 10 & Hệ thống & Chốt hạn mức Coupon (nếu có), tạo Order và chuyển trạng thái TeamCart sang "Converted". Thông báo đặt hàng thành công cho tất cả thành viên. \\ \hline
+     & 10 & Hệ thống & Chốt hạn mức Coupon (nếu có), tạo Order và chuyển trạng thái \gls{teamcart} sang "Converted". Thông báo đặt hàng thành công cho tất cả thành viên. \\ \hline
     \textbf{Luồng sự kiện thay thế} & \textbf{STT} & \textbf{Thực hiện bởi} & \textbf{Hành động} \\ \cline{2-4} 
-     & 4a & Hệ thống & Từ chối chốt giá nếu TeamCart không ở trạng thái Locked (CannotFinalizePricingInCurrentStatus). \\ \cline{2-4} 
-     & 6a & Hệ thống & Từ chối thanh toán nếu TeamCart chưa ở trạng thái Finalized (CanOnlyPayOnFinalizedCart). \\ \cline{2-4} 
+     & 4a & Hệ thống & Từ chối chốt giá nếu \gls{teamcart} không ở trạng thái Locked (CannotFinalizePricingInCurrentStatus). \\ \cline{2-4} 
+     & 6a & Hệ thống & Từ chối thanh toán nếu \gls{teamcart} chưa ở trạng thái Finalized (CanOnlyPayOnFinalizedCart). \\ \cline{2-4} 
      & 9a & Hệ thống & Báo lỗi nếu thông tin báo giá (Quote) đã thay đổi hoặc không khớp (xung đột Quote Version). \\ \cline{2-4} 
      & 9b & Hệ thống & Báo lỗi nếu tổng số tiền thanh toán từ các thành viên chưa đủ khớp với tổng đơn hàng. \\ \cline{2-4} 
      & 10a & Hệ thống & Báo lỗi nếu Coupon hết lượt sử dụng tại thời điểm chốt đơn. \\ \hline
-    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đơn hàng được tạo thành công trên hệ thống. TeamCart hoàn tất vòng đời và được chuyển đổi thành một đơn hàng bình thường, Host có thể theo dõi đơn hàng này.} \\ \hline
+    \textbf{Hậu điều kiện} & \multicolumn{3}{p{11.5cm}|}{Đơn hàng được tạo thành công trên hệ thống. \gls{teamcart} hoàn tất vòng đời và được chuyển đổi thành một đơn hàng bình thường, Host có thể theo dõi đơn hàng này.} \\ \hline
 \end{longtable}
 
 Dữ liệu đầu vào cho bước Chốt giá (Finalize Pricing):
@@ -524,14 +524,14 @@ Dữ liệu đầu vào cho bước Chốt giá (Finalize Pricing):
     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Dữ liệu đầu vào Chốt giá TeamCart} \label{tab:input_uc_004c_finalize} \\
+    \caption{Dữ liệu đầu vào Chốt giá \gls{teamcart}} \label{tab:input_uc_004c_finalize} \\
     \endlastfoot
 
     1 & TeamCartId & ID giỏ hàng nhóm & Có & GUID hợp lệ, trạng thái Locked \\ \hline
     2 & QuoteVersion & Phiên bản báo giá hiện tại & Có & Số nguyên không âm, khớp phiên bản mới nhất \\ \hline
 \end{longtable}
 
-Dữ liệu đầu vào cho use case Chốt đơn TeamCart (Bước xác nhận cuối cùng):
+Dữ liệu đầu vào cho use case Chốt đơn \gls{teamcart} (Bước xác nhận cuối cùng):
 
 \begin{longtable}{|c|p{3cm}|p{4cm}|c|p{3cm}|}
     \hline
@@ -547,7 +547,7 @@ Dữ liệu đầu vào cho use case Chốt đơn TeamCart (Bước xác nhận 
     \multicolumn{5}{r}{\textit{(Tiếp tục trang sau)}} \\
     \endfoot
     
-    \caption{Dữ liệu đầu vào Chốt đơn TeamCart} \label{tab:input_uc_004c} \\
+    \caption{Dữ liệu đầu vào Chốt đơn \gls{teamcart}} \label{tab:input_uc_004c} \\
     \endlastfoot
 
     1 & TeamCartId & ID giỏ hàng nhóm & Có & GUID hợp lệ, trạng thái ReadyToConfirm \\ \hline

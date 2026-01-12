@@ -37,21 +37,13 @@ module resources 'resources.bicep' = {
   }
 }
 
-module cache 'cache/cache.module.bicep' = {
-  name: 'cache'
+module redis 'redis/redis-containerapp.module.bicep' = {
+  name: 'redis'
   scope: rg
   params: {
     location: location
-  }
-}
-module cache_roles 'cache-roles/cache-roles.module.bicep' = {
-  name: 'cache-roles'
-  scope: rg
-  params: {
-    cache_outputs_name: cache.outputs.name
-    location: location
-    principalId: resources.outputs.MANAGED_IDENTITY_PRINCIPAL_ID
-    principalName: resources.outputs.MANAGED_IDENTITY_NAME
+    tags: tags
+    containerAppsEnvironmentId: resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_ID
   }
 }
 
@@ -90,7 +82,7 @@ module keyvaultSecrets 'keyvault/keyvault-secrets.module.bicep' = {
   params: {
     vaultName: keyvault.outputs.keyVaultName
     postgresConn: postgres.outputs.connectionString
-    redisConn: cache.outputs.connectionString
+    redisConn: redis.outputs.connectionString
   }
 }
 
@@ -103,7 +95,7 @@ output AZURE_CONTAINER_REGISTRY_NAME string = resources.outputs.AZURE_CONTAINER_
 output AZURE_CONTAINER_APPS_ENVIRONMENT_NAME string = resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_NAME
 output AZURE_CONTAINER_APPS_ENVIRONMENT_ID string = resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_ID
 output AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN string = resources.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN
-output REDIS_CONNECTIONSTRING string = cache.outputs.connectionString
+output REDIS_CONNECTIONSTRING string = redis.outputs.connectionString
 output POSTGRES_CONNECTIONSTRING string = postgres.outputs.connectionString
 output KEYVAULT_URI string = keyvault.outputs.keyVaultUri
 output KEYVAULT_NAME string = keyvault.outputs.keyVaultName

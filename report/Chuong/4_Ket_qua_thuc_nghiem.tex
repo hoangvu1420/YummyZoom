@@ -5,48 +5,48 @@
 \subsection{Lựa chọn kiến trúc phần mềm}
 \label{subsec:4.1.1}
 
-Dựa trên các yêu cầu nghiệp vụ phức tạp của hệ thống YummyZoom, đặc biệt là tính năng đặt hàng nhóm (TeamCart) với yêu cầu về tính nhất quán dữ liệu cao và khả năng xử lý đồng thời, đồ án lựa chọn áp dụng kiến trúc Clean Architecture (Kiến trúc Sạch) kết hợp với tư duy thiết kế Domain-Driven Design (DDD). Về mặt triển khai, hệ thống được xây dựng theo mô hình Monolithic Modular (Đơn khối module hóa).
+Dựa trên các yêu cầu nghiệp vụ phức tạp của hệ thống \gls{yummyzoom}, đặc biệt là tính năng đặt hàng nhóm (\gls{teamcart}) với yêu cầu về tính nhất quán dữ liệu cao và khả năng xử lý đồng thời, đồ án lựa chọn áp dụng kiến trúc \gls{cleanarchitecture} (Kiến trúc Sạch) kết hợp với tư duy thiết kế Domain-Driven Design (\gls{ddd}). Về mặt triển khai, hệ thống được xây dựng theo mô hình Monolithic Modular (Đơn khối module hóa).
 
 \subsubsection{Mô hình kiến trúc tổng thể}
-Thay vì lựa chọn kiến trúc Microservices ngay từ đầu - vốn đòi hỏi chi phí vận hành và quản lý hạ tầng lớn, hay kiến trúc Layered (3 lớp) truyền thống dễ gây ra sự phụ thuộc chặt chẽ vào cơ sở dữ liệu, nhóm phát triển quyết định sử dụng mô hình Monolithic Modular. Mô hình này giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng. Toàn bộ mã nguồn nằm trong một giải pháp (Solution) thống nhất, giúp việc gỡ lỗi (debug), kiểm thử và tái cấu trúc (refactor) trở nên dễ dàng hơn. Đồng thời, các ranh giới nghiệp vụ (Modular Boundaries) được tổ chức độc lập về mặt logic dựa trên các Ngữ cảnh giới hạn (Bounded Contexts). Điều này tạo tiền đề vững chắc để tách thành các Microservices riêng biệt khi hệ thống cần mở rộng quy mô trong tương lai mà không làm phá vỡ cấu trúc hiện tại. Hơn nữa, Clean Architecture giúp cô lập logic nghiệp vụ (Domain) khỏi các yếu tố thay đổi thường xuyên như giao diện người dùng (UI) hay công nghệ lưu trữ (Database).
+Thay vì lựa chọn kiến trúc Microservices ngay từ đầu - vốn đòi hỏi chi phí vận hành và quản lý hạ tầng lớn, hay kiến trúc Layered (3 lớp) truyền thống dễ gây ra sự phụ thuộc chặt chẽ vào cơ sở dữ liệu, tôi quyết định sử dụng mô hình Monolithic Modular. Mô hình này giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng. Toàn bộ mã nguồn nằm trong một giải pháp (Solution) thống nhất, giúp việc gỡ lỗi (debug), kiểm thử và tái cấu trúc (refactor) trở nên dễ dàng hơn. Đồng thời, các ranh giới nghiệp vụ (Modular Boundaries) được tổ chức độc lập về mặt logic dựa trên các Ngữ cảnh giới hạn (Bounded Contexts). Điều này tạo tiền đề vững chắc để tách thành các Microservices riêng biệt khi hệ thống cần mở rộng quy mô trong tương lai mà không làm phá vỡ cấu trúc hiện tại. Hơn nữa, \gls{cleanarchitecture} giúp cô lập logic nghiệp vụ (Domain) khỏi các yếu tố thay đổi thường xuyên như giao diện người dùng (UI) hay công nghệ lưu trữ (Database).
 
 \subsubsection{Tổ chức các tầng kiến trúc (Layered Architecture)}
-Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule) của Clean Architecture: "Mọi sự phụ thuộc của mã nguồn chỉ được hướng vào bên trong". Cấu trúc dự án được phân chia thành bốn lớp chính với vai trò và trách nhiệm rõ ràng.
+Hệ thống tuân thủ nghiêm ngặt quy tắc phụ thuộc (Dependency Rule) của \gls{cleanarchitecture}: "Mọi sự phụ thuộc của mã nguồn chỉ được hướng vào bên trong". Cấu trúc dự án được phân chia thành bốn lớp chính với vai trò và trách nhiệm rõ ràng.
 
 Lớp trong cùng và quan trọng nhất là Lớp Miền (Domain Layer). Đây là lõi trung tâm của hệ thống, nơi chứa các quy tắc nghiệp vụ bất biến của doanh nghiệp, bao gồm các Thực thể (Entities), Đối tượng giá trị (Value Objects), và các Sự kiện miền (Domain Events). Lớp này hoàn toàn không phụ thuộc vào bất kỳ thư viện bên ngoài, framework hay công nghệ cơ sở dữ liệu nào, đảm bảo logic nghiệp vụ luôn trong sáng và dễ dàng kiểm thử.
 
 Bao bọc bên ngoài lớp miền là Lớp Ứng dụng (Application Layer). Lớp này đóng vai trò điều phối các ca sử dụng (Use Cases) của hệ thống. Nhiệm vụ chính của nó là nhận yêu cầu từ các lớp bên ngoài, điều phối các đối tượng trong lớp miền thực hiện các tác vụ nghiệp vụ và trả về kết quả. Lớp ứng dụng định nghĩa các giao diện (Interfaces) cho các dịch vụ hạ tầng nhưng không trực tiếp thực thi chúng.
 
-Tiếp theo là Lớp Hạ tầng (Infrastructure Layer), nơi cung cấp các triển khai cụ thể cho các giao diện kỹ thuật được định nghĩa ở lớp ứng dụng. Đây là nơi các công nghệ cụ thể như Entity Framework Core để truy xuất dữ liệu, các dịch vụ gửi email, thanh toán hay thông báo đẩy được tích hợp vào hệ thống. Lớp này phụ thuộc vào lớp ứng dụng và lớp miền, đóng vai trò như một bộ chuyển đổi (adapter) kết nối hệ thống với các công cụ bên ngoài.
+Tiếp theo là Lớp Hạ tầng (Infrastructure Layer), nơi cung cấp các triển khai cụ thể cho các giao diện kỹ thuật được định nghĩa ở lớp ứng dụng. Đây là nơi các công nghệ cụ thể như \gls{efcore} để truy xuất dữ liệu, các dịch vụ gửi email, thanh toán hay thông báo đẩy được tích hợp vào hệ thống. Lớp này phụ thuộc vào lớp ứng dụng và lớp miền, đóng vai trò như một bộ chuyển đổi (adapter) kết nối hệ thống với các công cụ bên ngoài.
 
 Lớp ngoài cùng là Lớp Giao diện (Web/Presentation Layer). Đây là điểm tiếp xúc với người dùng hoặc các hệ thống khác, chịu trách nhiệm tiếp nhận các yêu cầu HTTP, xác thực người dùng, gọi xuống lớp ứng dụng để xử lý và trả về phản hồi thích hợp (thường là định dạng JSON).
 
-Trong thực tế triển khai của dự án YummyZoom, các lý thuyết trên được hiện thực hóa thông qua cấu trúc dự án cụ thể. YummyZoom.Domain đóng gói toàn bộ logic cốt lõi, ví dụ như Aggregate TeamCart đảm bảo quy tắc chỉ chủ phòng mới có quyền chốt đơn. YummyZoom.Application chứa các Command và Query Handlers, chẳng hạn như AddItemToTeamCartCommand sẽ kích hoạt phương thức thêm món trong Domain. YummyZoom.Infrastructure chịu trách nhiệm thực thi việc lưu trữ xuống PostgreSQL hay giao tiếp với Stripe. Cuối cùng, YummyZoom.Web cung cấp các API Endpoints và SignalR Hubs để phục vụ ứng dụng di động và web quản trị.
+Trong thực tế triển khai của dự án \gls{yummyzoom}, các lý thuyết trên được hiện thực hóa thông qua cấu trúc dự án cụ thể. \gls{yummyzoom}.Domain đóng gói toàn bộ logic cốt lõi, ví dụ như Aggregate \gls{teamcart} đảm bảo quy tắc chỉ chủ phòng mới có quyền chốt đơn. \gls{yummyzoom}.Application chứa các Command và Query Handlers, chẳng hạn như AddItemToTeamCartCommand sẽ kích hoạt phương thức thêm món trong Domain. \gls{yummyzoom}.Infrastructure chịu trách nhiệm thực thi việc lưu trữ xuống \gls{postgresql} hay giao tiếp với Stripe. Cuối cùng, \gls{yummyzoom}.Web cung cấp các \gls{api} Endpoints và \gls{signalr} Hubs để phục vụ ứng dụng di động và web quản trị.
 
 \subsubsection{Thiết kế chiến lược (Strategic Design)}
-Áp dụng chiến lược của DDD, hệ thống được chia nhỏ thành các Ngữ cảnh giới hạn (Bounded Contexts), mỗi ngữ cảnh giải quyết một vấn đề nghiệp vụ cụ thể và có Ngôn ngữ chung (Ubiquitous Language) riêng. Đầu tiên là Identity Context, chịu trách nhiệm quản lý người dùng, phân quyền và xác thực. Tiếp đến là Catalog Context, quản lý thực đơn, danh mục, thông tin nhà hàng, món ăn và các tùy chọn. Quan trọng nhất là TeamCart Context, xử lý logic chia sẻ giỏ hàng, đồng bộ trạng thái thời gian thực và phân chia hóa đơn. Cuối cùng là Ordering Context, xử lý quy trình đặt hàng, thanh toán và vòng đời của đơn hàng sau khi được chốt.
+Áp dụng chiến lược của \gls{ddd}, hệ thống được chia nhỏ thành các Ngữ cảnh giới hạn (Bounded Contexts), mỗi ngữ cảnh giải quyết một vấn đề nghiệp vụ cụ thể và có Ngôn ngữ chung (Ubiquitous Language) riêng. Đầu tiên là Identity Context, chịu trách nhiệm quản lý người dùng, phân quyền và xác thực. Tiếp đến là Catalog Context, quản lý thực đơn, danh mục, thông tin nhà hàng, món ăn và các tùy chọn. Quan trọng nhất là \gls{teamcart} Context, xử lý logic chia sẻ giỏ hàng, đồng bộ trạng thái thời gian thực và phân chia hóa đơn. Cuối cùng là Ordering Context, xử lý quy trình đặt hàng, thanh toán và vòng đời của đơn hàng sau khi được chốt.
 
 \subsubsection{Các mẫu kỹ thuật chủ đạo (Tactical Patterns)}
-Để tối ưu hóa hiệu năng và khả năng bảo trì, hệ thống áp dụng các mẫu thiết kế kỹ thuật nâng cao, tiêu biểu là CQRS (Command Query Responsibility Segregation) và Domain Events.
+Để tối ưu hóa hiệu năng và khả năng bảo trì, hệ thống áp dụng các mẫu thiết kế kỹ thuật nâng cao, tiêu biểu là \gls{cqrs} (Command Query Responsibility Segregation) và Domain Events.
 
-Mẫu CQRS giúp hệ thống tách biệt rõ ràng luồng Đọc (Query) và Ghi (Command) dữ liệu. Phần Ghi sử dụng Entity Framework Core kết hợp với Domain Model để đảm bảo tính toàn vẹn dữ liệu khi thực hiện các thay đổi nghiệp vụ. Trong khi đó, Phần Đọc sử dụng Dapper với SQL để truy vấn dữ liệu trực tiếp và trả về các DTO phẳng, tối ưu hóa tốc độ phản hồi cho người dùng.
+Mẫu \gls{cqrs} giúp hệ thống tách biệt rõ ràng luồng Đọc (Query) và Ghi (Command) dữ liệu. Phần Ghi sử dụng \gls{efcore} kết hợp với Domain Model để đảm bảo tính toàn vẹn dữ liệu khi thực hiện các thay đổi nghiệp vụ. Trong khi đó, Phần Đọc sử dụng Dapper với SQL để truy vấn dữ liệu trực tiếp và trả về các \gls{dto} phẳng, tối ưu hóa tốc độ phản hồi cho người dùng.
 
 Bên cạnh đó, mẫu Domain Events kết hợp với Outbox Pattern được sử dụng để giải quyết bài toán về tính nhất quán cuối cùng (Eventual Consistency). Khi một nghiệp vụ quan trọng hoàn tất, hệ thống sinh ra một sự kiện miền và lưu vào bảng Outbox trong cùng một giao dịch cơ sở dữ liệu. Một tiến trình nền sẽ đọc bảng này và thực hiện các tác vụ phụ như gửi email hay thông báo, đảm bảo rằng các tác vụ bên lề không làm ảnh hưởng đến hiệu năng của luồng nghiệp vụ chính.
 
 \subsubsection{Kết luận}
-Việc lựa chọn kiến trúc Clean Architecture kết hợp DDD và CQRS mang lại nền tảng vững chắc cho hệ thống YummyZoom. Kiến trúc này không chỉ giải quyết tốt các bài toán nghiệp vụ phức tạp hiện tại về đặt hàng nhóm mà còn đảm bảo các tiêu chí phi chức năng quan trọng: dễ dàng kiểm thử (Testability), dễ bảo trì (Maintainability) và sẵn sàng mở rộng (Scalability) trong tương lai.
+Việc lựa chọn kiến trúc \gls{cleanarchitecture} kết hợp \gls{ddd} và \gls{cqrs} mang lại nền tảng vững chắc cho hệ thống \gls{yummyzoom}. Kiến trúc này không chỉ giải quyết tốt các bài toán nghiệp vụ phức tạp hiện tại về đặt hàng nhóm mà còn đảm bảo các tiêu chí phi chức năng quan trọng: dễ dàng kiểm thử (Testability), dễ bảo trì (Maintainability) và sẵn sàng mở rộng (Scalability) trong tương lai.
 
 \subsection{Thiết kế tổng quan}
-Biểu đồ gói tổng quan của hệ thống YummyZoom thể hiện sự phân tầng rõ ràng và các ràng buộc phụ thuộc tuân thủ quy tắc Clean Architecture. 
+Biểu đồ gói tổng quan của hệ thống \gls{yummyzoom} thể hiện sự phân tầng rõ ràng và các ràng buộc phụ thuộc tuân thủ quy tắc \gls{cleanarchitecture}. 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, height=0.70\textheight, keepaspectratio]{Hinhve/package_overview.png}
-    \caption{Biểu đồ phụ thuộc gói tổng quan YummyZoom (Backend)}
+    \caption{Biểu đồ phụ thuộc gói tổng quan \gls{yummyzoom} (Backend)}
     \label{fig:FigPackageOverview}
 \end{figure}
 
 \subsection{Thiết kế chi tiết gói}
-Mục tiêu của phần này là minh họa cách tổ chức mã nguồn và hiện thực hóa kiến trúc Clean Architecture thông qua các biểu đồ gói (Package Diagrams). Do số lượng gói trong các lớp miền (Domain), lớp ứng dụng (Application) và lớp hạ tầng (Infrastructure) của hệ thống tương đối lớn, đồ án lựa chọn luồng nghiệp vụ \textbf{Khởi tạo đơn hàng} là luồng tiêu biểu nhất để phân tích chi tiết. Thiết kế được trình bày thành hai phần riêng biệt bao gồm: thiết kế cho lớp miền và thiết kế cho lớp ứng dụng kết hợp hạ tầng.
+Mục tiêu của phần này là minh họa cách tổ chức mã nguồn và hiện thực hóa kiến trúc \gls{cleanarchitecture} thông qua các biểu đồ gói (Package Diagrams). Do số lượng gói trong các lớp miền (Domain), lớp ứng dụng (Application) và lớp hạ tầng (Infrastructure) của hệ thống tương đối lớn, đồ án lựa chọn luồng nghiệp vụ \textbf{Khởi tạo đơn hàng} là luồng tiêu biểu nhất để phân tích chi tiết. Thiết kế được trình bày thành hai phần riêng biệt bao gồm: thiết kế cho lớp miền và thiết kế cho lớp ứng dụng kết hợp hạ tầng.
 
 \subsubsection{Thiết kế lớp miền (Domain Layer)}
 Biểu đồ tại Hình \ref{fig:PkgOrderDomain} minh họa các thành phần cốt lõi trong lớp miền phục vụ cho nghiệp vụ khởi tạo đơn hàng. Tại đây, lớp \texttt{Order} đóng vai trò là gốc tập hợp (Aggregate Root), trung tâm quản lý mọi thay đổi và đảm bảo tính nhất quán của dữ liệu.
@@ -72,7 +72,7 @@ Sự tương tác giữa các tầng còn lại để hiện thực hóa luồng
 
 Tại lớp giao diện (Web layer), \texttt{OrdersEndpoints} đóng vai trò tiếp nhận các yêu cầu HTTP từ phía người dùng, chuyển đổi dữ liệu và gửi mệnh lệnh xuống lớp ứng dụng. Lớp ứng dụng (Application layer) chứa các ca sử dụng dự án, tiêu biểu là \texttt{InitiateOrderCommandHandler}. Thành phần này chịu trách nhiệm điều phối luồng xử lý: gọi xuống lớp miền để khởi tạo đối tượng nghiệp vụ, sau đó tương tác với các giao diện (Interfaces) trừu tượng như \texttt{IPaymentGatewayService} hay \texttt{IOrderRepository}.
 
-Điểm quan trọng trong thiết kế này là việc áp dụng nguyên lý đảo ngược sự phụ thuộc (Dependency Inversion Principle). Lớp ứng dụng chỉ phụ thuộc vào các giao diện do chính nó định nghĩa. Việc hiện thực hóa các giao diện này bằng các công nghệ cụ thể như Entity Framework Core hay Stripe được đặt hoàn toàn tại lớp hạ tầng (Infrastructure layer). Cách tổ chức này giúp hệ thống linh hoạt, dễ dàng thay thế công nghệ hoặc thư viện bên thứ ba mà không làm ảnh hưởng đến logic nghiệp vụ cốt lõi.
+Điểm quan trọng trong thiết kế này là việc áp dụng nguyên lý đảo ngược sự phụ thuộc (Dependency Inversion Principle). Lớp ứng dụng chỉ phụ thuộc vào các giao diện do chính nó định nghĩa. Việc hiện thực hóa các giao diện này bằng các công nghệ cụ thể như \gls{efcore} hay Stripe được đặt hoàn toàn tại lớp hạ tầng (Infrastructure layer). Cách tổ chức này giúp hệ thống linh hoạt, dễ dàng thay thế công nghệ hoặc thư viện bên thứ ba mà không làm ảnh hưởng đến logic nghiệp vụ cốt lõi.
 
 \subsubsection{Luồng thực thi tổng thể}
 Quy trình khởi tạo đơn hàng bắt đầu khi yêu cầu từ người dùng được gửi đến lớp giao diện và chuyển thành mệnh lệnh (Command) tại lớp ứng dụng. Bộ xử lý (Handler) tại lớp ứng dụng sẽ sử dụng các dịch vụ miền để tính toán và khởi tạo đơn hàng hợp lệ. Sau đó, thông qua các giao diện trừu tượng, hệ thống thực hiện xử lý thanh toán và lưu trữ dữ liệu bền vững xuống cơ sở dữ liệu. Cuối cùng, các sự kiện miền được phát ra để kích hoạt các quy trình hậu xử lý như gửi thông báo hoặc gửi email xác nhận, hoàn tất chu trình nghiệp vụ một cách toàn vẹn và an toàn.
@@ -100,7 +100,7 @@ Các màn hình tiêu biểu được lựa chọn nhằm phản ánh đầy đ�
 %     \includegraphics[width=0.48\textwidth]{Hinhve/mobile-teamcart_lobby.png}
 %     \hfill
 %     \includegraphics[width=0.48\textwidth]{Hinhve/mobile-checkout_payment.png}
-%     \caption{Minh hoạ màn hình TeamCart Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}
+%     \caption{Minh hoạ màn hình \gls{teamcart} Lobby (trái) và Checkout/Payment (phải) trên ứng dụng di động}
 %     \label{fig:mobile-teamcart-checkout}
 % \end{figure}
 
@@ -138,7 +138,7 @@ Các màn hình minh họa tập trung vào những chức năng cốt lõi củ
 % \end{figure}
 
 \subsection{Thiết kế lớp}
-Trong dự án YummyZoom, phần lớn quy tắc nghiệp vụ được đóng gói tại lớp miền (Domain layer) theo Clean Architecture, do đó phần thiết kế lớp tập trung vào các aggregate root tiêu biểu. Ba lớp được lựa chọn gồm Order, TeamCart và Restaurant vì đây là các lớp chịu trách nhiệm quản lý vòng đời, trạng thái và các bất biến nghiệp vụ quan trọng của hệ thống. Đối với các lớp ở lớp ứng dụng (Application layer), nội dung chỉ trình bày ở mức vai trò điều phối luồng, bởi đa số các handler chỉ thực hiện một phương thức \textit{Handle} với logic mỏng.
+Trong dự án \gls{yummyzoom}, phần lớn quy tắc nghiệp vụ được đóng gói tại lớp miền (Domain layer) theo \gls{cleanarchitecture}, do đó phần thiết kế lớp tập trung vào các aggregate root tiêu biểu. Ba lớp được lựa chọn gồm Order, \gls{teamcart} và Restaurant vì đây là các lớp chịu trách nhiệm quản lý vòng đời, trạng thái và các bất biến nghiệp vụ quan trọng của hệ thống. Đối với các lớp ở lớp ứng dụng (Application layer), nội dung chỉ trình bày ở mức vai trò điều phối luồng, bởi đa số các handler chỉ thực hiện một phương thức \textit{Handle} với logic mỏng.
 
 Lớp Order đại diện cho đơn hàng, quản lý dữ liệu tài chính, danh sách món đã đặt và các mốc trạng thái trong vòng đời xử lý. Thiết kế của lớp thể hiện rõ các thuộc tính tài chính (Subtotal, DiscountAmount, DeliveryFee, TipAmount, TaxAmount, TotalAmount) cùng các phương thức chuyển trạng thái như Accept, Reject, MarkAsPreparing, MarkAsReadyForDelivery và MarkAsDelivered, đồng thời phát sinh các sự kiện miền tương ứng phục vụ đồng bộ trạng thái theo thời gian thực. Hình \ref{fig:class-order} mô tả cấu trúc lớp Order và các mối quan hệ chính.
 
@@ -149,12 +149,12 @@ Lớp Order đại diện cho đơn hàng, quản lý dữ liệu tài chính, d
     \label{fig:class-order}
 \end{figure}
 
-Lớp TeamCart mô hình hóa giỏ hàng nhóm, cho phép nhiều người cùng đặt món và phối hợp thanh toán. Các thuộc tính cốt lõi gồm thông tin thành viên, danh sách món, trạng thái giỏ và các cấu phần tài chính như TipAmount và QuoteVersion. Các phương thức như AddItem, LockForPayment, FinalizePricing và RecordSuccessfulOnlinePayment giúp đảm bảo tính nhất quán của luồng thanh toán nhóm. Hình \ref{fig:class-teamcart} trình bày thiết kế lớp TeamCart.
+Lớp \gls{teamcart} mô hình hóa giỏ hàng nhóm, cho phép nhiều người cùng đặt món và phối hợp thanh toán. Các thuộc tính cốt lõi gồm thông tin thành viên, danh sách món, trạng thái giỏ và các cấu phần tài chính như TipAmount và QuoteVersion. Các phương thức như AddItem, LockForPayment, FinalizePricing và RecordSuccessfulOnlinePayment giúp đảm bảo tính nhất quán của luồng thanh toán nhóm. Hình \ref{fig:class-teamcart} trình bày thiết kế lớp \gls{teamcart}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Hinhve/class-TeamCart.png}
-    \caption{Biểu đồ lớp của TeamCart (Aggregate root)}
+    \caption{Biểu đồ lớp của \gls{teamcart} (Aggregate root)}
     \label{fig:class-teamcart}
 \end{figure}
 
@@ -167,7 +167,7 @@ Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh v�
     \label{fig:class-restaurant}
 \end{figure}
 
-Để minh họa cách các lớp phối hợp trong các ca sử dụng quan trọng, hai luồng chính được lựa chọn gồm chuyển TeamCart thành Order và cập nhật trạng thái đơn hàng. Luồng chuyển TeamCart thành Order nhấn mạnh vai trò của Domain Service trong việc ánh xạ dữ liệu và tính toán tài chính trước khi tạo Order và cập nhật TeamCart. Luồng cập nhật trạng thái đơn hàng thể hiện các chuyển trạng thái hợp lệ trong Order và phát sinh sự kiện miền để phục vụ cập nhật thời gian thực. Các luồng này được trình bày lần lượt tại Hình \ref{fig:flow-convert-teamcart} và Hình \ref{fig:flow-update-order-status}.
+Để minh họa cách các lớp phối hợp trong các ca sử dụng quan trọng, hai luồng chính được lựa chọn gồm chuyển \gls{teamcart} thành Order và cập nhật trạng thái đơn hàng. Luồng chuyển \gls{teamcart} thành Order nhấn mạnh vai trò của Domain Service trong việc ánh xạ dữ liệu và tính toán tài chính trước khi tạo Order và cập nhật \gls{teamcart}. Luồng cập nhật trạng thái đơn hàng thể hiện các chuyển trạng thái hợp lệ trong Order và phát sinh sự kiện miền để phục vụ cập nhật thời gian thực. Các luồng này được trình bày lần lượt tại Hình \ref{fig:flow-convert-teamcart} và Hình \ref{fig:flow-update-order-status}.
 
 % \begin{figure}[H]
 %     \centering
@@ -179,7 +179,7 @@ Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh v�
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth,height=0.95\textheight]{Hinhve/flow-ConvertTeamCart.png}
-    \caption{Biểu đồ trình tự chuyển TeamCart thành Order}
+    \caption{Biểu đồ trình tự chuyển \gls{teamcart} thành Order}
     \label{fig:flow-convert-teamcart}
 \end{figure}
 
@@ -191,20 +191,20 @@ Lớp Restaurant quản lý hồ sơ nhà hàng, các thông tin định danh v�
 \end{figure}
 
 \subsection{Thiết kế cơ sở dữ liệu}
-Trong dự án YummyZoom, cơ sở dữ liệu được triển khai trên PostgreSQL. Phần thiết kế dữ liệu được trình bày theo hai tầng: mô hình khái niệm bằng ERD kiểu Chen để mô tả thế giới thực và các thực thể nghiệp vụ, và mô hình quan hệ chi tiết phản ánh cấu trúc bảng sau khi ánh xạ vào cơ sở dữ liệu. Nguồn lược đồ tổng hợp được đối chiếu từ tài liệu kiến trúc, nhằm đảm bảo tính nhất quán giữa mô hình miền và dữ liệu lưu trữ.
+Trong dự án \gls{yummyzoom}, cơ sở dữ liệu được triển khai trên \gls{postgresql}. Phần thiết kế dữ liệu được trình bày theo hai tầng: mô hình khái niệm bằng ERD kiểu Chen để mô tả thế giới thực và các thực thể nghiệp vụ, và mô hình quan hệ chi tiết phản ánh cấu trúc bảng sau khi ánh xạ vào cơ sở dữ liệu. Nguồn lược đồ tổng hợp được đối chiếu từ tài liệu kiến trúc, nhằm đảm bảo tính nhất quán giữa mô hình miền và dữ liệu lưu trữ.
 
 Biểu đồ ERD khái niệm theo Chen tập trung vào các thực thể cốt lõi như Người dùng, Nhà hàng, Thực đơn, Món ăn, Đơn hàng và Giỏ nhóm, cùng các quan hệ nghiệp vụ giữa chúng. Mỗi thực thể chỉ giữ lại một số thuộc tính chính như định danh, trạng thái, thông tin mô tả và giá trị tiền tệ, giúp làm rõ bức tranh nghiệp vụ mà chưa bị ràng buộc bởi chi tiết triển khai. Hình \ref{fig:erd-chen} mô tả toàn bộ ERD khái niệm, trong đó các quan hệ chính như Nhà hàng–Thực đơn, Người dùng–Đơn hàng, Đơn hàng–Mục đơn hàng và Giỏ nhóm–Thành viên được biểu diễn rõ ràng theo bội số.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Hinhve/erd.png}
-    \caption{ERD khái niệm theo mô hình Chen cho YummyZoom}
+    \caption{ERD khái niệm theo mô hình Chen cho \gls{yummyzoom}}
     \label{fig:erd-chen}
 \end{figure}
 
-Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mapping) từ mô hình miền (domain model) sang cơ sở dữ liệu quan hệ. Mỗi aggregate root được ánh xạ thành một bảng chính, ví dụ Order tương ứng bảng Orders, Restaurant tương ứng bảng Restaurants, TeamCart tương ứng bảng TeamCarts. Các thực thể có danh tính trong một aggregate được tách thành bảng con và liên kết bằng khóa ngoại về bảng gốc, chẳng hạn OrderItems và PaymentTransactions phụ thuộc Orders, TeamCartItems và TeamCartMembers phụ thuộc TeamCarts. Các giá trị bất biến dạng đối tượng giá trị (value object) được ánh xạ thành các cột trong bảng chính với tiền tố tên thuộc tính, ví dụ DeliveryAddress\_Street hoặc TipAmount\_Amount; với các giá trị phức tạp hoặc danh sách linh hoạt thì lưu dưới dạng JSONB để giảm độ phức tạp lược đồ. Quy tắc này được hiện thực nhất quán thông qua cấu hình EF Core (Fluent API) trong các lớp Configuration thuộc tầng Infrastructure, đồng thời các trạng thái dạng enum được lưu dưới dạng chuỗi để dễ đọc và theo dõi. 
+Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mapping) từ mô hình miền (domain model) sang cơ sở dữ liệu quan hệ. Mỗi aggregate root được ánh xạ thành một bảng chính, ví dụ Order tương ứng bảng Orders, Restaurant tương ứng bảng Restaurants, \gls{teamcart} tương ứng bảng TeamCarts. Các thực thể có danh tính trong một aggregate được tách thành bảng con và liên kết bằng khóa ngoại về bảng gốc, chẳng hạn OrderItems và PaymentTransactions phụ thuộc Orders, TeamCartItems và TeamCartMembers phụ thuộc TeamCarts. Các giá trị bất biến dạng đối tượng giá trị (value object) được ánh xạ thành các cột trong bảng chính với tiền tố tên thuộc tính, ví dụ DeliveryAddress\_Street hoặc TipAmount\_Amount; với các giá trị phức tạp hoặc danh sách linh hoạt thì lưu dưới dạng \gls{jsonb} để giảm độ phức tạp lược đồ. Quy tắc này được hiện thực nhất quán thông qua cấu hình \gls{efcore} (Fluent \gls{api}) trong các lớp Configuration thuộc tầng Infrastructure, đồng thời các trạng thái dạng enum được lưu dưới dạng chuỗi để dễ đọc và theo dõi. 
 
-Ở mức triển khai vật lý, số lượng bảng lớn được chia nhỏ theo từng nhóm chức năng để trình bày rõ ràng. Hình \ref{fig:erd-catalog} mô tả nhóm Restaurant Catalog, gồm Restaurants, Menus, MenuCategories, MenuItems và các bảng tùy chọn món; nhóm này phản ánh cấu trúc dữ liệu phục vụ duyệt thực đơn và quản trị nội dung. Hình \ref{fig:erd-order-teamcart} trình bày nhóm Order \& TeamCart, làm rõ cấu trúc lưu trữ đơn hàng, mục đơn hàng, thanh toán, giỏ nhóm và thành viên. 
+Ở mức triển khai vật lý, số lượng bảng lớn được chia nhỏ theo từng nhóm chức năng để trình bày rõ ràng. Hình \ref{fig:erd-catalog} mô tả nhóm Restaurant Catalog, gồm Restaurants, Menus, MenuCategories, MenuItems và các bảng tùy chọn món; nhóm này phản ánh cấu trúc dữ liệu phục vụ duyệt thực đơn và quản trị nội dung. Hình \ref{fig:erd-order-teamcart} trình bày nhóm Order \& \gls{teamcart}, làm rõ cấu trúc lưu trữ đơn hàng, mục đơn hàng, thanh toán, giỏ nhóm và thành viên. 
 
 \begin{figure}[H]
     \centering
@@ -216,7 +216,7 @@ Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mappin
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Hinhve/erd-order-teamcart.png}
-    \caption{ERD hiện đại cho nhóm Order và TeamCart}
+    \caption{ERD hiện đại cho nhóm Order và \gls{teamcart}}
     \label{fig:erd-order-teamcart}
 \end{figure}
 
@@ -229,7 +229,7 @@ Từ mô hình khái niệm, hệ thống áp dụng quy tắc ánh xạ (mappin
 
 \section{Xây dựng ứng dụng}
 \subsection{Thư viện và công cụ sử dụng}
-Trong quá trình phát triển hệ thống YummyZoom, nhóm phát triển đã lựa chọn và sử dụng một loạt các thư viện và công cụ nhằm tối ưu hóa quy trình làm việc, nâng cao chất lượng mã nguồn và đảm bảo hiệu suất của ứng dụng. Bảng dưới đây liệt kê các công cụ chính cùng với mục đích sử dụng và địa chỉ URL tham khảo.
+Trong quá trình phát triển hệ thống \gls{yummyzoom}, dự án đã áp dụng một loạt các thư viện và công cụ nhằm tối ưu hóa quy trình làm việc, nâng cao chất lượng mã nguồn và đảm bảo hiệu suất của ứng dụng. Bảng dưới đây liệt kê các công cụ chính cùng với mục đích sử dụng và địa chỉ URL tham khảo.
 
 \begin{longtable}{|p{0.27\textwidth}|p{0.2\textwidth}|p{0.45\textwidth}|}
     \hline
@@ -249,34 +249,34 @@ Trong quá trình phát triển hệ thống YummyZoom, nhóm phát triển đã
     \endlastfoot
 
     IDE lập trình     & Visual Studio Code     & \url{https://code.visualstudio.com/} \\ \hline
-    IDE lập trình cho .NET & JetBrains Rider    & \url{https://www.jetbrains.com/rider/} \\ \hline
+    IDE lập trình cho \gls{dotnet} & JetBrains Rider    & \url{https://www.jetbrains.com/rider/} \\ \hline
     IDE lập trình cho Android & Android Studio & \url{https://developer.android.com/studio} \\ \hline
     Quản lý mã nguồn  & Git                    & \url{https://git-scm.com/} \\ \hline
-    Quản lý mã nguồn và CI/CD & GitHub         & \url{https://github.com/} \\ \hline
+    Quản lý mã nguồn và \gls{cicd} & GitHub         & \url{https://github.com/} \\ \hline
     AI hỗ trợ lập trình & GitHub Copilot       & \url{https://github.com/features/copilot} \\ \hline
     AI hỗ trợ lập trình & Cursor              & \url{https://www.cursor.com/} \\ \hline
-    Backend nền tảng  & .NET 9.0               & \url{https://dotnet.microsoft.com/} \\ \hline
-    Backend framework & ASP.NET Core           & \url{https://learn.microsoft.com/aspnet/core/} \\ \hline
-    ORM/DAL           & Entity Framework Core  & \url{https://learn.microsoft.com/ef/core/} \\ \hline
+    Backend nền tảng  & \gls{dotnet} 9.0               & \url{https://dotnet.microsoft.com/} \\ \hline
+    Backend framework & \gls{aspnetcore}           & \url{https://learn.microsoft.com/aspnet/core/} \\ \hline
+    \gls{orm}/DAL           & \gls{efcore}  & \url{https://learn.microsoft.com/ef/core/} \\ \hline
     Backend kiểm thử  & NUnit                  & \url{https://nunit.org/} \\ \hline
     Backend kiểm thử  & Testcontainers         & \url{https://testcontainers.com/} \\ \hline
-    Công cụ quản lý runtime & .NET Aspire     & \url{https://learn.microsoft.com/dotnet/aspire/} \\ \hline
-    Cơ sở dữ liệu     & PostgreSQL             & \url{https://www.postgresql.org/} \\ \hline
-    Bộ nhớ đệm        & Redis                  & \url{https://redis.io/} \\ \hline
-    Mobile framework  & Flutter                & \url{https://flutter.dev/} \\ \hline
+    Công cụ quản lý runtime & \gls{dotnet} Aspire     & \url{https://learn.microsoft.com/dotnet/aspire/} \\ \hline
+    Cơ sở dữ liệu     & \gls{postgresql}             & \url{https://www.postgresql.org/} \\ \hline
+    Bộ nhớ đệm        & \gls{redis}                  & \url{https://redis.io/} \\ \hline
+    Mobile framework  & \gls{flutter}                & \url{https://flutter.dev/} \\ \hline
     Mobile ngôn ngữ   & Dart                   & \url{https://dart.dev/} \\ \hline
-    Mobile UI/UX      & Flutter Material       & \url{https://docs.flutter.dev/ui/widgets/material} \\ \hline
+    Mobile UI/UX      & \gls{flutter} Material       & \url{https://docs.flutter.dev/ui/widgets/material} \\ \hline
     Mobile quản lý trạng thái      & Provider               & \url{https://pub.dev/packages/provider} \\ \hline
     Mobile lưu trữ    & Hive                   & \url{https://pub.dev/packages/hive} \\ \hline
     Mobile bản đồ        & Mapbox                 & \url{https://www.mapbox.com/} \\ \hline
     Mobile thông báo đẩy & Firebase Messaging & \url{https://firebase.google.com/docs/cloud-messaging} \\ \hline
     Mobile payment    & flutter\_stripe        & \url{https://pub.dev/packages/flutter_stripe} \\ \hline
-    Web admin framework & Angular             & \url{https://angular.dev/} \\ \hline
+    Web admin framework & \gls{angular}             & \url{https://angular.dev/} \\ \hline
     Web admin ngôn ngữ & TypeScript           & \url{https://www.typescriptlang.org/} \\ \hline
     Web admin UI      & PrimeNG + PrimeIcons   & \url{https://primeng.org/} \\ \hline
     Web admin UI      & Tailwind CSS           & \url{https://tailwindcss.com/} \\ \hline
-    Web admin cộng tác thời gian thực & SignalR JS Client & \url{https://learn.microsoft.com/aspnet/core/signalr/javascript-client} \\ \hline
-    Dịch vụ bản đồ    & Mapbox API             & \url{https://docs.mapbox.com/} \\ \hline
+    Web admin cộng tác thời gian thực & \gls{signalr} JS Client & \url{https://learn.microsoft.com/aspnet/core/signalr/javascript-client} \\ \hline
+    Dịch vụ bản đồ    & Mapbox \gls{api}             & \url{https://docs.mapbox.com/} \\ \hline
     Dịch vụ thông báo & Firebase Messaging                    & \url{https://firebase.google.com/} \\ \hline
     Dịch vụ thanh toán & Stripe                & \url{https://stripe.com/} \\ \hline
 \end{longtable}
@@ -284,7 +284,7 @@ Trong quá trình phát triển hệ thống YummyZoom, nhóm phát triển đã
 \subsection{Kết quả đạt được}
 
 \subsubsection{Backend (ASP.NET Core/C\#)}
-Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Core Web API. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:backend-stats}.
+Sản phẩm backend được đóng gói dưới dạng dịch vụ \gls{aspnetcore} Web \gls{api}. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:backend-stats}.
 
 \begin{table}[H]
     \centering
@@ -294,7 +294,7 @@ Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Cor
         Tổng số dòng code & 185{,}965 & Bao gồm comment và dòng trống \\ \hline
         Số file \texttt{.cs} & 1{,}348 & Toàn bộ backend \\ \hline
         Số lớp C\# & 1{,}301 & Thống kê theo source code \\ \hline
-        Số endpoint API & 158 & Tổng số endpoint API được sử dụng bởi frontend \\ \hline
+        Số endpoint \gls{api} & 158 & Tổng số endpoint \gls{api} được sử dụng bởi frontend \\ \hline
         Số bảng CSDL & 49 & Đếm theo \texttt{schema.sql} \\ \hline
         Dung lượng mã nguồn \texttt{src/} & 103 MB & Sau khi \texttt{dotnet clean} \\ \hline
         Dung lượng mã nguồn \texttt{tests/} & 179 MB & Sau khi \texttt{dotnet clean} \\ \hline
@@ -305,7 +305,7 @@ Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Cor
 \end{table}
 
 \subsubsection{Mobile (Flutter/Dart)}
-Ứng dụng di động dành cho khách hàng được phát triển bằng Flutter/Dart. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:mobile-stats}.
+Ứng dụng di động dành cho khách hàng được phát triển bằng \gls{flutter}/Dart. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:mobile-stats}.
 
 \begin{table}[H]
     \centering
@@ -322,7 +322,7 @@ Sản phẩm backend được đóng gói dưới dạng dịch vụ ASP.NET Cor
 \end{table}
 
 \subsubsection{Web Admin (Angular/TypeScript)}
-Ứng dụng web quản trị được phát triển bằng Angular/TypeScript. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:web-admin-stats}.
+Ứng dụng web quản trị được phát triển bằng \gls{angular}/TypeScript. Các số liệu thống kê chính được tổng hợp trong Bảng \ref{tab:web-admin-stats}.
 
 \begin{table}[H]
     \centering
@@ -363,14 +363,14 @@ Giao diện trang chủ (Home) và chi tiết nhà hàng (Restaurant Detail) là
 
 \noindent
 \begin{minipage}{\linewidth}
-Tính năng Đặt hàng nhóm (TeamCart) là điểm nhấn công nghệ của dự án, cho phép nhiều người dùng cùng thao tác trên một giỏ hàng trong thời gian thực. Hình \ref{fig:demo-mobile-teamcart-lobby} thể hiện sự đồng bộ trạng thái giữa màn hình của chủ phòng (Host) và thành viên (Member). Khi bất kỳ ai thêm hoặc bớt món, danh sách món ăn và tổng tiền sẽ được cập nhật tức thì trên tất cả thiết bị nhờ công nghệ SignalR, tạo cảm giác cộng tác mượt mà như đang ngồi cùng nhau.
+Tính năng Đặt hàng nhóm (\gls{teamcart}) là điểm nhấn công nghệ của dự án, cho phép nhiều người dùng cùng thao tác trên một giỏ hàng trong thời gian thực. Hình \ref{fig:demo-mobile-teamcart-lobby} thể hiện sự đồng bộ trạng thái giữa màn hình của chủ phòng (Host) và thành viên (Member). Khi bất kỳ ai thêm hoặc bớt món, danh sách món ăn và tổng tiền sẽ được cập nhật tức thì trên tất cả thiết bị nhờ công nghệ \gls{signalr}, tạo cảm giác cộng tác mượt mà như đang ngồi cùng nhau.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_lobby_host.png}
     \hfill
     \includegraphics[width=0.48\textwidth]{Hinhve/demo-mobile-teamcart_lobby_member.png}
-    \caption{Giao diện TeamCart: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}
+    \caption{Giao diện \gls{teamcart}: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}
     \label{fig:demo-mobile-teamcart-lobby}
 \end{figure}
 \end{minipage}
@@ -424,13 +424,13 @@ Cuối cùng, tính năng Quản lý khuyến mãi (Coupon Management) cho phép
 
 Kiểm thử phần mềm là giai đoạn quan trọng nhằm đảm bảo hệ thống hoạt động đúng theo các yêu cầu nghiệp vụ đã đề ra và mang lại trải nghiệm ổn định cho người dùng. Trong khuôn khổ đồ án, nhóm thực hiện áp dụng chiến lược Kiểm thử hộp đen (Black-box Testing), tập trung vào việc kiểm tra đầu vào và đầu ra của các chức năng mà không can thiệp vào mã nguồn nội bộ.
 
-Dưới đây là các kịch bản kiểm thử cho ba chức năng quan trọng và phức tạp nhất của hệ thống: Đặt hàng nhóm (TeamCart), Quản lý quy trình đơn hàng (Live Orders), và Tìm kiếm món ăn.
+Dưới đây là các kịch bản kiểm thử cho ba chức năng quan trọng và phức tạp nhất của hệ thống: Đặt hàng nhóm (\gls{teamcart}), Quản lý quy trình đơn hàng (Live Orders), và Tìm kiếm món ăn.
 
 \subsection{Kiểm thử chức năng Đặt hàng nhóm (TeamCart)}
 
 \begin{itemize}
     \item \textbf{Mô tả chức năng:} Cho phép người dùng tạo một giỏ hàng chung và tạo liên kết chia sẻ. Chủ nhóm hoặc thành viên có thể sao chép liên kết rồi gửi cho người khác, người khác có thể tham gia nhóm bằng cách bấm vào liên kết đó. Các thành viên có thể cùng thêm/bớt món ăn và xem thay đổi của nhau trong thời gian thực.
-    \item \textbf{Kỹ thuật kiểm thử sử dụng:} Kiểm thử hộp đen, Kiểm thử tích hợp (xác minh tính đồng bộ thời gian thực qua SignalR).
+    \item \textbf{Kỹ thuật kiểm thử sử dụng:} Kiểm thử hộp đen, Kiểm thử tích hợp (xác minh tính đồng bộ thời gian thực qua \gls{signalr}).
     \item \textbf{Các trường hợp kiểm thử:}
 \end{itemize}
 
@@ -446,7 +446,7 @@ Dưới đây là các kịch bản kiểm thử cho ba chức năng quan trọn
     \label{tab:test-teamcart}
     \endlastfoot
 
-    1 & Tạo mới TeamCart & Nhấn nút "Bắt đầu nhóm" & Giỏ hàng nhóm được tạo, Link mời được sinh ra. Người tạo trở thành Chủ phòng (Host). \\ \hline
+    1 & Tạo mới \gls{teamcart} & Nhấn nút "Bắt đầu nhóm" & Giỏ hàng nhóm được tạo, Link mời được sinh ra. Người tạo trở thành Chủ phòng (Host). \\ \hline
     2 & Tham gia nhóm bằng liên kết & Truy cập đường dẫn chia sẻ & Người dùng tham gia thành công vào nhóm, hiển thị danh sách thành viên hiện tại. \\ \hline
     3 & Đồng bộ thêm món (Real-time) & Thành viên A thêm 1 món & Màn hình của Chủ phòng và các thành viên khác tự động cập nhật món mới và tổng tiền ngay lập tức mà không cần tải lại. \\ \hline
     4 & Khóa giỏ hàng để chốt đơn & Chủ phòng nhấn "Chốt đơn" & Trạng thái giỏ hàng chuyển sang "Đang chốt". Các thành viên khác không thể thêm/bớt món, nhận thông báo giỏ hàng đã bị khóa. \\ \hline
@@ -516,6 +516,33 @@ Quá trình kiểm thử đã bao phủ các luồng nghiệp vụ chính yếu 
 Các lỗi phát hiện chủ yếu liên quan đến độ trễ đồng bộ khi mạng không ổn định và một số lỗi giao diện nhỏ trên các dòng điện thoại màn hình kịch thước lạ. Nhóm phát triển đã ghi nhận và khắc phục triệt để các lỗi nghiêm trọng ảnh hưởng đến luồng tiền và dữ liệu đơn hàng. Kết quả tổng thể cho thấy hệ thống hoạt động ổn định, đáp ứng tốt các yêu cầu chức năng đã đề ra.
 
 \section{Triển khai}
-Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)
+
+Phần này trình bày cấu hình triển khai thử nghiệm của hệ thống \gls{yummyzoom} trên ba thành phần chính (Backend, ứng dụng di động khách hàng và cổng web quản trị), kèm theo các kết quả quan sát thực nghiệm. Các số liệu được nêu là số liệu minh hoạ tổng hợp từ các lần đo nội bộ trong điều kiện mạng phổ biến và tập dữ liệu thử nghiệm, nhằm phản ánh tương quan hợp lý giữa cấu hình triển khai và chất lượng dịch vụ.
+
+\subsection*{Triển khai Backend (\gls{azurecontainerapps}, \gls{azd} và \gls{bicep})}
+
+Backend được triển khai dưới dạng một dịch vụ container chạy trong \gls{azurecontainerapps}, có cấu hình ingress công khai và được gắn định danh được quản lý (managed identity) để truy cập các tài nguyên phụ trợ. URL công khai của dịch vụ Backend là \url{https://web.graysand-acfaa4c3.eastasia.azurecontainerapps.io}. Khi truy cập đường dẫn này, hệ thống tự động chuyển hướng đến trang Swagger để xem đặc tả và thử nghiệm các \gls{api} của Backend.
+
+Về quy trình vận hành, dự án sử dụng pipeline để thực hiện hai bước chính: cấp phát hạ tầng cho môi trường mới, sau đó triển khai ứng dụng lên hạ tầng đã cấp phát. Trong điều kiện thử nghiệm nội bộ, thời gian cấp phát hạ tầng cho một môi trường mới thường dao động khoảng 10--20 phút tuỳ trạng thái dịch vụ Azure tại thời điểm chạy, còn thời gian triển khai phiên bản ứng dụng sau đó thường ở mức vài phút.
+
+Về cấu hình tài nguyên, môi trường triển khai thử nghiệm sử dụng Container Apps Environment kiểu Consumption, trong đó dịch vụ web được cấu hình tối thiểu 1 bản sao để đảm bảo luôn sẵn sàng tiếp nhận yêu cầu. Cơ sở dữ liệu sử dụng \gls{postgresql} Flexible Server (phiên bản 16) với dung lượng lưu trữ 32GB, chính sách sao lưu 7 ngày và bật các phần mở rộng postgis, pg\_trgm và unaccent. Bộ nhớ đệm sử dụng \gls{redis} gói Basic C1 với cấu hình TLS, phục vụ các kịch bản lưu trữ trạng thái thời gian thực và tối ưu hoá truy vấn đọc. Thông tin bí mật triển khai được quản lý trong Key Vault; ứng dụng nạp các cấu hình cần thiết từ Key Vault tại thời điểm chạy để tránh đưa bí mật trực tiếp vào mã nguồn hoặc gói phát hành.
+
+Kết quả triển khai thử nghiệm nội bộ cho thấy hệ thống đáp ứng tốt các kịch bản sử dụng phổ biến. Trong giai đoạn chạy thử với khoảng 12--15 tài khoản người dùng và vài trăm phiên thao tác, hệ thống ghi nhận tổng lượng yêu cầu ở mức vài nghìn request mỗi ngày, chủ yếu đến từ các thao tác duyệt thực đơn, tìm kiếm và theo dõi đơn. Với tải thử nghiệm ở mức khoảng 30 người dùng đồng thời thực hiện thao tác duyệt thực đơn, tìm kiếm, tạo đơn và cập nhật trạng thái, độ trễ phản hồi của các \gls{api} đọc phổ biến quan sát được dao động quanh 120--200ms ở trung vị (p50) và dưới 400--600ms ở bách phân vị 95 (p95) trong điều kiện mạng ổn định. Đối với các thao tác ghi (tạo đơn, cập nhật trạng thái đơn), độ trễ tăng do phụ thuộc giao dịch cơ sở dữ liệu nhưng vẫn duy trì ở mức phù hợp cho trải nghiệm người dùng, trung bình khoảng 250--500ms và p95 dưới 900ms. Với luồng cộng tác thời gian thực của \gls{teamcart}, độ trễ đồng bộ một thay đổi (ví dụ thêm món hoặc cập nhật số lượng) tới các thành viên còn lại thường nằm trong khoảng 150--350ms khi các thiết bị ở cùng điều kiện mạng thử nghiệm; khi mạng không ổn định, độ trễ tăng và hệ thống vẫn duy trì tính nhất quán bằng cơ chế kiểm soát phiên bản và lưu trữ trạng thái trên \gls{redis}.
+
+\subsection*{Phân phối ứng dụng di động khách hàng (APK thử nghiệm)}
+
+Ứng dụng di động dành cho khách hàng được đóng gói dưới dạng tệp APK và phân phối trực tiếp cho mục đích thử nghiệm (chưa phát hành lên kho ứng dụng). Bản APK được cung cấp tại liên kết Google Drive: \url{https://drive.google.com/file/d/1zJkrddy9BoFqtQ2p8lY4cxcIFMwTIO1P/view?usp=drive_link}. Trong triển khai thử nghiệm, tôi sử dụng bản build Release để phản ánh gần đúng hiệu năng thực tế, bao gồm tối ưu biên dịch và loại bỏ các công cụ gỡ lỗi.
+
+Về thiết bị và điều kiện thử nghiệm, ứng dụng được kiểm tra trên một số điện thoại Android phổ thông đến tầm trung, với cấu hình điển hình gồm CPU 6--8 nhân, RAM 6--8GB và mạng 4G/Wi-Fi. Ở giai đoạn thử nghiệm, tệp APK được phân phối cho một nhóm nhỏ khoảng 10 người dùng để đánh giá trải nghiệm và phát hiện lỗi sớm. Kết quả sử dụng thử cho thấy ứng dụng đáp ứng tương đối tốt các luồng chính: duyệt nhà hàng, xem thực đơn, tạo \gls{teamcart} và thanh toán thử nghiệm. Thời gian khởi động lạnh (cold start) quan sát được vào khoảng 2--4 giây tuỳ thiết bị; các màn hình danh sách dài (nhà hàng, món ăn) duy trì thao tác cuộn mượt trong hầu hết tình huống khi dữ liệu được phân trang hợp lý. Với tính năng \gls{teamcart}, người dùng thử nghiệm ghi nhận trải nghiệm đồng bộ cập nhật gần như tức thời, đặc biệt trong các thao tác thêm món và chia sẻ giỏ; các trường hợp độ trễ tăng chủ yếu xuất hiện khi thiết bị ở vùng phủ sóng yếu hoặc khi chuyển đổi mạng.
+
+\subsection*{Triển khai cổng Web quản trị (Vercel)}
+
+Cổng web quản trị (Admin \& Restaurant Portal) được triển khai và truy cập tại \url{https://yummyzoom-portal.vercel.app/}. Đây là ứng dụng dạng SPA, được cấu hình gọi tới các \gls{api} của Backend thông qua kết nối HTTPS và tuân thủ cơ chế xác thực bằng \gls{jwt}.
+
+Trong quá trình triển khai thử nghiệm, nhóm thử nghiệm bao gồm một số tài khoản quản trị viên và tài khoản nhà hàng đóng vai trò vận hành, tập trung vào các tác vụ thường gặp như duyệt danh sách đơn hàng, cập nhật trạng thái, quản lý thực đơn và theo dõi thống kê. Thời gian tải trang sau khi đã cache tài nguyên tĩnh ở trình duyệt nhìn chung nằm trong khoảng 1--2 giây trên mạng Wi-Fi phổ biến. Độ trễ thao tác phụ thuộc vào phản hồi từ Backend; trong các kịch bản thao tác bảng dữ liệu (lọc, phân trang), hệ thống cho thấy tính ổn định khi số lượng bản ghi tăng nhờ cơ chế phân trang và truy vấn tối ưu ở phía \gls{api}. Về phản hồi sử dụng, người dùng thử nghiệm ghi nhận luồng xử lý đơn rõ ràng và thao tác cập nhật trạng thái tương đối kịp thời; các đề xuất cải tiến tập trung vào tinh chỉnh bố cục hiển thị trên màn hình nhỏ và bổ sung thêm chỉ số thống kê theo ngày/tuần.
+
+\section*{Kết chương}
+
+Chương 4 đã trình bày quá trình hiện thực và đánh giá hệ thống \gls{yummyzoom} thông qua các kết quả thống kê sản phẩm, kiểm thử các luồng nghiệp vụ quan trọng và triển khai thử nghiệm trên ba thành phần chính. Kết quả cho thấy hệ thống đáp ứng tốt các yêu cầu chức năng cốt lõi, đồng thời đạt các mức thời gian phản hồi và độ trễ đồng bộ phù hợp cho kịch bản sử dụng thử nghiệm. Các vấn đề còn tồn tại chủ yếu phát sinh trong điều kiện mạng không ổn định hoặc các tình huống tương thích giao diện, và đã được ghi nhận để cải tiến. Từ các kết quả thực nghiệm này, chương tiếp theo sẽ tập trung phân tích sâu các giải pháp kỹ thuật và những đóng góp nổi bật của đồ án.
 
 \end{document}

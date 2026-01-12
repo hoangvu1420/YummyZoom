@@ -1,29 +1,29 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này trình bày chi tiết về các công nghệ, phong cách kiến trúc và các giải pháp kỹ thuật được lựa chọn để xây dựng hệ thống YummyZoom. Các quyết định công nghệ được đưa ra dựa trên việc phân tích kỹ lưỡng các yêu cầu chức năng và phi chức năng đã được khảo sát, đặc biệt tập trung giải quyết các bài toán về hiệu năng xử lý đồng thời, tính toàn vẹn dữ liệu trong giao dịch tài chính và trải nghiệm người dùng mượt mà trên đa nền tảng.
+Chương này trình bày chi tiết về các công nghệ, phong cách kiến trúc và các giải pháp kỹ thuật được lựa chọn để xây dựng hệ thống \gls{yummyzoom}. Các quyết định công nghệ được đưa ra dựa trên việc phân tích kỹ lưỡng các yêu cầu chức năng và phi chức năng đã được khảo sát, đặc biệt tập trung giải quyết các bài toán về hiệu năng xử lý đồng thời, tính toàn vẹn dữ liệu trong giao dịch tài chính và trải nghiệm người dùng mượt mà trên đa nền tảng.
 
 \section{Kiến trúc hệ thống và Ứng dụng Backend}
 
-Hệ thống Backend đóng vai trò là xương sống của toàn bộ ứng dụng YummyZoom, chịu trách nhiệm xử lý các nghiệp vụ cốt lõi, quản lý dữ liệu và điều phối các tương tác giữa các phân hệ. Để đáp ứng các yêu cầu khắt khe về khả năng bảo trì (Maintainability) và độ tin cậy (Reliability), việc lựa chọn kiến trúc phần mềm và nền tảng phát triển phù hợp là yếu tố tiên quyết.
+Hệ thống Backend đóng vai trò là xương sống của toàn bộ ứng dụng \gls{yummyzoom}, chịu trách nhiệm xử lý các nghiệp vụ cốt lõi, quản lý dữ liệu và điều phối các tương tác giữa các phân hệ. Để đáp ứng các yêu cầu khắt khe về khả năng bảo trì (Maintainability) và độ tin cậy (Reliability), việc lựa chọn kiến trúc phần mềm và nền tảng phát triển phù hợp là yếu tố tiên quyết.
 
 \subsection{Kiến trúc Clean Architecture và Domain-Driven Design (DDD)}
 
-Trong bối cảnh phát triển tính năng TeamCart (Giỏ hàng nhóm), hệ thống phải đối mặt với các nghiệp vụ phức tạp như đồng bộ trạng thái giữa nhiều người dùng, tính toán chia sẻ hóa đơn và xử lý các giao dịch đồng thời. Để giải quyết các thách thức này, đồ án áp dụng kiến trúc Clean Architecture (Kiến trúc sạch) kết hợp với các nguyên lý của Domain-Driven Design (DDD - Thiết kế hướng tên miền) \cite{CleanArch, DDD}.
+Trong bối cảnh phát triển tính năng \gls{teamcart} (Giỏ hàng nhóm), hệ thống phải đối mặt với các nghiệp vụ phức tạp như đồng bộ trạng thái giữa nhiều người dùng, tính toán chia sẻ hóa đơn và xử lý các giao dịch đồng thời. Để giải quyết các thách thức này, đồ án áp dụng kiến trúc \gls{cleanarchitecture} (Kiến trúc sạch) kết hợp với các nguyên lý của Domain-Driven Design (\gls{ddd}) \cite{CleanArch, DDD}.
 
-Về mặt cấu trúc, hệ thống được tổ chức thành các lớp với quy tắc phụ thuộc hướng tâm, đảm bảo sự độc lập của logic nghiệp vụ. Lớp trong cùng là lớp miền (Domain Layer), chứa các thực thể (Entities), đối tượng giá trị (Value Objects) và các quy tắc nghiệp vụ bất biến. Ví dụ, logic tính toán tổng tiền của một giỏ hàng nhóm hay quy tắc khóa đơn hàng khi thanh toán được cài đặt tại đây, hoàn toàn không phụ thuộc vào cơ sở dữ liệu hay giao diện người dùng. Bao bọc bên ngoài là lớp ứng dụng (Application Layer), đóng vai trò điều phối các ca sử dụng (Use Cases), nhận yêu cầu từ bên ngoài và sử dụng các thực thể trong Domain để thực hiện tác vụ. Tiếp theo là lớp hạ tầng (Infrastructure Layer), nơi cài đặt chi tiết các giao tiếp kỹ thuật như truy xuất cơ sở dữ liệu hay tích hợp cổng thanh toán. Cuối cùng, lớp giao diện (Presentation Layer) chứa các API Controller để tiếp nhận yêu cầu từ ứng dụng di động hoặc web quản trị.
+Về mặt cấu trúc, hệ thống được tổ chức thành các lớp với quy tắc phụ thuộc hướng tâm, đảm bảo sự độc lập của logic nghiệp vụ. Lớp trong cùng là lớp miền (Domain Layer), chứa các thực thể (Entities), đối tượng giá trị (Value Objects) và các quy tắc nghiệp vụ bất biến. Ví dụ, logic tính toán tổng tiền của một giỏ hàng nhóm hay quy tắc khóa đơn hàng khi thanh toán được cài đặt tại đây, hoàn toàn không phụ thuộc vào cơ sở dữ liệu hay giao diện người dùng. Bao bọc bên ngoài là lớp ứng dụng (Application Layer), đóng vai trò điều phối các ca sử dụng (Use Cases), nhận yêu cầu từ bên ngoài và sử dụng các thực thể trong Domain để thực hiện tác vụ. Tiếp theo là lớp hạ tầng (Infrastructure Layer), nơi cài đặt chi tiết các giao tiếp kỹ thuật như truy xuất cơ sở dữ liệu hay tích hợp cổng thanh toán. Cuối cùng, lớp giao diện (Presentation Layer) chứa các \gls{api} Controller để tiếp nhận yêu cầu từ ứng dụng di động hoặc web quản trị.
 
 Sự kết hợp này mang lại lợi ích vượt trội so với kiến trúc phân tầng truyền thống hay kiến trúc Microservices thuần túy. Nó loại bỏ sự phụ thuộc chặt chẽ giữa logic nghiệp vụ và cơ sở dữ liệu, giúp mã nguồn ổn định và dễ dàng kiểm thử đơn vị. Đồng thời, việc áp dụng mô hình Monolithic Modular (Đơn khối module hóa) giúp cân bằng giữa tốc độ phát triển và khả năng mở rộng, phù hợp với quy mô nhân sự và tài nguyên của một đồ án tốt nghiệp.
 
 \subsection{Nền tảng phát triển: .NET 9 và ASP.NET Core}
 
-Để hiện thực hóa kiến trúc trên, hệ thống sử dụng nền tảng .NET 9 cùng framework ASP.NET Core Web API \cite{Net9}. Đây là một trong những nền tảng phát triển web hiệu năng cao và ổn định nhất hiện nay. Lựa chọn .NET 9 giải quyết trực tiếp bài toán về tối ưu hóa hiệu năng và khả năng chịu tải nhờ máy chủ web Kestrel mạnh mẽ và mô hình lập trình bất đồng bộ (Async/Await). Hệ thống có thể xử lý hiệu quả hàng nghìn yêu cầu mỗi giây mà không làm tắc nghẽn luồng xử lý chính, đảm bảo thời gian phản hồi luôn duy trì ở mức thấp ngay cả khi có lượng lớn người dùng thao tác cùng lúc trên TeamCart.
+Để hiện thực hóa kiến trúc trên, hệ thống sử dụng nền tảng \gls{dotnet} 9 cùng framework \gls{aspnetcore} Web \gls{api} \cite{Net9}. Đây là một trong những nền tảng phát triển web hiệu năng cao và ổn định nhất hiện nay. Lựa chọn \gls{dotnet} 9 giải quyết trực tiếp bài toán về tối ưu hóa hiệu năng và khả năng chịu tải nhờ máy chủ web Kestrel mạnh mẽ và mô hình lập trình bất đồng bộ (Async/Await). Hệ thống có thể xử lý hiệu quả hàng nghìn yêu cầu mỗi giây mà không làm tắc nghẽn luồng xử lý chính, đảm bảo thời gian phản hồi luôn duy trì ở mức thấp ngay cả khi có lượng lớn người dùng thao tác cùng lúc trên \gls{teamcart}.
 
-Bên cạnh đó, ngôn ngữ C\# với đặc tính định kiểu tĩnh mạnh (Strongly Typed) giúp phát hiện phần lớn các lỗi logic ngay trong quá trình biên dịch, giảm thiểu đáng kể lỗi runtime và tăng cường khả năng bảo trì so với các ngôn ngữ định kiểu động như JavaScript hay Python. So với các nền tảng khác như Node.js hay Java Spring Boot, .NET 9 mang lại sự cân bằng tốt hơn giữa hiệu năng xử lý đa luồng và mức tiêu thụ tài nguyên hệ thống.
+Bên cạnh đó, ngôn ngữ C\# với đặc tính định kiểu tĩnh mạnh (Strongly Typed) giúp phát hiện phần lớn các lỗi logic ngay trong quá trình biên dịch, giảm thiểu đáng kể lỗi runtime và tăng cường khả năng bảo trì so với các ngôn ngữ định kiểu động như JavaScript hay Python. So với các nền tảng khác như Node.js hay Java Spring Boot, \gls{dotnet} 9 mang lại sự cân bằng tốt hơn giữa hiệu năng xử lý đa luồng và mức tiêu thụ tài nguyên hệ thống.
 
 \subsection{Điều phối hệ thống và Khả năng quan sát: .NET Aspire}
 
-Để giải quyết bài toán phức tạp trong việc quản lý, kết nối và vận hành các thành phần phân tán ngay từ môi trường phát triển, dự án áp dụng stack công nghệ .NET Aspire \cite{Aspire}. Công nghệ này đóng vai trò điều phối tài nguyên (Orchestration), cho phép định nghĩa toàn bộ hạ tầng bằng mã nguồn C\# thay vì cấu hình thủ công từng container. Chỉ với một thao tác khởi động, toàn bộ hệ sinh thái bao gồm Backend, Database và Cache sẽ được khởi tạo và kết nối tự động. Ngoài ra, .NET Aspire còn cung cấp khả năng quan sát (Observability) mạnh mẽ với Dashboard tích hợp sẵn, hiển thị tập trung logs, metrics và traces theo chuẩn OpenTelemetry, giúp đội ngũ phát triển dễ dàng theo dõi luồng hoạt động và gỡ lỗi hệ thống.
+Để giải quyết bài toán phức tạp trong việc quản lý, kết nối và vận hành các thành phần phân tán ngay từ môi trường phát triển, dự án áp dụng stack công nghệ \gls{dotnet} Aspire \cite{Aspire}. Công nghệ này đóng vai trò điều phối tài nguyên (Orchestration), cho phép định nghĩa toàn bộ hạ tầng bằng mã nguồn C\# thay vì cấu hình thủ công từng container. Chỉ với một thao tác khởi động, toàn bộ hệ sinh thái bao gồm Backend, Database và Cache sẽ được khởi tạo và kết nối tự động. Ngoài ra, \gls{dotnet} Aspire còn cung cấp khả năng quan sát (Observability) mạnh mẽ với Dashboard tích hợp sẵn, hiển thị tập trung logs, metrics và traces theo chuẩn \gls{opentelemetry}, giúp đội ngũ phát triển dễ dàng theo dõi luồng hoạt động và gỡ lỗi hệ thống.
 
 \section{Cơ sở dữ liệu và Lưu trữ}
 
@@ -31,13 +31,13 @@ Việc lưu trữ và quản lý dữ liệu đóng vai trò then chốt trong v
 
 \subsection{Hệ quản trị cơ sở dữ liệu quan hệ: PostgreSQL}
 
-Dự án lựa chọn PostgreSQL 16 làm hệ quản trị cơ sở dữ liệu chính, kết hợp với Entity Framework Core đóng vai trò là lớp ORM để tương tác dữ liệu \cite{Postgres}. Đây là giải pháp lưu trữ bền vững, được thiết kế để giải quyết triệt để vấn đề toàn vẹn dữ liệu cho các tính năng nhạy cảm như thanh toán và quản lý đơn hàng. PostgreSQL đảm bảo tính ACID tuyệt đối, giúp ngăn chặn tình trạng sai lệch dữ liệu tài chính trong các kịch bản xử lý đồng thời phức tạp của TeamCart.
+Dự án lựa chọn \gls{postgresql} 16 làm hệ quản trị cơ sở dữ liệu chính, kết hợp với \gls{efcore} đóng vai trò là lớp \gls{orm} để tương tác dữ liệu \cite{Postgres}. Đây là giải pháp lưu trữ bền vững, được thiết kế để giải quyết triệt để vấn đề toàn vẹn dữ liệu cho các tính năng nhạy cảm như thanh toán và quản lý đơn hàng. \gls{postgresql} đảm bảo tính \gls{acid} tuyệt đối, giúp ngăn chặn tình trạng sai lệch dữ liệu tài chính trong các kịch bản xử lý đồng thời phức tạp của \gls{teamcart}.
 
-Ngoài ra, PostgreSQL còn cung cấp bộ tính năng nâng cao tích hợp sẵn giúp giải quyết trọn vẹn các bài toán nghiệp vụ đặc thù mà không cần phụ thuộc vào dịch vụ bên thứ ba. Hệ thống tận dụng engine tìm kiếm toàn văn (Full Text Search) để hỗ trợ tìm kiếm tiếng Việt hiệu quả, sử dụng PostGIS để xử lý các truy vấn không gian phục vụ tìm kiếm nhà hàng theo vị trí, và sử dụng kiểu dữ liệu JSONB để lưu trữ linh hoạt cấu trúc menu phức tạp. So với MySQL hay SQL Server, PostgreSQL mang lại ưu thế rõ rệt về khả năng xử lý các truy vấn phức tạp và chi phí vận hành tối ưu nhờ mã nguồn mở.
+Ngoài ra, \gls{postgresql} còn cung cấp bộ tính năng nâng cao tích hợp sẵn giúp giải quyết trọn vẹn các bài toán nghiệp vụ đặc thù mà không cần phụ thuộc vào dịch vụ bên thứ ba. Hệ thống tận dụng engine tìm kiếm toàn văn (Full Text Search) để hỗ trợ tìm kiếm tiếng Việt hiệu quả, sử dụng \gls{postgis} để xử lý các truy vấn không gian phục vụ tìm kiếm nhà hàng theo vị trí, và sử dụng kiểu dữ liệu \gls{jsonb} để lưu trữ linh hoạt cấu trúc menu phức tạp. So với MySQL hay SQL Server, \gls{postgresql} mang lại ưu thế rõ rệt về khả năng xử lý các truy vấn phức tạp và chi phí vận hành tối ưu nhờ mã nguồn mở.
 
 \subsection{Bộ nhớ đệm (Caching): Redis}
 
-Bên cạnh cơ sở dữ liệu chính, hệ thống triển khai Redis đóng vai trò là bộ nhớ đệm phân tán (Distributed Cache). Mục tiêu của Redis là giảm tải cho PostgreSQL và đảm bảo tốc độ xử lý thời gian thực cho các tính năng tương tác cao. Cụ thể, Redis được sử dụng để lưu trữ các dữ liệu tĩnh ít thay đổi như danh sách nhà hàng và thực đơn, giúp các truy vấn điều hướng đạt độ trễ cực thấp. Quan trọng hơn, Redis đóng vai trò quản lý trạng thái cho các TeamCart đang hoạt động. Khi các thành viên trong nhóm thao tác thêm bớt món dồn dập, hệ thống đọc ghi trực tiếp vào Redis trên RAM thay vì đĩa cứng, đảm bảo trải nghiệm người dùng mượt mà tuyệt đối. Dữ liệu chỉ được đồng bộ xuống PostgreSQL để lưu trữ bền vững khi đơn hàng được chốt.
+Bên cạnh cơ sở dữ liệu chính, hệ thống triển khai \gls{redis} đóng vai trò là bộ nhớ đệm phân tán (Distributed Cache). Mục tiêu của \gls{redis} là giảm tải cho \gls{postgresql} và đảm bảo tốc độ xử lý thời gian thực cho các tính năng tương tác cao. Cụ thể, \gls{redis} được sử dụng để lưu trữ các dữ liệu tĩnh ít thay đổi như danh sách nhà hàng và thực đơn, giúp các truy vấn điều hướng đạt độ trễ cực thấp. Quan trọng hơn, \gls{redis} đóng vai trò quản lý trạng thái cho các \gls{teamcart} đang hoạt động. Khi các thành viên trong nhóm thao tác thêm bớt món dồn dập, hệ thống đọc ghi trực tiếp vào \gls{redis} trên RAM thay vì đĩa cứng, đảm bảo trải nghiệm người dùng mượt mà tuyệt đối. Dữ liệu chỉ được đồng bộ xuống \gls{postgresql} để lưu trữ bền vững khi đơn hàng được chốt.
 
 \subsection{Quản lý và Phân phối đa phương tiện: Cloudinary}
 
@@ -45,15 +45,15 @@ Bên cạnh cơ sở dữ liệu chính, hệ thống triển khai Redis đóng 
 
 \section{Xác thực và Phân quyền (Authentication \& Authorization)}
 
-Bảo mật thông tin người dùng và kiểm soát quyền truy cập là ưu tiên hàng đầu của hệ thống. YummyZoom áp dụng các tiêu chuẩn an ninh hiện đại để bảo vệ dữ liệu, đồng thời đảm bảo tính tiện lợi cho người dùng cuối.
+Bảo mật thông tin người dùng và kiểm soát quyền truy cập là ưu tiên hàng đầu của hệ thống. \gls{yummyzoom} áp dụng các tiêu chuẩn an ninh hiện đại để bảo vệ dữ liệu, đồng thời đảm bảo tính tiện lợi cho người dùng cuối.
 
 \subsection{Cơ chế xác thực: JSON Web Token (JWT)}
 
-Hệ thống sử dụng tiêu chuẩn JSON Web Token (JWT) làm phương thức xác thực chính \cite{JWT}. Cơ chế xác thực không trạng thái (Stateless Authentication) này phù hợp hoàn hảo với mô hình ứng dụng di động quy mô lớn. JWT đóng gói toàn bộ thông tin định danh vào một chuỗi token duy nhất gửi kèm theo mỗi yêu cầu, loại bỏ nhu cầu lưu trữ session trên server. Điều này giúp hệ thống dễ dàng mở rộng theo chiều ngang và giảm tải đáng kể cho tầng lưu trữ, tối ưu hóa thời gian phản hồi API.
+Hệ thống sử dụng tiêu chuẩn JSON Web Token (\gls{jwt}) làm phương thức xác thực chính \cite{JWT}. Cơ chế xác thực không trạng thái (Stateless Authentication) này phù hợp hoàn hảo với mô hình ứng dụng di động quy mô lớn. \gls{jwt} đóng gói toàn bộ thông tin định danh vào một chuỗi token duy nhất gửi kèm theo mỗi yêu cầu, loại bỏ nhu cầu lưu trữ session trên server. Điều này giúp hệ thống dễ dàng mở rộng theo chiều ngang và giảm tải đáng kể cho tầng lưu trữ, tối ưu hóa thời gian phản hồi \gls{api}.
 
 \subsection{Quản lý định danh và Phân quyền: ASP.NET Core Identity}
 
-Để quản lý vòng đời tài khoản và phân quyền, hệ thống tích hợp framework ASP.NET Core Identity. Đây là giải pháp bảo mật toàn diện giúp quản lý đăng ký, đăng nhập và bảo mật mật khẩu người dùng bằng các thuật toán băm hiện đại. Hệ thống thiết lập cơ chế kiểm soát truy cập dựa trên vai trò (RBAC) với các quyền hạn cụ thể cho Khách hàng, Nhà hàng và Quản trị viên. Các API Endpoint được bảo vệ nghiêm ngặt bằng cách kiểm tra quyền (Claims) có trong JWT, đảm bảo ngăn chặn mọi truy cập trái phép.
+Để quản lý vòng đời tài khoản và phân quyền, hệ thống tích hợp framework \gls{aspnetcore} Identity. Đây là giải pháp bảo mật toàn diện giúp quản lý đăng ký, đăng nhập và bảo mật mật khẩu người dùng bằng các thuật toán băm hiện đại. Hệ thống thiết lập cơ chế kiểm soát truy cập dựa trên vai trò (\gls{rbac}) với các quyền hạn cụ thể cho Khách hàng, Nhà hàng và Quản trị viên. Các \gls{api} Endpoint được bảo vệ nghiêm ngặt bằng cách kiểm tra quyền (Claims) có trong \gls{jwt}, đảm bảo ngăn chặn mọi truy cập trái phép.
 
 \section{Ứng dụng dành cho khách hàng (Mobile App)}
 
@@ -61,15 +61,15 @@ Hệ thống sử dụng tiêu chuẩn JSON Web Token (JWT) làm phương thức
 
 \subsection{Nền tảng phát triển: Flutter \& Dart}
 
-Dự án lựa chọn Flutter SDK và ngôn ngữ Dart để phát triển ứng dụng di động \cite{FlutterArch}. Flutter cho phép xây dựng ứng dụng biên dịch natively, sử dụng engine đồ họa riêng để vẽ giao diện trực tiếp, đảm bảo tốc độ khung hình ổn định ở mức 60fps. Điều này cực kỳ quan trọng đối với các thao tác cuộn danh sách dài hay các hiệu ứng chuyển động phức tạp trong tính năng TeamCart. Khả năng kiểm soát giao diện chính xác đến từng pixel giúp hiện thực hóa các thiết kế độc đáo mà không bị giới hạn bởi các widget mặc định của hệ điều hành. Ngoài ra, tính năng Hot Reload giúp tăng tốc đáng kể quy trình phát triển và tinh chỉnh giao diện.
+Dự án lựa chọn \gls{flutter} \gls{sdk} và ngôn ngữ Dart để phát triển ứng dụng di động \cite{FlutterArch}. \gls{flutter} cho phép xây dựng ứng dụng biên dịch natively, sử dụng engine đồ họa riêng để vẽ giao diện trực tiếp, đảm bảo tốc độ khung hình ổn định ở mức 60fps. Điều này cực kỳ quan trọng đối với các thao tác cuộn danh sách dài hay các hiệu ứng chuyển động phức tạp trong tính năng \gls{teamcart}. Khả năng kiểm soát giao diện chính xác đến từng pixel giúp hiện thực hóa các thiết kế độc đáo mà không bị giới hạn bởi các widget mặc định của hệ điều hành. Ngoài ra, tính năng Hot Reload giúp tăng tốc đáng kể quy trình phát triển và tinh chỉnh giao diện.
 
 \subsection{Quản lý trạng thái và Tương tác API}
 
-Để xử lý luồng dữ liệu phức tạp của TeamCart, ứng dụng sử dụng thư viện Provider để quản lý trạng thái. Giải pháp này giúp tách biệt logic nghiệp vụ khỏi giao diện, giải quyết vấn đề truyền dữ liệu qua nhiều cấp và giữ cho cấu trúc mã nguồn gọn gàng, dễ bảo trì. Việc giao tiếp mạng được quản lý bởi thư viện Dio, hỗ trợ các kịch bản nâng cao như tự động hủy request, xử lý timeout và chặn bắt lỗi tập trung, đảm bảo ứng dụng luôn hoạt động ổn định trong mọi điều kiện mạng.
+Để xử lý luồng dữ liệu phức tạp của \gls{teamcart}, ứng dụng sử dụng thư viện Provider để quản lý trạng thái. Giải pháp này giúp tách biệt logic nghiệp vụ khỏi giao diện, giải quyết vấn đề truyền dữ liệu qua nhiều cấp và giữ cho cấu trúc mã nguồn gọn gàng, dễ bảo trì. Việc giao tiếp mạng được quản lý bởi thư viện Dio, hỗ trợ các kịch bản nâng cao như tự động hủy request, xử lý timeout và chặn bắt lỗi tập trung, đảm bảo ứng dụng luôn hoạt động ổn định trong mọi điều kiện mạng.
 
 \subsection{Tích hợp bản đồ và Thanh toán}
 
-Hệ thống tích hợp Mapbox SDK cho các chức năng bản đồ và định vị, mang lại trải nghiệm tương tác mượt mà và tối ưu chi phí phát triển \cite{Mapbox}. Về thanh toán, ứng dụng sử dụng cổng thanh toán Stripe thông qua SDK chính thức \cite{Stripe}. Stripe cung cấp môi trường kiểm thử (Sandbox) toàn diện, cho phép đội ngũ phát triển mô phỏng an toàn mọi kịch bản thanh toán từ thành công, thất bại đến hoàn tiền trước khi triển khai thực tế.
+Hệ thống tích hợp Mapbox \gls{sdk} cho các chức năng bản đồ và định vị, mang lại trải nghiệm tương tác mượt mà và tối ưu chi phí phát triển \cite{Mapbox}. Về thanh toán, ứng dụng sử dụng cổng thanh toán Stripe thông qua \gls{sdk} chính thức \cite{Stripe}. Stripe cung cấp môi trường kiểm thử (Sandbox) toàn diện, cho phép đội ngũ phát triển mô phỏng an toàn mọi kịch bản thanh toán từ thành công, thất bại đến hoàn tiền trước khi triển khai thực tế.
 
 \section{Ứng dụng Web quản trị (Admin \& Restaurant Portal)}
 
@@ -77,7 +77,7 @@ Cổng thông tin quản trị dành cho Đối tác nhà hàng và Quản trị
 
 \subsection{Nền tảng Frontend: Angular}
 
-Dự án sử dụng framework Angular (phiên bản mới nhất) kết hợp với ngôn ngữ TypeScript \cite{AngularArch}. Kiến trúc module chặt chẽ và hệ thống quản lý phụ thuộc (Dependency Injection) của Angular rất phù hợp với tư duy thiết kế hướng đối tượng, giúp đồng bộ kiến thức với đội ngũ Backend. Các công cụ tích hợp sẵn như HttpClient, Reactive Forms và Router giúp xây dựng ứng dụng quản trị ổn định, bảo mật và dễ bảo trì, vượt trội hơn so với các thư viện UI tự do trong bối cảnh ứng dụng doanh nghiệp.
+Dự án sử dụng framework \gls{angular} (phiên bản mới nhất) kết hợp với ngôn ngữ TypeScript \cite{AngularArch}. Kiến trúc module chặt chẽ và hệ thống quản lý phụ thuộc (Dependency Injection) của \gls{angular} rất phù hợp với tư duy thiết kế hướng đối tượng, giúp đồng bộ kiến thức với đội ngũ Backend. Các công cụ tích hợp sẵn như HttpClient, Reactive Forms và Router giúp xây dựng ứng dụng quản trị ổn định, bảo mật và dễ bảo trì, vượt trội hơn so với các thư viện UI tự do trong bối cảnh ứng dụng doanh nghiệp.
 
 \subsection{Thư viện giao diện: PrimeNG và Tailwind CSS}
 
@@ -85,14 +85,40 @@ Giao diện quản trị được xây dựng dựa trên sự kết hợp giữ
 
 \section{Cộng tác thời gian thực (Realtime Collaboration)}
 
-Khả năng tương tác thời gian thực là "trái tim" của tính năng TeamCart, đảm bảo trải nghiệm đồng bộ tức thì giữa các thành viên trong nhóm với độ trễ tối thiểu.
+Khả năng tương tác thời gian thực là "trái tim" của tính năng \gls{teamcart}, đảm bảo trải nghiệm đồng bộ tức thì giữa các thành viên trong nhóm với độ trễ tối thiểu.
 
 \subsection{Giao thức và Framework: SignalR}
 
-Hệ thống sử dụng thư viện ASP.NET Core SignalR với giao thức WebSockets làm nòng cốt \cite{SignalRIntro}. SignalR cho phép server đẩy (push) dữ liệu cập nhật xuống client ngay lập tức thay vì chờ client gửi yêu cầu. Điều này giúp các thay đổi trong TeamCart như thêm món, xóa món được đồng bộ gần như tức thời đến tất cả thành viên, tạo cảm giác cộng tác mượt mà. SignalR cũng hỗ trợ cơ chế tự động điều phối, tự động chuyển đổi sang các giao thức thay thế như Server-Sent Events hay Long Polling nếu môi trường mạng của người dùng không hỗ trợ WebSockets, đảm bảo kết nối luôn ổn định.
+Hệ thống sử dụng thư viện \gls{aspnetcore} \gls{signalr} với giao thức \gls{websockets} làm nòng cốt \cite{SignalRIntro}. \gls{signalr} cho phép server đẩy (push) dữ liệu cập nhật xuống client ngay lập tức thay vì chờ client gửi yêu cầu. Điều này giúp các thay đổi trong \gls{teamcart} như thêm món, xóa món được đồng bộ gần như tức thời đến tất cả thành viên, tạo cảm giác cộng tác mượt mà. \gls{signalr} cũng hỗ trợ cơ chế tự động điều phối, tự động chuyển đổi sang các giao thức thay thế như Server-Sent Events hay Long Polling nếu môi trường mạng của người dùng không hỗ trợ \gls{websockets}, đảm bảo kết nối luôn ổn định.
 
 \subsection{Thông báo đẩy tới thiết bị di động: Firebase Cloud Messaging (FCM)}
 
-Để bổ trợ cho SignalR trong các trường hợp ứng dụng chạy nền hoặc đã tắt, hệ thống tích hợp dịch vụ Firebase Cloud Messaging (FCM) \cite{FCM}. FCM sử dụng cơ chế thông báo tiêu chuẩn của hệ điều hành (APNs/GCM) để đánh thức thiết bị và gửi các thông tin quan trọng như cập nhật trạng thái đơn hàng hay lời mời tham gia nhóm. Sự kết hợp giữa SignalR (Online Realtime) và FCM (Background Notification) tạo nên một hệ thống thông báo toàn diện, đảm bảo người dùng không bao giờ bỏ lỡ các thông tin quan trọng từ YummyZoom.
+Để bổ trợ cho \gls{signalr} trong các trường hợp ứng dụng chạy nền hoặc đã tắt, hệ thống tích hợp dịch vụ \gls{fcm} (\gls{fcm}) \cite{FCM}. \gls{fcm} sử dụng cơ chế thông báo tiêu chuẩn của hệ điều hành (APNs/GCM) để đánh thức thiết bị và gửi các thông tin quan trọng như cập nhật trạng thái đơn hàng hay lời mời tham gia nhóm. Sự kết hợp giữa \gls{signalr} (Online Realtime) và \gls{fcm} (Background Notification) tạo nên một hệ thống thông báo toàn diện, đảm bảo người dùng không bao giờ bỏ lỡ các thông tin quan trọng từ \gls{yummyzoom}.
+
+\section{Nền tảng triển khai và phân phối hệ thống}
+
+Bên cạnh lựa chọn công nghệ phát triển, cách thức triển khai và phân phối cũng ảnh hưởng trực tiếp đến khả năng vận hành ổn định, tốc độ phát hành phiên bản và mức độ tái lập môi trường. Đồ án lựa chọn mô hình triển khai kết hợp, trong đó phần Backend được triển khai trên nền tảng đám mây Azure theo hướng hạ tầng dưới dạng mã (\gls{iac} -- \gls{iac}), ứng dụng di động khách hàng được đóng gói và phân phối dưới dạng tệp Android Package Kit (APK) để phục vụ thử nghiệm và đánh giá, còn cổng web quản trị được triển khai trên nền tảng Vercel nhằm tối ưu hóa quy trình phát hành giao diện.
+
+\subsection{Triển khai Backend trên Azure bằng Azure Developer CLI (azd) và .NET Aspire}
+
+Phần Backend được triển khai thông qua Azure Developer CLI (\gls{azd}), một công cụ dòng lệnh hỗ trợ chuẩn hóa cấu hình môi trường, quy trình cấp phát tài nguyên và triển khai ứng dụng \cite{Azd}. Trong bối cảnh hệ thống có nhiều thành phần phụ thuộc như cơ sở dữ liệu, bộ nhớ đệm và quản trị bí mật, cách tiếp cận này giúp giảm sai lệch cấu hình giữa các môi trường và tạo khả năng tái lập khi cần khởi tạo lại toàn bộ tài nguyên. Đồng thời, đồ án sử dụng \gls{dotnet} Aspire như một lớp điều phối ở mức ứng dụng, cho phép mô tả đồ thị tài nguyên và phụ thuộc (ví dụ giữa dịch vụ web, \gls{postgresql} và \gls{redis}) theo cách thống nhất giữa môi trường phát triển và môi trường triển khai \cite{Aspire}.
+
+Về hạ tầng, \gls{azd} kết hợp với \gls{bicep} để mô tả tài nguyên Azure theo hướng \gls{iac} \cite{Bicep}. Mô hình này giúp việc cấp phát tài nguyên trở nên có kiểm soát, có thể xem xét, và dễ dàng tự động hóa trong quy trình tích hợp và triển khai liên tục (\gls{cicd}). Dịch vụ web được triển khai trên \gls{azurecontainerapps} \cite{AzureContainerApps}, phù hợp với đặc thù ứng dụng web hiện đại chạy bằng container, đồng thời hỗ trợ quản lý phiên bản, mở rộng theo tải và tích hợp quan sát hệ thống. Thông tin nhạy cảm và cấu hình bí mật được quản lý tập trung bằng Azure Key Vault \cite{AzureKeyVault}, giúp hạn chế việc lưu trữ bí mật trực tiếp trong mã nguồn và tăng cường an toàn khi triển khai.
+
+\subsection{Tự động hóa triển khai bằng GitHub Actions và cơ chế xác thực OIDC}
+
+Để hỗ trợ phát hành phiên bản lặp lại, đồ án sử dụng GitHub Actions như nền tảng thực thi quy trình \gls{cicd} \cite{GitHubActions}. Điểm quan trọng trong quy trình này là cơ chế đăng nhập Azure theo hướng "không dùng bí mật dài hạn" (secretless) thông qua OpenID Connect (\gls{oidc}), cho phép workflow trên GitHub nhận định danh tạm thời để truy cập Azure thay vì phải lưu khóa truy cập cố định \cite{AzureGithubOIDC}. Cách tiếp cận này giúp giảm rủi ro rò rỉ thông tin xác thực trong kho mã nguồn và phù hợp với yêu cầu bảo mật khi triển khai trên môi trường đám mây.
+
+\subsection{Phân phối ứng dụng di động bằng tệp APK}
+
+Ứng dụng di động dành cho khách hàng hiện được đóng gói ở dạng tệp cài đặt APK và phân phối trực tiếp cho mục đích thử nghiệm, thay vì phát hành qua các kho ứng dụng. Hình thức phân phối này giúp rút ngắn vòng lặp kiểm thử -- phản hồi trong giai đoạn phát triển đồ án, đồng thời cho phép kiểm soát chặt chẽ phiên bản đang được đánh giá trên một nhóm người dùng giới hạn. Quy trình đóng gói và chuẩn bị phát hành APK tuân theo hướng dẫn chính thức từ Android Developers \cite{AndroidApk}.
+
+\subsection{Triển khai cổng web quản trị trên Vercel}
+
+Cổng web quản trị được triển khai trên Vercel \cite{Vercel}, một nền tảng tối ưu cho các ứng dụng web hiện đại với khả năng xây dựng (build) và phát hành tự động từ kho mã nguồn. Trong bối cảnh cổng quản trị là ứng dụng SPA, việc triển khai trên Vercel giúp đơn giản hóa việc phân phối tài nguyên tĩnh, đồng thời hỗ trợ cơ chế triển khai theo nhánh và xem trước (preview) để kiểm thử giao diện trước khi phát hành chính thức. Cách lựa chọn này giúp tách biệt vòng đời triển khai của giao diện quản trị khỏi Backend, giảm phụ thuộc khi cần phát hành các thay đổi giao diện nhanh chóng.
+
+\section*{Kết chương}
+
+Chương 3 đã giới thiệu các công nghệ và giải pháp kỹ thuật được sử dụng để hiện thực hóa hệ thống \gls{yummyzoom}, bao gồm kiến trúc Backend, nền tảng phát triển ứng dụng di động, công nghệ xây dựng web quản trị, cũng như các cơ chế hỗ trợ cộng tác thời gian thực. Việc lựa chọn công nghệ được đặt trong bối cảnh yêu cầu của bài toán đặt hàng nhóm, đảm bảo cân bằng giữa hiệu năng, độ tin cậy, khả năng bảo trì và trải nghiệm người dùng. Đồng thời, chương này cũng mô tả các nền tảng triển khai và phân phối cho từng thành phần nhằm đảm bảo hệ thống có thể vận hành ổn định và tái lập môi trường khi cần. Trên cơ sở các lựa chọn công nghệ đó, chương tiếp theo sẽ trình bày quá trình hiện thực, kiểm thử và các kết quả thực nghiệm đạt được của hệ thống.
 
 \end{document}
