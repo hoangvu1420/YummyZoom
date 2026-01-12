@@ -40,7 +40,7 @@ Move all “always-running” background loops out of the `Web` host so:
 
 - Only `web` is defined as an AppHost project resource:
   - `src/AppHost/Program.cs` adds `Projects.Web` only.
-- The deployed Container App template for `web` pins **`minReplicas: 1`**:
+- The deployed Container App template for `web` sets **`minReplicas: 0`** (scale-to-zero):
   - `src/AppHost/infra/web.tmpl.yaml`
 - `azd` configuration is AppHost-driven with a single service:
   - `src/AppHost/azure.yaml` (points at `AppHost.csproj`)
@@ -73,6 +73,11 @@ Move all “always-running” background loops out of the `Web` host so:
 
 ### Phase 0 — Low-risk wins (can be done first)
 
+0) **(Decision: do now) Allow Web to scale to 0**
+   - Update `src/AppHost/infra/web.tmpl.yaml` to `scale.minReplicas: 0`.
+   - Accepted trade-off (temporary): when `web` scales to 0, all background loops hosted in `web` also pause (outbox draining, maintenance, etc.).
+   - This is the cheapest “works for demo” setting, but it is not the final architecture; follow-up phases move background processing to a dedicated worker/job.
+
 1) **Adaptive idle backoff in outbox poller**
    - Change `OutboxPublisherHostedService` so idle delay grows (e.g. doubles up to `MaxBackoff`) and resets to minimum when work is found.
    - Keep `PollInterval` as the minimum.
@@ -90,7 +95,7 @@ Move all “always-running” background loops out of the `Web` host so:
    - Add defaults in `src/Web/appsettings*.json` (and later in worker settings).
 
 Notes:
-- Phase 0 improves cost/behavior even before splitting hosts, but it does **not** by itself guarantee scale-to-zero (that requires host separation + template change).
+- Phase 0 improves cost/behavior even before splitting hosts. With `minReplicas: 0` it enables scale-to-zero immediately, but background processing will be paused whenever `web` is scaled to 0.
 
 ### Phase 1 — Split DI so Web stops registering hosted services
 
@@ -233,4 +238,3 @@ Recommended order for implementation in this repo:
   - or move to a queue-based outbox dispatcher if/when Service Bus is introduced
 - Make background services opt-in via config per host:
   - e.g. `OUTBOX__ENABLED=true` only on worker.
-

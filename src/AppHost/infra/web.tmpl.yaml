@@ -51,7 +51,13 @@ properties:
           - name: ConnectionStrings__redis
             secretRef: redis-connection
     scale:
-      minReplicas: 1
+      minReplicas: 0
+      maxReplicas: 3
+      rules:
+        - name: http-scaler
+          http:
+            metadata:
+              concurrentRequests: "10"
 tags:
   azd-service-name: web
   aspire-resource-name: web
