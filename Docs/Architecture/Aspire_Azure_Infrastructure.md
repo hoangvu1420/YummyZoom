@@ -180,7 +180,7 @@ The template assigns Contributor on the Container Apps environment to `principal
 - Type: `Microsoft.App/containerApps@2024-02-02-preview`
 - Image: `docker.io/redis:7-alpine`
 - Ingress: internal-only, TCP, port `6379`
-- Scale: `minReplicas: 1`, `maxReplicas: 1`
+- Scale: `minReplicas: 0`, `maxReplicas: 1` (explicit `tcp-scaler` rule: `concurrentConnections: 10`)
 - Tag: `aspire-resource-name=redis` (matches AppHost resource name)
 
 Output:

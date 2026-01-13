@@ -39,8 +39,18 @@ resource redis 'Microsoft.App/containerApps@2024-02-02-preview' = {
         }
       ]
       scale: {
-        minReplicas: 1
+        minReplicas: 0
         maxReplicas: 1
+        rules: [
+          {
+            name: 'tcp-scaler'
+            tcp: {
+              metadata: {
+                concurrentConnections: '10'
+              }
+            }
+          }
+        ]
       }
     }
   }
