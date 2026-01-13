@@ -1,77 +1,54 @@
-<mxfile host="Electron" modified="2025-11-23T16:40:00.000Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" version="24.0.4" etag="GeneratedByAI" type="device">
+<mxfile host="Electron" modified="2025-11-23T09:43:23.945Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="MrItAKTn963atlbeQpFQ" version="24.0.4" type="device">
   <diagram name="Page-1" id="RestaurantApprovalUseCase">
     <mxGraphModel dx="2398" dy="894" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        
-        <!-- Title -->
         <mxCell id="title" value="Biểu đồ Use Case Phân rã - Duyệt đăng ký nhà hàng" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="-245" y="20" width="450" height="30" as="geometry" />
+          <mxGeometry x="-325" y="20" width="450" height="30" as="geometry" />
         </mxCell>
-        
-        <!-- System Boundary -->
         <mxCell id="system-boundary" value="Hệ thống YummyZoom - Admin Module" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=350;height=30;fontSize=14;fontStyle=1;" parent="1" vertex="1">
           <mxGeometry x="-450" y="60" width="700" height="750" as="geometry" />
         </mxCell>
-        
-        <!-- Actor: Admin -->
         <mxCell id="actor-admin" value="Quản trị viên&lt;div style=&quot;font-size: 13px;&quot;&gt;(Admin)&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=13;fontStyle=1;strokeWidth=2;" parent="1" vertex="1">
           <mxGeometry x="-600" y="350" width="30" height="60" as="geometry" />
         </mxCell>
-        
-        <!-- Actor: Email System -->
         <mxCell id="actor-email" value="Hệ thống Email" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=13;fontStyle=1;strokeWidth=2;" parent="1" vertex="1">
-          <mxGeometry x="350" y="350" width="30" height="60" as="geometry" />
+          <mxGeometry x="360" y="545" width="30" height="60" as="geometry" />
         </mxCell>
-        
-        <!-- Main Use Cases (Column 1) -->
         <mxCell id="uc1" value="Xem danh sách yêu cầu" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-380" y="120" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc2" value="Xem chi tiết hồ sơ" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-380" y="250" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc3" value="Phê duyệt đăng ký" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-380" y="450" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc4" value="Từ chối đăng ký" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-380" y="580" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc5" value="Yêu cầu bổ sung thông tin" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-380" y="700" width="160" height="50" as="geometry" />
         </mxCell>
-        
-        <!-- Sub Use Cases (Column 2) -->
         <mxCell id="uc1_1" value="Lọc theo trạng thái" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-100" y="120" width="140" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc2_1" value="Kiểm tra giấy phép KD" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-100" y="220" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc2_2" value="Kiểm tra menu dự kiến" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="-100" y="290" width="150" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc3_1" value="Kích hoạt tài khoản" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
-          <mxGeometry x="-100" y="420" width="140" height="50" as="geometry" />
+          <mxGeometry x="-90" y="400" width="140" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc4_1" value="Nhập lý do từ chối" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
-          <mxGeometry x="-100" y="580" width="140" height="50" as="geometry" />
+          <mxGeometry x="-100" y="700" width="140" height="50" as="geometry" />
         </mxCell>
-        
         <mxCell id="uc6" value="Gửi thông báo kết quả" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
-          <mxGeometry x="150" y="500" width="150" height="50" as="geometry" />
+          <mxGeometry x="50" y="550" width="150" height="50" as="geometry" />
         </mxCell>
-        
-        <!-- Relationships: Actor -> Main UCs -->
         <mxCell id="assoc1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="actor-admin" target="uc1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry" />
         </mxCell>
@@ -87,15 +64,9 @@
         <mxCell id="assoc5" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="actor-admin" target="uc5" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry" />
         </mxCell>
-        
-        <!-- Relationships: Email System -> UC6 -->
         <mxCell id="assoc_email" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="uc6" target="actor-email" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry" />
         </mxCell>
-        
-        <!-- Relationships: Include/Extend -->
-        
-        <!-- UC1 Extend UC1_1 -->
         <mxCell id="ext1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc1_1" target="uc1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -104,8 +75,6 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <!-- UC2 Includes -->
         <mxCell id="inc2_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc2" target="uc2_1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -114,7 +83,6 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
         <mxCell id="inc2_2" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc2" target="uc2_2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -123,9 +91,7 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <!-- UC3 Includes -->
-        <mxCell id="inc3_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc3" target="uc3_1" edge="1">
+        <mxCell id="inc3_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc3" target="uc3_1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="inc3_1-label" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="inc3_1" vertex="1" connectable="0">
@@ -133,8 +99,7 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <mxCell id="inc3_2" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc3" target="uc6" edge="1">
+        <mxCell id="inc3_2" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc3" target="uc6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="inc3_2-label" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="inc3_2" vertex="1" connectable="0">
@@ -142,9 +107,7 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <!-- UC4 Includes -->
-        <mxCell id="inc4_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc4" target="uc4_1" edge="1">
+        <mxCell id="inc4_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc4" target="uc4_1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="inc4_1-label" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="inc4_1" vertex="1" connectable="0">
@@ -152,7 +115,6 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
         <mxCell id="inc4_2" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc4" target="uc6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -161,8 +123,6 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <!-- UC5 Includes -->
         <mxCell id="inc5_1" style="endArrow=open;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="uc5" target="uc6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -171,7 +131,6 @@
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        
       </root>
     </mxGraphModel>
   </diagram>

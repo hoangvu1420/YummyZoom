@@ -5,7 +5,7 @@ Chương này trình bày chi tiết về các công nghệ, phong cách kiến 
 
 \section{Kiến trúc hệ thống và Ứng dụng Backend}
 
-Hệ thống Backend đóng vai trò là xương sống của toàn bộ ứng dụng \gls{yummyzoom}, chịu trách nhiệm xử lý các nghiệp vụ cốt lõi, quản lý dữ liệu và điều phối các tương tác giữa các phân hệ. Để đáp ứng các yêu cầu khắt khe về khả năng bảo trì (Maintainability) và độ tin cậy (Reliability), việc lựa chọn kiến trúc phần mềm và nền tảng phát triển phù hợp là yếu tố tiên quyết.
+Hệ thống Backend đóng vai trò là nền tảng cốt lõi của toàn bộ ứng dụng \gls{yummyzoom}, chịu trách nhiệm xử lý các nghiệp vụ cốt lõi, quản lý dữ liệu và điều phối các tương tác giữa các phân hệ. Để đáp ứng các yêu cầu khắt khe về khả năng bảo trì (Maintainability) và độ tin cậy (Reliability), việc lựa chọn kiến trúc phần mềm và nền tảng phát triển phù hợp là yếu tố tiên quyết.
 
 \subsection{Kiến trúc Clean Architecture và Domain-Driven Design (DDD)}
 
@@ -23,7 +23,7 @@ Bên cạnh đó, ngôn ngữ C\# với đặc tính định kiểu tĩnh mạnh
 
 \subsection{Điều phối hệ thống và Khả năng quan sát: .NET Aspire}
 
-Để giải quyết bài toán phức tạp trong việc quản lý, kết nối và vận hành các thành phần phân tán ngay từ môi trường phát triển, dự án áp dụng stack công nghệ \gls{dotnet} Aspire \cite{Aspire}. Công nghệ này đóng vai trò điều phối tài nguyên (Orchestration), cho phép định nghĩa toàn bộ hạ tầng bằng mã nguồn C\# thay vì cấu hình thủ công từng container. Chỉ với một thao tác khởi động, toàn bộ hệ sinh thái bao gồm Backend, Database và Cache sẽ được khởi tạo và kết nối tự động. Ngoài ra, \gls{dotnet} Aspire còn cung cấp khả năng quan sát (Observability) mạnh mẽ với Dashboard tích hợp sẵn, hiển thị tập trung logs, metrics và traces theo chuẩn \gls{opentelemetry}, giúp đội ngũ phát triển dễ dàng theo dõi luồng hoạt động và gỡ lỗi hệ thống.
+Để giải quyết bài toán phức tạp trong việc quản lý, kết nối và vận hành các thành phần phân tán ngay từ môi trường phát triển, dự án áp dụng công nghệ \gls{dotnet} Aspire \cite{Aspire}. Công nghệ này đóng vai trò điều phối tài nguyên (Orchestration), cho phép định nghĩa toàn bộ hạ tầng bằng mã nguồn C\# thay vì cấu hình thủ công từng container. Chỉ với một thao tác khởi động, toàn bộ hệ sinh thái bao gồm Backend, Database và Cache sẽ được khởi tạo và kết nối tự động. Ngoài ra, \gls{dotnet} Aspire còn cung cấp khả năng quan sát (Observability) mạnh mẽ với Dashboard tích hợp sẵn, hiển thị tập trung logs, metrics và traces theo chuẩn \gls{opentelemetry}, giúp đội ngũ phát triển dễ dàng theo dõi luồng hoạt động và gỡ lỗi hệ thống.
 
 \section{Cơ sở dữ liệu và Lưu trữ}
 
@@ -61,7 +61,7 @@ Hệ thống sử dụng tiêu chuẩn JSON Web Token (\gls{jwt}) làm phương 
 
 \subsection{Nền tảng phát triển: Flutter \& Dart}
 
-Dự án lựa chọn \gls{flutter} \gls{sdk} và ngôn ngữ Dart để phát triển ứng dụng di động \cite{FlutterArch}. \gls{flutter} cho phép xây dựng ứng dụng biên dịch natively, sử dụng engine đồ họa riêng để vẽ giao diện trực tiếp, đảm bảo tốc độ khung hình ổn định ở mức 60fps. Điều này cực kỳ quan trọng đối với các thao tác cuộn danh sách dài hay các hiệu ứng chuyển động phức tạp trong tính năng \gls{teamcart}. Khả năng kiểm soát giao diện chính xác đến từng pixel giúp hiện thực hóa các thiết kế độc đáo mà không bị giới hạn bởi các widget mặc định của hệ điều hành. Ngoài ra, tính năng Hot Reload giúp tăng tốc đáng kể quy trình phát triển và tinh chỉnh giao diện.
+Dự án lựa chọn \gls{flutter} \gls{sdk} và ngôn ngữ Dart để phát triển ứng dụng di động \cite{FlutterArch}. \gls{flutter} cho phép xây dựng ứng dụng biên dịch nguyên bản (native), sử dụng engine đồ họa riêng để vẽ giao diện trực tiếp, đảm bảo tốc độ khung hình ổn định ở mức 60fps. Điều này cực kỳ quan trọng đối với các thao tác cuộn danh sách dài hay các hiệu ứng chuyển động phức tạp trong tính năng \gls{teamcart}. Khả năng kiểm soát giao diện chính xác đến từng pixel giúp hiện thực hóa các thiết kế độc đáo mà không bị giới hạn bởi các widget mặc định của hệ điều hành. Ngoài ra, tính năng Hot Reload giúp tăng tốc đáng kể quy trình phát triển và tinh chỉnh giao diện.
 
 \subsection{Quản lý trạng thái và Tương tác API}
 
@@ -85,7 +85,7 @@ Giao diện quản trị được xây dựng dựa trên sự kết hợp giữ
 
 \section{Cộng tác thời gian thực (Realtime Collaboration)}
 
-Khả năng tương tác thời gian thực là "trái tim" của tính năng \gls{teamcart}, đảm bảo trải nghiệm đồng bộ tức thì giữa các thành viên trong nhóm với độ trễ tối thiểu.
+Khả năng tương tác thời gian thực là thành phần trung tâm của tính năng \gls{teamcart}, đảm bảo trải nghiệm đồng bộ tức thì giữa các thành viên trong nhóm với độ trễ tối thiểu.
 
 \subsection{Giao thức và Framework: SignalR}
 
