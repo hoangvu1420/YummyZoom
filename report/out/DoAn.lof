@@ -6,30 +6,31 @@
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Biểu đồ use case phân rã - \gls {teamcart}}}{10}{figure.caption.13}%
 \contentsline {figure}{\numberline {2.5}{\ignorespaces Biểu đồ use case phân rã - Quản lý thực đơn}}{11}{figure.caption.14}%
 \contentsline {figure}{\numberline {2.6}{\ignorespaces Biểu đồ use case phân rã - Duyệt đăng ký nhà hàng}}{12}{figure.caption.15}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Biểu đồ hoạt động - Quy trình xử lý đặt hàng}}{13}{figure.caption.16}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Biểu đồ hoạt động - Quy trình đặt hàng nhóm}}{14}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Biểu đồ hoạt động - Quy trình xử lý đặt hàng (1)}}{13}{figure.caption.16}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Biểu đồ hoạt động - Quy trình xử lý đặt hàng (2)}}{14}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Biểu đồ hoạt động - Quy trình đặt hàng nhóm}}{15}{figure.caption.18}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Biểu đồ phụ thuộc gói tổng quan \gls {yummyzoom} (Backend)}}{46}{figure.caption.18}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Thiết kế gói lớp miền cho luồng Khởi tạo Đơn hàng}}{47}{figure.caption.19}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Thiết kế gói lớp ứng dụng và hạ tầng cho luồng Khởi tạo Đơn hàng}}{48}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Minh hoạ màn hình Home/Menu (trái) và Restaurant Detail (phải) trên ứng dụng di động}}{50}{figure.caption.21}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Minh hoạ màn hình Restaurant Dashboard trên hệ thống quản trị}}{51}{figure.caption.22}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh hoạ màn hình Live Orders trên hệ thống quản trị}}{51}{figure.caption.23}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Biểu đồ lớp của Order (Aggregate root)}}{52}{figure.caption.24}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Biểu đồ lớp của \gls {teamcart} (Aggregate root)}}{53}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Biểu đồ lớp của Restaurant (Aggregate root)}}{54}{figure.caption.26}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Biểu đồ trình tự chuyển \gls {teamcart} thành Order}}{55}{figure.caption.27}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Biểu đồ trình tự cập nhật trạng thái đơn hàng}}{56}{figure.caption.28}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces ERD khái niệm theo mô hình Chen cho \gls {yummyzoom}}}{57}{figure.caption.29}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces ERD hiện đại cho nhóm Restaurant Catalog}}{58}{figure.caption.30}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces ERD hiện đại cho nhóm Order và \gls {teamcart}}}{59}{figure.caption.31}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Màn hình Trang chủ (Trái) và Chi tiết nhà hàng (Phải)}}{63}{figure.caption.35}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Giao diện \gls {teamcart}: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}}{64}{figure.caption.36}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces Quy trình Checkout: Giai đoạn Chốt giá (Trái) và Thanh toán (Phải)}}{65}{figure.caption.37}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces Giao diện Quản lý Menu và Thư viện tùy chọn}}{66}{figure.caption.38}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces Trung tâm xử lý đơn hàng trực tiếp (Live Orders Dashboard)}}{66}{figure.caption.39}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Giao diện Quản lý Mã giảm giá và Chương trình khuyến mãi}}{67}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Biểu đồ phụ thuộc gói tổng quan \gls {yummyzoom} (Backend)}}{47}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Thiết kế gói lớp miền cho luồng Khởi tạo Đơn hàng}}{48}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Thiết kế gói lớp ứng dụng và hạ tầng cho luồng Khởi tạo Đơn hàng}}{49}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Minh hoạ màn hình Home/Menu (trái) và Restaurant Detail (phải) trên ứng dụng di động}}{51}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Minh hoạ màn hình Restaurant Dashboard trên hệ thống quản trị}}{52}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh hoạ màn hình Live Orders trên hệ thống quản trị}}{52}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Biểu đồ lớp của Order (Aggregate root)}}{53}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Biểu đồ lớp của \gls {teamcart} (Aggregate root)}}{54}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Biểu đồ lớp của Restaurant (Aggregate root)}}{55}{figure.caption.27}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Biểu đồ trình tự chuyển \gls {teamcart} thành Order}}{56}{figure.caption.28}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Biểu đồ trình tự cập nhật trạng thái đơn hàng}}{57}{figure.caption.29}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces ERD khái niệm theo mô hình Chen cho \gls {yummyzoom}}}{58}{figure.caption.30}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces ERD hiện đại cho nhóm Restaurant Catalog}}{59}{figure.caption.31}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces ERD hiện đại cho nhóm Order và \gls {teamcart}}}{60}{figure.caption.32}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Màn hình Trang chủ (Trái) và Chi tiết nhà hàng (Phải)}}{64}{figure.caption.36}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Giao diện \gls {teamcart}: Màn hình Chủ phòng (Trái) và Thành viên (Phải)}}{65}{figure.caption.37}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Quy trình Checkout: Giai đoạn Chốt giá (Trái) và Thanh toán (Phải)}}{66}{figure.caption.38}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Giao diện Quản lý Menu và Thư viện tùy chọn}}{67}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Trung tâm xử lý đơn hàng trực tiếp (Live Orders Dashboard)}}{67}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Giao diện Quản lý Mã giảm giá và Chương trình khuyến mãi}}{68}{figure.caption.41}%
 \addvspace {10\p@ }
 \contentsfinish 
 \contentsfinish 

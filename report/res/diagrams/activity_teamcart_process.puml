@@ -44,7 +44,7 @@ endif
 
 |System (Hệ thống)|
 :Chuyển trạng thái sang "Locked";
-:Ngăn chặn thêm/sửa/xóa món; giữ quyền chỉnh Tip/Coupon cho Host;
+:Ngăn chặn thêm/sửa/xóa món;
 
 |Host (Trưởng nhóm)|
 :Áp dụng Mã giảm giá / Tip (Tùy chọn);
@@ -52,7 +52,7 @@ endif
 
 |System (Hệ thống)|
 :Cố định Tip/Coupon, tăng phiên bản báo giá (Quote);
-:Chuyển trạng thái sang "Finalized", thông báo cho thành viên có thể thanh toán;
+:Chuyển trạng thái sang "Finalized";
 
 |Member (Thành viên)|
 :Xem số tiền cần trả;

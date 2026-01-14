@@ -177,21 +177,29 @@ Quy trình này bao gồm các bước kiểm tra tính pháp lý (giấy phép 
 
 Hệ thống \gls{yummyzoom} có nhiều quy trình nghiệp vụ, trong đó quy trình Xử lý Đặt hàng (Order Processing) là quan trọng và phức tạp nhất. Quy trình này đảm bảo tính chính xác về mặt dữ liệu (tồn kho, giá cả), tuân thủ các quy tắc kinh doanh (khuyến mãi, giờ hoạt động) và an toàn trong giao dịch tài chính.
 
-Hình \ref{fig:activity_order_processing} dưới đây mô tả chi tiết các bước trong quy trình xử lý đặt hàng, từ lúc tiếp nhận yêu cầu, xác thực, tính toán tài chính cho đến khi hoàn tất đơn hàng.
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_order_processing.png}
-    \caption{Biểu đồ hoạt động - Quy trình xử lý đặt hàng}
-    \label{fig:activity_order_processing}
-\end{figure}
-\clearpage
+Hình \ref{fig:activity_order_processing_1} và Hình \ref{fig:activity_order_processing_2} dưới đây mô tả chi tiết các bước trong quy trình xử lý đặt hàng, từ lúc tiếp nhận yêu cầu, xác thực, tính toán tài chính cho đến khi hoàn tất đơn hàng.
 
 Ngoài ra, hình \ref{fig:activity_teamcart_process} minh họa luồng hoạt động của TeamCart, từ lúc Host khởi tạo, các thành viên tham gia chọn món, cho đến khi hoàn tất thanh toán và chốt đơn.
 
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_order_processing(1).png}
+    \caption{Biểu đồ hoạt động - Quy trình xử lý đặt hàng (1)}
+    \label{fig:activity_order_processing_1}
+\end{figure}
+\clearpage
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_order_processing(2).png}
+    \caption{Biểu đồ hoạt động - Quy trình xử lý đặt hàng (2)}
+    \label{fig:activity_order_processing_2}
+\end{figure}
+\clearpage
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{../Hinhve/activity_teamcart_process.png}
+    \includegraphics[width=\textwidth, height=\textheight, keepaspectratio]{../Hinhve/activity_teamcart_process.png}
     \caption{Biểu đồ hoạt động - Quy trình đặt hàng nhóm}
     \label{fig:activity_teamcart_process}
 \end{figure}
