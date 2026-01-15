@@ -1,31 +1,31 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces Đặc tả Use Case Đăng ký nhà hàng}}{15}{table.2.1}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces Dữ liệu đầu vào Đăng ký nhà hàng}}{16}{table.2.2}%
-\contentsline {table}{\numberline {2.3}{\ignorespaces Đặc tả Use Case Quản lý thực đơn}}{17}{table.2.3}%
-\contentsline {table}{\numberline {2.4}{\ignorespaces Dữ liệu đầu vào Quản lý thực đơn - Tạo món ăn}}{18}{table.2.4}%
-\contentsline {table}{\numberline {2.5}{\ignorespaces Đặc tả Use Case Tìm kiếm nhà hàng}}{19}{table.2.5}%
-\contentsline {table}{\numberline {2.6}{\ignorespaces Dữ liệu đầu vào Tìm kiếm nhà hàng}}{20}{table.2.6}%
-\contentsline {table}{\numberline {2.7}{\ignorespaces Đặc tả Use Case Đặt hàng cá nhân}}{22}{table.2.7}%
-\contentsline {table}{\numberline {2.8}{\ignorespaces Dữ liệu đầu vào Đặt hàng cá nhân}}{23}{table.2.8}%
-\contentsline {table}{\numberline {2.9}{\ignorespaces Đặc tả Use Case Khởi tạo \gls {teamcart}}}{24}{table.2.9}%
-\contentsline {table}{\numberline {2.10}{\ignorespaces Dữ liệu đầu vào Khởi tạo \gls {teamcart}}}{25}{table.2.10}%
-\contentsline {table}{\numberline {2.11}{\ignorespaces Đặc tả Use Case Tham gia \gls {teamcart}}}{26}{table.2.11}%
-\contentsline {table}{\numberline {2.12}{\ignorespaces Dữ liệu đầu vào Tham gia \gls {teamcart}}}{26}{table.2.12}%
-\contentsline {table}{\numberline {2.13}{\ignorespaces Đặc tả Use Case Chốt đơn \gls {teamcart}}}{29}{table.2.13}%
-\contentsline {table}{\numberline {2.14}{\ignorespaces Dữ liệu đầu vào Chốt giá \gls {teamcart}}}{29}{table.2.14}%
-\contentsline {table}{\numberline {2.15}{\ignorespaces Dữ liệu đầu vào Chốt đơn \gls {teamcart}}}{30}{table.2.15}%
-\contentsline {table}{\numberline {2.16}{\ignorespaces Đặc tả Use Case Xử lý đơn hàng}}{31}{table.2.16}%
-\contentsline {table}{\numberline {2.17}{\ignorespaces Dữ liệu đầu vào Xử lý đơn hàng}}{32}{table.2.17}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Đặc tả Use Case Đăng ký nhà hàng}}{16}{table.2.1}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Dữ liệu đầu vào Đăng ký nhà hàng}}{17}{table.2.2}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces Đặc tả Use Case Quản lý thực đơn}}{18}{table.2.3}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces Dữ liệu đầu vào Quản lý thực đơn - Tạo món ăn}}{19}{table.2.4}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces Đặc tả Use Case Tìm kiếm nhà hàng}}{20}{table.2.5}%
+\contentsline {table}{\numberline {2.6}{\ignorespaces Dữ liệu đầu vào Tìm kiếm nhà hàng}}{21}{table.2.6}%
+\contentsline {table}{\numberline {2.7}{\ignorespaces Đặc tả Use Case Đặt hàng cá nhân}}{23}{table.2.7}%
+\contentsline {table}{\numberline {2.8}{\ignorespaces Dữ liệu đầu vào Đặt hàng cá nhân}}{24}{table.2.8}%
+\contentsline {table}{\numberline {2.9}{\ignorespaces Đặc tả Use Case Khởi tạo \gls {teamcart}}}{25}{table.2.9}%
+\contentsline {table}{\numberline {2.10}{\ignorespaces Dữ liệu đầu vào Khởi tạo \gls {teamcart}}}{26}{table.2.10}%
+\contentsline {table}{\numberline {2.11}{\ignorespaces Đặc tả Use Case Tham gia \gls {teamcart}}}{27}{table.2.11}%
+\contentsline {table}{\numberline {2.12}{\ignorespaces Dữ liệu đầu vào Tham gia \gls {teamcart}}}{27}{table.2.12}%
+\contentsline {table}{\numberline {2.13}{\ignorespaces Đặc tả Use Case Chốt đơn \gls {teamcart}}}{30}{table.2.13}%
+\contentsline {table}{\numberline {2.14}{\ignorespaces Dữ liệu đầu vào Chốt giá \gls {teamcart}}}{30}{table.2.14}%
+\contentsline {table}{\numberline {2.15}{\ignorespaces Dữ liệu đầu vào Chốt đơn \gls {teamcart}}}{31}{table.2.15}%
+\contentsline {table}{\numberline {2.16}{\ignorespaces Đặc tả Use Case Xử lý đơn hàng}}{32}{table.2.16}%
+\contentsline {table}{\numberline {2.17}{\ignorespaces Dữ liệu đầu vào Xử lý đơn hàng}}{33}{table.2.17}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Danh sách thư viện và công cụ sử dụng}}{61}{table.4.1}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Thống kê kết quả backend}}{61}{table.caption.32}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Thống kê kết quả mobile}}{62}{table.caption.33}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Thống kê kết quả web admin}}{62}{table.caption.34}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Kiểm thử chức năng Đặt hàng nhóm}}{68}{table.4.5}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Kiểm thử chức năng Quy trình Đơn hàng}}{69}{table.4.6}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Kiểm thử chức năng Tìm kiếm và Lọc}}{70}{table.4.7}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Danh sách thư viện và công cụ sử dụng}}{62}{table.4.1}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Thống kê kết quả backend}}{62}{table.caption.33}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Thống kê kết quả mobile}}{63}{table.caption.34}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Thống kê kết quả web admin}}{63}{table.caption.35}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Kiểm thử chức năng Đặt hàng nhóm}}{69}{table.4.5}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Kiểm thử chức năng Quy trình Đơn hàng}}{70}{table.4.6}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Kiểm thử chức năng Tìm kiếm và Lọc}}{71}{table.4.7}%
 \addvspace {10\p@ }
 \contentsfinish 
 \contentsfinish 

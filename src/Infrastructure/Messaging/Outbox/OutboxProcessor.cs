@@ -41,11 +41,10 @@ public sealed class OutboxProcessor : IOutboxProcessor
                 .FromSqlRaw(@"
 					SELECT * FROM ""OutboxMessages""
 					WHERE ""ProcessedOnUtc"" IS NULL
-					  AND ""Attempt"" < {1}
 					  AND (""NextAttemptOnUtc"" IS NULL OR ""NextAttemptOnUtc"" <= NOW())
 					ORDER BY ""OccurredOnUtc""
 					FOR UPDATE SKIP LOCKED
-					LIMIT {0}", _options.BatchSize, _options.MaxAttempts)
+					LIMIT {0}", _options.BatchSize)
                 .ToListAsync(ct);
 
             if (toPublish.Count == 0)
@@ -85,26 +84,13 @@ public sealed class OutboxProcessor : IOutboxProcessor
                     db2.Attach(msg);
 
                     msg.Attempt += 1;
-                    if (msg.Attempt >= _options.MaxAttempts)
-                    {
-                        msg.NextAttemptOnUtc = null;
-                    }
-                    else
-                    {
-                        var backoff = ComputeBackoff(msg.Attempt, _options.MaxBackoff);
-                        msg.NextAttemptOnUtc = now + backoff;
-                    }
+                    var backoff = ComputeBackoff(msg.Attempt, _options.MaxBackoff);
+                    msg.NextAttemptOnUtc = now + backoff;
                     msg.Error = ex.ToString();
 
                     await db2.SaveChangesAsync(ct);
 
-                    _logger.LogError(
-                        ex,
-                        "Outbox: failed to publish event {Type} OutboxId={OutboxId} Attempt={Attempt}/{MaxAttempts}",
-                        msg.Type,
-                        msg.Id,
-                        msg.Attempt,
-                        _options.MaxAttempts);
+                    _logger.LogError(ex, "Outbox: failed to publish event {Type} OutboxId={OutboxId}", msg.Type, msg.Id);
                 }
             }
 
