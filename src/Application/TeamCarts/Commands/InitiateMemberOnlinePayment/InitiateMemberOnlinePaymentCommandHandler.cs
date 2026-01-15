@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using YummyZoom.Application.Common.Currency;
 using YummyZoom.Application.Common.Interfaces.IRepositories;
 using YummyZoom.Application.Common.Interfaces.IServices;
 using YummyZoom.Domain.Common.ValueObjects;
@@ -83,7 +84,8 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
                 ["teamcart_id"] = cart.Id.Value.ToString(),
                 ["member_user_id"] = userId.Value.ToString(),
                 ["quote_version"] = cart.QuoteVersion.ToString(),
-                ["quoted_cents"] = ((long)Math.Round(memberTotal.Amount * 100m, 0, System.MidpointRounding.AwayFromZero)).ToString()
+                // Stripe amount is expressed in minor units; keep webhook cross-check in the same unit.
+                ["quoted_cents"] = CurrencyMinorUnitConverter.ToMinorUnits(memberTotal.Amount, memberTotal.Currency).ToString()
             };
 
             var intentResult = await _paymentGatewayService.CreatePaymentIntentAsync(
@@ -106,4 +108,3 @@ public sealed class InitiateMemberOnlinePaymentCommandHandler : IRequestHandler<
         }, cancellationToken);
     }
 }
-
