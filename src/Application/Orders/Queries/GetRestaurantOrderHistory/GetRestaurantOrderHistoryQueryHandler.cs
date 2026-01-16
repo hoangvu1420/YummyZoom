@@ -60,7 +60,27 @@ public sealed class GetRestaurantOrderHistoryQueryHandler
              FROM "PaymentTransactions" pt
              WHERE pt."OrderId" = o."Id" AND pt."Type" = 'Payment'
              ORDER BY pt."Timestamp" ASC
-             LIMIT 1) AS PaymentMethod
+             LIMIT 1) AS PaymentMethod,
+            o."SourceTeamCartId"     AS SourceTeamCartId,
+            (o."SourceTeamCartId" IS NOT NULL) AS IsFromTeamCart,
+            (SELECT COALESCE(SUM(CASE
+                WHEN pt."Status" = 'Succeeded'
+                 AND pt."Type" = 'Payment'
+                 AND pt."PaymentMethodType" <> 'CashOnDelivery'
+                    THEN pt."Transaction_Amount"
+                ELSE 0
+            END), 0)
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = o."Id" AND pt."Type" = 'Payment') AS PaidOnlineAmount,
+            (SELECT COALESCE(SUM(CASE
+                WHEN pt."Status" = 'Succeeded'
+                 AND pt."Type" = 'Payment'
+                 AND pt."PaymentMethodType" = 'CashOnDelivery'
+                    THEN pt."Transaction_Amount"
+                ELSE 0
+            END), 0)
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = o."Id" AND pt."Type" = 'Payment') AS CashOnDeliveryAmount
             """;
 
         var fromAndWhere = new StringBuilder("""

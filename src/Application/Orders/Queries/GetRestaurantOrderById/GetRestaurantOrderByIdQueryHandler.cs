@@ -86,6 +86,26 @@ public sealed class GetRestaurantOrderByIdQueryHandler : IRequestHandler<GetRest
             WHERE pt."OrderId" = @OrderId AND pt."Type" = 'Payment'
             ORDER BY pt."Timestamp" ASC
             LIMIT 1;
+
+            SELECT
+                COALESCE(SUM(CASE
+                    WHEN pt."Status" = 'Succeeded'
+                     AND pt."Type" = 'Payment'
+                     AND pt."PaymentMethodType" <> 'CashOnDelivery'
+                        THEN pt."Transaction_Amount"
+                    ELSE 0
+                END), 0) AS PaidOnlineAmount,
+                COALESCE(SUM(CASE
+                    WHEN pt."Status" = 'Succeeded'
+                     AND pt."Type" = 'Payment'
+                     AND pt."PaymentMethodType" = 'CashOnDelivery'
+                        THEN pt."Transaction_Amount"
+                    ELSE 0
+                END), 0) AS CashOnDeliveryAmount
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = @OrderId
+              AND pt."Type" = 'Payment'
+              AND pt."Transaction_Currency" = (SELECT o."Subtotal_Currency" FROM "Orders" o WHERE o."Id" = @OrderId);
             """;
 
         using var multi = await connection.QueryMultipleAsync(
@@ -120,6 +140,7 @@ public sealed class GetRestaurantOrderByIdQueryHandler : IRequestHandler<GetRest
             .ToList();
 
         var paymentMethod = await multi.ReadSingleOrDefaultAsync<string?>();
+        var paymentSplit = await multi.ReadSingleAsync<PaymentSplitRow>();
 
         bool cancellable = false;
         try
@@ -172,7 +193,10 @@ public sealed class GetRestaurantOrderByIdQueryHandler : IRequestHandler<GetRest
             null, // DeliveryLon not available currently
             null, // DistanceKm placeholder for future computation
             paymentMethod,
-            cancellable);
+            cancellable,
+            IsFromTeamCart: orderRow.SourceTeamCartId.HasValue,
+            PaidOnlineAmount: paymentSplit.PaidOnlineAmount,
+            CashOnDeliveryAmount: paymentSplit.CashOnDeliveryAmount);
 
         return Result.Success(details);
     }
@@ -220,4 +244,6 @@ public sealed class GetRestaurantOrderByIdQueryHandler : IRequestHandler<GetRest
         decimal LineItemTotalAmount,
         string? SelectedCustomizations,
         string? ImageUrl);
+
+    private sealed record PaymentSplitRow(decimal PaidOnlineAmount, decimal CashOnDeliveryAmount);
 }

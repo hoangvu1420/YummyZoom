@@ -16,6 +16,60 @@ public class RestaurantOrderHistoryContractTests
         => new(orderId, "ORD-H1", "Delivered", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow, 25m, "USD", 2, "Test Customer", "0900000000", "Paid", "CashOnDelivery");
 
     [Test]
+    public async Task OrderOriginAndPaymentBreakdown_GetRestaurantOrderHistory_IncludesOriginAndSplitFields()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var restId = Guid.NewGuid();
+        var sourceTeamCartId = Guid.NewGuid();
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetRestaurantOrderHistoryQuery>();
+            var list = new PaginatedList<OrderHistorySummaryDto>(
+                new[]
+                {
+                    new OrderHistorySummaryDto(
+                        OrderId: Guid.NewGuid(),
+                        OrderNumber: "ORD-H-TC",
+                        Status: "Delivered",
+                        PlacementTimestamp: DateTime.UtcNow.AddDays(-1),
+                        CompletedTimestamp: DateTime.UtcNow.AddDays(-1).AddMinutes(45),
+                        TotalAmount: 10m,
+                        TotalCurrency: "USD",
+                        ItemCount: 1,
+                        CustomerName: "Test Customer",
+                        CustomerPhone: "0900000000",
+                        PaymentStatus: "Paid",
+                        PaymentMethod: "Mixed",
+                        SourceTeamCartId: sourceTeamCartId,
+                        IsFromTeamCart: true,
+                        PaidOnlineAmount: 7m,
+                        CashOnDeliveryAmount: 3m)
+                },
+                count: 1,
+                pageNumber: 1,
+                pageSize: 10);
+
+            return YummyZoom.SharedKernel.Result.Success(list);
+        });
+
+        var path = $"/api/v1/restaurants/{restId}/orders/history?pageNumber=1&pageSize=10";
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        resp.StatusCode.Should().Be(HttpStatusCode.OK, raw);
+
+        using var doc = JsonDocument.Parse(raw);
+        var item = doc.RootElement.GetProperty("items")[0];
+        item.GetProperty("sourceTeamCartId").GetString().Should().Be(sourceTeamCartId.ToString());
+        item.GetProperty("isFromTeamCart").GetBoolean().Should().BeTrue();
+        item.GetProperty("paidOnlineAmount").GetDecimal().Should().Be(7m);
+        item.GetProperty("cashOnDeliveryAmount").GetDecimal().Should().Be(3m);
+    }
+
+    [Test]
     public async Task GetRestaurantOrderHistory_WhenNonEmpty_Returns200WithItems()
     {
         var factory = new ApiContractWebAppFactory();

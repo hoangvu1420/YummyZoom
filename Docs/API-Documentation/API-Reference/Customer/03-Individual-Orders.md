@@ -198,6 +198,7 @@ Retrieves complete order information including items, pricing breakdown, and cur
     "totalAmount": 34.43,
     "appliedCouponId": "c3d4e5f6-g7h8-9012-cdef-gh3456789012",
     "sourceTeamCartId": null,
+    "isFromTeamCart": false,
     "deliveryAddress_Street": "123 Market Street, Apt 4B",
     "deliveryAddress_City": "San Francisco",
     "deliveryAddress_State": "CA",
@@ -229,7 +230,9 @@ Retrieves complete order information including items, pricing breakdown, and cur
     "deliveryLon": null,
     "distanceKm": null,
     "paymentMethod": "CreditCard",
-    "cancellable": true
+    "cancellable": true,
+    "paidOnlineAmount": 34.43,
+    "cashOnDeliveryAmount": 0
   }
 }
 ```
@@ -247,6 +250,8 @@ Notes
 - New fields are optional and may be null depending on data availability: `restaurant*`, `restaurantLat`, `restaurantLon`, `deliveryLat`, `deliveryLon`, `distanceKm`, `paymentMethod`, `cancellable`, and `items[].imageUrl`.
 - `distanceKm` is a placeholder for future enhancement; currently null as delivery coordinates are not captured.
 - `cancellable` is true for statuses `AwaitingPayment` and `Placed`.
+- `isFromTeamCart` is a convenience flag derived from `sourceTeamCartId != null`.
+- `paidOnlineAmount` and `cashOnDeliveryAmount` sum succeeded payment transactions; amounts can be `0` if payment is still pending.
 
 ---
 
@@ -273,7 +278,9 @@ Retrieves lightweight order status information optimized for polling and real-ti
   "status": "Preparing",
   "lastUpdateTimestamp": "2023-10-27T14:45:00Z",
   "estimatedDeliveryTime": "2023-10-27T15:30:00Z",
-  "version": 7
+  "version": 7,
+  "sourceTeamCartId": null,
+  "isFromTeamCart": false
 }
 ```
 
@@ -338,7 +345,11 @@ Retrieves paginated list of orders for the authenticated customer.
       "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "totalAmount": 34.43,
       "totalCurrency": "USD",
-      "itemCount": 3
+      "itemCount": 3,
+      "sourceTeamCartId": null,
+      "isFromTeamCart": false,
+      "paidOnlineAmount": 34.43,
+      "cashOnDeliveryAmount": 0
     },
     {
       "orderId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -351,7 +362,11 @@ Retrieves paginated list of orders for the authenticated customer.
       "customerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "totalAmount": 18.75,
       "totalCurrency": "USD",
-      "itemCount": 2
+      "itemCount": 2,
+      "sourceTeamCartId": "11111111-2222-3333-4444-555555555555",
+      "isFromTeamCart": true,
+      "paidOnlineAmount": 10.00,
+      "cashOnDeliveryAmount": 8.75
     }
   ],
   "pageNumber": 1,

@@ -19,7 +19,7 @@ This guide covers day-to-day order operations for restaurant staff: triaging new
 - Authorization: MustBeRestaurantStaff.
 - Description: FIFO list of newly `Placed` orders for intake.
 - Response 200: Paginated list of OrderSummaryDto
-  - Fields: `orderId`, `orderNumber`, `status`, `placementTimestamp`, `restaurantId`, `customerId`, `totalAmount`, `totalCurrency`, `itemCount`.
+  - Fields: `orderId`, `orderNumber`, `status`, `placementTimestamp`, `restaurantId`, `customerId`, `totalAmount`, `totalCurrency`, `itemCount`, `sourceTeamCartId`, `isFromTeamCart`, `paidOnlineAmount`, `cashOnDeliveryAmount`.
 
 ### GET /api/v1/restaurants/{restaurantId}/orders/active?pageNumber=1&pageSize=10
 - Authorization: MustBeRestaurantStaff.

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting; // IHostedService
 using YummyZoom.Application.Common.Authorization;
 using YummyZoom.Infrastructure;
+using YummyZoom.Infrastructure.Persistence.EfCore.Seeding;
 using YummyZoom.Web.ApiContractTests.Infrastructure;
 
 
@@ -49,6 +50,18 @@ public class ApiContractWebAppFactory : WebApplicationFactory<Program>
             // Disable Cache invalidation subscriber hosted service (depends on Redis)
             var hosted3 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "CacheInvalidationSubscriber");
             if (hosted3 is not null) services.Remove(hosted3);
+
+            // Disable coupon read model maintenance hosted service (depends on Postgres)
+            var hosted4 = services.FirstOrDefault(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType?.Name == "ActiveCouponViewMaintenanceHostedService");
+            if (hosted4 is not null) services.Remove(hosted4);
+
+            // Disable DB seeding for API contract tests (avoids connecting to Postgres during app startup).
+            // The contract test suite replaces ISender with a stub and does not need database access.
+            var seeders = services.Where(d => d.ServiceType == typeof(ISeeder)).ToList();
+            foreach (var seeder in seeders)
+            {
+                services.Remove(seeder);
+            }
 
             // Remove Redis-related services to avoid connection issues in tests
             var redisServices = services.Where(d =>
