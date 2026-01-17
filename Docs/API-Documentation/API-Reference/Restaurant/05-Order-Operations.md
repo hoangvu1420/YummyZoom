@@ -18,7 +18,7 @@ Returns orders with Status = `Placed`, oldest first (FIFO) for intake.
 
 - Authorization: MustBeRestaurantStaff
 - Response 200: Paginated list of `OrderSummaryDto` objects:
-  - Fields: `orderId`, `orderNumber`, `status`, `placementTimestamp`, `restaurantId`, `customerId`, `totalAmount`, `totalCurrency`, `itemCount`.
+  - Fields: `orderId`, `orderNumber`, `status`, `placementTimestamp`, `restaurantId`, `customerId`, `totalAmount`, `totalCurrency`, `itemCount`, `sourceTeamCartId`, `isFromTeamCart`, `paidOnlineAmount`, `cashOnDeliveryAmount`.
 - Errors: Standard validation on pagination.
 
 ### GET /restaurants/{restaurantId}/orders/active?pageNumber=1&pageSize=10
@@ -45,6 +45,8 @@ Returns historical orders (terminal statuses) for reporting and customer support
 - `customerName`, `customerPhone`
 - `paymentStatus` (e.g., `Paid`, `Pending`, `Failed`)
 - `paymentMethod` (e.g., `CashOnDelivery`, `CreditCard`)
+- `sourceTeamCartId`, `isFromTeamCart`
+- `paidOnlineAmount`, `cashOnDeliveryAmount` (payment split; prefer these over `paymentMethod` for TeamCart-originated orders)
 
 Example response item
 
@@ -61,7 +63,11 @@ Example response item
   "customerName": "Nguyen Van A",
   "customerPhone": "09xxxx",
   "paymentStatus": "Paid",
-  "paymentMethod": "CashOnDelivery"
+  "paymentMethod": "CashOnDelivery",
+  "sourceTeamCartId": null,
+  "isFromTeamCart": false,
+  "paidOnlineAmount": 0,
+  "cashOnDeliveryAmount": 170000
 }
 ```
 
@@ -97,6 +103,11 @@ Returns a detailed view of a single order for kitchen/ops screens (line items + 
   "tipAmount": 0,
   "taxAmount": 0,
   "totalAmount": 170000,
+  "sourceTeamCartId": null,
+  "isFromTeamCart": false,
+  "paymentMethod": "CashOnDelivery",
+  "paidOnlineAmount": 0,
+  "cashOnDeliveryAmount": 170000,
   "items": [
     {
       "orderItemId": "d7c9...",

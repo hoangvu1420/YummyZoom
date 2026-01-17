@@ -14,6 +14,39 @@ namespace YummyZoom.Web.ApiContractTests.Orders;
 public class GetOrderStatusContractTests
 {
     [Test]
+    public async Task OrderOriginAndPaymentBreakdown_GetOrderStatus_IncludesOriginFields()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var orderId = Guid.NewGuid();
+        var sourceTeamCartId = Guid.NewGuid();
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetOrderStatusQuery>();
+            ((GetOrderStatusQuery)req).OrderIdGuid.Should().Be(orderId);
+            return YummyZoom.SharedKernel.Result.Success(new OrderStatusDto(
+                orderId,
+                "Preparing",
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddMinutes(20),
+                Version: 1,
+                SourceTeamCartId: sourceTeamCartId,
+                IsFromTeamCart: true));
+        });
+
+        var path = $"/api/v1/orders/{orderId}/status";
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        resp.StatusCode.Should().Be(HttpStatusCode.OK, raw);
+
+        using var doc = JsonDocument.Parse(raw);
+        doc.RootElement.GetProperty("sourceTeamCartId").GetString().Should().Be(sourceTeamCartId.ToString());
+        doc.RootElement.GetProperty("isFromTeamCart").GetBoolean().Should().BeTrue();
+    }
+
+    [Test]
     public async Task GetOrderStatus_WhenFound_Returns200()
     {
         var factory = new ApiContractWebAppFactory();

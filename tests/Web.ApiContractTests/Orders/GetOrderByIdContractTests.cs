@@ -47,6 +47,46 @@ public class GetOrderByIdContractTests
         );
 
     [Test]
+    public async Task OrderOriginAndPaymentBreakdown_GetOrderById_IncludesOriginAndSplitFields()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var orderId = Guid.NewGuid();
+        var sourceTeamCartId = Guid.NewGuid();
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetOrderByIdQuery>();
+            ((GetOrderByIdQuery)req).OrderIdGuid.Should().Be(orderId);
+
+            var details = CreateDetails(orderId) with
+            {
+                SourceTeamCartId = sourceTeamCartId,
+                PaymentMethod = "Mixed",
+                IsFromTeamCart = true,
+                PaidOnlineAmount = 7m,
+                CashOnDeliveryAmount = 3m
+            };
+
+            return YummyZoom.SharedKernel.Result.Success(new GetOrderByIdResponse(details));
+        });
+
+        var path = $"/api/v1/orders/{orderId}";
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        resp.StatusCode.Should().Be(HttpStatusCode.OK, raw);
+
+        using var doc = JsonDocument.Parse(raw);
+        var order = doc.RootElement.GetProperty("order");
+        order.GetProperty("sourceTeamCartId").GetString().Should().Be(sourceTeamCartId.ToString());
+        order.GetProperty("isFromTeamCart").GetBoolean().Should().BeTrue();
+        order.GetProperty("paidOnlineAmount").GetDecimal().Should().Be(7m);
+        order.GetProperty("cashOnDeliveryAmount").GetDecimal().Should().Be(3m);
+    }
+
+    [Test]
     public async Task GetOrderById_WhenFound_Returns200()
     {
         var factory = new ApiContractWebAppFactory();

@@ -17,6 +17,58 @@ public class GetCustomerRecentOrdersContractTests
         => new(orderId, "ORD-1", "Placed", DateTime.UtcNow.AddMinutes(-10), Guid.NewGuid(), "Test Restaurant", "http://example.com/img.jpg", Guid.NewGuid(), 15m, "USD", 2);
 
     [Test]
+    public async Task OrderOriginAndPaymentBreakdown_GetCustomerRecentOrders_IncludesOriginAndSplitFields()
+    {
+        var factory = new ApiContractWebAppFactory();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("x-test-user-id", "user-1");
+
+        var orderId = Guid.NewGuid();
+        var sourceTeamCartId = Guid.NewGuid();
+
+        factory.Sender.RespondWith(req =>
+        {
+            req.Should().BeOfType<GetCustomerRecentOrdersQuery>();
+            var list = new PaginatedList<OrderSummaryDto>(
+                new[]
+                {
+                    new OrderSummaryDto(
+                        orderId,
+                        "ORD-TC-1",
+                        "Placed",
+                        DateTime.UtcNow.AddMinutes(-10),
+                        Guid.NewGuid(),
+                        "Test Restaurant",
+                        null,
+                        Guid.NewGuid(),
+                        10m,
+                        "USD",
+                        1,
+                        SourceTeamCartId: sourceTeamCartId,
+                        IsFromTeamCart: true,
+                        PaidOnlineAmount: 7m,
+                        CashOnDeliveryAmount: 3m)
+                },
+                count: 1,
+                pageNumber: 1,
+                pageSize: 20);
+            return YummyZoom.SharedKernel.Result.Success(list);
+        });
+
+        var path = "/api/v1/orders/my?pageNumber=1&pageSize=20";
+        var resp = await client.GetAsync(path);
+        var raw = await resp.Content.ReadAsStringAsync();
+        resp.StatusCode.Should().Be(HttpStatusCode.OK, raw);
+
+        using var doc = JsonDocument.Parse(raw);
+        var item = doc.RootElement.GetProperty("items")[0];
+        item.GetProperty("sourceTeamCartId").GetString().Should().Be(sourceTeamCartId.ToString());
+        item.GetProperty("isFromTeamCart").GetBoolean().Should().BeTrue();
+        item.GetProperty("paidOnlineAmount").GetDecimal().Should().Be(7m);
+        item.GetProperty("cashOnDeliveryAmount").GetDecimal().Should().Be(3m);
+    }
+
+    [Test]
     public async Task GetCustomerRecentOrders_WhenNonEmpty_Returns200WithItems()
     {
         var factory = new ApiContractWebAppFactory();

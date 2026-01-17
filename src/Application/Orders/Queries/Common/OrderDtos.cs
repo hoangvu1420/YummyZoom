@@ -18,7 +18,11 @@ public record OrderSummaryDto(
     Guid CustomerId,
     decimal TotalAmount,
     string TotalCurrency,
-    int ItemCount);
+    int ItemCount,
+    Guid? SourceTeamCartId = null,
+    bool IsFromTeamCart = false,
+    decimal PaidOnlineAmount = 0m,
+    decimal CashOnDeliveryAmount = 0m);
 
 /// <summary>
 /// Compact projection for restaurant order history screens.
@@ -35,7 +39,11 @@ public record OrderHistorySummaryDto(
     string? CustomerName,
     string? CustomerPhone,
     string? PaymentStatus,
-    string? PaymentMethod);
+    string? PaymentMethod,
+    Guid? SourceTeamCartId = null,
+    bool IsFromTeamCart = false,
+    decimal PaidOnlineAmount = 0m,
+    decimal CashOnDeliveryAmount = 0m);
 
 /// <summary>
 /// Detailed order representation including monetary breakdown and line items.
@@ -84,7 +92,10 @@ public record OrderDetailsDto(
     double? DistanceKm,
     // Payment & cancellation UX
     string? PaymentMethod,
-    bool Cancellable);
+    bool Cancellable,
+    bool IsFromTeamCart = false,
+    decimal PaidOnlineAmount = 0m,
+    decimal CashOnDeliveryAmount = 0m);
 
 /// <summary>
 /// Line item snapshot at time of order placement.
@@ -115,7 +126,9 @@ public record OrderStatusDto(
     string Status,
     DateTime LastUpdateTimestamp,
     DateTime? EstimatedDeliveryTime,
-    long Version);
+    long Version,
+    Guid? SourceTeamCartId = null,
+    bool IsFromTeamCart = false);
 
 /// <summary>
 /// Helper for parsing persisted JSON for SelectedCustomizations -> list of OrderItemCustomizationDto.

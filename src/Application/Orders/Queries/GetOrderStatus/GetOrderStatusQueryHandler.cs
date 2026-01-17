@@ -42,7 +42,8 @@ public sealed class GetOrderStatusQueryHandler : IRequestHandler<GetOrderStatusQ
                 o."EstimatedDeliveryTime"   AS EstimatedDeliveryTime,
                 o."CustomerId"              AS CustomerId,
                 o."RestaurantId"            AS RestaurantId,
-                o."Version"                AS Version
+                o."Version"                 AS Version,
+                o."SourceTeamCartId"        AS SourceTeamCartId
             FROM "Orders" o
             WHERE o."Id" = @OrderId
             """;
@@ -73,7 +74,14 @@ public sealed class GetOrderStatusQueryHandler : IRequestHandler<GetOrderStatusQ
             return Result.Failure<OrderStatusDto>(GetOrderStatusErrors.NotFound);
         }
 
-        var dto = new OrderStatusDto(row.OrderId, row.Status, row.LastUpdateTimestamp, row.EstimatedDeliveryTime, row.Version);
+        var dto = new OrderStatusDto(
+            row.OrderId,
+            row.Status,
+            row.LastUpdateTimestamp,
+            row.EstimatedDeliveryTime,
+            row.Version,
+            row.SourceTeamCartId,
+            IsFromTeamCart: row.SourceTeamCartId.HasValue);
         _logger.LogInformation("Order status retrieved {OrderId} = {Status}", row.OrderId, row.Status);
         return Result.Success(dto);
     }
@@ -85,5 +93,6 @@ public sealed class GetOrderStatusQueryHandler : IRequestHandler<GetOrderStatusQ
         DateTime? EstimatedDeliveryTime,
         Guid CustomerId,
         Guid RestaurantId,
-        long Version);
+        long Version,
+        Guid? SourceTeamCartId);
 }

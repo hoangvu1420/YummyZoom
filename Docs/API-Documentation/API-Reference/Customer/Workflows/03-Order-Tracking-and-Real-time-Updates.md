@@ -27,13 +27,18 @@ Response — 200 OK
   "orderId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "status": "Preparing",
   "lastUpdateTimestamp": "2025-09-27T18:25:43Z",
-  "estimatedDeliveryTime": "2025-09-27T18:55:00Z"
+  "estimatedDeliveryTime": "2025-09-27T18:55:00Z",
+  "version": 7,
+  "sourceTeamCartId": null,
+  "isFromTeamCart": false
 }
 ```
 
 Business rules
 - Only the customer who placed the order (or restaurant staff) can access; unauthorized orders are masked as 404.
 - Status values: `AwaitingPayment`, `Placed`, `Accepted`, `Preparing`, `ReadyForDelivery`, `Delivered`, `Cancelled`, `Rejected`.
+- `version` increments on user-visible changes; clients can use it for efficient conditional requests (ETag).
+- `isFromTeamCart` is a convenience flag derived from `sourceTeamCartId != null`.
 
 ---
 
@@ -67,6 +72,9 @@ Response — 200 OK
     "totalAmount": 37.84,
     "appliedCouponId": null,
     "sourceTeamCartId": null,
+    "isFromTeamCart": false,
+    "paidOnlineAmount": 37.84,
+    "cashOnDeliveryAmount": 0,
     "deliveryAddress_Street": "123 Foodie Lane",
     "deliveryAddress_City": "Tastytown",
     "deliveryAddress_State": "CA",
@@ -123,6 +131,9 @@ Response — 200 OK
   - `totalAmount` (number): The final amount charged.
   - `appliedCouponId` (string, UUID, nullable): ID of the coupon used, if any.
   - `sourceTeamCartId` (string, UUID, nullable): ID of the TeamCart this order originated from, if any.
+  - `isFromTeamCart` (boolean): Convenience discriminator derived from `sourceTeamCartId != null`.
+  - `paidOnlineAmount` (number): Sum of succeeded online payment transactions.
+  - `cashOnDeliveryAmount` (number): Sum of succeeded COD payment transactions.
   - `deliveryAddress_*`: A flattened snapshot of the delivery address fields.
 - `items` (array): A list of `OrderItemDto` objects.
   - `orderItemId` (string, UUID): Unique identifier for this line item.
@@ -162,7 +173,11 @@ Response — 200 OK
       "customerId": "9f54a6d8-b3e4-4b40-9b60-d3a25a3e1c7a",
       "totalAmount": 37.84,
       "totalCurrency": "USD",
-      "itemCount": 2
+      "itemCount": 2,
+      "sourceTeamCartId": null,
+      "isFromTeamCart": false,
+      "paidOnlineAmount": 37.84,
+      "cashOnDeliveryAmount": 0
     },
     {
       "orderId": "e36bb20a-47dd-4261-b458-1f03c3d4e580",
@@ -173,7 +188,11 @@ Response — 200 OK
       "customerId": "9f54a6d8-b3e4-4b40-9b60-d3a25a3e1c7a",
       "totalAmount": 25.50,
       "totalCurrency": "USD",
-      "itemCount": 1
+      "itemCount": 1,
+      "sourceTeamCartId": "11111111-2222-3333-4444-555555555555",
+      "isFromTeamCart": true,
+      "paidOnlineAmount": 10.00,
+      "cashOnDeliveryAmount": 15.50
     }
   ],
   "pageNumber": 1,
@@ -194,6 +213,10 @@ Response — 200 OK
   - `totalAmount` (number): The final total amount of the order.
   - `totalCurrency` (string): The currency code for the total amount.
   - `itemCount` (integer): The total number of individual items in the order.
+  - `sourceTeamCartId` (string, UUID, nullable): ID of the TeamCart this order originated from, if any.
+  - `isFromTeamCart` (boolean): Convenience discriminator derived from `sourceTeamCartId != null`.
+  - `paidOnlineAmount` (number): Sum of succeeded online payment transactions.
+  - `cashOnDeliveryAmount` (number): Sum of succeeded COD payment transactions.
 - `pageNumber` (integer): The current page number.
 - `totalPages` (integer): The total number of pages available.
 - `totalCount` (integer): The total number of orders in the customer's history.

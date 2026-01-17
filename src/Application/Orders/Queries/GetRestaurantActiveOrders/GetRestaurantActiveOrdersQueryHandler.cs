@@ -41,7 +41,27 @@ public sealed class GetRestaurantActiveOrdersQueryHandler : IRequestHandler<GetR
             o."CustomerId"          AS CustomerId,
             o."TotalAmount_Amount"   AS TotalAmount,
             o."TotalAmount_Currency" AS TotalCurrency,
-            CAST((SELECT COUNT(1) FROM "OrderItems" oi WHERE oi."OrderId" = o."Id") AS int) AS ItemCount
+            CAST((SELECT COUNT(1) FROM "OrderItems" oi WHERE oi."OrderId" = o."Id") AS int) AS ItemCount,
+            o."SourceTeamCartId"     AS SourceTeamCartId,
+            (o."SourceTeamCartId" IS NOT NULL) AS IsFromTeamCart,
+            (SELECT COALESCE(SUM(CASE
+                WHEN pt."Status" = 'Succeeded'
+                 AND pt."Type" = 'Payment'
+                 AND pt."PaymentMethodType" <> 'CashOnDelivery'
+                    THEN pt."Transaction_Amount"
+                ELSE 0
+            END), 0)
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = o."Id" AND pt."Type" = 'Payment') AS PaidOnlineAmount,
+            (SELECT COALESCE(SUM(CASE
+                WHEN pt."Status" = 'Succeeded'
+                 AND pt."Type" = 'Payment'
+                 AND pt."PaymentMethodType" = 'CashOnDelivery'
+                    THEN pt."Transaction_Amount"
+                ELSE 0
+            END), 0)
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = o."Id" AND pt."Type" = 'Payment') AS CashOnDeliveryAmount
             """;
 
         const string fromAndWhere = """

@@ -147,6 +147,35 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
         var paymentMethod = await connection.ExecuteScalarAsync<string?>(
             new CommandDefinition(paymentSql, new { OrderId = request.OrderIdGuid }, cancellationToken: cancellationToken));
 
+        // 4b. Payment split: aggregate succeeded payment amounts by method
+        const string paymentSplitSql = """
+            SELECT
+                COALESCE(SUM(CASE
+                    WHEN pt."Status" = 'Succeeded'
+                     AND pt."Type" = 'Payment'
+                     AND pt."PaymentMethodType" <> 'CashOnDelivery'
+                        THEN pt."Transaction_Amount"
+                    ELSE 0
+                END), 0) AS PaidOnlineAmount,
+                COALESCE(SUM(CASE
+                    WHEN pt."Status" = 'Succeeded'
+                     AND pt."Type" = 'Payment'
+                     AND pt."PaymentMethodType" = 'CashOnDelivery'
+                        THEN pt."Transaction_Amount"
+                    ELSE 0
+                END), 0) AS CashOnDeliveryAmount
+            FROM "PaymentTransactions" pt
+            WHERE pt."OrderId" = @OrderId
+              AND pt."Type" = 'Payment'
+              AND pt."Transaction_Currency" = @Currency
+            """;
+
+        var paymentSplit = await connection.QuerySingleAsync<PaymentSplitRow>(
+            new CommandDefinition(
+                paymentSplitSql,
+                new { OrderId = request.OrderIdGuid, Currency = orderRow.Currency },
+                cancellationToken: cancellationToken));
+
         // 5. Cancellation: simple policy (AwaitingPayment, Placed)
         bool cancellable = false;
         try
@@ -199,7 +228,10 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
             null, // DeliveryLon not available currently
             null, // DistanceKm placeholder for future computation
             paymentMethod,
-            cancellable);
+            cancellable,
+            IsFromTeamCart: orderRow.SourceTeamCartId.HasValue,
+            PaidOnlineAmount: paymentSplit.PaidOnlineAmount,
+            CashOnDeliveryAmount: paymentSplit.CashOnDeliveryAmount);
 
         _logger.LogInformation("Order {OrderId} retrieved with {ItemCount} items", request.OrderIdGuid, itemDtos.Count);
         return Result.Success(new GetOrderByIdResponse(details));
@@ -249,4 +281,6 @@ public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery
         decimal LineItemTotalAmount,
         string? SelectedCustomizations,
         string? ImageUrl);
+
+    private sealed record PaymentSplitRow(decimal PaidOnlineAmount, decimal CashOnDeliveryAmount);
 }

@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber out/DoAn"] 1768217519.75062 "out/DoAn.bcf" "out/DoAn.bbl" "out/DoAn" 1768415054.46422 0
+["biber out/DoAn"] 1768550369.46733 "out/DoAn.bcf" "out/DoAn.bbl" "out/DoAn" 1768550411.82167 0
   "Danh_sach_tai_lieu_tham_khao.bib" 1767855469 6929 71976cb1e8c83b3cebab94f9c20972fd ""
-  "out/DoAn.bcf" 1768415054 109418 f878ded4cff8b2fc20e4d5f26b1f61e8 "pdflatex"
+  "out/DoAn.bcf" 1768550410 109418 f878ded4cff8b2fc20e4d5f26b1f61e8 "pdflatex"
   (generated)
   "out/DoAn.bbl"
   "out/DoAn.blg"
   (rewritten before read)
-["pdflatex"] 1768415043.92387 "e:/source/repos/CA/YummyZoom/report/DoAn.tex" "out/DoAn.pdf" "DoAn" 1768415054.46513 0
-  "Bia.tex" 1768202271 1425 c632b1becef87feb7c41792d202162ff ""
+["pdflatex"] 1768550397.56413 "e:/source/repos/CA/YummyZoom/report/DoAn.tex" "out/DoAn.pdf" "DoAn" 1768550411.82257 0
+  "Bia.tex" 1768550311 1426 590b649a0e50cff5e9c8024692ea3f0a ""
   "Chuong/../Hinhve/activity_order_processing(1).png" 1768414727 50113 c9d4d43200a102df2375d885585303ac ""
   "Chuong/../Hinhve/activity_order_processing(2).png" 1768414782 55538 a7183b303d50b6e8a9b9260f674d3a8a ""
   "Chuong/../Hinhve/activity_teamcart_process.png" 1768414618 176331 9e39781e99873db6fb9dea7ea0bc6e65 ""
@@ -252,13 +252,13 @@
   "out/../Hinhve/usecase_overview.drawio.png" 1768216635 147743 9d4ac185cc399f43b6c6ea739f0f041c ""
   "out/../Hinhve/usecase_restaurant_approval_decomposition.drawio.png" 1768217260 127080 81acc99cc07626ac7d472037a53675b8 ""
   "out/../Hinhve/usecase_teamcart_decomposition.drawio.png" 1768217122 162460 d6243c41a28a46bb24f5bf116cf30535 ""
-  "out/DoAn.aux" 1768415053 72744 72302cd57dca3ccca9d2020f6ad2c80e "pdflatex"
-  "out/DoAn.bbl" 1768217528 30054 bd7742f80ecd05ac337088745c46373d "biber out/DoAn"
-  "out/DoAn.lof" 1768415054 4389 f5a237b01e1015d3ad182c3c91ae4e58 "pdflatex"
-  "out/DoAn.lot" 1768415054 3009 6f84f5525f38914007c9b36fd6684a31 "pdflatex"
-  "out/DoAn.out" 1768415054 21850 916813ecdb168bf2ac0aa93c01c7d478 "pdflatex"
-  "out/DoAn.run.xml" 1768415054 2420 870e78ade61913599db1e9f942eafbe6 "pdflatex"
-  "out/DoAn.toc" 1768415054 12307 a0549064a0eae68d4264191aeaa340b1 "pdflatex"
+  "out/DoAn.aux" 1768550410 72744 72302cd57dca3ccca9d2020f6ad2c80e "pdflatex"
+  "out/DoAn.bbl" 1768550372 30054 bd7742f80ecd05ac337088745c46373d "biber out/DoAn"
+  "out/DoAn.lof" 1768550410 4389 f5a237b01e1015d3ad182c3c91ae4e58 "pdflatex"
+  "out/DoAn.lot" 1768550410 3009 6f84f5525f38914007c9b36fd6684a31 "pdflatex"
+  "out/DoAn.out" 1768550410 21850 916813ecdb168bf2ac0aa93c01c7d478 "pdflatex"
+  "out/DoAn.run.xml" 1768550410 2420 870e78ade61913599db1e9f942eafbe6 "pdflatex"
+  "out/DoAn.toc" 1768550410 12307 a0549064a0eae68d4264191aeaa340b1 "pdflatex"
   "use Chuong/../Hinhve/activity_order_processing(1).png" 1768414727 50113 c9d4d43200a102df2375d885585303ac ""
   "use Chuong/../Hinhve/activity_order_processing(2).png" 1768414782 55538 a7183b303d50b6e8a9b9260f674d3a8a ""
   "use Chuong/../Hinhve/activity_teamcart_process.png" 1768414618 176331 9e39781e99873db6fb9dea7ea0bc6e65 ""
