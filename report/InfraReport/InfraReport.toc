@@ -1,0 +1,40 @@
+\ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } CHƯƠNG \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {chapter}{}{}{}\relax 
+\ttl@change@i {\@ne }{section}{0.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {section}{}{}{}\relax 
+\ttl@change@i {\@ne }{subsection}{1.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {subsection}{}{}{}\relax 
+\thispagestyle {empty}
+\contentsline {chapter}{\numberline {1}Giới thiệu và mục tiêu triển khai}{1}{chapter.4}%
+\contentsline {section}{\numberline {1.1}Mục tiêu của báo cáo}{1}{section.5}%
+\contentsline {section}{\numberline {1.2}Phạm vi nghiên cứu}{1}{section.6}%
+\contentsline {chapter}{\numberline {2}Kiến trúc triển khai tổng quan}{2}{chapter.7}%
+\contentsline {section}{\numberline {2.1}Kiến trúc Container và Phân rã Logic}{2}{section.8}%
+\contentsline {section}{\numberline {2.2}Các thành phần hạ tầng cốt lõi trên Microsoft Azure}{3}{section.10}%
+\contentsline {section}{\numberline {2.3}Kiến trúc triển khai điện toán thực tế trên Azure}{4}{section.11}%
+\contentsline {section}{\numberline {2.4}Phân tích và so sánh kiến trúc}{5}{section.13}%
+\contentsline {chapter}{\numberline {3}Hạ tầng dưới dạng mã (IaC): azd + Bicep + Azure Container Apps}{6}{chapter.15}%
+\contentsline {section}{\numberline {3.1}Vai trò của .NET Aspire AppHost trong định nghĩa hạ tầng}{6}{section.16}%
+\contentsline {section}{\numberline {3.2}Kiến trúc Bicep Modules và Tài nguyên Azure}{7}{section.29}%
+\contentsline {subsection}{\numberline {3.2.1}Tài nguyên nền tảng (Shared Resources)}{7}{subsection.30}%
+\contentsline {subsection}{\numberline {3.2.2}Tài nguyên dữ liệu (Data Resources)}{7}{subsection.31}%
+\contentsline {subsection}{\numberline {3.2.3}Aspire Dashboard}{8}{subsection.50}%
+\contentsline {section}{\numberline {3.3}Quy trình cấp phát với Azure Developer CLI (azd)}{8}{section.51}%
+\contentsline {section}{\numberline {3.4}Chiến lược Quản lý Bảo mật và Cấu hình}{8}{section.54}%
+\contentsline {chapter}{\numberline {4}Quy trình phát triển và Vận hành (DevOps và CI/CD)}{10}{chapter.55}%
+\contentsline {section}{\numberline {4.1}Tổng quan quy trình CI/CD}{10}{section.56}%
+\contentsline {section}{\numberline {4.2}Cơ chế Bảo mật và Xác thực không mật khẩu (Secretless)}{11}{section.63}%
+\contentsline {section}{\numberline {4.3}Chi tiết luồng thực thi (Workflow Implementation)}{12}{section.64}%
+\contentsline {subsection}{\numberline {4.3.1}Khởi tạo và Xác thực}{12}{subsection.65}%
+\contentsline {subsection}{\numberline {4.3.2}Cấp phát hạ tầng (Provisioning)}{12}{subsection.73}%
+\contentsline {subsection}{\numberline {4.3.3}Đóng gói và Triển khai (Build \& Deploy)}{13}{subsection.74}%
+\contentsline {chapter}{\numberline {5}Vận hành, quan sát hệ thống và mở rộng}{14}{chapter.78}%
+\contentsline {section}{\numberline {5.1}Kiến trúc Quan sát (Observability Architecture)}{14}{section.79}%
+\contentsline {section}{\numberline {5.2}Giám sát thời gian thực với Aspire Dashboard}{14}{section.80}%
+\contentsline {subsection}{\numberline {5.2.1}Theo dõi tài nguyên (Resources)}{14}{subsection.81}%
+\contentsline {subsection}{\numberline {5.2.2}Truy vết phân tán (Distributed Tracing)}{15}{subsection.83}%
+\contentsline {section}{\numberline {5.3}Chiến lược Mở rộng (Scaling) và Tối ưu chi phí}{16}{section.86}%
+\contentsline {subsection}{\numberline {5.3.1}Cấu hình Scaling}{16}{subsection.87}%
+\contentsline {subsection}{\numberline {5.3.2}Bài toán Cold Start và Chi phí}{16}{subsection.88}%
+\contentsline {chapter}{Kết luận}{18}{chapter*.89}%
+\contentsfinish 

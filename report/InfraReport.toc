@@ -1,0 +1,31 @@
+\ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } CHƯƠNG \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {chapter}{}{}{}\relax 
+\ttl@change@i {\@ne }{section}{0.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {section}{}{}{}\relax 
+\ttl@change@i {\@ne }{subsection}{1.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
+\ttl@change@v {subsection}{}{}{}\relax 
+\thispagestyle {empty}
+\contentsline {chapter}{\numberline {1}Giới thiệu và mục tiêu triển khai}{1}{chapter.4}%
+\contentsline {section}{\numberline {1.1}Mục tiêu}{1}{section.5}%
+\contentsline {section}{\numberline {1.2}Phạm vi}{1}{section.6}%
+\contentsline {chapter}{\numberline {2}Kiến trúc triển khai tổng quan}{2}{chapter.7}%
+\contentsline {section}{\numberline {2.1}Kiến trúc Container và Phân rã Logic}{2}{section.8}%
+\contentsline {section}{\numberline {2.2}Kiến trúc triển khai Vật lý trên Azure}{3}{section.10}%
+\contentsline {section}{\numberline {2.3}Phân tích và so sánh kiến trúc}{5}{section.12}%
+\contentsline {chapter}{\numberline {3}Hạ tầng dưới dạng mã (IaC): azd + Bicep + Azure Container Apps}{6}{chapter.14}%
+\contentsline {section}{\numberline {3.1}Vai trò của .NET Aspire AppHost trong định nghĩa hạ tầng}{6}{section.15}%
+\contentsline {section}{\numberline {3.2}Kiến trúc Bicep Modules và Tài nguyên Azure}{7}{section.16}%
+\contentsline {subsection}{\numberline {3.2.1}Tài nguyên nền tảng (Shared Resources)}{7}{subsection.17}%
+\contentsline {subsection}{\numberline {3.2.2}Tài nguyên dữ liệu (Data Resources)}{7}{subsection.18}%
+\contentsline {subsection}{\numberline {3.2.3}Aspire Dashboard}{8}{subsection.19}%
+\contentsline {section}{\numberline {3.3}Quy trình cấp phát với Azure Developer CLI (azd)}{8}{section.20}%
+\contentsline {section}{\numberline {3.4}Chiến lược Quản lý Bảo mật và Cấu hình}{8}{section.23}%
+\contentsline {chapter}{\numberline {4}Quy trình phát triển và Vận hành (DevOps \& CI/CD)}{10}{chapter.27}%
+\contentsline {section}{\numberline {4.1}Luồng build và push container image}{10}{section.28}%
+\contentsline {section}{\numberline {4.2}Luồng deploy trên Azure Container Apps}{10}{section.29}%
+\contentsline {chapter}{\numberline {5}Vận hành, quan sát hệ thống và mở rộng}{11}{chapter.30}%
+\contentsline {section}{\numberline {5.1}Observability: OpenTelemetry, Aspire Dashboard và Log Analytics}{11}{section.31}%
+\contentsline {section}{\numberline {5.2}Quản lý bí mật và cấu hình: Key Vault + Managed Identity}{11}{section.32}%
+\contentsline {section}{\numberline {5.3}Scaling và các trade-off (zero-scale, cold start)}{11}{section.33}%
+\contentsline {chapter}{Kết luận}{12}{chapter*.34}%
+\contentsfinish 
