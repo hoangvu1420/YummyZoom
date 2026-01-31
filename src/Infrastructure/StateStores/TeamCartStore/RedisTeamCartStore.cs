@@ -148,7 +148,7 @@ public sealed class RedisTeamCartStore : ITeamCartStore
         {
             var m = vm.Members.FirstOrDefault(x => x.UserId == userId);
             if (m is null) return;
-            m.PaymentStatus = "CashOnDelivery";
+            m.PaymentStatus = "CommittedToCOD";
             m.CommittedAmount = amount;
             vm.CashOnDeliveryPortion += amount;
         }, "payment_cod_committed");
