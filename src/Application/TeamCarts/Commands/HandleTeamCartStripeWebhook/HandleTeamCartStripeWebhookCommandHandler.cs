@@ -15,6 +15,7 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
 {
     private readonly IPaymentGatewayService _paymentGatewayService;
     private readonly ITeamCartRepository _teamCartRepository;
+    private readonly ITeamCartStore _teamCartStore;
     private readonly IApplicationDbContext _dbContext;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<HandleTeamCartStripeWebhookCommandHandler> _logger;
@@ -22,12 +23,14 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
     public HandleTeamCartStripeWebhookCommandHandler(
         IPaymentGatewayService paymentGatewayService,
         ITeamCartRepository teamCartRepository,
+        ITeamCartStore teamCartStore,
         IApplicationDbContext dbContext,
         IUnitOfWork unitOfWork,
         ILogger<HandleTeamCartStripeWebhookCommandHandler> logger)
     {
         _paymentGatewayService = paymentGatewayService ?? throw new ArgumentNullException(nameof(paymentGatewayService));
         _teamCartRepository = teamCartRepository ?? throw new ArgumentNullException(nameof(teamCartRepository));
+        _teamCartStore = teamCartStore ?? throw new ArgumentNullException(nameof(teamCartStore));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -122,6 +125,45 @@ public class HandleTeamCartStripeWebhookCommandHandler : IRequestHandler<HandleT
             if (webhookEvent.EventType is "payment_intent.succeeded" or "payment_intent.payment_failed")
             {
                 await _teamCartRepository.UpdateAsync(cart, cancellationToken);
+                
+                // Synchronously update Redis to ensure client polling sees the change immediately
+                // This prevents the 60s timeout issue where client polls with stale ETag
+                try
+                {
+                    if (webhookEvent.EventType == "payment_intent.succeeded")
+                    {
+                        var payment = cart.MemberPayments.FirstOrDefault(p => p.UserId == memberUserId);
+                        if (payment?.OnlineTransactionId != null)
+                        {
+                            var quoted = cart.GetMemberQuote(memberUserId);
+                            if (quoted.IsSuccess)
+                            {
+                                await _teamCartStore.RecordOnlinePaymentAsync(
+                                    cartId, 
+                                    memberUserId.Value, 
+                                    quoted.Value.Amount, 
+                                    quoted.Value.Currency, 
+                                    payment.OnlineTransactionId, 
+                                    cancellationToken);
+                                
+                                _logger.LogInformation("Redis updated synchronously for payment success. CartId={CartId}, UserId={UserId}, Tx={Tx}", 
+                                    cartId.Value, memberUserId.Value, payment.OnlineTransactionId);
+                            }
+                        }
+                    }
+                    else if (webhookEvent.EventType == "payment_intent.payment_failed")
+                    {
+                        await _teamCartStore.RecordOnlinePaymentFailureAsync(cartId, memberUserId.Value, cancellationToken);
+                        _logger.LogInformation("Redis updated synchronously for payment failure. CartId={CartId}, UserId={UserId}", 
+                            cartId.Value, memberUserId.Value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't fail the webhook - the event handler will retry via outbox
+                    _logger.LogWarning(ex, "Failed to update Redis synchronously in webhook handler. CartId={CartId}, UserId={UserId}. Will be retried via outbox.", 
+                        cartId.Value, memberUserId.Value);
+                }
             }
 
             await MarkEventAsProcessed(webhookEvent.EventId, cancellationToken);
