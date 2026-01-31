@@ -1,12 +1,12 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Sơ đồ kiến trúc hệ thống (C4 Container View)}}{2}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Sơ đồ triển khai vật lý trên Microsoft Azure}}{4}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Sơ đồ triển khai vật lý trên Microsoft Azure}}{4}{figure.caption.13}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ luồng Tích hợp và Triển khai liên tục (CI/CD)}}{11}{figure.caption.62}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ luồng Tích hợp và Triển khai liên tục (CI/CD)}}{11}{figure.caption.63}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Giao diện Resources trên Aspire Dashboard hiển thị các container đang chạy}}{15}{figure.caption.82}%
-\contentsline {figure}{\numberline {5.2}{\ignorespaces Danh sách các Trace thu thập được từ Web API}}{15}{figure.caption.84}%
-\contentsline {figure}{\numberline {5.3}{\ignorespaces Chi tiết Timeline của một Trace: Phân tích thời gian xử lý từng bước}}{16}{figure.caption.85}%
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Giao diện Resources trên Aspire Dashboard hiển thị các container đang chạy}}{15}{figure.caption.83}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Danh sách các Trace thu thập được từ Web API}}{15}{figure.caption.85}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Chi tiết Timeline của một Trace: Phân tích thời gian xử lý từng bước}}{16}{figure.caption.86}%
 \contentsfinish 

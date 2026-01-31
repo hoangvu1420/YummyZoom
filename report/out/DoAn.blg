@@ -1,19 +1,19 @@
 [0] Config.pm:328> INFO - This is Biber 2.21
 [0] Config.pm:331> INFO - Logfile is 'out/DoAn.blg'
-[107] biber-MSWIN64:342> INFO - === 
-[143] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
-[239] Biber.pm:1002> INFO - Found 24 citekeys in bib section 0
-[253] Biber.pm:4487> INFO - Processing section 0
-[289] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
-[345] bibtex.pm:1713> INFO - LaTeX decoding ...
-[379] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
-[524] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[524] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[525] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
-[525] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
-[591] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
-[605] bbl.pm:779> INFO - Output to out/DoAn.bbl
-[605] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
-[605] Biber.pm:132> WARN - legacy month field 'May' in entry 'Aspire' is not an integer - this will probably not sort properly.
-[605] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
-[605] Biber.pm:134> INFO - WARNINGS: 3
+[138] biber-MSWIN64:342> INFO - === 
+[189] Biber.pm:421> INFO - Reading 'out/DoAn.bcf'
+[316] Biber.pm:1002> INFO - Found 24 citekeys in bib section 0
+[332] Biber.pm:4487> INFO - Processing section 0
+[348] Biber.pm:4678> INFO - Looking for bibtex file 'Danh_sach_tai_lieu_tham_khao.bib' for section 0
+[445] bibtex.pm:1713> INFO - LaTeX decoding ...
+[509] bibtex.pm:1519> INFO - Found BibTeX data source 'Danh_sach_tai_lieu_tham_khao.bib'
+[664] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[664] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[666] Biber.pm:4307> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+[666] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[697] bbl.pm:676> INFO - Writing 'out/DoAn.bbl' with encoding 'UTF-8'
+[712] bbl.pm:779> INFO - Output to out/DoAn.bbl
+[712] Biber.pm:132> WARN - legacy month field 'Nov' in entry 'Net9' is not an integer - this will probably not sort properly.
+[712] Biber.pm:132> WARN - legacy month field 'May' in entry 'Aspire' is not an integer - this will probably not sort properly.
+[712] Biber.pm:132> WARN - legacy month field 'May' in entry 'JWT' is not an integer - this will probably not sort properly.
+[712] Biber.pm:134> INFO - WARNINGS: 3
